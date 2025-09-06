@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react'
 
-const TipsBox = () => {
+const TipsBox: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false)
-  const videoRef = useRef(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const togglePlayPause = () => {
     if (videoRef.current) {
@@ -71,11 +71,15 @@ const TipsBox = () => {
         </p>
 
         {/* Tips List */}
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {tips.map((tip, index) => (
             <li key={index} className="flex items-start">
-              <div className="flex-shrink-0 w-2 h-2 bg-[#134E4A] rounded-full mt-2 mr-3"></div>
-              <span className="text-sm text-gray-600">{tip}</span>
+              <div className="flex-shrink-0 w-5 h-5 bg-[#065A46] rounded-full flex items-center justify-center mt-0.5 mr-3">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-sm text-gray-600 leading-relaxed">{tip}</span>
             </li>
           ))}
         </ul>

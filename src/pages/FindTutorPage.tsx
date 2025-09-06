@@ -3,7 +3,7 @@ import FilterBar from '../components/findTutor/FilterBar'
 import TutorCard from '../components/findTutor/TutorCard'
 import TipsBox from '../components/findTutor/TipsBox'
 
-const FindTutorPage = () => {
+const FindTutorPage: React.FC = () => {
   // Mock data for tutors
   const tutors = [
     {
@@ -51,43 +51,68 @@ const FindTutorPage = () => {
   ]
 
   return (
-    <div className="bg-gray-50 min-h-screen py-10">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-gray-400 mb-6">
-          <a href="/" className="hover:text-[#134E4A] hover:underline">Home</a> &gt;{" "}
-          <span className="text-gray-500">Find a Tutor</span>
-        </nav>
+    <div className="min-h-screen bg-[#FAF8F6]">
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-sm text-gray-500">
+            <span className="hover:text-gray-700 cursor-pointer">Home</span>
+            <span className="mx-2">/</span>
+            <span className="text-gray-900 font-medium">Find tutor</span>
+          </nav>
+        </div>
+      </div>
 
-        {/* Title */}
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-wide mb-4">
-            Find Your Perfect Tutor
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Discover a skilled online tutor for your studies
           </h1>
-          <p className="text-gray-500 text-lg">
-            Browse hundreds of verified tutors and book your first session today.
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Master your studies with personalized online tutoring from expert educators. Our skilled tutors are here to help you build strong foundations and achieve your academic goals.
           </p>
-        </header>
+        </div>
 
-        {/* Filters */}
+        {/* Filter Bar */}
         <FilterBar />
 
-        <div className="grid grid-cols-12 gap-8 mt-12">
-          {/* Tutors */}
-          <div className="col-span-12 lg:col-span-8 space-y-8">
-            <TutorCard />
-            <TutorCard />
-            <TutorCard />
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Tutor Listings */}
+          <div className="lg:col-span-2">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Available Tutors ({tutors.length})
+              </h2>
+            </div>
+            
+            {/* Tutor Cards */}
+            <div className="space-y-6">
+              {tutors.map((tutor) => (
+                <TutorCard key={tutor.id} tutor={tutor} />
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            <div className="text-center mt-8">
+              <button className="px-8 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                Load More Tutors
+              </button>
+            </div>
           </div>
 
-          {/* Tips */}
-          <aside className="col-span-12 lg:col-span-4">
-            <TipsBox />
-          </aside>
+          {/* Right Column - Tips Box */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8">
+              <TipsBox />
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default FindTutorPage

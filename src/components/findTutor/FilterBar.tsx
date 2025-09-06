@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const FilterBar = () => {
+const FilterBar: React.FC = () => {
   const [activeTab, setActiveTab] = useState('all')
   const [filters, setFilters] = useState({
     subjectGroup: '',
@@ -12,7 +12,7 @@ const FilterBar = () => {
     language: ''
   })
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
@@ -44,7 +44,7 @@ const FilterBar = () => {
         ))}
       </div>
 
-      {/* Filter Inputs */}
+      {/* Filter Inputs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Subject Group */}
         <div>
@@ -54,13 +54,15 @@ const FilterBar = () => {
           <select
             value={filters.subjectGroup}
             onChange={(e) => handleFilterChange('subjectGroup', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
           >
             <option value="">Choose subject group</option>
             <option value="mathematics">Mathematics</option>
             <option value="science">Science</option>
             <option value="languages">Languages</option>
             <option value="arts">Arts</option>
+            <option value="business">Business</option>
+            <option value="technology">Technology</option>
           </select>
         </div>
 
@@ -72,15 +74,19 @@ const FilterBar = () => {
           <select
             value={filters.subject}
             onChange={(e) => handleFilterChange('subject', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
           >
             <option value="">Choose subject</option>
             <option value="algebra">Algebra</option>
             <option value="calculus">Calculus</option>
+            <option value="geometry">Geometry</option>
             <option value="physics">Physics</option>
             <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
             <option value="english">English</option>
             <option value="spanish">Spanish</option>
+            <option value="french">French</option>
+            <option value="history">History</option>
           </select>
         </div>
 
@@ -94,7 +100,7 @@ const FilterBar = () => {
             placeholder="$0.00"
             value={filters.feePerSession}
             onChange={(e) => handleFilterChange('feePerSession', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
           />
         </div>
 
@@ -106,7 +112,7 @@ const FilterBar = () => {
           <select
             value={filters.tutorLocation}
             onChange={(e) => handleFilterChange('tutorLocation', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
           >
             <option value="">Search by country</option>
             <option value="usa">United States</option>
@@ -114,6 +120,9 @@ const FilterBar = () => {
             <option value="canada">Canada</option>
             <option value="australia">Australia</option>
             <option value="germany">Germany</option>
+            <option value="france">France</option>
+            <option value="spain">Spain</option>
+            <option value="italy">Italy</option>
           </select>
         </div>
 
@@ -128,7 +137,7 @@ const FilterBar = () => {
               placeholder="Search by keyword"
               value={filters.searchKeyword}
               onChange={(e) => handleFilterChange('searchKeyword', e.target.value)}
-              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+              className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +155,7 @@ const FilterBar = () => {
           <select
             value={filters.sortBy}
             onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
           >
             <option value="">Sort by</option>
             <option value="rating">Rating</option>
@@ -154,6 +163,8 @@ const FilterBar = () => {
             <option value="price-high">Price: High to Low</option>
             <option value="experience">Experience</option>
             <option value="availability">Availability</option>
+            <option value="newest">Newest</option>
+            <option value="popular">Most Popular</option>
           </select>
         </div>
 
@@ -165,7 +176,7 @@ const FilterBar = () => {
           <select
             value={filters.language}
             onChange={(e) => handleFilterChange('language', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#134E4A] focus:border-[#134E4A] outline-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#065A46] focus:border-[#065A46] outline-none"
           >
             <option value="">Select language</option>
             <option value="english">English</option>
@@ -173,6 +184,9 @@ const FilterBar = () => {
             <option value="french">French</option>
             <option value="german">German</option>
             <option value="chinese">Chinese</option>
+            <option value="japanese">Japanese</option>
+            <option value="korean">Korean</option>
+            <option value="arabic">Arabic</option>
           </select>
         </div>
       </div>
