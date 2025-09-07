@@ -1,24 +1,108 @@
-# Logs
-logs
-*.log
+# ==========================
+# Node dependencies
+# ==========================
+node_modules/
+*/node_modules/
+
+# ==========================
+# Build outputs
+# ==========================
+dist/
+build/
+*/dist/
+*/build/
+
+# Vite cache
+.vite/
+*/.vite/
+
+# ==========================
+# Environment variables
+# ==========================
+.env
+.env.*
+!*.example   # giữ lại file mẫu
+frontend/.env
+frontend/.env.*
+
+# Backend (nếu có trong tương lai)
+backend/.env
+backend/.env.*
+
+# ==========================
+# Logs & debug
+# ==========================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ==========================
+# Test coverage & reports
+# ==========================
+coverage/
+*.lcov
+.nyc_output
+junit.xml
+test-results.xml
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# ==========================
+# Cache files
+# ==========================
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.eslintcache
+.cache
+.parcel-cache
+.storybook-out
+
+# ==========================
+# Lock files (chỉ ignore nếu team bạn không muốn commit)
+# Nếu muốn đồng bộ version thì xoá mấy dòng này
+# ==========================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ==========================
+# Framework specific
+# ==========================
+.next/
+.nuxt/
+.cache/
+public/    # Gatsby
+
+# ==========================
+# Temporary folders
+# ==========================
+tmp/
+temp/
+
+# ==========================
+# Editor & IDE
+# ==========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==========================
+# OS generated
+# ==========================
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ==========================
+# Backend specific (future)
+# ==========================
+backend/node_modules/
+backend/dist/
+backend/build/
