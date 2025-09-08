@@ -4,9 +4,11 @@ import MainLayout from '../layouts/MainLayout'
 import AuthLayout from '../layouts/AuthLayout'
 import HomePage from '../pages/HomePage'
 import CourseListPage from '../pages/CourseListPage'
+import CourseSearchPage from '../pages/CourseSearchPage'
 import CourseDetailPage from '../pages/CourseDetailPage'
 import LessonPage from '../pages/LessonPage'
 import FindTutorPage from '../pages/FindTutorPage'
+import TutorProfilePage from '../pages/TutorProfilePage'
 import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import ProfilePage from '../pages/ProfilePage'
@@ -21,7 +23,9 @@ const AppRoutes = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="find-tutors" element={<FindTutorPage />} />
+        <Route path="tutor/:id" element={<TutorProfilePage />} />
         <Route path="courses" element={<CourseListPage />} />
+        <Route path="search-courses" element={<CourseSearchPage />} />
         <Route path="courses/:id" element={<CourseDetailPage />} />
         <Route path="courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
       </Route>
