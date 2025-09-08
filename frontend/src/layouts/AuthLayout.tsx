@@ -3,8 +3,9 @@ import { Outlet, useLocation } from 'react-router-dom'
 const AuthLayout = () => {
   const location = useLocation()
   const isLoginPage = location.pathname === '/auth/login'
+  const isRegisterPage = location.pathname === '/auth/register'
 
-  if (isLoginPage) {
+  if (isLoginPage || isRegisterPage) {
     return <Outlet />
   }
 
