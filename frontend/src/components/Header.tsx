@@ -104,7 +104,7 @@ const Header = () => {
               {activeDropdown === 'subscriptions' && (
                 <div className="absolute top-full left-0 bg-white rounded-b-lg shadow-lg border border-gray-100 py-1 z-50 min-w-[200px]">
                   <Link
-                    to="/subscriptions/student"
+                    to="/student-subscriptions"
                     className="block px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
                   >
                     Student Subscriptions

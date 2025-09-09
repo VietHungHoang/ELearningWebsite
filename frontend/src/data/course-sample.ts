@@ -1,3 +1,65 @@
+// Mock course data used by CoursePlayerPage. Replace with real API call.
+export const courseSample = {
+  id: 'course-1',
+  title: 'Time Management Mastery: Boost Your Productivity',
+  subtitle: 'Master the art of time management to maximize productivity and achieve goals',
+  price: '$29',
+  originalPrice: '$59',
+  discount: 50,
+  videosCount: 27,
+  totalDuration: '23 mins : 56 sec',
+  lessonsCount: 27,
+  language: 'English',
+  level: 'Intermediate',
+  enrolments: 2,
+  views: 3492,
+  lastUpdated: 'Sep 09, 2025',
+  progressPct: 0,
+  prerequisites: ['Basic computer skills', 'Motivation to improve productivity'],
+  faqs: [
+    { q: 'Do I need prior time management experience?', a: 'No, this course starts from fundamentals and builds up.' },
+    { q: 'Can I access the materials offline?', a: 'Videos are streamed. Transcripts and PDFs are downloadable.' },
+  ],
+  description:
+    "In today’s demanding world, mastering time management is a critical skill that can greatly enhance both your personal and professional life. This course equips you with essential tools and techniques to maximize productivity, manage time effectively, and stay focused on what truly matters. You will learn how to prioritize tasks, set achievable goals, and create effective schedules that align with your personal and professional objectives. Through a combination of video lectures, practical exercises, and real-world examples, you will gain the skills and knowledge needed to take control of your time and achieve your goals.",
+  learningOutcomes: [
+    'Prioritize tasks and set achievable goals',
+    'Create effective schedules and routines',
+    'Overcome procrastination and stay focused',
+  ],
+  instructor: {
+    id: 'inst-1',
+    name: 'Antony Clara',
+    avatar: '/media/instructors/Antony%20Shao.png',
+    verified: true,
+    languages: ['English'],
+    stats: { students: 22, courses: 4 },
+    bio: "Passionate tutor helping students unlock their full potential through customized learning.",
+  },
+  reviews: [
+    { name: 'Steven', avatar: '/media/avatars/Steven%20Ford.png', text: 'Steven is an outstanding tutor! Clear explanations and engaging sessions.' },
+  ],
+  chapters: [
+    {
+      id: 'ch-1',
+      title: '1. Introduction to Design',
+      lessons: [
+        { id: 'l-1', title: 'Welcome to the Design Class', duration: '15 sec', type: 'video', videoSrc: '/media/homepage/tutor-video-1.mp4', poster: '/media/homepage/homepage-laptop.png' },
+        { id: 'l-2', title: 'Tools Introduction', duration: '15 sec', type: 'video', videoSrc: '/media/homepage/tutor-video-2.mp4', poster: '/media/homepage/homepage-laptop.png' },
+        { id: 'l-3', title: 'HTML5 Certification', duration: '1 sec', type: 'article', videoSrc: '/media/homepage/tutor-video-3.mp4', poster: '/media/homepage/homepage-laptop.png' },
+      ],
+    },
+    {
+      id: 'ch-2',
+      title: '2. Certified HTML5',
+      lessons: [
+        { id: 'l-4', title: 'Program Information', duration: '2:35', type: 'video', videoSrc: '/media/homepage/tutor-video-4.mp4', poster: '/media/homepage/homepage-laptop.png' },
+        { id: 'l-5', title: 'Your Development Toolbox', duration: '3:35', type: 'video', videoSrc: '/media/homepage/tutor-video-1.mp4', poster: '/media/homepage/homepage-laptop.png' },
+      ],
+    },
+  ],
+};
+
 export interface Course {
   id: number
   title: string

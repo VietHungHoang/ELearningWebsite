@@ -6,6 +6,8 @@ import HomePage from '../pages/HomePage'
 import CourseListPage from '../pages/CourseListPage'
 import CourseSearchPage from '../pages/CourseSearchPage'
 import CourseDetailPage from '../pages/CourseDetailPage'
+import CoursePlayerPage from '../pages/CoursePlayerPage'
+import PremiumFeaturesPage from '../pages/PremiumFeaturesPage'
 import LessonPage from '../pages/LessonPage'
 import FindTutorPage from '../pages/FindTutorPage'
 import TutorProfilePage from '../pages/TutorProfilePage'
@@ -23,10 +25,13 @@ const AppRoutes = () => {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="find-tutors" element={<FindTutorPage />} />
+        <Route path="premium" element={<PremiumFeaturesPage />} />
+        <Route path="student-subscriptions" element={<PremiumFeaturesPage />} />
         <Route path="tutor/:id" element={<TutorProfilePage />} />
         <Route path="courses" element={<CourseListPage />} />
         <Route path="search-courses" element={<CourseSearchPage />} />
         <Route path="courses/:id" element={<CourseDetailPage />} />
+        <Route path="courses/:id/player" element={<CoursePlayerPage />} />
         <Route path="courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
       </Route>
 
