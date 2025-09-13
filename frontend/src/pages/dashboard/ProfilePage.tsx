@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useAppSelector } from '../store/hooks'
+import { useAppSelector } from '../../store/hooks'
 import { User, Mail, Phone, MapPin, Globe, Camera, Save, Edit, Award, BookOpen, Clock } from 'lucide-react'
 
 const ProfilePage = () => {

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAppDispatch } from '../store/hooks'
-import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice'
+import { useAppDispatch } from '../../store/hooks'
+import { loginStart, loginSuccess, loginFailure } from '../../store/slices/authSlice'
 import { Eye, EyeOff, BookOpen, Star, MapPin, Book, Users, Plus } from 'lucide-react'
 
 const LoginPage = () => {
@@ -10,7 +10,7 @@ const LoginPage = () => {
     password: '',
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [userType, setUserType] = useState<'tutor' | 'student' | 'admin'>('student')
+  const [userType, setUserType] = useState<'instructor' | 'student' | 'admin'>('student')
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   
   const dispatch = useAppDispatch()
@@ -35,6 +35,43 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0
   }
 
+  // Fake accounts for testing
+  const fakeAccounts = {
+    student: {
+      email: 'student@test.com',
+      password: '123456',
+      user: {
+        id: 1,
+        name: 'Nguyễn Văn Student',
+        email: 'student@test.com',
+        role: 'student' as const,
+        avatar: '/media/avatars/student.jpg'
+      }
+    },
+    instructor: {
+      email: 'tutor@test.com',
+      password: '123456',
+      user: {
+        id: 2,
+        name: 'Trần Thị Tutor',
+        email: 'tutor@test.com',
+        role: 'instructor' as const,
+        avatar: '/media/avatars/tutor.jpg'
+      }
+    },
+    admin: {
+      email: 'admin@test.com',
+      password: '123456',
+      user: {
+        id: 3,
+        name: 'Lê Văn Admin',
+        email: 'admin@test.com',
+        role: 'admin' as const,
+        avatar: '/media/avatars/admin.jpg'
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -46,17 +83,29 @@ const LoginPage = () => {
       // Mock API call - replace with actual API
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Simulate successful login
-      const mockUser = {
-        id: 1,
-        name: 'Nguyễn Văn A',
-        email: formData.email,
-        role: 'student' as const,
+      // Check fake accounts
+      const account = fakeAccounts[userType]
+      if (formData.email === account.email && formData.password === account.password) {
+        const mockToken = `mock-jwt-token-${userType}`
+        dispatch(loginSuccess({ user: account.user, token: mockToken }))
+        
+        // Navigate based on role
+        switch (userType) {
+          case 'student':
+            navigate('/student/bookings')
+            break
+          case 'instructor':
+            navigate('/tutor/dashboard')
+            break
+          case 'admin':
+            navigate('/admin/insights')
+            break
+          default:
+            navigate('/')
+        }
+      } else {
+        dispatch(loginFailure('Email hoặc mật khẩu không đúng. Vui lòng thử lại.'))
       }
-      const mockToken = 'mock-jwt-token'
-
-      dispatch(loginSuccess({ user: mockUser, token: mockToken }))
-      navigate('/dashboard')
     } catch (error) {
       dispatch(loginFailure('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.'))
     }
@@ -275,7 +324,7 @@ const LoginPage = () => {
             <div>
               <p className="text-sm text-gray-700 mb-3">Login as</p>
               <div className="grid grid-cols-3 gap-2">
-                {(['tutor', 'student', 'admin'] as const).map((type) => (
+                {(['instructor', 'student', 'admin'] as const).map((type) => (
                   <button
                     key={type}
                     type="button"
@@ -289,6 +338,13 @@ const LoginPage = () => {
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </button>
                 ))}
+              </div>
+              
+              {/* Fake Account Info */}
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium mb-2">Test Account ({userType}):</p>
+                <p className="text-xs text-blue-700">Email: {fakeAccounts[userType].email}</p>
+                <p className="text-xs text-blue-700">Password: {fakeAccounts[userType].password}</p>
               </div>
             </div>
 

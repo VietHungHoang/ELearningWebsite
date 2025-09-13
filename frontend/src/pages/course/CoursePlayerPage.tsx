@@ -1,11 +1,11 @@
 // Mock-wired Course Player page. Replace mock imports with real API hooks when backend is ready.
 import React, { useMemo, useState } from 'react';
-import PlayerLayout from '../components/coursePlayer/PlayerLayout';
-import CourseOutline from '../components/coursePlayer/CourseOutline';
-import VideoPlayer from '../components/coursePlayer/VideoPlayer';
-import CourseTabs from '../components/coursePlayer/CourseTabs';
-import SidebarSummary from '../components/coursePlayer/SidebarSummary';
-import { courseSample } from '../data/course-sample';
+import PlayerLayout from '../../components/coursePlayer/PlayerLayout';
+import CourseOutline from '../../components/coursePlayer/CourseOutline';
+import VideoPlayer from '../../components/coursePlayer/VideoPlayer';
+import CourseTabs from '../../components/coursePlayer/CourseTabs';
+import SidebarSummary from '../../components/coursePlayer/SidebarSummary';
+import { courseSample } from '../../data/course-sample';
 
 const CoursePlayerPage: React.FC = () => {
   const course = courseSample;

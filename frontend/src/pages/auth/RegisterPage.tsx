@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAppDispatch } from '../store/hooks'
-import { loginSuccess } from '../store/slices/authSlice'
+import { useAppDispatch } from '../../store/hooks'
+import { loginSuccess } from '../../store/slices/authSlice'
 import { Eye, EyeOff, Mail, BookOpen, Users, MapPin, Book, Plus } from 'lucide-react'
 
 const RegisterPage = () => {

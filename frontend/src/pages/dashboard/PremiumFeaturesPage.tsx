@@ -1,10 +1,10 @@
 // Premium Features main page container. Replace mock data imports with API hooks when ready.
 import React from 'react';
-import HeroPremium from '../components/premium/HeroPremium';
-import PlansGrid from '../components/premium/PlansGrid';
-import HowItWorksSection from '../components/premium/HowItWorksSection';
-import FAQAccordion from '../components/premium/FAQAccordion';
-import { plans } from '../data/premium-plans';
+import HeroPremium from '../../components/premium/HeroPremium';
+import PlansGrid from '../../components/premium/PlansGrid';
+import HowItWorksSection from '../../components/premium/HowItWorksSection';
+import FAQAccordion from '../../components/premium/FAQAccordion';
+import { plans } from '../../data/premium-plans';
 
 const PremiumFeaturesPage: React.FC = () => {
   return (

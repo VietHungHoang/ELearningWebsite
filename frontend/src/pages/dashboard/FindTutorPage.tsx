@@ -1,7 +1,7 @@
 import React from 'react'
-import FilterBar from '../components/findTutor/FilterBar'
-import TutorCard from '../components/findTutor/TutorCard'
-import TipsBox from '../components/findTutor/TipsBox'
+import FilterBar from '../../components/findTutor/FilterBar'
+import TutorCard from '../../components/findTutor/TutorCard'
+import TipsBox from '../../components/findTutor/TipsBox'
 
 const FindTutorPage: React.FC = () => {
   // Mock data for tutors

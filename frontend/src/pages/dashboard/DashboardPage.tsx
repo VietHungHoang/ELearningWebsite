@@ -1,4 +1,4 @@
-import { useAppSelector } from '../store/hooks'
+import { useAppSelector } from '../../store/hooks'
 import { Link } from 'react-router-dom'
 import { BookOpen, Clock, Award, TrendingUp, Play, Check, Calendar } from 'lucide-react'
 
