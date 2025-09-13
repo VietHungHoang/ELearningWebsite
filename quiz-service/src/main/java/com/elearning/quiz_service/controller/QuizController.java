@@ -1,21 +1,8 @@
-package com.elearning.quiz_service.controller;
-
-import com.elearning.quiz_service.dto.request.QuizRequest;
-import com.elearning.quiz_service.dto.request.SubmitAnswerRequest;
-import com.elearning.quiz_service.dto.response.QuizResponse;
-import com.elearning.quiz_service.dto.response.QuizQuestionResponse;
-import com.elearning.quiz_service.dto.response.SubmitAnswerResponse;
-import com.elearning.quiz_service.service.IQuizService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/quizzes")
 @RequiredArgsConstructor
 public class QuizController {
+
     private final IQuizService quizService;
 
     // 1. Lấy tất cả quiz theo lesson
@@ -32,7 +19,7 @@ public class QuizController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. Tạo quiz mới cho lesson
+    // 3. Tạo quiz mới
     @PostMapping
     public QuizResponse create(@RequestBody QuizRequest request) {
         return quizService.saveQuiz(request);
@@ -56,5 +43,20 @@ public class QuizController {
             @RequestBody SubmitAnswerRequest request
     ) {
         return quizService.submitAnswer(id, request);
+    }
+
+    // 6. Cập nhật trạng thái quiz (DRAFT -> PUBLISHED)
+    @PutMapping("/{id}/status")
+    public QuizResponse updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status // ví dụ ?status=PUBLISHED
+    ) {
+        return quizService.updateQuizStatus(id, status);
+    }
+
+    // 7. Xem kết quả làm quiz của 1 user
+    @GetMapping("/results/{userId}")
+    public List<QuizResultResponse> getResultsByUser(@PathVariable Long userId) {
+        return quizService.getResultsByUser(userId);
     }
 }

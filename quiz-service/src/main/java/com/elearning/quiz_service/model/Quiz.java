@@ -22,4 +22,12 @@ public class Quiz {
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuizQuestion> questions;
+
+    // ✅ Thêm trạng thái quiz: DRAFT, PUBLISHED
+    @Enumerated(EnumType.STRING)
+    private QuizStatus status = QuizStatus.DRAFT;
+
+    // ✅ Kết quả quiz của nhiều người dùng
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuizResult> results;
 }
