@@ -32,7 +32,7 @@ const StudentBookingsPage = () => {
   const sidebarItems = [
     { icon: Settings, label: 'Profile Settings', path: '/student/profile' },
     { icon: Calendar, label: 'My Bookings', path: '/student/bookings', active: true },
-    { icon: BookOpen, label: 'My Learning', path: '/student/learning' },
+    { icon: BookOpen, label: 'My Learning', path: '/student/course-list' },
     { icon: Users, label: 'Find Tutors', path: '/student/find-tutors' },
     { icon: FileText, label: 'My Quizzes', path: '/student/quizzes' },
     { icon: GraduationCap, label: 'Find Courses', path: '/student/courses' },

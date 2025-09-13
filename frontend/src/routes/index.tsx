@@ -8,7 +8,6 @@ import {
   CourseListPage, 
   CourseSearchPage, 
   CourseDetailPage, 
-  CoursePlayerPage, 
   LessonPage 
 } from '../pages/course'
 import { 
@@ -18,6 +17,10 @@ import {
 } from '../pages/dashboard'
 import { LoginPage, RegisterPage } from '../pages/auth'
 import { StudentBookingsPage, StudentQuizzesPage } from '../pages/student'
+import StudentCoursesPage from '../pages/student/StudentCoursesPage'
+import CoursePlayerPage from '../pages/student/CoursePlayerPage'
+import QuizResultPage from '../pages/student/QuizResultPage'
+import QuizTakingPage from '../pages/student/QuizTakingPage'
 import { TutorDashboardPage } from '../pages/tutor'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
 
@@ -56,10 +59,14 @@ const AppRoutes = () => {
         }
       >
         <Route path="bookings" element={<StudentBookingsPage />} />
+        <Route path="course-list" element={<StudentCoursesPage />} />
         <Route path="profile/personal-details" element={<div>Personal Details</div>} />
         <Route path="profile/account-settings" element={<div>Account Settings</div>} />
         <Route path="profile/identification" element={<div>Identification</div>} />
         <Route path="quizzes" element={<StudentQuizzesPage />} />
+        <Route path="quiz-result/:id" element={<QuizResultPage />} />
+        <Route path="quiz-taking/:id" element={<QuizTakingPage />} />
+        <Route path="course-player/:slug" element={<CoursePlayerPage />} />
         <Route path="assignments" element={<div>Student Assignments</div>} />
         <Route path="certificates" element={<div>Student Certificates</div>} />
         <Route path="favourites" element={<div>Student Favourites</div>} />

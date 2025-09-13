@@ -13,7 +13,7 @@ const CoursePlayerPage: React.FC = () => {
   const currentLesson = useMemo(() => allLessons.find((l) => l.id === currentLessonId) || allLessons[0], [allLessons, currentLessonId]);
 
   return (
-    <div className="bg-[#FAF8F6] min-h-screen">
+    <div className="bg-[#FAF8F6] min-h-screen overflow-y-auto">
       <div className="h-1 bg-gray-200">
         <div className="h-full bg-[#134E4A]" style={{ width: `${course.progressPct}%` }} />
       </div>

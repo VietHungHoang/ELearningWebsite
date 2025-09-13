@@ -73,8 +73,8 @@ const VideoPlayer: React.FC<Props> = ({ currentLesson, instructor, onEnded }) =>
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-      <div className="relative">
+    <div className="bg-white rounded-2xl shadow-lg">
+      <div className="relative rounded-2xl overflow-hidden">
         <video
           ref={videoRef}
           className="w-full aspect-video"

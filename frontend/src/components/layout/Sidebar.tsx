@@ -1,5 +1,6 @@
 import React from 'react'
-import { Menu, X, CreditCard, LogOut } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
 import SidebarItem from './SidebarItem'
 import WalletSection from './WalletSection'
 
@@ -32,20 +33,23 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className={`bg-white shadow-sm transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} flex flex-col`}>
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between h-20">
         {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">L</span>
-            </div>
-            <span className="font-semibold text-gray-900">Lernen</span>
+          <div className="flex items-center justify-start w-full">
+            <Link to="/" className="block">
+              <img 
+                src="/media/homepage/logo-default.svg" 
+                alt="Lernen Logo" 
+                className="w-32 h-32 object-contain max-h-16 ml-2 hover:opacity-80 transition-opacity cursor-pointer"
+              />
+            </Link>
           </div>
         )}
         <button 
           onClick={onToggle}
-          className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-md transition-colors bg-gray-50 border border-gray-200"
         >
-          {collapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          {collapsed ? <Menu className="w-5 h-5 text-gray-600" /> : <X className="w-5 h-5 text-gray-600" />}
         </button>
       </div>
 

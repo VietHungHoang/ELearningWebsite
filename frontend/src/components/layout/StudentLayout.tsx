@@ -83,7 +83,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({
         />
 
         {/* Page Content */}
-        <div className="flex-1 p-6 pb-8 overflow-hidden flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
           {children}
         </div>
       </div>

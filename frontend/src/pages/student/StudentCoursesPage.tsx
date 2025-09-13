@@ -1,24 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Settings, Calendar, BookOpen, Users, FileText, GraduationCap, Mail, MessageCircle, Award } from 'lucide-react'
+import { 
+  Calendar, 
+  Settings, 
+  BookOpen, 
+  Users, 
+  GraduationCap, 
+  FileText, 
+  Mail, 
+  MessageCircle, 
+  Award
+} from 'lucide-react'
 import { StudentLayout } from '../../components'
-import { QuizContent } from '../../components/student'
-import type { QuizTopic } from '../../types/quiz'
+import CoursesContent from '../../components/student/courses/CoursesContent'
 
-const StudentQuizzesPage = () => {
+const StudentCoursesPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const navigate = useNavigate()
-
-  const handleQuizClick = (quiz: QuizTopic) => {
-    // Navigate based on quiz status
-    if (quiz.status === 'upcoming' || quiz.status === 'attempted') {
-      // Play quiz (new or retry)
-      navigate(`/student/quiz-taking/${quiz.id}`)
-    } else if (quiz.status === 'completed') {
-      // Show quiz result
-      navigate(`/student/quiz-result/${quiz.id}`)
-    }
-  }
 
   const handleSidebarItemClick = (path: string) => {
     navigate(path)
@@ -27,9 +25,9 @@ const StudentQuizzesPage = () => {
   const sidebarItems = [
     { icon: Settings, label: 'Profile Settings', path: '/student/profile' },
     { icon: Calendar, label: 'My Bookings', path: '/student/bookings' },
-    { icon: BookOpen, label: 'My Learning', path: '/student/course-list' },
+    { icon: BookOpen, label: 'My Learning', path: '/student/course-list', active: true },
     { icon: Users, label: 'Find Tutors', path: '/student/find-tutors' },
-    { icon: FileText, label: 'My Quizzes', path: '/student/quizzes', active: true },
+    { icon: FileText, label: 'My Quizzes', path: '/student/quizzes' },
     { icon: GraduationCap, label: 'Find Courses', path: '/student/courses' },
     { icon: BookOpen, label: 'Find Course Bundles', path: '/student/bundles' },
     { icon: FileText, label: 'Assignments', path: '/student/assignments' },
@@ -38,18 +36,20 @@ const StudentQuizzesPage = () => {
     { icon: Award, label: 'My Certificates', path: '/student/certificates' },
   ]
 
+  const handleStartCourse = (course: any) => {
+    // Navigate to course player page using slug
+    navigate(`/student/course-player/${course.slug}`)
+  }
+
+  const handleToggleLike = (_courseId: string) => {
+    // Update course like status in backend
+    // You can implement API call here
+  }
+
   const breadcrumbItems = [
     { label: 'Profile Settings', path: '/student/profile' },
-    { label: 'Quizzes' }
+    { label: 'My Learning' }
   ]
-
-  const userControls = {
-    currency: 'USD $',
-    language: 'En',
-    languageFlag: 'https://flagcdn.com/w20/us.png',
-    cartCount: 1,
-    userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
-  }
 
   return (
     <StudentLayout
@@ -58,13 +58,15 @@ const StudentQuizzesPage = () => {
       sidebarItems={sidebarItems}
       onSidebarItemClick={handleSidebarItemClick}
       breadcrumbItems={breadcrumbItems}
-      searchPlaceholder="Quick search here"
-      searchShortcut="Ctrl + K"
-      userControls={userControls}
+      searchPlaceholder="Search courses..."
+      showSearch={true}
     >
-      <QuizContent onQuizClick={handleQuizClick} />
+      <CoursesContent 
+        onStartCourse={handleStartCourse}
+        onToggleLike={handleToggleLike}
+      />
     </StudentLayout>
   )
 }
 
-export default StudentQuizzesPage
+export default StudentCoursesPage

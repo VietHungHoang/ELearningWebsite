@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   Clock, 
   FileText, 
@@ -6,27 +7,16 @@ import {
   Award,
   CheckCircle
 } from 'lucide-react'
-
-interface Quiz {
-  id: string
-  title: string
-  subtitle?: string
-  image: string
-  status: 'attempted' | 'upcoming' | 'completed'
-  totalQuestions: number
-  totalMarks: number
-  duration: string
-  createdAt: string
-  score?: number
-  progress?: number
-}
+import type { QuizTopic } from '../../../../types/quiz'
 
 interface QuizCardProps {
-  quiz: Quiz
-  onClick?: (quiz: Quiz) => void
+  quiz: QuizTopic
+  onClick?: (quiz: QuizTopic) => void
 }
 
 const QuizCard: React.FC<QuizCardProps> = ({ quiz, onClick }) => {
+  const navigate = useNavigate()
+
   const getStatusBadge = () => {
     const baseClasses = "absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1"
     
@@ -58,7 +48,13 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onClick }) => {
   }
 
   const handleClick = () => {
-    onClick?.(quiz)
+    if (quiz.status === 'attempted') {
+      navigate(`/student/quiz-result/${quiz.id}`)
+    } else if (quiz.status === 'upcoming') {
+      navigate(`/student/quiz-taking/${quiz.id}`)
+    } else {
+      onClick?.(quiz)
+    }
   }
 
   return (
@@ -83,10 +79,10 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onClick }) => {
           {quiz.title}
         </h3>
         
-        {/* Subtitle */}
-        {quiz.subtitle && (
+        {/* Description */}
+        {quiz.description && (
           <p className="text-gray-600 text-sm mb-4 line-clamp-1">
-            {quiz.subtitle}
+            {quiz.description}
           </p>
         )}
 
@@ -107,7 +103,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onClick }) => {
               <Calendar className="w-4 h-4" />
               <span>Created at</span>
             </div>
-            <span className="font-medium text-gray-900">{quiz.createdAt}</span>
+            <span className="font-medium text-gray-900">{new Date(quiz.createdAt).toLocaleDateString()}</span>
           </div>
 
           {/* Total Marks Row */}
@@ -125,7 +121,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz, onClick }) => {
               <Clock className="w-4 h-4" />
               <span>Duration</span>
             </div>
-            <span className="font-medium text-gray-900">{quiz.duration}</span>
+            <span className="font-medium text-gray-900">{quiz.timeLimit} minutes</span>
           </div>
 
           {/* Score (if attempted) */}
