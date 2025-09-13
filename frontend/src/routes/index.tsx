@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { useAppSelector } from '../store/hooks'
 import MainLayout from '../layouts/MainLayout'
 import AuthLayout from '../layouts/AuthLayout'
@@ -17,6 +17,7 @@ import {
   TutorProfilePage 
 } from '../pages/dashboard'
 import { LoginPage, RegisterPage } from '../pages/auth'
+import { StudentBookingsPage, StudentQuizzesPage } from '../pages/student'
 import { TutorDashboardPage } from '../pages/tutor'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
 
@@ -50,15 +51,15 @@ const AppRoutes = () => {
         path="/student"
         element={
           <RoleBasedRedirect allowedRoles={['student']}>
-            <MainLayout />
+            <Outlet />
           </RoleBasedRedirect>
         }
       >
-        <Route path="bookings" element={<div>Student Bookings</div>} />
+        <Route path="bookings" element={<StudentBookingsPage />} />
         <Route path="profile/personal-details" element={<div>Personal Details</div>} />
         <Route path="profile/account-settings" element={<div>Account Settings</div>} />
         <Route path="profile/identification" element={<div>Identification</div>} />
-        <Route path="quizzes" element={<div>Student Quizzes</div>} />
+        <Route path="quizzes" element={<StudentQuizzesPage />} />
         <Route path="assignments" element={<div>Student Assignments</div>} />
         <Route path="certificates" element={<div>Student Certificates</div>} />
         <Route path="favourites" element={<div>Student Favourites</div>} />

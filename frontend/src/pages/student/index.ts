@@ -1,1 +1,3 @@
-export { default as StudentDashboardPage } from './StudentDashboardPage'
+
+export { default as StudentBookingsPage } from './StudentBookingsPage'
+export { default as StudentQuizzesPage } from './StudentQuizzesPage'

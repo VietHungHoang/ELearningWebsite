@@ -1,2 +1,2 @@
-// Student Components exports
-// Add student-specific components here when created
+export { default as QuizCard } from './QuizCard'
+export { default as QuizContent } from './QuizContent'
