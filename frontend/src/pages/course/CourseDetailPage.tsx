@@ -1,16 +1,18 @@
 import { useState } from 'react'
 // Course components
-import CourseHeader from '../../components/course/CourseHeader'
-import CourseTabs from '../../components/course/CourseTabs'
-import CourseOverview from '../../components/course/CourseOverview'
-import LearningOutcomes from '../../components/course/LearningOutcomes'
-import CurriculumAccordion from '../../components/course/CurriculumAccordion'
-import FAQAccordion from '../../components/course/FAQAccordion'
-import Prerequisites from '../../components/course/Prerequisites'
-import ReviewsSummary from '../../components/course/ReviewsSummary'
-import SidebarCourseCard from '../../components/course/SidebarCourseCard'
-import InstructorMiniCard from '../../components/course/InstructorMiniCard'
-import ShareTags from '../../components/course/ShareTags'
+import { 
+  CourseHeader, 
+  CourseTabsMain as CourseTabs, 
+  CourseOverview, 
+  LearningOutcomes, 
+  CurriculumAccordion, 
+  CourseFAQAccordion as FAQAccordion, 
+  Prerequisites, 
+  ReviewsSummary, 
+  SidebarCourseCard, 
+  CourseInstructorMiniCard as InstructorMiniCard, 
+  ShareTags 
+} from '../../components'
 import { courseData, instructorData, reviewsData } from '../../data/course-sample'
 
 const CourseDetailPage = () => {

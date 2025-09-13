@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAppSelector } from '../../store/hooks'
-import UserInfo from '../../components/UserInfo'
+import { UserInfo } from '../../components'
 
 const StudentDashboardPage: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth)

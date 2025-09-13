@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAppSelector } from '../store/hooks'
 import MainLayout from '../layouts/MainLayout'
 import AuthLayout from '../layouts/AuthLayout'
-import RoleBasedRedirect from '../components/RoleBasedRedirect'
+import { RoleBasedRedirect } from '../components'
 import HomePage from '../pages/HomePage'
 import { 
   CourseListPage, 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAppSelector, useAppDispatch } from '../store/hooks'
-import { logout } from '../store/slices/authSlice'
+import { useAppSelector, useAppDispatch } from '../../store/hooks'
+import { logout } from '../../store/slices/authSlice'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)

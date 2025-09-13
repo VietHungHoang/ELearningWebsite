@@ -1,12 +1,14 @@
 import React from 'react'
-import Hero from '../components/homepage/Hero'
-import FeatureTutors from '../components/homepage/FeatureTutors'
-import TestimonialsSection from '../components/homepage/TestimonialsSection'
-import WhyChooseUs from '../components/homepage/WhyChooseUs'
-import StepGuideSection from '../components/homepage/StepGuideSection'
-import ExploreCourses from '../components/homepage/ExploreCourses'
-import SupportSection from '../components/homepage/SupportSection'
-import ExpertGuideSection from '../components/homepage/ExpertGuideSection'
+import { 
+  Hero, 
+  FeatureTutors, 
+  TestimonialsSection, 
+  WhyChooseUs, 
+  StepGuideSection, 
+  ExploreCourses, 
+  SupportSection, 
+  ExpertGuideSection 
+} from '../components'
 
 const HomePage: React.FC = () => {
   return (

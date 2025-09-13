@@ -1,4 +1,4 @@
-import { Play, Star, Globe, Users, Eye } from 'lucide-react'
+import { Star, Globe, Users, Eye } from 'lucide-react'
 import type { Course } from '../../data/course-sample'
 
 interface CourseHeaderProps {
