@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: course-servive
+  datasource:
+    url: jdbc:postgresql://localhost:5433/course_db
+    username: course_user
+    password: course_pass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
