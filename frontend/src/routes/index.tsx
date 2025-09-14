@@ -21,6 +21,7 @@ import StudentCoursesPage from '../pages/student/StudentCoursesPage'
 import CoursePlayerPage from '../pages/student/CoursePlayerPage'
 import QuizResultPage from '../pages/student/QuizResultPage'
 import QuizTakingPage from '../pages/student/QuizTakingPage'
+import ProfileSettingsPage from '../pages/student/ProfileSettingsPage'
 import { TutorDashboardPage } from '../pages/tutor'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
 
@@ -60,9 +61,10 @@ const AppRoutes = () => {
       >
         <Route path="bookings" element={<StudentBookingsPage />} />
         <Route path="course-list" element={<StudentCoursesPage />} />
-        <Route path="profile/personal-details" element={<div>Personal Details</div>} />
-        <Route path="profile/account-settings" element={<div>Account Settings</div>} />
-        <Route path="profile/identification" element={<div>Identification</div>} />
+        <Route path="profile" element={<Navigate to="/student/profile/personal-details" replace />} />
+        <Route path="profile/personal-details" element={<ProfileSettingsPage />} />
+        <Route path="profile/account-settings" element={<ProfileSettingsPage />} />
+        <Route path="profile/identification" element={<ProfileSettingsPage />} />
         <Route path="quizzes" element={<StudentQuizzesPage />} />
         <Route path="quiz-result/:id" element={<QuizResultPage />} />
         <Route path="quiz-taking/:id" element={<QuizTakingPage />} />

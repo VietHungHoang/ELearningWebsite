@@ -1,27 +1,12 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Calendar, 
-  Settings, 
-  BookOpen, 
-  Users, 
-  GraduationCap, 
-  FileText, 
-  Mail, 
-  MessageCircle, 
-  Award, 
-  CreditCard, 
-  LogOut,
-  ShoppingCart,
-  Bell,
-  MessageCircle as MessageIcon
-} from 'lucide-react'
 import { StudentLayout, CalendarView } from '../../components'
+import { studentUserControls, getStudentSidebarItems } from '../../utils/studentConfig'
 
 const StudentBookingsPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [currentDate, setCurrentDate] = useState('September 13, 2025')
-  const [activeView, setActiveView] = useState('Daily')
+  const [currentDate] = useState('September 13, 2025')
+  const [activeView] = useState('Daily')
   const [searchValue, setSearchValue] = useState('')
   const navigate = useNavigate()
 
@@ -29,32 +14,11 @@ const StudentBookingsPage = () => {
     navigate(path)
   }
 
-  const sidebarItems = [
-    { icon: Settings, label: 'Profile Settings', path: '/student/profile' },
-    { icon: Calendar, label: 'My Bookings', path: '/student/bookings', active: true },
-    { icon: BookOpen, label: 'My Learning', path: '/student/course-list' },
-    { icon: Users, label: 'Find Tutors', path: '/student/find-tutors' },
-    { icon: FileText, label: 'My Quizzes', path: '/student/quizzes' },
-    { icon: GraduationCap, label: 'Find Courses', path: '/student/courses' },
-    { icon: BookOpen, label: 'Find Course Bundles', path: '/student/bundles' },
-    { icon: FileText, label: 'Assignments', path: '/student/assignments' },
-    { icon: Mail, label: 'Inbox', path: '/student/inbox' },
-    { icon: MessageCircle, label: 'Community', path: '/student/community' },
-    { icon: Award, label: 'My Certificates', path: '/student/certificates' },
-  ]
+  const sidebarItems = getStudentSidebarItems('/student/bookings')
 
   const breadcrumbItems = [
-    { label: 'Profile Settings', path: '/student/profile' },
     { label: 'My Bookings' }
   ]
-
-  const userControls = {
-    currency: 'USD $',
-    language: 'En',
-    languageFlag: 'https://flagcdn.com/w20/us.png',
-    cartCount: 1,
-    userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
-  }
 
   const timeSlots = [
     '12:00 am', '01:00 am', '02:00 am', '03:00 am', '04:00 am', '05:00 am',
@@ -100,7 +64,7 @@ const StudentBookingsPage = () => {
       breadcrumbItems={breadcrumbItems}
       searchPlaceholder="Quick search here"
       searchShortcut="Ctrl + K"
-      userControls={userControls}
+      userControls={studentUserControls}
     >
       <div className="flex-1 flex flex-col min-h-0">
         <CalendarView

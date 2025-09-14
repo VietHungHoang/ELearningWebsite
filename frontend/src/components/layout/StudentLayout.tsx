@@ -57,15 +57,17 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={onSidebarToggle}
-        items={sidebarItems}
-        onItemClick={onSidebarItemClick}
-        walletBalance={walletBalance}
-        onWithdraw={onWithdraw}
-        onSignOut={onSignOut}
-      />
+      <div className="flex-shrink-0">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={onSidebarToggle}
+          items={sidebarItems}
+          onItemClick={onSidebarItemClick}
+          walletBalance={walletBalance}
+          onWithdraw={onWithdraw}
+          onSignOut={onSignOut}
+        />
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

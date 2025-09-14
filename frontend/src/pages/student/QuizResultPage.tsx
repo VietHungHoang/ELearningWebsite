@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Settings, Calendar, BookOpen, Users, FileText, GraduationCap, Mail, MessageCircle, Award } from 'lucide-react'
 import { StudentLayout } from '../../components'
 import { QuizResultHeader, QuestionResult } from '../../components/student/quizzes/attempted'
+import { studentUserControls, getStudentSidebarItems } from '../../utils/studentConfig'
 import { useAppSelector, useAppDispatch } from '../../store/hooks'
 import { fetchQuizById } from '../../store/slices/quizSlice'
 
@@ -90,33 +90,12 @@ const QuizResultPage = () => {
     navigate(path)
   }
 
-  const sidebarItems = [
-    { icon: Settings, label: 'Profile Settings', path: '/student/profile' },
-    { icon: Calendar, label: 'My Bookings', path: '/student/bookings' },
-    { icon: BookOpen, label: 'My Learning', path: '/student/course-list' },
-    { icon: Users, label: 'Find Tutors', path: '/student/find-tutors' },
-    { icon: FileText, label: 'My Quizzes', path: '/student/quizzes', active: true },
-    { icon: GraduationCap, label: 'Find Courses', path: '/student/courses' },
-    { icon: BookOpen, label: 'Find Course Bundles', path: '/student/bundles' },
-    { icon: FileText, label: 'Assignments', path: '/student/assignments' },
-    { icon: Mail, label: 'Inbox', path: '/student/inbox' },
-    { icon: MessageCircle, label: 'Community', path: '/student/community' },
-    { icon: Award, label: 'My Certificates', path: '/student/certificates' },
-  ]
+  const sidebarItems = getStudentSidebarItems('/student/quizzes')
 
   const breadcrumbItems = [
-    { label: 'Profile Settings', path: '/student/profile' },
     { label: 'My Quizzes', path: '/student/quizzes' },
     { label: 'Quiz Result' }
   ]
-
-  const userControls = {
-    currency: 'USD $',
-    language: 'En',
-    languageFlag: 'https://flagcdn.com/w20/us.png',
-    cartCount: 1,
-    userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
-  }
 
   return (
     <StudentLayout
@@ -127,7 +106,7 @@ const QuizResultPage = () => {
       breadcrumbItems={breadcrumbItems}
       searchPlaceholder="Quick search here"
       searchShortcut="Ctrl + K"
-      userControls={userControls}
+      userControls={studentUserControls}
     >
       <div className="flex-1 overflow-y-auto p-6 pb-8">
         <div className="max-w-4xl mx-auto">

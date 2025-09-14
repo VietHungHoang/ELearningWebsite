@@ -4,9 +4,11 @@ import CoursePlayerSidebar from '../../components/student/coursePlayer/CoursePla
 import CourseVideoPlayer from '../../components/student/coursePlayer/CourseVideoPlayer'
 import { 
   Share, 
-  ChevronDown, 
-  Bell
+  Bell,
+  ShoppingCart,
+  MessageCircle
 } from 'lucide-react'
+import UserProfileDropdown from '../../components/navigation/user-actions/UserProfileDropdown'
 
 interface Lesson {
   id: string
@@ -717,6 +719,7 @@ const CoursePlayerPage = () => {
   const [showNextLessonModal, setShowNextLessonModal] = useState(false)
   const [nextLesson, setNextLesson] = useState<Lesson | null>(null)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
   // Helper function to find current lesson
   const findCurrentLesson = (course: Course): Lesson | null => {
@@ -1095,6 +1098,29 @@ const CoursePlayerPage = () => {
     })
   }
 
+  const handleToggleUserMenu = () => {
+    setIsUserMenuOpen(!isUserMenuOpen)
+  }
+
+  const handleCloseUserMenu = () => {
+    setIsUserMenuOpen(false)
+  }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (isUserMenuOpen && !target.closest('.user-dropdown-container')) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserMenuOpen])
+
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'prerequisites', label: 'Prerequisites & FAQs' },
@@ -1197,24 +1223,79 @@ const CoursePlayerPage = () => {
                 <span className="text-sm">Share</span>
               </button>
 
-              <div className="flex items-center space-x-1 text-sm">
-                <span>USD $</span>
-                <ChevronDown className="w-3 h-3" />
-              </div>
+              {/* Currency */}
+              <button className="inline-flex items-center text-sm text-gray-300 hover:text-white">
+                USD $
+                <svg viewBox="0 0 20 20" className="w-4 h-4 ml-1 text-gray-400">
+                  <path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
 
-              <div className="flex items-center space-x-1 text-sm">
-                <img src="https://flagcdn.com/w20/us.png" alt="EN" className="w-4 h-3" />
-                <span>En</span>
-                <ChevronDown className="w-3 h-3" />
-              </div>
+              {/* Language */}
+              <button className="inline-flex items-center text-sm text-gray-300 hover:text-white">
+                <span className="inline-flex items-center justify-center w-6 h-4 mr-1">
+                  <img src="https://flagcdn.com/w20/gb.png" alt="EN" className="w-5 h-3.5" />
+                </span>
+                En
+                <svg viewBox="0 0 20 20" className="w-4 h-4 ml-1 text-gray-400">
+                  <path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </button>
 
-              <Bell className="w-5 h-5 text-gray-300 hover:text-white cursor-pointer" />
+              {/* Shopping Cart */}
+              <button className="relative p-2 text-gray-300 hover:text-white transition-colors">
+                <ShoppingCart className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  2
+                </span>
+              </button>
 
-              <div className="w-8 h-8 rounded-full overflow-hidden">
-                <img 
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face" 
-                  alt="User" 
-                  className="w-full h-full object-cover" 
+              {/* Notifications */}
+              <button className="relative p-2 text-gray-300 hover:text-white transition-colors">
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  0
+                </span>
+              </button>
+
+              {/* Chat */}
+              <button className="p-2 text-gray-300 hover:text-white transition-colors">
+                <MessageCircle className="w-5 h-5" />
+              </button>
+
+              {/* User Profile Dropdown */}
+              <div className="relative user-dropdown-container">
+                <button
+                  onClick={handleToggleUserMenu}
+                  className="flex items-center space-x-2 text-gray-300 hover:text-white"
+                >
+                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/media/students/sarah-chapman.jpg" 
+                      alt="User"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement
+                        if (nextElement) {
+                          nextElement.style.display = 'flex'
+                        }
+                      }}
+                    />
+                    <div className="w-full h-full bg-emerald-100 rounded-full flex items-center justify-center" style={{display: 'none'}}>
+                      <span className="text-emerald-600 font-semibold text-sm">
+                        U
+                      </span>
+                    </div>
+                  </div>
+                  <svg viewBox="0 0 20 20" className="w-4 h-4 text-gray-400">
+                    <path d="M5 7l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </button>
+
+                <UserProfileDropdown 
+                  isOpen={isUserMenuOpen} 
+                  onClose={handleCloseUserMenu} 
                 />
               </div>
             </div>

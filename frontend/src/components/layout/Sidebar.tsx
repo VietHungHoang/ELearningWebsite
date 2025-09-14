@@ -31,9 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSignOut
 }) => {
   return (
-    <div className={`bg-white shadow-sm transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} flex flex-col`}>
+    <div className={`bg-white shadow-sm transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} flex flex-col h-full`}>
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between h-20">
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between h-20 flex-shrink-0">
         {!collapsed && (
           <div className="flex items-center justify-start w-full">
             <Link to="/" className="block">
@@ -53,8 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      {/* Sidebar Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      {/* Sidebar Navigation - Scrollable */}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto min-h-0">
         {items.map((item, index) => (
           <SidebarItem
             key={index}
@@ -68,9 +68,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </nav>
 
-      {/* Wallet Section */}
+      {/* Wallet Section - Fixed at bottom */}
       {!collapsed && (
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 flex-shrink-0">
           <WalletSection
             balance={walletBalance}
             onWithdraw={onWithdraw}
