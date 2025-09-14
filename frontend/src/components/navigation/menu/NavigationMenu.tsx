@@ -49,10 +49,10 @@ const NavigationMenu = () => {
               Search Courses
             </Link>
             <Link
-              to="/courses/bundles"
+              to="/course-bundles"
               className="block px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
             >
-              Search Course Bundles
+              Course Bundles
             </Link>
           </div>
         )}

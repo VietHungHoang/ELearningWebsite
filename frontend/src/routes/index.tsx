@@ -10,6 +10,7 @@ import {
   CourseDetailPage, 
   LessonPage 
 } from '../pages/course'
+import CourseBundlesPage from '../pages/course/CourseBundlesPage'
 import { 
   PremiumFeaturesPage, 
   FindTutorPage, 
@@ -22,6 +23,7 @@ import CoursePlayerPage from '../pages/student/CoursePlayerPage'
 import QuizResultPage from '../pages/student/QuizResultPage'
 import QuizTakingPage from '../pages/student/QuizTakingPage'
 import ProfileSettingsPage from '../pages/student/ProfileSettingsPage'
+import CheckoutPage from '../pages/checkout/CheckoutPage'
 import { TutorDashboardPage } from '../pages/tutor'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
 
@@ -39,9 +41,11 @@ const AppRoutes = () => {
         <Route path="tutor/:id" element={<TutorProfilePage />} />
         <Route path="courses" element={<CourseListPage />} />
         <Route path="search-courses" element={<CourseSearchPage />} />
+        <Route path="course-bundles" element={<CourseBundlesPage />} />
         <Route path="courses/:id" element={<CourseDetailPage />} />
         <Route path="courses/:id/player" element={<CoursePlayerPage />} />
         <Route path="courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
       </Route>
 
       {/* Auth Routes */}
@@ -180,18 +184,6 @@ const AppRoutes = () => {
         }
       >
         <Route index element={<CourseSearchPage />} />
-      </Route>
-      <Route
-        path="/course-bundles"
-        element={
-          isAuthenticated ? (
-            <MainLayout />
-          ) : (
-            <Navigate to="/auth/login" replace />
-          )
-        }
-      >
-        <Route index element={<div>Course Bundles</div>} />
       </Route>
       <Route
         path="/messenger"
