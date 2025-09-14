@@ -13,3 +13,6 @@ export * from './findTutor'
 
 // Premium components
 export * from './premium'
+
+// Tutor components
+export * from './tutor'

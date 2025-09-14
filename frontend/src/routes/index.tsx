@@ -16,6 +16,7 @@ import {
   FindTutorPage, 
   TutorProfilePage 
 } from '../pages/dashboard'
+import TutorSubscriptionPage from '../pages/dashboard/TutorSubscriptionPage'
 import { LoginPage, RegisterPage } from '../pages/auth'
 import { StudentBookingsPage, StudentQuizzesPage } from '../pages/student'
 import StudentCoursesPage from '../pages/student/StudentCoursesPage'
@@ -38,6 +39,7 @@ const AppRoutes = () => {
         <Route path="find-tutors" element={<FindTutorPage />} />
         <Route path="premium" element={<PremiumFeaturesPage />} />
         <Route path="student-subscriptions" element={<PremiumFeaturesPage />} />
+        <Route path="tutor-subscriptions" element={<TutorSubscriptionPage />} />
         <Route path="tutor/:id" element={<TutorProfilePage />} />
         <Route path="courses" element={<CourseListPage />} />
         <Route path="search-courses" element={<CourseSearchPage />} />

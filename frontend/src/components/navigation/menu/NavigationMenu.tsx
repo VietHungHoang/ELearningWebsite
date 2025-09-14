@@ -85,7 +85,7 @@ const NavigationMenu = () => {
               Student Subscriptions
             </Link>
             <Link
-              to="/subscriptions/tutor"
+              to="/tutor-subscriptions"
               className="block px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-50"
             >
               Tutor Subscriptions
