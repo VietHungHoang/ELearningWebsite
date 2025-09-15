@@ -1,3 +1,5 @@
+import java.util.*;
+
 @RestController
 @RequestMapping("/api/quizzes")
 @RequiredArgsConstructor
@@ -29,8 +31,7 @@ public class QuizController {
     @GetMapping("/{id}/question/{questionIndex}")
     public ResponseEntity<QuizQuestionResponse> getQuestion(
             @PathVariable Long id,
-            @PathVariable int questionIndex
-    ) {
+            @PathVariable int questionIndex) {
         return quizService.getQuestion(id, questionIndex)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -40,8 +41,7 @@ public class QuizController {
     @PostMapping("/{id}/answer")
     public SubmitAnswerResponse submitAnswer(
             @PathVariable Long id,
-            @RequestBody SubmitAnswerRequest request
-    ) {
+            @RequestBody SubmitAnswerRequest request) {
         return quizService.submitAnswer(id, request);
     }
 

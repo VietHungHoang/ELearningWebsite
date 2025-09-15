@@ -2,7 +2,7 @@ package com.elearning.quiz_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import com.elearning.quiz_service.enums.QuizStatus;
 import java.util.List;
 
 @Entity
