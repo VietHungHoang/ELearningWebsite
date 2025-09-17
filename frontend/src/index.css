@@ -1,0 +1,431 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+/* Hide scrollbar for slider */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  
+  --color-background-light: #faf8f5;
+  
+  --color-secondary-50: #f8fafc;
+  --color-secondary-100: #f1f5f9;
+  --color-secondary-200: #e2e8f0;
+  --color-secondary-300: #cbd5e1;
+  --color-secondary-400: #94a3b8;
+  --color-secondary-500: #64748b;
+  --color-secondary-600: #475569;
+  --color-secondary-700: #334155;
+  --color-secondary-800: #1e293b;
+  --color-secondary-900: #0f172a;
+  
+  --color-accent-50: #fef7ee;
+  --color-accent-100: #fdedd4;
+  --color-accent-200: #fbd7a8;
+  --color-accent-300: #f8bb71;
+  --color-accent-400: #f59538;
+  --color-accent-500: #f2750e;
+  --color-accent-600: #e35a09;
+  --color-accent-700: #bc420b;
+  --color-accent-800: #95350f;
+  --color-accent-900: #782e10;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Roboto', system-ui, sans-serif;
+  }
+  
+  body {
+    font-family: 'Roboto', system-ui, sans-serif;
+    background-color: #212121;
+    color: #ffffff;
+  }
+
+  /* Ensure all text elements use Roboto */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', system-ui, sans-serif;
+  }
+
+  p, span, div, a, button, input, textarea, select {
+    font-family: 'Roboto', system-ui, sans-serif;
+  }
+
+  /* Laravel Header Styles */
+  .am-header_two {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem 0;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .am-header_two_wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .am-logo {
+    display: flex;
+    align-items: center;
+  }
+
+  .am-navigation {
+    display: flex;
+    align-items: center;
+  }
+
+  .am-navbar-toggler {
+    display: none;
+  }
+
+  .navbar-collapse {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-item {
+    list-style: none;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .nav-link:hover {
+    color: #93c5fd;
+  }
+
+  .am-loginbtns {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .am-btn {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+
+  .am-btn:hover {
+    background-color: #2563eb;
+  }
+
+  .am-white-btn {
+    border: 1px solid white;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .am-white-btn:hover {
+    background-color: white;
+    color: #1f2937;
+  }
+
+  /* Laravel Banner Styles */
+  .am-learning {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 4rem 0;
+    color: white;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.5rem;
+  }
+
+  .col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+
+  .am-learning_content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .am-learning_details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .am-pre-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .am-learning_title h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .am-learning_title p {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .am-learning_search {
+    display: flex;
+    background: white;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .am-learning_search_input {
+    flex: 1;
+  }
+
+  .am-learning_search_input input {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+  }
+
+  .am-learning_search_btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .am-learning_search_btn:hover {
+    background: #2563eb;
+  }
+
+  .am-learning_video {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .am-learning_video_info {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .video-container {
+    background: white;
+    border-radius: 1rem;
+    padding: 1rem;
+    box-shadow: 0 10px 25px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .am-learning_video_tag {
+    text-align: center;
+  }
+
+  .am-learning_video_tag_talent {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+
+  .am-text-svg {
+    width: 120px;
+    height: 120px;
+  }
+
+  .am-text-svg text {
+    font-size: 8px;
+    fill: white;
+    font-weight: 500;
+  }
+
+  .am-learning_video_tag p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .am-learning_video_tutors-img,
+  .am-learning_video_talents-img {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .am-learning_video_tutors-img {
+    top: -30px;
+    right: -30px;
+  }
+
+  .am-learning_video_talents-img {
+    bottom: -30px;
+    left: -30px;
+  }
+
+  .am-learning_video_tutors-img img,
+  .am-learning_video_talents-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .am-learning_content {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .am-learning_title h3 {
+      font-size: 2rem;
+    }
+
+    .am-header_two_wrap {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .am-navbar-toggler {
+      display: block;
+    }
+
+    .navbar-collapse {
+      display: none;
+      width: 100%;
+    }
+
+    .navbar-collapse.show {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .nav-item {
+      width: 100%;
+    }
+
+    .nav-link {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    background-color: theme(colors.primary.600);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: theme(colors.primary.700);
+  }
+  
+  .btn-accent {
+    background-color: theme(colors.accent.500);
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-accent:hover {
+    background-color: theme(colors.accent.600);
+  }
+  
+  .btn-outline {
+    border: 1px solid white;
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+  }
+  
+  .btn-outline:hover {
+    background-color: white;
+    color: #1f2937;
+  }
+  
+  .section-padding {
+    padding: 4rem 1rem;
+  }
+  
+  .container-custom {
+    max-width: 80rem;
+    margin: 0 auto;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(to bottom right, theme(colors.primary.900), theme(colors.secondary.900), theme(colors.accent.900));
+  }
+  
+  .card-hover {
+    transition: all 0.3s;
+  }
+  
+  .card-hover:hover {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-0.25rem);
+  }
+}

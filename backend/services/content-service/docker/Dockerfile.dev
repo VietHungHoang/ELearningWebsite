@@ -1,0 +1,15 @@
+FROM maven:3.9.11-amazoncorretto-17-al2023 AS builder
+
+WORKDIR /app
+
+# Copy pom.xml first for better Docker layer caching
+COPY pom.xml . 
+
+# Download dependencies (this layer will be cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline
+
+# Copy source code
+COPY src ./src
+
+# Run the application in development mode with hot reload
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.fork=false"]

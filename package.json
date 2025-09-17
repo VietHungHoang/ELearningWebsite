@@ -1,0 +1,38 @@
+{
+  "name": "elearning-react",
+  "version": "1.0.0",
+  "description": "E-Learning Platform with React Frontend",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "preview": "npm run preview --workspace=frontend",
+    "lint": "npm run lint --workspace=frontend",
+    "install:frontend": "npm install --workspace=frontend",
+    "clean": "npm run clean --workspace=frontend"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/elearning-react.git"
+  },
+  "keywords": [
+    "elearning",
+    "react",
+    "typescript",
+    "tailwindcss",
+    "education"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

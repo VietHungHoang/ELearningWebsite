@@ -1,0 +1,13 @@
+// Course Components exports
+export { default as CourseHeader } from './CourseHeader'
+export { default as CourseOverview } from './CourseOverview'
+export { default as CourseTabsMain } from './CourseTabs'
+export { default as CurriculumAccordion } from './CurriculumAccordion'
+export { default as CourseFAQAccordion } from './FAQAccordion'
+export { default as CourseInstructorMiniCard } from './InstructorMiniCard'
+export { default as LearningOutcomes } from './LearningOutcomes'
+export { default as Prerequisites } from './Prerequisites'
+export { default as ReviewCard } from './ReviewCard'
+export { default as ReviewsSummary } from './ReviewsSummary'
+export { default as ShareTags } from './ShareTags'
+export { default as SidebarCourseCard } from './SidebarCourseCard'
