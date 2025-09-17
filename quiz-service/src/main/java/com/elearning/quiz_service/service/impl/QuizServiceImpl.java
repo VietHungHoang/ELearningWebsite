@@ -136,8 +136,7 @@ public class QuizServiceImpl implements IQuizService {
         dto.setQuestions(
                 quiz.getQuestions().stream()
                         .map(this::mapToQuestionResponse)
-                        .collect(Collectors.toList())
-        );
+                        .collect(Collectors.toList()));
         return dto;
     }
 
@@ -148,8 +147,7 @@ public class QuizServiceImpl implements IQuizService {
         dto.setAnswers(
                 question.getAnswers().stream()
                         .map(a -> new QuizAnswerResponse(a.getId(), a.getAnswerText()))
-                        .collect(Collectors.toList())
-        );
+                        .collect(Collectors.toList()));
         return dto;
     }
 
@@ -157,19 +155,21 @@ public class QuizServiceImpl implements IQuizService {
         List<Long> answers = userAnswers.getOrDefault(quizId, new ArrayList<>());
         int score = 0;
         for (Long answerId : answers) {
-            quizAnswerRepository.findById(answerId)
-                    .filter(QuizAnswer::isCorrect)
-                    .ifPresent(a -> score++);
+            Optional<QuizAnswer> opt = quizAnswerRepository.findById(answerId);
+            if (opt.isPresent() && opt.get().isCorrect()) {
+                score++;
+            }
         }
         return score;
     }
-        @Override
+
+
+    @Override
     public QuizResponse updateQuizStatus(Long quizId, String status) {
-        // TODO: Thêm logic update status trong DB (DRAFT, PUBLISHED, ...)
-        return QuizResponse.builder()
-                .id(quizId)
-                .status(status)
-                .build();
+        QuizResponse quiz = new QuizResponse();
+        quiz.setId(quizId);
+        quiz.setStatus(QuizStatus.valueOf(status)); // convert String -> enum
+        return quiz;
     }
 
     @Override
