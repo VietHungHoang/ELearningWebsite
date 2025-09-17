@@ -163,4 +163,19 @@ public class QuizServiceImpl implements IQuizService {
         }
         return score;
     }
+        @Override
+    public QuizResponse updateQuizStatus(Long quizId, String status) {
+        // TODO: Thêm logic update status trong DB (DRAFT, PUBLISHED, ...)
+        return QuizResponse.builder()
+                .id(quizId)
+                .status(status)
+                .build();
+    }
+
+    @Override
+    public List<QuizResultResponse> getResultsByUser(Long userId) {
+        // TODO: Lấy kết quả quiz từ DB theo userId
+        return List.of();
+    }
+
 }

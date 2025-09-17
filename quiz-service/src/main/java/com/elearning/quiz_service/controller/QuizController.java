@@ -1,4 +1,24 @@
+package com.elearning.quiz_service.controller;
 import java.util.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.elearning.quiz_service.dto.request.QuizRequest;
+import com.elearning.quiz_service.dto.request.SubmitAnswerRequest;
+import com.elearning.quiz_service.dto.response.QuizQuestionResponse;
+import com.elearning.quiz_service.dto.response.QuizResponse;
+import com.elearning.quiz_service.dto.response.QuizResultResponse;
+import com.elearning.quiz_service.dto.response.SubmitAnswerResponse;
+import com.elearning.quiz_service.service.IQuizService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/quizzes")

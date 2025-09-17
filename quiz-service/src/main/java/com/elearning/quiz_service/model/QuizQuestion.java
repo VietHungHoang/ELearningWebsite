@@ -1,5 +1,7 @@
 package com.elearning.quiz_service.model;
 
+import java.util.*;
+
 import jakarta.persistence.*;
 import lombok.*;
 @Entity

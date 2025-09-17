@@ -10,5 +10,4 @@ public class QuizRequest {
     private Long lessonId;
     private List<QuizQuestionRequest> questions;
     private QuizStatus status; // DRAFT hoặc PUBLISHED
-    private List<QuizQuestionRequest> questions;
 }
