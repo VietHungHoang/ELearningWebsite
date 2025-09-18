@@ -1,9 +1,23 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '../../store/hooks'
 import { UserInfo } from '../../components'
 
 const TutorDashboardPage: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth)
+  const navigate = useNavigate()
+
+  const handleCreateCourse = () => {
+    navigate('/tutor/courses/create')
+  }
+
+  const handleViewStudents = () => {
+    navigate('/tutor/students')
+  }
+
+  const handleViewEarnings = () => {
+    navigate('/tutor/earnings')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,7 +33,10 @@ const TutorDashboardPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">My Students</h3>
             <p className="text-gray-600">Manage your student relationships and sessions</p>
-            <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            <button 
+              onClick={handleViewStudents}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
               View Students
             </button>
           </div>
@@ -28,7 +45,10 @@ const TutorDashboardPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Create Course</h3>
             <p className="text-gray-600">Design and publish new courses for students</p>
-            <button className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+            <button 
+              onClick={handleCreateCourse}
+              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
               Create Course
             </button>
           </div>
@@ -37,7 +57,10 @@ const TutorDashboardPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Earnings</h3>
             <p className="text-gray-600">Track your teaching income and payments</p>
-            <button className="mt-4 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700">
+            <button 
+              onClick={handleViewEarnings}
+              className="mt-4 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700"
+            >
               View Earnings
             </button>
           </div>

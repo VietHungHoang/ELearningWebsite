@@ -26,6 +26,8 @@ import QuizTakingPage from '../pages/student/QuizTakingPage'
 import ProfileSettingsPage from '../pages/student/ProfileSettingsPage'
 import CheckoutPage from '../pages/checkout/CheckoutPage'
 import { TutorDashboardPage } from '../pages/tutor'
+import CreateCoursePage from '../pages/tutor/CreateCoursePage'
+import CourseManagementPage from '../pages/tutor/CourseManagementPage'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
 
 const AppRoutes = () => {
@@ -106,6 +108,26 @@ const AppRoutes = () => {
         <Route path="invoices" element={<div>Tutor Invoices</div>} />
         <Route path="disputes" element={<div>Tutor Disputes</div>} />
       </Route>
+
+      {/* Course Creation - No Layout */}
+      <Route 
+        path="/tutor/courses/create" 
+        element={
+          <RoleBasedRedirect allowedRoles={['instructor']}>
+            <CreateCoursePage />
+          </RoleBasedRedirect>
+        } 
+      />
+
+      {/* Course Management - No Layout */}
+      <Route 
+        path="/tutor/courses/manage/:courseId" 
+        element={
+          <RoleBasedRedirect allowedRoles={['instructor']}>
+            <CourseManagementPage />
+          </RoleBasedRedirect>
+        } 
+      />
 
       {/* Admin Routes */}
       <Route
