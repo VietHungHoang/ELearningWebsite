@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Configuration;
 import lombok.Data;
 
 @Configuration
-@ConfigurationProperties(prefix = "aws.s3")
+@ConfigurationProperties(prefix = "aws.s3.images")
 @Data
-public class S3Properties {
+public class S3ImagesProperties {
     private String bucketName;
     private String region;
 

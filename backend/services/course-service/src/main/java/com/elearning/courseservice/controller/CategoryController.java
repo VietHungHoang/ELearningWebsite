@@ -2,7 +2,7 @@ package com.elearning.courseservice.controller;
 
 import com.elearning.courseservice.dto.response.ApiResponse;
 import com.elearning.courseservice.dto.response.CategoryResponse;
-import com.elearning.courseservice.service.ICategoryService;
+import com.elearning.courseservice.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryController {
     
-    private final ICategoryService categoryService;
+    private final CategoryService categoryService;
     
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {

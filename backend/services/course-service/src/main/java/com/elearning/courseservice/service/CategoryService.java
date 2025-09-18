@@ -4,7 +4,7 @@ import com.elearning.courseservice.dto.response.CategoryResponse;
 
 import java.util.List;
 
-public interface ICategoryService {
+public interface CategoryService {
 
     /**
      * Get all active categories ordered by sort order

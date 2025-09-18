@@ -52,8 +52,12 @@ server:
 # AWS S3 Configuration
 aws:
   s3:
-    bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-images}
-    region: ${AWS_S3_REGION:ap-southeast-2}
+    images:
+      bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-videos}
+      region: ${AWS_S3_REGION:ap-southeast-2}
+    videos:
+      bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-videos}
+      region: ${AWS_S3_REGION:ap-southeast-2}
 
 # Image Upload Configuration
 image:

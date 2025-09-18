@@ -3,11 +3,13 @@ package com.elearning.contentservice.service;
 import java.util.List;
 
 public interface S3Service {
-    
+
+    public String getUploadId(String fileName, String contentType, int totalChunks);
+
     /**
      * Generate presigned URLs for multipart upload chunks
      */
-    List<String> generatePresignedUrls(String uploadId, int totalChunks);
+    List<String> generatePresignedUrls(String key, String uploadId, int totalChunks);
     
     /**
      * Complete multipart upload and return final video URL

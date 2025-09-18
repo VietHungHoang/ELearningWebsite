@@ -1,49 +1,110 @@
 package com.elearning.contentservice.service.impl;
 
 import com.elearning.contentservice.config.ImageProperties;
-import com.elearning.contentservice.config.S3Properties;
+import com.elearning.contentservice.config.S3ImagesProperties;
+import com.elearning.contentservice.config.S3VideosProperties;
+import com.elearning.contentservice.dto.response.InitiateUploadResponse;
 import com.elearning.contentservice.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
     
-    private final S3Properties s3Properties;
+    private final S3ImagesProperties s3ImagesProperties;
+    private final S3VideosProperties s3VideosProperties;
     private final ImageProperties imageProperties;
     
-    private S3Presigner getS3Presigner() {
+    private S3Presigner getS3Presigner(Region region) {
         // Using default credential provider (IAM roles, environment variables, etc.)
         return S3Presigner.builder()
-                .region(Region.of(s3Properties.getRegion()))
+                .region(region)
+                .build();
+    }
+
+    private S3Client getS3Client(Region region) {
+        return S3Client.builder()
+                .region(region)
                 .build();
     }
     
-    @Override
-    public List<String> generatePresignedUrls(String uploadId, int totalChunks) {
-        log.info("Generating {} presigned URLs for upload ID: {}", totalChunks, uploadId);
-        
-        List<String> urls = new ArrayList<>();
-        for (int i = 0; i < totalChunks; i++) {
-            // Mock presigned URL - replace with actual S3 implementation
-            String url = "https://mock-s3-bucket.amazonaws.com/" + uploadId + "/chunk-" + i + "?signature=mock-signature";
-            urls.add(url);
+    public String getUploadId(String key, String contentType, int totalChunks) {
+
+        try (S3Client s3Client = getS3Client(Region.of(s3VideosProperties.getRegion()))) {
+            CreateMultipartUploadRequest request = CreateMultipartUploadRequest.builder()
+                .bucket(s3VideosProperties.getBucketName())
+                .key(key)
+                .contentType(contentType)
+                .build();
+
+        CreateMultipartUploadResponse response = s3Client.createMultipartUpload(request);
+        return response.uploadId();
+
+        } catch (Exception e) {
+            log.error("Failed to generate presigned URL for video: {}", key, e);
+            throw new RuntimeException("Failed to generate presigned URL", e);
         }
         
-        return urls;
     }
+
+@Override
+public List<String> generatePresignedUrls(String key, String uploadId, int totalChunks) {
+    log.info("Generating {} presigned URLs for upload ID: {}", totalChunks, uploadId);
+    
+    List<String> urls = new ArrayList<>();
+    
+    try (S3Presigner presigner = getS3Presigner(Region.of(s3VideosProperties.getRegion()))) {
+        
+        for (int partNumber = 1; partNumber <= totalChunks; partNumber++) {
+            // Create upload part request
+            UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                    .bucket(s3VideosProperties.getBucketName())
+                    .key(key) // The key for the multipart upload
+                    .uploadId(uploadId)
+                    .partNumber(partNumber)
+                    .build();
+            
+            // Create presign request
+            UploadPartPresignRequest presignRequest = UploadPartPresignRequest.builder()
+                    .signatureDuration(Duration.ofHours(1)) // 1 hour expiry
+                    .uploadPartRequest(uploadPartRequest)
+                    .build();
+            
+            // Generate presigned URL
+            PresignedUploadPartRequest presignedRequest = presigner.presignUploadPart(presignRequest);
+            String presignedUrl = presignedRequest.url().toString();
+            
+            urls.add(presignedUrl);
+            log.debug("Generated presigned URL for part {}: {}", partNumber, presignedUrl);
+        }
+        
+        log.info("Successfully generated {} presigned URLs for upload ID: {}", totalChunks, uploadId);
+        return urls;
+        
+    } catch (Exception e) {
+        log.error("Failed to generate presigned URLs for upload ID: {}", uploadId, e);
+        throw new RuntimeException("Failed to generate presigned URLs", e);
+    }
+}
     
     @Override
     public String completeMultipartUpload(String uploadId, List<String> etags) {
@@ -90,9 +151,9 @@ public class S3ServiceImpl implements S3Service {
             throw new IllegalArgumentException("Unsupported image type: " + contentType);
         }
         
-        try (S3Presigner presigner = getS3Presigner()) {
+        try (S3Presigner presigner = getS3Presigner(Region.of(s3ImagesProperties.getRegion()))) {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(s3Properties.getBucketName())
+                    .bucket(s3ImagesProperties.getBucketName())
                     .key(imageKey)
                     .contentType(contentType)
                     .build();
@@ -132,7 +193,7 @@ public class S3ServiceImpl implements S3Service {
             // Mock upload process - replace with actual S3 SDK implementation
             Thread.sleep(500); // Simulate upload time
             
-            String imageUrl = String.format("%simages/%s", s3Properties.getBaseUrl(), imageKey);
+            String imageUrl = String.format("%simages/%s", s3ImagesProperties.getBaseUrl(), imageKey);
             log.info("Image uploaded successfully: {}", imageUrl);
             
             return imageUrl;

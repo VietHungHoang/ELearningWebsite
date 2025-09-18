@@ -5,7 +5,7 @@ import com.elearning.courseservice.dto.response.ApiResponse;
 import com.elearning.courseservice.dto.response.CourseResponse;
 import com.elearning.courseservice.enums.CourseLevel;
 import com.elearning.courseservice.enums.CourseStatus;
-import com.elearning.courseservice.service.ICourseService;
+import com.elearning.courseservice.service.CourseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,12 +23,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CourseController {
     
-    private final ICourseService courseService;
+    private final CourseService courseService;
     
     @PostMapping
     public ResponseEntity<ApiResponse<CourseResponse>> createCourse(@Valid @RequestBody CreateCourseRequest request) {
         CourseResponse course = courseService.createCourse(request);
-        ApiResponse<CourseResponse> response = ApiResponse.success(course, "Course created successfully");
+        ApiResponse<CourseResponse> response = ApiResponse.success(201, course, "Course created successfully");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
     

@@ -16,7 +16,6 @@ public class ApiResponse<T> {
     private int status;
     private T data;
     private String message;
-    private String error;
     
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()

@@ -5,7 +5,7 @@ import com.elearning.courseservice.exception.CourseNotFoundException;
 import com.elearning.courseservice.mapper.CategoryMapper;
 import com.elearning.courseservice.model.Category;
 import com.elearning.courseservice.repository.CategoryRepository;
-import com.elearning.courseservice.service.ICategoryService;
+import com.elearning.courseservice.service.CategoryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class CategoryServiceImpl implements ICategoryService {
+public class CategoryServiceImpl implements CategoryService {
     
     private final CategoryRepository categoryRepository;
 

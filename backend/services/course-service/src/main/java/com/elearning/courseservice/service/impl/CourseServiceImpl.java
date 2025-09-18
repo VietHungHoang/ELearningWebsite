@@ -1,5 +1,6 @@
 package com.elearning.courseservice.service.impl;
 
+import com.elearning.contentservice.config.S3Properties;
 import com.elearning.courseservice.dto.request.CreateCourseRequest;
 import com.elearning.courseservice.dto.response.CourseResponse;
 import com.elearning.courseservice.enums.CourseLevel;
@@ -11,8 +12,9 @@ import com.elearning.courseservice.model.Category;
 import com.elearning.courseservice.model.Course;
 import com.elearning.courseservice.repository.CategoryRepository;
 import com.elearning.courseservice.repository.CourseRepository;
-import com.elearning.courseservice.service.ICourseService;
+import com.elearning.courseservice.service.CourseService;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -28,7 +30,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class CourseServiceImpl implements ICourseService {
+public class CourseServiceImpl implements CourseService {
+    private final S3Properties s3Properties;
     
     private final CourseRepository courseRepository;
     

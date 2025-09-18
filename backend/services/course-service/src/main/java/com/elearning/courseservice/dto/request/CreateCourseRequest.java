@@ -40,8 +40,6 @@ public class CreateCourseRequest {
     
     private String thumbnailUrl;
     
-
-    
     @Min(value = 0, message = "Duration must be positive")
     private Integer durationMinutes;
     

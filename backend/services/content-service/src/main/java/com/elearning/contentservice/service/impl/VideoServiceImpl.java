@@ -9,7 +9,7 @@ import com.elearning.contentservice.exception.VideoNotFoundException;
 import com.elearning.contentservice.mapper.VideoMapper;
 import com.elearning.contentservice.model.Video;
 import com.elearning.contentservice.repository.VideoRepository;
-import com.elearning.contentservice.service.IVideoService;
+import com.elearning.contentservice.service.VideoService;
 import com.elearning.contentservice.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
-public class VideoServiceImpl implements IVideoService {
+public class VideoServiceImpl implements VideoService {
     
     private final VideoRepository videoRepository;
     private final S3Service s3Service;
@@ -40,9 +40,10 @@ public class VideoServiceImpl implements IVideoService {
     public InitiateUploadResponse initiateUpload(InitiateUploadRequest request, Long uploadedBy) {
         // Calculate chunks
         int totalChunks = (int) Math.ceil((double) request.getFileSize() / CHUNK_SIZE);
+
+        String key = "videos/" + UUID.randomUUID() + "-" + request.getFileName();
         
-        // Generate unique upload ID
-        String uploadId = UUID.randomUUID().toString();
+        String uploadId = s3Service.getUploadId(key, "video/mp4", totalChunks);
         
         // Create video record
         Video video = Video.builder()
@@ -63,7 +64,7 @@ public class VideoServiceImpl implements IVideoService {
         log.info("Created video record with ID: {} for upload: {}", video.getId(), uploadId);
         
         // Generate presigned URLs for each chunk
-        List<String> presignedUrls = s3Service.generatePresignedUrls(uploadId, totalChunks);
+        List<String> presignedUrls = s3Service.generatePresignedUrls(key, uploadId, totalChunks);
         
         return InitiateUploadResponse.builder()
                 .videoId(video.getId())

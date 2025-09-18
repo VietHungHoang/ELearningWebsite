@@ -6,7 +6,7 @@ import com.elearning.contentservice.dto.response.ApiResponse;
 import com.elearning.contentservice.dto.response.InitiateUploadResponse;
 import com.elearning.contentservice.dto.response.VideoResponse;
 import com.elearning.contentservice.enums.VideoStatus;
-import com.elearning.contentservice.service.IVideoService;
+import com.elearning.contentservice.service.VideoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +25,7 @@ import java.util.Stack;
 @RequiredArgsConstructor
 public class VideoController {
     
-    private final IVideoService videoService;
+    private final VideoService videoService;
     
     // Upload Management
     @PostMapping("/upload/initiate")
