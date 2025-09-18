@@ -163,7 +163,6 @@ public class QuizServiceImpl implements IQuizService {
         return score;
     }
 
-
     @Override
     public QuizResponse updateQuizStatus(Long quizId, String status) {
         QuizResponse quiz = new QuizResponse();
@@ -174,8 +173,16 @@ public class QuizServiceImpl implements IQuizService {
 
     @Override
     public List<QuizResultResponse> getResultsByUser(Long userId) {
-        // TODO: Lấy kết quả quiz từ DB theo userId
-        return List.of();
+        List<QuizResult> results = quizResultRepository.findByUserId(userId);
+
+        return results.stream().map(r -> {
+            QuizResultResponse dto = new QuizResultResponse();
+            dto.setQuizId(r.getQuiz().getId());
+            dto.setQuizTitle(r.getQuiz().getTitle());
+            dto.setScore(r.getScore());
+            dto.setUserId(r.getUserId());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
 }

@@ -1,14 +1,18 @@
 package com.elearning.quiz_service.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuizResultResponse {
-    private Long id;
-    private Long quizId;
     private Long userId;
+    private Long quizId;
+    private String quizTitle;
     private int score;
     private LocalDateTime submittedAt;
 }

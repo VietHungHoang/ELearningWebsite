@@ -3,8 +3,7 @@ package com.elearning.quiz_service.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
+// Lesson.java
 @Entity
 @Data
 @NoArgsConstructor
@@ -15,10 +14,9 @@ public class Lesson {
     private Long id;
 
     private String title;
-
     private String description;
 
-    // Một Lesson có thể có nhiều Quiz
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Quiz> quizzes;
+    // Một Lesson có 1 Quiz
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Quiz quiz;
 }

@@ -1,5 +1,7 @@
 package com.elearning.quiz_service.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,9 +15,11 @@ public class QuizResult {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId; // giả định bạn có userId từ service auth
+    private Long userId;
 
     private int score;
+
+    private LocalDateTime submittedAt;
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
