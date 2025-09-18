@@ -193,3 +193,54 @@ GET http://localhost:8081/api/quizzes/1/question/0
 ```
 
 ---
+
+## 6. Update Quiz Status
+- **Method**: PUT  
+- **URL**: `/api/quizzes/{id}/status?status=PUBLISHED`  
+- **Description**: Cập nhật trạng thái của quiz (ví dụ từ `DRAFT` sang `PUBLISHED`).  
+
+**Example Request**:
+```json
+PUT http://localhost:8081/api/quizzes/1/status?status=PUBLISHED
+
+```
+
+**Example Response**:
+```json
+{
+  "id": 1,
+  "title": "Java Basics Quiz",
+  "status": "PUBLISHED",
+  "lessonId": 101
+}
+---
+
+## 7. Get Results by User
+- **Method**: GET  
+- **URL**: `/api/quizzes/results/{userId}`  
+- **Description**: Lấy danh sách kết quả quiz mà một user đã thực hiện.  
+
+**Example Request**:
+```json
+GET http://localhost:8081/api/quizzes/results/1001
+
+```
+
+**Example Response**:
+```json
+[
+  {
+    "id": 1,
+    "quizId": 1,
+    "userId": 1001,
+    "score": 2,
+    "submittedAt": "2025-09-18T16:30:00"
+  },
+  {
+    "id": 2,
+    "quizId": 2,
+    "userId": 1001,
+    "score": 3,
+    "submittedAt": "2025-09-18T17:00:00"
+  }
+]
