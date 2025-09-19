@@ -1,0 +1,14 @@
+export { default as TutorDashboardPage } from './TutorDashboardPage';
+export { default as TutorProfilePage } from './TutorProfilePage';
+export { default as TutorBookingsPage } from './TutorBookingsPage';
+export { default as TutorCoursesPage } from './TutorCoursesPage';
+export { default as TutorBundlesPage } from './TutorBundlesPage';
+export { default as TutorAssignmentsPage } from './TutorAssignmentsPage';
+export { default as TutorCommunityPage } from './TutorCommunityPage';
+export { default as TutorQuizzesPage } from './TutorQuizzesPage';
+export { default as TutorInboxPage } from './TutorInboxPage';
+export { default as TutorDealsPage } from './TutorDealsPage';
+export { default as TutorCertificatesPage } from './TutorCertificatesPage';
+export { default as TutorPayoutsPage } from './TutorPayoutsPage';
+export { default as TutorInvoicesPage } from './TutorInvoicesPage';
+export { default as TutorDisputesPage } from './TutorDisputesPage';

@@ -1,0 +1,43 @@
+# Cursor Rules for E-Learning React Project
+
+## Project Overview
+This is an e-learning platform built with React, TypeScript, and Tailwind CSS.
+
+## Code Standards
+- Use TypeScript for all components and utilities
+- Follow React functional components with hooks
+- Use Tailwind CSS for styling
+- Implement proper error handling and loading states
+- Use meaningful variable and function names
+- Add proper TypeScript types for all props and data
+
+## File Structure
+- Components should be in `/src/components/`
+- Pages should be in `/src/pages/`
+- Types should be in `/src/types/`
+- Services should be in `/src/services/`
+- Utils should be in `/src/utils/`
+
+## Quiz System Requirements
+- Quiz questions should be integrated into lessons, not separate pages
+- Questions should appear after video completion
+- Support multiple question types: multiple choice, true/false, fill in the blank
+- Tutor can create and manage quiz questions for their courses
+- Student progress should be tracked per lesson
+
+## Component Guidelines
+- Use proper prop interfaces
+- Implement responsive design
+- Add loading and error states
+- Use consistent naming conventions
+- Keep components focused and reusable
+
+## State Management
+- Use Redux Toolkit for global state
+- Keep local state in components when appropriate
+- Use proper TypeScript types for state
+
+## Testing
+- Write unit tests for utility functions
+- Test component rendering and user interactions
+- Mock external dependencies properly
