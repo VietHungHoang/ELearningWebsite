@@ -6,7 +6,7 @@ const InstructorDashboardPage: React.FC = () => {
   const navigate = useNavigate()
 
   const handleCreateCourse = () => {
-    navigate('/tutor/courses/create')
+    navigate('/instructor/courses/create')
   }
 
   const handleViewStudents = () => {
