@@ -1,4 +1,6 @@
 // Course-related type definitions
+import type { QuizQuestion } from './quiz'
+
 export interface Lesson {
   id: string
   title: string
@@ -8,17 +10,6 @@ export interface Lesson {
   isLocked?: boolean
   videoUrl?: string
   description?: string
-  quiz?: {
-    id: string
-    title: string
-    description?: string
-    questions: any[]
-    passingScore: number
-    maxAttempts: number
-    timeLimit?: number
-    isRequired: boolean
-    isActive: boolean
-  }
 }
 
 export interface Section {
@@ -27,6 +18,17 @@ export interface Section {
   isExpanded: boolean
   progress: { completed: number; total: number; duration: string }
   lessons: Lesson[]
+  quiz?: {
+    id: string
+    title: string
+    description?: string
+    questions: QuizQuestion[]
+    passingScore: number
+    timeLimit?: number
+    isActive: boolean
+  }
+  quizCompleted?: boolean
+  isUnlocked?: boolean
 }
 
 export interface Course {

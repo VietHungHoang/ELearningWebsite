@@ -11,76 +11,7 @@ import {
 } from 'lucide-react'
 import UserProfileDropdown from '../../components/navigation/user-actions/UserProfileDropdown'
 import type { LessonQuiz as LessonQuizType, QuizResult } from '../../types/quiz'
-
-
-interface Lesson {
-  id: string
-  title: string
-  duration: string
-  isCompleted: boolean
-  isCurrent: boolean
-  isLocked?: boolean
-  videoUrl?: string
-  description?: string
-  quiz?: {
-    id: string
-    title: string
-    description?: string
-    questions: any[]
-    passingScore: number
-    maxAttempts: number
-    timeLimit?: number
-    isRequired: boolean
-    isActive: boolean
-  }
-}
-
-interface Section {
-  id: string
-  title: string
-  isExpanded: boolean
-  progress: { completed: number; total: number; duration: string }
-  lessons: Lesson[]
-  quiz?: {
-    id: string
-    title: string
-    description?: string
-    questions: any[]
-    passingScore: number
-    timeLimit?: number
-    isActive: boolean
-  }
-  quizCompleted?: boolean
-  isUnlocked?: boolean
-}
-
-interface Course {
-  id: string
-  title: string
-  slug: string
-  description: string
-  shortDescription: string
-  progress: number
-  thumbnail: string
-  videoUrl?: string
-  instructor: {
-    name: string
-    avatar: string
-    title?: string
-  }
-  sections: Section[]
-  duration: string
-  level: 'Beginner' | 'Intermediate' | 'Advanced'
-  rating: number
-  studentsCount: number
-  price: number
-  originalPrice?: number
-  isEnrolled: boolean
-  lastAccessed?: string
-  completionPercentage: number
-  totalLessons: number
-  completedLessons: number
-}
+import type { Course, Lesson } from '../../types/course'
 
 // Sample course data
 const sampleCourses: Record<string, Course> = {
@@ -1909,15 +1840,8 @@ const CoursePlayerPage = () => {
     console.log('DEBUG: handleVideoEnd called for lesson:', currentLesson?.title)
     if (!currentLesson || !courseData) return
 
-    // Check if lesson has a quiz
-    if (currentLesson.quiz && currentLesson.quiz.isActive) {
-      console.log('Lesson has quiz, showing quiz:', currentLesson.quiz.title)
-      setCurrentQuiz(currentLesson.quiz as LessonQuizType)
-      setShowQuiz(true)
-    } else {
-      // No quiz, proceed as before
-      handleLessonCompletion()
-    }
+    // Complete the lesson
+    handleLessonCompletion()
   }
 
   const handleLessonCompletion = () => {
@@ -2244,12 +2168,6 @@ const CoursePlayerPage = () => {
     setShowQuiz(false)
     setCurrentQuiz(null)
     setCurrentSection(null)
-    
-    // If quiz is required, don't allow skip
-    if (currentLesson?.quiz?.isRequired) {
-      console.log('Cannot skip required quiz')
-      return
-    }
     
     // Proceed to next lesson
     handleLessonCompletion()
