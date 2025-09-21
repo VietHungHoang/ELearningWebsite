@@ -1,17 +1,12 @@
 package com.elearning.quiz_service.controller;
+
 import java.util.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.elearning.quiz_service.dto.request.QuizRequest;
 import com.elearning.quiz_service.dto.request.SubmitAnswerRequest;
+import com.elearning.quiz_service.dto.response.ApiResponse;
 import com.elearning.quiz_service.dto.response.QuizQuestionResponse;
 import com.elearning.quiz_service.dto.response.QuizResponse;
 import com.elearning.quiz_service.dto.response.QuizResultResponse;
@@ -29,54 +24,64 @@ public class QuizController {
 
     // 1. Lấy tất cả quiz theo lesson
     @GetMapping("/lesson/{lessonId}")
-    public List<QuizResponse> getAllByLesson(@PathVariable Long lessonId) {
-        return quizService.getAllQuizzesByLesson(lessonId);
+    public ResponseEntity<ApiResponse<List<QuizResponse>>> getAllByLesson(@PathVariable Long lessonId) {
+        List<QuizResponse> list = quizService.getAllQuizzesByLesson(lessonId);
+        ApiResponse<List<QuizResponse>> response = new ApiResponse<>(200, "Get all quizzes by lesson success", list);
+        return ResponseEntity.ok(response);
     }
 
     // 2. Lấy quiz theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<QuizResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<QuizResponse>> getById(@PathVariable Long id) {
         return quizService.getQuiz(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(quiz -> ResponseEntity.ok(
+                        new ApiResponse<>(200, "Get quiz by id success", quiz)))
+                .orElse(ResponseEntity.status(404)
+                        .body(new ApiResponse<>(404, "Quiz not found", null)));
     }
 
     // 3. Tạo quiz mới
     @PostMapping
-    public QuizResponse create(@RequestBody QuizRequest request) {
-        return quizService.saveQuiz(request);
+    public ResponseEntity<ApiResponse<QuizResponse>> create(@RequestBody QuizRequest request) {
+        QuizResponse quiz = quizService.saveQuiz(request);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Create quiz success", quiz));
     }
 
     // 4. Lấy câu hỏi theo quiz và index
     @GetMapping("/{id}/question/{questionIndex}")
-    public ResponseEntity<QuizQuestionResponse> getQuestion(
+    public ResponseEntity<ApiResponse<QuizQuestionResponse>> getQuestion(
             @PathVariable Long id,
             @PathVariable int questionIndex) {
         return quizService.getQuestion(id, questionIndex)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(q -> ResponseEntity.ok(
+                        new ApiResponse<>(200, "Get quiz question success", q)))
+                .orElse(ResponseEntity.status(404)
+                        .body(new ApiResponse<>(404, "Question not found", null)));
     }
 
     // 5. Trả lời câu hỏi
     @PostMapping("/{id}/answer")
-    public SubmitAnswerResponse submitAnswer(
+    public ResponseEntity<ApiResponse<SubmitAnswerResponse>> submitAnswer(
             @PathVariable Long id,
             @RequestBody SubmitAnswerRequest request) {
-        return quizService.submitAnswer(id, request);
+        SubmitAnswerResponse answer = quizService.submitAnswer(id, request);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Submit answer success", answer));
     }
 
     // 6. Cập nhật trạng thái quiz (DRAFT -> PUBLISHED)
     @PutMapping("/{id}/status")
-    public QuizResponse updateStatus(
+    public ResponseEntity<ApiResponse<QuizResponse>> updateStatus(
             @PathVariable Long id,
             @RequestParam String status // ví dụ ?status=PUBLISHED
     ) {
-        return quizService.updateQuizStatus(id, status);
+        QuizResponse updated = quizService.updateQuizStatus(id, status);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Update quiz status success", updated));
     }
 
     // 7. Xem kết quả làm quiz của 1 user
     @GetMapping("/results/{userId}")
-    public List<QuizResultResponse> getResultsByUser(@PathVariable Long userId) {
-        return quizService.getResultsByUser(userId);
+    public ResponseEntity<ApiResponse<List<QuizResultResponse>>> getResultsByUser(@PathVariable Long userId) {
+        List<QuizResultResponse> results = quizService.getResultsByUser(userId);
+        return ResponseEntity.ok(new ApiResponse<>(200, "Get quiz results success", results));
     }
 }
