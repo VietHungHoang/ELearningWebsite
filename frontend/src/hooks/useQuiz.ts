@@ -1,70 +1,57 @@
 import { useState, useCallback } from 'react'
 import type { LessonQuiz as LessonQuizType, QuizResult, QuizAttempt } from '../types/quiz'
+import { quizApiService } from '../services/quizApi'
 
-// Mock quiz service
-const mockQuizService = {
+// Quiz service using real API
+const quizService = {
   // Submit quiz attempt
   submitQuizAttempt: async (quizId: string, answers: Record<string, string | string[]>): Promise<QuizResult> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Mock scoring logic
-    const totalQuestions = Object.keys(answers).length
-    const correctAnswers = Math.floor(Math.random() * totalQuestions) + 1 // Random score for demo
-    const score = Math.round((correctAnswers / totalQuestions) * 100)
-    
-    const attempt: QuizAttempt = {
-      id: `attempt-${Date.now()}`,
-      quizId,
-      lessonId: '', // Will be set by caller
-      studentId: 'current-user',
-      answers,
-      score: correctAnswers,
-      totalPoints: totalQuestions,
-      percentage: score,
-      passed: score >= 70,
-      timeSpent: Math.floor(Math.random() * 300) + 60, // 1-5 minutes
-      completedAt: new Date(),
-      createdAt: new Date()
-    }
+    try {
+      // Start quiz attempt
+      const attemptData = {
+        quizId,
+        sectionId: 'section-1', // This should come from context
+        courseId: 'course-1', // This should come from context
+        studentId: 'current-student', // This should come from auth context
+        answers: answers as Record<string, string>,
+        timeSpent: 0
+      }
+      
+      const attempt = await quizApiService.startQuizAttempt(attemptData)
+      
+      // Update with answers and submit
+      await quizApiService.updateQuizAttemptAnswers(attempt.id, answers as Record<string, string>, 0)
+      const submittedAttempt = await quizApiService.submitQuizAttempt(attempt.id)
+      
+      // Get quiz details for questions
+      const quiz = await quizApiService.getQuizById(quizId)
+      
+      const result: QuizResult = {
+        attempt: submittedAttempt,
+        questions: quiz.questions || [],
+        feedback: submittedAttempt.passed 
+          ? `Congratulations! You passed with ${submittedAttempt.percentage}%` 
+          : `You scored ${submittedAttempt.percentage}%. You need ${quiz.passingScore}% to pass.`,
+        recommendations: submittedAttempt.passed 
+          ? ['Great job! You can proceed to the next lesson.']
+          : ['Review the lesson content and try again.', 'Focus on the areas you missed.']
+      }
 
-    const result: QuizResult = {
-      attempt,
-      questions: [], // Would be populated with actual questions
-      correctAnswers,
-      totalQuestions,
-      feedback: score >= 70 
-        ? 'Congratulations! You passed the quiz.' 
-        : 'Keep studying! You can retake this quiz.',
-      recommendations: score < 70 
-        ? ['Review the lesson materials', 'Take notes on key concepts', 'Practice with similar questions']
-        : ['Great job! Move on to the next lesson', 'Consider helping other students in discussions']
+      return result
+    } catch (error) {
+      console.error('Error submitting quiz attempt:', error)
+      throw error
     }
-
-    return result
   },
 
-  // Get quiz attempts for a student
+  // Get quiz attempts
   getQuizAttempts: async (quizId: string, studentId: string): Promise<QuizAttempt[]> => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // Mock previous attempts
-    return [
-      {
-        id: 'attempt-1',
-        quizId,
-        lessonId: 'lesson-1',
-        studentId,
-        answers: {},
-        score: 6,
-        totalPoints: 10,
-        percentage: 60,
-        passed: false,
-        timeSpent: 180,
-        completedAt: new Date(Date.now() - 86400000), // 1 day ago
-        createdAt: new Date(Date.now() - 86400000)
-      }
-    ]
+    try {
+      return await quizApiService.getQuizAttemptsByStudentAndQuiz(studentId, quizId)
+    } catch (error) {
+      console.error('Error getting quiz attempts:', error)
+      return []
+    }
   }
 }
 
@@ -72,21 +59,21 @@ export const useQuiz = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentQuiz, setCurrentQuiz] = useState<LessonQuizType | null>(null)
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null)
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
 
-  const handleApiCall = useCallback(async <T>(
-    apiCall: () => Promise<T>
-  ): Promise<T | null> => {
-    setLoading(true)
-    setError(null)
-    
+  // Generic API call handler
+  const handleApiCall = useCallback(async <T>(apiCall: () => Promise<T>): Promise<T | null> => {
     try {
+      setLoading(true)
+      setError(null)
       const result = await apiCall()
       return result
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
+      setError(errorMessage)
+      console.error('API call failed:', err)
       return null
     } finally {
       setLoading(false)
@@ -106,7 +93,7 @@ export const useQuiz = () => {
     if (!currentQuiz) return null
 
     const result = await handleApiCall(() => 
-      mockQuizService.submitQuizAttempt(currentQuiz.id, answers)
+      quizService.submitQuizAttempt(currentQuiz.id, answers)
     )
 
     if (result) {
@@ -123,7 +110,7 @@ export const useQuiz = () => {
     if (!currentQuiz) return
 
     const result = await handleApiCall(() => 
-      mockQuizService.getQuizAttempts(currentQuiz.id, 'current-user')
+      quizService.getQuizAttempts(currentQuiz.id, 'current-user')
     )
 
     if (result) {
@@ -174,7 +161,7 @@ export const useQuiz = () => {
 
   // Check if all questions answered
   const isAllQuestionsAnswered = useCallback((): boolean => {
-    if (!currentQuiz) return false
+    if (!currentQuiz || !currentQuiz.questions) return false
     
     return currentQuiz.questions.every(question => 
       answers[question.id] !== undefined && answers[question.id] !== ''
@@ -186,9 +173,9 @@ export const useQuiz = () => {
     loading,
     error,
     currentQuiz,
+    answers,
     quizResult,
     attempts,
-    answers,
     
     // Actions
     startQuiz,
@@ -201,9 +188,6 @@ export const useQuiz = () => {
     // Computed
     canRetake,
     getRemainingAttempts,
-    isAllQuestionsAnswered,
-    
-    // Utils
-    clearError: () => setError(null)
+    isAllQuestionsAnswered
   }
 }

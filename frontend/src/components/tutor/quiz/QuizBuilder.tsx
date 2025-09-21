@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
-import { Plus, Trash2, Save, Eye, CheckCircle, BookOpen } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Plus, Trash2, Save, Eye, CheckCircle, BookOpen, Bot } from 'lucide-react'
 import type { SectionQuiz, QuizQuestion, QuizQuestionOption } from '../../../types/quiz'
+import { quizApi } from '../../../services/quizApi'
+import AIQuestionGenerator from './AIQuestionGenerator'
 
 interface Course {
   id: string
@@ -33,10 +35,10 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
   const availableSections = selectedCourse?.sections || []
 
   const [quiz, setQuiz] = useState<SectionQuiz>(initialQuiz || {
-    id: `quiz-${Date.now()}`,
+    id: '', // Will be set when quiz is created
     sectionId: selectedSectionId,
     courseId: selectedCourseId,
-    tutorId: 'current-tutor', // This would come from auth context
+    tutorId: 'tutor-1', // Use consistent tutor ID
     title: '',
     description: '',
     questions: [],
@@ -47,8 +49,47 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
     updatedAt: new Date()
   })
 
+  // Load questions when editing existing quiz
+  useEffect(() => {
+    if (initialQuiz && initialQuiz.id && !initialQuiz.id.startsWith('quiz-')) {
+      loadQuestions(initialQuiz.id)
+    }
+  }, [initialQuiz])
+
+  const loadQuestions = async (quizId: string) => {
+    try {
+      console.log('🔍 Loading questions for quiz:', quizId)
+      const questions = await quizApi.getQuestionsByQuizId(quizId)
+      console.log('📚 Questions loaded:', questions)
+      
+      // Convert API questions to SectionQuiz format
+      const convertedQuestions: QuizQuestion[] = questions.map(q => ({
+        id: q.id || '',
+        quizId: q.quizId || '',
+        questionText: q.questionText,
+        options: q.options?.map(opt => ({
+          id: opt.id || '',
+          questionId: opt.questionId || '',
+          text: opt.text,
+          isCorrect: opt.isCorrect,
+          order: opt.order
+        })) || [],
+        correctAnswer: q.correctAnswer,
+        order: q.order
+      }))
+      
+      setQuiz(prev => ({
+        ...prev,
+        questions: convertedQuestions
+      }))
+    } catch (error) {
+      console.error('❌ Error loading questions:', error)
+    }
+  }
+
   const [editingQuestion, setEditingQuestion] = useState<QuizQuestion | null>(null)
   const [showQuestionForm, setShowQuestionForm] = useState(false)
+  const [showAIGenerator, setShowAIGenerator] = useState(false)
 
   // Update quiz when course or section changes
   React.useEffect(() => {
@@ -71,7 +112,6 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
         { id: 'd', text: '', isCorrect: false, order: 4 }
       ],
       correctAnswer: '',
-      explanation: '',
       order: quiz.questions.length + 1
     }
 
@@ -84,30 +124,117 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
     setShowQuestionForm(true)
   }
 
-  const saveQuestion = (question: QuizQuestion) => {
-    const updatedQuestions = editingQuestion?.id && quiz.questions.find(q => q.id === editingQuestion.id)
-      ? quiz.questions.map(q => q.id === editingQuestion.id ? question : q)
-      : [...quiz.questions, question]
+  const saveQuestion = async (question: QuizQuestion) => {
+    try {
+      console.log('💾 Saving question:', question)
+      
+      // Check if quiz has valid ID
+      if (!quiz.id || quiz.id.startsWith('quiz-')) {
+        console.error('❌ Cannot save question: Quiz not saved yet')
+        alert('Please save the quiz first before adding questions')
+        return
+      }
+      
+      // Convert to API format
+      const questionData = {
+        id: question.id,
+        quizId: quiz.id,
+        questionText: question.questionText,
+        correctAnswer: question.correctAnswer,
+        order: question.order, // Changed from questionOrder to order
+        options: question.options?.map(opt => ({
+          id: opt.id,
+          questionId: question.id,
+          text: opt.text, // Changed from optionText to text
+          isCorrect: opt.isCorrect,
+          order: opt.order // Changed from optionOrder to order
+        })) || []
+      }
 
-    setQuiz(prev => ({
-      ...prev,
-      questions: updatedQuestions,
-      updatedAt: new Date()
-    }))
+      let savedQuestion: QuizQuestion
+      
+      if (editingQuestion?.id && quiz.questions.find(q => q.id === editingQuestion.id)) {
+        // Update existing question
+        console.log('🔄 Updating existing question')
+        const updatedQuestionDto = await quizApi.updateQuestion(quiz.id, question.id, questionData)
+        
+        // Convert back to SectionQuiz format
+        savedQuestion = {
+          id: updatedQuestionDto.id || question.id,
+          quizId: updatedQuestionDto.quizId || quiz.id,
+          questionText: updatedQuestionDto.questionText,
+          options: updatedQuestionDto.options?.map(opt => ({
+            id: opt.id || '',
+            questionId: opt.questionId || '',
+            text: opt.text,
+            isCorrect: opt.isCorrect,
+            order: opt.order
+          })) || [],
+          correctAnswer: updatedQuestionDto.correctAnswer,
+          order: updatedQuestionDto.order
+        }
+      } else {
+        // Create new question
+        console.log('➕ Creating new question')
+        const createdQuestionDto = await quizApi.createQuestion(quiz.id, questionData)
+        
+        // Convert back to SectionQuiz format
+        savedQuestion = {
+          id: createdQuestionDto.id || '',
+          quizId: createdQuestionDto.quizId || quiz.id,
+          questionText: createdQuestionDto.questionText,
+          options: createdQuestionDto.options?.map(opt => ({
+            id: opt.id || '',
+            questionId: opt.questionId || '',
+            text: opt.text,
+            isCorrect: opt.isCorrect,
+            order: opt.order
+          })) || [],
+          correctAnswer: createdQuestionDto.correctAnswer,
+          order: createdQuestionDto.order
+        }
+      }
 
-    setEditingQuestion(null)
-    setShowQuestionForm(false)
+      // Update local state
+      const updatedQuestions = editingQuestion?.id && quiz.questions.find(q => q.id === editingQuestion.id)
+        ? quiz.questions.map(q => q.id === editingQuestion.id ? savedQuestion : q)
+        : [...quiz.questions, savedQuestion]
+
+      setQuiz(prev => ({
+        ...prev,
+        questions: updatedQuestions,
+        updatedAt: new Date()
+      }))
+
+      setEditingQuestion(null)
+      setShowQuestionForm(false)
+      
+      console.log('✅ Question saved successfully')
+    } catch (error) {
+      console.error('❌ Error saving question:', error)
+      alert('Failed to save question. Please try again.')
+    }
   }
 
-  const deleteQuestion = (questionId: string) => {
-    setQuiz(prev => ({
-      ...prev,
-      questions: prev.questions.filter(q => q.id !== questionId).map((q, index) => ({
-        ...q,
-        order: index + 1
-      })),
-      updatedAt: new Date()
-    }))
+  const deleteQuestion = async (questionId: string) => {
+    try {
+      console.log('🗑️ Deleting question:', questionId)
+      await quizApi.deleteQuestion(quiz.id, questionId)
+      
+      setQuiz(prev => ({
+        ...prev,
+        questions: prev.questions.filter(q => q.id !== questionId).map((q, index) => ({
+          ...q,
+          order: index + 1
+        })),
+        updatedAt: new Date()
+      }))
+      
+      console.log('✅ Question deleted successfully')
+    } catch (error) {
+      console.error('❌ Error deleting question:', error)
+      alert('Failed to delete question. Please try again.')
+    }
   }
 
   const updateQuizField = (field: keyof SectionQuiz, value: any) => {
@@ -118,7 +245,36 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
     }))
   }
 
-  const canSave = selectedCourseId && selectedSectionId && quiz.title.trim() && quiz.questions.length > 0
+  const canSave = selectedCourseId && selectedSectionId && quiz.title.trim()
+  const canAddQuestions = quiz.id && !quiz.id.startsWith('quiz-') && quiz.id.trim() !== ''
+
+  const handleAIGeneratedQuestions = (questions: any[]) => {
+    console.log('🤖 AI Generated questions:', questions)
+    
+    // Convert AI questions to SectionQuiz format
+    const convertedQuestions: QuizQuestion[] = questions.map((q, index) => ({
+      id: `ai-q-${Date.now()}-${index}`,
+      quizId: quiz.id,
+      questionText: q.questionText,
+      options: q.options?.map((opt: any, optIndex: number) => ({
+        id: `ai-opt-${Date.now()}-${index}-${optIndex}`,
+        questionId: `ai-q-${Date.now()}-${index}`,
+        text: opt.text,
+        isCorrect: opt.isCorrect,
+        order: opt.order || optIndex + 1
+      })) || [],
+      correctAnswer: q.correctAnswer,
+      order: q.order || index + 1
+    }))
+
+    setQuiz(prev => ({
+      ...prev,
+      questions: [...prev.questions, ...convertedQuestions],
+      updatedAt: new Date()
+    }))
+
+    setShowAIGenerator(false)
+  }
 
   if (showQuestionForm && editingQuestion) {
     return (
@@ -129,6 +285,16 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
           setEditingQuestion(null)
           setShowQuestionForm(false)
         }}
+      />
+    )
+  }
+
+  if (showAIGenerator) {
+    return (
+      <AIQuestionGenerator
+        quizId={quiz.id}
+        onQuestionsGenerated={handleAIGeneratedQuestions}
+        onClose={() => setShowAIGenerator(false)}
       />
     )
   }
@@ -258,27 +424,58 @@ const QuizBuilder: React.FC<QuizBuilderProps> = ({
       {/* Questions Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Questions ({quiz.questions.length})
-          </h3>
-          <button
-            onClick={addQuestion}
-            className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Question</span>
-          </button>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Questions ({quiz.questions.length})
+            </h3>
+            {!canAddQuestions && (
+              <p className="text-sm text-amber-600 mt-1">
+                💡 Save the quiz first, then come back to add questions
+              </p>
+            )}
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={addQuestion}
+              disabled={!canAddQuestions}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                canAddQuestions 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>{canAddQuestions ? 'Add Question' : 'Save Quiz First'}</span>
+            </button>
+            
+            <button
+              onClick={() => setShowAIGenerator(true)}
+              disabled={!canAddQuestions}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                canAddQuestions 
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700' 
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <Bot className="w-4 h-4" />
+              <span>AI Generate</span>
+            </button>
+          </div>
         </div>
 
         {quiz.questions.length === 0 ? (
           <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-            <p className="text-gray-800 mb-4">No questions added yet</p>
-            <button
-              onClick={addQuestion}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Add your first question
-            </button>
+            <p className="text-gray-800 mb-4">
+              {canAddQuestions ? 'No questions added yet' : 'Save the quiz first to add questions'}
+            </p>
+            {canAddQuestions && (
+              <button
+                onClick={addQuestion}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Add your first question
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -520,19 +717,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ question, onSave, onCancel 
           </div>
 
 
-        {/* Explanation */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Explanation (Optional)
-          </label>
-           <textarea
-             value={formData.explanation || ''}
-             onChange={(e) => updateField('explanation', e.target.value)}
-             placeholder="Explain why this is the correct answer..."
-             rows={2}
-             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 bg-white"
-           />
-        </div>
       </div>
 
       {/* Action Buttons */}

@@ -37,7 +37,6 @@ export interface QuizQuestion {
   questionText: string
   options: QuizQuestionOption[]
   correctAnswer: string
-  explanation?: string
   order: number
 }
 
@@ -72,31 +71,4 @@ export interface QuizResult {
   feedback: string
   recommendations?: string[]
 }
-
-// Legacy types - keeping for backward compatibility during migration
-// These will be removed after migration is complete
-export interface QuizTopic {
-  id: string
-  title: string
-  description: string
-  image: string
-  category: string
-  difficulty: string
-  estimatedDuration: number
-  totalQuestions: number
-  totalMarks: number
-  timeLimit: number
-  status: string
-  score?: number
-  prerequisites: string[]
-  tags: string[]
-  createdAt: string
-  updatedAt: string
-  instructor: {
-    id: string
-    name: string
-    avatar: string
-    rating: number
-  }
-  questions: QuizQuestion[]
-}
+  

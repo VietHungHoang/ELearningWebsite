@@ -19,6 +19,8 @@ import {
 } from 'lucide-react'
 import QuizBuilder from '../../components/tutor/quiz/QuizBuilder'
 import type { SectionQuiz } from '../../types/quiz'
+import { quizApi } from '../../services/quizApi'
+import ApiTest from '../../components/debug/ApiTest'
 
 interface Quiz {
   id: string;
@@ -101,115 +103,91 @@ const TutorQuizzesPage: React.FC = () => {
   const [showQuizBuilder, setShowQuizBuilder] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<SectionQuiz | null>(null);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data
-  const initialQuizzes: Quiz[] = [
-    {
-      id: '1',
-      title: 'Goal Setting Fundamentals Quiz',
-      description: 'Test your understanding of goal setting principles and techniques',
-      sectionTitle: 'Introduction to Goal Setting',
-      courseTitle: 'Goal Setting Masterclass',
-      courseId: 'course-1',
-      sectionId: 'section-1',
-      status: 'published',
-      questions: 5,
-      passingScore: 70,
-      timeLimit: 10,
-      isActive: true,
-      attempts: 1250,
-      averageScore: 78.5,
-      completionRate: 85.2,
-      createdAt: '2024-01-15',
-      lastUpdated: '2024-01-20',
-      thumbnail: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=450&fit=crop'
-    },
-    {
-      id: '2',
-      title: 'Focus and Concentration Quiz',
-      description: 'Test your knowledge of focus techniques and concentration methods',
-      sectionTitle: 'Focus Fundamentals',
-      courseTitle: 'Focus and Concentration Boost',
-      courseId: 'course-2',
-      sectionId: 'section-1',
-      status: 'published',
-      questions: 8,
-      passingScore: 75,
-      timeLimit: 15,
-      isActive: true,
-      attempts: 890,
-      averageScore: 82.3,
-      completionRate: 91.5,
-      createdAt: '2024-01-10',
-      lastUpdated: '2024-01-18',
-      thumbnail: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=450&fit=crop'
-    },
-    {
-      id: '3',
-      title: 'Time Management Basics Quiz',
-      description: 'Test your understanding of time management concepts and tools',
-      sectionTitle: 'Time Management Fundamentals',
-      courseTitle: 'Time Management Mastery',
-      courseId: 'course-3',
-      sectionId: 'section-1',
-      status: 'draft',
-      questions: 6,
-      passingScore: 80,
-      timeLimit: 12,
-      isActive: false,
-      attempts: 0,
-      averageScore: 0,
-      completionRate: 0,
-      createdAt: '2024-01-25',
-      lastUpdated: '2024-01-25',
-      thumbnail: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=450&fit=crop'
-    },
-    {
-      id: '4',
-      title: 'React Fundamentals Quiz',
-      description: 'Test your knowledge of React basics and component lifecycle',
-      sectionTitle: 'React Fundamentals',
-      courseTitle: 'React Development Mastery',
-      courseId: 'course-4',
-      sectionId: 'section-1',
-      status: 'published',
-      questions: 10,
-      passingScore: 70,
-      timeLimit: 20,
-      isActive: true,
-      attempts: 2100,
-      averageScore: 76.8,
-      completionRate: 88.7,
-      createdAt: '2024-01-08',
-      lastUpdated: '2024-01-22',
-      thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=450&fit=crop'
-    },
-    {
-      id: '5',
-      title: 'Design Thinking Process Quiz',
-      description: 'Test your understanding of design thinking methodology',
-      sectionTitle: 'Design Thinking Fundamentals',
-      courseTitle: 'Design Thinking for Innovation',
-      courseId: 'course-5',
-      sectionId: 'section-1',
-      status: 'archived',
-      questions: 7,
-      passingScore: 75,
-      timeLimit: 15,
-      isActive: false,
-      attempts: 450,
-      averageScore: 81.2,
-      completionRate: 92.3,
-      createdAt: '2023-12-01',
-      lastUpdated: '2023-12-15',
-      thumbnail: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop'
-    }
-  ];
-
-  // Initialize quizzes on component mount
+  // Load quizzes from API
   useEffect(() => {
-    setQuizzes(initialQuizzes);
+    loadQuizzes();
   }, []);
+
+  const loadQuizzes = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🚀 Loading quizzes...');
+      
+      // Mock tutor ID - in real app, this would come from auth context
+      const tutorId = 'tutor-1';
+      console.log('👤 Tutor ID:', tutorId);
+      
+      const quizDtos = await quizApi.getQuizzesByTutorId(tutorId);
+      console.log('📚 Quiz DTOs received:', quizDtos);
+      
+      // Convert QuizDto to Quiz format for display
+      const convertedQuizzes: Quiz[] = quizDtos.map(quizDto => ({
+        id: quizDto.id || '',
+        title: quizDto.title,
+        description: quizDto.description || '',
+        sectionTitle: getSectionTitle(quizDto.sectionId),
+        courseTitle: getCourseTitle(quizDto.courseId),
+        courseId: quizDto.courseId,
+        sectionId: quizDto.sectionId,
+        status: quizDto.isActive ? 'published' : 'draft',
+        questions: quizDto.questions?.length || 0,
+        passingScore: quizDto.passingScore,
+        timeLimit: quizDto.timeLimit,
+        isActive: quizDto.isActive,
+        attempts: 0, // TODO: Get from quiz attempts API
+        averageScore: 0, // TODO: Get from quiz attempts API
+        completionRate: 0, // TODO: Get from quiz attempts API
+        createdAt: quizDto.createdAt ? new Date(quizDto.createdAt).toISOString().split('T')[0] : '',
+        lastUpdated: quizDto.updatedAt ? new Date(quizDto.updatedAt).toISOString().split('T')[0] : '',
+        thumbnail: undefined
+      }));
+      
+      console.log('✅ Converted quizzes:', convertedQuizzes);
+      setQuizzes(convertedQuizzes);
+    } catch (err: any) {
+      console.error('❌ Error loading quizzes:', err);
+      
+      // More detailed error message
+      let errorMessage = 'Failed to load quizzes. Please try again.';
+      
+      if (err.response) {
+        // Server responded with error status
+        errorMessage = `Server error: ${err.response.status} - ${err.response.statusText}`;
+        console.error('Server response:', err.response.data);
+      } else if (err.request) {
+        // Request was made but no response received
+        errorMessage = 'Cannot connect to server. Please check if backend is running.';
+        console.error('No response received:', err.request);
+      } else {
+        // Something else happened
+        errorMessage = `Error: ${err.message}`;
+        console.error('Error message:', err.message);
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper functions to get course and section titles
+  const getCourseTitle = (courseId: string): string => {
+    const course = mockCourses.find(c => c.id === courseId);
+    return course?.title || 'Unknown Course';
+  };
+
+  const getSectionTitle = (sectionId: string): string => {
+    for (const course of mockCourses) {
+      const section = course.sections.find(s => s.id === sectionId);
+      if (section) return section.title;
+    }
+    return 'Unknown Section';
+  };
 
   const filteredQuizzes = quizzes.filter(quiz => {
     const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -284,55 +262,115 @@ const TutorQuizzesPage: React.FC = () => {
     setShowQuizBuilder(true);
   };
 
-  const handleSaveQuiz = (quiz: SectionQuiz) => {
-    console.log('Saving quiz:', quiz);
-    
-    // Find course and section info
-    const course = mockCourses.find(c => c.id === quiz.courseId);
-    const section = course?.sections.find(s => s.id === quiz.sectionId);
-    
-    if (!course || !section) {
-      console.error('Course or section not found');
-      return;
-    }
+  const handleSaveQuiz = async (quiz: SectionQuiz) => {
+    try {
+      console.log('Saving quiz:', quiz);
+      
+      // Find course and section info
+      const course = mockCourses.find(c => c.id === quiz.courseId);
+      const section = course?.sections.find(s => s.id === quiz.sectionId);
+      
+      if (!course || !section) {
+        console.error('Course or section not found');
+        setError('Course or section not found');
+        return;
+      }
 
-    // Convert SectionQuiz to Quiz format
-    const newQuiz: Quiz = {
-      id: quiz.id,
-      title: quiz.title,
-      description: quiz.description || '',
-      sectionTitle: section.title,
-      courseTitle: course.title,
-      courseId: quiz.courseId,
-      sectionId: quiz.sectionId,
-      status: 'published',
-      questions: quiz.questions.length,
-      passingScore: quiz.passingScore,
-      timeLimit: quiz.timeLimit,
-      isActive: quiz.isActive,
-      attempts: 0,
-      averageScore: 0,
-      completionRate: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastUpdated: new Date().toISOString().split('T')[0],
-      thumbnail: undefined
-    };
-
-    // Check if editing existing quiz or creating new one
-    const existingIndex = quizzes.findIndex(q => q.id === quiz.id);
-    
-    if (existingIndex >= 0) {
-      // Update existing quiz
-      const updatedQuizzes = [...quizzes];
-      updatedQuizzes[existingIndex] = newQuiz;
-      setQuizzes(updatedQuizzes);
-    } else {
-      // Add new quiz
-      setQuizzes(prevQuizzes => [...prevQuizzes, newQuiz]);
+      // Check if editing existing quiz or creating new one
+      const existingIndex = quizzes.findIndex(q => q.id === quiz.id);
+      
+      if (existingIndex >= 0) {
+        // Update existing quiz
+        const updateData = {
+          sectionId: quiz.sectionId,
+          courseId: quiz.courseId,
+          tutorId: quiz.tutorId,
+          title: quiz.title,
+          description: quiz.description,
+          passingScore: quiz.passingScore,
+          timeLimit: quiz.timeLimit,
+          isActive: quiz.isActive
+        };
+        
+        console.log('🔄 Updating quiz with data:', updateData);
+        const updatedQuizDto = await quizApi.updateQuiz(quiz.id, updateData);
+        
+        // Convert to display format and update local state
+        const updatedQuiz: Quiz = {
+          id: updatedQuizDto.id || quiz.id,
+          title: updatedQuizDto.title,
+          description: updatedQuizDto.description || '',
+          sectionTitle: section.title,
+          courseTitle: course.title,
+          courseId: updatedQuizDto.courseId,
+          sectionId: updatedQuizDto.sectionId,
+          status: updatedQuizDto.isActive ? 'published' : 'draft',
+          questions: quiz.questions.length,
+          passingScore: updatedQuizDto.passingScore,
+          timeLimit: updatedQuizDto.timeLimit,
+          isActive: updatedQuizDto.isActive,
+          attempts: quizzes[existingIndex].attempts, // Keep existing attempts
+          averageScore: quizzes[existingIndex].averageScore, // Keep existing score
+          completionRate: quizzes[existingIndex].completionRate, // Keep existing rate
+          createdAt: quizzes[existingIndex].createdAt, // Keep original date
+          lastUpdated: new Date().toISOString().split('T')[0],
+          thumbnail: undefined
+        };
+        
+        const updatedQuizzes = [...quizzes];
+        updatedQuizzes[existingIndex] = updatedQuiz;
+        setQuizzes(updatedQuizzes);
+      } else {
+        // Create new quiz
+        const createData = {
+          sectionId: quiz.sectionId,
+          courseId: quiz.courseId,
+          tutorId: 'tutor-1', // Mock tutor ID
+          title: quiz.title,
+          description: quiz.description,
+          passingScore: quiz.passingScore,
+          timeLimit: quiz.timeLimit,
+          isActive: quiz.isActive
+        };
+        
+        const createdQuizDto = await quizApi.createQuiz(createData);
+        
+        // Update quiz ID in the quiz object for questions
+        quiz.id = createdQuizDto.id || '';
+        
+        // Convert to display format and add to local state
+        const newQuiz: Quiz = {
+          id: createdQuizDto.id || '',
+          title: createdQuizDto.title,
+          description: createdQuizDto.description || '',
+          sectionTitle: section.title,
+          courseTitle: course.title,
+          courseId: createdQuizDto.courseId,
+          sectionId: createdQuizDto.sectionId,
+          status: createdQuizDto.isActive ? 'published' : 'draft',
+          questions: quiz.questions.length,
+          passingScore: createdQuizDto.passingScore,
+          timeLimit: createdQuizDto.timeLimit,
+          isActive: createdQuizDto.isActive,
+          attempts: 0,
+          averageScore: 0,
+          completionRate: 0,
+          createdAt: new Date().toISOString().split('T')[0],
+          lastUpdated: new Date().toISOString().split('T')[0],
+          thumbnail: undefined
+        };
+        
+        setQuizzes(prevQuizzes => [...prevQuizzes, newQuiz]);
+      }
+      
+      // Close quiz builder after creating quiz
+      setShowQuizBuilder(false);
+      setEditingQuiz(null);
+      setError(null);
+    } catch (err) {
+      console.error('Error saving quiz:', err);
+      setError('Failed to save quiz. Please try again.');
     }
-    
-    setShowQuizBuilder(false);
-    setEditingQuiz(null);
   };
 
   const handlePreviewQuiz = (quiz: SectionQuiz) => {
@@ -358,9 +396,16 @@ const TutorQuizzesPage: React.FC = () => {
     handlePreviewQuiz(sectionQuiz);
   };
 
-  const handleDeleteQuiz = (quiz: Quiz) => {
-    console.log('Deleting quiz:', quiz);
-    setQuizzes(prevQuizzes => prevQuizzes.filter(q => q.id !== quiz.id));
+  const handleDeleteQuiz = async (quiz: Quiz) => {
+    try {
+      console.log('Deleting quiz:', quiz);
+      await quizApi.deleteQuiz(quiz.id);
+      setQuizzes(prevQuizzes => prevQuizzes.filter(q => q.id !== quiz.id));
+      setError(null);
+    } catch (err) {
+      console.error('Error deleting quiz:', err);
+      setError('Failed to delete quiz. Please try again.');
+    }
   };
 
   const handleCancelQuiz = () => {
@@ -377,6 +422,22 @@ const TutorQuizzesPage: React.FC = () => {
         onPreview={handlePreviewQuiz}
         onCancel={handleCancelQuiz}
       />
+    );
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading quizzes...</p>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -398,6 +459,25 @@ const TutorQuizzesPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <div className="flex items-center">
+            <AlertCircle className="w-5 h-5 text-red-600 mr-3" />
+            <p className="text-red-800">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="ml-auto text-red-600 hover:text-red-800"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Debug API Test */}
+      <ApiTest />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">

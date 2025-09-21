@@ -62,7 +62,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'They should be set by others', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'b',
-                  explanation: 'Effective goals are specific, measurable, achievable, relevant, and time-bound (SMART).',
                   order: 1
                 },
                 {
@@ -76,7 +75,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To organize your schedule', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'A vision board helps you visualize your goals and keeps them at the forefront of your mind.',
                   order: 2
             },
             {
@@ -90,7 +88,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: '1-3 years', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'c',
-              explanation: 'Short-term goals are typically achievable within 1-3 months.',
               order: 3
                 }
               ],
@@ -149,7 +146,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Strong', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'The "S" in SMART goals stands for Specific - goals should be clear and well-defined.',
               order: 1
             },
             {
@@ -163,7 +159,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'It makes them less important', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Breaking down large goals into smaller, manageable steps increases the likelihood of success.',
               order: 2
             },
             {
@@ -177,7 +172,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Ask others to track for you', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Regular review and adjustment of goals helps maintain momentum and adapt to changing circumstances.',
               order: 3
             }
           ],
@@ -238,7 +232,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Avoid reviewing progress regularly', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Celebrating small wins helps maintain motivation and momentum toward long-term goals.',
               order: 1
             },
             {
@@ -252,7 +245,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'They eliminate the need for planning', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'An accountability partner provides support, encouragement, and helps keep you on track.',
               order: 2
             },
             {
@@ -266,7 +258,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Ignore the obstacle and continue as planned', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'c',
-              explanation: 'When facing obstacles, analyze them and adjust your approach rather than giving up.',
               order: 3
             }
           ],
@@ -363,7 +354,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'It makes tasks easier to complete', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'b',
-                  explanation: 'Focus increases productivity and improves the quality of work by allowing deep concentration.',
                   order: 1
                 },
                 {
@@ -377,7 +367,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: '60 minutes', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'A typical Pomodoro work session is 25 minutes, followed by a 5-minute break.',
                   order: 2
             },
             {
@@ -391,7 +380,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'Uncomfortable chairs', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'b',
-                  explanation: 'Digital notifications and social media are the most common sources of distraction in modern work environments.',
               order: 3
                 }
               ],
@@ -477,7 +465,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Working only in the morning hours', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Deep work is professional activities performed in a state of distraction-free concentration that push your cognitive capabilities to their limit.',
               order: 1
             },
             {
@@ -491,7 +478,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: '6-8 hours', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'c',
-              explanation: 'Deep work sessions typically last 90 minutes to 4 hours, depending on your experience and the complexity of the task.',
               order: 2
             },
             {
@@ -505,7 +491,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'A state of multitasking efficiently', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Flow state is a state of optimal performance where you are fully immersed in an activity and lose track of time.',
               order: 3
             }
           ],
@@ -611,7 +596,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'Time management is more important', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'a',
-                  explanation: 'Time is finite and cannot be renewed, while energy can be restored through rest, nutrition, and exercise.',
                   order: 1
                 },
                 {
@@ -625,7 +609,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'Quadrant 4: Eliminate', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'a',
-                  explanation: 'Quadrant 1 contains tasks that are both urgent and important - these should be done first.',
               order: 2
             },
             {
@@ -639,7 +622,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'It eliminates the need for breaks', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Time blocking reduces context switching by dedicating specific time blocks to similar tasks.',
               order: 3
                 }
               ],
@@ -734,7 +716,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Complete tasks in two-minute intervals', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'The Two-Minute Rule states that if a task takes less than two minutes, you should do it immediately rather than adding it to your to-do list.',
               order: 1
             },
             {
@@ -748,7 +729,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To eliminate all uncompleted tasks', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'A weekly review helps you reflect on what you accomplished, what you learned, and plan effectively for the upcoming week.',
               order: 2
             },
             {
@@ -762,7 +742,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Working in teams of two people', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Batching involves grouping similar tasks together and completing them consecutively to reduce context switching and increase efficiency.',
               order: 3
             }
           ],
@@ -859,7 +838,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Keys improve performance by caching components', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Keys help React identify which items have changed, been added, or removed, enabling efficient updates.',
               order: 1
             },
             {
@@ -873,7 +851,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Only for small lists with less than 10 items', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'c',
-              explanation: 'Array indices should only be used as keys when the list order never changes, otherwise it can cause performance issues.',
               order: 2
             },
             {
@@ -887,7 +864,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To handle events', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'useState hook allows functional components to manage state, which was previously only possible in class components.',
               order: 3
             }
           ],
@@ -1009,7 +985,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To handle side effects', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'useReducer is used to manage complex state logic with a reducer function, similar to Redux.',
               order: 1
             },
             {
@@ -1023,7 +998,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To manage component state', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'React.memo() prevents unnecessary re-renders by memoizing components when props haven\'t changed.',
               order: 2
             },
             {
@@ -1037,7 +1011,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To manage component lifecycle', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'useCallback memoizes callback functions to prevent unnecessary re-renders of child components.',
               order: 3
             }
           ],
@@ -1143,7 +1116,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'To speed up the design process', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'b',
-                  explanation: 'Design thinking focuses on solving complex problems through user-centered, creative solutions.',
                   order: 1
                 },
                 {
@@ -1157,7 +1129,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Only people working in tech companies', isCorrect: false, order: 4 }
                   ],
               correctAnswer: 'c',
-                  explanation: 'Design thinking can be applied by anyone in any field to solve problems creatively.',
                   order: 2
                 },
             {
@@ -1171,7 +1142,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: '10 stages', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'The design thinking process has 5 stages: Empathize, Define, Ideate, Prototype, and Test.',
               order: 3
                 }
               ],
@@ -1275,7 +1245,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To impress stakeholders', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Rapid prototyping allows you to quickly test and validate ideas with users before investing in full development.',
               order: 1
             },
             {
@@ -1289,7 +1258,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To document the process', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'The Test phase focuses on gathering feedback from users and iterating on solutions based on their input.',
               order: 2
             },
             {
@@ -1303,7 +1271,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To increase project costs', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Involving users throughout the process ensures that solutions are designed to meet real user needs and problems.',
               order: 3
             }
           ],
@@ -1400,7 +1367,6 @@ const sampleCourses: Record<string, Course> = {
                     { id: 'd', text: 'To improve product quality', isCorrect: false, order: 4 }
                   ],
                   correctAnswer: 'b',
-                  explanation: 'Business strategy aims to achieve competitive advantage and help organizations reach their long-term goals.',
                   order: 1
                 },
                 {
@@ -1414,7 +1380,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'It should ignore market trends', isCorrect: false, order: 4 }
                   ],
               correctAnswer: 'b',
-                  explanation: 'Effective strategies must be flexible enough to adapt to changing market conditions and opportunities.',
                   order: 2
                 },
             {
@@ -1428,7 +1393,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Success, Wisdom, Organization, Training', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'a',
-              explanation: 'SWOT analysis evaluates Strengths, Weaknesses, Opportunities, and Threats to inform strategic planning.',
               order: 3
                 }
               ],
@@ -1550,7 +1514,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'To reduce planning time', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Scenario planning helps organizations prepare for multiple possible futures and develop flexible strategies.',
               order: 1
             },
             {
@@ -1564,7 +1527,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Avoiding all changes', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'Successful strategy execution requires aligning people, processes, and systems to support the strategic objectives.',
               order: 2
             },
             {
@@ -1578,7 +1540,6 @@ const sampleCourses: Record<string, Course> = {
                 { id: 'd', text: 'Avoiding all measurements', isCorrect: false, order: 4 }
               ],
               correctAnswer: 'b',
-              explanation: 'The balanced scorecard balances four perspectives: financial, customer, internal processes, and learning and growth.',
               order: 3
             }
           ],
