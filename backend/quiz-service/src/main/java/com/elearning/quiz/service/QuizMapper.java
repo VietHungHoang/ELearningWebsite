@@ -5,7 +5,6 @@ import com.elearning.quiz.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -103,7 +102,7 @@ public class QuizMapper {
         dto.setQuestionId(option.getQuestionId());
         dto.setText(option.getOptionText());
         dto.setIsCorrect(option.getIsCorrect());
-        dto.setOrder(option.getOrderIndex());
+        dto.setOrderIndex(option.getOrderIndex());
         return dto;
     }
     
@@ -113,7 +112,7 @@ public class QuizMapper {
         option.setQuestionId(dto.getQuestionId());
         option.setOptionText(dto.getText());
         option.setIsCorrect(dto.getIsCorrect());
-        option.setOrderIndex(dto.getOrder());
+        option.setOrderIndex(dto.getOrderIndex());
         return option;
     }
     

@@ -58,6 +58,12 @@ const CoursePlayerSidebar: React.FC<CoursePlayerSidebarProps> = ({
   isCollapsed = false,
   onToggleCollapse
 }) => {
+  // Debug log to check if component receives updated data
+  console.log('DEBUG: CoursePlayerSidebar rendered with sections:', sections.map(s => ({
+    id: s.id,
+    title: s.title,
+    lessons: s.lessons.map(l => ({ id: l.id, title: l.title, isCompleted: l.isCompleted }))
+  })))
   const handleLessonClick = (lesson: Lesson, sectionId: string) => {
     if (lesson.isLocked) return
     onLessonSelect(lesson.id, sectionId)

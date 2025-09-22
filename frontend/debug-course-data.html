@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Course Data</title>
+</head>
+<body>
+    <h1>Debug Course Data</h1>
+    <div id="output"></div>
+    
+    <script>
+        async function testCourseData() {
+            try {
+                const response = await fetch('http://localhost:8081/api/courses/slug/goal-setting-masterclass-achieve-your-dreams');
+                const data = await response.json();
+                
+                console.log('Course data:', data);
+                
+                const output = document.getElementById('output');
+                output.innerHTML = `
+                    <h2>Course: ${data.title}</h2>
+                    <p>Sections: ${data.sections.length}</p>
+                    <div>
+                        ${data.sections.map(section => `
+                            <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                                <h3>Section: ${section.title}</h3>
+                                <p>ID: ${section.id}</p>
+                                <p>Unlocked: ${section.isUnlocked}</p>
+                                <p>Lessons: ${section.lessons.length}</p>
+                                <div>
+                                    ${section.lessons.map(lesson => `
+                                        <div style="margin: 5px; padding: 5px; background: ${lesson.isCurrent ? '#e6f3ff' : '#f0f0f0'};">
+                                            <strong>${lesson.title}</strong><br>
+                                            ID: ${lesson.id}<br>
+                                            Current: ${lesson.isCurrent}<br>
+                                            Locked: ${lesson.isLocked}<br>
+                                            Completed: ${lesson.isCompleted}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('output').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        testCourseData();
+    </script>
+</body>
+</html>

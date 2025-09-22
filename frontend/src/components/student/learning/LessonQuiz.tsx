@@ -67,13 +67,18 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
   }, [quizState.timeRemaining, quizState.isSubmitted])
 
   const handleAnswerChange = (questionId: string, answer: string) => {
-    setQuizState(prev => ({
-      ...prev,
-      answers: {
+    console.log('🎯 Answer change:', { questionId, answer })
+    setQuizState(prev => {
+      const newAnswers = {
         ...prev.answers,
         [questionId]: answer
       }
-    }))
+      console.log('🎯 New answers:', newAnswers)
+      return {
+        ...prev,
+        answers: newAnswers
+      }
+    })
   }
 
   const calculateScore = (): QuizResult => {
@@ -183,24 +188,25 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
             {question.options && (
               <div className="space-y-3">
                 {question.options.map((option) => (
-                  <label
+                  <div
                     key={option.id}
                     className={`flex items-center space-x-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
                       userAnswer === option.id
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
+                    onClick={() => handleAnswerChange(question.id, option.id)}
                   >
                     <input
                       type="radio"
                       name={`question-${question.id}`}
                       value={option.id}
                       checked={userAnswer === option.id}
-                      onChange={() => handleAnswerChange(question.id, option.id)}
-                      className="w-4 h-4 text-blue-600"
+                      onChange={() => {}} // Empty handler since we handle click on div
+                      className="w-4 h-4 text-blue-600 pointer-events-none"
                     />
                     <span className="flex-1 text-gray-900">{option.text}</span>
-                  </label>
+                  </div>
                 ))}
               </div>
             )}

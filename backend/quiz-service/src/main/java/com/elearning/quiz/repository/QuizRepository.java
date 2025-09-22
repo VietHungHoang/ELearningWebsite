@@ -18,6 +18,9 @@ public interface QuizRepository extends JpaRepository<Quiz, String> {
     // Find quiz by section
     Optional<Quiz> findBySectionIdAndIsActiveTrue(String sectionId);
     
+    // Find quiz by section (any status)
+    Quiz findBySectionId(String sectionId);
+    
     // Find quizzes by course
     List<Quiz> findByCourseIdAndIsActiveTrueOrderByCreatedAtDesc(String courseId);
     

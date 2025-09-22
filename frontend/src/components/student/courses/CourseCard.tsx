@@ -1,25 +1,10 @@
 import React, { useState } from 'react'
 import { Play, Heart } from 'lucide-react'
-
-interface Course {
-  id: string
-  title: string
-  slug: string
-  instructor: {
-    name: string
-    avatar: string
-  }
-  category: string
-  thumbnail: string
-  progress: number
-  duration?: string
-  isLiked?: boolean
-  enrolledStudents?: number
-}
+import type { CourseDto } from '../../../services/courseApi'
 
 interface CourseCardProps {
-  course: Course
-  onStartCourse?: (course: Course) => void
+  course: CourseDto
+  onStartCourse?: (course: CourseDto) => void
   onToggleLike?: (courseId: string) => void
 }
 
@@ -28,7 +13,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
   onStartCourse, 
   onToggleLike 
 }) => {
-  const [liked, setLiked] = useState(course.isLiked || false)
+  const [liked, setLiked] = useState(false) // Default to false since CourseDto doesn't have isLiked
 
   const handleLikeToggle = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -111,13 +96,13 @@ const CourseCard: React.FC<CourseCardProps> = ({
           {course.title}
         </h3>
 
-        {/* Category */}
-        <div className="mb-4">
+        {/* Level and Duration */}
+        <div className="mb-4 flex items-center justify-between">
           <span className="text-sm text-gray-600">
-            In{' '}
-            <span className="text-blue-600 hover:text-blue-800 cursor-pointer underline">
-              {course.category}
-            </span>
+            Level: <span className="text-blue-600 font-medium">{course.level}</span>
+          </span>
+          <span className="text-sm text-gray-600">
+            {course.duration}
           </span>
         </div>
 

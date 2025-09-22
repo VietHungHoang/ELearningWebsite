@@ -58,7 +58,7 @@ public class QuizQuestionMapper {
         dto.setQuestionId(option.getQuestionId());
         dto.setText(option.getOptionText());
         dto.setIsCorrect(option.getIsCorrect());
-        dto.setOrder(option.getOrderIndex());
+        dto.setOrderIndex(option.getOrderIndex());
         return dto;
     }
     
@@ -68,7 +68,7 @@ public class QuizQuestionMapper {
         option.setQuestionId(dto.getQuestionId());
         option.setOptionText(dto.getText());
         option.setIsCorrect(dto.getIsCorrect() != null ? dto.getIsCorrect() : false);
-        option.setOrderIndex(dto.getOrder() != null ? dto.getOrder() : 1);
+        option.setOrderIndex(dto.getOrderIndex() != null ? dto.getOrderIndex() : 1);
         return option;
     }
 }

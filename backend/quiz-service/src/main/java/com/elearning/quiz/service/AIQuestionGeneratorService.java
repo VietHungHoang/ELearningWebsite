@@ -6,7 +6,6 @@ import com.elearning.quiz.dto.QuizQuestionOptionDto;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 @Service
 public class AIQuestionGeneratorService {
@@ -112,14 +111,13 @@ public class AIQuestionGeneratorService {
         List<QuizQuestionOptionDto> options = new ArrayList<>();
         
         // Generate 4 options (A, B, C, D)
-        String[] optionLabels = {"A", "B", "C", "D"};
         String[] optionTexts = generateOptionTexts(request, questionNumber);
         
         for (int i = 0; i < 4; i++) {
             QuizQuestionOptionDto option = new QuizQuestionOptionDto();
             option.setText(optionTexts[i]);
             option.setIsCorrect(i == 0); // First option is correct by default
-            option.setOrder(i + 1);
+            option.setOrderIndex(i + 1);
             options.add(option);
         }
         

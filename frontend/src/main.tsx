@@ -6,10 +6,6 @@ import { store } from './store/store'
 import './index.css'
 import App from './App.tsx'
 
-// Import debug utilities in development
-if (import.meta.env.DEV) {
-  import('./utils/debug-courses')
-}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

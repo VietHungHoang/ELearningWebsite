@@ -44,7 +44,7 @@ public class QuizQuestionService {
                 option.setQuestionId(savedQuestion.getId()); // Set correct questionId
                 option.setOptionText(optionDto.getText());
                 option.setIsCorrect(optionDto.getIsCorrect() != null ? optionDto.getIsCorrect() : false);
-                option.setOrderIndex(optionDto.getOrder() != null ? optionDto.getOrder() : 1);
+                option.setOrderIndex(optionDto.getOrderIndex() != null ? optionDto.getOrderIndex() : 1);
                 
                 // Add to question's options list
                 savedQuestion.getOptions().add(option);

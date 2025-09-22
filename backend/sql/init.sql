@@ -69,8 +69,8 @@ CREATE TABLE quiz_attempts (
     INDEX idx_course_id (course_id)
 );
 
--- Use course database
-USE elearning_course;
+-- Use quiz database (courses table will be in elearning_quiz)
+USE elearning_quiz;
 
 CREATE TABLE courses (
     id VARCHAR(36) PRIMARY KEY,
@@ -80,17 +80,22 @@ CREATE TABLE courses (
     short_description TEXT,
     thumbnail VARCHAR(500),
     video_url VARCHAR(500),
-    instructor_id VARCHAR(36) NOT NULL,
+    instructor_name VARCHAR(255),
+    instructor_avatar VARCHAR(500),
+    instructor_title VARCHAR(255),
     duration VARCHAR(50),
-    level ENUM('Beginner', 'Intermediate', 'Advanced') DEFAULT 'Beginner',
+    level VARCHAR(50) DEFAULT 'Beginner',
     rating DECIMAL(3,2) DEFAULT 0.00,
     students_count INT DEFAULT 0,
     price DECIMAL(10,2) DEFAULT 0.00,
     original_price DECIMAL(10,2),
-    is_active BOOLEAN DEFAULT TRUE,
+    is_enrolled BOOLEAN DEFAULT FALSE,
+    last_accessed TIMESTAMP NULL,
+    completion_percentage INT DEFAULT 0,
+    total_lessons INT DEFAULT 0,
+    completed_lessons INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_instructor_id (instructor_id),
     INDEX idx_slug (slug)
 );
 
@@ -99,7 +104,11 @@ CREATE TABLE sections (
     course_id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
     order_index INT NOT NULL,
+    is_expanded BOOLEAN DEFAULT FALSE,
     is_unlocked BOOLEAN DEFAULT FALSE,
+    completed INT DEFAULT 0,
+    total INT DEFAULT 0,
+    duration VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
@@ -109,12 +118,16 @@ CREATE TABLE sections (
 CREATE TABLE lessons (
     id VARCHAR(36) PRIMARY KEY,
     section_id VARCHAR(36) NOT NULL,
+    course_id VARCHAR(36) NOT NULL,
     title VARCHAR(255) NOT NULL,
-    duration VARCHAR(50),
-    video_url VARCHAR(500),
     description TEXT,
-    order_index INT NOT NULL,
+    duration VARCHAR(50),
+    is_completed BOOLEAN DEFAULT FALSE,
+    is_current BOOLEAN DEFAULT FALSE,
     is_locked BOOLEAN DEFAULT FALSE,
+    video_url VARCHAR(500),
+    content TEXT,
+    order_index INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (section_id) REFERENCES sections(id) ON DELETE CASCADE,

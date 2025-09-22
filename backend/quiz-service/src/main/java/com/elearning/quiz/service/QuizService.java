@@ -117,7 +117,7 @@ public class QuizService {
     // Generate questions using AI
     public List<QuizQuestionDto> generateQuestions(String quizId, GenerateQuestionsRequest request) {
         // Verify quiz exists
-        Quiz quiz = quizRepository.findById(quizId)
+        quizRepository.findById(quizId)
                 .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + quizId));
         
         // Generate questions using AI service

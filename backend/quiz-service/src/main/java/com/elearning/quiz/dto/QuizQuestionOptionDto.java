@@ -15,16 +15,19 @@ public class QuizQuestionOptionDto {
     private Boolean isCorrect = false;
     
     @Min(value = 1, message = "Order index must be at least 1")
-    private Integer order;
+    private Integer orderIndex;
+    
+    private java.time.LocalDateTime createdAt;
+    private java.time.LocalDateTime updatedAt;
     
     // Constructors
     public QuizQuestionOptionDto() {}
     
-    public QuizQuestionOptionDto(String questionId, String text, Boolean isCorrect, Integer order) {
+    public QuizQuestionOptionDto(String questionId, String text, Boolean isCorrect, Integer orderIndex) {
         this.questionId = questionId;
         this.text = text;
         this.isCorrect = isCorrect;
-        this.order = order;
+        this.orderIndex = orderIndex;
     }
     
     // Getters and Setters
@@ -60,11 +63,27 @@ public class QuizQuestionOptionDto {
         this.isCorrect = isCorrect;
     }
     
-    public Integer getOrder() {
-        return order;
+    public Integer getOrderIndex() {
+        return orderIndex;
     }
     
-    public void setOrder(Integer order) {
-        this.order = order;
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+    }
+    
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public java.time.LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

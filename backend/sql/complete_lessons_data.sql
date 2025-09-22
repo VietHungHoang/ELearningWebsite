@@ -1,0 +1,55 @@
+-- Complete Lessons Data
+-- Insert all lessons for all courses
+
+-- Course 1, Section 1 Lessons
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-1', 'section-1', 'course-1', 'The Importance of Goal Setting', 'Learn why goal setting is crucial for success and how it can transform your life.', '4 mins 30 sec', true, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', '', 1, NOW(), NOW()),
+('lesson-2', 'section-1', 'course-1', 'Types of Goals: Short-term vs Long-term', 'Understand the difference between short-term and long-term goals and how to balance them.', '4 mins 15 sec', false, true, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', '', 2, NOW(), NOW()),
+('lesson-3', 'section-1', 'course-1', 'Creating a Vision Board', 'Learn how to create an effective vision board to visualize your goals.', '4 mins 20 sec', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', '', 3, NOW(), NOW());
+
+-- Course 1, Section 2 Lessons
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-4', 'goal-section-2', 'course-1', 'SMART Goals Framework', 'Learn the SMART framework for setting effective and achievable goals.', '6 mins 15 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', '', 1, NOW(), NOW()),
+('lesson-5', 'goal-section-2', 'course-1', 'Breaking Down Big Goals', 'Master the art of breaking down large goals into manageable steps.', '6 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', '', 2, NOW(), NOW()),
+('lesson-6', 'goal-section-2', 'course-1', 'Tracking Your Progress', 'Learn effective methods to track and monitor your goal progress.', '5 mins 45 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', '', 3, NOW(), NOW());
+
+-- Course 1, Section 3 Lessons
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-7', 'goal-section-3', 'course-1', 'Maintaining Motivation for Long-term Goals', 'Learn strategies to maintain motivation throughout your goal achievement journey.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', '', 1, NOW(), NOW()),
+('lesson-8', 'goal-section-3', 'course-1', 'Building an Accountability System', 'Create a support system to help you stay accountable to your goals.', '4 mins 45 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', '', 2, NOW(), NOW()),
+('lesson-9', 'goal-section-3', 'course-1', 'Overcoming Obstacles and Setbacks', 'Develop resilience and strategies to overcome challenges in goal achievement.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', '', 3, NOW(), NOW()),
+('lesson-10', 'goal-section-3', 'course-1', 'Reviewing and Adjusting Your Goals', 'Learn when and how to review and adjust your goals for better outcomes.', '4 mins 45 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4', '', 4, NOW(), NOW());
+
+-- Course 2, Section 1 Lessons (Focus)
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-11', 'focus-section-1', 'course-2', 'What is Focus and Why It Matters', 'Understand the importance of focus in achieving your goals.', '4 mins', false, true, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', '', 1, NOW(), NOW()),
+('lesson-12', 'focus-section-1', 'course-2', 'Common Distractions and How to Overcome Them', 'Identify and eliminate common distractions that hinder your focus.', '4 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', '', 2, NOW(), NOW()),
+('lesson-13', 'focus-section-1', 'course-2', 'The Pomodoro Technique', 'Master the Pomodoro Technique for enhanced productivity and focus.', '5 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', '', 3, NOW(), NOW()),
+('lesson-14', 'focus-section-1', 'course-2', 'Mindfulness and Meditation', 'Learn mindfulness techniques to improve your concentration abilities.', '6 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', '', 4, NOW(), NOW()),
+('lesson-15', 'focus-section-1', 'course-2', 'Creating a Focus-Friendly Environment', 'Design your workspace and environment to maximize focus and productivity.', '4 mins 30 sec', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', '', 5, NOW(), NOW()),
+('lesson-16', 'focus-section-1', 'course-2', 'Building Focus Habits', 'Develop sustainable habits that strengthen your focus over time.', '5 mins 15 sec', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', '', 6, NOW(), NOW());
+
+-- Course 2, Section 2 Lessons (Focus Advanced)
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-17', 'focus-section-2', 'course-2', 'Understanding Deep Work', 'Learn the principles of deep work and how it differs from shallow work.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', '', 1, NOW(), NOW()),
+('lesson-18', 'focus-section-2', 'course-2', 'Creating Deep Work Rituals', 'Develop rituals and routines that prepare your mind for deep work sessions.', '4 mins 45 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', '', 2, NOW(), NOW()),
+('lesson-19', 'focus-section-2', 'course-2', 'Managing Digital Distractions', 'Advanced strategies for eliminating digital distractions during focus time.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', '', 3, NOW(), NOW()),
+('lesson-20', 'focus-section-2', 'course-2', 'Building Focus Endurance', 'Gradually increase your ability to maintain focus for longer periods.', '4 mins 45 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', '', 4, NOW(), NOW()),
+('lesson-21', 'focus-section-2', 'course-2', 'Recovery and Rest for Focus', 'Learn the importance of proper rest and recovery for maintaining focus.', '4 mins', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', '', 5, NOW(), NOW());
+
+-- Course 3, Section 1 Lessons (Time Management)
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-22', 'time-section-1', 'course-3', 'Understanding Time vs Energy', 'Learn the difference between time and energy management for better productivity.', '4 mins', false, true, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', '', 1, NOW(), NOW()),
+('lesson-23', 'time-section-1', 'course-3', 'The Eisenhower Matrix', 'Master the Eisenhower Matrix for prioritizing tasks effectively.', '4 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', '', 2, NOW(), NOW()),
+('lesson-24', 'time-section-1', 'course-3', 'Time Blocking Techniques', 'Implement time blocking strategies to maximize your daily productivity.', '4 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', '', 3, NOW(), NOW()),
+('lesson-25', 'time-section-1', 'course-3', 'Eliminating Time Wasters', 'Identify and eliminate activities that waste your valuable time.', '5 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', '', 4, NOW(), NOW()),
+('lesson-26', 'time-section-1', 'course-3', 'Delegation and Outsourcing', 'Learn when and how to delegate tasks to free up your time.', '6 mins', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', '', 5, NOW(), NOW()),
+('lesson-27', 'time-section-1', 'course-3', 'Digital Tools for Time Management', 'Explore digital tools and apps that can enhance your time management.', '5 mins 30 sec', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', '', 6, NOW(), NOW()),
+('lesson-28', 'time-section-1', 'course-3', 'Building Time Management Habits', 'Develop sustainable habits that improve your time management skills.', '4 mins 45 sec', false, false, false, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', '', 7, NOW(), NOW());
+
+-- Course 3, Section 2 Lessons (Time Management Advanced)
+INSERT INTO lessons (id, section_id, course_id, title, description, duration, is_completed, is_current, is_locked, video_url, content, order_index, created_at, updated_at) VALUES
+('lesson-29', 'time-section-2', 'course-3', 'The Two-Minute Rule and Quick Wins', 'Learn how to identify and handle quick tasks immediately to reduce mental clutter.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', '', 1, NOW(), NOW()),
+('lesson-30', 'time-section-2', 'course-3', 'Weekly Review and Planning', 'Master the weekly review process to improve your planning and productivity.', '4 mins 45 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', '', 2, NOW(), NOW()),
+('lesson-31', 'time-section-2', 'course-3', 'Task Batching and Batch Processing', 'Learn how to group similar tasks together for maximum efficiency.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', '', 3, NOW(), NOW()),
+('lesson-32', 'time-section-2', 'course-3', 'Energy Management and Peak Performance', 'Understand your energy patterns and schedule tasks accordingly for peak performance.', '4 mins 30 sec', false, false, true, 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4', '', 4, NOW(), NOW());
