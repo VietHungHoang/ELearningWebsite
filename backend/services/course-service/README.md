@@ -1,181 +1,157 @@
 # Course Service
 
-## Overview
-Course Service quản lý tất cả thông tin liên quan đến khóa học trong hệ thống E-learning, bao gồm tạo, cập nhật, tìm kiếm và quản lý trạng thái khóa học.
+## Overvie
+Course Service manages core course metadata for the E-learning platform. This service follows a modular microservices architecture where course content management is handled by a separate content service.
 
 ## Features
-- ✅ **CRUD Operations**: Tạo, đọc, cập nhật, xóa khóa học
-- ✅ **Search & Filter**: Tìm kiếm theo tiêu đề, lọc theo category, level, status, giá
-- ✅ **Status Management**: Quản lý trạng thái khóa học (DRAFT, PUBLISHED, ARCHIVED, etc.)
-- ✅ **Instructor Management**: Quản lý khóa học theo instructor
-- ✅ **Featured Courses**: Đánh dấu và quản lý khóa học nổi bật
-- ✅ **Statistics**: Thống kê số lượng khóa học theo các tiêu chí
-- ✅ **Pagination**: Hỗ trợ phân trang cho danh sách lớn
 
-## Architecture
+- **Draft Course Creation**: Basic course creation with title, category, and level
+- **Category Management**: Dynamic categories with validation
 
-### Domain Model
-```
-Course Entity:
-├── Basic Info: title, description, shortDescription
-├── Instructor: instructorId
-├── Classification: category, level, status
-├── Pricing: price, discountPrice
-├── Media: thumbnailUrl
-├── Metrics: enrolledCount, averageRating, ratingCount
-├── Content: requirements, whatYouWillLearn, tags
-├── Settings: isFeatured, isActive
-└── Timestamps: createdAt, updatedAt
-```
-
-### Domain Models
-- **CourseStatus** (enum): DRAFT, PUBLISHED, ARCHIVED, PENDING_REVIEW, REJECTED
-- **CourseLevel** (enum): BEGINNER, INTERMEDIATE, ADVANCED, EXPERT  
-- **Category** (entity): Dynamic categories với name, code, description, isActive
-
-### API Endpoints
-
-#### Course Management
-- `POST /api/courses` - Tạo khóa học mới
-- `GET /api/courses/{id}` - Lấy thông tin khóa học theo ID
-- `GET /api/courses` - Lấy danh sách tất cả khóa học (có phân trang)
-- `PUT /api/courses/{id}` - Cập nhật thông tin khóa học
-- `DELETE /api/courses/{id}` - Xóa khóa học
-- `PATCH /api/courses/{id}/status` - Cập nhật trạng thái khóa học
-
-#### Search & Filter
-- `GET /api/courses/search?keyword={keyword}` - Tìm kiếm theo tiêu đề
-- `GET /api/courses/filter?categoryId={}&level={}&status={}&minPrice={}&maxPrice={}` - Lọc khóa học
-- `GET /api/courses/instructor/{instructorId}` - Lấy khóa học theo instructor
-- `GET /api/courses/category/{categoryId}` - Lấy khóa học theo category ID
-- `GET /api/courses/level/{level}` - Lấy khóa học theo level
-- `GET /api/courses/status/{status}` - Lấy khóa học theo status
-
-#### Special Lists
-- `GET /api/courses/featured` - Lấy khóa học nổi bật
-- `GET /api/courses/most-enrolled?limit={}` - Khóa học có nhiều học viên nhất
-- `GET /api/courses/recent?limit={}` - Khóa học mới nhất
-
-#### Statistics
-- `GET /api/courses/count/instructor/{instructorId}` - Đếm khóa học theo instructor
-- `GET /api/courses/count/status/{status}` - Đếm khóa học theo status  
-- `GET /api/courses/count/category/{categoryId}` - Đếm khóa học theo category ID
-
-#### Category Management
-- `GET /api/categories` - Lấy tất cả categories
-- `GET /api/categories/active` - Lấy categories đang hoạt động
-- `GET /api/categories/{id}` - Lấy category theo ID
-- `GET /api/categories/code/{code}` - Lấy category theo code
-
-### Technologies
+## Technologies
 - **Spring Boot 3.5.5** - Main framework
-- **Spring Data JPA** - Data access layer
-- **PostgreSQL** - Primary database
-- **Lombok** - Code generation
+- **Spring Data JPA** - Data access layer with modular repository pattern
+- **MySQL** - Primary database
+- **Lombok** - Code generation with SuperBuilder for inheritance
 - **Jakarta Validation** - Input validation
 - **Maven** - Build tool
 
-### Validation Rules
-- Title: Required, max 200 characters
-- Description: Required
-- InstructorId: Required, not null
-- Category: Required
-- Price: Must be positive
-- Rating: Between 0.0 and 5.0
-- Duration: Must be positive
+## Project Structure
+```
+course-service/
+├── src/main/java/com/elearning/courseservice/
+│   ├── controller/
+│   │   └── CourseController.java          # Draft API + commented endpoints
+│   ├── service/
+│   │   ├── CourseService.java             # Interface with 1 active method
+│   │   └── impl/CourseServiceImpl.java    # Implementation with utilities
+│   ├── dto/
+│   │   ├── request/
+│   │   │   └── CreateDraftCourseRequest.java  # Draft creation DTO
+│   │   └── response/
+│   │       ├── DraftCourseResponse.java       # Draft response DTO
+│   │       └── ApiResponse.java               # Standardized response
+│   ├── model/
+│   │   ├── BaseEntity.java               # Shared timestamp fields
+│   │   ├── Course.java                   # Core course entity
+│   │   ├── CourseDetail.java            # Content information
+│   │   ├── CoursePricing.java           # Pricing information
+│   │   ├── CourseAnalytics.java         # Performance metrics
+│   │   └── Category.java                # Course categories
+│   ├── repository/
+│   │   ├── CourseRepository.java
+│   │   ├── CourseContentRepository.java
+│   │   ├── CoursePricingRepository.java
+│   │   ├── CourseAnalyticsRepository.java
+│   │   └── CategoryRepository.java
+│   ├── exception/
+│   │   ├── CourseNotFoundException.java
+│   │   ├── CategoryNotFoundException.java
+│   │   └── GlobalExceptionHandler.java
+│   ├── enums/
+│   │   ├── CourseStatus.java
+│   │   ├── CourseLevel.java
+│   │   └── PricingType.java
+│   └── utils/
+│       └── CourseUtils.java             # Level conversion utilities
+└── README.md
+```
 
-### Exception Handling
-- `CourseNotFoundException` - Khóa học không tồn tại
-- `CourseTitleAlreadyExistsException` - Tiêu đề khóa học đã tồn tại
-- `ValidationException` - Lỗi validation input
-- `GlobalExceptionHandler` - Xử lý exception toàn cục
+## Exception Handling
+- `CourseNotFoundException` - Course not found
+- `CategoryNotFoundException` - Category not found  
+- `ValidationException` - Input validation errors
+- `GlobalExceptionHandler` - Centralized exception handling
+
+## API Usage
+
+### Create Draft Course
+```bash
+POST /api/courses/draft
+Content-Type: application/json
+
+{
+  "title": "Java Programming Basics",
+  "category": 1,
+  "level": "beginner"
+}
+```
 
 ### Response Format
 ```json
 {
-  "status": 200,
-  "data": {
-    "id": 1,
-    "title": "Java Programming Masterclass",
-    "category": "PROGRAMMING",
-    "level": "INTERMEDIATE",
-    "price": 99.99,
-    "enrolledCount": 1250,
-    "averageRating": 4.7
-  },
-  "message": "Course retrieved successfully"
+  "status": 201,
+  "message": "Draft course created successfully",
+  "data": "1"
 }
-```
-
-## Usage Examples
-
-### Create Course
-```bash
-POST /api/courses
-{
-  "title": "React Complete Guide",
-  "description": "Learn React from scratch to advanced level",
-  "instructorId": 1,
-  "category": "PROGRAMMING", 
-  "level": "BEGINNER",
-  "price": 49.99
-}
-```
-
-### Search Courses
-```bash
-GET /api/courses/search?keyword=react
-GET /api/courses/filter?category=PROGRAMMING&level=BEGINNER&maxPrice=50
-```
-
-### Update Course Status
-```bash
-PATCH /api/courses/1/status?status=PUBLISHED
 ```
 
 ## Database Schema
 ```sql
--- Categories table
-CREATE TABLE categories (
-  id BIGSERIAL PRIMARY KEY,
-  name VARCHAR(100) NOT NULL UNIQUE,
-  description TEXT,
-  code VARCHAR(20) UNIQUE,
+-- Base entity pattern with shared timestamps
+CREATE TABLE courses (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  title VARCHAR(200) NOT NULL,
+  instructor_id BIGINT NOT NULL,
+  status ENUM('DRAFT', 'PUBLISHED', 'ARCHIVED', 'PENDING_REVIEW', 'REJECTED') DEFAULT 'DRAFT',
+  category_id BIGINT NOT NULL,
+  level ENUM('BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'ALL_LEVELS') DEFAULT 'BEGINNER',
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
--- Courses table
-CREATE TABLE courses (
-  id BIGSERIAL PRIMARY KEY,
-  title VARCHAR(200) NOT NULL,
-  description TEXT NOT NULL,
+-- Modular related tables with shared primary keys
+CREATE TABLE course_content (
+  course_id BIGINT PRIMARY KEY,
+  description TEXT,
   short_description TEXT,
-  instructor_id BIGINT NOT NULL,
-  status VARCHAR(20) DEFAULT 'DRAFT',
-  category_id BIGINT NOT NULL REFERENCES categories(id),
-  level VARCHAR(20) DEFAULT 'BEGINNER',
-  price DECIMAL(10,2) DEFAULT 0.00,
-  discount_price DECIMAL(10,2),
   thumbnail_url VARCHAR(500),
-  duration_minutes INTEGER DEFAULT 0,
-  enrolled_count INTEGER DEFAULT 0,
-  average_rating DECIMAL(3,2) DEFAULT 0.00,
-  rating_count INTEGER DEFAULT 0,
+  promo_video_url VARCHAR(500),
   requirements TEXT,
   what_you_will_learn TEXT,
   tags TEXT,
+  language VARCHAR(10) DEFAULT 'vi',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+CREATE TABLE course_pricing (
+  course_id BIGINT PRIMARY KEY,
+  base_price DECIMAL(10,2) DEFAULT 0.00,
+  currency VARCHAR(3) DEFAULT 'USD',
+  pricing_type ENUM('FREE', 'PAID', 'SUBSCRIPTION') DEFAULT 'PAID',
+  is_tax_included BOOLEAN DEFAULT FALSE,
+  tax_rate DECIMAL(5,4) DEFAULT 0.0000,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+CREATE TABLE course_analytics (
+  course_id BIGINT PRIMARY KEY,
+  enrolled_count INT DEFAULT 0,
+  completed_count INT DEFAULT 0,
+  average_rating DECIMAL(3,2) DEFAULT 0.00,
+  rating_count INT DEFAULT 0,
+  total_duration_minutes INT DEFAULT 0,
+  total_lectures INT DEFAULT 0,
+  total_sections INT DEFAULT 0,
   is_featured BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+);
+
+CREATE TABLE categories (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL UNIQUE,
+  description TEXT,
+  icon_name VARCHAR(50) UNIQUE,
   is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ```
-
-## Development Notes
-- Sử dụng static mapper thay vì ModelMapper để tối ưu performance
-- Implement pagination cho tất cả list endpoints
-- Áp dụng @Transactional(readOnly = true) cho read operations
-- Validation đầy đủ cho input data
-- Exception handling toàn diện với meaningful messages

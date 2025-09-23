@@ -7,20 +7,18 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "courses")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Course {
+@SuperBuilder
+public class Course extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,13 +28,6 @@ public class Course {
     @Size(max = 200, message = "Title must not exceed 200 characters")
     @Column(nullable = false)
     private String title;
-    
-    @NotBlank(message = "Description is required")
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    
-    @Column(columnDefinition = "TEXT")
-    private String shortDescription;
     
     @NotNull(message = "Instructor ID is required")
     @Column(nullable = false)
@@ -57,53 +48,16 @@ public class Course {
     @Builder.Default
     private CourseLevel level = CourseLevel.BEGINNER;
     
-    @DecimalMin(value = "0.00", message = "Price must be positive")
-    @Column(precision = 10, scale = 2)
-    @Builder.Default
-    private BigDecimal price = BigDecimal.ZERO; 
-    
-    @DecimalMin(value = "0.00", message = "Discount price must be positive")
-    @Column(precision = 10, scale = 2)
-    private BigDecimal discountPrice;
-    
-    private String thumbnailUrl;     
-
-    @Min(value = 0, message = "Duration must be positive")
-    private Integer durationMinutes;
-    
-    @Min(value = 0, message = "Enrolled count cannot be negative")
-    @Builder.Default
-    private Integer enrolledCount = 0;
-    
-    @DecimalMin(value = "0.0", message = "Rating must be between 0 and 5")
-    @DecimalMax(value = "5.0", message = "Rating must be between 0 and 5")
-    @Builder.Default
-    private BigDecimal averageRating = BigDecimal.ZERO;
-    
-    @Min(value = 0, message = "Rating count cannot be negative")
-    @Builder.Default
-    private Integer ratingCount = 0;
-    
-    @Column(columnDefinition = "TEXT")
-    private String requirements;
-    
-    @Column(columnDefinition = "TEXT")
-    private String whatYouWillLearn;
-    
-    @Column(columnDefinition = "TEXT")
-    private String tags;     
-
-    @Builder.Default
-    private Boolean isFeatured = false;     
-    
     @Builder.Default
     private Boolean isActive = true;
     
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    // Lazy-loaded related entities
+    @OneToOne(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private CourseDetail content;
     
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    @OneToOne(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private CoursePricing pricing;
+    
+    @OneToOne(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private CourseAnalytics analytics;
 }

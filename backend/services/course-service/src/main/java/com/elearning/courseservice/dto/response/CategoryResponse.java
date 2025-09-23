@@ -14,8 +14,6 @@ public class CategoryResponse {
     private Long id;
     private String name;
     private String description;
-    private String code;
-    private String iconUrl;
+    private String iconName;
     private Boolean isActive;
-    private Integer sortOrder;
 }

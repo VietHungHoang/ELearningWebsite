@@ -1,7 +1,9 @@
+server:
+  port: 8081
+  
 spring:
   application:
     name: course-servive
-  port: 8081
   datasource:
     url: jdbc:postgresql://db:5432/courses_db
     username: course_user
@@ -9,12 +11,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-
-aws:
-  s3:
-    bucket-name: my-udemy-clone-course-images
-    region: ap-southeast-1
-
-
-2n93MwDt17hXwmJ6jSfY0bIBhX5/gT+r9q+0bovy
-AKIAQ3EGQSAWCIMT6NQH

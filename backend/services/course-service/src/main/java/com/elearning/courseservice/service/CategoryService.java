@@ -1,8 +1,8 @@
 package com.elearning.courseservice.service;
 
-import com.elearning.courseservice.dto.response.CategoryResponse;
-
 import java.util.List;
+
+import com.elearning.courseservice.dto.response.CategoryResponse;
 
 public interface CategoryService {
 
@@ -11,18 +11,13 @@ public interface CategoryService {
      */
     List<CategoryResponse> getActiveCategories();
 
-    /**
-     * Get all categories ordered by sort order
-     */
-    List<CategoryResponse> getAllCategories();
+    // /**
+    //  * Get all categories ordered by sort order
+    //  */
+    // List<CategoryResponse> getAllCategories();
 
     /**
      * Get category by ID
      */
     CategoryResponse getCategoryById(Long id);
-
-    /**
-     * Get category by code
-     */
-    CategoryResponse getCategoryByCode(String code);
 }

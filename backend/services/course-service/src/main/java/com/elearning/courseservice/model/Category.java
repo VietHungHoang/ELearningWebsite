@@ -6,19 +6,18 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "categories")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Category {
+@SuperBuilder
+public class Category extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,18 +32,10 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
     
-    @Size(max = 20, message = "Code must not exceed 20 characters")
+    @Size(max = 50, message = "Icon name must not exceed 50 characters")
     @Column(unique = true)
-    private String code; // For programmatic access: "PROGRAMMING", "BUSINESS", etc
+    private String iconName; // icon name
     
     @Builder.Default
     private Boolean isActive = true;
-    
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 }

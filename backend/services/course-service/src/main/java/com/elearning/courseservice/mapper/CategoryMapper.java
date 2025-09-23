@@ -17,7 +17,7 @@ public class CategoryMapper {
                 .id(category.getId())
                 .name(category.getName())
                 .description(category.getDescription())
-                .code(category.getCode())
+                .iconName(category.getIconName())
                 .isActive(category.getIsActive())
                 .build();
     }

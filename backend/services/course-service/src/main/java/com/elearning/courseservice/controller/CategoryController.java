@@ -17,12 +17,12 @@ public class CategoryController {
     
     private final CategoryService categoryService;
     
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
-        List<CategoryResponse> categories = categoryService.getAllCategories();
-        ApiResponse<List<CategoryResponse>> response = ApiResponse.success(categories, "Categories retrieved successfully");
-        return ResponseEntity.ok(response);
-    }
+    // @GetMapping
+    // public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
+    //     List<CategoryResponse> categories = categoryService.getAllCategories();
+    //     ApiResponse<List<CategoryResponse>> response = ApiResponse.success(categories, "Categories retrieved successfully");
+    //     return ResponseEntity.ok(response);
+    // }
     
     @GetMapping("/active")
     public ResponseEntity<ApiResponse<List<CategoryResponse>>> getActiveCategories() {
@@ -31,17 +31,10 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
     
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
-        CategoryResponse category = categoryService.getCategoryById(id);
-        ApiResponse<CategoryResponse> response = ApiResponse.success(category, "Category retrieved successfully");
-        return ResponseEntity.ok(response);
-    }
-    
-    @GetMapping("/code/{code}")
-    public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryByCode(@PathVariable String code) {
-        CategoryResponse category = categoryService.getCategoryByCode(code);
-        ApiResponse<CategoryResponse> response = ApiResponse.success(category, "Category retrieved successfully");
-        return ResponseEntity.ok(response);
-    }
+    // @GetMapping("/{id}")
+    // public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
+    //     CategoryResponse category = categoryService.getCategoryById(id);
+    //     ApiResponse<CategoryResponse> response = ApiResponse.success(category, "Category retrieved successfully");
+    //     return ResponseEntity.ok(response);
+    // }
 }
