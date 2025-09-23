@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  media-service:
+    container_name: media-service-app
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    image: media-service-dev
+    ports:
+      - "8082:8082"
+    environment:
+      # Database Configuration
+      - DATABASE_URL=jdbc:postgresql://db:5432/media_service_db
+      - DATABASE_USERNAME=media_user
+      - DATABASE_PASSWORD=media_pass
+      
+      # AWS S3 Configuration (can be overridden with actual values)
+      - AWS_S3_BUCKET_NAME=my-elearning-course-images
+      - AWS_S3_REGION=ap-southeast-2
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-dev-access-key}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-dev-secret-key}
+      
+      # File Upload Configuration
+      - VIDEO_MAX_FILE_SIZE=2147483648
+      - IMAGE_MAX_FILE_SIZE=10485760
+      
+      # Spring Profile
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      - db
+    volumes:
+      - ./src/main:/app/src/main
+      - ./pom.xml:/app/pom.xml
+    command: mvn spring-boot:run -Dspring-boot.run.fork=false
+
+  db:
+    image: postgres:15-alpine
+    container_name: media-db
+    environment:
+      - POSTGRES_DB=media_service_db
+      - POSTGRES_USER=media_user
+      - POSTGRES_PASSWORD=media_pass
+    ports:
+      - "5434:5432"  # Different port from course-service (5433)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U media_user -d media_service_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres-data:
