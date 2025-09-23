@@ -19,6 +19,7 @@ import TutorSubscriptionPage from '../pages/dashboard/TutorSubscriptionPage'
 import { LoginPage, RegisterPage } from '../pages/auth'
 import { StudentBookingsPage } from '../pages/student'
 import StudentCoursesPage from '../pages/student/StudentCoursesPage'
+import StudentCertificatesPage from '../pages/student/StudentCertificatesPage'
 import CoursePlayerPage from '../pages/student/CoursePlayerPage'
 import ProfileSettingsPage from '../pages/student/ProfileSettingsPage'
 import CheckoutPage from '../pages/checkout/CheckoutPage'
@@ -87,7 +88,7 @@ const AppRoutes = () => {
         <Route path="profile/identification" element={<ProfileSettingsPage />} />
         <Route path="course-player/:slug" element={<CoursePlayerPage />} />
         <Route path="assignments" element={<div>Student Assignments</div>} />
-        <Route path="certificates" element={<div>Student Certificates</div>} />
+        <Route path="certificates" element={<StudentCertificatesPage />} />
         <Route path="favourites" element={<div>Student Favourites</div>} />
         <Route path="billing-detail" element={<div>Billing Details</div>} />
         <Route path="invoices" element={<div>Student Invoices</div>} />

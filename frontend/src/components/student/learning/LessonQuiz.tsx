@@ -84,18 +84,37 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
   const calculateScore = (): QuizResult => {
     let correctAnswers = 0
 
+    console.log('🎯 DEBUG: Calculating quiz score...')
+    console.log('🎯 DEBUG: Quiz questions:', quiz.questions.length)
+    console.log('🎯 DEBUG: User answers:', quizState.answers)
+
     quiz.questions.forEach(question => {
       const userAnswer = quizState.answers[question.id]
       
+      console.log(`🎯 DEBUG: Question ${question.id}:`, {
+        questionText: question.questionText,
+        userAnswer,
+        options: question.options?.map(opt => ({ id: opt.id, text: opt.text, isCorrect: opt.isCorrect }))
+      })
+      
       if (userAnswer) {
-        // All questions are now multiple choice
-        const isCorrect = userAnswer === question.correctAnswer
+        // Find the correct option for this question
+        const correctOption = question.options?.find(option => option.isCorrect)
+        const isCorrect = correctOption && userAnswer === correctOption.id
+        
+        console.log(`🎯 DEBUG: Question ${question.id} validation:`, {
+          correctOption: correctOption?.id,
+          userAnswer,
+          isCorrect
+        })
         
         if (isCorrect) {
           correctAnswers++
         }
       }
     })
+
+    console.log(`🎯 DEBUG: Final score: ${correctAnswers}/${quiz.questions.length}`)
 
     const percentage = quiz.questions.length > 0 ? Math.round((correctAnswers / quiz.questions.length) * 100) : 0
     const passed = percentage >= quiz.passingScore

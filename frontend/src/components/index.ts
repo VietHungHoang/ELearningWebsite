@@ -5,6 +5,7 @@ export * from './common'
 export * from './course'
 export * from './calendar'
 export * from './student'
+export * from './certificate'
 
 // Navigation components
 export { Header as NavigationHeader, Footer } from './navigation'
