@@ -86,4 +86,12 @@ public class QuizQuestionOptionDto {
     public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+    
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = java.time.LocalDateTime.parse(createdAt);
+    }
+    
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = java.time.LocalDateTime.parse(updatedAt);
+    }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { StudentLayout } from '../../components/layout'
 import { studentUserControls, getStudentSidebarItems } from '../../utils/studentConfig'
@@ -13,8 +13,9 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { CertificatePreviewModal } from '../../components/certificate'
-import { certificateApi } from '../../services/certificateApi'
-import type { StudentCertificate, CertificateStats } from '../../types/certificate'
+// import { certificateApi } from '../../services/certificateApi'
+import { sampleStudentCertificates } from '../../data/certificate-sample-data'
+import type { StudentCertificate } from '../../types/certificate'
 
 const StudentCertificatesPage = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -22,10 +23,10 @@ const StudentCertificatesPage = () => {
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedCertificate, setSelectedCertificate] = useState<StudentCertificate | null>(null)
   const [showCertificatePreview, setShowCertificatePreview] = useState(false)
-  const [certificates, setCertificates] = useState<StudentCertificate[]>([])
-  const [stats, setStats] = useState<CertificateStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // const [certificates, setCertificates] = useState<StudentCertificate[]>([])
+  // const [stats, setStats] = useState<CertificateStats | null>(null)
+  // const [loading, setLoading] = useState(true)
+  // const [error, setError] = useState<string | null>(null)
 
   const navigate = useNavigate()
 
@@ -36,49 +37,51 @@ const StudentCertificatesPage = () => {
   const sidebarItems = getStudentSidebarItems('/student/certificates')
 
   // Load certificates and stats on component mount
-  useEffect(() => {
-    loadCertificates()
-    loadStats()
-  }, [statusFilter])
+  // useEffect(() => {
+  //   loadCertificates()
+  //   loadStats()
+  // }, [statusFilter])
 
-  const loadCertificates = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      console.log('📜 Loading student certificates...')
+  // const loadCertificates = async () => {
+  //   try {
+  //     setLoading(true)
+  //     setError(null)
+  //     console.log('📜 Loading student certificates...')
 
-      const params = statusFilter !== 'all' ? { status: statusFilter as any } : {}
-      const response = await certificateApi.certificates.getMyCertificates(params)
+  //     const params = statusFilter !== 'all' ? { status: statusFilter as any } : {}
+  //     const response = await certificateApi.certificates.getMyCertificates(params)
       
-      console.log('✅ Certificates loaded:', response.certificates.length)
-      setCertificates(response.certificates)
-    } catch (err: any) {
-      console.error('❌ Error loading certificates:', err)
-      setError(err.response?.data?.message || 'Failed to load certificates. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     console.log('✅ Certificates loaded:', response.certificates.length)
+  //     setCertificates(response.certificates)
+  //   } catch (err: any) {
+  //     console.error('❌ Error loading certificates:', err)
+  //     setError(err.response?.data?.message || 'Failed to load certificates. Please try again.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const loadStats = async () => {
-    try {
-      console.log('📊 Loading certificate statistics...')
-      const statsData = await certificateApi.stats.getStudentStats()
-      console.log('✅ Stats loaded:', statsData)
-      setStats(statsData)
-    } catch (err: any) {
-      console.error('❌ Error loading stats:', err)
-      // Don't set error for stats, just log it
-    }
-  }
+  // const loadStats = async () => {
+  //   try {
+  //     console.log('📊 Loading certificate statistics...')
+  //     const statsData = await certificateApi.stats.getStudentStats()
+  //     console.log('✅ Stats loaded:', statsData)
+  //     setStats(statsData)
+  //   } catch (err: any) {
+  //     console.error('❌ Error loading stats:', err)
+  //     // Don't set error for stats, just log it
+  //   }
+  // }
 
-  // Filter certificates based on search
-  const filteredCertificates = certificates.filter(cert => {
+  // Filter certificates based on search and status
+  const filteredCertificates = sampleStudentCertificates.filter(cert => {
     const matchesSearch = cert.courseTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          cert.instructorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          cert.certificateData.certificateId.toLowerCase().includes(searchQuery.toLowerCase())
     
-    return matchesSearch
+    const matchesStatus = statusFilter === 'all' || cert.status === statusFilter
+    
+    return matchesSearch && matchesStatus
   })
 
   const handlePreviewCertificate = (certificate: StudentCertificate) => {
@@ -167,48 +170,50 @@ const StudentCertificatesPage = () => {
         </div>
 
         {/* Stats */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="group bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-sm border border-blue-200 hover:shadow-lg hover:shadow-blue-200/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide">Total Certificates</p>
-                  <p className="text-3xl font-bold text-blue-900 mt-2">{stats.totalCertificates}</p>
-                  <p className="text-xs text-blue-600 mt-1">All time</p>
-                </div>
-                <div className="p-3 bg-blue-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Award className="w-6 h-6 text-white" />
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="group bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow-sm border border-blue-200 hover:shadow-lg hover:shadow-blue-200/50 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-blue-700 uppercase tracking-wide">Total Certificates</p>
+                <p className="text-3xl font-bold text-blue-900 mt-2">{sampleStudentCertificates.length}</p>
+                <p className="text-xs text-blue-600 mt-1">All time</p>
               </div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl shadow-sm border border-green-200 hover:shadow-lg hover:shadow-green-200/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-green-700 uppercase tracking-wide">Approved</p>
-                  <p className="text-3xl font-bold text-green-900 mt-2">{stats.approvedCertificates}</p>
-                  <p className="text-xs text-green-600 mt-1">Ready to share</p>
-                </div>
-                <div className="p-3 bg-green-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <CheckCircle className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </div>
-
-            <div className="group bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl shadow-sm border border-yellow-200 hover:shadow-lg hover:shadow-yellow-200/50 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-yellow-700 uppercase tracking-wide">Pending</p>
-                  <p className="text-3xl font-bold text-yellow-900 mt-2">{stats.pendingCertificates}</p>
-                  <p className="text-xs text-yellow-600 mt-1">Under review</p>
-                </div>
-                <div className="p-3 bg-yellow-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
+              <div className="p-3 bg-blue-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Award className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
-        )}
+
+          <div className="group bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl shadow-sm border border-green-200 hover:shadow-lg hover:shadow-green-200/50 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-green-700 uppercase tracking-wide">Approved</p>
+                <p className="text-3xl font-bold text-green-900 mt-2">
+                  {sampleStudentCertificates.filter(c => c.status === 'approved').length}
+                </p>
+                <p className="text-xs text-green-600 mt-1">Ready to share</p>
+              </div>
+              <div className="p-3 bg-green-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </div>
+
+          <div className="group bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl shadow-sm border border-yellow-200 hover:shadow-lg hover:shadow-yellow-200/50 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-yellow-700 uppercase tracking-wide">Pending</p>
+                <p className="text-3xl font-bold text-yellow-900 mt-2">
+                  {sampleStudentCertificates.filter(c => c.status === 'pending').length}
+                </p>
+                <p className="text-xs text-yellow-600 mt-1">Under review</p>
+              </div>
+              <div className="p-3 bg-yellow-500 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Filters */}
         <div className="flex items-center justify-between">
@@ -226,36 +231,8 @@ const StudentCertificatesPage = () => {
           </div>
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading certificates...</p>
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="text-red-500 text-6xl mb-4">⚠️</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Certificates</h3>
-              <p className="text-gray-600 mb-4">{error}</p>
-              <button
-                onClick={loadCertificates}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Certificates Grid */}
-        {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCertificates.map((certificate) => (
             <div key={certificate.id} className="group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 hover:-translate-y-1">
               {/* Certificate Preview */}
@@ -300,7 +277,7 @@ const StudentCertificatesPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Completed</p>
-                      <p className="text-sm text-gray-900 font-medium">{certificate.certificateData.completionDate}</p>
+                      <p className="text-sm text-gray-900 font-medium">{certificate.completionDate}</p>
                     </div>
                     {certificate.expiresAt && (
                       <div>
@@ -350,11 +327,10 @@ const StudentCertificatesPage = () => {
               </div>
             </div>
           ))}
-          </div>
-        )}
+        </div>
 
         {/* Empty State */}
-        {!loading && !error && filteredCertificates.length === 0 && (
+        {filteredCertificates.length === 0 && (
           <div className="text-center py-12">
             <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Certificates Found</h3>

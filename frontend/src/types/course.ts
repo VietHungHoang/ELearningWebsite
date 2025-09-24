@@ -46,6 +46,17 @@ export interface Course {
     title?: string
   }
   sections: Section[]
+  finalQuiz?: {
+    id: string
+    title: string
+    description?: string
+    questions: QuizQuestion[]
+    passingScore: number
+    timeLimit?: number
+    isActive: boolean
+    isRequired: boolean
+    maxAttempts?: number
+  }
   duration: string
   level: 'Beginner' | 'Intermediate' | 'Advanced'
   rating: number

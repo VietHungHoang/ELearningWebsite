@@ -8,7 +8,6 @@ export { default as TutorCommunityPage } from './TutorCommunityPage';
 export { default as TutorQuizzesPage } from './TutorQuizzesPage';
 export { default as TutorInboxPage } from './TutorInboxPage';
 export { default as TutorDealsPage } from './TutorDealsPage';
-export { default as TutorCertificatesPage } from './TutorCertificatesPage';
 export { default as TutorPayoutsPage } from './TutorPayoutsPage';
 export { default as TutorInvoicesPage } from './TutorInvoicesPage';
 export { default as TutorDisputesPage } from './TutorDisputesPage';

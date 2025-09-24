@@ -74,6 +74,7 @@ const CourseVideoPlayer: React.FC<CourseVideoPlayerProps> = ({
     }
 
     const handleEnded = () => {
+      console.log('🎯 Video ended, calling onVideoEnd')
       setIsPlaying(false)
       onVideoEnd?.()
     }

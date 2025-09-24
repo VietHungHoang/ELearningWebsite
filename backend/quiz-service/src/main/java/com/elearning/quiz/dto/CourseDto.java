@@ -25,6 +25,7 @@ public class CourseDto {
     private int totalLessons;
     private int completedLessons;
     private List<SectionDto> sections;
+    private QuizDto finalQuiz;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -243,5 +244,13 @@ public class CourseDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public QuizDto getFinalQuiz() {
+        return finalQuiz;
+    }
+
+    public void setFinalQuiz(QuizDto finalQuiz) {
+        this.finalQuiz = finalQuiz;
     }
 }

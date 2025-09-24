@@ -75,12 +75,7 @@ export const useCoursePlayer = () => {
 
   // Helper function to update lesson progress
   const updateLessonProgress = useCallback(async (lessonId: string, isCompleted: boolean) => {
-    console.log('DEBUG: updateLessonProgress ENTRY - lessonId:', lessonId, 'isCompleted:', isCompleted, 'courseData exists:', !!courseData)
-    if (!courseData) {
-      console.log('DEBUG: updateLessonProgress EXIT - no courseData')
-      return
-    }
-    console.log('DEBUG: updateLessonProgress called for lesson:', lessonId, 'completed:', isCompleted)
+    if (!courseData) return
 
     try {
       // Call API to update lesson progress in database
@@ -142,7 +137,11 @@ export const useCoursePlayer = () => {
         progress: {
           ...section.progress,
           completed: sectionCompleted,
-          total: sectionTotal
+          total: sectionTotal,
+          duration: `${section.lessons.reduce((total, lesson) => {
+            const duration = parseInt(lesson.duration.replace(/\D/g, '')) || 0
+            return total + duration
+          }, 0)} min`
         }
       }
     })
@@ -153,14 +152,9 @@ export const useCoursePlayer = () => {
       progress: courseProgress
     }
 
-    console.log('DEBUG: Setting updated course data:', updatedCourseData.progress, 'sections:', updatedSectionsWithProgress.length)
-    console.log('DEBUG: Course progress before:', courseData?.progress, 'after:', courseProgress)
-    
     // Force re-render by creating a completely new object
-    setCourseData(prevData => {
-      console.log('DEBUG: setCourseData callback called, prevData progress:', prevData?.progress)
+    setCourseData(() => {
       const newData = { ...updatedCourseData }
-      console.log('DEBUG: newData progress:', newData.progress)
       return newData
     })
     
@@ -172,10 +166,75 @@ export const useCoursePlayer = () => {
       
       console.log('DEBUG: Updating currentLesson:', updatedCurrentLesson?.title, 'completed:', updatedCurrentLesson?.isCompleted)
       if (updatedCurrentLesson) {
-        setCurrentLesson(prevLesson => ({ ...updatedCurrentLesson }))
+        setCurrentLesson(() => ({ ...updatedCurrentLesson }))
       }
     }
   }, [courseData, currentLesson])
+
+  // Helper function to handle quiz completion and unlock next section
+  const handleQuizCompletion = useCallback((sectionId: string) => {
+    if (!courseData) return
+
+    console.log('🎯 Handling quiz completion for section:', sectionId)
+
+    // Update sections to mark quiz as completed and unlock next section
+    const updatedSections = courseData.sections.map((section, index) => {
+      const currentSectionIndex = courseData.sections.findIndex(s => s.id === sectionId)
+      
+      if (section.id === sectionId) {
+        // Mark quiz as completed AND mark all lessons in this section as completed
+        const updatedLessons = section.lessons.map(lesson => ({
+          ...lesson,
+          isCompleted: true // Mark all lessons in this section as completed
+        }))
+        
+        return { 
+          ...section, 
+          quizCompleted: true,
+          lessons: updatedLessons,
+          progress: {
+            completed: updatedLessons.length,
+            total: updatedLessons.length
+          }
+        }
+      }
+      
+      // Unlock the next section if this quiz is completed
+      if (index === currentSectionIndex + 1) {
+        console.log('🎯 🔓 Unlocking next section:', section.id)
+        return { ...section, isUnlocked: true }
+      }
+      
+      return section
+    })
+
+    // Calculate overall course progress
+    const totalLessons = updatedSections.reduce((sum, section) => sum + section.lessons.length, 0)
+    const completedLessons = updatedSections.reduce((sum, section) => 
+      sum + section.lessons.filter(lesson => lesson.isCompleted).length, 0
+    )
+    const courseProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+
+    // Update course data with proper typing
+    const updatedCourseData: CourseDto = {
+      ...courseData,
+      sections: updatedSections.map(section => ({
+        ...section,
+        progress: {
+          completed: section.lessons.filter(lesson => lesson.isCompleted).length,
+          total: section.lessons.length,
+          duration: `${section.lessons.reduce((total, lesson) => {
+            const duration = parseInt(lesson.duration.replace(/\D/g, '')) || 0
+            return total + duration
+          }, 0)} min`
+        }
+      })),
+      progress: courseProgress
+    }
+
+    console.log('🎯 Updated course progress:', courseProgress, 'completed:', completedLessons, 'total:', totalLessons)
+    setCourseData(updatedCourseData)
+  }, [courseData])
 
   // Load course data
   const loadCourse = useCallback(async (slug: string) => {
@@ -286,6 +345,7 @@ export const useCoursePlayer = () => {
     setCourseData,
     setCurrentLesson,
     updateLessonProgress,
+    handleQuizCompletion,
     findCurrentLesson,
     findNextLesson
   }

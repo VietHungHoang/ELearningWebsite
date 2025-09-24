@@ -152,6 +152,8 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
     if (quizState.isSubmitted) return
 
     const result = calculateScore()
+    console.log('🎯 Quiz submitted, result:', result)
+    console.log('🎯 Quiz passed:', result.attempt.passed)
     
     setQuizState(prev => ({
       ...prev,
@@ -160,10 +162,8 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
       result
     }))
 
-    // Call onComplete after a short delay to show the result
-    setTimeout(() => {
-      onComplete(result)
-    }, 2000)
+    // Don't auto-call onComplete, wait for user to click Continue button
+    console.log('🎯 Quiz submitted, waiting for user to click Continue')
   }
 
   const handleNextQuestion = () => {
@@ -302,7 +302,10 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
           
           {attempt.passed && (
             <button
-              onClick={() => onComplete(quizState.result!)}
+              onClick={() => {
+                console.log('🎯 Continue button clicked - calling onComplete')
+                onComplete(quizState.result!)
+              }}
               className="flex-1 flex items-center justify-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
             >
               <ArrowRight className="w-4 h-4" />

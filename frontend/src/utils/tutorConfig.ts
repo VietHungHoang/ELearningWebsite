@@ -88,13 +88,6 @@ export const tutorMainSidebarItems = [
     path: '/tutor/deals',
     isActive: false
   },
-  {
-    id: 'certificates',
-    label: 'Certificates',
-    icon: Award,
-    path: '/tutor/certificates',
-    isActive: false
-  }
 ];
 
 // Additional sidebar items for tutor (scrollable)

@@ -66,6 +66,17 @@ export interface CourseDto {
   totalLessons: number
   completedLessons: number
   sections: SectionDto[]
+  finalQuiz?: {
+    id: string
+    title: string
+    description?: string
+    questions: any[]
+    passingScore: number
+    timeLimit?: number
+    isActive: boolean
+    isRequired: boolean
+    maxAttempts?: number
+  }
   createdAt?: string
   updatedAt?: string
 }
@@ -103,6 +114,12 @@ export const courseApi = {
     try {
       const response = await api.get(`/courses/slug/${slug}`)
       console.log('✅ API: Course received:', response.data)
+      console.log('🎯 Final Quiz Debug:', {
+        hasFinalQuiz: !!response.data.finalQuiz,
+        finalQuizTitle: response.data.finalQuiz?.title,
+        finalQuizQuestions: response.data.finalQuiz?.questions?.length,
+        finalQuizPassingScore: response.data.finalQuiz?.passingScore
+      })
       return response.data
     } catch (error) {
       console.error('❌ API: Error fetching course by slug:', error)

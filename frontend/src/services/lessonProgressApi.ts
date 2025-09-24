@@ -20,7 +20,7 @@ export const lessonProgressApi = {
   updateLessonProgress: async (lessonId: string, data: LessonProgressRequest): Promise<LessonProgressResponse> => {
     try {
       console.log('DEBUG: lessonProgressApi - Updating lesson:', lessonId, 'with data:', data)
-      const response = await api.put(`/lessons/${lessonId}/progress`, data)
+      const response = await api.put(`/courses/lessons/${lessonId}/progress`, data)
       console.log('DEBUG: lessonProgressApi - Response:', response.data)
       return response.data
     } catch (error) {

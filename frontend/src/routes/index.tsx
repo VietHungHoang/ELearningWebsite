@@ -34,7 +34,6 @@ import {
   TutorQuizzesPage,
   TutorInboxPage,
   TutorDealsPage,
-  TutorCertificatesPage,
   TutorPayoutsPage,
   TutorInvoicesPage,
   TutorDisputesPage
@@ -126,7 +125,6 @@ const AppRoutes = () => {
         <Route path="quizzes" element={<TutorQuizzesPage />} />
         <Route path="inbox" element={<TutorInboxPage />} />
         <Route path="deals" element={<TutorDealsPage />} />
-        <Route path="certificates" element={<TutorCertificatesPage />} />
         <Route path="payouts" element={<TutorPayoutsPage />} />
         <Route path="invoices" element={<TutorInvoicesPage />} />
         <Route path="disputes" element={<TutorDisputesPage />} />

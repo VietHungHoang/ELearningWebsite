@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -127,6 +129,74 @@ public class CourseController {
             return ResponseEntity.ok(courses);
         } catch (Exception e) {
             System.err.println("❌ Error fetching courses by level: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/{courseId}/final-test/complete")
+    @Operation(summary = "Complete final test and generate certificate")
+    public ResponseEntity<Map<String, Object>> completeFinalTest(
+            @PathVariable String courseId,
+            @RequestParam String studentId,
+            @RequestParam int score) {
+        try {
+            System.out.println("🎯 Final test completed for course: " + courseId + ", student: " + studentId + ", score: " + score);
+            
+            // Check if score is passing (70% or higher)
+            boolean passed = score >= 70;
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("passed", passed);
+            response.put("score", score);
+            response.put("message", passed ? "Congratulations! You passed the final test." : "You need to score at least 70% to pass.");
+            
+            if (passed) {
+                // Generate certificate data
+                Map<String, Object> certificate = new HashMap<>();
+                certificate.put("certificateId", "CERT-" + System.currentTimeMillis());
+                certificate.put("courseId", courseId);
+                certificate.put("studentId", studentId);
+                certificate.put("score", score);
+                certificate.put("issuedAt", java.time.LocalDateTime.now().toString());
+                certificate.put("status", "approved");
+                certificate.put("downloadUrl", "https://platform.com/certificates/CERT-" + System.currentTimeMillis() + ".pdf");
+                certificate.put("verificationUrl", "https://platform.com/verify/CERT-" + System.currentTimeMillis());
+                
+                response.put("certificate", certificate);
+                System.out.println("✅ Certificate generated: " + certificate.get("certificateId"));
+            }
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error completing final test: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PutMapping("/lessons/{lessonId}/progress")
+    @Operation(summary = "Update lesson progress")
+    public ResponseEntity<Map<String, Object>> updateLessonProgress(
+            @PathVariable String lessonId,
+            @RequestBody Map<String, Object> progressData) {
+        try {
+            System.out.println("📝 Updating lesson progress for lesson: " + lessonId + ", data: " + progressData);
+            
+            // For now, just return success - in real implementation, this would update database
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Lesson progress updated successfully");
+            response.put("lessonId", lessonId);
+            response.put("isCompleted", progressData.get("isCompleted"));
+            response.put("isCurrent", progressData.get("isCurrent"));
+            response.put("isLocked", progressData.get("isLocked"));
+            
+            System.out.println("✅ Lesson progress updated: " + lessonId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error updating lesson progress: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

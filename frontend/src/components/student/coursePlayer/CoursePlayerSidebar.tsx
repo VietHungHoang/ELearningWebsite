@@ -40,9 +40,12 @@ interface CourseSection {
 interface CoursePlayerSidebarProps {
   courseTitle: string
   sections: CourseSection[]
+  finalQuiz?: Quiz
+  finalQuizCompleted?: boolean
   onBackToCourses: () => void
   onLessonSelect: (lessonId: string, sectionId: string) => void
   onQuizSelect: (quizId: string, sectionId: string) => void
+  onFinalQuizSelect: () => void
   onToggleSection: (sectionId: string) => void
   isCollapsed?: boolean
   onToggleCollapse?: () => void
@@ -51,9 +54,12 @@ interface CoursePlayerSidebarProps {
 const CoursePlayerSidebar: React.FC<CoursePlayerSidebarProps> = ({
   courseTitle,
   sections,
+  finalQuiz,
+  finalQuizCompleted = false,
   onBackToCourses,
   onLessonSelect,
   onQuizSelect,
+  onFinalQuizSelect,
   onToggleSection,
   isCollapsed = false,
   onToggleCollapse
@@ -256,6 +262,64 @@ const CoursePlayerSidebar: React.FC<CoursePlayerSidebarProps> = ({
             )}
           </div>
         ))}
+        
+        {/* Final Quiz Section */}
+        {finalQuiz && (
+          <div className="mt-6 pt-6 border-t border-gray-700">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+              <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                Final Test
+              </h3>
+            </div>
+            
+            {/* Check if all sections are completed */}
+            {(() => {
+              const allSectionsCompleted = sections.every(section => 
+                section.lessons.every(lesson => lesson.isCompleted)
+              )
+              const isFinalQuizLocked = !allSectionsCompleted && !finalQuizCompleted
+              
+              return (
+                <button
+                  onClick={onFinalQuizSelect}
+                  disabled={isFinalQuizLocked}
+                  className={`w-full flex items-center space-x-3 p-4 rounded-lg text-left transition-all duration-200 ${
+                    isFinalQuizLocked
+                      ? 'bg-gray-600/10 text-gray-500 cursor-not-allowed border border-gray-600/20'
+                      : finalQuizCompleted
+                      ? 'bg-green-600/10 text-green-400 hover:bg-green-600/20 border border-green-600/20'
+                      : 'bg-gradient-to-r from-yellow-600/10 to-orange-600/10 text-yellow-400 hover:from-yellow-600/20 hover:to-orange-600/20 border border-yellow-600/20'
+                  }`}
+                >
+                  <div className="flex-shrink-0">
+                    <Brain className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{finalQuiz.title}</div>
+                    <div className="text-xs opacity-80 mt-1">
+                      {isFinalQuizLocked 
+                        ? 'Hoàn thành tất cả sections trước' 
+                        : finalQuizCompleted
+                        ? 'Đã hoàn thành - Certificate đã được tạo'
+                        : `${finalQuiz.questions.length} questions • ${finalQuiz.timeLimit || 15} min`
+                      }
+                    </div>
+                    {finalQuizCompleted && (
+                      <div className="flex items-center space-x-1 mt-2">
+                        <CheckCircle className="w-3 h-3 text-green-400" />
+                        <span className="text-xs text-green-400">Certificate Ready</span>
+                      </div>
+                    )}
+                  </div>
+                  {!isFinalQuizLocked && !finalQuizCompleted && (
+                    <ChevronRight className="w-4 h-4 text-yellow-400" />
+                  )}
+                </button>
+              )
+            })()}
+          </div>
+        )}
       </div>
     </div>
   )

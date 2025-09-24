@@ -14,40 +14,28 @@ export const useLessonCompletion = (
 
   const handleLessonCompletion = useCallback(async () => {
     if (!currentLesson || !courseData) return
-    console.log('DEBUG: handleLessonCompletion called for lesson:', currentLesson.title, 'ID:', currentLesson.id)
+    console.log('🎯 Completing lesson:', currentLesson.title)
 
     // Mark current lesson as completed
-    console.log('DEBUG: About to call updateLessonProgress for lesson:', currentLesson.id)
-    console.log('DEBUG: Current lesson details:', {
-      id: currentLesson.id,
-      title: currentLesson.title,
-      sectionId: currentLesson.sectionId,
-      courseId: currentLesson.courseId
-    })
     try {
       await updateLessonProgress(currentLesson.id, true)
-      console.log('DEBUG: updateLessonProgress completed for lesson:', currentLesson.id)
+      console.log('🎯 ✅ Lesson completed:', currentLesson.title)
     } catch (error) {
-      console.error('DEBUG: Error in updateLessonProgress:', error)
+      console.error('🎯 ❌ Error completing lesson:', error)
     }
-    console.log('Marked lesson as completed:', currentLesson.title)
 
     // Find next lesson
     const next = findNextLesson(courseData, currentLesson.id)
-    console.log('Next lesson found:', next?.title)
     if (next) {
+      console.log('🎯 Next lesson:', next.title)
       setNextLesson(next)
       setShowNextLessonModal(true)
     }
   }, [currentLesson, courseData, updateLessonProgress, findNextLesson])
 
   const handleVideoEnd = useCallback(async () => {
-    console.log('DEBUG: handleVideoEnd called for lesson:', currentLesson?.title, 'ID:', currentLesson?.id)
-    console.log('DEBUG: courseData exists:', !!courseData)
-    if (!currentLesson || !courseData) {
-      console.log('DEBUG: Missing currentLesson or courseData, cannot complete lesson')
-      return
-    }
+    console.log('🎯 Video ended:', currentLesson?.title)
+    if (!currentLesson || !courseData) return
 
     // Complete the lesson
     await handleLessonCompletion()

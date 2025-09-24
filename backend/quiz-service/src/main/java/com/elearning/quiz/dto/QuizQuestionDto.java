@@ -21,6 +21,9 @@ public class QuizQuestionDto {
     @Min(value = 1, message = "Order index must be at least 1")
     private Integer order;
     
+    private String questionType;
+    private Boolean isRequired;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
@@ -91,6 +94,30 @@ public class QuizQuestionDto {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public String getQuestionType() {
+        return questionType;
+    }
+    
+    public void setQuestionType(String questionType) {
+        this.questionType = questionType;
+    }
+    
+    public Boolean getIsRequired() {
+        return isRequired;
+    }
+    
+    public void setIsRequired(Boolean isRequired) {
+        this.isRequired = isRequired;
+    }
+    
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = LocalDateTime.parse(createdAt);
+    }
+    
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = LocalDateTime.parse(updatedAt);
     }
     
     public List<QuizQuestionOptionDto> getOptions() {

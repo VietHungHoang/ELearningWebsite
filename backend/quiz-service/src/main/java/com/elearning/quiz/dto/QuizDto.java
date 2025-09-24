@@ -31,6 +31,8 @@ public class QuizDto {
     private Integer timeLimit;
     
     private Boolean isActive = true;
+    private Boolean isRequired = false;
+    private Integer maxAttempts = 3;
     
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -134,6 +136,30 @@ public class QuizDto {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = LocalDateTime.parse(createdAt);
+    }
+    
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = LocalDateTime.parse(updatedAt);
+    }
+    
+    public Boolean getIsRequired() {
+        return isRequired;
+    }
+    
+    public void setIsRequired(Boolean isRequired) {
+        this.isRequired = isRequired;
+    }
+    
+    public Integer getMaxAttempts() {
+        return maxAttempts;
+    }
+    
+    public void setMaxAttempts(Integer maxAttempts) {
+        this.maxAttempts = maxAttempts;
     }
     
     public List<QuizQuestionDto> getQuestions() {

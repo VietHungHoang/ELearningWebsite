@@ -1,143 +1,19 @@
-# Certificate System API Documentation
+# Certificate API Documentation
 
 ## Overview
-This document outlines the API endpoints required for the Certificate System in the e-learning platform. The system allows tutors to create certificate templates and manage student certificates, while students can view and download their earned certificates.
+Certificate system cho phép tự động tạo certificates khi student hoàn thành khóa học và vượt qua final test. Certificates được lưu trữ và quản lý trong My Certificates section của student.
 
-## Base URL
+## API Endpoints
+
+### 1. Student Certificates
+
+#### Get My Certificates
+```http
+GET /api/certificates/my-certificates
 ```
-http://localhost:8081/api
-```
-
-## Authentication
-All endpoints require authentication. Include the authorization header:
-```
-Authorization: Bearer <token>
-```
-
----
-
-## Certificate Templates API
-
-### 1. Get All Certificate Templates
-**GET** `/certificates/templates`
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "template-1",
-      "title": "Default Certificate Template",
-      "description": "A clean and professional certificate template",
-      "templateData": {
-        "backgroundColor": "#ffffff",
-        "textColor": "#1f2937",
-        "logoUrl": "https://example.com/logo.png",
-        "signatureUrl": "https://example.com/signature.png",
-        "borderColor": "#3b82f6",
-        "fontFamily": "Inter",
-        "fontSize": 16
-      },
-      "isActive": true,
-      "createdAt": "2024-01-01T00:00:00Z",
-      "updatedAt": "2024-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
-### 2. Get Certificate Template by ID
-**GET** `/certificates/templates/{id}`
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "template-1",
-    "title": "Default Certificate Template",
-    "description": "A clean and professional certificate template",
-    "templateData": {
-      "backgroundColor": "#ffffff",
-      "textColor": "#1f2937",
-      "logoUrl": "https://example.com/logo.png",
-      "signatureUrl": "https://example.com/signature.png",
-      "borderColor": "#3b82f6",
-      "fontFamily": "Inter",
-      "fontSize": 16
-    },
-    "isActive": true,
-    "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T00:00:00Z"
-  }
-}
-```
-
-### 3. Create Certificate Template
-**POST** `/certificates/templates`
-
-**Request Body:**
-```json
-{
-  "title": "New Template",
-  "description": "Template description",
-  "templateData": {
-    "backgroundColor": "#ffffff",
-    "textColor": "#1f2937",
-    "logoUrl": "https://example.com/logo.png",
-    "signatureUrl": "https://example.com/signature.png",
-    "borderColor": "#3b82f6",
-    "fontFamily": "Inter",
-    "fontSize": 16
-  },
-  "isActive": true
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "template-2",
-    "title": "New Template",
-    "description": "Template description",
-    "templateData": { ... },
-    "isActive": true,
-    "createdAt": "2024-01-02T00:00:00Z",
-    "updatedAt": "2024-01-02T00:00:00Z"
-  }
-}
-```
-
-### 4. Update Certificate Template
-**PUT** `/certificates/templates/{id}`
-
-**Request Body:** Same as create
-
-**Response:** Same as create
-
-### 5. Delete Certificate Template
-**DELETE** `/certificates/templates/{id}`
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Template deleted successfully"
-}
-```
-
----
-
-## Student Certificates API
-
-### 1. Get All Student Certificates (Tutor)
-**GET** `/certificates/students`
 
 **Query Parameters:**
-- `status` (optional): Filter by status (pending, approved, rejected)
+- `status` (optional): Filter by status (`pending`, `approved`, `rejected`)
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Items per page (default: 10)
 
@@ -148,374 +24,276 @@ Authorization: Bearer <token>
   "data": {
     "certificates": [
       {
-        "id": "cert-1",
-        "studentId": "student-1",
-        "studentName": "John Doe",
-        "studentEmail": "john.doe@example.com",
-        "courseId": "course-1",
-        "courseTitle": "Goal Setting Masterclass",
-        "instructorName": "Sarah Johnson",
-        "templateId": "template-1",
-        "certificateData": {
-          "studentName": "John Doe",
-          "courseTitle": "Goal Setting Masterclass",
-          "instructorName": "Sarah Johnson",
-          "completionDate": "2024-01-15",
-          "certificateId": "CERT-2024-001",
-          "qrCode": "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://elearning.com/verify/cert-1"
-        },
+        "id": "cert_123",
+        "studentId": "student_456",
+        "courseId": "course_789",
+        "courseTitle": "Advanced React Development",
+        "instructorName": "Dr. Sarah Johnson",
+        "studentName": "John Smith",
+        "studentEmail": "john@example.com",
         "status": "approved",
+        "score": 85,
         "issuedAt": "2024-01-15T10:30:00Z",
-        "expiresAt": "2025-01-15T10:30:00Z",
-        "downloadUrl": "https://elearning.com/certificates/cert-1.pdf",
-        "verificationUrl": "https://elearning.com/verify/cert-1"
+        "certificateData": {
+          "certificateId": "CERT-20240115-001",
+          "templateId": "template_001",
+          "verificationUrl": "https://platform.com/verify/CERT-20240115-001",
+          "downloadUrl": "https://platform.com/certificates/CERT-20240115-001.pdf"
+        }
       }
     ],
     "pagination": {
-      "page": 1,
-      "limit": 10,
-      "total": 100,
-      "totalPages": 10
+      "currentPage": 1,
+      "totalPages": 3,
+      "totalItems": 25,
+      "itemsPerPage": 10
     }
   }
 }
 ```
 
-### 2. Get Student Certificates (Student)
-**GET** `/certificates/my-certificates`
-
-**Query Parameters:**
-- `status` (optional): Filter by status
-- `page` (optional): Page number
-- `limit` (optional): Items per page
-
-**Response:** Same as above
-
-### 3. Get Certificate by ID
-**GET** `/certificates/{id}`
+#### Get Certificate Statistics
+```http
+GET /api/certificates/my-certificates/stats
+```
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "id": "cert-1",
-    "studentId": "student-1",
-    "studentName": "John Doe",
-    "studentEmail": "john.doe@example.com",
-    "courseId": "course-1",
-    "courseTitle": "Goal Setting Masterclass",
-    "instructorName": "Sarah Johnson",
-    "templateId": "template-1",
-    "certificateData": { ... },
-    "status": "approved",
+    "totalCertificates": 25,
+    "approvedCertificates": 20,
+    "pendingCertificates": 3,
+    "rejectedCertificates": 2,
+    "averageScore": 82.5,
+    "completionRate": 80.0
+  }
+}
+```
+
+#### Download Certificate
+```http
+GET /api/certificates/{certificateId}/download
+```
+
+**Response:** PDF file download
+
+#### Share Certificate
+```http
+POST /api/certificates/{certificateId}/share
+```
+
+**Request Body:**
+```json
+{
+  "platform": "linkedin", // "linkedin", "twitter", "facebook", "email"
+  "message": "I just completed the Advanced React Development course!"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "shareUrl": "https://linkedin.com/share?url=https://platform.com/verify/CERT-20240115-001",
+    "message": "Certificate shared successfully"
+  }
+}
+```
+
+### 2. Certificate Generation (Internal)
+
+#### Generate Certificate
+```http
+POST /api/certificates/generate
+```
+
+**Request Body:**
+```json
+{
+  "studentId": "student_456",
+  "courseId": "course_789",
+  "finalTestScore": 85,
+  "templateId": "template_001"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "certificateId": "cert_123",
+    "certificateUrl": "https://platform.com/certificates/CERT-20240115-001.pdf",
+    "verificationUrl": "https://platform.com/verify/CERT-20240115-001",
+    "status": "approved"
+  }
+}
+```
+
+### 3. Certificate Verification (Public)
+
+#### Verify Certificate
+```http
+GET /api/certificates/verify/{certificateId}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "certificateId": "CERT-20240115-001",
+    "studentName": "John Smith",
+    "courseTitle": "Advanced React Development",
+    "instructorName": "Dr. Sarah Johnson",
     "issuedAt": "2024-01-15T10:30:00Z",
-    "expiresAt": "2025-01-15T10:30:00Z",
-    "downloadUrl": "https://elearning.com/certificates/cert-1.pdf",
-    "verificationUrl": "https://elearning.com/verify/cert-1"
-  }
-}
-```
-
-### 4. Approve Certificate
-**PUT** `/certificates/{id}/approve`
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Certificate approved successfully",
-  "data": {
-    "id": "cert-1",
+    "score": 85,
     "status": "approved",
-    "updatedAt": "2024-01-15T10:30:00Z"
+    "verificationDate": "2024-01-20T14:22:00Z"
   }
 }
 ```
 
-### 5. Reject Certificate
-**PUT** `/certificates/{id}/reject`
+## Data Models
 
-**Request Body:**
-```json
-{
-  "reason": "Reason for rejection"
+### Certificate
+```typescript
+interface Certificate {
+  id: string;
+  studentId: string;
+  courseId: string;
+  courseTitle: string;
+  instructorName: string;
+  studentName: string;
+  studentEmail: string;
+  status: 'pending' | 'approved' | 'rejected';
+  score: number;
+  issuedAt: string;
+  certificateData: {
+    certificateId: string;
+    templateId: string;
+    verificationUrl: string;
+    downloadUrl: string;
+  };
 }
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Certificate rejected successfully",
-  "data": {
-    "id": "cert-1",
-    "status": "rejected",
-    "rejectionReason": "Reason for rejection",
-    "updatedAt": "2024-01-15T10:30:00Z"
-  }
+### Certificate Stats
+```typescript
+interface CertificateStats {
+  totalCertificates: number;
+  approvedCertificates: number;
+  pendingCertificates: number;
+  rejectedCertificates: number;
+  averageScore: number;
+  completionRate: number;
 }
 ```
 
-### 6. Generate Certificate
-**POST** `/certificates/generate`
+## Workflow
 
-**Request Body:**
-```json
-{
-  "studentId": "student-1",
-  "courseId": "course-1",
-  "templateId": "template-1",
-  "completionDate": "2024-01-15"
-}
-```
+### 1. Course Completion Flow
+1. Student hoàn thành tất cả lessons trong khóa học
+2. Final test xuất hiện trong Course Player
+3. Student làm final test và đạt điểm ≥ 70%
+4. System tự động gọi API `POST /api/certificates/generate`
+5. Certificate được tạo với status `approved`
+6. Certificate hiển thị trong My Certificates
 
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Certificate generated successfully",
-  "data": {
-    "id": "cert-1",
-    "status": "pending",
-    "downloadUrl": "https://elearning.com/certificates/cert-1.pdf",
-    "verificationUrl": "https://elearning.com/verify/cert-1"
-  }
-}
-```
+### 2. Certificate Management Flow
+1. Student truy cập My Certificates page
+2. System gọi API `GET /api/certificates/my-certificates`
+3. Student có thể:
+   - Xem danh sách certificates
+   - Download PDF
+   - Share lên social media
+   - Verify certificate
 
----
+## Error Handling
 
-## Certificate Statistics API
-
-### 1. Get Certificate Statistics (Tutor)
-**GET** `/certificates/statistics`
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "totalCertificates": 156,
-    "pendingCertificates": 12,
-    "approvedCertificates": 134,
-    "rejectedCertificates": 10,
-    "thisMonthCertificates": 28,
-    "lastMonthCertificates": 32,
-    "monthlyGrowth": -12.5
-  }
-}
-```
-
-### 2. Get Student Certificate Statistics
-**GET** `/certificates/my-statistics`
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "totalCertificates": 5,
-    "approvedCertificates": 4,
-    "pendingCertificates": 1,
-    "rejectedCertificates": 0,
-    "thisMonthCertificates": 2,
-    "lastMonthCertificates": 1
-  }
-}
-```
-
----
-
-## Certificate Verification API
-
-### 1. Verify Certificate
-**GET** `/certificates/verify/{certificateId}`
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "isValid": true,
-    "certificate": {
-      "id": "cert-1",
-      "studentName": "John Doe",
-      "courseTitle": "Goal Setting Masterclass",
-      "instructorName": "Sarah Johnson",
-      "issuedAt": "2024-01-15T10:30:00Z",
-      "expiresAt": "2025-01-15T10:30:00Z",
-      "status": "approved"
-    }
-  }
-}
-```
-
----
-
-## File Upload API
-
-### 1. Upload Certificate Logo
-**POST** `/certificates/upload/logo`
-
-**Request:** Multipart form data with `logo` file
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "url": "https://elearning.com/uploads/logos/logo-123.png"
-  }
-}
-```
-
-### 2. Upload Certificate Signature
-**POST** `/certificates/upload/signature`
-
-**Request:** Multipart form data with `signature` file
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "url": "https://elearning.com/uploads/signatures/signature-123.png"
-  }
-}
-```
-
----
-
-## Error Responses
-
-All endpoints return errors in the following format:
-
+### Common Error Responses
 ```json
 {
   "success": false,
   "error": {
     "code": "CERTIFICATE_NOT_FOUND",
     "message": "Certificate not found",
-    "details": "The requested certificate does not exist"
+    "details": "The requested certificate does not exist or has been deleted"
   }
 }
 ```
 
-### Common Error Codes:
-- `CERTIFICATE_NOT_FOUND`: Certificate not found
-- `TEMPLATE_NOT_FOUND`: Template not found
-- `UNAUTHORIZED`: User not authorized
-- `FORBIDDEN`: Access denied
-- `VALIDATION_ERROR`: Request validation failed
-- `FILE_UPLOAD_ERROR`: File upload failed
-- `CERTIFICATE_ALREADY_EXISTS`: Certificate already exists for this student/course
+### Error Codes
+- `CERTIFICATE_NOT_FOUND`: Certificate không tồn tại
+- `INSUFFICIENT_SCORE`: Điểm số không đủ để tạo certificate
+- `COURSE_NOT_COMPLETED`: Khóa học chưa hoàn thành
+- `TEMPLATE_NOT_FOUND`: Template không tồn tại
+- `GENERATION_FAILED`: Lỗi khi tạo certificate
+- `DOWNLOAD_FAILED`: Lỗi khi download certificate
+- `SHARE_FAILED`: Lỗi khi share certificate
 
----
+## Security Considerations
 
-## Database Schema
+1. **Authentication**: Tất cả API calls cần JWT token
+2. **Authorization**: Student chỉ có thể truy cập certificates của mình
+3. **Rate Limiting**: Giới hạn số lượng requests per minute
+4. **File Security**: PDF files được lưu trữ an toàn với signed URLs
+5. **Verification**: Public verification endpoint không cần authentication
 
-### Certificate Templates Table
-```sql
-CREATE TABLE certificate_templates (
-    id VARCHAR(36) PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    template_data JSON NOT NULL,
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
+## Performance Optimization
 
-### Student Certificates Table
-```sql
-CREATE TABLE student_certificates (
-    id VARCHAR(36) PRIMARY KEY,
-    student_id VARCHAR(36) NOT NULL,
-    course_id VARCHAR(36) NOT NULL,
-    template_id VARCHAR(36) NOT NULL,
-    certificate_data JSON NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-    issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NULL,
-    download_url VARCHAR(500),
-    verification_url VARCHAR(500),
-    rejection_reason TEXT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (template_id) REFERENCES certificate_templates(id),
-    INDEX idx_student_id (student_id),
-    INDEX idx_course_id (course_id),
-    INDEX idx_status (status)
-);
-```
+1. **Caching**: Certificate data được cache trong Redis
+2. **CDN**: PDF files được serve qua CDN
+3. **Pagination**: Large datasets được paginate
+4. **Lazy Loading**: Certificate images được load khi cần
+5. **Compression**: API responses được compress
 
----
+## Testing
 
-## Implementation Notes
+### Test Scenarios
+1. **Certificate Generation**: Test tạo certificate sau khi pass final test
+2. **Certificate Listing**: Test hiển thị danh sách certificates
+3. **Certificate Download**: Test download PDF
+4. **Certificate Sharing**: Test share lên social media
+5. **Certificate Verification**: Test public verification
+6. **Error Handling**: Test các error cases
 
-1. **File Storage**: Use cloud storage (AWS S3, Google Cloud Storage) for logo and signature files
-2. **PDF Generation**: Use libraries like Puppeteer or jsPDF for certificate PDF generation
-3. **QR Code**: Generate QR codes for certificate verification
-4. **Security**: Implement proper authentication and authorization
-5. **Validation**: Validate all input data before processing
-6. **Rate Limiting**: Implement rate limiting for file uploads
-7. **Caching**: Cache frequently accessed data like templates
-8. **Logging**: Log all certificate operations for audit purposes
-
----
-
-## Frontend Integration
-
-The frontend expects the following data structures:
-
-### Certificate Template Interface
-```typescript
-interface CertificateTemplate {
-  id: string;
-  title: string;
-  description: string;
-  templateData: {
-    backgroundColor: string;
-    textColor: string;
-    logoUrl: string;
-    signatureUrl: string;
-    borderColor: string;
-    fontFamily: string;
-    fontSize: number;
-  };
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+### Mock Data
+```json
+{
+  "certificates": [
+    {
+      "id": "cert_001",
+      "studentId": "student_001",
+      "courseId": "course_001",
+      "courseTitle": "React Fundamentals",
+      "instructorName": "Dr. Sarah Johnson",
+      "studentName": "John Smith",
+      "studentEmail": "john@example.com",
+      "status": "approved",
+      "score": 85,
+      "issuedAt": "2024-01-15T10:30:00Z",
+      "certificateData": {
+        "certificateId": "CERT-20240115-001",
+        "templateId": "template_001",
+        "verificationUrl": "https://platform.com/verify/CERT-20240115-001",
+        "downloadUrl": "https://platform.com/certificates/CERT-20240115-001.pdf"
+      }
+    }
+  ]
 }
 ```
 
-### Student Certificate Interface
-```typescript
-interface StudentCertificate {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentEmail: string;
-  courseId: string;
-  courseTitle: string;
-  instructorName: string;
-  templateId: string;
-  certificateData: {
-    studentName: string;
-    courseTitle: string;
-    instructorName: string;
-    completionDate: string;
-    certificateId: string;
-    qrCode: string;
-  };
-  status: 'pending' | 'approved' | 'rejected';
-  issuedAt: string;
-  expiresAt?: string;
-  downloadUrl: string;
-  verificationUrl: string;
-}
-```
+## Future Enhancements
 
-This documentation provides a complete guide for implementing the Certificate System backend APIs.
+1. **Certificate Templates**: Cho phép tutor tạo custom templates
+2. **Digital Badges**: Tích hợp với Open Badges standard
+3. **Blockchain Verification**: Sử dụng blockchain để verify certificates
+4. **AI-Generated Certificates**: Tự động tạo certificates với AI
+5. **Multi-language Support**: Hỗ trợ nhiều ngôn ngữ cho certificates
+6. **Analytics**: Thống kê chi tiết về certificate completion rates
+7. **Integration**: Tích hợp với LinkedIn, GitHub, và các platform khác
+8. **Mobile App**: Native mobile app để quản lý certificates
