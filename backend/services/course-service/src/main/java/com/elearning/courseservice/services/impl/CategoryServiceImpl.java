@@ -1,11 +1,11 @@
-package com.elearning.courseservice.service.impl;
+package com.elearning.courseservice.services.impl;
 
 import com.elearning.courseservice.dto.response.CategoryResponse;
 import com.elearning.courseservice.exception.CategoryNotFoundException;
 import com.elearning.courseservice.mapper.CategoryMapper;
 import com.elearning.courseservice.model.Category;
 import com.elearning.courseservice.repository.CategoryRepository;
-import com.elearning.courseservice.service.CategoryService;
+import com.elearning.courseservice.services.CategoryService;
 
 import lombok.RequiredArgsConstructor;
 

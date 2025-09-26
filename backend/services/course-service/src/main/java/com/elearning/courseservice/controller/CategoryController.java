@@ -2,7 +2,8 @@ package com.elearning.courseservice.controller;
 
 import com.elearning.courseservice.dto.response.ApiResponse;
 import com.elearning.courseservice.dto.response.CategoryResponse;
-import com.elearning.courseservice.service.CategoryService;
+import com.elearning.courseservice.services.CategoryService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

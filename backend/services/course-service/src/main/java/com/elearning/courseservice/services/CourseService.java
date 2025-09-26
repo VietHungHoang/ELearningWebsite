@@ -1,4 +1,4 @@
-package com.elearning.courseservice.service;
+package com.elearning.courseservice.services;
 
 import com.elearning.courseservice.dto.request.CreateDraftCourseRequest;
 

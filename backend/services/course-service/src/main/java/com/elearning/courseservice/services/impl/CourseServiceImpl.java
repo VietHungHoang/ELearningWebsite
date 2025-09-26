@@ -1,13 +1,15 @@
-package com.elearning.courseservice.service.impl;
+package com.elearning.courseservice.services.impl;
 
 import com.elearning.courseservice.dto.request.CreateDraftCourseRequest;
 import com.elearning.courseservice.enums.CourseLevel;
+import com.elearning.courseservice.events.CourseCreatedEvent;
 import com.elearning.courseservice.exception.CategoryNotFoundException;
 import com.elearning.courseservice.model.Category;
 import com.elearning.courseservice.model.Course;
 import com.elearning.courseservice.repository.CategoryRepository;
 import com.elearning.courseservice.repository.CourseRepository;
-import com.elearning.courseservice.service.CourseService;
+import com.elearning.courseservice.services.CourseEventProducer;
+import com.elearning.courseservice.services.CourseService;
 import com.elearning.courseservice.utils.CourseUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
+    private final CourseEventProducer courseEventProducer;
     // private final CourseContentRepository courseContentRepository;
     // private final CoursePricingRepository coursePricingRepository;
     // private final CourseAnalyticsRepository courseAnalyticsRepository;
@@ -46,6 +49,14 @@ public class CourseServiceImpl implements CourseService {
                 .build();
 
         Course savedCourse = courseRepository.save(course);
+
+        CourseCreatedEvent event = CourseCreatedEvent.builder()
+                .courseId(savedCourse.getId())
+                .title(savedCourse.getTitle())
+                .instructorId(savedCourse.getInstructorId())
+                .build();
+
+        courseEventProducer.sendCourseCreatedEvent(event);
         
         return savedCourse.getId();
     }

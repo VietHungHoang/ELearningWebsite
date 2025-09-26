@@ -2,7 +2,8 @@ package com.elearning.courseservice.controller;
 
 import com.elearning.courseservice.dto.request.CreateDraftCourseRequest;
 import com.elearning.courseservice.dto.response.ApiResponse;
-import com.elearning.courseservice.service.CourseService;
+import com.elearning.courseservice.services.CourseService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

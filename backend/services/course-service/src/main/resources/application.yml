@@ -5,9 +5,25 @@ spring:
   application:
     name: course-servive
   datasource:
-    url: jdbc:postgresql://db:5432/courses_db
+    # url: jdbc:postgresql://db:5432/courses_db
+    url: jdbc:postgresql://localhost:5433/courses_db
     username: course_user
     password: course_pass
   jpa:
     hibernate:
       ddl-auto: update
+  kafka:
+    producer:
+      # Địa chỉ của Kafka broker. Phải khớp với port bạn đã map ra từ Docker.
+      bootstrap-servers: localhost:29092
+      # Lớp serializer cho KEY của message. Key sẽ là String (ví dụ: courseId).
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # Lớp serializer cho VALUE của message.
+      # JsonSerializer của Spring sẽ tự động chuyển đổi Java Object thành chuỗi JSON.
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        # Cấu hình acks=all là một lựa chọn an toàn cho các nghiệp vụ quan trọng.
+        # Producer sẽ đợi cho đến khi cả leader và các follower đều xác nhận đã nhận message.
+        # Bảo serializer dùng alias thay vì tên class đầy đủ
+        acks: "all"
+        spring.json.add.type.headers: false
