@@ -1,125 +1,87 @@
-spring:
-  application:
-    name: content-service
-  
-  # Database Configuration
-  datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5434/content_service_db}
-    username: ${DATABASE_USERNAME:content_user}
-    password: ${DATABASE_PASSWORD:content_pass}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      connection-timeout: 20000
-      leak-detection-threshold: 60000
-  
-  # JPA Configuration
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        use_sql_comments: true
-        order_inserts: true
-        order_updates: true
-        jdbc:
-          batch_size: 20
-    show-sql: false
-    open-in-view: false
-  
-  # File Upload Configuration
-  servlet:
-    multipart:
-      max-file-size: 2GB
-      max-request-size: 2GB
-      enabled: true
-      location: ${java.io.tmpdir}
-      resolve-lazily: true
-
-# Server Configuration
 server:
-  port: ${SERVER_PORT:8082}
-  servlet:
-    context-path: /
-  compression:
-    enabled: true
-    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    port: 8082
 
-# AWS S3 Configuration
-aws:
-  s3:
-    images:
-      bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-videos}
-      region: ${AWS_S3_REGION:ap-southeast-2}
-    videos:
-      bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-videos}
-      region: ${AWS_S3_REGION:ap-southeast-2}
+spring:
+    application:
+        name: content-service
 
-# Image Upload Configuration
-image:
-  max-size-in-bytes: ${IMAGE_MAX_FILE_SIZE:10485760}  # 10MB
-  allowed-types:
-    - image/jpeg
-    - image/jpg
-    - image/png
-    - image/webp
-    - image/gif
-  allowed-extensions:
-    - .jpg
-    - .jpeg
-    - .png
-    - .webp
-    - .gif
+    datasource:
+        url: jdbc:postgresql://localhost:5434/content_service_db
+        username: content_user
+        password: content_pass
+        driver-class-name: org.postgresql.Driver
 
-# Video Upload Configuration
-video:
-  max-file-size: ${VIDEO_MAX_FILE_SIZE:2147483648}  # 2GB
-  allowed-formats:
-    - mp4
-    - mov
-    - avi
-    - mkv
-    - webm
-  upload-chunk-size: 10485760  # 10MB
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+        properties:
+            hibernate:
+                jdbc:
+                    time_zone: Asia/Ho_Chi_Minh
+                format_sql: true
+                use_sql_comments: true
 
-# Logging Configuration
-logging:
-  level:
-    com.elearning.contentservice: DEBUG
-    org.springframework.web: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    kafka:
+        consumer:
+            # Địa chỉ của Kafka broker.
+            bootstrap-servers: localhost:29092
+            # ID duy nhất cho consumer group này. Rất quan trọng!
+            # Tất cả các instance của ContentService sẽ dùng chung ID này.
+            group-id: "content-service-group"
+            # Khi một consumer group mới được tạo, nó sẽ bắt đầu đọc từ đâu.
+            # 'earliest': đọc lại từ đầu lịch sử của topic.
+            # 'latest': chỉ đọc các message mới được gửi đến sau khi nó khởi động.
+            auto-offset-reset: "earliest"
+            # Lớp deserializer cho KEY. Phải khớp với serializer của producer.
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            # Lớp deserializer cho VALUE.
+            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+            properties:
+                # Quan trọng: Cho phép JsonDeserializer biết class Java nào để map JSON tới.
+                # Nếu không có, nó sẽ báo lỗi class not found.
+                # Cho phép Deserializer sử dụng class từ listener
+                spring.json.use.type.headers: false
+        # Chỉ định class mặc định để deserialize thành
+                spring.json.value.default.type: com.elearning.contentservice.events.CourseCreatedEvent # <--- THÊM DÒNG NÀY
+                # spring.json.trusted.packages: "com.elearning.contentservice.events"
+                spring.json.trusted.packages: "*"
+            
+        # properties:
+            # Thêm cấu hình Type Mapping
+            # spring.json.value.type.mapping: "courseCreatedEventAlias:com.elearning.contentservice.events.CourseCreatedEvent"
+                # Bật/tắt chế độ tự động commit offset. Chúng ta sẽ để Spring quản lý.
+                # enable.auto.commit: "true" # Mặc định là true, không cần ghi
+                # auto.commit.interval.ms: "5000" # Mặc định 5s commit 1 lần
 
-# Management and Monitoring
+        # Cấu hình riêng cho listener (nếu cần)
+        # listener:
+        #   ack-mode: record # Sẽ giải thích sau
+
+    sql:
+        init:
+            mode: always
+            platform: postgresql
+
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: when_authorized
-  health:
-    db:
-      enabled: true
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+    endpoints:
+        web:
+            exposure:
+                include: health,info,metrics
+    endpoint:
+        health:
+            show-details: when_authorized
 
-# Application Info
-info:
-  app:
-    name: ${spring.application.name}
-    description: E-Learning Content Management Service
-    version: 1.0.0
-    encoding: UTF-8
-    java:
-      version: ${java.version}
+logging:
+    level:
+        com.elearning.contentservice: DEBUG
+        org.hibernate.SQL: DEBUG
+        org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    pattern:
+        console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Custom application properties
+app:
+    name: "Content Service"
+    description: "Service for managing course curriculum and learning content"
+    version: "1.0.0"

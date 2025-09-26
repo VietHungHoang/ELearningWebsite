@@ -5,18 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PresignedUrlResponse {
-    
-    private String imageKey;
-    private String presignedUrl;
-    private String contentType;
-    private Long courseId;
-    private LocalDateTime expiresAt;
+public class SectionResponse {
+    private Long id;
+    private String name;
     private String description;
+    private List<LectureResponse> lectures;
+    private Integer orderIndex;
 }
