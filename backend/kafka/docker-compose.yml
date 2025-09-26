@@ -1,0 +1,65 @@
+# Version của cú pháp docker-compose. '3.8' là phổ biến và ổn định.
+version: '3.8'
+
+# Nơi định nghĩa các service (container) sẽ chạy.
+services:
+  # Service 1: Zookeeper - Trình quản lý metadata cho Kafka cluster.
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    networks:
+      - elearning-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  # Service 2: Kafka Broker - Trái tim của hệ thống.
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    # Phụ thuộc vào zookeeper, docker-compose sẽ đảm bảo zookeeper khởi chạy trước.
+    depends_on:
+      - zookeeper
+    networks:
+      - elearning-network
+    ports:
+      # Ánh xạ port 29092 của máy host vào port 29092 của container.
+      # Đây là port mà ứng dụng Spring Boot của bạn sẽ kết nối tới.
+      - "29092:29092"
+    environment:
+      # ID duy nhất cho broker này trong cluster.
+      KAFKA_BROKER_ID: 1
+      # Địa chỉ để broker kết nối tới Zookeeper.
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      # Cấu hình quan trọng cho việc kết nối từ cả bên trong và bên ngoài Docker.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      # Số lượng bản sao cho các topic nội bộ của Kafka. Đặt là 1 cho môi trường dev.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # Tự động tạo topic nếu một producer/consumer cố gắng sử dụng nó. Tiện lợi cho dev.
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  # Service 3: AKHQ - Giao diện Web UI để quản lý và giám sát Kafka.
+  akhq:
+    image: tchiotludo/akhq:latest
+    container_name: akhq
+    depends_on:
+      - kafka
+    networks:
+      - elearning-network
+    ports:
+      # Truy cập UI qua trình duyệt tại http://localhost:8088
+      - "8088:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-cluster:
+              properties:
+                bootstrap.servers: "kafka:9092"
+
+# Định nghĩa một network ảo để các container có thể giao tiếp với nhau bằng tên.
+networks:
+  elearning-network:
+    driver: bridge
