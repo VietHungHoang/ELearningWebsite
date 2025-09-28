@@ -18,7 +18,6 @@ import com.itextpdf.io.image.ImageDataFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -28,225 +27,185 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
         @Override
         public byte[] generateCertificate(String learnerName, String courseName, String instructorName) {
                 try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+
                         PdfWriter writer = new PdfWriter(baos);
                         PdfDocument pdf = new PdfDocument(writer);
-                        // Đặt hướng ngang (landscape)
                         Document document = new Document(pdf, PageSize.A4.rotate());
 
-                        // Vẽ viền kép (ngoài và trong, màu xanh)
-                        PdfCanvas canvas = new PdfCanvas(pdf.addNewPage());
                         float width = pdf.getDefaultPageSize().getWidth();
                         float height = pdf.getDefaultPageSize().getHeight();
                         float outerMargin = 40;
                         float innerMargin = 60;
 
-                        // Thêm background ảnh
+                        // === Background image ===
                         try {
-                                Image bgImage = new Image(ImageDataFactory.create("src/main/resources/background.png"))
+                                Image bgImage = new Image(ImageDataFactory.create(
+                                                getClass().getClassLoader().getResource("background.png")))
                                                 .scaleToFit(width, height)
                                                 .setFixedPosition(0, 0)
-                                                .setOpacity(0.15f);
+                                                .setOpacity(0.12f);
                                 document.add(bgImage);
                         } catch (Exception e) {
-                                System.err.println("Không thể tải background: " + e.getMessage());
+                                System.err.println("Background image not found: " + e.getMessage());
                         }
 
-                        // Thêm watermark chữ
-                        PdfCanvas watermarkCanvas = new PdfCanvas(pdf.getFirstPage());
-                        watermarkCanvas.saveState();
-                        watermarkCanvas.setFillColor(ColorConstants.LIGHT_GRAY);
-                        watermarkCanvas.beginText();
-                        PdfFont watermarkFont = PdfFontFactory.createFont("Times-Bold");
-                        watermarkCanvas.setFontAndSize(watermarkFont, 60); // Giảm font để tránh che nội dung
-                        float textWidth = watermarkFont.getWidth("E-LEARNING ACADEMY", 60);
-                        watermarkCanvas.setTextMatrix((width - textWidth) / 2, height / 2 - 30); // Căn giữa
-                        watermarkCanvas.showText("E-LEARNING ACADEMY");
-                        watermarkCanvas.endText();
-                        watermarkCanvas.restoreState();
+                        // === Watermark LOGO mờ ===
+                        try {
 
-                        // Viền ngoài (xanh, dày)
+                                Image watermarkLogo = new Image(ImageDataFactory.create(
+                                                getClass().getClassLoader().getResource("logo.png")))
+                                                .scaleToFit(300, 200)
+                                                .setFixedPosition((width - 300) / 2, (height - 200) / 2)
+                                                .setOpacity(0.05f);
+                                document.add(watermarkLogo);
+                        } catch (Exception e) {
+                                System.err.println("Watermark logo not found: " + e.getMessage());
+                        }
+
+                        // === Khung viền ===
+                        PdfCanvas canvas = new PdfCanvas(pdf.getFirstPage());
+                        // Outer border
                         canvas.setLineWidth(4);
                         canvas.setStrokeColor(ColorConstants.BLUE);
-                        canvas.rectangle(outerMargin, outerMargin, width - 2 * outerMargin, height - 2 * outerMargin);
+                        canvas.rectangle(outerMargin, outerMargin,
+                                        width - 2 * outerMargin, height - 2 * outerMargin);
                         canvas.stroke();
 
-                        // Viền trong (xanh, mỏng)
+                        // Inner border
                         canvas.setLineWidth(1);
                         canvas.setStrokeColor(ColorConstants.BLUE);
-                        canvas.rectangle(innerMargin, innerMargin, width - 2 * innerMargin, height - 2 * innerMargin);
+                        canvas.rectangle(innerMargin, innerMargin,
+                                        width - 2 * innerMargin, height - 2 * innerMargin);
                         canvas.stroke();
 
-                        // Logo
+                        // === Logo góc trái trên ===
                         try {
-                                Image logoImage = new Image(ImageDataFactory.create("src/main/resources/logo.png"))
+                                Image logoImage = new Image(ImageDataFactory.create(
+                                                getClass().getClassLoader().getResource("logo.png")))
                                                 .setWidth(80)
                                                 .setHeight(40)
-                                                .setTextAlignment(TextAlignment.LEFT)
-                                                .setMarginTop(outerMargin + 5)
-                                                .setMarginLeft(outerMargin + 10);
+                                                .setFixedPosition(outerMargin + 10, height - 60);
                                 document.add(logoImage);
                         } catch (Exception e) {
-                                System.err.println("Không thể tải logo: " + e.getMessage());
-                                document.add(new Paragraph("E-LEARNING LOGO")
-                                                .setFont(PdfFontFactory.createFont("Times-Bold"))
-                                                .setFontSize(12)
-                                                .setFontColor(ColorConstants.BLACK)
-                                                .setTextAlignment(TextAlignment.LEFT)
-                                                .setMarginTop(outerMargin + 5)
-                                                .setMarginLeft(outerMargin + 10));
+                                System.err.println("Main logo not found: " + e.getMessage());
                         }
 
-                        // Tên tổ chức
-                        Paragraph institutionName = new Paragraph("E-LEARNING ACADEMY")
+                        // === Institution name ===
+                        document.add(new Paragraph("E-LEARNING ACADEMY")
                                         .setFont(PdfFontFactory.createFont("Times-Bold"))
                                         .setFontSize(12)
                                         .setFontColor(ColorConstants.BLACK)
                                         .setTextAlignment(TextAlignment.LEFT)
-                                        .setMarginTop(3)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10);
-                        document.add(institutionName);
+                                        .setMarginTop(5));
 
-                        // Tiêu đề chứng chỉ
-                        Paragraph title = new Paragraph("Certificate of Completion")
+                        // === Certificate Title ===
+                        document.add(new Paragraph("Certificate of Completion")
                                         .setFont(PdfFontFactory.createFont("Times-Bold"))
                                         .setFontSize(26)
                                         .setFontColor(ColorConstants.BLACK)
                                         .setTextAlignment(TextAlignment.CENTER)
-                                        .setMarginTop(8)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(8);
-                        document.add(title);
+                                        .setMarginTop(20));
 
-                        // Phụ đề
+                        // Subtitle
                         document.add(new Paragraph("This is to certify that")
                                         .setFont(PdfFontFactory.createFont("Helvetica"))
                                         .setFontSize(14)
-                                        .setFontColor(ColorConstants.BLACK)
-                                        .setTextAlignment(TextAlignment.CENTER)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(6));
+                                        .setTextAlignment(TextAlignment.CENTER));
 
-                        // Tên người học
+                        // Learner’s Name
                         document.add(new Paragraph(learnerName)
                                         .setFont(PdfFontFactory.createFont("Times-Bold"))
-                                        .setFontSize(18)
-                                        .setFontColor(ColorConstants.BLACK)
+                                        .setFontSize(20)
                                         .setTextAlignment(TextAlignment.CENTER)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(6));
+                                        .setMarginBottom(5));
 
-                        // Văn bản hoàn thành khóa học
+                        // Completion text
                         document.add(new Paragraph("has successfully completed")
                                         .setFont(PdfFontFactory.createFont("Helvetica"))
                                         .setFontSize(14)
-                                        .setFontColor(ColorConstants.BLACK)
-                                        .setTextAlignment(TextAlignment.CENTER)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(6));
+                                        .setTextAlignment(TextAlignment.CENTER));
 
-                        // Tên khóa học
+                        // Course name
                         document.add(new Paragraph(courseName)
                                         .setFont(PdfFontFactory.createFont("Times-Italic"))
-                                        .setFontSize(16)
-                                        .setFontColor(ColorConstants.BLACK)
+                                        .setFontSize(18)
                                         .setTextAlignment(TextAlignment.CENTER)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(8));
+                                        .setMarginBottom(15));
 
-                        // Ngày phát hành
+                        // Issued date
                         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"));
                         document.add(new Paragraph("Issued on: " + date)
                                         .setFont(PdfFontFactory.createFont("Helvetica"))
                                         .setFontSize(10)
-                                        .setFontColor(ColorConstants.BLACK)
                                         .setTextAlignment(TextAlignment.RIGHT)
                                         .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(8));
+                                        .setMarginBottom(20));
 
-                        // Phần chữ ký
+                        // === Signatures ===
                         Paragraph signatureSection = new Paragraph()
                                         .setWidth(UnitValue.createPercentValue(80))
                                         .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(outerMargin - 15);
+                                        .setMarginRight(outerMargin + 10);
 
-                        // Chữ ký giảng viên
                         signatureSection.add(new Text("_____________________________\n")
-                                        .setFont(PdfFontFactory.createFont("Helvetica"))
-                                        .setFontSize(10));
+                                        .setFont(PdfFontFactory.createFont("Helvetica")).setFontSize(10));
                         signatureSection.add(new Text(instructorName + "\n")
-                                        .setFont(PdfFontFactory.createFont("Times-Bold"))
-                                        .setFontSize(10)
-                                        .setFontColor(ColorConstants.BLACK));
+                                        .setFont(PdfFontFactory.createFont("Times-Bold")).setFontSize(10));
                         signatureSection.add(new Text("Course Instructor")
                                         .setFont(PdfFontFactory.createFont("Helvetica"))
-                                        .setFontSize(8)
-                                        .setFontColor(ColorConstants.GRAY));
+                                        .setFontSize(8).setFontColor(ColorConstants.GRAY));
 
-                        // Khoảng cách giữa chữ ký
-                        signatureSection.add(new Text("        "));
+                        signatureSection.add(new Text("            "));
 
-                        // Chữ ký giám đốc
                         signatureSection.add(new Text("_____________________________\n")
-                                        .setFont(PdfFontFactory.createFont("Helvetica"))
-                                        .setFontSize(10));
+                                        .setFont(PdfFontFactory.createFont("Helvetica")).setFontSize(10));
                         signatureSection.add(new Text("Director of Education\n")
-                                        .setFont(PdfFontFactory.createFont("Times-Bold"))
-                                        .setFontSize(10)
-                                        .setFontColor(ColorConstants.BLACK));
+                                        .setFont(PdfFontFactory.createFont("Times-Bold")).setFontSize(10));
                         signatureSection.add(new Text("E-Learning Academy")
                                         .setFont(PdfFontFactory.createFont("Helvetica"))
-                                        .setFontSize(8)
-                                        .setFontColor(ColorConstants.GRAY));
+                                        .setFontSize(8).setFontColor(ColorConstants.GRAY));
 
                         document.add(signatureSection);
 
-                        // Chân trang
-                        Paragraph footer = new Paragraph("E-Learning Academy | Empowering Knowledge Worldwide")
+                        // Footer
+                        document.add(new Paragraph("E-Learning Academy | Empowering Knowledge Worldwide")
                                         .setFont(PdfFontFactory.createFont("Helvetica"))
                                         .setFontSize(7)
                                         .setFontColor(ColorConstants.GRAY)
                                         .setTextAlignment(TextAlignment.CENTER)
-                                        .setMarginTop(3)
-                                        .setMarginLeft(outerMargin + 10)
-                                        .setMarginRight(outerMargin + 10)
-                                        .setMarginBottom(outerMargin - 15);
-                        document.add(footer);
+                                        .setMarginTop(10));
 
                         document.close();
                         return baos.toByteArray();
-                } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("Lỗi khi tạo chứng chỉ PDF: " + e.getMessage(), e);
-                }
-        }
 
-        // Hàm main để test
-        public static void main(String[] args) {
-                CertificatePdfServiceImpl certificateService = new CertificatePdfServiceImpl();
-                String learnerName = "Nguyễn Văn A";
-                String courseName = "Lập trình Java Cơ bản";
-                String instructorName = "TS. Trần Thị B";
-                try {
-                        byte[] pdfBytes = certificateService.generateCertificate(learnerName, courseName,
-                                        instructorName);
-                        String outputPath = "certificate_output.pdf";
-                        try (FileOutputStream fos = new FileOutputStream(outputPath)) {
-                                fos.write(pdfBytes);
-                                System.out.println("Tạo chứng chỉ PDF thành công tại: " + outputPath);
-                        } catch (Exception e) {
-                                System.err.println("Lỗi khi ghi file PDF: " + e.getMessage());
-                                e.printStackTrace();
-                        }
                 } catch (Exception e) {
-                        System.err.println("Lỗi khi tạo chứng chỉ: " + e.getMessage());
                         e.printStackTrace();
+                        throw new RuntimeException("Error generating PDF certificate: " + e.getMessage(), e);
                 }
         }
 }
+
+// Hàm main để test
+// public static void main(String[] args) {
+// CertificatePdfServiceImpl certificateService = new
+// CertificatePdfServiceImpl();
+// String learnerName = "Nguyen Van A";
+// String courseName = "A basic Java course";
+// String instructorName = "TS. Tran Thi B";
+// try {
+// byte[] pdfBytes = certificateService.generateCertificate(learnerName,
+// courseName,
+// instructorName);
+// String outputPath = "certificate_output.pdf";
+// try (FileOutputStream fos = new FileOutputStream(outputPath)) {
+// fos.write(pdfBytes);
+// System.out.println("Tạo chứng chỉ PDF thành công tại: " + outputPath);
+// } catch (Exception e) {
+// System.err.println("Lỗi khi ghi file PDF: " + e.getMessage());
+// e.printStackTrace();
+// }
+// } catch (Exception e) {
+// System.err.println("Lỗi khi tạo chứng chỉ: " + e.getMessage());
+// e.printStackTrace();
+// }
+// }
