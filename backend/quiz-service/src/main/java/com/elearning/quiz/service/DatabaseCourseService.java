@@ -179,9 +179,103 @@ public class DatabaseCourseService {
             }
             Quiz quiz = quizzes.get(0); // Take the first quiz if multiple exist
             dto.setQuiz(convertToQuizDto(quiz));
+        } else {
+            // Generate quiz for section if none exists
+            System.out.println("📝 No quiz found for section " + section.getId() + ", generating one...");
+            QuizDto generatedQuiz = generateSectionQuiz(section);
+            dto.setQuiz(generatedQuiz);
         }
 
         return dto;
+    }
+
+    private QuizDto generateSectionQuiz(Section section) {
+        System.out.println("🎯 Generating quiz for section: " + section.getTitle());
+        
+        QuizDto quiz = new QuizDto();
+        quiz.setId("quiz-" + section.getId());
+        quiz.setTitle(section.getTitle() + " Quiz");
+        quiz.setDescription("Test your knowledge of " + section.getTitle());
+        quiz.setCourseId(section.getCourseId());
+        quiz.setSectionId(section.getId());
+        quiz.setTutorId("tutor-001"); // Default tutor
+        quiz.setIsActive(true);
+        quiz.setIsRequired(true);
+        quiz.setPassingScore(70);
+        quiz.setTimeLimit(10); // 10 minutes
+        quiz.setMaxAttempts(3);
+        quiz.setCreatedAt(java.time.LocalDateTime.now().toString());
+        quiz.setUpdatedAt(java.time.LocalDateTime.now().toString());
+        
+        // Create sample questions for section quiz
+        List<QuizQuestionDto> questions = createSectionQuizQuestions(section);
+        quiz.setQuestions(questions);
+        
+        System.out.println("✅ Section quiz generated with " + questions.size() + " questions");
+        return quiz;
+    }
+
+    private List<QuizQuestionDto> createSectionQuizQuestions(Section section) {
+        List<QuizQuestionDto> questions = new ArrayList<>();
+        
+        // Question 1
+        QuizQuestionDto q1 = new QuizQuestionDto();
+        q1.setId("q1-" + section.getId());
+        q1.setQuizId("quiz-" + section.getId());
+        q1.setQuestionText("What is the main topic covered in " + section.getTitle() + "?");
+        q1.setQuestionType("multiple_choice");
+        q1.setOrder(1);
+        q1.setIsRequired(true);
+        q1.setCreatedAt(java.time.LocalDateTime.now().toString());
+        q1.setUpdatedAt(java.time.LocalDateTime.now().toString());
+        
+        List<QuizQuestionOptionDto> options1 = new ArrayList<>();
+        options1.add(createOption("q1-a-" + section.getId(), "Basic concepts", true));
+        options1.add(createOption("q1-b-" + section.getId(), "Advanced techniques", false));
+        options1.add(createOption("q1-c-" + section.getId(), "Tools and frameworks", false));
+        options1.add(createOption("q1-d-" + section.getId(), "Best practices", false));
+        q1.setOptions(options1);
+        questions.add(q1);
+        
+        // Question 2
+        QuizQuestionDto q2 = new QuizQuestionDto();
+        q2.setId("q2-" + section.getId());
+        q2.setQuizId("quiz-" + section.getId());
+        q2.setQuestionText("Which of the following is important in " + section.getTitle() + "?");
+        q2.setQuestionType("multiple_choice");
+        q2.setOrder(2);
+        q2.setIsRequired(true);
+        q2.setCreatedAt(java.time.LocalDateTime.now().toString());
+        q2.setUpdatedAt(java.time.LocalDateTime.now().toString());
+        
+        List<QuizQuestionOptionDto> options2 = new ArrayList<>();
+        options2.add(createOption("q2-a-" + section.getId(), "Understanding fundamentals", true));
+        options2.add(createOption("q2-b-" + section.getId(), "Memorizing syntax", false));
+        options2.add(createOption("q2-c-" + section.getId(), "Copying code", false));
+        options2.add(createOption("q2-d-" + section.getId(), "Following tutorials", false));
+        q2.setOptions(options2);
+        questions.add(q2);
+        
+        // Question 3
+        QuizQuestionDto q3 = new QuizQuestionDto();
+        q3.setId("q3-" + section.getId());
+        q3.setQuizId("quiz-" + section.getId());
+        q3.setQuestionText("What should you focus on when learning " + section.getTitle() + "?");
+        q3.setQuestionType("multiple_choice");
+        q3.setOrder(3);
+        q3.setIsRequired(true);
+        q3.setCreatedAt(java.time.LocalDateTime.now().toString());
+        q3.setUpdatedAt(java.time.LocalDateTime.now().toString());
+        
+        List<QuizQuestionOptionDto> options3 = new ArrayList<>();
+        options3.add(createOption("q3-a-" + section.getId(), "Practice and application", true));
+        options3.add(createOption("q3-b-" + section.getId(), "Theory only", false));
+        options3.add(createOption("q3-c-" + section.getId(), "Reading documentation", false));
+        options3.add(createOption("q3-d-" + section.getId(), "Watching videos", false));
+        q3.setOptions(options3);
+        questions.add(q3);
+        
+        return questions;
     }
 
     private void addFinalQuizToCourse(CourseDto course) {

@@ -37,7 +37,7 @@ public class QuizAttemptService {
     // Get quiz attempt by ID
     @Transactional(readOnly = true)
     public Optional<QuizAttemptDto> getQuizAttemptById(String id) {
-        return quizAttemptRepository.findById(id)
+        return quizAttemptRepository.findById(Long.parseLong(id))
                 .map(quizMapper::toDto);
     }
     
@@ -70,10 +70,10 @@ public class QuizAttemptService {
     
     // Update quiz attempt answers
     public QuizAttemptDto updateQuizAttemptAnswers(String id, QuizAttemptDto attemptDto) {
-        QuizAttempt existingAttempt = quizAttemptRepository.findById(id)
+        QuizAttempt existingAttempt = quizAttemptRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new RuntimeException("Quiz attempt not found with id: " + id));
         
-        existingAttempt.setAnswers(attemptDto.getAnswers());
+        existingAttempt.setAnswersMap(attemptDto.getAnswers());
         existingAttempt.setTimeSpent(attemptDto.getTimeSpent());
         
         QuizAttempt updatedAttempt = quizAttemptRepository.save(existingAttempt);
@@ -82,7 +82,7 @@ public class QuizAttemptService {
     
     // Submit quiz attempt
     public QuizAttemptDto submitQuizAttempt(String id) {
-        QuizAttempt attempt = quizAttemptRepository.findById(id)
+        QuizAttempt attempt = quizAttemptRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new RuntimeException("Quiz attempt not found with id: " + id));
         
         // Calculate score
@@ -115,7 +115,7 @@ public class QuizAttemptService {
     
     // Calculate score for quiz attempt
     private void calculateScore(QuizAttempt attempt) {
-        if (attempt.getAnswers() == null || attempt.getAnswers().isEmpty()) {
+        if (attempt.getAnswersMap() == null || attempt.getAnswersMap().isEmpty()) {
             attempt.setCorrectAnswers(0);
             attempt.setTotalQuestions(0);
             attempt.setPercentage(0.0);
@@ -132,7 +132,7 @@ public class QuizAttemptService {
         
         // Check each answer
         for (com.elearning.quiz.model.QuizQuestion question : questions) {
-            String userAnswer = attempt.getAnswers().get(question.getId());
+            String userAnswer = attempt.getAnswersMap().get(question.getId());
             if (userAnswer != null && userAnswer.equals(question.getCorrectAnswer())) {
                 correctAnswers++;
             }

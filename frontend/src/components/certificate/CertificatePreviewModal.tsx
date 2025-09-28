@@ -1,5 +1,6 @@
 import React from 'react'
-import { X, Download, Share2, ExternalLink, Award } from 'lucide-react'
+import { X, Download, Share2, ExternalLink, Award, Eye } from 'lucide-react'
+import { certificateApi } from '../../services/certificateApi'
 import type { StudentCertificate } from '../../types/certificate'
 
 interface CertificatePreviewModalProps {
@@ -62,6 +63,20 @@ const CertificatePreviewModal: React.FC<CertificatePreviewModalProps> = ({
               <p className="text-sm text-gray-600">{certificate.courseTitle}</p>
             </div>
             <div className="flex items-center space-x-2">
+              <button
+                onClick={() => certificateApi.preview.openPreviewInNewTab({
+                  learnerName: certificate.studentName,
+                  courseName: certificate.courseTitle,
+                  instructorName: certificate.instructorName,
+                  organizationName: 'E-LEARNING ACADEMY',
+                  certificateId: certificate.certificateData.certificateId,
+                  verificationUrl: certificate.verificationUrl
+                })}
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Preview PDF</span>
+              </button>
               <button
                 onClick={handleDownload}
                 className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"

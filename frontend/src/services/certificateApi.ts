@@ -85,6 +85,33 @@ export const certificateApi = {
     }
   },
 
+  // PDF Preview
+  preview: {
+    openPreviewInNewTab: async (payload: {
+      learnerName: string
+      courseName: string
+      instructorName: string
+      organizationName?: string
+      certificateId?: string
+      verificationUrl?: string
+    }) => {
+      try {
+        console.log('🖨️ API: Generating certificate preview')
+        const response = await api.post('/certificates/preview', payload, {
+          responseType: 'blob'
+        })
+        const blob = new Blob([response.data], { type: 'application/pdf' })
+        const url = URL.createObjectURL(blob)
+        window.open(url, '_blank')
+        // Cleanup later
+        setTimeout(() => URL.revokeObjectURL(url), 60_000)
+      } catch (error) {
+        console.error('❌ API: Error opening certificate preview:', error)
+        throw error
+      }
+    }
+  },
+
   // Certificate verification (public)
   verification: {
     verifyCertificate: async (certificateId: string): Promise<CertificateVerification> => {

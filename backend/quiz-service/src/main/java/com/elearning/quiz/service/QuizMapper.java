@@ -119,12 +119,12 @@ public class QuizMapper {
     // QuizAttempt mapping
     public QuizAttemptDto toDto(QuizAttempt attempt) {
         QuizAttemptDto dto = new QuizAttemptDto();
-        dto.setId(attempt.getId());
+        dto.setId(attempt.getId().toString());
         dto.setQuizId(attempt.getQuizId());
         dto.setSectionId(attempt.getSectionId());
         dto.setCourseId(attempt.getCourseId());
         dto.setStudentId(attempt.getStudentId());
-        dto.setAnswers(attempt.getAnswers());
+        dto.setAnswers(attempt.getAnswersMap());
         dto.setCorrectAnswers(attempt.getCorrectAnswers());
         dto.setTotalQuestions(attempt.getTotalQuestions());
         dto.setPercentage(attempt.getPercentage());
@@ -137,12 +137,14 @@ public class QuizMapper {
     
     public QuizAttempt toEntity(QuizAttemptDto dto) {
         QuizAttempt attempt = new QuizAttempt();
-        attempt.setId(dto.getId());
+        if (dto.getId() != null) {
+            attempt.setId(Long.parseLong(dto.getId()));
+        }
         attempt.setQuizId(dto.getQuizId());
         attempt.setSectionId(dto.getSectionId());
         attempt.setCourseId(dto.getCourseId());
         attempt.setStudentId(dto.getStudentId());
-        attempt.setAnswers(dto.getAnswers());
+        attempt.setAnswersMap(dto.getAnswers());
         attempt.setCorrectAnswers(dto.getCorrectAnswers());
         attempt.setTotalQuestions(dto.getTotalQuestions());
         attempt.setPercentage(dto.getPercentage());

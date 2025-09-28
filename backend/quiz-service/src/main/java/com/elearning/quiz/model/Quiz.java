@@ -61,8 +61,7 @@ public class Quiz {
     @OrderBy("orderIndex ASC")
     private List<QuizQuestion> questions = new ArrayList<>();
     
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<QuizAttempt> attempts = new ArrayList<>();
+    // Note: QuizAttempt relationship is handled via quizId field, not JPA mapping
     
     // Constructors
     public Quiz() {}
@@ -171,11 +170,5 @@ public class Quiz {
         this.questions = questions;
     }
     
-    public List<QuizAttempt> getAttempts() {
-        return attempts;
-    }
-    
-    public void setAttempts(List<QuizAttempt> attempts) {
-        this.attempts = attempts;
-    }
+    // Note: QuizAttempt methods removed - relationship handled via quizId field
 }

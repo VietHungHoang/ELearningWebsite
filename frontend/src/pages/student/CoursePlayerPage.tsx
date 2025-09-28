@@ -12,7 +12,7 @@ import { useCoursePlayer } from '../../hooks/useCoursePlayer'
 import { useLessonNavigation } from '../../hooks/useLessonNavigation'
 import { useQuizManagement } from '../../hooks/useQuizManagement'
 import { useLessonCompletion } from '../../hooks/useLessonCompletion'
-import { certificateApi } from '../../services/certificateApi'
+// import { certificateApi } from '../../services/certificateApi' // COMMENTED FOR TESTING
 import { Award, CheckCircle, Clock, BookOpen } from 'lucide-react'
 
 const CoursePlayerPage = () => {
@@ -29,7 +29,6 @@ const CoursePlayerPage = () => {
     setCourseData,
     setCurrentLesson,
     updateLessonProgress,
-    handleQuizCompletion,
     findNextLesson
   } = useCoursePlayer()
 
@@ -49,10 +48,30 @@ const CoursePlayerPage = () => {
   const {
     hasPreviousLesson,
     hasNextLesson,
-    handleLessonSelect,
+    handleLessonSelect: originalHandleLessonSelect,
     handlePreviousLesson,
     handleNextLesson
   } = useLessonNavigation(courseData, currentLesson, setCourseData, setCurrentLesson)
+
+  // Override handleLessonSelect to check section unlock (like code cũ)
+  const handleLessonSelect = (lessonId: string, sectionId: string) => {
+    if (!courseData) return
+    
+    // Find the section containing the lesson
+    const targetSection = courseData.sections.find(section => section.id === sectionId)
+    if (!targetSection) return
+
+    // Check if this section is unlocked (first section is always unlocked)
+    const currentSectionIndex = courseData.sections.findIndex(section => section.id === sectionId)
+    const isFirstSection = currentSectionIndex === 0
+    if (!isFirstSection && !targetSection.isUnlocked) {
+      alert('Bạn phải hoàn thành quiz của section trước đó trước khi có thể xem section này!')
+      return
+    }
+
+    // Call original lesson select
+    originalHandleLessonSelect(lessonId, sectionId)
+  }
 
   const {
     showQuiz,
@@ -71,7 +90,7 @@ const CoursePlayerPage = () => {
         // This will be handled by useLessonCompletion hook
       }
     }
-  }, handleQuizCompletion)
+  })
 
   const {
     showNextLessonModal,
@@ -162,17 +181,27 @@ const CoursePlayerPage = () => {
         throw new Error('Course ID not found')
       }
       
-      // Call certificate API to complete final test and generate certificate
-      const certificate = await certificateApi.finalTest.completeFinalTest(courseData.id, score)
+      // TODO: Call certificate API to complete final test and generate certificate (COMMENTED FOR TESTING)
+      // const certificate = await certificateApi.finalTest.completeFinalTest(courseData.id, score)
       
-      if (certificate) {
-        console.log('✅ Certificate generated successfully:', certificate)
+      // MOCK DATA: Simulate certificate generation
+      console.log('🎯 MOCK: Simulating certificate generation')
+      const mockCertificate = {
+        id: 'cert-' + Date.now(),
+        certificateId: 'cert-' + Date.now(),
+        templateId: 'template-001',
+        verificationUrl: 'https://verify.example.com/cert-' + Date.now(),
+        downloadUrl: 'https://download.example.com/cert-' + Date.now() + '.pdf'
+      }
+      
+      if (mockCertificate) {
+        console.log('✅ MOCK: Certificate generated successfully:', mockCertificate)
         setFinalTestCompleted(true)
         setShowQuiz(false)
         setCurrentQuiz(null)
         
         // Show success message with certificate info
-        alert(`🎉 Chúc mừng! Bạn đã hoàn thành khóa học với điểm ${score}%!\n\n📜 Chứng chỉ đã được tạo thành công!\n\nCertificate ID: ${certificate.id}\nKhóa học: ${courseData.title}`)
+        alert(`🎉 Chúc mừng! Bạn đã hoàn thành khóa học với điểm ${score}%!\n\n📜 Chứng chỉ đã được tạo thành công!\n\nCertificate ID: ${mockCertificate.id}\nKhóa học: ${courseData.title}\n\nTải xuống: ${mockCertificate.downloadUrl}`)
       } else {
         throw new Error('Certificate generation failed')
       }
@@ -237,7 +266,11 @@ const CoursePlayerPage = () => {
             {showQuiz && currentQuiz ? (
               <LessonQuizComponent
                 quiz={currentQuiz}
-                onComplete={currentQuiz.id.startsWith('final-quiz-') ? handleFinalTestComplete : handleQuizComplete}
+                onComplete={currentQuiz.id.startsWith('final-quiz-') ? handleFinalTestComplete : (result) => {
+                  console.log('🎯 CoursePlayerPage onComplete called with:', result)
+                  console.log('🎯 Calling handleQuizComplete...')
+                  handleQuizComplete(result)
+                }}
                 onSkip={handleQuizSkip}
                 isRequired={currentQuiz.id.startsWith('final-quiz-')}
               />

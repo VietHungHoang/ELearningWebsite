@@ -304,6 +304,7 @@ const LessonQuizComponent: React.FC<LessonQuizProps> = ({
             <button
               onClick={() => {
                 console.log('🎯 Continue button clicked - calling onComplete')
+                console.log('🎯 onComplete function:', onComplete)
                 onComplete(quizState.result!)
               }}
               className="flex-1 flex items-center justify-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"

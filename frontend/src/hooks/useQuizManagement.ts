@@ -1,35 +1,78 @@
 import { useState, useCallback } from 'react'
 import type { CourseDto } from '../services/courseApi'
 import type { LessonQuiz as LessonQuizType, QuizResult } from '../types/quiz'
+// import { quizApi } from '../services/quizApi' // COMMENTED FOR TESTING
 
 export const useQuizManagement = (
   courseData: CourseDto | null,
   setCourseData: (data: CourseDto) => void,
-  onLessonCompletion: () => void,
-  handleQuizCompletion: (sectionId: string) => void
+  onLessonCompletion: () => void
 ) => {
   const [showQuiz, setShowQuiz] = useState(false)
   const [currentQuiz, setCurrentQuiz] = useState<LessonQuizType | null>(null)
   const [currentSection, setCurrentSection] = useState<string | null>(null)
 
-  const handleQuizComplete = useCallback((result: QuizResult) => {
-    console.log('🎯 Quiz completed:', result.attempt.passed ? 'PASSED' : 'FAILED', 'for section:', currentSection)
+  const handleQuizComplete = useCallback(async (result: QuizResult) => {
+    console.log('🎯 🚀 handleQuizComplete called!', result.attempt.passed ? 'PASSED' : 'FAILED', 'for section:', currentSection)
     
     // Mark the quiz as completed for the current section only if passed
     if (currentSection && courseData && result.attempt.passed) {
       console.log('🎯 ✅ Processing quiz completion for section:', currentSection)
       
-      // Use the centralized quiz completion handler
-      handleQuizCompletion(currentSection)
+      // TODO: Call API to save quiz completion to database (COMMENTED FOR TESTING)
+      // try {
+      //   // Call API to save quiz completion to database
+      //   if (currentQuiz?.id) {
+      //     console.log('🎯 📡 Calling API to save quiz completion...')
+      //     await quizApi.completeQuiz(currentQuiz.id, {
+      //       studentId: 'student-001', // TODO: Get from auth context
+      //       score: result.attempt.percentage,
+      //       passed: result.attempt.passed,
+      //       sectionId: currentSection,
+      //       courseId: courseData.id
+      //     })
+      //     console.log('🎯 ✅ Quiz completion saved to database')
+      //   }
+      // } catch (error) {
+      //   console.error('🎯 ❌ Error saving quiz completion:', error)
+      //   // Continue with UI update even if API fails
+      // }
       
-      // Call lesson completion callback to trigger next lesson logic
-      onLessonCompletion()
+      console.log('🎯 MOCK: Skipping API call for quiz completion (testing mode)')
+      
+      // Find current section index
+      const currentSectionIndex = courseData.sections.findIndex(section => section.id === currentSection)
+      
+      // Update sections: mark quiz completed and unlock next section (like code cũ)
+      const updatedSections = courseData.sections.map((section, index) => {
+        if (section.id === currentSection) {
+          // Mark ALL lessons in current section as completed
+          return {
+            ...section,
+            lessons: section.lessons.map(lesson => ({ ...lesson, isCompleted: true })),
+            quizCompleted: true
+          }
+        }
+        // Unlock the next section if this quiz is completed
+        if (index === currentSectionIndex + 1) {
+          return { ...section, isUnlocked: true }
+        }
+        return section
+      })
+      
+      // Update course data directly (like code cũ)
+      setCourseData({
+        ...courseData,
+        sections: updatedSections
+      })
+      
+      console.log('🎯 Section unlocked:', currentSectionIndex + 1)
     }
     
     setShowQuiz(false)
     setCurrentQuiz(null)
     setCurrentSection(null)
-  }, [currentSection, courseData, setCourseData, onLessonCompletion, handleQuizCompletion])
+  }, [currentSection, courseData, setCourseData, currentQuiz])
 
   const handleQuizSkip = useCallback(() => {
     console.log('Skipping quiz')

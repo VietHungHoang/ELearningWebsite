@@ -3,6 +3,8 @@ package com.elearning.quiz.controller;
 import com.elearning.quiz.dto.QuizDto;
 import com.elearning.quiz.dto.QuizQuestionDto;
 import com.elearning.quiz.dto.GenerateQuestionsRequest;
+import com.elearning.quiz.model.QuizAttempt;
+import com.elearning.quiz.repository.QuizAttemptRepository;
 import com.elearning.quiz.service.QuizService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,7 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/quizzes")
@@ -22,6 +26,9 @@ public class QuizController {
     
     @Autowired
     private QuizService quizService;
+    
+    @Autowired
+    private QuizAttemptRepository quizAttemptRepository;
     
     @PostMapping
     @Operation(summary = "Create a new quiz")
@@ -112,6 +119,91 @@ public class QuizController {
     public ResponseEntity<Long> getQuizCountByTutorId(@PathVariable String tutorId) {
         Long count = quizService.countQuizzesByTutorId(tutorId);
         return ResponseEntity.ok(count);
+    }
+    
+    @GetMapping("/student/{studentId}/course/{courseId}/completion-status")
+    @Operation(summary = "Get quiz completion status for a student in a course")
+    public ResponseEntity<Map<String, Object>> getQuizCompletionStatus(
+            @PathVariable String studentId, 
+            @PathVariable String courseId) {
+        try {
+            System.out.println("🎯 Getting quiz completion status for student: " + studentId + ", course: " + courseId);
+            
+            // Get all quiz attempts for this student in this course
+            List<QuizAttempt> attempts = quizAttemptRepository.findByStudentIdAndCourseIdOrderByCreatedAtDesc(studentId, courseId);
+            
+            // Group by section and check if passed
+            Map<String, Boolean> sectionCompletionStatus = new HashMap<>();
+            for (QuizAttempt attempt : attempts) {
+                if (attempt.getPassed()) {
+                    sectionCompletionStatus.put(attempt.getSectionId(), true);
+                }
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("studentId", studentId);
+            response.put("courseId", courseId);
+            response.put("sectionCompletionStatus", sectionCompletionStatus);
+            response.put("totalAttempts", attempts.size());
+            response.put("passedAttempts", attempts.stream().mapToInt(a -> a.getPassed() ? 1 : 0).sum());
+            
+            System.out.println("✅ Quiz completion status retrieved: " + sectionCompletionStatus);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error getting quiz completion status: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/{quizId}/complete")
+    @Operation(summary = "Complete a quiz and update progress")
+    public ResponseEntity<Map<String, Object>> completeQuiz(
+            @PathVariable String quizId,
+            @RequestBody Map<String, Object> request) {
+        try {
+            System.out.println("🎯 Quiz completion request for quiz: " + quizId);
+            System.out.println("📝 Request data: " + request);
+            
+            // Extract data from request
+            String studentId = (String) request.get("studentId");
+            Integer score = (Integer) request.get("score");
+            Boolean passed = (Boolean) request.get("passed");
+            String sectionId = (String) request.get("sectionId");
+            String courseId = (String) request.get("courseId");
+            
+            // Calculate additional fields
+            Integer correctAnswers = score != null ? score : 0;
+            Integer totalQuestions = 3; // Default, should be calculated from quiz
+            Double percentage = score != null ? score.doubleValue() : 0.0;
+            Integer timeSpent = 0; // Default, should be calculated from frontend
+            
+            // Save quiz attempt to database
+            QuizAttempt attempt = new QuizAttempt(quizId, sectionId, courseId, studentId, score, passed, 
+                                                correctAnswers, totalQuestions, percentage, timeSpent);
+            QuizAttempt savedAttempt = quizAttemptRepository.save(attempt);
+            
+            System.out.println("💾 Quiz attempt saved to database with ID: " + savedAttempt.getId());
+            
+            // Create response
+            Map<String, Object> response = new HashMap<>();
+            response.put("attemptId", savedAttempt.getId());
+            response.put("quizId", quizId);
+            response.put("studentId", studentId);
+            response.put("score", score);
+            response.put("passed", passed);
+            response.put("sectionId", sectionId);
+            response.put("courseId", courseId);
+            response.put("completedAt", savedAttempt.getCompletedAt().toString());
+            response.put("message", "Quiz completed successfully and saved to database");
+            
+            System.out.println("✅ Quiz completion processed and saved successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("❌ Error processing quiz completion: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/{id}/questions/generate")

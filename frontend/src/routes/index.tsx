@@ -41,6 +41,7 @@ import {
 import { TutorLayout } from '../components/layout'
 import { tutorUserControls, tutorMainSidebarItems, tutorAdditionalSidebarItems } from '../utils/tutorConfig'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
+import CertificateDebugPage from '../pages/debug/CertificateDebugPage'
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAppSelector((state) => state.auth)
@@ -388,6 +389,7 @@ const AppRoutes = () => {
       {/* Test Routes - Remove in production */}
       <Route path="/test-403" element={<AccessForbiddenPage />} />
       <Route path="/test-404" element={<NotFoundPage />} />
+      <Route path="/debug/certificate" element={<CertificateDebugPage />} />
 
       {/* Legacy Dashboard Route - Redirect based on role */}
       <Route

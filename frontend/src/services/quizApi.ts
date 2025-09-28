@@ -127,6 +127,24 @@ export const quizApi = {
     return response.data
   },
 
+  // Complete quiz
+  completeQuiz: async (quizId: string, data: {
+    studentId: string
+    score: number
+    passed: boolean
+    sectionId: string
+    courseId: string
+  }): Promise<any> => {
+    const response = await api.post(`/quizzes/${quizId}/complete`, data)
+    return response.data
+  },
+
+  // Get quiz completion status for a student in a course
+  getQuizCompletionStatus: async (studentId: string, courseId: string): Promise<any> => {
+    const response = await api.get(`/quizzes/student/${studentId}/course/${courseId}/completion-status`)
+    return response.data
+  },
+
   // Question Management APIs
   // Create question for quiz
   createQuestion: async (quizId: string, questionData: QuizQuestionDto): Promise<QuizQuestionDto> => {

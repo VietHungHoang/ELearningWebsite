@@ -9,40 +9,40 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, String> {
+public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> {
     
-    // Find attempts by student ID
-    List<QuizAttempt> findByStudentIdOrderByCreatedAtDesc(String studentId);
+    // Find attempts by student and course
+    List<QuizAttempt> findByStudentIdAndCourseId(String studentId, String courseId);
     
-    // Find attempts by quiz ID
-    List<QuizAttempt> findByQuizIdOrderByCreatedAtDesc(String quizId);
+    // Find attempts by student and section
+    List<QuizAttempt> findByStudentIdAndSectionId(String studentId, String sectionId);
     
-    // Find attempts by student and quiz
-    List<QuizAttempt> findByStudentIdAndQuizIdOrderByCreatedAtDesc(String studentId, String quizId);
+    // Find attempts by quiz
+    List<QuizAttempt> findByQuizId(String quizId);
     
-    // Find latest attempt by student and quiz
-    @Query("SELECT a FROM QuizAttempt a WHERE a.studentId = :studentId AND a.quizId = :quizId ORDER BY a.createdAt DESC")
+    // Check if student has completed a specific quiz
+    @Query("SELECT COUNT(a) > 0 FROM QuizAttempt a WHERE a.studentId = :studentId AND a.quizId = :quizId AND a.passed = true")
+    boolean hasStudentPassedQuiz(@Param("studentId") String studentId, @Param("quizId") String quizId);
+    
+    // Get latest attempt for a quiz by student
+    @Query("SELECT a FROM QuizAttempt a WHERE a.studentId = :studentId AND a.quizId = :quizId ORDER BY a.completedAt DESC")
     List<QuizAttempt> findLatestAttemptByStudentAndQuiz(@Param("studentId") String studentId, @Param("quizId") String quizId);
     
-    // Find attempts by course ID
+    // Find attempts by student ID ordered by created date
+    List<QuizAttempt> findByStudentIdOrderByCreatedAtDesc(String studentId);
+    
+    // Find attempts by quiz ID ordered by created date
+    List<QuizAttempt> findByQuizIdOrderByCreatedAtDesc(String quizId);
+    
+    // Find attempts by student and quiz ordered by created date
+    List<QuizAttempt> findByStudentIdAndQuizIdOrderByCreatedAtDesc(String studentId, String quizId);
+    
+    // Find attempts by course ID ordered by created date
     List<QuizAttempt> findByCourseIdOrderByCreatedAtDesc(String courseId);
     
-    // Find attempts by section ID
+    // Find attempts by section ID ordered by created date
     List<QuizAttempt> findBySectionIdOrderByCreatedAtDesc(String sectionId);
     
-    // Count attempts by quiz ID
-    @Query("SELECT COUNT(a) FROM QuizAttempt a WHERE a.quizId = :quizId")
-    Long countByQuizId(@Param("quizId") String quizId);
-    
-    // Count passed attempts by quiz ID
-    @Query("SELECT COUNT(a) FROM QuizAttempt a WHERE a.quizId = :quizId AND a.passed = true")
-    Long countPassedAttemptsByQuizId(@Param("quizId") String quizId);
-    
-    // Find best attempt by student and quiz
-    @Query("SELECT a FROM QuizAttempt a WHERE a.studentId = :studentId AND a.quizId = :quizId ORDER BY a.percentage DESC, a.createdAt DESC")
-    List<QuizAttempt> findBestAttemptByStudentAndQuiz(@Param("studentId") String studentId, @Param("quizId") String quizId);
-    
-    // Calculate average score by quiz ID
-    @Query("SELECT AVG(a.percentage) FROM QuizAttempt a WHERE a.quizId = :quizId")
-    Double calculateAverageScoreByQuizId(@Param("quizId") String quizId);
+    // Find attempts by student and course ordered by created date
+    List<QuizAttempt> findByStudentIdAndCourseIdOrderByCreatedAtDesc(String studentId, String courseId);
 }

@@ -1,193 +1,145 @@
 package com.elearning.quiz.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Entity
 @Table(name = "quiz_attempts")
 public class QuizAttempt {
-    
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
-    @NotBlank(message = "Quiz ID is required")
     @Column(name = "quiz_id", nullable = false)
     private String quizId;
     
-    @NotBlank(message = "Section ID is required")
     @Column(name = "section_id", nullable = false)
     private String sectionId;
     
-    @NotBlank(message = "Course ID is required")
     @Column(name = "course_id", nullable = false)
     private String courseId;
     
-    @NotBlank(message = "Student ID is required")
     @Column(name = "student_id", nullable = false)
     private String studentId;
     
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "JSON")
-    private Map<String, String> answers;
+    @Column(name = "score", nullable = false)
+    private Integer score;
     
-    @Min(value = 0, message = "Correct answers cannot be negative")
-    @Column(name = "correct_answers", nullable = false)
-    private Integer correctAnswers = 0;
+    @Column(name = "passed", nullable = false)
+    private Boolean passed;
     
-    @Min(value = 0, message = "Total questions cannot be negative")
-    @Column(name = "total_questions", nullable = false)
-    private Integer totalQuestions = 0;
-    
-    @DecimalMin(value = "0.0", message = "Percentage cannot be negative")
-    @DecimalMax(value = "100.0", message = "Percentage cannot exceed 100")
-    @Column(nullable = false)
-    private Double percentage = 0.0;
-    
-    @Column(nullable = false)
-    private Boolean passed = false;
-    
-    @Min(value = 0, message = "Time spent cannot be negative")
-    @Column(name = "time_spent", nullable = false)
-    private Integer timeSpent = 0;
-    
-    @Column(name = "completed_at")
+    @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
     
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quiz_id", insertable = false, updatable = false)
-    private Quiz quiz;
+    @Column(name = "answers", columnDefinition = "TEXT")
+    private String answers; // JSON string of answers
+    
+    @Transient
+    private java.util.Map<String, String> answersMap; // For easier handling
+    
+    @Column(name = "correct_answers")
+    private Integer correctAnswers;
+    
+    @Column(name = "total_questions")
+    private Integer totalQuestions;
+    
+    @Column(name = "percentage")
+    private Double percentage;
+    
+    @Column(name = "time_spent")
+    private Integer timeSpent; // seconds
+    
+    // Note: Quiz relationship handled via quizId field, not JPA mapping
     
     // Constructors
     public QuizAttempt() {}
     
-    public QuizAttempt(String quizId, String sectionId, String courseId, String studentId) {
+    public QuizAttempt(String quizId, String sectionId, String courseId, String studentId, 
+                      Integer score, Boolean passed) {
         this.quizId = quizId;
         this.sectionId = sectionId;
         this.courseId = courseId;
         this.studentId = studentId;
+        this.score = score;
+        this.passed = passed;
+        this.completedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        
+        // Set default values for other fields
+        this.answers = "{}"; // Empty JSON object
+        this.correctAnswers = 0;
+        this.totalQuestions = 0;
+        this.percentage = 0.0;
+        this.timeSpent = 0;
+    }
+    
+    // Full constructor with all fields
+    public QuizAttempt(String quizId, String sectionId, String courseId, String studentId, 
+                      Integer score, Boolean passed, Integer correctAnswers, Integer totalQuestions, 
+                      Double percentage, Integer timeSpent) {
+        this.quizId = quizId;
+        this.sectionId = sectionId;
+        this.courseId = courseId;
+        this.studentId = studentId;
+        this.score = score;
+        this.passed = passed;
+        this.correctAnswers = correctAnswers;
+        this.totalQuestions = totalQuestions;
+        this.percentage = percentage;
+        this.timeSpent = timeSpent;
+        this.completedAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.answers = "{}"; // Empty JSON object
     }
     
     // Getters and Setters
-    public String getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getQuizId() { return quizId; }
+    public void setQuizId(String quizId) { this.quizId = quizId; }
     
-    public String getQuizId() {
-        return quizId;
-    }
+    public String getSectionId() { return sectionId; }
+    public void setSectionId(String sectionId) { this.sectionId = sectionId; }
     
-    public void setQuizId(String quizId) {
-        this.quizId = quizId;
-    }
+    public String getCourseId() { return courseId; }
+    public void setCourseId(String courseId) { this.courseId = courseId; }
     
-    public String getSectionId() {
-        return sectionId;
-    }
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
     
-    public void setSectionId(String sectionId) {
-        this.sectionId = sectionId;
-    }
+    public Integer getScore() { return score; }
+    public void setScore(Integer score) { this.score = score; }
     
-    public String getCourseId() {
-        return courseId;
-    }
+    public Boolean getPassed() { return passed; }
+    public void setPassed(Boolean passed) { this.passed = passed; }
     
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
+    public LocalDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
     
-    public String getStudentId() {
-        return studentId;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
-    }
+    public String getAnswers() { return answers; }
+    public void setAnswers(String answers) { this.answers = answers; }
     
-    public Map<String, String> getAnswers() {
-        return answers;
-    }
+    public java.util.Map<String, String> getAnswersMap() { return answersMap; }
+    public void setAnswersMap(java.util.Map<String, String> answersMap) { this.answersMap = answersMap; }
     
-    public void setAnswers(Map<String, String> answers) {
-        this.answers = answers;
-    }
+    public Integer getCorrectAnswers() { return correctAnswers; }
+    public void setCorrectAnswers(Integer correctAnswers) { this.correctAnswers = correctAnswers; }
     
-    public Integer getCorrectAnswers() {
-        return correctAnswers;
-    }
+    public Integer getTotalQuestions() { return totalQuestions; }
+    public void setTotalQuestions(Integer totalQuestions) { this.totalQuestions = totalQuestions; }
     
-    public void setCorrectAnswers(Integer correctAnswers) {
-        this.correctAnswers = correctAnswers;
-    }
+    public Double getPercentage() { return percentage; }
+    public void setPercentage(Double percentage) { this.percentage = percentage; }
     
-    public Integer getTotalQuestions() {
-        return totalQuestions;
-    }
+    public Integer getTimeSpent() { return timeSpent; }
+    public void setTimeSpent(Integer timeSpent) { this.timeSpent = timeSpent; }
     
-    public void setTotalQuestions(Integer totalQuestions) {
-        this.totalQuestions = totalQuestions;
-    }
-    
-    public Double getPercentage() {
-        return percentage;
-    }
-    
-    public void setPercentage(Double percentage) {
-        this.percentage = percentage;
-    }
-    
-    public Boolean getPassed() {
-        return passed;
-    }
-    
-    public void setPassed(Boolean passed) {
-        this.passed = passed;
-    }
-    
-    public Integer getTimeSpent() {
-        return timeSpent;
-    }
-    
-    public void setTimeSpent(Integer timeSpent) {
-        this.timeSpent = timeSpent;
-    }
-    
-    public LocalDateTime getCompletedAt() {
-        return completedAt;
-    }
-    
-    public void setCompletedAt(LocalDateTime completedAt) {
-        this.completedAt = completedAt;
-    }
-    
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    
-    public Quiz getQuiz() {
-        return quiz;
-    }
-    
-    public void setQuiz(Quiz quiz) {
-        this.quiz = quiz;
-    }
+    // Note: Quiz getter/setter removed - relationship handled via quizId field
 }

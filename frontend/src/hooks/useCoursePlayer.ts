@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { courseApi } from '../services/courseApi'
 import { lessonProgressApi } from '../services/lessonProgressApi'
+// import { quizApi } from '../services/quizApi' // COMMENTED FOR TESTING
 import type { CourseDto, LessonDto } from '../services/courseApi'
 
 export const useCoursePlayer = () => {
@@ -171,70 +172,7 @@ export const useCoursePlayer = () => {
     }
   }, [courseData, currentLesson])
 
-  // Helper function to handle quiz completion and unlock next section
-  const handleQuizCompletion = useCallback((sectionId: string) => {
-    if (!courseData) return
-
-    console.log('🎯 Handling quiz completion for section:', sectionId)
-
-    // Update sections to mark quiz as completed and unlock next section
-    const updatedSections = courseData.sections.map((section, index) => {
-      const currentSectionIndex = courseData.sections.findIndex(s => s.id === sectionId)
-      
-      if (section.id === sectionId) {
-        // Mark quiz as completed AND mark all lessons in this section as completed
-        const updatedLessons = section.lessons.map(lesson => ({
-          ...lesson,
-          isCompleted: true // Mark all lessons in this section as completed
-        }))
-        
-        return { 
-          ...section, 
-          quizCompleted: true,
-          lessons: updatedLessons,
-          progress: {
-            completed: updatedLessons.length,
-            total: updatedLessons.length
-          }
-        }
-      }
-      
-      // Unlock the next section if this quiz is completed
-      if (index === currentSectionIndex + 1) {
-        console.log('🎯 🔓 Unlocking next section:', section.id)
-        return { ...section, isUnlocked: true }
-      }
-      
-      return section
-    })
-
-    // Calculate overall course progress
-    const totalLessons = updatedSections.reduce((sum, section) => sum + section.lessons.length, 0)
-    const completedLessons = updatedSections.reduce((sum, section) => 
-      sum + section.lessons.filter(lesson => lesson.isCompleted).length, 0
-    )
-    const courseProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
-
-    // Update course data with proper typing
-    const updatedCourseData: CourseDto = {
-      ...courseData,
-      sections: updatedSections.map(section => ({
-        ...section,
-        progress: {
-          completed: section.lessons.filter(lesson => lesson.isCompleted).length,
-          total: section.lessons.length,
-          duration: `${section.lessons.reduce((total, lesson) => {
-            const duration = parseInt(lesson.duration.replace(/\D/g, '')) || 0
-            return total + duration
-          }, 0)} min`
-        }
-      })),
-      progress: courseProgress
-    }
-
-    console.log('🎯 Updated course progress:', courseProgress, 'completed:', completedLessons, 'total:', totalLessons)
-    setCourseData(updatedCourseData)
-  }, [courseData])
+  // Note: handleQuizCompletion removed - logic moved to useQuizManagement for simplicity
 
   // Load course data
   const loadCourse = useCallback(async (slug: string) => {
@@ -273,9 +211,56 @@ export const useCoursePlayer = () => {
         // Calculate progress from API data
         const totalLessons = allLessons.length
         const completedCount = completedLessons.length
-        const courseProgress = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
+        // MOCK: Set progress to 100% for final quiz testing
+        const courseProgress = 100 // totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0
         
         console.log('DEBUG: Calculating progress from API - total:', totalLessons, 'completed:', completedCount, 'progress:', courseProgress)
+        
+        // TODO: Load quiz completion status from database (COMMENTED FOR TESTING)
+        // console.log('🎯 Loading quiz completion status from database...')
+        // try {
+        //   const completionStatus = await quizApi.getQuizCompletionStatus('student-001', course.id)
+        //   console.log('🎯 Quiz completion status loaded:', completionStatus)
+        //   
+        //   // Update course with completion status
+        //   if (completionStatus.sectionCompletionStatus) {
+        //     const updatedSections = course.sections.map((section, index) => {
+        //       const isQuizCompleted = completionStatus.sectionCompletionStatus[section.id] === true
+        //       const isUnlocked = index === 0 || completionStatus.sectionCompletionStatus[course.sections[index - 1].id] === true
+        //       
+        //       return {
+        //         ...section,
+        //         quizCompleted: isQuizCompleted,
+        //         isUnlocked: isUnlocked,
+        //         lessons: section.lessons.map(lesson => ({
+        //           ...lesson,
+        //           isCompleted: isQuizCompleted // Mark all lessons as completed if quiz is passed
+        //         }))
+        //       }
+        //     })
+        //     
+        //     course.sections = updatedSections
+        //     console.log('🎯 Course sections updated with completion status')
+        //   }
+        // } catch (error) {
+        //   console.error('🎯 Error loading quiz completion status:', error)
+        //   // Continue without completion status
+        // }
+        
+        // MOCK DATA: Unlock all sections and mark all lessons as completed for testing
+        console.log('🎯 MOCK: Unlocking all sections for final quiz testing')
+        const mockSections = course.sections.map((section) => ({
+          ...section,
+          quizCompleted: true, // Mark all quizzes as completed
+          isUnlocked: true, // Unlock all sections
+          lessons: section.lessons.map(lesson => ({
+            ...lesson,
+            isCompleted: true // Mark all lessons as completed
+          }))
+        }))
+        
+        course.sections = mockSections
+        console.log('🎯 MOCK: All sections unlocked and lessons completed')
         
         // Update course with calculated progress
         const courseWithProgress = {
@@ -345,7 +330,6 @@ export const useCoursePlayer = () => {
     setCourseData,
     setCurrentLesson,
     updateLessonProgress,
-    handleQuizCompletion,
     findCurrentLesson,
     findNextLesson
   }
