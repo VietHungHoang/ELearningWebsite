@@ -1,6 +1,6 @@
 package com.elearning.certificate_service.service.impl;
 
-import com.elearning.certificate_service.dto.request.CertificatePreviewRequest;
+import com.elearning.certificate_service.dto.request.IssueCertificateRequest;
 import com.elearning.certificate_service.service.CertificatePdfService;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -33,7 +33,7 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
         private static final DeviceRgb BACKGROUND_CREAM = new DeviceRgb(254, 252, 247);
 
         @Override
-        public byte[] generateCourseraStyleCertificate(CertificatePreviewRequest request) {
+        public byte[] generateCertificate(IssueCertificateRequest request) {
                 String organizationName = request.getOrganizationName() != null ? request.getOrganizationName()
                                 : "PROFESSIONAL E-LEARNING INSTITUTE";
 
@@ -158,7 +158,7 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                 canvas.stroke();
         }
 
-        private void createBalancedMainContent(Document document, CertificatePreviewRequest request,
+        private void createBalancedMainContent(Document document, IssueCertificateRequest request,
                         float width, float height, PdfFont serifBold, PdfFont serifItalic,
                         PdfFont serif, PdfFont sansSerif) {
 
@@ -244,7 +244,7 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                 document.add(details);
         }
 
-        private void createRightSidebar(PdfDocument pdf, Document document, CertificatePreviewRequest request,
+        private void createRightSidebar(PdfDocument pdf, Document document, IssueCertificateRequest request,
                         float width, float height, PdfFont sansSerif, PdfFont sansSerifBold) {
 
                 float sidebarX = width - 220f;
@@ -374,7 +374,7 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                 document.add(badgeText);
         }
 
-        private void createModernInfoPanel(Document document, CertificatePreviewRequest request,
+        private void createModernInfoPanel(Document document, IssueCertificateRequest request,
                         float centerX, float startY, float panelWidth, PdfFont sansSerif, PdfFont sansSerifBold) {
 
                 float currentY = startY;
@@ -398,13 +398,6 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                 canvas.lineTo(centerX + panelWidth / 2 - 20, currentY + 10);
                 canvas.stroke();
                 currentY -= 25f; // More space after divider
-
-                // Certificate ID
-                if (request.getCertificateId() != null) {
-                        addModernInfoItem(document, "Certificate ID", request.getCertificateId(),
-                                        centerX, currentY, panelWidth, sansSerif, sansSerifBold, NAVY_BLUE);
-                        currentY -= 40f; // Increased spacing
-                }
 
                 // Issue date
                 String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"));
@@ -458,7 +451,7 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                 document.add(valuePara);
         }
 
-        private void createBalancedSignatureArea(Document document, CertificatePreviewRequest request,
+        private void createBalancedSignatureArea(Document document, IssueCertificateRequest request,
                         float width, float height, PdfFont serifBold, PdfFont sansSerif) {
 
                 float sigY = 160f;
@@ -543,12 +536,6 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                                 .setFontColor(LIGHT_GRAY);
                 contact.setFixedPosition(1, centerX - footerWidth / 2, footerY - 15, footerWidth);
                 document.add(contact);
-        }
-
-        @Override
-        public byte[] generateCertificate(String learnerName, String courseName, String instructorName) {
-                // TODO Auto-generated method stub
-                throw new UnsupportedOperationException("Unimplemented method 'generateCertificate'");
         }
 
 }

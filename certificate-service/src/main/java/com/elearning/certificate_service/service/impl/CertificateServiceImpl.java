@@ -28,11 +28,18 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     public byte[] generateCertificatePdf(IssueCertificateRequest request) {
-        return certificatePdfService.generateCertificate(
-                request.getLearnerName() != null ? request.getLearnerName() : "Student #" + request.getLearnerId(),
-                request.getCourseName() != null ? request.getCourseName() : "Course #" + request.getCourseId(),
-                request.getInstructorName() != null ? request.getInstructorName()
-                        : "Instructor #" + request.getInstructorId());
+        // nếu cần default fallback, set trực tiếp vào request
+        if (request.getLearnerName() == null) {
+            request.setLearnerName("Student #" + request.getLearnerId());
+        }
+        if (request.getCourseName() == null) {
+            request.setCourseName("Course #" + request.getCourseId());
+        }
+        if (request.getInstructorName() == null) {
+            request.setInstructorName("Instructor #N/A");
+        }
+
+        return certificatePdfService.generateCertificate(request);
     }
 
     @Override
