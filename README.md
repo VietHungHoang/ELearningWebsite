@@ -17,4 +17,5 @@ tất cả các course nằm trong 1 list (giống udemy), mỗi course gồm:
 - **tổng quan số giờ học, số bài học** 
 - **TIỀN**
 - **đánh giá**
+- **ngày hết hạn**: auto xóa
 - ***nút remove***
