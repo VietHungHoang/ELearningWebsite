@@ -1,6 +1,7 @@
 package com.elearning.courseservice.controller;
 
 import com.elearning.courseservice.dto.response.ApiResponse;
+import com.elearning.courseservice.dto.response.CategoryBasicResponse;
 import com.elearning.courseservice.dto.response.CategoryResponse;
 import com.elearning.courseservice.services.CategoryService;
 
@@ -18,24 +19,24 @@ public class CategoryController {
     
     private final CategoryService categoryService;
     
-    // @GetMapping
-    // public ResponseEntity<ApiResponse<List<CategoryResponse>>> getAllCategories() {
-    //     List<CategoryResponse> categories = categoryService.getAllCategories();
-    //     ApiResponse<List<CategoryResponse>> response = ApiResponse.success(categories, "Categories retrieved successfully");
-    //     return ResponseEntity.ok(response);
-    // }
-    
-    @GetMapping("/active")
-    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getActiveCategories() {
-        List<CategoryResponse> categories = categoryService.getActiveCategories();
-        ApiResponse<List<CategoryResponse>> response = ApiResponse.success(categories, "Active categories retrieved successfully");
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getRootCategories() {
+        List<CategoryResponse> categories = categoryService.getRootCategories();
+        ApiResponse<List<CategoryResponse>> response = ApiResponse.success(categories, "Root categories retrieved successfully");
         return ResponseEntity.ok(response);
     }
     
-    // @GetMapping("/{id}")
-    // public ResponseEntity<ApiResponse<CategoryResponse>> getCategoryById(@PathVariable Long id) {
-    //     CategoryResponse category = categoryService.getCategoryById(id);
-    //     ApiResponse<CategoryResponse> response = ApiResponse.success(category, "Category retrieved successfully");
-    //     return ResponseEntity.ok(response);
-    // }
+    @GetMapping("/basic")
+    public ResponseEntity<ApiResponse<List<CategoryBasicResponse>>> getBasicRootCategories() {
+        List<CategoryBasicResponse> categories = categoryService.getBasicRootCategories();
+        ApiResponse<List<CategoryBasicResponse>> response = ApiResponse.success(categories, "Basic root categories retrieved successfully");
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/{parentId}/subcategories")
+    public ResponseEntity<ApiResponse<List<CategoryResponse>>> getSubcategories(@PathVariable Long parentId) {
+        List<CategoryResponse> categories = categoryService.getSubcategoriesByParentId(parentId);
+        ApiResponse<List<CategoryResponse>> response = ApiResponse.success(categories, "Subcategories retrieved successfully");
+        return ResponseEntity.ok(response);
+    }
 }

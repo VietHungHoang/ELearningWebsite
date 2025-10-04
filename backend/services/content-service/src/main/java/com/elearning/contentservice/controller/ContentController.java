@@ -1,5 +1,6 @@
 package com.elearning.contentservice.controller;
 
+import com.elearning.contentservice.dto.response.ApiResponse;
 import com.elearning.contentservice.dto.response.SectionResponse;
 import com.elearning.contentservice.service.ContentService;
 import lombok.RequiredArgsConstructor;
@@ -10,20 +11,21 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/content")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ContentController {
     
     private final ContentService contentService;
     
     @GetMapping("/courses/{courseId}/sections")
-    public ResponseEntity<List<SectionResponse>> getSectionsByCourseId(@PathVariable Long courseId) {
+    public ResponseEntity<ApiResponse<List<SectionResponse>>> getSectionsByCourseId(@PathVariable Long courseId) {
         List<SectionResponse> sections = contentService.getSectionsByCourseId(courseId);
-        return ResponseEntity.ok(sections);
+        return ResponseEntity.ok(ApiResponse.success(sections, "Sections retrieved successfully"));
     }
     
-    // @PostMapping("/courses/{courseId}/sections/base")
-    // public ResponseEntity<String> createBaseSectionForNewCourse(@PathVariable Long courseId) {
-    //     contentService.createBaseSectionForNewCourse(courseId);
-    //     return ResponseEntity.ok("Base section created successfully for course " + courseId);
-    // }
+    @PostMapping("/courses/{courseId}/sections/base")
+    public ResponseEntity<ApiResponse<String>> createBaseSectionForNewCourse(@PathVariable Long courseId) {
+        contentService.createBaseSectionForNewCourse(courseId);
+        return ResponseEntity.ok(ApiResponse.success("Success", "Base section created successfully for course " + courseId));
+    }
 }

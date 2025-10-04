@@ -3,7 +3,6 @@ package com.elearning.courseservice.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -49,7 +48,7 @@ public class CourseDetail extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String tags;
     
-    @Size(max = 10, message = "Language code must not exceed 10 characters")
-    @Builder.Default
-    private String language = "vi";
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "language_id")
+    private Language language;
 }

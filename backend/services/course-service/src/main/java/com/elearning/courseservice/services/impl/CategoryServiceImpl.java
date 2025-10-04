@@ -1,5 +1,6 @@
 package com.elearning.courseservice.services.impl;
 
+import com.elearning.courseservice.dto.response.CategoryBasicResponse;
 import com.elearning.courseservice.dto.response.CategoryResponse;
 import com.elearning.courseservice.exception.CategoryNotFoundException;
 import com.elearning.courseservice.mapper.CategoryMapper;
@@ -24,7 +25,32 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponse> getActiveCategories() {
-        return categoryRepository.findByIsActiveTrueOrderByNameAsc()
+        return categoryRepository.findAllByOrderByNameAsc()
+                .stream()
+                .map(CategoryMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<CategoryResponse> getRootCategories() {
+        return categoryRepository.findByParentIsNullOrderByNameAsc()
+                .stream()
+                .map(CategoryMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<CategoryBasicResponse> getBasicRootCategories() {
+        // Using projection for optimized query - only select id and name fields
+        return categoryRepository.findBasicRootCategories()
+                .stream()
+                .map(CategoryMapper::toBasicResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<CategoryResponse> getSubcategoriesByParentId(Long parentId) {
+        return categoryRepository.findByParentIdOrderByNameAsc(parentId)
                 .stream()
                 .map(CategoryMapper::toResponse)
                 .collect(Collectors.toList());

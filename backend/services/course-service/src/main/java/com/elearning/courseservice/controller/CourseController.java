@@ -2,6 +2,7 @@ package com.elearning.courseservice.controller;
 
 import com.elearning.courseservice.dto.request.CreateDraftCourseRequest;
 import com.elearning.courseservice.dto.response.ApiResponse;
+import com.elearning.courseservice.dto.response.CourseBasicResponse;
 import com.elearning.courseservice.services.CourseService;
 
 import jakarta.validation.Valid;
@@ -27,6 +28,16 @@ public class CourseController {
         Long courseId = courseService.createDraftCourse(request);
         ApiResponse<Long> response = ApiResponse.success(HttpStatus.CREATED, courseId, "Draft course created successfully");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    
+    /**
+     * Get basic course information by ID
+     */
+    @GetMapping("/{courseId}/info")
+    public ResponseEntity<ApiResponse<CourseBasicResponse>> getBasicCourseById(@PathVariable Long courseId) {
+        CourseBasicResponse course = courseService.getBasicCourseById(courseId);
+        ApiResponse<CourseBasicResponse> response = ApiResponse.success(course, "Basic course information retrieved successfully");
+        return ResponseEntity.ok(response);
     }
     
     // ===== COMMENTED OUT APIs - Will implement after content service completion =====

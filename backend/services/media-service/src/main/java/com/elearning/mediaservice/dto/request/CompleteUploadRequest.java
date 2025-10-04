@@ -19,5 +19,5 @@ public class CompleteUploadRequest {
     private String uploadId;
     
     @NotNull(message = "ETags list is required")
-    private List<String> etags; // ETags from S3 multipart upload
+    private List<String> etags;
 }

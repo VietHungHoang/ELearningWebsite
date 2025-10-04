@@ -1,6 +1,7 @@
 package com.elearning.courseservice.services;
 
 import com.elearning.courseservice.dto.request.CreateDraftCourseRequest;
+import com.elearning.courseservice.dto.response.CourseBasicResponse;
 
 public interface CourseService {
 
@@ -8,6 +9,11 @@ public interface CourseService {
      * Create a draft course - Only active method
      */
     Long createDraftCourse(CreateDraftCourseRequest request);
+    
+    /**
+     * Get basic course information by ID
+     */
+    CourseBasicResponse getBasicCourseById(Long courseId);
 
     /*
      * ===== COMMENTED OUT METHODS - Will implement after content service completion =====

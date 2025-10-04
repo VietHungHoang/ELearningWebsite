@@ -15,5 +15,6 @@ public class CategoryResponse {
     private String name;
     private String description;
     private String iconName;
-    private Boolean isActive;
+    private Long parentId; // ID of parent category
+    private String parentName; // Name of parent category for convenience
 }

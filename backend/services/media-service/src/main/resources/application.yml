@@ -1,12 +1,12 @@
 spring:
   application:
-    name: content-service
+    name: media-service
   
   # Database Configuration
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5434/content_service_db}
-    username: ${DATABASE_USERNAME:content_user}
-    password: ${DATABASE_PASSWORD:content_pass}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5435/media_service_db}
+    username: ${DATABASE_USERNAME:media_user}
+    password: ${DATABASE_PASSWORD:media_pass}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 20
@@ -21,7 +21,6 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
         order_inserts: true
@@ -42,49 +41,82 @@ spring:
 
 # Server Configuration
 server:
-  port: ${SERVER_PORT:8082}
+  port: ${SERVER_PORT:8083}
   servlet:
     context-path: /
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
 
-# AWS S3 Configuration
+# AWS S3 Configuration for Strategy Pattern
 aws:
   s3:
-    images:
-      bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-videos}
-      region: ${AWS_S3_REGION:ap-southeast-2}
-    videos:
-      bucket-name: ${AWS_S3_BUCKET_NAME:my-elearning-course-videos}
-      region: ${AWS_S3_REGION:ap-southeast-2}
+    buckets:
+      IMAGE:
+        bucket-name: ${AWS_S3_IMAGES_BUCKET_NAME:my-elearning-course-images}
+        region: ${AWS_S3_REGION:ap-southeast-2}
+        baseUrl: ${AWS_S3_IMAGES_BASE_URL:https://my-elearning-course-images.s3.ap-southeast-2.amazonaws.com/}
+      VIDEO:
+        bucket-name: ${AWS_S3_VIDEOS_BUCKET_NAME:my-elearning-course-videos}
+        region: ${AWS_S3_REGION:ap-southeast-2}
+        baseUrl: ${AWS_S3_VIDEOS_BASE_URL:https://my-elearning-course-videos.s3.ap-southeast-2.amazonaws.com/}
+      DOCUMENT:
+        bucket-name: ${AWS_S3_DOCUMENTS_BUCKET_NAME:my-elearning-documents}
+        region: ${AWS_S3_REGION:ap-southeast-2}
+        baseUrl: ${AWS_S3_DOCUMENTS_BASE_URL:https://my-elearning-documents.s3.ap-southeast-2.amazonaws.com/}
 
-# Image Upload Configuration
-image:
-  max-size-in-bytes: ${IMAGE_MAX_FILE_SIZE:10485760}  # 10MB
-  allowed-types:
-    - image/jpeg
-    - image/jpg
-    - image/png
-    - image/webp
-    - image/gif
-  allowed-extensions:
-    - .jpg
-    - .jpeg
-    - .png
-    - .webp
-    - .gif
+# Media Type Configurations for Strategy Pattern
+media:
+  image:
+    max-size-in-bytes: ${IMAGE_MAX_FILE_SIZE:10485760}  # 10MB
+    allowed-types:
+      - image/jpeg
+      - image/jpg
+      - image/png
+      - image/webp
+      - image/gif
+    allowed-extensions:
+      - .jpg
+      - .jpeg
+      - .png
+      - .webp
+      - .gif
 
-# Video Upload Configuration
-video:
-  max-file-size: ${VIDEO_MAX_FILE_SIZE:2147483648}  # 2GB
-  allowed-formats:
-    - mp4
-    - mov
-    - avi
-    - mkv
-    - webm
-  upload-chunk-size: 10485760  # 10MB
+  video:
+    max-size-in-bytes: ${VIDEO_MAX_FILE_SIZE:524288000}  # 500MB
+    allowed-types:
+      - video/mp4
+      - video/quicktime
+      - video/x-msvideo
+      - video/webm
+      - video/x-ms-wmv
+    allowed-extensions:
+      - .mp4
+      - .mov
+      - .avi
+      - .webm
+      - .wmv
+
+  document:
+    max-size-in-bytes: ${DOCUMENT_MAX_FILE_SIZE:52428800}  # 50MB
+    allowed-types:
+      - application/pdf
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.presentationml.presentation
+      - application/vnd.ms-powerpoint
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      - application/vnd.ms-excel
+      - text/plain
+    allowed-extensions:
+      - .pdf
+      - .docx
+      - .doc
+      - .pptx
+      - .ppt
+      - .xlsx
+      - .xls
+      - .txt
 
 # Logging Configuration
 logging:

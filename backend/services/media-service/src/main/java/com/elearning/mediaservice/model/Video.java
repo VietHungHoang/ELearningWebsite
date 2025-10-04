@@ -61,7 +61,6 @@ public class Video {
     // Upload tracking
     private String uploadId; // AWS multipart upload ID
     private Integer totalChunks; // Total number of chunks
-    private Integer uploadedChunks; // Number of successfully uploaded chunks
     
     // Access control
     @Builder.Default

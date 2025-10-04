@@ -19,24 +19,30 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     Optional<Video> findByUploadId(String uploadId);
     
     // Find videos by lesson
-    // List<Video> findByLessonIdAndIsActiveTrueOrderByCreatedAtAsc(Long lessonId);
+    List<Video> findByLessonIdAndIsActiveTrue(Long lessonId);
     
-    // Page<Video> findByLessonIdAndIsActiveTrueOrderByCreatedAtAsc(Long lessonId, Pageable pageable);
+    Page<Video> findByLessonIdAndIsActiveTrue(Long lessonId, Pageable pageable);
     
     // Find videos by status
     List<Video> findByStatus(VideoStatus status);
     
+    Page<Video> findByStatusAndIsActiveTrue(VideoStatus status, Pageable pageable);
+    
     // Find videos by uploader
-    Page<Video> findByUploadedByAndIsActiveTrueOrderByCreatedAtDesc(Long uploadedBy, Pageable pageable);
+    Page<Video> findByUploadedByAndIsActiveTrue(Long uploadedBy, Pageable pageable);
     
     // Find preview videos
     List<Video> findByIsPreviewTrueAndStatusAndIsActiveTrueOrderByCreatedAtDesc(VideoStatus status);
+    
+    Page<Video> findByIsPreviewTrueAndIsActiveTrue(Pageable pageable);
     
     // Count videos by lesson
     long countByLessonIdAndIsActiveTrue(Long lessonId);
     
     // Count videos by status
     long countByStatus(VideoStatus status);
+    
+    long countByStatusAndIsActiveTrue(VideoStatus status);
     
     // Find videos needing processing
     @Query("SELECT v FROM Video v WHERE v.status = :status AND v.processingStartedAt IS NULL")

@@ -13,10 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class PresignedUrlResponse {
     
-    private String imageKey;
+    private String objectKey;
     private String presignedUrl;
-    private String contentType;
-    private Long courseId;
+    private String finalUrl;
     private LocalDateTime expiresAt;
-    private String description;
 }

@@ -1,106 +1,54 @@
 # Media Service
 
 ## Overview
-Media Service quản lý tất cả nội dung multimedia trong hệ thống E-learning, bao gồm upload video chunked lên S3, upload ảnh thumbnail cho khóa học, xử lý content và streaming.
-
-## Features
-- ✅ **Chunked Video Upload**: Upload video files lên đến 2GB với resume capability
-- ✅ **Image Upload**: Upload ảnh thumbnail cho khóa học (JPG, PNG, WEBP)
-- ✅ **Direct S3 Upload**: Client upload trực tiếp lên S3 qua presigned URLs
-- ✅ **Content Processing**: Tự động extract metadata, generate thumbnails
-- ✅ **Progress Tracking**: Real-time upload và processing progress
-- ✅ **Access Control**: Preview videos (free) và paid content
-- ✅ **Multi-format Support**: MP4, WebM videos; JPG, PNG, WEBP images
-- ✅ **Async Processing**: Background content processing với queue system
+Media Service quản lý tất cả nội dung multimedia trong hệ thống E-learning, hỗ trợ upload video với cơ chế multipart upload lên S3, xử lý ảnh và các loại media khác.
 
 ## Architecture
 
-### Upload Flow
+### Multipart Upload Flow (Recommended)
 ```
-1. Client Request → Generate Presigned URLs
-2. Client Upload → Direct to S3 (chunked)
-3. Complete Upload → S3 Multipart Complete
-4. Async Processing → Extract metadata + Generate thumbnail
-5. Update Status → READY for streaming
-```
-
-### Domain Model
-```
-Video Entity:
-├── Identity: id, lessonId, title, description
-├── File Info: originalFileName, fileSize, durationSeconds
-├── Storage: videoUrl, thumbnailUrl
-├── Processing: status, processingMessage, processingTimestamps
-├── Upload: uploadId, totalChunks, uploadedChunks
-├── Access: isPreview, isActive, viewCount
-└── Audit: uploadedBy, createdAt, updatedAt
+1. Initiate Upload → Backend tạo Video entity và generate presigned URLs cho từng chunk
+2. Client Upload → Upload từng chunk song song trực tiếp lên S3
+3. Complete Upload → Client gửi ETags, backend complete multipart upload trên S3
+4. Processing → Background processing để extract metadata và generate thumbnail
+5. Ready → Video sẵn sàng để streaming
 ```
 
-### Video Status Flow
+### Legacy Upload Flow
 ```
-UPLOADING → PROCESSING → READY
-    ↓           ↓         ↑
-   FAILED ←─── FAILED ───┘
+1. Generate Presigned URL → Client yêu cầu presigned URL
+2. Direct Upload → Client upload trực tiếp lên S3
 ```
 
 ## API Endpoints
 
-### Video Upload Management
-- `POST /api/videos/upload/initiate` - Khởi tạo upload session
-- `POST /api/videos/upload/complete` - Hoàn thành upload
-- `GET /api/videos/upload/status/{uploadId}` - Kiểm tra progress
+### Video Multipart Upload (Recommended)
 
-### Video CRUD
-- `GET /api/videos/{id}` - Lấy thông tin video theo ID
-- `GET /api/videos/lesson/{lessonId}` - Lấy videos của lesson
-- `GET /api/videos/lesson/{lessonId}/paginated` - Lấy videos có phân trang
-- `PUT /api/videos/{id}` - Cập nhật thông tin video
-- `DELETE /api/videos/{id}` - Xóa video (soft delete)
-
-### Video Queries
-- `GET /api/videos/status/{status}` - Lấy videos theo status
-- `GET /api/videos/uploader/{uploaderId}` - Lấy videos theo uploader
-- `GET /api/videos/preview` - Lấy preview videos (free content)
-
-### Image Upload Management
-- `POST /api/images/presigned-url` - Tạo presigned URL cho image upload
-- `POST /api/images/upload` - Upload ảnh trực tiếp qua multipart form
-- `DELETE /api/images/{imageKey}` - Xóa ảnh khỏi S3
-- `POST /api/images/validate` - Validate file ảnh
-- `GET /api/images/health` - Health check cho image service
-
-### Statistics
-- `GET /api/videos/count/lesson/{lessonId}` - Đếm videos trong lesson
-- `GET /api/videos/count/status/{status}` - Đếm videos theo status
-
-### Processing
-- `POST /api/videos/{id}/process` - Trigger manual processing
-- `GET /api/videos/processing/pending` - Lấy videos đang chờ processing
-
-## Usage Examples
-
-### 1. Initiate Upload
-```bash
+#### 1. Initiate Upload
+```http
 POST /api/videos/upload/initiate
-Headers: X-User-Id: 123
+Headers: X-User-Id: {userId}
+Content-Type: application/json
+
 {
-  "lessonId": 456,
-  "fileName": "course-intro.mp4",
+  "lessonId": 123,
+  "fileName": "lesson-video.mp4",
   "fileSize": 1073741824,
-  "title": "Course Introduction",
-  "description": "Welcome to the course",
+  "title": "Introduction to Spring Boot",
+  "description": "Basic concepts of Spring Boot framework",
   "isPreview": true
 }
 
 Response:
 {
   "status": 200,
+  "message": "Upload initiated successfully",
   "data": {
-    "videoId": 789,
+    "videoId": 456,
     "uploadId": "uuid-upload-id",
     "presignedUrls": [
-      "https://s3.../chunk-0?signature=...",
-      "https://s3.../chunk-1?signature=..."
+      "https://s3.../videos/uuid-upload-id.mp4?uploadId=...&partNumber=1&signature=...",
+      "https://s3.../videos/uuid-upload-id.mp4?uploadId=...&partNumber=2&signature=..."
     ],
     "chunkSize": 5242880,
     "totalChunks": 205
@@ -108,48 +56,41 @@ Response:
 }
 ```
 
-### 2. Upload Chunks (Client Side)
-```javascript
-// Client uploads each chunk directly to S3
-for (let i = 0; i < totalChunks; i++) {
-    const chunk = file.slice(i * chunkSize, (i + 1) * chunkSize);
-    const response = await fetch(presignedUrls[i], {
-        method: 'PUT',
-        body: chunk
-    });
-    const etag = response.headers.get('ETag');
-    etags.push(etag);
-}
-```
-
-### 3. Complete Upload
-```bash
+#### 2. Complete Upload
+```http
 POST /api/videos/upload/complete
+Content-Type: application/json
+
 {
   "uploadId": "uuid-upload-id",
-  "etags": ["etag1", "etag2", "etag3", ...]
+  "etags": ["\"etag1\"", "\"etag2\"", "\"etag3\""]
 }
 
 Response:
 {
   "status": 200,
+  "message": "Upload completed successfully",
   "data": {
-    "id": 789,
+    "id": 456,
+    "lessonId": 123,
+    "title": "Introduction to Spring Boot",
     "status": "PROCESSING",
-    "videoUrl": "https://s3.../videos/uuid-upload-id.mp4"
+    "videoUrl": "https://s3.../videos/uuid-upload-id.mp4",
+    "uploadProgressPercent": 100
   }
 }
 ```
 
-### 4. Check Processing Status
-```bash
-GET /api/videos/upload/status/uuid-upload-id
+#### 3. Check Upload Status
+```http
+GET /api/videos/upload/status/{uploadId}
 
 Response:
 {
   "status": 200,
+  "message": "Upload status retrieved successfully",
   "data": {
-    "id": 789,
+    "id": 456,
     "status": "READY",
     "videoUrl": "https://s3.../videos/uuid-upload-id.mp4",
     "thumbnailUrl": "https://s3.../thumbnails/uuid-upload-id.jpg",
@@ -159,94 +100,370 @@ Response:
 }
 ```
 
+### Video Management
+
+#### 4. Get Video by ID
+```http
+GET /api/videos/{id}
+
+Response:
+{
+  "status": 200,
+  "message": "Video retrieved successfully",
+  "data": {
+    "id": 456,
+    "lessonId": 123,
+    "title": "Introduction to Spring Boot",
+    "description": "Basic concepts of Spring Boot framework",
+    "originalFileName": "lesson-video.mp4",
+    "fileSize": 1073741824,
+    "durationSeconds": 300,
+    "videoUrl": "https://s3.../videos/uuid-upload-id.mp4",
+    "thumbnailUrl": "https://s3.../thumbnails/uuid-upload-id.jpg",
+    "status": "READY",
+    "isPreview": true,
+    "isActive": true,
+    "viewCount": 0,
+    "uploadedBy": 789,
+    "createdAt": "2024-01-15T10:30:00",
+    "updatedAt": "2024-01-15T10:35:00"
+  }
+}
+```
+
+#### 5. Get Videos by Lesson ID
+```http
+GET /api/videos/lesson/{lessonId}
+
+Response:
+{
+  "status": 200,
+  "message": "Videos retrieved successfully",
+  "data": [
+    {
+      "id": 456,
+      "lessonId": 123,
+      "title": "Introduction to Spring Boot",
+      "status": "READY",
+      "videoUrl": "https://s3.../videos/uuid-upload-id.mp4"
+    }
+  ]
+}
+```
+
+#### 6. Get Videos by Lesson ID (Paginated)
+```http
+GET /api/videos/lesson/{lessonId}/paginated?page=0&size=10&sort=createdAt&direction=desc
+
+Response:
+{
+  "status": 200,
+  "message": "Videos retrieved successfully",
+  "data": {
+    "content": [...],
+    "pageable": {...},
+    "totalElements": 25,
+    "totalPages": 3,
+    "number": 0,
+    "size": 10
+  }
+}
+```
+
+#### 7. Update Video
+```http
+PUT /api/videos/{id}?title=New Title&description=New Description&isPreview=false
+
+Response:
+{
+  "status": 200,
+  "message": "Video updated successfully",
+  "data": {
+    "id": 456,
+    "title": "New Title",
+    "description": "New Description",
+    "isPreview": false
+  }
+}
+```
+
+#### 8. Delete Video (Soft Delete)
+```http
+DELETE /api/videos/{id}
+
+Response:
+{
+  "status": 200,
+  "message": "Video deleted successfully",
+  "data": null
+}
+```
+
+### Video Queries
+
+#### 9. Get Videos by Status
+```http
+GET /api/videos/status/{status}?page=0&size=10
+
+Response:
+{
+  "status": 200,
+  "message": "Videos retrieved successfully",
+  "data": {
+    "content": [...],
+    "totalElements": 15
+  }
+}
+```
+
+#### 10. Get Videos by Uploader
+```http
+GET /api/videos/uploader/{uploaderId}?page=0&size=10
+
+Response:
+{
+  "status": 200,
+  "message": "Videos retrieved successfully",
+  "data": {
+    "content": [...],
+    "totalElements": 8
+  }
+}
+```
+
+#### 11. Get Preview Videos
+```http
+GET /api/videos/preview?page=0&size=10
+
+Response:
+{
+  "status": 200,
+  "message": "Preview videos retrieved successfully",
+  "data": {
+    "content": [...],
+    "totalElements": 12
+  }
+}
+```
+
+### Statistics
+
+#### 12. Count Videos by Lesson
+```http
+GET /api/videos/count/lesson/{lessonId}
+
+Response:
+{
+  "status": 200,
+  "message": "Video count retrieved successfully",
+  "data": 5
+}
+```
+
+#### 13. Count Videos by Status
+```http
+GET /api/videos/count/status/{status}
+
+Response:
+{
+  "status": 200,
+  "message": "Video count retrieved successfully",
+  "data": 25
+}
+```
+
+### Processing
+
+#### 14. Trigger Manual Processing
+```http
+POST /api/videos/{id}/process
+
+Response:
+{
+  "status": 200,
+  "message": "Video processing triggered successfully",
+  "data": null
+}
+```
+
+#### 15. Get Pending Processing Videos
+```http
+GET /api/videos/processing/pending?page=0&size=10
+
+Response:
+{
+  "status": 200,
+  "message": "Pending videos retrieved successfully",
+  "data": {
+    "content": [...],
+    "totalElements": 3
+  }
+}
+```
+
+### Legacy API
+
+#### 16. Generate Presigned URL (Legacy)
+```http
+POST /api/videos/presigned-url
+Content-Type: application/json
+
+{
+  "courseId": 123,
+  "contentType": "video/mp4"
+}
+
+Response:
+{
+  "status": 200,
+  "message": "Presigned URL generated successfully",
+  "data": {
+    "objectKey": "videos/uuid.mp4",
+    "presignedUrl": "https://s3.../videos/uuid.mp4?signature=...",
+    "finalUrl": "https://s3.../videos/uuid.mp4",
+    "expiresAt": "2024-01-15T11:00:00"
+  }
+}
+```
+
+## Video Status Flow
+```
+UPLOADING → PROCESSING → READY
+    ↓           ↓         
+   FAILED ←─── FAILED    
+```
+
+- **UPLOADING**: Video đang được upload
+- **PROCESSING**: Video đang được xử lý (extract metadata, generate thumbnail)
+- **READY**: Video sẵn sàng để streaming
+- **FAILED**: Upload hoặc processing thất bại
+
+## Client Implementation Example
+
+### JavaScript Multipart Upload
+```javascript
+// 1. Initiate upload
+const initiateResponse = await fetch('/api/videos/upload/initiate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-User-Id': userId
+  },
+  body: JSON.stringify({
+    lessonId: 123,
+    fileName: file.name,
+    fileSize: file.size,
+    title: "Video Title",
+    description: "Video Description",
+    isPreview: true
+  })
+});
+
+const { data } = await initiateResponse.json();
+const { presignedUrls, chunkSize, uploadId } = data;
+
+// 2. Upload chunks in parallel
+const etags = [];
+const uploadPromises = [];
+
+for (let i = 0; i < presignedUrls.length; i++) {
+  const start = i * chunkSize;
+  const end = Math.min(start + chunkSize, file.size);
+  const chunk = file.slice(start, end);
+  
+  const uploadPromise = fetch(presignedUrls[i], {
+    method: 'PUT',
+    body: chunk
+  }).then(response => {
+    const etag = response.headers.get('ETag');
+    etags[i] = etag;
+    return etag;
+  });
+  
+  uploadPromises.push(uploadPromise);
+}
+
+await Promise.all(uploadPromises);
+
+// 3. Complete upload
+const completeResponse = await fetch('/api/videos/upload/complete', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    uploadId: uploadId,
+    etags: etags
+  })
+});
+
+const result = await completeResponse.json();
+console.log('Upload completed:', result.data);
+```
+
 ## Configuration
 
-### Application Properties
-```properties
-# Database
-spring.datasource.url=jdbc:postgresql://localhost:5432/media_service_db
+### application.yml
+```yaml
+media:
+  video:
+    max-size-in-bytes: 2147483648  # 2GB
+    chunk-size-in-bytes: 5242880   # 5MB
+    presigned-url-expiry-minutes: 15
+    allowed-types:
+      - video/mp4
+      - video/quicktime
+      - video/webm
+    allowed-extensions:
+      - .mp4
+      - .mov
+      - .webm
 
-# File Upload
-spring.servlet.multipart.max-file-size=10MB
-app.video.chunk-size=5242880
-app.video.max-file-size=2147483648
+aws:
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:elearning-videos}
+    region: ${AWS_REGION:us-east-1}
 
-# S3 Configuration
-app.s3.bucket-name=elearning-videos
-app.s3.region=us-east-1
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/media_service_db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:password}
 ```
 
-### Environment Variables
-```bash
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-S3_BUCKET_NAME=elearning-videos
-```
+## Performance & Security
 
-## Database Schema
-```sql
-CREATE TABLE videos (
-    id BIGSERIAL PRIMARY KEY,
-    lesson_id BIGINT NOT NULL,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    original_file_name VARCHAR(255) NOT NULL,
-    file_size BIGINT NOT NULL,
-    duration_seconds INTEGER,
-    video_url VARCHAR(500),
-    thumbnail_url VARCHAR(500),
-    status VARCHAR(20) NOT NULL DEFAULT 'UPLOADING',
-    processing_message TEXT,
-    upload_id VARCHAR(255) UNIQUE,
-    total_chunks INTEGER,
-    uploaded_chunks INTEGER DEFAULT 0,
-    is_preview BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN DEFAULT TRUE,
-    view_count INTEGER DEFAULT 0,
-    uploaded_by BIGINT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    processing_started_at TIMESTAMP,
-    processing_completed_at TIMESTAMP
-);
+### Performance
+- **Multipart Upload**: Upload file lớn với chunks 5MB để tối ưu performance
+- **Parallel Upload**: Client có thể upload nhiều chunks song song
+- **Direct S3 Upload**: Không qua backend server, giảm tải cho server
+- **Async Processing**: Background processing không block upload process
 
--- Indexes
-CREATE INDEX idx_videos_lesson_id ON videos(lesson_id);
-CREATE INDEX idx_videos_upload_id ON videos(upload_id);
-CREATE INDEX idx_videos_status ON videos(status);
-CREATE INDEX idx_videos_uploaded_by ON videos(uploaded_by);
+### Security
+- **Presigned URLs**: Time-limited access (15 phút)
+- **User Validation**: Kiểm tra quyền user trước khi generate URLs
+- **File Type Validation**: Chỉ accept video formats được phép
+- **Size Limits**: Maximum 2GB per file
+
+## Error Handling
+
+### Common Error Codes
+- **400**: Invalid request (file size, format, missing parameters)
+- **404**: Video not found
+- **500**: Server error (S3 connection, database error)
+
+### Error Response Format
+```json
+{
+  "status": 400,
+  "message": "Invalid request",
+  "data": "File size exceeds maximum allowed size"
+}
 ```
 
 ## Technologies
-- **Spring Boot 3.5.5** - Main framework
-- **Spring Data JPA** - Database access
-- **PostgreSQL** - Database
-- **AWS S3** - Video storage
-- **FFmpeg** - Video processing (future)
-- **Async Processing** - Background jobs
-
-## Performance Considerations
-- **Chunked Upload**: 5MB chunks để tối ưu network và memory
-- **Direct S3 Upload**: Không qua backend server
-- **Async Processing**: Background video processing
-- **Lazy Loading**: Video content chỉ load khi cần
-- **CDN Integration**: Fast global content delivery
-
-## Security
-- **Presigned URLs**: Time-limited access to S3
-- **User Validation**: Check user permissions trước khi upload
-- **File Type Validation**: Chỉ accept video formats
-- **Size Limits**: Maximum 2GB per file
-
-## Monitoring & Analytics
-- Upload success/failure rates
-- Processing time metrics  
-- Video view statistics
-- Storage usage tracking
-
-## Future Enhancements
-- **HLS Streaming**: Adaptive bitrate streaming
-- **Video Transcoding**: Multiple quality versions
-- **Subtitle Support**: SRT, VTT file uploads
-- **Video Analytics**: Detailed viewing behavior
-- **Offline Download**: Mobile app support
+- **Spring Boot 3.5.5**
+- **Spring Data JPA**  
+- **PostgreSQL**
+- **AWS S3 SDK**
+- **AWS S3 Multipart Upload**

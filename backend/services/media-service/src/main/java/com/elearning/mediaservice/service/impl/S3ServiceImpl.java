@@ -1,19 +1,20 @@
 package com.elearning.mediaservice.service.impl;
 
-import com.elearning.mediaservice.config.ImageProperties;
-import com.elearning.mediaservice.config.S3ImagesProperties;
-import com.elearning.mediaservice.config.S3VideosProperties;
-import com.elearning.mediaservice.dto.response.InitiateUploadResponse;
+import com.elearning.mediaservice.config.StorageInfo;
+import com.elearning.mediaservice.config.StorageProperties;
+import com.elearning.mediaservice.dto.response.PresignedUrlResponse;
+import com.elearning.mediaservice.enums.MediaType;
+
 import com.elearning.mediaservice.service.S3Service;
+import com.elearning.mediaservice.strategy.MediaProcessingStrategy;
+import com.elearning.mediaservice.strategy.MediaStrategyFactory;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.UploadPartRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
@@ -21,226 +22,228 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * S3 Service Implementation - main service that orchestrates S3 operations
+ * Uses MediaProcessingStrategy to determine logic for different media types
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
     
-    private final S3ImagesProperties s3ImagesProperties;
-    private final S3VideosProperties s3VideosProperties;
-    private final ImageProperties imageProperties;
+    private final MediaStrategyFactory mediaStrategyFactory;
+    private final StorageProperties storageProperties;
     
-    private S3Presigner getS3Presigner(Region region) {
-        // Using default credential provider (IAM roles, environment variables, etc.)
-        return S3Presigner.builder()
-                .region(region)
-                .build();
+    @Override
+    public String generateObjectKey(String contentType) {
+        log.info("Generating object key for content type: {}", contentType);
+        
+        MediaProcessingStrategy strategy = mediaStrategyFactory.getStrategyByContentType(contentType);
+        String objectKey = strategy.generateObjectKey(contentType);
+        
+        log.debug("Generated object key: {} for media type: {}", objectKey, strategy.getMediaType());
+        return objectKey;
     }
 
-    private S3Client getS3Client(Region region) {
-        return S3Client.builder()
-                .region(region)
-                .build();
+    @Override
+    public String generateObjectUrl(StorageInfo storageInfo, String objectKey) {
+        return storageInfo.getBaseUrl() + objectKey;
     }
     
-    public String getUploadId(String key, String contentType, int totalChunks) {
+    @Override
+    public PresignedUrlResponse generatePresignedUrl(String contentType) {
+        return null;
+//        log.info("Generating presigned URL for content type: {}", contentType);
+//
+//        // Use strategy to get media-specific logic
+//        MediaProcessingStrategy strategy = mediaStrategyFactory.getStrategyByContentType(contentType);
+//        MediaType mediaType = strategy.getMediaType();
+//
+//        String objectKey = strategy.generateObjectKey(contentType);
+//
+//        String presignedUrl = generateS3PresignedUrl(objectKey, contentType, mediaType, strategy.getPresignedUrlExpiryMinutes());
+//
+//        String finalUrl = generateFinalUrl(objectKey, mediaType);
+//
+//        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(strategy.getPresignedUrlExpiryMinutes());
+//
+//        PresignedUrlResponse response = PresignedUrlResponse.builder()
+//                .objectKey(objectKey)
+//                .presignedUrl(presignedUrl)
+//                .finalUrl(finalUrl)
+//                .expiresAt(expiresAt)
+//                .build();
+//
+//        log.info("Generated presigned URL successfully for {} with key: {}", mediaType, objectKey);
+//        return response;
+    }
 
-        try (S3Client s3Client = getS3Client(Region.of(s3VideosProperties.getRegion()))) {
-            CreateMultipartUploadRequest request = CreateMultipartUploadRequest.builder()
-                .bucket(s3VideosProperties.getBucketName())
-                .key(key)
-                .contentType(contentType)
-                .build();
+    public String getUploadIDForMultipartUpload(StorageInfo storageInfo, String videoKey) {
+        try (S3Client s3Client = S3Client.builder()
+                .region(Region.of(storageInfo.getRegion()))
+                .build()) {
 
-        CreateMultipartUploadResponse response = s3Client.createMultipartUpload(request);
-        return response.uploadId();
+            // Initiate multipart upload
+            CreateMultipartUploadRequest createRequest = CreateMultipartUploadRequest.builder()
+                    .bucket(storageInfo.getBucketName())
+                    .key(videoKey)
+                    .contentType("video/mp4")
+                    .build();
+
+            CreateMultipartUploadResponse createResponse = s3Client.createMultipartUpload(createRequest);
+            String uploadId = createResponse.uploadId();
+
+            log.info("AWS multipart upload created with ID: {}", uploadId);
+            return uploadId;
 
         } catch (Exception e) {
-            log.error("Failed to generate presigned URL for video: {}", key, e);
-            throw new RuntimeException("Failed to generate presigned URL", e);
+            log.error("Failed to create multipart upload for video key: {}", videoKey, e);
+            throw new RuntimeException("Failed to create multipart upload", e);
         }
-        
     }
 
-@Override
-public List<String> generatePresignedUrls(String key, String uploadId, int totalChunks) {
-    log.info("Generating {} presigned URLs for upload ID: {}", totalChunks, uploadId);
     
-    List<String> urls = new ArrayList<>();
-    
-    try (S3Presigner presigner = getS3Presigner(Region.of(s3VideosProperties.getRegion()))) {
+    @Override
+    public String getPresignedUrlForUploadPart(S3Presigner presigner, UploadPartRequest uploadPartRequest) {
+        log.info("Generating presigned URL for upload part - Bucket: {}, Key: {}, UploadId: {}, PartNumber: {}", 
+                 uploadPartRequest.bucket(), uploadPartRequest.key(), 
+                 uploadPartRequest.uploadId(), uploadPartRequest.partNumber());
         
-        for (int partNumber = 1; partNumber <= totalChunks; partNumber++) {
-            // Create upload part request
-            UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
-                    .bucket(s3VideosProperties.getBucketName())
-                    .key(key) // The key for the multipart upload
-                    .uploadId(uploadId)
-                    .partNumber(partNumber)
-                    .build();
-            
-            // Create presign request
+        try {
+            // Create presign request for upload part
             UploadPartPresignRequest presignRequest = UploadPartPresignRequest.builder()
-                    .signatureDuration(Duration.ofHours(1)) // 1 hour expiry
+                    .signatureDuration(Duration.ofMinutes(15))
                     .uploadPartRequest(uploadPartRequest)
                     .build();
             
-            // Generate presigned URL
+            // Generate presigned upload part request
             PresignedUploadPartRequest presignedRequest = presigner.presignUploadPart(presignRequest);
+            
             String presignedUrl = presignedRequest.url().toString();
+            log.info("Successfully generated presigned URL for upload part {}", uploadPartRequest.partNumber());
             
-            urls.add(presignedUrl);
-            log.debug("Generated presigned URL for part {}: {}", partNumber, presignedUrl);
-        }
-        
-        log.info("Successfully generated {} presigned URLs for upload ID: {}", totalChunks, uploadId);
-        return urls;
-        
-    } catch (Exception e) {
-        log.error("Failed to generate presigned URLs for upload ID: {}", uploadId, e);
-        throw new RuntimeException("Failed to generate presigned URLs", e);
-    }
-}
-    
-    @Override
-    public String completeMultipartUpload(String uploadId, List<String> etags) {
-        log.info("Completing multipart upload for ID: {} with {} parts", uploadId, etags.size());
-        
-        // Mock video URL - replace with actual S3 implementation
-        return "https://mock-s3-bucket.amazonaws.com/videos/" + uploadId + ".mp4";
-    }
-    
-    @Override
-    public void processVideo(String videoUrl, String uploadId) {
-        log.info("Processing video at URL: {} for upload ID: {}", videoUrl, uploadId);
-        
-        // Mock processing - replace with actual FFmpeg implementation
-        try {
-            Thread.sleep(1000); // Simulate processing time
-            log.info("Video processing completed for upload ID: {}", uploadId);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Video processing interrupted", e);
-        }
-    }
-    
-    @Override
-    public String getThumbnailUrl(String uploadId) {
-        // Mock thumbnail URL - replace with actual S3 implementation
-        return "https://mock-s3-bucket.amazonaws.com/thumbnails/" + uploadId + ".jpg";
-    }
-    
-    @Override
-    public Integer getVideoDuration(String videoUrl) {
-        log.info("Extracting duration for video: {}", videoUrl);
-        
-        // Mock duration - replace with actual FFmpeg implementation
-        return 300; // 5 minutes
-    }
-    
-    @Override
-    public String generateImagePresignedUrl(String imageKey, String contentType) {
-        log.info("Generating presigned URL for image: {} with content type: {}", imageKey, contentType);
-        
-        // Validate content type
-        if (!imageProperties.getAllowedTypes().contains(contentType.toLowerCase())) {
-            throw new IllegalArgumentException("Unsupported image type: " + contentType);
-        }
-        
-        try (S3Presigner presigner = getS3Presigner(Region.of(s3ImagesProperties.getRegion()))) {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(s3ImagesProperties.getBucketName())
-                    .key(imageKey)
-                    .contentType(contentType)
-                    .build();
-            
-            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .signatureDuration(Duration.ofMinutes(5)) // 5 minutes- expiry
-                    .putObjectRequest(putObjectRequest)
-                    .build();
-            
-            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
-            String presignedUrl = presignedRequest.url().toString();
-            
-            log.info("Generated presigned URL: {}", presignedUrl);
             return presignedUrl;
             
         } catch (Exception e) {
-            log.error("Failed to generate presigned URL for image: {}", imageKey, e);
-            throw new RuntimeException("Failed to generate presigned URL", e);
+            log.error("Failed to generate presigned URL for upload part - Bucket: {}, Key: {}, UploadId: {}, PartNumber: {}", 
+                     uploadPartRequest.bucket(), uploadPartRequest.key(), 
+                     uploadPartRequest.uploadId(), uploadPartRequest.partNumber(), e);
+            throw new RuntimeException("Failed to generate presigned URL for upload part", e);
         }
     }
     
     @Override
-    public String uploadImage(byte[] imageData, String imageKey, String contentType) {
-        log.info("Uploading image with key: {} and size: {} bytes", imageKey, imageData.length);
+    public List<String> getPresignedUrlsForMultipartUpload(StorageInfo storageInfo, String objectKey, String uploadId, int totalChunks) {
+        log.info("Generating {} presigned URLs for multipart upload - Bucket: {}, Key: {}, UploadId: {}", 
+                 totalChunks, storageInfo.getBucketName(), objectKey, uploadId);
         
-        // Validate image data
-        long maxSize = imageProperties.getMaxSizeInBytes();
-        if (imageData.length > maxSize) {
-            throw new IllegalArgumentException("Image size exceeds maximum allowed size of " + maxSize + " bytes");
+        List<String> presignedUrls = new ArrayList<>();
+        
+        try (S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(storageInfo.getRegion()))
+                .build()) {
+            // Generate presigned URL for each part
+            for (int partNumber = 1; partNumber <= totalChunks; partNumber++) {
+                UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                        .bucket(storageInfo.getBucketName())
+                        .key(objectKey)
+                        .uploadId(uploadId)
+                        .partNumber(partNumber)
+                        .build();
+                
+                String presignedUrl = getPresignedUrlForUploadPart(presigner, uploadPartRequest);
+                presignedUrls.add(presignedUrl);
+            }
+            
+            log.info("Successfully generated {} presigned URLs for multipart upload with uploadId: {}", totalChunks, uploadId);
+            return presignedUrls;
+            
+        } catch (Exception e) {
+            log.error("Failed to generate presigned URLs for multipart upload - Bucket: {}, Key: {}, UploadId: {}", 
+                     storageInfo.getBucketName(), objectKey, uploadId, e);
+            throw new RuntimeException("Failed to generate presigned URLs for multipart upload", e);
         }
-        
-        if (!imageProperties.getAllowedTypes().contains(contentType.toLowerCase())) {
-            throw new IllegalArgumentException("Unsupported image type: " + contentType);
-        }
-        
-        try {
-            // Mock upload process - replace with actual S3 SDK implementation
-            Thread.sleep(500); // Simulate upload time
-            
-            String imageUrl = String.format("%simages/%s", s3ImagesProperties.getBaseUrl(), imageKey);
-            log.info("Image uploaded successfully: {}", imageUrl);
-            
-            return imageUrl;
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Image upload interrupted", e);
+    }
+
+    public void completeMultipartUpload(StorageInfo storageInfo, String videoKey, String uploadId, List<String> etags) {
+        try (S3Client s3Client = S3Client.builder()
+                .region(Region.of(storageInfo.getRegion()))
+                .build()) {
+
+            // Build completed parts list
+            List<CompletedPart> completedParts = new ArrayList<>();
+            for (int i = 0; i < etags.size(); i++) {
+                CompletedPart part = CompletedPart.builder()
+                        .partNumber(i + 1)
+                        .eTag(etags.get(i))
+                        .build();
+                completedParts.add(part);
+            }
+
+            CompleteMultipartUploadRequest completeRequest = CompleteMultipartUploadRequest.builder()
+                    .bucket(storageInfo.getBucketName())
+                    .key(videoKey)
+                    .uploadId(uploadId)  // Use the actual AWS Upload ID
+                    .multipartUpload(CompletedMultipartUpload.builder()
+                            .parts(completedParts)
+                            .build())
+                    .build();
+
+            s3Client.completeMultipartUpload(completeRequest);
+            log.info("Multipart upload completed successfully for video key: {} with AWS Upload ID: {}", videoKey, uploadId);
+
+        } catch (Exception e) {
+            log.error("Failed to complete multipart upload for video key: {} with AWS Upload ID: {}", videoKey, uploadId, e);
+            throw new RuntimeException("Failed to complete multipart upload", e);
         }
     }
     
-    @Override
-    public void deleteImage(String imageKey) {
-        log.info("Deleting image with key: {}", imageKey);
-        
-        try {
-            // Mock deletion process - replace with actual S3 SDK implementation
-            Thread.sleep(200); // Simulate deletion time
-            log.info("Image deleted successfully: {}", imageKey);
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Image deletion interrupted", e);
-        }
-    }
+    /**
+     * Generate actual S3 presigned URL using AWS SDK
+     */
+//    private String generateS3PresignedUrl(String objectKey, String contentType, MediaType mediaType, long expiryMinutes) {
+//        StorageProperties bucketConfig = getBucketConfig(mediaType);
+//
+//        try (S3Presigner presigner = S3Presigner.builder()
+//                .region(Region.of(bucketConfig.getRegion()))
+//                .build()) {
+//
+//            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+//                    .bucket(bucketConfig.getName())
+//                    .key(objectKey)
+//                    .contentType(contentType)
+//                    .build();
+//
+//            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+//                    .signatureDuration(Duration.ofMinutes(expiryMinutes))
+//                    .putObjectRequest(putObjectRequest)
+//                    .build();
+//
+//            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
+//            return presignedRequest.url().toString();
+//
+//        } catch (Exception e) {
+//            log.error("Failed to generate S3 presigned URL for {}: {}", mediaType, objectKey, e);
+//            throw new RuntimeException("Failed to generate presigned URL for " + mediaType, e);
+//        }
+//    }
     
-    @Override
-    public boolean isValidImageFile(String fileName, long fileSize) {
-        log.debug("Validating image file: {} with size: {} bytes", fileName, fileSize);
-        
-        // Check file size
-        long maxSize = imageProperties.getMaxSizeInBytes();
-        if (fileSize > maxSize) {
-            log.warn("Image file size {} exceeds maximum allowed size {}", fileSize, maxSize);
-            return false;
-        }
-        
-        // Check file extension
-        String lowerFileName = fileName.toLowerCase();
-        boolean hasValidExtension = imageProperties.getAllowedExtensions().stream()
-                .anyMatch(lowerFileName::endsWith);
-        
-        if (!hasValidExtension) {
-            log.warn("Image file {} has invalid extension. Allowed: {}", fileName, imageProperties.getAllowedExtensions());
-            return false;
-        }
-        
-        log.debug("Image file {} is valid", fileName);
-        return true;
-    }
+    /**
+     * Generate final URL that client can use after successful upload
+     */
+//    private String generateFinalUrl(String objectKey, MediaType mediaType) {
+//        StorageProperties.BucketConfig bucketConfig = getBucketConfig(mediaType);
+//        return bucketConfig.getBaseUrl() + objectKey;
+//    }
+//
+//    /**
+//     * Get S3 bucket configuration for media type
+//     */
+//    private StorageProperties.BucketConfig getBucketConfig(MediaType mediaType) {
+//        return storageProperties.getBucketConfig(mediaType);
+//    }
 }

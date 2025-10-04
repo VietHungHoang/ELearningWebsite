@@ -1,11 +1,14 @@
 package com.elearning.courseservice.services.impl;
 
 import com.elearning.courseservice.dto.request.CreateDraftCourseRequest;
+import com.elearning.courseservice.dto.response.CourseBasicResponse;
 import com.elearning.courseservice.enums.CourseLevel;
 import com.elearning.courseservice.events.CourseCreatedEvent;
 import com.elearning.courseservice.exception.CategoryNotFoundException;
+import com.elearning.courseservice.mapper.CourseMapper;
 import com.elearning.courseservice.model.Category;
 import com.elearning.courseservice.model.Course;
+import com.elearning.courseservice.projection.CourseBasicProjection;
 import com.elearning.courseservice.repository.CategoryRepository;
 import com.elearning.courseservice.repository.CourseRepository;
 import com.elearning.courseservice.services.CourseEventProducer;
@@ -59,6 +62,17 @@ public class CourseServiceImpl implements CourseService {
         courseEventProducer.sendCourseCreatedEvent(event);
         
         return savedCourse.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CourseBasicResponse getBasicCourseById(Long courseId) {
+        log.info("Fetching basic course information for courseId: {}", courseId);
+        
+        CourseBasicProjection projection = courseRepository.findBasicCourseById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
+        
+        return CourseMapper.toBasicResponse(projection);
     }
     
     // private void createDefaultCourseModules(Long courseId) {
