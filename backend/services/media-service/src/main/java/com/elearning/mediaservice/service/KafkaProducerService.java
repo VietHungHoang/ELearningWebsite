@@ -1,6 +1,6 @@
 package com.elearning.mediaservice.service;
 
-import com.elearning.mediaservice.dto.VideoTranscodingMessage;
+import com.elearning.mediaservice.events.VideoTranscodingMessage;
 
 /**
  * Kafka producer service for sending video transcoding messages

@@ -1,6 +1,6 @@
 package com.elearning.mediaservice.service.impl;
 
-import com.elearning.mediaservice.dto.VideoTranscodingMessage;
+import com.elearning.mediaservice.events.VideoTranscodingMessage;
 import com.elearning.mediaservice.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +9,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -31,8 +32,9 @@ public class KafkaProducerServiceImpl implements KafkaProducerService {
         
         try {
             // Use video ID as the key for partitioning
+            String key = message.getVideoId() != null ? message.getVideoId().toString() : UUID.randomUUID().toString();
             CompletableFuture<SendResult<String, VideoTranscodingMessage>> future = 
-                kafkaTemplate.send(videoTranscodingTopic, message.getVideoId(), message);
+                kafkaTemplate.send(videoTranscodingTopic, key, message);
             
             future.whenComplete((result, throwable) -> {
                 if (throwable == null) {

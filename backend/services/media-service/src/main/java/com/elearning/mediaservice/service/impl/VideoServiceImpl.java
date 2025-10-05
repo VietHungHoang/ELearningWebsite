@@ -2,12 +2,12 @@ package com.elearning.mediaservice.service.impl;
 
 import com.elearning.mediaservice.config.StorageProperties;
 import com.elearning.mediaservice.config.VideoProperties;
-import com.elearning.mediaservice.dto.VideoTranscodingMessage;
 import com.elearning.mediaservice.dto.request.CompleteUploadRequest;
 import com.elearning.mediaservice.dto.request.InitiateUploadRequest;
 import com.elearning.mediaservice.dto.response.InitiateUploadResponse;
 import com.elearning.mediaservice.dto.response.VideoResponse;
 import com.elearning.mediaservice.enums.VideoStatus;
+import com.elearning.mediaservice.events.VideoTranscodingMessage;
 import com.elearning.mediaservice.exception.VideoNotFoundException;
 import com.elearning.mediaservice.mapper.VideoMapper;
 import com.elearning.mediaservice.model.Video;
@@ -67,11 +67,11 @@ public class VideoServiceImpl implements VideoService {
         
         try {
             // Generate presigned URLs for each chunk and get AWS upload ID
-            String uploadId = s3Service.getUploadIDForMultipartUpload(storageProperties.getVideosConfig(), videoKey);
+            String uploadId = s3Service.getUploadIDForMultipartUpload(storageProperties.getVideosRaw(), videoKey);
             
             // Generate actual presigned URLs for upload
             List<String> presignedUrls = s3Service.getPresignedUrlsForMultipartUpload(
-                    storageProperties.getVideosConfig(),
+                    storageProperties.getVideosRaw(),
                     videoKey,
                     uploadId,
                     totalChunks
@@ -88,7 +88,7 @@ public class VideoServiceImpl implements VideoService {
                     .isPreview(request.getIsPreview())
                     .uploadedBy(uploadedBy)
                     .status(VideoStatus.UPLOADING)
-                    .videoUrl(s3Service.generateObjectUrl(storageProperties.getVideosConfig(), videoKey))
+                    .videoUrl(s3Service.generateObjectUrl(storageProperties.getVideosRaw(), videoKey))
                     .build();
             
             Video savedVideo = videoRepository.save(video);
@@ -127,7 +127,7 @@ public class VideoServiceImpl implements VideoService {
         try {
             // Complete multipart upload on S3 using the AWS Upload ID directly
             s3Service.completeMultipartUpload(
-                    storageProperties.getVideosConfig(),
+                    storageProperties.getVideosRaw(),
                     videoKey,
                     request.getUploadId(),
                     request.getEtags()
@@ -285,7 +285,7 @@ public class VideoServiceImpl implements VideoService {
         if (videoUrl == null) {
             throw new IllegalArgumentException("Video URL is null");
         }
-        return videoUrl.replace(storageProperties.getVideosConfig().getBaseUrl(), "");
+        return videoUrl.replace(storageProperties.getVideosRaw().getBaseUrl(), "");
     }
 
     /**
@@ -303,15 +303,9 @@ public class VideoServiceImpl implements VideoService {
     private void sendTranscodingMessage(Video video) {
         try {
             VideoTranscodingMessage message = VideoTranscodingMessage.builder()
-                    .bucket(storageProperties.getVideosConfig().getBucketName())
-                    .key(extractVideoKeyFromUrl(video.getVideoUrl()))
-                    .videoId(video.getId().toString())
-                    .lessonId(video.getLessonId().toString())
-                    .originalFilename(video.getOriginalFileName())
-                    .fileSize(video.getFileSize())
-                    .contentType(detectContentType(video.getOriginalFileName()))
-                    .uploadTimestamp(System.currentTimeMillis())
-                    .uploadedBy(video.getUploadedBy())
+                    .videoId(video.getId())
+                    .lessonId(video.getLessonId())
+                    .videoUrl(video.getVideoUrl())
                     .build();
             
             kafkaProducerService.sendVideoTranscodingMessage(message);

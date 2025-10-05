@@ -54,7 +54,7 @@ public class StorageProperties {
         return mediaTypeBuckets.get(MediaType.IMAGE);
     }
 
-    public StorageInfo getVideosConfig() {
+    public StorageInfo getVideosRaw() {
         return mediaTypeBuckets.get(MediaType.VIDEO);
     }
 
