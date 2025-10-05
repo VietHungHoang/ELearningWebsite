@@ -1,0 +1,34 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: transcoding-service
+
+# FFmpeg Configuration
+ffmpeg:
+  binary-path: ffmpeg  # Path to FFmpeg binary
+  output-formats:
+    - resolution: 1080p
+      bitrate: 5000k
+      audio-bitrate: 192k
+    - resolution: 720p
+      bitrate: 3000k
+      audio-bitrate: 128k
+    - resolution: 480p
+      bitrate: 1500k
+      audio-bitrate: 96k
+  hls:
+    segment-duration: 10  # seconds
+    playlist-type: vod
+
+# Processing Configuration
+processing:
+  workspace-root: /tmp/transcoding
+  cleanup-after-processing: true
+  cleanup-on-failure: false  # Keep files when processing fails for debugging
+  max-concurrent-jobs: 2
+
+logging:
+  level:
+    com.elearning.transcodingservice: DEBUG
