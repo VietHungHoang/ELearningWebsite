@@ -32,3 +32,9 @@ processing:
 logging:
   level:
     com.elearning.transcodingservice: DEBUG
+
+# Kafka configuration placeholders (no listeners implemented yet)
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+  topics:
+    video-transcoding: video-transcoding

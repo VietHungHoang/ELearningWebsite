@@ -1,56 +1,34 @@
 package com.elearning.transcodingservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * DTO representing a video transcoding message from SQS
+ * Minimal DTO matching media-service contract for transcoding requests
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VideoTranscodingMessage {
-    
-    /**
-     * S3 bucket name containing the raw video file
-     */
-    private String bucket;
-    
-    /**
-     * S3 key (path) to the raw video file
-     */
-    private String key;
-    
+
     /**
      * Video ID for updating status in course service
      */
-    private String videoId;
-    
+    private Long videoId;
+
     /**
-     * Course ID that the video belongs to
+     * Lesson ID that the video belongs to
      */
-    private String lessonId;
-    
+    private Long lessonId;
+
     /**
-     * Original filename
+     * Public or presigned URL to download the source video
      */
-    private String originalFilename;
-    
-    /**
-     * File size in bytes
-     */
-    private Long fileSize;
-    
-    /**
-     * Content type of the video file
-     */
-    private String contentType;
-    
-    /**
-     * Timestamp when the video was uploaded
-     */
-    private Long uploadTimestamp;
+    private String videoUrl;
+
 }
