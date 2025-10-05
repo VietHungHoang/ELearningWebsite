@@ -298,23 +298,48 @@ public class VideoServiceImpl implements VideoService {
     }
 
     /**
+     * Extract S3 object name (key) from the full URL previously stored in video.videoUrl
+     */
+    private String extractObjectNameFromUrl(String videoUrl) {
+        if (videoUrl == null) {
+            throw new IllegalArgumentException("Video URL is null");
+        }
+        String base = storageProperties.getVideosRaw().getBaseUrl();
+        if (videoUrl.startsWith(base)) {
+            return videoUrl.substring(base.length());
+        }
+        // Fallback: try to find the path after the bucket host
+        int idx = videoUrl.indexOf(".amazonaws.com/");
+        if (idx != -1) {
+            return videoUrl.substring(idx + ".amazonaws.com/".length());
+        }
+        // As a last resort, return the original URL (not ideal but keeps behavior)
+        return videoUrl;
+    }
+
+    /**
      * Send transcoding message to Kafka
      */
     private void sendTranscodingMessage(Video video) {
         try {
+            // Build message with bucketName and objectName instead of a full URL
+            String objectName = extractObjectNameFromUrl(video.getVideoUrl());
+            String bucketName = storageProperties.getVideosRaw().getBucketName();
+
             VideoTranscodingMessage message = VideoTranscodingMessage.builder()
                     .videoId(video.getId())
                     .lessonId(video.getLessonId())
-                    .videoUrl(video.getVideoUrl())
+                    .bucketName(bucketName)
+                    .objectName(objectName)
                     .build();
-            
+
             kafkaProducerService.sendVideoTranscodingMessage(message);
-            
+
             log.info("Sent transcoding message to Kafka for video ID: {}", video.getId());
-            
+
         } catch (Exception e) {
             log.error("Failed to send transcoding message for video ID: {}", video.getId(), e);
-            
+
             // Update video status to failed
             video.setStatus(VideoStatus.FAILED);
             video.setProcessingMessage("Failed to send transcoding message: " + e.getMessage());

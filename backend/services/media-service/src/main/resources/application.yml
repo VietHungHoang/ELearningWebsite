@@ -89,7 +89,7 @@ aws:
 # Kafka Topics Configuration
 kafka:
   topics:
-    video-transcoding: video-transcoding-topic
+    video-transcoding: video-transcoding
 
 # Media Type Configurations for Strategy Pattern
 media:

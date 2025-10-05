@@ -30,6 +30,9 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+    // Do not add __TypeId__ headers with producer-side class names — consumers should deserialize to their own DTOs
+    configProps.put(org.springframework.kafka.support.serializer.JsonSerializer.ADD_TYPE_INFO_HEADERS, false);
         
         // Performance and reliability configurations
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
