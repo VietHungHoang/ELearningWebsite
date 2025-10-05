@@ -2,6 +2,7 @@ package com.elearning.mediaservice.service.impl;
 
 import com.elearning.mediaservice.config.StorageProperties;
 import com.elearning.mediaservice.config.VideoProperties;
+import com.elearning.mediaservice.dto.VideoTranscodingMessage;
 import com.elearning.mediaservice.dto.request.CompleteUploadRequest;
 import com.elearning.mediaservice.dto.request.InitiateUploadRequest;
 import com.elearning.mediaservice.dto.response.InitiateUploadResponse;
@@ -11,6 +12,7 @@ import com.elearning.mediaservice.exception.VideoNotFoundException;
 import com.elearning.mediaservice.mapper.VideoMapper;
 import com.elearning.mediaservice.model.Video;
 import com.elearning.mediaservice.repository.VideoRepository;
+import com.elearning.mediaservice.service.KafkaProducerService;
 import com.elearning.mediaservice.service.S3Service;
 import com.elearning.mediaservice.service.VideoService;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,7 @@ public class VideoServiceImpl implements VideoService {
     private final VideoProperties videoProperties;
     private final StorageProperties storageProperties;
     private final S3Service s3Service;
+    private final KafkaProducerService kafkaProducerService;
 
 
     @Override
@@ -136,8 +139,8 @@ public class VideoServiceImpl implements VideoService {
             
             Video updatedVideo = videoRepository.save(video);
             
-            // TODO: Trigger async processing (extract metadata, generate thumbnail)
-//            processVideoAsync(updatedVideo);
+            // Send transcoding message to Kafka
+            sendTranscodingMessage(updatedVideo);
             
             log.info("Upload completed successfully for video ID: {}", updatedVideo.getId());
             
@@ -292,6 +295,53 @@ public class VideoServiceImpl implements VideoService {
         // Extract the UUID part from videos/{uploadId}.ext
         String fileName = videoKey.substring(videoKey.lastIndexOf('/') + 1);
         return fileName.substring(0, fileName.lastIndexOf('.'));
+    }
+
+    /**
+     * Send transcoding message to Kafka
+     */
+    private void sendTranscodingMessage(Video video) {
+        try {
+            VideoTranscodingMessage message = VideoTranscodingMessage.builder()
+                    .bucket(storageProperties.getVideosConfig().getBucketName())
+                    .key(extractVideoKeyFromUrl(video.getVideoUrl()))
+                    .videoId(video.getId().toString())
+                    .lessonId(video.getLessonId().toString())
+                    .originalFilename(video.getOriginalFileName())
+                    .fileSize(video.getFileSize())
+                    .contentType(detectContentType(video.getOriginalFileName()))
+                    .uploadTimestamp(System.currentTimeMillis())
+                    .uploadedBy(video.getUploadedBy())
+                    .build();
+            
+            kafkaProducerService.sendVideoTranscodingMessage(message);
+            
+            log.info("Sent transcoding message to Kafka for video ID: {}", video.getId());
+            
+        } catch (Exception e) {
+            log.error("Failed to send transcoding message for video ID: {}", video.getId(), e);
+            
+            // Update video status to failed
+            video.setStatus(VideoStatus.FAILED);
+            video.setProcessingMessage("Failed to send transcoding message: " + e.getMessage());
+            videoRepository.save(video);
+        }
+    }
+    
+    /**
+     * Detect content type from filename
+     */
+    private String detectContentType(String filename) {
+        if (filename == null) return "application/octet-stream";
+        
+        String lowerFilename = filename.toLowerCase();
+        if (lowerFilename.endsWith(".mp4")) return "video/mp4";
+        if (lowerFilename.endsWith(".avi")) return "video/x-msvideo";
+        if (lowerFilename.endsWith(".mov")) return "video/quicktime";
+        if (lowerFilename.endsWith(".wmv")) return "video/x-ms-wmv";
+        if (lowerFilename.endsWith(".webm")) return "video/webm";
+        
+        return "video/mp4"; // Default to mp4
     }
 
     /**

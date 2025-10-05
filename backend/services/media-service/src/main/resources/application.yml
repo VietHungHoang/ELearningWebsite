@@ -39,6 +39,27 @@ spring:
       location: ${java.io.tmpdir}
       resolve-lazily: true
 
+# Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      batch-size: 16384
+      linger-ms: 1
+      buffer-memory: 33554432
+    consumer:
+      group-id: media-service-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      auto-commit-interval-ms: 1000
+      properties:
+        spring.json.trusted.packages: "*"
+
 # Server Configuration
 server:
   port: ${SERVER_PORT:8083}
@@ -64,6 +85,11 @@ aws:
         bucket-name: ${AWS_S3_DOCUMENTS_BUCKET_NAME:my-elearning-documents}
         region: ${AWS_S3_REGION:ap-southeast-2}
         baseUrl: ${AWS_S3_DOCUMENTS_BASE_URL:https://my-elearning-documents.s3.ap-southeast-2.amazonaws.com/}
+
+# Kafka Topics Configuration
+kafka:
+  topics:
+    video-transcoding: video-transcoding-topic
 
 # Media Type Configurations for Strategy Pattern
 media:
