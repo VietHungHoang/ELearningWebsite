@@ -1,0 +1,136 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/certificates/issue:
+    post:
+      tags:
+      - certificate-controller
+      operationId: issueCertificate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueCertificateRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiResponseCertificateResponse'
+  /api/certificates/learner/{learnerId}:
+    get:
+      tags:
+      - certificate-controller
+      operationId: getCertificatesByLearner
+      parameters:
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiResponseListCertificateResponse'
+  /api/certificates/course/{courseId}/learner/{learnerId}:
+    get:
+      tags:
+      - certificate-controller
+      operationId: getCertificateByCourse
+      parameters:
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ApiResponseCertificateResponse'
+components:
+  schemas:
+    IssueCertificateRequest:
+      type: object
+      properties:
+        learnerId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        instructorId:
+          type: integer
+          format: int64
+        learnerName:
+          type: string
+        courseName:
+          type: string
+        instructorName:
+          type: string
+        organizationName:
+          type: string
+    ApiResponseCertificateResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/CertificateResponse'
+    CertificateResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        learnerId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        instructorId:
+          type: integer
+          format: int64
+        issuedAt:
+          type: string
+          format: date-time
+        url:
+          type: string
+        status:
+          type: string
+    ApiResponseListCertificateResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateResponse'

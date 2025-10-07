@@ -537,5 +537,4 @@ public class CertificatePdfServiceImpl implements CertificatePdfService {
                 contact.setFixedPosition(1, centerX - footerWidth / 2, footerY - 15, footerWidth);
                 document.add(contact);
         }
-
 }
