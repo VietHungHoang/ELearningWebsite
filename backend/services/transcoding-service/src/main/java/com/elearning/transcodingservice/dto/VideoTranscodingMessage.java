@@ -27,8 +27,13 @@ public class VideoTranscodingMessage {
     private Long lessonId;
 
     /**
-     * Public or presigned URL to download the source video
+     * S3 bucket name where the source video is stored
      */
-    private String videoUrl;
+    private String bucketName;
+
+    /**
+     * Object key (path) inside the bucket for the source video
+     */
+    private String objectName;
 
 }

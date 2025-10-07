@@ -16,20 +16,9 @@ public class VideoTranscodingListener {
 
     @KafkaListener(topics = "${kafka.topics.video-transcoding}", containerFactory = "kafkaListenerContainerFactory")
     public void handle(VideoTranscodingMessage message) {
-        log.info("Received transcoding message from Kafka: {}", message);
+    log.info("Received transcoding message from Kafka: videoId={} lessonId={} bucket={} object={}",
+        message.getVideoId(), message.getLessonId(), message.getBucketName(), message.getObjectName());
 
-        // For now, just log and acknowledge. Future: download from message.getVideoUrl(), then call service
-        try {
-            // TODO: download the file from message.getVideoUrl() to local workspace and call videoTranscodingService
-            log.info("Received job for videoId={} lessonId={} url={}", message.getVideoId(), message.getLessonId(), message.getVideoUrl());
-
-            // Placeholder: in future we'll implement download + transcode steps
-            // videoTranscodingService.transcodeVideo(...)
-
-        } catch (Exception e) {
-            log.error("Failed to handle transcoding message for videoId={}", message.getVideoId(), e);
-            // Depending on configuration, exceptions may cause retries
-            throw e;
-        }
+        videoTranscodingService.processMessage(message);
     }
 }

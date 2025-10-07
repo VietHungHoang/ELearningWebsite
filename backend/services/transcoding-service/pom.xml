@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+	<aws.sdk.version>2.35.0</aws.sdk.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -62,12 +63,9 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
+		<!-- Removed spring-boot-devtools to avoid devtools RestartClassLoader interfering with
+		     third-party SDK classes at runtime (e.g. AWS SDK S3). If you need devtools locally,
+		     add it back only in your developer environment or enable it conditionally. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -79,6 +77,13 @@
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
+        
+		<!-- AWS SDK S3 -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+            <version>${aws.sdk.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

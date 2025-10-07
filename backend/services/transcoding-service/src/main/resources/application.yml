@@ -35,6 +35,17 @@ logging:
 
 # Kafka configuration placeholders (no listeners implemented yet)
 kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
   topics:
     video-transcoding: video-transcoding
+    video-processed: video-processed
+
+aws:
+  s3:
+    buckets:
+      VIDEO-RAW:
+        bucket-name: ${AWS_S3_VIDEOS_RAW_BUCKET_NAME}
+        region: ${AWS_S3_REGION}
+      VIDEO-STREAM:
+        bucket-name: ${AWS_S3_VIDEOS_STREAM_BUCKET_NAME}
+        region: ${AWS_S3_REGION}
