@@ -12,7 +12,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "payment_transactions")
@@ -23,16 +22,16 @@ import java.util.UUID;
 public class PaymentTransaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "order_id", nullable = false, unique = true)
-    private String orderId;
+    private Long orderId;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "currency", nullable = false, length = 3)
+    @Column(name = "currency", nullable = false)
     private String currency;
 
     @Enumerated(EnumType.STRING)
@@ -44,7 +43,8 @@ public class PaymentTransaction {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private PaymentStatus status;
+    @Builder.Default
+    private PaymentStatus status = PaymentStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -5,9 +5,9 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://localhost:5434/payments_db
-    username: payment_user
-    password: payment_pass
+    url: jdbc:postgresql://localhost:5432/payment_service
+    username: postgres
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
@@ -26,3 +26,13 @@ spring:
         # Bảo serializer dùng alias thay vì tên class đầy đủ
         acks: "all"
         spring.json.add.type.headers: false
+
+# Configuration for external payment providers. Add provider-specific keys here.
+payment:
+  providers:
+    momo:
+      partnerCode: "MOMOI0ZT20251005_TEST"
+      accessKey: "RAlqforIHMzHupmt"
+      # secretKey and endpoint are optional but commonly needed for real integrations
+      secretKey: "UeTsSYek1420zZmXpbinGDnTviPnditj"
+      endpoint: "https://test-payment.momo.vn/v2/gateway/api"
