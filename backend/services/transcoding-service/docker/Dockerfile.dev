@@ -1,60 +1,18 @@
-# Multi-stage Dockerfile for Transcoding Service
-# This Dockerfile includes FFmpeg for video processing
-
-# Stage 1: Build the application
-FROM openjdk:17-jdk-slim as builder
-
+# ---- Stage 1: Build (dùng image có Maven sẵn)
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS builder
 WORKDIR /app
-
-# Copy Maven wrapper and pom.xml first for better caching
-COPY mvnw .
-COPY mvnw.cmd .
-COPY .mvn .mvn
 COPY pom.xml .
+RUN mvn -B dependency:go-offline
+COPY src ./src
+RUN mvn -B clean package -DskipTests
 
-# Download dependencies
-RUN ./mvnw dependency:go-offline -B
-
-# Copy source code
-COPY src src
-
-# Build the application
-RUN ./mvnw clean package -DskipTests
-
-# Stage 2: Runtime image with FFmpeg
-FROM openjdk:17-jre-slim
-
-# Install FFmpeg and other dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    ffmpeg \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create app directory
+# ---- Stage 2: Run (dùng JRE siêu nhẹ)
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# Create transcoding workspace directory
-RUN mkdir -p /tmp/transcoding && chmod 777 /tmp/transcoding
-
-# Copy the JAR from builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-RUN chown -R appuser:appuser /app /tmp/transcoding
-USER appuser
+# Giới hạn heap size để tránh OOM
+ENV JAVA_OPTS="-Xms128m -Xmx350m"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8085/api/transcoding/health || exit 1
-
-# Expose port
-EXPOSE 8085
-
-# Environment variables
-ENV SPRING_PROFILES_ACTIVE=docker
-ENV JAVA_OPTS="-Xmx2g -Xms1g"
-
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
+EXPOSE 8080
+CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

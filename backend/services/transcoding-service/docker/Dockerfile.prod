@@ -1,14 +1,18 @@
-# Stage 1: Build với Maven
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
+# ---- Stage 1: Build (dùng image có Maven sẵn)
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS builder
 WORKDIR /app
-COPY ../pom.xml .
+COPY pom.xml .
 RUN mvn -B dependency:go-offline
-COPY ../src ./src
-RUN mvn clean package -DskipTests
+COPY src ./src
+RUN mvn -B clean package -DskipTests
 
-# Stage 2: Runtime nhẹ hơn
-FROM eclipse-temurin:17-jdk
+# ---- Stage 2: Run (dùng JRE siêu nhẹ)
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
+
+# Giới hạn heap size để tránh OOM
+ENV JAVA_OPTS="-Xms128m -Xmx350m"
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
