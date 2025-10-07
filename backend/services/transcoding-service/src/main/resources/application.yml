@@ -39,6 +39,13 @@ kafka:
   topics:
     video-transcoding: video-transcoding
     video-processed: video-processed
+  properties:
+    sasl.mechanism: PLAIN
+    security.protocol: SASL_SSL
+    sasl.jaas.config: >
+      org.apache.kafka.common.security.plain.PlainLoginModule required
+      username="${KAFKA_API_KEY}"
+      password="${KAFKA_API_SECRET}";
 
 aws:
   s3:

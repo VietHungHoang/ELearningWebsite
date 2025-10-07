@@ -1,34 +1,14 @@
-# Multi-stage build for production
-# Stage 1: Build the application
-FROM openjdk:17-jdk-slim AS build
-
+# Stage 1: Build với Maven
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
-
-# Copy pom.xml and download dependencies (for better caching)
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source code and build
-COPY src ./src
+COPY ../pom.xml .
+RUN mvn -B dependency:go-offline
+COPY ../src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Runtime
-FROM openjdk:17-jre-slim
-
+# Stage 2: Runtime nhẹ hơn
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
-
-# Create a non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
-# Copy the built JAR from build stage
-COPY --from=build /app/target/transcoding-service-*.jar app.jar
-
-# Change ownership to non-root user
-RUN chown -R appuser:appuser /app
-USER appuser
-
-# Expose port
-EXPOSE 8085
-
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+COPY --from=builder /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
