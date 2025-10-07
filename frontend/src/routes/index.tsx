@@ -38,9 +38,11 @@ import {
   TutorInvoicesPage,
   TutorDisputesPage
 } from '../pages/tutor'
-import { TutorLayout } from '../components/layout'
+import { TutorLayout, AdminLayout } from '../components/layout'
 import { tutorUserControls, tutorMainSidebarItems, tutorAdditionalSidebarItems } from '../utils/tutorConfig'
 import { AccessForbiddenPage, NotFoundPage } from '../pages/error'
+import { AdminDashboardPage, AdminUsersPage, AdminCoursesPage, AdminSettingsPage } from '../pages/admin'
+import { adminUserControls, adminMainSidebarItems, adminAdditionalSidebarItems } from '../utils/adminConfig'
 import CertificateDebugPage from '../pages/debug/CertificateDebugPage'
 
 const AppRoutes = () => {
@@ -136,16 +138,26 @@ const AppRoutes = () => {
         path="/admin"
         element={
           <RoleBasedRedirect allowedRoles={['admin']}>
-            <MainLayout />
+            <AdminLayout
+              searchPlaceholder="Search users, courses..."
+              searchValue=""
+              onSearchChange={(value) => console.log('Search:', value)}
+              searchShortcut="⌘K"
+              userControls={adminUserControls}
+              mainItems={adminMainSidebarItems}
+              additionalItems={adminAdditionalSidebarItems}
+            />
           </RoleBasedRedirect>
         }
       >
-        <Route path="insights" element={<div>Admin Insights</div>} />
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboardPage />} />
+        <Route path="insights" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="manage-menus" element={<div>Manage Menus</div>} />
         <Route path="option-builder" element={<div>Option Builder</div>} />
         <Route path="pages" element={<div>Admin Pages</div>} />
-        <Route path="email-settings" element={<div>Email Settings</div>} />
-        <Route path="notification-settings" element={<div>Notification Settings</div>} />
+        <Route path="email-settings" element={<AdminSettingsPage />} />
+        <Route path="notification-settings" element={<AdminSettingsPage />} />
         <Route path="taxonomies/languages" element={<div>Languages</div>} />
         <Route path="taxonomies/subjects" element={<div>Subjects</div>} />
         <Route path="taxonomies/subject-groups" element={<div>Subject Groups</div>} />
@@ -154,20 +166,20 @@ const AppRoutes = () => {
         <Route path="packages/installed" element={<div>Installed Packages</div>} />
         <Route path="upgrade" element={<div>Upgrade</div>} />
         <Route path="manage-admin-users" element={<div>Manage Admin Users</div>} />
-        <Route path="users" element={<div>Users</div>} />
+        <Route path="users" element={<AdminUsersPage />} />
         <Route path="identity-verification" element={<div>Identity Verification</div>} />
         <Route path="reviews" element={<div>Reviews</div>} />
         <Route path="invoices" element={<div>Admin Invoices</div>} />
         <Route path="bookings" element={<div>Admin Bookings</div>} />
         <Route path="withdraw-requests" element={<div>Withdraw Requests</div>} />
         <Route path="commission-settings" element={<div>Commission Settings</div>} />
-        <Route path="payment-methods" element={<div>Payment Methods</div>} />
+        <Route path="payment-methods" element={<AdminSettingsPage />} />
         <Route path="subscriptions" element={<div>Subscriptions</div>} />
         <Route path="subscriptions/purchased" element={<div>Purchased Subscriptions</div>} />
         <Route path="blogs/create" element={<div>Create Blog</div>} />
         <Route path="all-blogs" element={<div>All Blogs</div>} />
         <Route path="blog-categories" element={<div>Blog Categories</div>} />
-        <Route path="courses" element={<div>Admin Courses</div>} />
+        <Route path="courses" element={<AdminCoursesPage />} />
         <Route path="categories" element={<div>Admin Categories</div>} />
         <Route path="course-enrollments" element={<div>Course Enrollments</div>} />
         <Route path="commission-setting" element={<div>Commission Setting</div>} />
