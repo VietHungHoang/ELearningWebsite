@@ -35,11 +35,17 @@ logging:
 
 # Kafka configuration placeholders (no listeners implemented yet)
 kafka:
+  listener:
+        auto-startup: false
   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
   topics:
     video-transcoding: video-transcoding
     video-processed: video-processed
   properties:
+    fetch.max.bytes: 1048576
+    max.partition.fetch.bytes: 524288
+    receive.buffer.bytes: 32768
+    send.buffer.bytes: 32768
     sasl.mechanism: PLAIN
     security.protocol: SASL_SSL
     sasl.jaas.config: >
