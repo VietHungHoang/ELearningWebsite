@@ -1,6 +1,6 @@
 # Multi-stage build for production
 # Stage 1: Build the application
-FROM maven:3.9.4-openjdk-17-slim AS build
+FROM openjdk:17-jdk-slim AS build
 
 WORKDIR /app
 
