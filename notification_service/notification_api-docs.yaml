@@ -198,3 +198,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/NotificationResponse"
+
+
+# API_key:
+# MONGO_URI: mongodb+srv://root:root123456@lms.1zh4ll5.mongodb.net/notification_db?retryWrites=true&w=majority&appName=LMS
+# MAIL_USERNAME: hoangtienhung30062003@gmail.com
+# MAIL_PASSWORD: yhbjtesyagzozccz
+# EUREKA_SERVER_URL: https://eureka-server-73wv.onrender.com
+# MAIl_PORT: 587
