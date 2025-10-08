@@ -134,3 +134,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CertificateResponse'
+
+# API_key:
+# POSTGRES_URL: jdbc:postgresql://dpg-d3hj17ggjchc73ahmakg-a.singapore-postgres.render.com:5432/my_app_db_hwrr
+# POSTGRES_USER: my_app_db_hwrr_user
+# POSTGRES_PASSWORD: KrRD1ZaZ5pb9K0TzTDP5e8eU1V8z1v12
+# CONTENT_SERVICE_URL: http://localhost:8081/api/files/upload #content-service
+# EUREKA_SERVER_URL: https://eureka-server-73wv.onrender.com

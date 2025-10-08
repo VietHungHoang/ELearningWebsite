@@ -1,0 +1,26 @@
+
+spring:
+  application:
+    name: certificate-service 
+  datasource:
+    url: ${POSTGRES_URL}                      # ví dụ: jdbc:postgresql://<host>:<port>/<db>?sslmode=require
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      "[hibernate.format_sql]": false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+content:
+  service:
+    url: ${CONTENT_SERVICE_URL}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}

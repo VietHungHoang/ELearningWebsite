@@ -1,0 +1,39 @@
+# spring.application.name=certificate_service
+# # ------------------------
+# # Database (MySQL)
+# # ------------------------
+# spring.datasource.url=jdbc:mysql://localhost:3306/certificate_service_db
+# spring.datasource.username=root
+# spring.datasource.password=123456
+# spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# # ------------------------
+# # JPA / Hibernate
+# # ------------------------
+# spring.jpa.hibernate.ddl-auto=update
+# spring.jpa.show-sql=true
+# spring.jpa.properties.hibernate.format_sql=true
+# spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+
+# # ------------------------
+# # Content-Service
+# # ------------------------
+# content.service.url=http://localhost:8081/api/files/upload
+# # nao m truyen cho t api vao day la dc
+
+# # Đường dẫn mặc định cho API docs và giao diện Swagger
+# springdoc.api-docs.path=/api-docs
+# springdoc.swagger-ui.path=/swagger-ui.html
+
+
+spring:
+  application:
+    name: certificate-service    # tên service để đăng ký với Eureka
+#   profiles:
+#     active: dev
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
