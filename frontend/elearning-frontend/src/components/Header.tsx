@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import CartSidebar from './CartSidebar';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const headerWrapperRef = useRef<HTMLDivElement>(null);
   const placeholderRef = useRef<HTMLDivElement>(null);
 
@@ -35,126 +37,6 @@ const Header = () => {
     <>
       <div ref={placeholderRef} className="rbt-sticky-placeholder"></div>
       <header className="rbt-header rbt-header-10">
-      {/* Start Header Top */}
-      <div className="rbt-header-top rbt-header-top-1 header-space-betwween bg-not-transparent bg-color-darker top-expended-activation">
-        <div className="container-fluid">
-          <div className="top-expended-wrapper">
-            <div className="top-expended-inner rbt-header-sec align-items-center">
-              <div className="rbt-header-sec-col rbt-header-left d-none d-xl-block">
-                <div className="rbt-header-content">
-                  {/* Start Header Information List */}
-                  <div className="header-info">
-                    <ul className="rbt-information-list">
-                      <li>
-                        <a href="#"><i className="fab fa-instagram"></i>100k <span className="d-none d-xxl-block">Followers</span></a>
-                      </li>
-                      <li>
-                        <a href="#"><i className="fab fa-facebook-square"></i>500k <span className="d-none d-xxl-block">Followers</span></a>
-                      </li>
-                      <li>
-                        <a href="#"><i className="feather-phone"></i>+1-202-555-0174</a>
-                      </li>
-                    </ul>
-                  </div>
-                  {/* End Header Information List */}
-                </div>
-              </div>
-              <div className="rbt-header-sec-col rbt-header-center">
-                <div className="rbt-header-content justify-content-start justify-content-xl-center">
-                  <div className="header-info">
-                    <div className="rbt-header-top-news">
-                      <div className="inner">
-                        <div className="content">
-                          <span className="rbt-badge variation-02 bg-color-primary color-white radius-round">Hot</span>
-                          <span className="news-text"><img src="/assets/images/icons/hand-emojji.svg" alt="Hand Emojji Images" /> Intro price. Get Histudy for Big Sale -95% off.</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="rbt-header-sec-col rbt-header-right mt_md--10 mt_sm--10">
-                <div className="rbt-header-content justify-content-start justify-content-lg-end">
-                  <div className="header-info d-none d-xl-block">
-                    <ul className="social-share-transparent">
-                      <li>
-                        <a href="#"><i className="fab fa-facebook-f"></i></a>
-                      </li>
-                      <li>
-                        <a href="#"><i className="fab fa-twitter"></i></a>
-                      </li>
-                      <li>
-                        <a href="#"><i className="fab fa-linkedin-in"></i></a>
-                      </li>
-                      <li>
-                        <a href="#"><i className="fab fa-instagram"></i></a>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="rbt-separator d-none d-xl-block"></div>
-
-                  <div className="header-info">
-                    <ul className="rbt-dropdown-menu switcher-language">
-                      <li className="has-child-menu">
-                        <a href="#">
-                          <img className="left-image" src="/assets/images/icons/en-us.png" alt="Language Images" />
-                          <span className="menu-item">English</span>
-                          <i className="right-icon feather-chevron-down"></i>
-                        </a>
-                        <ul className="sub-menu">
-                          <li>
-                            <a href="#">
-                              <img className="left-image" src="/assets/images/icons/fr.png" alt="Language Images" />
-                              <span className="menu-item">Français</span>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <img className="left-image" src="/assets/images/icons/de.png" alt="Language Images" />
-                              <span className="menu-item">Deutsch</span>
-                            </a>
-                          </li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="header-info">
-                    <ul className="rbt-dropdown-menu currency-menu">
-                      <li className="has-child-menu">
-                        <a href="#">
-                          <span className="menu-item">USD</span>
-                          <i className="right-icon feather-chevron-down"></i>
-                        </a>
-                        <ul className="sub-menu hover-reverse">
-                          <li>
-                            <a href="#">
-                              <span className="menu-item">EUR</span>
-                            </a>
-                          </li>
-                          <li>
-                            <a href="#">
-                              <span className="menu-item">GBP</span>
-                            </a>
-                          </li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="header-info">
-              <div className="top-bar-expended d-block d-lg-none">
-                <button className="topbar-expend-button rbt-round-btn"><i className="feather-plus"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* End Header Top */}
-
       {/* Start Main Header */}
       <div ref={headerWrapperRef} className="rbt-header-wrapper header-space-betwween header-sticky">
         <div className="container-fluid">
@@ -219,10 +101,61 @@ const Header = () => {
                   </a>
                 </li>
                 <li className="access-icon rbt-mini-cart">
-                  <a className="rbt-cart-sidenav-activation rbt-round-btn" href="#">
+                  <a className="rbt-cart-sidenav-activation rbt-round-btn" href="#" onClick={(e) => { e.preventDefault(); setIsCartOpen(!isCartOpen); }}>
                     <i className="feather-shopping-cart"></i>
                     <span className="rbt-cart-count">4</span>
                   </a>
+                </li>
+                <li>
+                  <div className="header-info">
+                    <ul className="rbt-dropdown-menu switcher-language">
+                      <li className="has-child-menu">
+                        <a href="#">
+                          <img className="left-image" src="/assets/images/icons/en-us.png" alt="Language Images" />
+                          <span className="menu-item">English</span>
+                          <i className="right-icon feather-chevron-down"></i>
+                        </a>
+                        <ul className="sub-menu">
+                          <li>
+                            <a href="#">
+                              <img className="left-image" src="/assets/images/icons/fr.png" alt="Language Images" />
+                              <span className="menu-item">Français</span>
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#">
+                              <img className="left-image" src="/assets/images/icons/de.png" alt="Language Images" />
+                              <span className="menu-item">Deutsch</span>
+                            </a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li>
+                   <div className="header-info">
+                    <ul className="rbt-dropdown-menu currency-menu">
+                      <li className="has-child-menu">
+                        <a href="#">
+                          <span className="menu-item">USD</span>
+                          <i className="right-icon feather-chevron-down"></i>
+                        </a>
+                        <ul className="sub-menu hover-reverse">
+                          <li>
+                            <a href="#">
+                              <span className="menu-item">EUR</span>
+                            </a>
+                          </li>
+                          <li>
+                            <a href="#">
+                              <span className="menu-item">GBP</span>
+                            </a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
                 </li>
                 <li className="account-access rbt-user-wrapper d-none d-xl-block">
                   <a href="#"><i className="feather-user"></i>Admin</a>
@@ -401,7 +334,8 @@ const Header = () => {
       )}
       {/* End Search Dropdown */}
 
-      {/* Start Side Vav */}
+      {/* Cart Sidebar Component */}
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       <div className="rbt-offcanvas-side-menu rbt-category-sidemenu">
         <div className="inner-wrapper">
           <div className="inner-top">
