@@ -9,6 +9,9 @@ import StudentReviewsPage from './pages/StudentReviewsPage';
 import StudentMyQuizAttemptsPage from './pages/StudentMyQuizAttemptsPage';
 import StudentOrderHistoryPage from './pages/StudentOrderHistoryPage';
 import StudentSettingsPage from './pages/StudentSettingsPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import LessonPage from './pages/LessonPage';
 
 function App() {
   return (
@@ -24,6 +27,9 @@ function App() {
         <Route path="/student-my-quiz-attempts" element={<StudentMyQuizAttemptsPage />} />
         <Route path="/student-order-history" element={<StudentOrderHistoryPage />} />
         <Route path="/student-settings" element={<StudentSettingsPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/lesson" element={<LessonPage />} />
       </Routes>
     </Router>
   );
