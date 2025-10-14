@@ -1,0 +1,781 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8082
+  description: Generated server url
+paths:
+  /api/v1/learners/reviews:
+    put:
+      tags:
+      - review-controller
+      operationId: updateReview
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseReviewResponse"
+    post:
+      tags:
+      - review-controller
+      operationId: createReview
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseReviewResponse"
+  /api/v1/learners/wishlist:
+    post:
+      tags:
+      - wishlist-controller
+      operationId: addToWishlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WishlistRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseWishlistResponse"
+  /api/v1/learners/quiz-attempts:
+    post:
+      tags:
+      - quiz-attempt-controller
+      operationId: createAttempt
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizAttemptRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseQuizAttemptResponse"
+  /api/v1/learners/enrollments:
+    post:
+      tags:
+      - enrollment-controller
+      operationId: enrollCourse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnrollmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseEnrollmentResponse"
+  /api/v1/learners/enrollments/{accountId}/{courseId}/start:
+    post:
+      tags:
+      - enrollment-controller
+      operationId: startCourse
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseEnrollmentResponse"
+  /api/v1/learners/enrollments/{accountId}/{courseId}/complete:
+    post:
+      tags:
+      - enrollment-controller
+      operationId: completeCourse
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseEnrollmentResponse"
+  /api/v1/learners/cart/{accountId}/items/{courseId}:
+    post:
+      tags:
+      - cart-controller
+      operationId: addItem
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringObject"
+    delete:
+      tags:
+      - cart-controller
+      operationId: removeItem
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringObject"
+  /api/v1/learners/cart/{accountId}/items/{courseId}/apply-coupon:
+    post:
+      tags:
+      - cart-controller
+      operationId: applyCoupon
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringObject"
+  /api/v1/learners/profile/{accountId}:
+    get:
+      tags:
+      - profile-controller
+      operationId: getProfile
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseProfileResponse"
+    patch:
+      tags:
+      - profile-controller
+      operationId: updateProfile
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseProfileResponse"
+  /api/v1/learners/wishlist/{accountId}:
+    get:
+      tags:
+      - wishlist-controller
+      operationId: getWishlist
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListWishlistResponse"
+  /api/v1/learners/reviews/{accountId}:
+    get:
+      tags:
+      - review-controller
+      operationId: getMyReviews
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListReviewResponse"
+  /api/v1/learners/quiz-attempts/{accountId}:
+    get:
+      tags:
+      - quiz-attempt-controller
+      operationId: getMyAttempts
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListQuizAttemptResponse"
+  /api/v1/learners/enrollments/{accountId}:
+    get:
+      tags:
+      - enrollment-controller
+      operationId: getEnrollments
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListEnrollmentResponse"
+  /api/v1/learners/enrollments/{accountId}/{courseId}:
+    get:
+      tags:
+      - enrollment-controller
+      operationId: getEnrollment
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseEnrollmentResponse"
+  /api/v1/learners/cart/{accountId}:
+    get:
+      tags:
+      - cart-controller
+      operationId: getCart
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMapStringObject"
+  /api/v1/learners/wishlist/{accountId}/{courseId}:
+    delete:
+      tags:
+      - wishlist-controller
+      operationId: removeFromWishlist
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/learners/reviews/{accountId}/{courseId}:
+    delete:
+      tags:
+      - review-controller
+      operationId: deleteReview
+      parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+components:
+  schemas:
+    ReviewRequest:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+          format: int32
+        comment:
+          type: string
+    ApiResponseReviewResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ReviewResponse"
+    ReviewResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+          format: int32
+        comment:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        courseTitle:
+          type: string
+        courseThumbnail:
+          type: string
+        totalReviews:
+          type: integer
+          format: int32
+        ratingAverage:
+          type: number
+          format: double
+    WishlistRequest:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+    ApiResponseWishlistResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/WishlistResponse"
+    WishlistResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        createdAt:
+          type: integer
+          format: int64
+        courseTitle:
+          type: string
+        courseThumbnail:
+          type: string
+        courseDescription:
+          type: string
+        totalStudents:
+          type: integer
+          format: int32
+        totalLessons:
+          type: integer
+          format: int32
+        price:
+          type: number
+          format: double
+        totalReviews:
+          type: integer
+          format: int32
+        rating:
+          type: number
+          format: double
+    QuizAttemptRequest:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        quizId:
+          type: integer
+          format: int64
+        score:
+          type: number
+          format: double
+        timeSpent:
+          type: integer
+          format: int64
+    ApiResponseQuizAttemptResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/QuizAttemptResponse"
+    QuizAttemptResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountId:
+          type: integer
+          format: int64
+        quizId:
+          type: integer
+          format: int64
+        quizTitle:
+          type: string
+        attemptedAt:
+          type: integer
+          format: int64
+        totalQuestions:
+          type: integer
+          format: int32
+        maxScore:
+          type: integer
+          format: int32
+        score:
+          type: integer
+          format: int32
+        result:
+          type: string
+    EnrollmentRequest:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+    ApiResponseEnrollmentResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/EnrollmentResponse"
+    EnrollmentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountId:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        status:
+          type: string
+        enrolledAt:
+          type: integer
+          format: int64
+        startedAt:
+          type: integer
+          format: int64
+        completedAt:
+          type: integer
+          format: int64
+        courseTitle:
+          type: string
+        courseThumbnail:
+          type: string
+        courseDescription:
+          type: string
+        totalStudents:
+          type: integer
+          format: int32
+        totalLessons:
+          type: integer
+          format: int32
+        price:
+          type: number
+          format: double
+        totalReviews:
+          type: integer
+          format: int32
+        rating:
+          type: number
+          format: double
+    ApiResponseMapStringObject:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: object
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+        skill:
+          type: string
+        biography:
+          type: string
+    ApiResponseProfileResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/ProfileResponse"
+    ProfileResponse:
+      type: object
+      properties:
+        registrationDate:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        skill:
+          type: string
+        biography:
+          type: string
+    ApiResponseListWishlistResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WishlistResponse"
+    ApiResponseListReviewResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewResponse"
+    ApiResponseListQuizAttemptResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuizAttemptResponse"
+    ApiResponseListEnrollmentResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnrollmentResponse"
+    ApiResponseVoid:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: object
