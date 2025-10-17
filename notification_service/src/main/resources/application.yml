@@ -25,7 +25,8 @@
 spring:
   application:
     name: notification-service
-
+  profiles:
+    active: dev
 server:
   port: 8083
 

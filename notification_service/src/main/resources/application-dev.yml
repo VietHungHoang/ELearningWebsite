@@ -14,3 +14,8 @@ spring:
           auth: true
           starttls:
             enable: true
+
+# Disable Eureka client for local dev
+eureka:
+  client:
+    enabled: false
