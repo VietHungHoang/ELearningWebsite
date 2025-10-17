@@ -1,5 +1,0 @@
-export { default as DashboardPage } from './DashboardPage'
-export { default as FindTutorPage } from './FindTutorPage'
-export { default as PremiumFeaturesPage } from './PremiumFeaturesPage'
-export { default as ProfilePage } from './ProfilePage'
-export { default as TutorProfilePage } from './TutorProfilePage'

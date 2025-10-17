@@ -90,6 +90,7 @@ aws:
 kafka:
   topics:
     video-transcoding: video-transcoding
+    video-processed: video-processed
 
 # Media Type Configurations for Strategy Pattern
 media:

@@ -214,4 +214,60 @@ public class FFmpegService {
             return "";
         }
     }
+    
+    /**
+     * Extract audio from video file to WAV format
+     */
+    public void extractAudioToWav(Path inputFile, Path outputWavFile) {
+        try {
+            log.info("Starting audio extraction to WAV for: {}", inputFile);
+            
+            // Build FFmpeg command for audio extraction
+            List<String> command = Arrays.asList(
+                ffmpegBinaryPath,
+                "-i", inputFile.toString(),
+                "-vn",  // No video
+                "-acodec", "pcm_s16le",  // WAV codec
+                "-ar", "44100",  // Sample rate
+                "-ac", "2",  // Stereo
+                "-y",  // Overwrite output file
+                outputWavFile.toString()
+            );
+            
+            log.info("Executing FFmpeg command: {}", String.join(" ", command));
+            
+            // Execute FFmpeg process
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.redirectErrorStream(true);
+            
+            Process process = processBuilder.start();
+            
+            // Log FFmpeg output
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.debug("FFmpeg: {}", line);
+                }
+            }
+            
+            // Wait for process to complete
+            boolean finished = process.waitFor(10, TimeUnit.MINUTES);
+            
+            if (!finished) {
+                process.destroyForcibly();
+                throw new TranscodingException("FFmpeg audio extraction timed out after 10 minutes");
+            }
+            
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                throw new TranscodingException("FFmpeg audio extraction failed with exit code: " + exitCode);
+            }
+            
+            log.info("Audio extraction to WAV completed successfully for: {}", inputFile);
+            
+        } catch (IOException | InterruptedException e) {
+            log.error("Error during audio extraction", e);
+            throw new TranscodingException("Error during audio extraction", e);
+        }
+    }
 }

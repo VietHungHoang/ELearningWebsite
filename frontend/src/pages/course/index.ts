@@ -1,5 +1,0 @@
-export { default as CourseListPage } from './CourseListPage'
-export { default as CourseSearchPage } from './CourseSearchPage'
-export { default as CourseDetailPage } from './CourseDetailPage'
-export { default as CoursePlayerPage } from './CoursePlayerPage'
-export { default as LessonPage } from './LessonPage'

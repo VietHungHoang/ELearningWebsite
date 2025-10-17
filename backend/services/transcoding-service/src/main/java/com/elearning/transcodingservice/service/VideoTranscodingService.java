@@ -14,10 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-// ...existing imports...
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
@@ -48,48 +48,33 @@ public class VideoTranscodingService {
         String jobId = UUID.randomUUID().toString();
         Path jobDir = Paths.get(workspaceRoot, "job-" + jobId + "-" + message.getVideoId());
         Path inputPath = jobDir.resolve("input.mp4");
+        Path wavPath = jobDir.resolve(message.getVideoId() + ".wav");
         Path outputDir = jobDir.resolve("output");
 
         try {
         log.info("Starting processing for videoId={} lessonId={} bucket={} object={}",
             message.getVideoId(), message.getLessonId(), message.getBucketName(), message.getObjectName());
 
-            Files.createDirectories(jobDir);
+            downloadInput(message, jobDir, inputPath);
 
-            // Determine bucket to use: prefer message.bucketName, fallback to configured VIDEO-RAW bucket
-            String bucketToUse = message.getBucketName();
-            if (bucketToUse == null || bucketToUse.isBlank()) {
-                bucketToUse = s3Service.getVideosRawBucketName();
-            }
+            // Run extract and transcode in parallel
+            CompletableFuture<Void> extractFuture = CompletableFuture.runAsync(() -> {
+                ffmpegService.extractAudioToWav(inputPath, wavPath);
+                uploadWav(message, wavPath);
+                log.info("WAV extraction and upload completed for videoId={}", message.getVideoId());
+            });
 
-            s3Service.downloadObject(bucketToUse, message.getObjectName(), inputPath);
+            CompletableFuture<Void> transcodeFuture = CompletableFuture.runAsync(() -> {
+                performTranscoding(inputPath, outputDir);
+                uploadDirectoryAndNotify(message, outputDir);
+                log.info("Transcoding and upload completed for videoId={}", message.getVideoId());
+            });
 
-            // Perform transcoding (this method already handles ffmpeg availability and verification)
-            performTranscoding(inputPath, outputDir);
+            // Wait for both to complete
+            CompletableFuture.allOf(extractFuture, transcodeFuture).join();
 
-            // Upload transcoded files to VIDEO-STREAM bucket
-            String streamBucket = s3Service.getVideosStreamBucketName();
-            if (streamBucket != null && !streamBucket.isBlank()) {
-                String baseKey = message.getLessonId() + "/" + message.getVideoId(); // Use lessonId/videoId as base key
-                s3Service.uploadDirectory(streamBucket, outputDir, baseKey);
-                log.info("Uploaded transcoded files for videoId={} lessonId={} to bucket {} with base key {}", message.getVideoId(), message.getLessonId(), streamBucket, baseKey);
-
-                // Send processed event
-                VideoProcessedEvent event = VideoProcessedEvent.builder()
-                    .videoId(message.getVideoId())
-                    .lessonId(message.getLessonId())
-                    .status(VideoStatus.READY)
-                    .masterPlaylistUrl("s3://" + streamBucket + "/" + baseKey + "/playlist.m3u8")
-                    .processedAt(LocalDateTime.now())
-                    .build();
-                videoProcessedKafkaTemplate.send(videoProcessedTopic, String.valueOf(message.getVideoId()), event);
-                log.info("Sent VideoProcessedEvent for videoId={}", message.getVideoId());
-            } else {
-                log.warn("VIDEO-STREAM bucket not configured, skipping upload after transcoding for videoId={}", message.getVideoId());
-            }
-
-            // Log completion
-            log.info("Transcoding finished for videoId={} outputDir={}", message.getVideoId(), outputDir);
+            // Log overall completion
+            log.info("All processing finished for videoId={} outputDir={}", message.getVideoId(), outputDir);
 
         } catch (Exception e) {
             log.error("Failed to process videoId={}", message.getVideoId(), e);
@@ -114,7 +99,51 @@ public class VideoTranscodingService {
         }
     }
 
-    // downloadVideoTo removed: downloading is performed via S3Service.downloadObject(bucket, key, dest)
+    private void downloadInput(VideoTranscodingMessage message, Path jobDir, Path inputPath) throws IOException {
+        Files.createDirectories(jobDir);
+
+        // Determine bucket to use: prefer message.bucketName, fallback to configured VIDEO-RAW bucket
+        String bucketToUse = message.getBucketName();
+        if (bucketToUse == null || bucketToUse.isBlank()) {
+            bucketToUse = s3Service.getVideosRawBucketName();
+        }
+
+        s3Service.downloadObject(bucketToUse, message.getObjectName(), inputPath);
+    }
+
+    private void uploadWav(VideoTranscodingMessage message, Path wavPath) {
+        String streamBucket = s3Service.getVideosStreamBucketName();
+        if (streamBucket != null && !streamBucket.isBlank()) {
+            String wavKey = message.getLessonId() + "/" + message.getVideoId() + "/" + message.getVideoId() + ".wav";
+            s3Service.uploadObject(streamBucket, wavKey, wavPath);
+            log.info("Uploaded WAV file for videoId={} to bucket {} with key {}", message.getVideoId(), streamBucket, wavKey);
+        } else {
+            log.warn("VIDEO-STREAM bucket not configured, skipping WAV upload for videoId={}", message.getVideoId());
+        }
+    }
+
+    private void uploadDirectoryAndNotify(VideoTranscodingMessage message, Path outputDir) {
+        // Upload transcoded files to VIDEO-STREAM bucket
+        String streamBucket = s3Service.getVideosStreamBucketName();
+        if (streamBucket != null && !streamBucket.isBlank()) {
+            String baseKey = message.getLessonId() + "/" + message.getVideoId(); // Use lessonId/videoId as base key
+            s3Service.uploadDirectory(streamBucket, outputDir, baseKey);
+            log.info("Uploaded transcoded files for videoId={} lessonId={} to bucket {} with base key {}", message.getVideoId(), message.getLessonId(), streamBucket, baseKey);
+
+            // Send processed event
+            VideoProcessedEvent event = VideoProcessedEvent.builder()
+                .videoId(message.getVideoId())
+                .lessonId(message.getLessonId())
+                .status(VideoStatus.READY)
+                .masterPlaylistUrl("s3://" + streamBucket + "/" + baseKey + "/playlist.m3u8")
+                .processedAt(LocalDateTime.now())
+                .build();
+            videoProcessedKafkaTemplate.send(videoProcessedTopic, String.valueOf(message.getVideoId()), event);
+            log.info("Sent VideoProcessedEvent for videoId={}", message.getVideoId());
+        } else {
+            log.warn("VIDEO-STREAM bucket not configured, skipping upload after transcoding for videoId={}", message.getVideoId());
+        }
+    }
 
     private void deleteRecursively(Path dir) throws IOException {
         if (dir == null) return;
