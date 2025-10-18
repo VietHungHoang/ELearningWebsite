@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.elearning.cart_service.model.CartItem.CartItemBuilder;
+
 /**
  * Thông tin toàn bộ cart trả về cho FE
  */
@@ -16,4 +18,5 @@ public class CartResponse {
     private LocalDateTime expiresAt; // Thời gian hết hạn (để FE đếm ngược)
     private BigDecimal totalAmount; // Tổng tiền của tất cả item
     private List<CartItemResponse> items; // Danh sách item trong cart
+
 }

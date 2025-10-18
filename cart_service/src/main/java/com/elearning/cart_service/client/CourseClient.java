@@ -33,5 +33,9 @@ public class CourseClient {
         private Double listPrice;
         private Double discountPrice;
         private Boolean isActive; // trạng thái course còn bán không
+
+        // THÊM: Thông tin instructor và thumbnail
+        private String instructorName;
+        private String thumbnailUrl;
     }
 }

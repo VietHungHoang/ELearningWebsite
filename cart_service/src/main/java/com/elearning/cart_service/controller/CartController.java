@@ -16,17 +16,32 @@ import org.springframework.web.bind.annotation.*;
  * REST Controller cho Cart
  */
 @RestController
-@RequestMapping("/api/carts")
+@RequestMapping("/api/learners/{learnerId}/cart")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
 
     /**
-     * POST /api/carts/{learnerId}/items
+     * GET /api/learners/{learnerId}/cart
+     * Lấy cart hiện tại của learner
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<CartResponse>> getCart(@PathVariable Long learnerId) {
+        CartResponse cart = cartService.getCart(learnerId);
+        ApiResponse<CartResponse> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Fetch cart successfully.",
+                cart);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * POST /api/learners/{learnerId}/cart/items
      * Add course vào cart
      */
-    @PostMapping("/{learnerId}/items")
+    @PostMapping("/items")
     public ResponseEntity<ApiResponse<CartResponse>> addToCart(
             @PathVariable Long learnerId,
             @RequestBody AddToCartRequest request) {
@@ -40,24 +55,10 @@ public class CartController {
     }
 
     /**
-     * GET /api/carts/{learnerId}
-     * Lấy cart hiện tại của learner
-     */
-    @GetMapping("/{learnerId}")
-    public ResponseEntity<ApiResponse<CartResponse>> getCart(@PathVariable Long learnerId) {
-        CartResponse cart = cartService.getCart(learnerId);
-        ApiResponse<CartResponse> response = new ApiResponse<>(
-                HttpStatus.OK.value(),
-                "Fetch cart successfully.",
-                cart);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * DELETE /api/carts/{learnerId}/items/{courseId}
+     * DELETE /api/learners/{learnerId}/cart/items/{courseId}
      * Xoá 1 course khỏi cart
      */
-    @DeleteMapping("/{learnerId}/items/{courseId}")
+    @DeleteMapping("/items/{courseId}")
     public ResponseEntity<ApiResponse<CartResponse>> removeItem(
             @PathVariable Long learnerId,
             @PathVariable Long courseId) {
@@ -71,10 +72,10 @@ public class CartController {
     }
 
     /**
-     * POST /api/carts/{learnerId}/checkout
+     * POST /api/learners/{learnerId}/cart/checkout
      * Thực hiện checkout toàn bộ cart
      */
-    @PostMapping("/{learnerId}/checkout")
+    @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(
             @PathVariable Long learnerId,
             @RequestBody(required = false) CheckoutRequest request) {
@@ -93,22 +94,25 @@ public class CartController {
 
         return ResponseEntity.ok(response);
     }
-    //Apply coupon
-    @PostMapping("/{learnerId}/items/{courseId}/apply-coupon")
-public ResponseEntity<ApiResponse<CartResponse>> applyCoupon(
-        @PathVariable Long learnerId,
-        @PathVariable Long courseId,
-        @RequestBody ApplyCouponRequest request) {
 
-    request.setCourseId(courseId); // đảm bảo DTO có courseId
-    CartResponse cart = cartService.applyCoupon(learnerId, request);
+    /**
+     * POST /api/learners/{learnerId}/cart/items/{courseId}/apply-coupon
+     * Apply coupon cho 1 course trong cart
+     */
+    @PostMapping("/items/{courseId}/apply-coupon")
+    public ResponseEntity<ApiResponse<CartResponse>> applyCoupon(
+            @PathVariable Long learnerId,
+            @PathVariable Long courseId,
+            @RequestBody ApplyCouponRequest request) {
 
-    ApiResponse<CartResponse> response = new ApiResponse<>(
-            HttpStatus.OK.value(),
-            "Coupon applied successfully.",
-            cart
-    );
-    return ResponseEntity.ok(response);
-}
+        request.setCourseId(courseId); // đảm bảo DTO có courseId
+        CartResponse cart = cartService.applyCoupon(learnerId, request);
+
+        ApiResponse<CartResponse> response = new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Coupon applied successfully.",
+                cart);
+        return ResponseEntity.ok(response);
+    }
 
 }

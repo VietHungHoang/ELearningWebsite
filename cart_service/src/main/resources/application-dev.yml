@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: cart-service
   datasource:
     url: jdbc:mysql://localhost:3306/cart_service_db
     username: root
@@ -12,3 +14,7 @@ spring:
     properties:
       "[hibernate.format_sql]": true
     database-platform: org.hibernate.dialect.MySQL8Dialect
+# Disable Eureka client for local dev
+eureka:
+  client:
+    enabled: false

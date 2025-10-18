@@ -1,20 +1,40 @@
 package com.elearning.cart_service.dto.response;
 
-
 import lombok.Data;
-import java.math.BigDecimal;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-/**
- * Thông tin 1 item trong cart trả về cho FE
- */
+import java.math.BigDecimal;
+import java.util.List;
+
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CartItemResponse {
-    private Long id;              // ID của cart item
-    private Long courseId;        // ID khoá học
-    private String courseTitle;   // Tên khoá học
-    private BigDecimal listPrice;     // Giá gốc
-    private BigDecimal discountPrice; // Giá sau giảm (nếu có)
-    private BigDecimal finalPrice;    // Giá cuối sau coupon
-    private String appliedCoupon;     // Coupon đang dùng
-    private boolean valid;            // Item còn hợp lệ không
+    private Long id; // cartItemId
+    private Long courseId;
+    private String courseTitle;
+    private String instructorName;
+    private String instructorAvatar;
+    private String thumbnailUrl;
+    private String description;
+    private String category;
+    private String level;
+    private BigDecimal listPrice;
+    private BigDecimal discountPrice;
+    private BigDecimal finalPrice;
+    private Double rating;
+    private Integer totalRatings;
+    private Integer totalStudents;
+    private String duration;
+    private String language;
+    private Boolean hasCertificate;
+    private String lastUpdated;
+    private List<String> whatYouWillLearn;
+    private List<String> requirements;
+    private List<String> includes;
+    private String appliedCoupon;
+    private Boolean valid;
 }
