@@ -23,9 +23,9 @@
 # springdoc.swagger-ui.path=/swagger-ui.html
 spring:
   application:
-    name: cart-service          # tên service đăng ký với Eureka
-  profiles:
-    active: dev
+    name: cart-service # tên service đăng ký với Eureka
+  # profiles:
+  #   active: dev
 # Cấu hình chung cho Swagger
 springdoc:
   api-docs:
