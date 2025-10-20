@@ -1,0 +1,64 @@
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Output files (transcription results)
+output/
+*.srt
+*.vtt
+
+# Audio/Video files (nặng)
+audio/
+*.mp3
+*.m4a
+*.wav
+*.mp4
+*.mkv
+*.mov
+*.flv
+
+# Model files (rất nặng)
+*.pth
+*.pt
+*.ckpt
+models/
+checkpoints/
+
+# Whisper source code (không cần thiết - dùng openai-whisper package)
+whisper/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info
+.pytest_cache
+.ipynb_checkpoints
+
+# Cache & temp files
+.cache/
+*.cache
+*.tmp
+*~
+
+# OS specific
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+
+# FFmpeg config (nếu có API keys)
+ffmpeg_config.json

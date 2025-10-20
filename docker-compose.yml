@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  whisper-transcriber:
+    build: .
+    image: whisper-transcriber:latest
+    container_name: whisper-transcriber
+    
+    # Volumes để mount input/output folders
+    volumes:
+      - ./audio:/app/audio          # Input audio files
+      - ./output:/app/output        # Output transcriptions
+      - ./models:/app/models        # Model cache (persistent)
+    
+    # Environment variables
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - WHISPER_HOME=/app/models
+    
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+    
+    # Interactive terminal
+    stdin_open: true
+    tty: true
+    
+    # Command to run
+    command: python scripts/transcribe.py "audio/input.mp3"
