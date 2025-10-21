@@ -1,7 +1,7 @@
-version: '3.8'
-
 services:
   # Whisper Transcription REST API
+  # Usage: docker-compose up
+  # API will serve pre-generated SRT/VTT files from ./output/
   whisper-api:
     build:
       context: .
@@ -14,13 +14,11 @@ services:
       - FLASK_ENV=${FLASK_ENV:-production}
       - FLASK_DEBUG=${FLASK_DEBUG:-False}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - LESSON_SERVICE_URL=${LESSON_SERVICE_URL:-http://lesson-service:8000/api}
+      - LESSON_SERVICE_URL=${LESSON_SERVICE_URL:-http://localhost:8000/api}
       - WHISPER_HOME=/app/models
     volumes:
-      - ./audio:/app/audio                    # Input audio files
-      - ./output:/app/output                  # Output SRT/VTT files
+      - ./output:/app/output                  # Output SRT/VTT files (read-only for API)
       - ./models:/app/models                  # Whisper model cache (persistent)
-      - ./src:/app/src                        # Source code (dev hot-reload)
     networks:
       - whisper-network
     command: python -m flask run --host=0.0.0.0
@@ -39,22 +37,6 @@ services:
         reservations:
           cpus: '1'
           memory: 2G
-    profiles:
-      - ""  # Default - always active
-
-  # Optional: Lesson Service (if running locally)
-  lesson-service:
-    image: ${LESSON_SERVICE_IMAGE:-placeholder}
-    container_name: lesson-service
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=${LESSON_SERVICE_DB_URL}
-    networks:
-      - whisper-network
-    restart: unless-stopped
-    profiles:
-      - lesson-service  # Only with: docker-compose --profile lesson-service up
 
 networks:
   whisper-network:
