@@ -1,13 +1,13 @@
-# Multi-stage build để giảm size image
+# Dockerfile for Whisper Transcription API
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install FFmpeg (cần thiết cho audio processing)
+# Install system dependencies (FFmpeg for audio, curl for healthcheck)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
-    git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
@@ -19,15 +19,21 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Create directories for input/output
+# Create directories for audio input, SRT output, and model cache
 RUN mkdir -p /app/audio /app/output /app/models
 
-# Set environment for Whisper model cache
+# Set environment variables
 ENV WHISPER_HOME=/app/models
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+ENV FLASK_APP=src/api/app.py
+ENV FLASK_ENV=production
 
-# Pre-download base model (optional, comment out để skip)
+# Optional: Pre-download Whisper base model to reduce startup time
+# Uncomment if you want to include model in image (increases image size ~1GB)
 # RUN python -c "import whisper; whisper.load_model('base')"
 
-# Default command
-CMD ["python", "scripts/transcribe.py"]
+# Expose Flask port
+EXPOSE 5000
+
+# Run Flask API
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0"]
+

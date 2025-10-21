@@ -110,10 +110,10 @@ Nếu FFmpeg không ở trong PATH, tạo file `ffmpeg_config.json` trong root:
 
 ```bash
 # Transcribe file audio/video
-python scripts/transcribe.py "path/to/audio.mp3"
+python src/scripts/transcribe_simple.py "path/to/audio.mp3"
 
 # Với context tùy chỉnh
-python scripts/transcribe.py "path/to/audio.mp3" --context "ReactJS"
+python src/scripts/transcribe_simple.py "path/to/audio.mp3" --context "ReactJS"
 ```
 
 ### Cách 2: Dùng trong Python Code
@@ -134,7 +134,17 @@ result = transcriber.transcribe(
 print(result["text"])
 ```
 
-### Cách 3: Chạy bằng Docker
+### Cách 3: Dùng CLI Module
+
+```bash
+# Dùng module chính
+python -m src.cli "audio/file.mp3" --language vi --context "ReactJS"
+
+# Batch processing
+python src/scripts/batch_transcribe.py --input audio --output output --language vi
+```
+
+### Cách 4: Chạy bằng Docker
 
 **Yêu cầu:** Docker & Docker Compose đã cài sẵn
 
@@ -196,17 +206,52 @@ Các file kết quả sẽ được lưu trong thư mục `output/`:
 
 ```
 open-whisper/
-├── src/
-│   └── transcriber.py          # Main transcriber class
-├── scripts/
-│   └── transcribe.py           # CLI interface
-├── audio/                      # Thư mục chứa audio/video input
-├── output/                     # Kết quả transcription
-├── tests/                      # Unit tests
-├── requirements.txt            # Dependencies
-├── ffmpeg_config.json         # FFmpeg configuration
-└── README.md                  # This file
+├── src/                          # ⭐ Main package
+│   ├── __init__.py              # Package init
+│   ├── cli.py                   # CLI interface
+│   ├── app.py                   # Main app entry
+│   ├── core/                    # Core business logic
+│   │   ├── __init__.py
+│   │   ├── whisper_engine.py    # Whisper transcription
+│   │   ├── gemini_enhancer.py   # AI text enhancement
+│   │   └── audio_processor.py   # Audio processing
+│   ├── api/                     # API layer ⭐ NEW!
+│   │   ├── __init__.py          # Flask app & endpoints
+│   │   ├── lesson_service.py    # Call Lesson Service API
+│   │   ├── subtitle_service.py  # Database operations
+│   │   └── subtitle_cache.py    # Caching layer
+│   ├── jobs/                    # Background jobs ⭐ NEW!
+│   │   ├── __init__.py
+│   │   └── transcription_job.py # Pre-generate subtitles
+│   ├── utils/                   # Utilities & helpers
+│   │   ├── __init__.py
+│   │   └── config.py            # Config & file utils
+│   └── scripts/                 # CLI entry points
+│       ├── __init__.py
+│       ├── transcribe_simple.py # Simple wrapper
+│       └── batch_transcribe.py  # Batch processing
+├── tests/                        # Unit tests
+│   ├── __init__.py
+│   └── test_gemini.py           # Gemini API tests
+├── audio/                        # Input audio files
+├── output/                       # Output transcriptions
+├── models/                       # Model cache
+├── Dockerfile                   # Docker config
+├── docker-compose.yml           # Docker compose
+├── requirements.txt              # Dependencies
+├── .gitignore                   # Git ignore rules
+└── README.md                    # This file
 ```
+
+├── audio/ # Input audio/video files
+├── output/ # Transcription results
+├── Dockerfile # Docker configuration
+├── docker-compose.yml # Docker compose
+├── requirements.txt # Python dependencies
+├── .gitignore # Git ignore rules
+└── README.md # This file
+
+````
 
 ## 🔧 Troubleshooting
 
@@ -217,7 +262,7 @@ open-whisper/
 ffmpeg -version
 
 # Nếu chưa, cài đặt theo hướng dẫn ở trên
-```
+````
 
 ### Lỗi: "CUDA not available"
 
@@ -265,6 +310,127 @@ python -c "import os; print(os.getenv('GEMINI_API_KEY'))"
 "sot code" → "source code"
 "REG" → "React"
 "click vào cái" → "nhấn vào"  # (AI tự sửa)
+```
+
+## 🐳 Docker Deployment
+
+### Build Image
+
+```bash
+docker build -t whisper-transcription-api:latest .
+```
+
+### Run with Docker Compose
+
+#### Production Setup
+
+```bash
+# 1. Create .env file
+cp .env.example .env
+# Edit .env and add your GEMINI_API_KEY
+
+# 2. Start services (production mode)
+docker-compose up -d
+
+# 3. API will be available at http://localhost:5000
+```
+
+#### Development Setup
+
+```bash
+# Start with development environment (hot-reload enabled)
+FLASK_ENV=development FLASK_DEBUG=True docker-compose up -d
+```
+
+#### With Optional Lesson Service
+
+```bash
+# Start Whisper API + Lesson Service
+docker-compose --profile lesson-service up -d
+```
+
+### Manual Docker Run
+
+```bash
+docker run -d \
+  -p 5000:5000 \
+  -e GEMINI_API_KEY=your_key \
+  -e FLASK_ENV=production \
+  -v $(pwd)/audio:/app/audio \
+  -v $(pwd)/output:/app/output \
+  -v $(pwd)/models:/app/models \
+  --name whisper-api \
+  whisper-transcription-api:latest
+```
+
+### API Endpoints
+
+```bash
+# Health check
+curl http://localhost:5000/api/health
+
+# Get subtitles for lesson 42
+curl http://localhost:5000/api/subtitles/42
+
+# Download SRT file
+curl -O http://localhost:5000/api/subtitles/42/download
+```
+
+### Admin Script (inside or outside Docker)
+
+```bash
+# Inside Docker container
+docker exec whisper-api python src/scripts/transcribe_lesson.py 42 /app/audio/lesson.mp3
+
+# Outside container (local)
+python src/scripts/transcribe_lesson.py 42 audio/lesson.mp3
+```
+
+### Docker Compose Services
+
+| Service        | Port | Purpose                                | Profile        |
+| -------------- | ---- | -------------------------------------- | -------------- |
+| whisper-api    | 5000 | REST API for serving subtitles         | default        |
+| lesson-service | 8000 | (Optional) External lesson context API | lesson-service |
+
+### Volumes
+
+| Volume     | Mount         | Purpose                             |
+| ---------- | ------------- | ----------------------------------- |
+| `./audio`  | `/app/audio`  | Input audio files                   |
+| `./output` | `/app/output` | Generated SRT/VTT files             |
+| `./models` | `/app/models` | Cached Whisper models               |
+| `./src`    | `/app/src`    | Source code (for hot-reload in dev) |
+
+### Environment Variables
+
+See `.env.example` for all available options:
+
+- `GEMINI_API_KEY` - Google Gemini API key (required)
+- `LESSON_SERVICE_URL` - External lesson service URL
+- `FLASK_ENV` - Flask environment (production/development)
+- `FLASK_DEBUG` - Debug mode (True/False)
+
+### Docker Commands
+
+```bash
+# View logs
+docker-compose logs -f whisper-api
+
+# Stop services
+docker-compose down
+
+# Restart services
+docker-compose restart
+
+# Rebuild image
+docker-compose up -d --build
+
+# Remove all volumes (careful!)
+docker-compose down -v
+
+# Shell into container
+docker exec -it whisper-api bash
 ```
 
 ## 🤝 Contribute
