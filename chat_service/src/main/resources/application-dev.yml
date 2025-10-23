@@ -1,0 +1,19 @@
+server:
+  port: 8084
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/chat_db
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    com.elearning.chatservice: DEBUG
+# CORS handled in WebConfig.java
+app:
+  cors:
+    allowed-origins: "*"
+  swagger:
+    enabled: true

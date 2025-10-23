@@ -1,0 +1,264 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8084
+  description: Generated server url
+paths:
+  /internal/enrollments:
+    post:
+      tags:
+      - enrollment-event-controller
+      operationId: handleEnrollment
+      parameters:
+      - name: learnerId
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: instructorId
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: courseId
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/chat/unread/{userId}/reset:
+    post:
+      tags:
+      - chat-controller
+      operationId: resetUnreadCount
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/chat/messages/{messageId}/read:
+    post:
+      tags:
+      - chat-controller
+      operationId: markMessageAsRead
+      parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseVoid"
+  /api/v1/chat/messages/{conversationId}:
+    get:
+      tags:
+      - chat-controller
+      operationId: getMessages
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListMessageResponse"
+    post:
+      tags:
+      - chat-controller
+      operationId: sendMessage
+      parameters:
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseMessageResponse"
+  /api/v1/chat/unread/{userId}:
+    get:
+      tags:
+      - chat-controller
+      operationId: getUnreadCount
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseInteger"
+  /api/v1/chat/conversations/{userId}:
+    get:
+      tags:
+      - chat-controller
+      operationId: getUserConversations
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseListConversationResponse"
+components:
+  schemas:
+    ApiResponseVoid:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: object
+    MessageRequest:
+      type: object
+      properties:
+        senderId:
+          type: string
+        content:
+          type: string
+    ApiResponseMessageResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/MessageResponse"
+    MessageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        senderId:
+          type: string
+        content:
+          type: string
+        systemMessage:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+          - SENT
+          - DELIVERED
+          - READ
+        deliveredAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+        readBy:
+          type: string
+    ApiResponseInteger:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: integer
+          format: int32
+    ApiResponseListMessageResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageResponse"
+    ApiResponseListConversationResponse:
+      type: object
+      properties:
+        success:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationResponse"
+    ConversationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        courseId:
+          type: string
+        learnerId:
+          type: string
+        instructorId:
+          type: string
+        participantIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time

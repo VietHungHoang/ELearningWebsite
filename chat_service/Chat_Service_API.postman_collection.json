@@ -1,0 +1,409 @@
+{
+  "info": {
+    "name": "Chat Service - REST API",
+    "description": "Collection for testing Chat Service REST endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Get User Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/conversations/user-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "conversations", "user-1"]
+            },
+            "description": "Get all conversations for a specific user"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/conversations/user-1",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "conversations", "user-1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Conversations retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"conv-123\",\n      \"courseId\": \"course-123\",\n      \"learnerId\": \"user-1\",\n      \"instructorId\": \"instructor-1\",\n      \"participantIds\": [\"user-1\", \"instructor-1\"],\n      \"createdAt\": \"2025-10-23T15:00:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Get Messages History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/messages/conv-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "messages", "conv-123"]
+            },
+            "description": "Get message history for a conversation (with pagination in future)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/messages/conv-123",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "messages", "conv-123"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Messages retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"msg-1\",\n      \"senderId\": \"user-1\",\n      \"content\": \"Hello world\",\n      \"systemMessage\": false,\n      \"status\": \"read\",\n      \"deliveredAt\": \"2025-10-23T15:30:30Z\",\n      \"readAt\": \"2025-10-23T15:31:00Z\",\n      \"readBy\": \"user-2\",\n      \"createdAt\": \"2025-10-23T15:30:00Z\"\n    },\n    {\n      \"id\": \"msg-2\",\n      \"senderId\": \"user-2\",\n      \"content\": \"Hi there!\",\n      \"systemMessage\": false,\n      \"status\": \"sent\",\n      \"deliveredAt\": null,\n      \"readAt\": null,\n      \"readBy\": null,\n      \"createdAt\": \"2025-10-23T15:31:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send Message (REST Alternative)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senderId\": \"user-1\",\n  \"content\": \"Hello from REST API\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/messages/conv-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "messages", "conv-123"]
+            },
+            "description": "Send a message via REST API (alternative to WebSocket)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderId\": \"user-1\",\n  \"content\": \"Hello from REST API\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/messages/conv-123",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "messages", "conv-123"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Message sent successfully\",\n  \"data\": {\n    \"id\": \"msg-456\",\n    \"senderId\": \"user-1\",\n    \"content\": \"Hello from REST API\",\n    \"systemMessage\": false,\n    \"status\": \"sent\",\n    \"deliveredAt\": null,\n    \"readAt\": null,\n    \"readBy\": null,\n    \"createdAt\": \"2025-10-23T15:35:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send Message 2 (Instructor Reply)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senderId\": \"instructor-1\",\n  \"content\": \"Hi user-1! Welcome to the course.\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/messages/conv-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "messages", "conv-123"]
+            },
+            "description": "Send second message from instructor (reply to learner)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"senderId\": \"instructor-1\",\n  \"content\": \"Hi user-1! Welcome to the course.\"\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/messages/conv-123",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "messages", "conv-123"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Message sent successfully\",\n  \"data\": {\n    \"id\": \"msg-789\",\n    \"senderId\": \"instructor-1\",\n    \"content\": \"Hi user-1! Welcome to the course.\",\n    \"systemMessage\": false,\n    \"status\": \"sent\",\n    \"deliveredAt\": null,\n    \"readAt\": null,\n    \"readBy\": null,\n    \"createdAt\": \"2025-10-23T15:36:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark Message as Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/messages/msg-456/read?userId=user-2",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "messages", "msg-456", "read"],
+              "query": [{ "key": "userId", "value": "user-2" }]
+            },
+            "description": "Mark a message as read by a user (read receipts)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/messages/msg-456/read?userId=user-2",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "messages", "msg-456", "read"],
+                  "query": [{ "key": "userId", "value": "user-2" }]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Message marked as read\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/unread/user-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "unread", "user-1"]
+            },
+            "description": "Get unread message count for a user (for chat icon badge)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/unread/user-1",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "unread", "user-1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Unread count retrieved\",\n  \"data\": 3\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset Unread Count",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/api/v1/chat/unread/user-1/reset",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["api", "v1", "chat", "unread", "user-1", "reset"]
+            },
+            "description": "Reset unread count to 0 when user opens chat (clears badge)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8084/api/v1/chat/unread/user-1/reset",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["api", "v1", "chat", "unread", "user-1", "reset"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Unread count reset\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Enrollment",
+      "item": [
+        {
+          "name": "Create Conversation on Enrollment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/internal/enrollments?learnerId=user-1&instructorId=instructor-1&courseId=course-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["internal", "enrollments"],
+              "query": [
+                { "key": "learnerId", "value": "user-1" },
+                { "key": "instructorId", "value": "instructor-1" },
+                { "key": "courseId", "value": "course-123" }
+              ]
+            },
+            "description": "Create a new conversation when a learner enrolls in a course"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8084/internal/enrollments?learnerId=user-1&instructorId=instructor-1&courseId=course-123",
+                  "protocol": "http",
+                  "host": ["localhost"],
+                  "port": "8084",
+                  "path": ["internal", "enrollments"],
+                  "query": [
+                    { "key": "learnerId", "value": "user-1" },
+                    { "key": "instructorId", "value": "instructor-1" },
+                    { "key": "courseId", "value": "course-123" }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": 1,\n  \"message\": \"Conversation created or already exists\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "UI Tests",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/swagger-ui/index.html",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["swagger-ui", "index.html"]
+            },
+            "description": "Open Swagger UI for API documentation and testing (open in browser)"
+          },
+          "response": []
+        },
+        {
+          "name": "API Docs (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8084/v3/api-docs",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8084",
+              "path": ["v3", "api-docs"]
+            },
+            "description": "Get OpenAPI specification in JSON format"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
