@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Service - E-Learning</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Sidebar - Conversations List -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 Conversations</h2>
+                <!-- User Selection -->
+                <div class="user-selection">
+                    <label for="user-select">Select User:</label>
+                    <select id="user-select" onchange="changeUser(this.value)">
+                        <option value="user1">User 1</option>
+                        <option value="user2">User 2</option>
+                        <option value="instructor1">Instructor 1</option>
+                        <option value="instructor2">Instructor 2</option>
+                    </select>
+                    <div class="current-user-info">
+                        <small>Current: <span id="current-user-display">user1</span></small>
+                    </div>
+                </div>
+            </div>
+            <div class="conversation-list">
+                <div class="conversation-item active" onclick="selectConversation('68f9edf52d7d16c4f6985d6d')">
+                    <div class="conv-avatar">💬</div>
+                    <div class="conv-info">
+                        <div class="conv-name">Chat Room</div>
+                        <div class="conv-preview">Real-time messaging test</div>
+                    </div>
+                    <div class="unread-badge" id="unread-68f9edf52d7d16c4f6985d6d">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="chat-info">
+                    <h2 id="chat-title">Conversation with instructor-1</h2>
+                    <p id="chat-status" class="status-text">● Online</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-action" onclick="toggleUserInfo()">ℹ️ Info</button>
+                    <button class="btn-action" onclick="clearChat()">🗑️ Clear</button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="messages-area" id="messages-area">
+                <div class="message-placeholder">
+                    <p>📱 No messages yet. Send your first message!</p>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <form id="message-form" onsubmit="sendMessage(event)">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="message-input" 
+                            placeholder="Type a message..." 
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="btn-send">➤ Send</button>
+                    </div>
+                </form>
+                <div class="connection-status" id="connection-status">
+                    <span class="status-indicator" id="status-indicator"></span>
+                    <span id="status-text">Disconnected</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Info Panel -->
+        <div class="user-info-panel" id="user-info-panel">
+            <div class="panel-header">
+                <h3>👤 User Info</h3>
+                <button class="btn-close" onclick="toggleUserInfo()">✕</button>
+            </div>
+            <div class="panel-content">
+                <div class="info-item">
+                    <label>Current User:</label>
+                    <p id="current-user">user-1</p>
+                </div>
+                <div class="info-item">
+                    <label>Conversation ID:</label>
+                    <p id="conv-id">68f9edf52d7d16c4f6985d6d</p>
+                </div>
+                <div class="info-item">
+                    <label>Unread Count:</label>
+                    <p id="unread-count">0</p>
+                </div>
+                <div class="info-item">
+                    <label>WebSocket Status:</label>
+                    <p id="ws-status">Connecting...</p>
+                </div>
+                <button class="btn-reset-unread" onclick="resetUnreadCount()">Reset Unread</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

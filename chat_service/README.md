@@ -75,7 +75,7 @@ The application will start on `http://localhost:8084`
 
 - **API Base URL**: `http://localhost:8084/api/v1/chat`
 - **Swagger UI**: `http://localhost:8084/swagger-ui/index.html`
-- **WebSocket Endpoint**: `ws://localhost:8084/ws`
+- **WebSocket Endpoint**: `ws://localhost:8084/ws/chat`
 
 ## 📚 API Documentation
 
@@ -106,7 +106,7 @@ The application will start on `http://localhost:8084`
 
 ```javascript
 // Connect to WebSocket
-const socket = new SockJS("/ws");
+const socket = new SockJS("/ws/chat");
 const stompClient = Stomp.over(socket);
 
 // Subscribe to conversation
@@ -223,7 +223,7 @@ spring:
 websocket:
   app: /app
   topic: /topic
-  endpoint: /ws
+  endpoint: /ws/chat
 ```
 
 **application-dev.yml** (development)

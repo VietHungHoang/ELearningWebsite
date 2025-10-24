@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Đăng ký WebSocket endpoint
         registry.addEndpoint("/ws/chat")
-                .setAllowedOrigins("*")
+                .setAllowedOriginPatterns("*")
                 .withSockJS(); // Fallback cho browser không support WebSocket
     }
 }
