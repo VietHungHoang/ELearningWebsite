@@ -27,7 +27,7 @@ public class DashboardController {
         var dashboardData = dashboardService.getDashboard(accountId);
 
         DashboardResponse dashboard = DashboardResponse.builder()
-                // Learning Stats
+                // Learning overview
                 .enrolledCourses((List<Map<String, Object>>) dashboardData.get("enrolledCourses"))
                 .totalEnrolledCourses((Integer) dashboardData.get("totalEnrolledCourses"))
                 .completedCourses((Integer) dashboardData.get("completedCourses"))

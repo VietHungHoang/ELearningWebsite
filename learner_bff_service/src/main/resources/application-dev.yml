@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: learner-bff-service
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8083
+
+eureka:
+  client:
+    enabled: false
+
+service:
+  learner:
+    base-url: http://localhost:8082/api/v1/learners
+  course:
+    base-url: http://localhost:8084/api/v1/courses
+  cart:
+    base-url: http://api-gateway/api/v1/cart
+  quiz:
+    base-url: http://localhost:8085/api/v1/quiz
+  user:
+    base-url: http://localhost:8081/api/v1/users
+
+logging:
+  level:
+    com.elearning: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+
+cache:
+  course:
+    ttl: 600
+  cart:
+    ttl: 300
+  user:
+    ttl: 300
+
+connection:
+  timeout: 5000
+  read-timeout: 10000

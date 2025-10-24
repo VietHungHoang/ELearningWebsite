@@ -1,0 +1,58 @@
+# Multi-stage build for production
+# Stage 1: Build
+FROM maven:3.8.1-openjdk-17 AS builder
+
+WORKDIR /build
+
+# Copy pom.xml and download dependencies
+COPY pom.xml .
+RUN mvn dependency:go-offline -q
+
+# Copy source code
+COPY src ./src
+
+# Build application
+RUN mvn clean package -DskipTests=true -q
+
+# Stage 2: Runtime
+FROM openjdk:17-jdk-slim
+
+LABEL maintainer="E-Learning Platform"
+LABEL version="1.0.0"
+LABEL description="Learner BFF Service - Production"
+
+# Create app user (security best practice)
+RUN useradd -m -u 1000 appuser
+
+# Set working directory
+WORKDIR /app
+
+# Copy jar from builder stage
+COPY --from=builder /build/target/learner-bff-service-*.jar app.jar
+
+# Create log directory
+RUN mkdir -p /var/log/learner-bff && chown appuser:appuser /var/log/learner-bff
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 8083
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD java -cp app.jar org.springframework.boot.loader.PropertiesLauncher \
+    -Dspring.profiles.active=prod \
+    -Dmanagement.endpoints.web.exposure.include=health || exit 1
+
+# Run application with production profile
+ENTRYPOINT ["java", \
+    "-XX:+UseG1GC", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-XX:InitialRAMPercentage=50.0", \
+    "-XX:+ParallelRefProcEnabled", \
+    "-XX:+AlwaysPreTouch", \
+    "-XX:+UseStringDeduplication", \
+    "-Dspring.profiles.active=prod", \
+    "-jar", \
+    "app.jar"]

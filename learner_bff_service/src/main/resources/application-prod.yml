@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: learner-bff-service
+  data:
+    redis:
+      host: ${REDIS_HOST:redis-cluster.production}
+      port: ${REDIS_PORT:6379}
+      timeout: 3000
+      password: ${REDIS_PASSWORD}
+      ssl: true
+      database: 0
+
+server:
+  port: 8083
+  compression:
+    enabled: true
+    min-response-size: 1024
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:learner-bff-service.onrender.com}
+    prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+service:
+  learner:
+    base-url: http://learner-service/api/v1/learners
+  course:
+    base-url: http://course-service/api/v1/courses
+  cart:
+    base-url: http://cart-service/api/v1/cart
+  quiz:
+    base-url: http://quiz-service/api/v1/quiz
+  user:
+    base-url: http://user-service/api/v1/users
+
+logging:
+  level:
+    com.elearning: WARN
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+cache:
+  course:
+    ttl: 3600
+  cart:
+    ttl: 1800
+  user:
+    ttl: 900
+
+connection:
+  timeout: 3000
+  read-timeout: 8000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      learner-service:
+        sliding-window-size: 100
+        failure-rate-threshold: 50.0
+        wait-duration-in-open-state: 30000
+      cart-service:
+        sliding-window-size: 100
+        failure-rate-threshold: 50.0
+        wait-duration-in-open-state: 30000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus,info
