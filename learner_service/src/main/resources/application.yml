@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: learner-service
+  profiles:
+    active: dev
+
+server:
+  error:
+    include-message: always
