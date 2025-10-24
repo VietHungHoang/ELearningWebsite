@@ -5,16 +5,40 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb+srv://username:password@cluster0.mongodb.net/lms_chat_db?retryWrites=true&w=majority}
+    redis:
+      host: ${REDIS_HOST:redis-service}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000
+      jedis:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://eureka-service:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    hostname: ${HOSTNAME:chat-service}
+    instance-id: ${HOSTNAME:chat-service}:${server.port}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 logging:
   level:
     root: WARN
-    org.springframework.web: INFO
-    com.elearning.chatservice: INFO
+    "[org.springframework.web]": INFO
+    "[com.elearning.chat_service]": INFO
 
 # CORS handled at API Gateway
 app:
   cors:
     allowed-origins: "https://lms-prod.com"
   swagger:
-    enabled: false   # ❌ không bật swagger trên prod
+    enabled: false # ❌ không bật swagger trên prod
