@@ -8,8 +8,8 @@ export const InteractiveImagePanel: React.FC = () => {
         <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] group">
                 <img src="https://picsum.photos/seed/teacher/800/600" alt="Online tutoring session" className="w-full h-full object-cover zoom-image" />
-                <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                    <button className="w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-all duration-300 transform group-hover:scale-110">
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <button className="w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-all duration-300 transform group-hover:scale-110 cursor-pointer">
                         <PlayIcon />
                     </button>
                 </div>
