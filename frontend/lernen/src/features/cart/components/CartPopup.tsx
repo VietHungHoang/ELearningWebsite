@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import type { CartItem } from '../../../types/cart';
 import cartService from '../../../services/cartService';
-import { FaStar } from 'react-icons/fa';
+import { AiFillStar } from 'react-icons/ai';
 import Loading from '../../../components/ui/Loading';
+import { useNavigate } from 'react-router-dom';
 
 const CartPopup: React.FC = () => {
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -45,7 +47,7 @@ const CartPopup: React.FC = () => {
                                     <p className="text-sm font-semibold text-gray-800 truncate" title={item.name}>{item.name}</p>
                                     <p className="text-xs text-gray-500 mt-1">by {item.tutor}</p>
                                     <div className="flex items-center gap-1 mt-1">
-                                        <FaStar size={16} className="text-yellow-500 pb-0.5" />
+                                        <AiFillStar className="w-4 h-4 text-orange-400" />
                                         <span className="text-xs font-bold text-gray-800">{item.rating.toFixed(1)}</span>
                                         <span className="text-xs text-gray-500">({item.reviews})</span>
                                     </div>
@@ -63,7 +65,7 @@ const CartPopup: React.FC = () => {
                             <span>${subtotal.toFixed(2)}</span>
                         </div>
                         <button 
-                            onClick={() => {}}
+                            onClick={() => navigate('/cart')}
                             className="w-full bg-[#0b6459] text-white font-bold py-2.5 px-4 rounded-lg hover:bg-[#084c43] transition-colors btn-scale"
                         >
                             View Cart Details

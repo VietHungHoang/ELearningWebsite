@@ -144,7 +144,7 @@ const NotificationsPopup: React.FC = () => {
                       backgroundColor: 'rgba(41, 92, 81, 0.08)',
                       color: '#295C51'
                     }}
-                    className="w-fit h-8 px-6 rounded-lg text-sm font-semibold hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-[#295C51] transition-opacity flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="w-fit h-8 px-6 rounded-lg text-sm font-semibold hover:bg-[rgba(41,92,81,0.15)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-[#295C51] transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                 >
                     {isLoadingMore ? (
                       <>
