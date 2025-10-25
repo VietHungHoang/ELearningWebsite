@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LernenLogo } from '../../features/home/components/icons/LernenLogo';
 import { ChevronDownIcon } from '../../features/home/components/icons/ChevronDownIcon';
-import NotificationsPopup from '../../features/home/components/NotificationsPopup';
+import NotificationsPopup from './NotificationsPopup';
 import { FiShoppingCart, FiBell, FiMessageSquare } from 'react-icons/fi';
 import { currencyOptions, languageOptions } from '../../constants/headerConstants';
+import CartPopup from '../../features/cart/components/CartPopup';
 
 interface LanguageOption {
   name: string;
@@ -128,7 +129,7 @@ const Header: React.FC = () => {
             <div className="flex items-center space-x-3">
                <div ref={cartRef} className="relative">
                 <LnIconButton onClick={() => setIsCartOpen(!isCartOpen)}><FiShoppingCart size={24} /></LnIconButton>
-                {isCartOpen && <div>Cart Popup Placeholder</div>}
+                {isCartOpen && <CartPopup />}
               </div>
                <div ref={notificationsRef} className="relative">
                  <LnIconButton onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} hasDot={true}><FiBell size={24} /></LnIconButton>

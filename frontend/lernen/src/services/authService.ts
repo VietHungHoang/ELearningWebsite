@@ -1,5 +1,4 @@
-import axiosInstance from "../../lib/axiosInstance.ts";
-import type {ApiResponse} from "../../types/api.ts";
+import apiService from './apiService';
 
 export interface LoginRequest {
   email: string;
@@ -18,11 +17,11 @@ export interface LoginResponse {
 }
 
 const login = async (request: LoginRequest): Promise<LoginResponse> => {
-  const response = await axiosInstance.post<ApiResponse<LoginResponse>>('/auth/login', request);
-  if (!response.data.success) {
-    throw new Error(response.data.message);
+  const response = await apiService.post<LoginResponse>('/auth/login', request);
+  if (!response.success) {
+    throw new Error(response.message);
   }
-  return response.data.data;
+  return response.data;
 };
 
 export default { login };
