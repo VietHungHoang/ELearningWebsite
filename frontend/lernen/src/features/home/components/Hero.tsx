@@ -1,5 +1,5 @@
 import React from 'react';
-import { SearchIcon } from '../../../icon/SearchIcon';
+import { FiSearch } from 'react-icons/fi';
 import IntroducePanel from '../../../components/auth/IntroducePanel';
 const Hero: React.FC = () => {
   return (
@@ -25,7 +25,7 @@ const Hero: React.FC = () => {
               className="w-full pl-6 pr-20 py-4 text-base bg-white border border-gray-200 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459]"
             />
             <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-gray-800 hover:bg-gray-900 rounded-full flex items-center justify-center transition-transform hover:scale-110">
-              <SearchIcon />
+              <FiSearch size={24} color='white' />
             </button>
           </div>
         </div>

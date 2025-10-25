@@ -1,7 +1,6 @@
 import React from 'react';
-import { CircularBadge } from "../../icon/CircularBadge.tsx";
-import { StarIcon } from "../../icon/StarIcon.tsx";
-import { PlayIcon } from "../../icon/PlayIcon.tsx";
+import { AiFillStar } from 'react-icons/ai';
+import { FaPlay } from 'react-icons/fa';
 
 export const InteractiveImagePanel: React.FC = () => {
     return (
@@ -10,7 +9,7 @@ export const InteractiveImagePanel: React.FC = () => {
                 <img src="https://picsum.photos/seed/teacher/800/600" alt="Online tutoring session" className="w-full h-full object-cover zoom-image" />
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                     <button className="w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-all duration-300 transform group-hover:scale-110 cursor-pointer">
-                        <PlayIcon />
+                        <FaPlay size={28} />
                     </button>
                 </div>
             </div>
@@ -34,13 +33,13 @@ export const InteractiveImagePanel: React.FC = () => {
                     <p className="text-xs text-gray-500 mt-1">🇬🇧 Manchester, UK</p>
                 </div>
                 <div className="flex items-center text-orange-500 font-bold">
-                    <StarIcon />
-                    <span className="ml-1 text-sm text-gray-800">4.8/5.0</span>
+                    <AiFillStar />
+                    <span className="ml-1 text-sm text-gray-800">4.8</span>
                 </div>
             </div>
-            <div className="absolute -bottom-12 -left-12 z-10">
-                <CircularBadge />
-            </div>
+            {/* <div className="absolute -bottom-12 -left-12 z-10">
+                <FaCircle className="w-16 h-16 text-blue-500" />
+            </div> */}
         </div>
     );
 };

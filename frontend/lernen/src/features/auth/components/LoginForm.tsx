@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import {GoogleIcon} from "../../../icon/GoogleIcon.tsx";
+import { FcGoogle } from 'react-icons/fc';
 
 
 interface LoginFormProps {
@@ -122,7 +122,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin }) => {
               type="button"
               className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer"
             >
-              <GoogleIcon />
+              <FcGoogle />
               <span className="ml-3">Sign in with Google</span>
             </button>
         </div>

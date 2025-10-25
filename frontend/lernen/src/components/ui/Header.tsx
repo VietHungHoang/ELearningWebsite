@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LernenLogo } from '../../features/home/components/icons/LernenLogo';
-import { ChevronDownIcon } from '../../features/home/components/icons/ChevronDownIcon';
 import NotificationsPopup from './NotificationsPopup';
-import { FiShoppingCart, FiBell, FiMessageSquare } from 'react-icons/fi';
+import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from 'react-icons/fi';
 import { currencyOptions, languageOptions } from '../../constants/headerConstants';
 import CartPopup from '../../features/cart/components/CartPopup';
+import { LernenLogo } from '../LernenLogo';
 
 interface LanguageOption {
   name: string;
@@ -89,7 +88,7 @@ const Header: React.FC = () => {
             <div ref={currencyRef} className="relative">
               <button onClick={() => handleDropdownToggle('currency')} className="hidden sm:flex items-center space-x-1 text-gray-600 cursor-pointer">
                 <span className="font-medium">{selectedCurrency}</span>
-                <ChevronDownIcon />
+                <FiChevronDown size={20} />
               </button>
               {openDropdown === 'currency' && (
                 <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-xl z-50 p-2 border border-gray-100 transform transition-all duration-150 ease-out opacity-100 scale-100">
@@ -109,7 +108,7 @@ const Header: React.FC = () => {
               <button onClick={() => handleDropdownToggle('language')} className="hidden sm:flex items-center space-x-2 text-gray-600 cursor-pointer">
                 <div style={{width: '20px', height: '15px'}}>{selectedLanguage.icon}</div>
                 <span>{selectedLanguage.name}</span>
-                <ChevronDownIcon />
+                <FiChevronDown size={20} />
               </button>
               {openDropdown === 'language' && (
                 <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-xl z-50 p-2 border border-gray-100 transform transition-all duration-150 ease-out opacity-100 scale-100">
