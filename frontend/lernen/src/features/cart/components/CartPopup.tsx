@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import type { CartItem } from '../../../types/cart';
+import type { CartItemResponse } from '../../../services/cartService';
 import cartService from '../../../services/cartService';
 import { AiFillStar } from 'react-icons/ai';
 import Loading from '../../../components/ui/Loading';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const CartPopup: React.FC = () => {
+const CartPopup: React.FC<{ onCartCountChange?: (count: number) => void }> = ({ onCartCountChange }) => {
     const navigate = useNavigate();
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const location = useLocation();
+    const isOnCartPage = location.pathname === '/cart';
+    const [cartItems, setCartItems] = useState<CartItemResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -16,14 +18,17 @@ const CartPopup: React.FC = () => {
             try {
                 const items = await cartService.getCart();
                 setCartItems(items);
+                // Notify parent component about cart count
+                onCartCountChange?.(items.length);
             } catch (error) {
                 console.error('Failed to fetch cart:', error);
+                onCartCountChange?.(0);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchCart();
-    }, []);
+    }, [onCartCountChange]);
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
 
@@ -64,12 +69,14 @@ const CartPopup: React.FC = () => {
                             <span>Subtotal</span>
                             <span>${subtotal.toFixed(2)}</span>
                         </div>
-                        <button 
-                            onClick={() => navigate('/cart')}
-                            className="w-full bg-[#0b6459] text-white font-bold py-2.5 px-4 rounded-lg hover:bg-[#084c43] transition-colors btn-scale"
-                        >
-                            View Cart Details
-                        </button>
+                        {!isOnCartPage && (
+                            <button 
+                                onClick={() => navigate('/cart')}
+                                className="w-full bg-[#0b6459] text-white font-bold py-2.5 px-4 rounded-lg hover:bg-[#084c43] transition-colors btn-scale"
+                            >
+                                View Cart Details
+                            </button>
+                        )}
                     </div>
                 </>
             ) : (

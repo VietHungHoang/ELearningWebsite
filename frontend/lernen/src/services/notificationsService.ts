@@ -1,42 +1,123 @@
-import apiService from './apiService';
+import { notificationsAxiosInstance } from '../lib/axiosInstance';
 
 export interface Notification {
-  id: number;
-  sender: string;
-  time: string;
-  isRead: boolean;
+  id: string;
+  userId: number;
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'success' | 'error';
+  read: boolean; // Backend uses 'read', not 'isRead'
+  createdAt: string;
+  metadata?: Record<string, unknown>;
 }
+
+// TEMPORARY: Hardcode userId = 1001 để test
+const getUserId = (): string => {
+  return '1001';
+};
 
 class NotificationsService {
   async getNotifications(): Promise<Notification[]> {
     try {
-      // Try API call first
-      const response = await apiService.get('/notifications');
-      return response.data as Notification[];
+      const userId = getUserId();
+      const url = `/user/${userId}`;
+      
+      const response = await notificationsAxiosInstance.get(url);
+
+      // BE trả về ApiResponse<List<NotificationResponse>>
+      if (response.status === 200 && response.data) {
+        const responseData = response.data as Record<string, unknown>;
+        
+        // Check if response has data wrapper (ApiResponse format)
+        if (responseData.data && Array.isArray(responseData.data)) {
+          return responseData.data as Notification[];
+        } else if (Array.isArray(responseData)) {
+          return responseData as Notification[];
+        } else {
+          console.warn('Unexpected response format for notifications');
+          return [];
+        }
+      } else {
+        throw new Error('Failed to fetch notifications');
+      }
     } catch (error) {
-      console.warn('API call failed, using mock data:', error);
-      // Fallback to mock data
-      return [
-        { id: 1, sender: 'Olivia Wilson', time: '3m', isRead: false },
-        { id: 2, sender: 'William Moore', time: '3m', isRead: true },
-        { id: 3, sender: 'Sophia Taylor', time: '4m', isRead: false },
-      ];
+      console.error('Error fetching notifications from API:', error);
+      throw error;
     }
   }
 
-  async loadMoreNotifications(page: number, perPage: number): Promise<Notification[]> {
+  async loadMoreNotifications(page: number, size: number): Promise<Notification[]> {
     try {
-      const response = await apiService.get(`/notifications?page=${page}&perPage=${perPage}`);
-      return response.data as Notification[];
+      const userId = getUserId();
+      const url = `/user/${userId}?page=${page}&size=${size}`;
+      
+      const response = await notificationsAxiosInstance.get(url);
+
+      if (response.status === 200 && response.data) {
+        const responseData = response.data as Record<string, unknown>;
+        
+        if (responseData.data && Array.isArray(responseData.data)) {
+          return responseData.data as Notification[];
+        } else if (Array.isArray(responseData)) {
+          return responseData as Notification[];
+        } else {
+          console.warn('Unexpected response format for notifications', responseData);
+          return [];
+        }
+      } else {
+        throw new Error('Failed to load more notifications');
+      }
     } catch (error) {
-      console.warn('API call failed, using mock data:', error);
-      // Mock additional notifications
-      const mockNotifications: Notification[] = [
-        { id: 4, sender: 'James Anderson', time: '4m', isRead: true },
-        { id: 5, sender: 'Isabella Thomas', time: '5m', isRead: false },
-        { id: 6, sender: 'Logan Jackson', time: '5m', isRead: true },
-      ];
-      return mockNotifications.slice((page - 1) * perPage, page * perPage);
+      console.error('Error loading more notifications from API:', error);
+      throw error;
+    }
+  }
+
+  async getUnreadCount(): Promise<number> {
+    try {
+      const userId = getUserId();
+      const url = `/user/${userId}/unread-count`;
+      
+      const response = await notificationsAxiosInstance.get(url);
+
+      if (response.status === 200 && response.data) {
+        const responseData = response.data as Record<string, unknown>;
+        
+        // BE trả về ApiResponse<Long>
+        if (typeof responseData.data === 'number') {
+          return responseData.data as number;
+        }
+        return 0;
+      } else {
+        throw new Error('Failed to fetch unread count');
+      }
+    } catch (error) {
+      console.error('Error fetching unread count from API:', error);
+      throw error;
+    }
+  }
+
+  async markAsRead(notificationId: string): Promise<void> {
+    try {
+      const userId = getUserId();
+      const url = `/${notificationId}/user/${userId}/mark-read`;
+      
+      await notificationsAxiosInstance.post(url);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  }
+
+  async markAllAsRead(): Promise<void> {
+    try {
+      const userId = getUserId();
+      const url = `/user/${userId}/mark-all-read`;
+      
+      await notificationsAxiosInstance.post(url);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
     }
   }
 }

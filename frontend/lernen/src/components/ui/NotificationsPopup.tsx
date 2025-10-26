@@ -3,9 +3,6 @@ import notificationsService from '../../services/notificationsService';
 import type { Notification } from '../../services/notificationsService';
 import Loading from './Loading';
 
-// Initial mock data is empty, will be loaded on demand.
-const initialNotifications: Notification[] = [];
-
 const NOTIFICATIONS_PER_PAGE = 3; // Number of notifications to load at a time
 
 // Message Icon component
@@ -26,20 +23,29 @@ const MessageIcon: React.FC<{ isRead: boolean }> = ({ isRead }) => (
 
 // Notification item component
 const NotificationItem: React.FC<{ notification: Notification; onClick: () => void }> = ({ notification, onClick }) => (
-  <div onClick={onClick} className="flex items-start space-x-4 p-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors duration-200">
-    <MessageIcon isRead={notification.isRead} />
+  <div 
+    onClick={onClick} 
+    className={`flex items-start space-x-4 p-2 cursor-pointer rounded-lg transition-colors duration-200 ${
+      notification.read 
+        ? 'bg-gray-100 hover:bg-gray-150' 
+        : 'hover:bg-gray-50'
+    }`}
+  >
+    <MessageIcon isRead={notification.read} />
     <div className="flex-grow">
       <p 
         style={{ color: 'rgba(0, 0, 0, 0.9)' }} 
-        className={`${notification.isRead ? 'font-medium' : 'font-semibold'}`}
+        className={`${notification.read ? 'font-medium text-gray-600' : 'font-semibold'}`}
       >
-        New Message from {notification.sender}
+        {notification.title}
       </p>
-      <p className="text-sm text-gray-500 mt-1">
-        New message from {notification.sender}. Goto messages to respond.
+      <p className={`text-sm mt-1 ${notification.read ? 'text-gray-400' : 'text-gray-500'}`}>
+        {notification.message}
       </p>
     </div>
-    <span className="text-xs text-gray-400 flex-shrink-0 pt-1">{notification.time}</span>
+    <span className={`text-xs flex-shrink-0 pt-1 ${notification.read ? 'text-gray-400' : 'text-gray-400'}`}>
+      {new Date(notification.createdAt).toLocaleDateString()}
+    </span>
   </div>
 );
 
@@ -56,36 +62,70 @@ const NotificationsPopup: React.FC = () => {
       setIsLoading(true);
       try {
         const items = await notificationsService.getNotifications();
-        setNotifications(items);
+        
+        // Sort by createdAt (newest first)
+        const sortedItems = items.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        
+        setNotifications(sortedItems);
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
       } finally {
         setIsLoading(false);
       }
     };
+    
     fetchNotifications();
-  }, []);
+  }, []); // Only fetch on mount
 
-  const allRead = useMemo(() => notifications.length > 0 && notifications.every(n => n.isRead), [notifications]);
+  const allRead = useMemo(() => notifications.length > 0 && notifications.every(n => n.read), [notifications]);
 
   const handleMarkAllAsRead = () => {
-    const markAsRead = !allRead;
-    setNotifications(
-      notifications.map(n => ({ ...n, isRead: markAsRead }))
-    );
+    // Always mark all as read (không toggle)
+    setNotifications(prev => {
+      const updated = prev.map(n => ({ ...n, read: true }));
+      return updated;
+    });
+    
+    // Call API to mark all as read in database
+    notificationsService.markAllAsRead().catch(error => {
+      console.error('Failed to mark all notifications as read:', error);
+    });
   };
   
-  const handleNotificationClick = (id: number) => {
+  const handleNotificationClick = (id: string) => {
     setNotifications(
-        notifications.map(n => n.id === id ? { ...n, isRead: true } : n)
+        notifications.map(n => n.id === id ? { ...n, read: true } : n)
     );
+    // useEffect sẽ tự update count
+    
+    // Call API to mark as read in database
+    notificationsService.markAsRead(id).catch(error => {
+      console.error('Failed to mark notification as read:', error);
+    });
   };
 
   const handleLoadMore = async () => {
     setIsLoadingMore(true);
     try {
       const newNotifications = await notificationsService.loadMoreNotifications(currentPage + 1, NOTIFICATIONS_PER_PAGE);
-      setNotifications(prev => [...prev, ...newNotifications]);
+      
+      // Merge, deduplicate by ID, and sort by createdAt (newest first)
+      const notificationMap = new Map<string, Notification>();
+      
+      // Add existing notifications
+      notifications.forEach(notif => notificationMap.set(notif.id, notif));
+      
+      // Add new notifications (overwrites if ID exists)
+      newNotifications.forEach(notif => notificationMap.set(notif.id, notif));
+      
+      // Convert to array and sort by createdAt DESC
+      const allNotifications = Array.from(notificationMap.values()).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      
+      setNotifications(allNotifications);
       setCurrentPage(prev => prev + 1);
       if (newNotifications.length < NOTIFICATIONS_PER_PAGE) {
         setCanLoadMore(false);
@@ -106,9 +146,9 @@ const NotificationsPopup: React.FC = () => {
           <button
             onClick={handleMarkAllAsRead}
             className="text-sm font-medium text-[#0b6459] hover:text-[#084c43] transition-colors"
-            disabled={notifications.length === 0}
+            disabled={notifications.length === 0 || allRead}
           >
-            {allRead ? 'Mark all as unread' : 'Mark all as read'}
+            Mark all as read
           </button>
         </header>
 

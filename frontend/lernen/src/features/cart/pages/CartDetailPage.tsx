@@ -1,15 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Layout from '../../../components/ui/Layout';
 import Breadcrumb from '../../../components/ui/Breadcrumb';
-import { AiFillStar, AiOutlineDelete } from 'react-icons/ai';
+import { AiFillStar, AiOutlineDelete, AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { FaClock, FaLanguage } from 'react-icons/fa';
 import { MdBook, MdSchool } from 'react-icons/md';
-import { HiXCircle, HiTag } from 'react-icons/hi';
+import { HiXCircle } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
-import type { CartItemDetail } from '../../../types/api';
+import type { CartItemResponse } from '../../../services/cartService';
 import cartService from '../../../services/cartService';
+import wishlistService from '../../../services/wishlistService';
 
 const VALID_SYSTEM_COUPONS: { [key: string]: { type: 'percentage' | 'fixed'; value: number } } = {
+    'SAVE20': { type: 'percentage', value: 20 },
     'SUMMER25': { type: 'percentage', value: 25 },
     'NEWUSER10': { type: 'fixed', value: 10 },
 };
@@ -29,19 +31,32 @@ const StatItem: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, tex
 
 const CartDetailPage: React.FC = () => {
     const navigate = useNavigate();
-    const [cartItems, setCartItems] = useState<CartItemDetail[]>([]);
+    const [cartItems, setCartItems] = useState<CartItemResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [systemCouponInput, setSystemCouponInput] = useState('');
     const [appliedSystemCoupons, setAppliedSystemCoupons] = useState<AppliedCoupon[]>([]);
     const [systemCouponError, setSystemCouponError] = useState<string | null>(null);
-    const [openCouponPopover, setOpenCouponPopover] = useState<number | null>(null);
-    const popoverRef = useRef<HTMLDivElement>(null);
+    const [wishlistItems, setWishlistItems] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         const fetchCartDetails = async () => {
             try {
-                const data = await cartService.getCartDetail();
-                setCartItems(data);
+                const items = await cartService.getCart();
+                setCartItems(items);
+                
+                // Load wishlist status for cart items
+                const wishlistStatus = new Set<number>();
+                for (const item of items) {
+                    try {
+                        const isInWishlist = await wishlistService.isInWishlist(item.courseId);
+                        if (isInWishlist) {
+                            wishlistStatus.add(item.courseId);
+                        }
+                    } catch (error) {
+                        console.error(`Failed to check wishlist status for course ${item.courseId}:`, error);
+                    }
+                }
+                setWishlistItems(wishlistStatus);
             } catch (error) {
                 console.error('Failed to fetch cart details:', error);
             } finally {
@@ -49,16 +64,6 @@ const CartDetailPage: React.FC = () => {
             }
         };
         fetchCartDetails();
-    }, []);
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
-                setOpenCouponPopover(null);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     const handleRemoveItem = (id: number) => {
@@ -69,7 +74,7 @@ const CartDetailPage: React.FC = () => {
 
     const itemDiscounts = useMemo(() => {
         return cartItems
-            .filter(item => item.appliedCouponCode && item.availableCoupon)
+            .filter(item => item.appliedCoupon && item.availableCoupon)
             .map(item => {
                 const coupon = item.availableCoupon!;
                 const discount = coupon.type === 'percentage' ? item.price * (coupon.value / 100) : coupon.value;
@@ -89,8 +94,9 @@ const CartDetailPage: React.FC = () => {
 
         if (!code) return;
         
+        // Check if coupon is already applied
         if (appliedSystemCoupons.some(c => c.code === code)) {
-            setSystemCouponError('Coupon has already been applied.');
+            setSystemCouponError('This coupon is already applied.');
             return;
         }
 
@@ -103,10 +109,11 @@ const CartDetailPage: React.FC = () => {
                 discountAmount = couponDetails.value;
             }
 
-            setAppliedSystemCoupons([...appliedSystemCoupons, { code, discount: discountAmount }]);
+            // Only allow 1 coupon - replace the old one if exists
+            setAppliedSystemCoupons([{ code, discount: discountAmount }]);
             setSystemCouponInput('');
         } else {
-            setSystemCouponError('Invalid system coupon code.');
+            setSystemCouponError('Invalid coupon code.');
         }
     };
     
@@ -114,13 +121,36 @@ const CartDetailPage: React.FC = () => {
         setAppliedSystemCoupons(appliedSystemCoupons.filter(c => c.code !== codeToRemove));
     };
     
-    const handleApplyTutorCoupon = (itemId: number, couponCode: string) => {
-        setCartItems(items => items.map(item => item.id === itemId ? { ...item, appliedCouponCode: couponCode } : item));
-        setOpenCouponPopover(null);
+    const handleRemoveTutorCoupon = async (itemId: number) => {
+        try {
+            // Để remove coupon, có thể cần gọi API với empty code hoặc endpoint riêng
+            // Hiện tại tạm thời chỉ update local state
+            setCartItems(items => items.map(item => 
+                item.id === itemId ? { ...item, appliedCoupon: undefined } : item
+            ));
+        } catch (error) {
+            console.error('Failed to remove coupon:', error);
+        }
     };
 
-    const handleRemoveTutorCoupon = (itemId: number) => {
-         setCartItems(items => items.map(item => item.id === itemId ? { ...item, appliedCouponCode: undefined } : item));
+    const handleToggleWishlist = async (courseId: number) => {
+        const isInWishlist = wishlistItems.has(courseId);
+        
+        try {
+            if (isInWishlist) {
+                await wishlistService.removeFromWishlist(courseId);
+                setWishlistItems(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(courseId);
+                    return newSet;
+                });
+            } else {
+                await wishlistService.addToWishlist(courseId);
+                setWishlistItems(prev => new Set([...prev, courseId]));
+            }
+        } catch (error) {
+            console.error('Failed to toggle wishlist:', error);
+        }
     };
 
     return (
@@ -150,7 +180,7 @@ const CartDetailPage: React.FC = () => {
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xl font-bold text-gray-800">${item.price.toFixed(2)}</p>
-                                            {item.appliedCouponCode && item.availableCoupon && (
+                                            {item.appliedCoupon && item.availableCoupon && (
                                                 <p className="text-sm font-semibold text-green-600">
                                                     -${(item.availableCoupon.type === 'percentage' ? item.price * (item.availableCoupon.value/100) : item.availableCoupon.value).toFixed(2)}
                                                 </p>
@@ -176,44 +206,30 @@ const CartDetailPage: React.FC = () => {
                                     
                                 <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
                                         <div>
-                                            {item.appliedCouponCode ? (
+                                            {item.appliedCoupon ? (
                                                 <div className="bg-green-100 text-green-800 text-xs font-semibold pl-2.5 pr-1 py-1 rounded-full flex items-center gap-1.5">
-                                                    <span>{item.appliedCouponCode} applied</span>
+                                                    <span>{item.appliedCoupon} applied</span>
                                                     <button onClick={() => handleRemoveTutorCoupon(item.id)} className="bg-green-200 hover:bg-green-300 text-green-900 rounded-full h-4 w-4 flex items-center justify-center focus:outline-none transition-colors cursor-pointer">
                                                         <HiXCircle className="h-4 w-4" />
                                                     </button>
                                                 </div>
-                                            ) : (
-                                                <div className="relative">
-                                                    <button 
-                                                        onClick={() => item.availableCoupon && setOpenCouponPopover(openCouponPopover === item.id ? null : item.id)} 
-                                                        disabled={!item.availableCoupon}
-                                                        className={`flex items-center gap-1.5 text-xs font-semibold transition-colors ${
-                                                            item.availableCoupon 
-                                                            ? 'text-blue-600 hover:text-blue-800 cursor-pointer' 
-                                                            : 'text-gray-400 cursor-not-allowed'
-                                                        }`}
-                                                    >
-                                                        <HiTag className="h-3 w-3" /> See available coupons
-                                                    </button>
-                                                    {item.availableCoupon && openCouponPopover === item.id && (
-                                                        <div ref={popoverRef} className="absolute top-full left-0 mt-2 w-64 bg-white p-3 rounded-lg shadow-lg border border-gray-200 z-10 animate-fade-in-up">
-                                                            <p className="text-xs font-bold text-gray-800 mb-2">Tutor Coupon</p>
-                                                            <div className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                                                                <div>
-                                                                    <p className="text-sm font-bold text-gray-700">{item.availableCoupon.code}</p>
-                                                                    <p className="text-xs text-gray-500">{item.availableCoupon.value}{item.availableCoupon.type === 'percentage' ? '%' : '$'} off this course</p>
-                                                                </div>
-                                                                <button onClick={() => handleApplyTutorCoupon(item.id, item.availableCoupon!.code)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded font-semibold hover:bg-blue-700">Apply</button>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                            ) : null}
                                         </div>
-                                        <button onClick={() => handleRemoveItem(item.id)} className="text-gray-400 hover:text-red-500 p-1 cursor-pointer">
-                                            <AiOutlineDelete className="w-5 h-5" />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => handleToggleWishlist(item.courseId)}
+                                                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                                            >
+                                                {wishlistItems.has(item.courseId) ? (
+                                                    <AiFillHeart className="w-5 h-5 text-red-500" />
+                                                ) : (
+                                                    <AiOutlineHeart className="w-5 h-5 text-gray-400 hover:text-red-400" />
+                                                )}
+                                            </button>
+                                            <button onClick={() => handleRemoveItem(item.id)} className="text-gray-400 hover:text-red-500 p-1 cursor-pointer">
+                                                <AiOutlineDelete className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -274,7 +290,7 @@ const CartDetailPage: React.FC = () => {
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="text"
-                                                placeholder="Coupon code"
+                                                placeholder="e.g. SAVE20"
                                                 className={`w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none placeholder-gray-400 ${
                                                     systemCouponError ? 'border-red-500 focus:ring-1 focus:ring-red-200' : 'border-gray-300 focus:ring-1 focus:ring-[#0b6459]'
                                                 }`} 
@@ -284,6 +300,36 @@ const CartDetailPage: React.FC = () => {
                                             <button onClick={handleApplySystemCoupon} className="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-md hover:bg-gray-300 cursor-pointer border  border-gray-200">Apply</button>
                                         </div>
                                         {systemCouponError && <p className="text-xs text-red-500 mt-1">{systemCouponError}</p>}
+
+                                        {/* Available Coupons */}
+                                        <div className="mt-3 pt-3 border-t border-gray-200">
+                                            <p className="text-xs font-semibold text-gray-700 mb-2">Available Coupons:</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {Object.entries(VALID_SYSTEM_COUPONS).map(([code, details]) => {
+                                                    const isApplied = appliedSystemCoupons.some(c => c.code === code);
+                                                    return (
+                                                        <button
+                                                            key={code}
+                                                            onClick={() => {
+                                                                setSystemCouponInput(code);
+                                                                setSystemCouponError(null);
+                                                            }}
+                                                            className={`text-xs font-semibold px-3 py-1.5 rounded-md border transition-colors ${
+                                                                isApplied
+                                                                    ? 'bg-green-50 text-green-700 border-green-200 cursor-pointer hover:bg-green-100'
+                                                                    : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer'
+                                                            }`}
+                                                        >
+                                                            {code}
+                                                            <span className="text-xs text-gray-600 ml-1">
+                                                                ({details.value}{details.type === 'percentage' ? '%' : '$'} off)
+                                                            </span>
+                                                            {isApplied && <span className="ml-1 text-green-700">✓</span>}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="border-t border-gray-200 my-4"></div>
