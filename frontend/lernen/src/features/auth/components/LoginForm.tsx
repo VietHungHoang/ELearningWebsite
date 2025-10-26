@@ -88,7 +88,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin }) => {
             </label>
 
             <div className="text-sm">
-              <Link to="/forgotPassword" className="font-medium text-[#0b6459] hover:text-[#084c43]">
+              <Link to="/forgot-password" className="font-medium text-[#0b6459] hover:text-[#084c43]">
                 Forgot Password?
               </Link>
             </div>
