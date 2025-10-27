@@ -1,4 +1,5 @@
-import { notificationsAxiosInstance } from '../lib/axiosInstance';
+import axiosInstance from '../lib/axiosInstance';
+import type { ApiResponse } from '../types/api';
 
 export interface Notification {
   id: string;
@@ -21,21 +22,13 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}`;
-      const response = await notificationsAxiosInstance.get(url);
-      // BE trả về ApiResponse<List<NotificationResponse>>
-      if (response.status === 200 && response.data) {
-        const responseData = response.data as Record<string, unknown>;
-        // Check if response has data wrapper (ApiResponse format)
-        if (responseData.data && Array.isArray(responseData.data)) {
-          return responseData.data as Notification[];
-        } else if (Array.isArray(responseData)) {
-          return responseData as Notification[];
-        } else {
-          console.warn('Unexpected response format for notifications');
-          return [];
-        }
+      const response = await axiosInstance.get(url);
+      const apiResponse = response.data as ApiResponse<Notification[]>;
+      
+      if (apiResponse.success === true && apiResponse.data) {
+        return apiResponse.data;
       } else {
-        throw new Error('Failed to fetch notifications');
+        throw new Error(apiResponse.message || 'Failed to fetch notifications');
       }
     } catch (error) {
       console.error('Error fetching notifications from API:', error);
@@ -47,20 +40,13 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}?page=${page}&size=${size}`;
-      const response = await notificationsAxiosInstance.get(url);
-      if (response.status === 200 && response.data) {
-        const responseData = response.data as Record<string, unknown>;
-        
-        if (responseData.data && Array.isArray(responseData.data)) {
-          return responseData.data as Notification[];
-        } else if (Array.isArray(responseData)) {
-          return responseData as Notification[];
-        } else {
-          console.warn('Unexpected response format for notifications', responseData);
-          return [];
-        }
+      const response = await axiosInstance.get(url);
+      const apiResponse = response.data as ApiResponse<Notification[]>;
+      
+      if (apiResponse.success === true && apiResponse.data) {
+        return apiResponse.data;
       } else {
-        throw new Error('Failed to load more notifications');
+        throw new Error(apiResponse.message || 'Failed to load more notifications');
       }
     } catch (error) {
       console.error('Error loading more notifications from API:', error);
@@ -72,17 +58,13 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}/unread-count`;
-      const response = await notificationsAxiosInstance.get(url);
-      if (response.status === 200 && response.data) {
-        const responseData = response.data as Record<string, unknown>;
-        
-        // BE trả về ApiResponse<Long>
-        if (typeof responseData.data === 'number') {
-          return responseData.data as number;
-        }
-        return 0;
+      const response = await axiosInstance.get(url);
+      const apiResponse = response.data as ApiResponse<number>;
+      
+      if (apiResponse.success === true && typeof apiResponse.data === 'number') {
+        return apiResponse.data;
       } else {
-        throw new Error('Failed to fetch unread count');
+        throw new Error(apiResponse.message || 'Failed to fetch unread count');
       }
     } catch (error) {
       console.error('Error fetching unread count from API:', error);
@@ -94,8 +76,10 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/${notificationId}/user/${userId}/mark-read`;
-      
-      await notificationsAxiosInstance.post(url);
+
+      await axiosInstance.post(url);
+      // POST requests for marking as read typically return success/error in ApiResponse format
+      // If backend returns ApiResponse, we can check it here, but for now assume success
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;
@@ -106,8 +90,10 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}/mark-all-read`;
-      
-      await notificationsAxiosInstance.post(url);
+
+      await axiosInstance.post(url);
+      // POST requests for marking all as read typically return success/error in ApiResponse format
+      // If backend returns ApiResponse, we can check it here, but for now assume success
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       throw error;

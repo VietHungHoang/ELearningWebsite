@@ -110,33 +110,18 @@ const setupInterceptors = (instance: AxiosInstance) => {
 };
 
 /**
- * 🛒 Axios instance cho Cart Service (port 8080)
+ * � Axios instance cho tất cả API Services (qua API Gateway port 3000)
  */
-const cartAxiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+const apiInstance: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-/**
- * 🔔 Axios instance cho Notification Service (port 8083)
- */
-const notificationsAxiosInstance: AxiosInstance = axios.create({
-  baseURL:
-    import.meta.env.VITE_NOTIFICATIONS_API_BASE_URL ||
-    'http://localhost:8083/api/notifications',
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Áp dụng interceptor cho instance
+setupInterceptors(apiInstance);
 
-// Áp dụng interceptor cho cả 2 instance
-setupInterceptors(cartAxiosInstance);
-setupInterceptors(notificationsAxiosInstance);
-
-// Xuất instance mặc định và phụ
-export default cartAxiosInstance;
-export { notificationsAxiosInstance };
+// Xuất instance duy nhất
+export default apiInstance;
