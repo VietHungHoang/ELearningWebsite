@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Layout from '../../../components/ui/Layout';
 import Breadcrumb from '../../../components/ui/Breadcrumb';
-import { AiFillStar, AiOutlineDelete, AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
-import { FaClock, FaLanguage } from 'react-icons/fa';
+import { AiFillStar, AiOutlineDelete, AiOutlineHeart, AiFillHeart, AiOutlineTag } from 'react-icons/ai';
+import { FaClock, FaLanguage, FaCopy } from 'react-icons/fa';
 import { MdBook, MdSchool } from 'react-icons/md';
 import { HiXCircle } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +37,8 @@ const CartDetailPage: React.FC = () => {
     const [appliedSystemCoupons, setAppliedSystemCoupons] = useState<AppliedCoupon[]>([]);
     const [systemCouponError, setSystemCouponError] = useState<string | null>(null);
     const [wishlistItems, setWishlistItems] = useState<Set<number>>(new Set());
+    const [showCouponCode, setShowCouponCode] = useState<{[itemId: number]: boolean}>({});
+    const [copiedCoupon, setCopiedCoupon] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCartDetails = async () => {
@@ -133,6 +135,40 @@ const CartDetailPage: React.FC = () => {
         }
     };
 
+    const handleToggleCouponDisplay = (itemId: number) => {
+        setShowCouponCode(prev => ({
+            ...prev,
+            [itemId]: !prev[itemId]
+        }));
+    };
+
+    const handleCopyCouponCode = async (couponCode: string) => {
+        try {
+            await navigator.clipboard.writeText(couponCode);
+            setCopiedCoupon(couponCode);
+            setTimeout(() => setCopiedCoupon(null), 2000); // Reset after 2 seconds
+        } catch (err) {
+            console.error('Failed to copy coupon code:', err);
+        }
+    };
+
+    const handleApplyItemCoupon = (couponCode: string) => {
+        setSystemCouponInput(couponCode);
+        setSystemCouponError(null);
+        // Scroll to coupon input section
+        const couponSection = document.querySelector('[data-coupon-input]');
+        if (couponSection) {
+            couponSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
+    const handleApplyCouponDirectly = async (couponCode: string) => {
+        // Apply coupon directly without needing to paste into input
+        setSystemCouponInput(couponCode);
+        // Auto apply the coupon
+        await handleApplySystemCoupon();
+    };
+
     const handleToggleWishlist = async (courseId: number) => {
         const isInWishlist = wishlistItems.has(courseId);
         
@@ -202,6 +238,62 @@ const CartDetailPage: React.FC = () => {
                                         <StatItem icon={<FaLanguage className="w-4 h-4 text-gray-500" />} text={item.language} />
                                         <StatItem icon={<MdBook className="w-4 h-4 text-gray-500" />} text={`${item.lessons} lessons`} />
                                         <StatItem icon={<FaClock className="w-4 h-4 text-gray-500" />} text={item.duration} />
+                                    </div>
+
+                                    {/* See Available Coupon Button - luôn hiển thị nhưng disabled nếu không có coupon */}
+                                    <div className="mt-3">
+                                        <button
+                                            onClick={() => item.availableCoupon && handleToggleCouponDisplay(item.id)}
+                                            disabled={!item.availableCoupon}
+                                            className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                                                item.availableCoupon
+                                                    ? 'text-[#0b6459] hover:text-[#084c43] cursor-pointer'
+                                                    : 'text-gray-400 cursor-not-allowed opacity-60'
+                                            }`}
+                                        >
+                                            <AiOutlineTag className="w-4 h-4" />
+                                            See Available Coupon
+                                        </button>
+
+                                        {/* Coupon Code Display */}
+                                        {showCouponCode[item.id] && item.availableCoupon && (
+                                            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="text-sm font-semibold text-blue-800">
+                                                            Coupon Code: <span className="font-mono bg-blue-100 px-2 py-1 rounded text-blue-900">{item.availableCoupon.code}</span>
+                                                        </p>
+                                                        <p className="text-xs text-blue-600 mt-1">
+                                                            {item.availableCoupon.type === 'percentage'
+                                                                ? `${item.availableCoupon.value}% off`
+                                                                : `$${item.availableCoupon.value} off`
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleCopyCouponCode(item.availableCoupon!.code)}
+                                                            className="flex items-center gap-1 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
+                                                        >
+                                                            <FaCopy className="w-3 h-3" />
+                                                            {copiedCoupon === item.availableCoupon!.code ? 'Copied!' : 'Copy'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleApplyItemCoupon(item.availableCoupon!.code)}
+                                                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors"
+                                                        >
+                                                            Copy & Apply
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleApplyCouponDirectly(item.availableCoupon!.code)}
+                                                            className="text-xs bg-purple-600 text-white px-2 py-1 rounded hover:bg-purple-700 transition-colors"
+                                                        >
+                                                            Apply Directly
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                     
                                 <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
@@ -287,7 +379,7 @@ const CartDetailPage: React.FC = () => {
                                             </div>
                                         )}
 
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2" data-coupon-input>
                                             <input
                                                 type="text"
                                                 placeholder="e.g. SAVE20"

@@ -30,6 +30,11 @@ const mockCartItems: CartItemResponse[] = [
     instructor: {
       id: 1,
       name: "John Doe"
+    },
+    availableCoupon: {
+      code: "REACT25",
+      type: "percentage",
+      value: 25
     }
   },
   {
@@ -58,7 +63,41 @@ const mockCartItems: CartItemResponse[] = [
     instructor: {
       id: 2,
       name: "Jane Smith"
+    },
+    availableCoupon: {
+      code: "NODE15",
+      type: "percentage",
+      value: 15
     }
+  },
+  {
+    id: 3,
+    courseId: 103,
+    appliedCoupon: undefined,
+    valid: true,
+    name: "Python for Data Science",
+    category: "Data Science",
+    price: 89.99,
+    image: "/images/courses/python.jpg",
+    rating: 4.7,
+    reviews: 1200,
+    instructorId: 3,
+    description: "Learn Python for data analysis and machine learning",
+    level: "Beginner",
+    listPrice: 179.99,
+    discountPrice: 89.99,
+    totalStudents: 4500,
+    duration: "10 hours",
+    language: "English",
+    lessons: 55,
+    lastUpdated: "2024-03-10",
+    requirements: ["No programming experience required"],
+    includes: ["Video lectures", "Jupyter notebooks", "Datasets"],
+    instructor: {
+      id: 3,
+      name: "Sarah Johnson"
+    }
+    // No availableCoupon - để test trạng thái disabled
   }
 ];
 
