@@ -50,7 +50,7 @@ const CartPopup: React.FC<{ onCartCountChange?: (count: number) => void }> = ({ 
                                 <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
                                 <div className="flex-grow min-w-0">
                                     <p className="text-sm font-semibold text-gray-800 truncate" title={item.name}>{item.name}</p>
-                                    <p className="text-xs text-gray-500 mt-1">by {item.tutor}</p>
+                                    <p className="text-xs text-gray-500 mt-1">by {item.instructor.name}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <AiFillStar className="w-4 h-4 text-orange-400" />
                                         <span className="text-xs font-bold text-gray-800">{item.rating.toFixed(1)}</span>

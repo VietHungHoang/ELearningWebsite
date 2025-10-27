@@ -21,13 +21,10 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}`;
-      
       const response = await notificationsAxiosInstance.get(url);
-
       // BE trả về ApiResponse<List<NotificationResponse>>
       if (response.status === 200 && response.data) {
         const responseData = response.data as Record<string, unknown>;
-        
         // Check if response has data wrapper (ApiResponse format)
         if (responseData.data && Array.isArray(responseData.data)) {
           return responseData.data as Notification[];
@@ -50,9 +47,7 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}?page=${page}&size=${size}`;
-      
       const response = await notificationsAxiosInstance.get(url);
-
       if (response.status === 200 && response.data) {
         const responseData = response.data as Record<string, unknown>;
         
@@ -77,9 +72,7 @@ class NotificationsService {
     try {
       const userId = getUserId();
       const url = `/user/${userId}/unread-count`;
-      
       const response = await notificationsAxiosInstance.get(url);
-
       if (response.status === 200 && response.data) {
         const responseData = response.data as Record<string, unknown>;
         

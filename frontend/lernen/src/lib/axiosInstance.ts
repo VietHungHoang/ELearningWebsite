@@ -1,39 +1,60 @@
-import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios';
 import { store } from './store';
 import { logout } from '../features/auth/store/authSlice';
 
-// Helper function to setup interceptors
+/**
+ * 🔧 Thiết lập interceptor cho một instance Axios
+ */
 const setupInterceptors = (instance: AxiosInstance) => {
   let isRefreshing = false;
-  let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (error: unknown) => void; config: InternalAxiosRequestConfig }> = [];
+  let failedQueue: Array<{
+    resolve: (value?: unknown) => void;
+    reject: (error: unknown) => void;
+    config: InternalAxiosRequestConfig;
+  }> = [];
 
-  // Request interceptor to attach access token
+  /**
+   * 🟢 Request Interceptor
+   * - Gắn access token vào header nếu có
+   * - Bỏ qua các endpoint public như login / register
+   */
   instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-      // Exclude public endpoints like login and register
-      if (!config.url?.includes('/auth/login') && !config.url?.includes('/auth/register')) {
+      const isAuthEndpoint =
+        config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+
+      if (!isAuthEndpoint) {
         const token = localStorage.getItem('accessToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
       }
+
       return config;
     },
     (error) => Promise.reject(error)
   );
 
-  // Response interceptor to handle token refresh on 401
+  /**
+   * 🔴 Response Interceptor
+   * - Tự động refresh token khi gặp lỗi 401
+   * - Retry các request bị fail sau khi refresh thành công
+   */
   instance.interceptors.response.use(
-    (response: AxiosResponse) => {
-      // Response is kept as is, services will handle ApiResponse
-      return response;
-    },
+    (response: AxiosResponse) => response,
     async (error) => {
-      const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+      const originalRequest = error.config as InternalAxiosRequestConfig & {
+        _retry?: boolean;
+      };
 
+      // Xử lý lỗi 401 (Unauthorized)
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
-          // Add to queue
+          // Thêm request vào queue chờ refresh
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject, config: originalRequest });
           });
@@ -45,42 +66,39 @@ const setupInterceptors = (instance: AxiosInstance) => {
         try {
           const refreshToken = localStorage.getItem('refreshToken');
           if (!refreshToken) {
-            // No refresh token, dispatch logout
             store.dispatch(logout());
             return Promise.reject(error);
           }
 
-          // Attempt to refresh token
+          // 🔁 Gọi API refresh token
           const response = await axios.post(`${instance.defaults.baseURL}/auth/refresh`, {
             refreshToken,
           });
 
           const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-          // Update tokens in storage
+          // Lưu token mới
           localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('refreshToken', newRefreshToken);
 
-          // Process queued requests
+          // Retry các request trong queue
           failedQueue.forEach(({ resolve, config }) => {
             config.headers.Authorization = `Bearer ${accessToken}`;
             resolve(instance(config));
           });
-          failedQueue = [];
 
+          failedQueue = [];
           isRefreshing = false;
 
-          // Retry original request
+          // Retry request ban đầu
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return instance(originalRequest);
         } catch (refreshError) {
-          // Process queued requests with rejection
+          // Nếu refresh fail → reject toàn bộ queue + logout
           failedQueue.forEach(({ reject }) => reject(refreshError));
           failedQueue = [];
-
           isRefreshing = false;
 
-          // Refresh failed, dispatch logout
           store.dispatch(logout());
           return Promise.reject(refreshError);
         }
@@ -91,7 +109,9 @@ const setupInterceptors = (instance: AxiosInstance) => {
   );
 };
 
-// Create axios instance for Cart BE on port 8080
+/**
+ * 🛒 Axios instance cho Cart Service (port 8080)
+ */
 const cartAxiosInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   timeout: 10000,
@@ -100,18 +120,23 @@ const cartAxiosInstance: AxiosInstance = axios.create({
   },
 });
 
-// Create axios instance for Notifications BE on port 8083
+/**
+ * 🔔 Axios instance cho Notification Service (port 8083)
+ */
 const notificationsAxiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_NOTIFICATIONS_API_BASE_URL || 'http://localhost:8083/api/notifications',
+  baseURL:
+    import.meta.env.VITE_NOTIFICATIONS_API_BASE_URL ||
+    'http://localhost:8083/api/notifications',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Setup interceptors for both instances
+// Áp dụng interceptor cho cả 2 instance
 setupInterceptors(cartAxiosInstance);
 setupInterceptors(notificationsAxiosInstance);
 
+// Xuất instance mặc định và phụ
 export default cartAxiosInstance;
 export { notificationsAxiosInstance };

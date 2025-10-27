@@ -5,7 +5,7 @@ import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from 'react-ic
 import { currencyOptions, languageOptions } from '../../constants/headerConstants';
 import CartPopup from '../../features/cart/components/CartPopup';
 import { LernenLogo } from '../LernenLogo';
-import { useWebSocket } from '../providers/WebSocketProvider';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface LanguageOption {
   name: string;

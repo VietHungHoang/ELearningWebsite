@@ -1,21 +1,9 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import React, { useEffect, useState, useCallback, type ReactNode } from 'react';
+import { useSelector } from 'react-redux';
 import { connectWebSocket, disconnectWebSocket } from '../../lib/websocketClient';
 import notificationsService from '../../services/notificationsService';
-
-interface WebSocketContextType {
-  notificationCount: number;
-  refreshNotificationCount: () => Promise<void>;
-}
-
-const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined);
-
-export const useWebSocket = () => {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
-  }
-  return context;
-};
+import { WebSocketContext } from '../../hooks/useWebSocket';
+import type { RootState, AuthState } from '../../lib/store';
 
 interface WebSocketProviderProps {
   children: ReactNode;
@@ -23,6 +11,7 @@ interface WebSocketProviderProps {
 
 const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
   const [notificationCount, setNotificationCount] = useState(0);
+  const user = useSelector((state: RootState) => (state.auth as AuthState).user);
 
   const refreshNotificationCount = useCallback(async () => {
     try {
@@ -38,7 +27,7 @@ const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
     refreshNotificationCount();
 
     // Connect WebSocket for realtime updates
-    const userId = '1001'; // TODO: Get from auth store
+    const userId = user?.id || '1001';
     connectWebSocket(userId, () => {
       // Refresh count when new notification arrives
       refreshNotificationCount();
@@ -48,7 +37,7 @@ const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
     return () => {
       disconnectWebSocket();
     };
-  }, [refreshNotificationCount]);
+  }, [refreshNotificationCount, user?.id]);
 
   const value = {
     notificationCount,

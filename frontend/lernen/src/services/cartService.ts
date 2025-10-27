@@ -1,22 +1,114 @@
 import apiService from './apiService';
-// TODO: Import khi restore code backup
-// import { store } from '../lib/store';
+import { store } from '../lib/store';
+import type { ApiResponse } from '../types/api';
 
-// CartItemResponse từ BE (chứa cả CartItem và CartItemDetail)
-export interface CartItemResponse {
-  // CartItem fields
+// Mock data for testing when API fails
+const mockCartItems: CartItemResponse[] = [
+  {
+    id: 1,
+    courseId: 101,
+    appliedCoupon: undefined,
+    valid: true,
+    name: "React Masterclass",
+    category: "Web Development",
+    price: 99.99,
+    image: "/images/courses/react.jpg",
+    rating: 4.8,
+    reviews: 1250,
+    instructorId: 1,
+    description: "Learn React from basics to advanced",
+    level: "Intermediate",
+    listPrice: 199.99,
+    discountPrice: 99.99,
+    totalStudents: 5000,
+    duration: "8 hours",
+    language: "English",
+    lessons: 45,
+    lastUpdated: "2024-01-15",
+    requirements: ["Basic JavaScript knowledge"],
+    includes: ["Video lectures", "Code exercises", "Certificate"],
+    instructor: {
+      id: 1,
+      name: "John Doe"
+    }
+  },
+  {
+    id: 2,
+    courseId: 102,
+    appliedCoupon: "SAVE20",
+    valid: true,
+    name: "Node.js Backend Development",
+    category: "Backend Development",
+    price: 79.99,
+    image: "/images/courses/nodejs.jpg",
+    rating: 4.6,
+    reviews: 890,
+    instructorId: 2,
+    description: "Build scalable backend applications",
+    level: "Advanced",
+    listPrice: 149.99,
+    discountPrice: 79.99,
+    totalStudents: 3200,
+    duration: "12 hours",
+    language: "English",
+    lessons: 62,
+    lastUpdated: "2024-02-20",
+    requirements: ["JavaScript fundamentals", "Basic programming"],
+    includes: ["Video content", "Projects", "Q&A support"],
+    instructor: {
+      id: 2,
+      name: "Jane Smith"
+    }
+  }
+];
+
+const mockCartResponse: CartResponse = {
+  items: mockCartItems,
+  totalPrice: 179.98
+};
+
+const mockCheckoutResponse: CheckoutResponse = {
+  orderId: "ORD-2025-001",
+  totalAmount: 179.98
+};
+
+// Utility function to show mock data warning
+const showMockDataWarning = (operation: string) => {
+  const message = `🚨 API Error: Using mock data for ${operation}. Please check backend connection.`;
+  console.warn(message);
+  
+  // You can also trigger a toast notification here if you have a toast system
+  // For now, we'll just use console.warn and alert for immediate visibility
+  if (typeof window !== 'undefined') {
+    // Simple browser alert for immediate user feedback
+    setTimeout(() => {
+      alert(`⚠️ Development Mode: ${operation} is using mock data due to API error.`);
+    }, 100);
+  }
+};
+
+// CartItem từ BE (chỉ chứa thông tin cơ bản của item trong cart)
+export interface CartItem {
+  id: number;
+  courseId: number;
+  appliedCoupon?: string;
+  valid: boolean;
+}
+// Instructor information (để sử dụng khi cần fetch riêng)
+export interface Instructor {
+  id: number;
+  name: string;
+}
+// CourseDetail từ BE (thông tin chi tiết của course)
+export interface CourseDetail {
   id: number;
   name: string;
   category: string;
-  tutor: string;
   price: number;
   image: string;
   rating: number;
   reviews: number;
-  // CartItemDetail fields
-  courseId: number;
-  instructorName: string;
-  instructorAvatar: string;
+  instructorId: number; // Foreign key to instructor
   description: string;
   level: string;
   listPrice: number;
@@ -25,9 +117,7 @@ export interface CartItemResponse {
   duration: string;
   language: string;
   lessons: number;
-  hasCertificate: boolean;
   lastUpdated: string;
-  whatYouWillLearn: string[];
   requirements: string[];
   includes: string[];
   availableCoupon?: {
@@ -35,9 +125,14 @@ export interface CartItemResponse {
     type: 'percentage' | 'fixed';
     value: number;
   };
-  appliedCoupon?: string;
-  valid: boolean;
 }
+
+// CartItemResponse từ BE (kết hợp CartItem + CourseDetail + Instructor)
+export interface CartItemResponse extends CartItem, CourseDetail {
+  instructor: Instructor; // Instructor object populated by backend JOIN
+}
+
+
 
 export interface CartResponse {
   items: CartItemResponse[];
@@ -60,91 +155,97 @@ export interface ApplyCouponRequest {
 
 export type CheckoutRequest = Record<string, unknown>;
 
-interface ApiResponseWrapper<T> {
-  status: number;
-  message: string;
-  data: T;
-}
-
-// ==========================================
-// TODO: Backup - Lấy learnerId từ Redux store
-// ==========================================
-// const getLearnerId = (): string => {
-//   const user = store.getState().auth.user;
-//   if (!user) throw new Error('User not authenticated');
-//   return user.id;
-// };
-
-// TEMPORARY: Hardcode learnerId = 1 để test
+// TEMPORARY: Hardcode learnerId = 1 để test khi không có user
+// TODO: Sau khi hoàn thành authentication, bỏ điều kiện !user
 const getLearnerId = (): string => {
-  // TODO: Sau khi hoàn thành testing, thay bằng code backup ở trên
-  return '1';
+  const user = store.getState().auth.user;
+  if (!user) return '1'; // Temporary fallback for testing
+  return user.id;
 };
 
 const getCart = async (): Promise<CartItemResponse[]> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.get(`/learners/${learnerId}/cart`);
+    const response = await apiService.get<ApiResponse<{items: CartItemResponse[]}>>(`/learners/${learnerId}/cart`);
     
-    // axios trả về response.data là cart object
-    if (response.status === 200 && response.data) {
-      const cartData = response.data as Record<string, unknown>;
-      
-      // Lấy items array trực tiếp
-      if ('items' in cartData && Array.isArray(cartData.items)) {
-        return cartData.items as CartItemResponse[];
+    // Kiểm tra business logic success
+    if (response.success === true) {
+      if (response.data) {
+        const cartData = response.data as unknown as Record<string, unknown>;
+        
+        // Nếu có items property, return nó
+        if ('items' in cartData && Array.isArray(cartData.items)) {
+          return cartData.items as CartItemResponse[];
+        }
+        
+        // Nếu không có items, có thể cart trống, return empty array
+        return [];
+      } else {
+        // Success nhưng không có data - có thể cart trống
+        return [];
       }
+    } else {
+      // Business logic failed
+      throw new Error(response.message || 'Failed to fetch cart');
     }
-    
-    throw new Error('No items found in cart');
   } catch (error) {
     console.error('Error fetching cart from API:', error);
-    throw error;
+    showMockDataWarning('getCart');
+    return mockCartItems; // Return mock data for UI testing
   }
 };
 
 const addToCart = async (request: AddToCartRequest): Promise<CartResponse> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.post<ApiResponseWrapper<CartResponse>>(`/learners/${learnerId}/cart/items`, request);
-    if (response.data && response.data.status === 200) {
-      return response.data.data;
+    const response = await apiService.post<ApiResponse<ApiResponse<CartResponse>>>(`/learners/${learnerId}/cart/items`, request);
+    
+    if (response.success === true && response.data && response.data.success === true) {
+      return response.data.data as unknown as CartResponse;
     } else {
-      throw new Error(response.data?.message || 'Failed to add to cart');
+      const errorMessage = response.data?.message || response.message || 'Failed to add to cart';
+      throw new Error(errorMessage);
     }
   } catch (error) {
     console.error('Error adding to cart from API:', error);
-    throw error;
+    showMockDataWarning('addToCart');
+    return mockCartResponse; // Return mock data for UI testing
   }
 };
 
 const removeItem = async (courseId: number): Promise<CartResponse> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.delete<ApiResponseWrapper<CartResponse>>(`/learners/${learnerId}/cart/items/${courseId}`);
-    if (response.data && response.data.status === 200) {
-      return response.data.data;
+    const response = await apiService.delete<ApiResponse<ApiResponse<CartResponse>>>(`/learners/${learnerId}/cart/items/${courseId}`);
+    
+    if (response.success === true && response.data && response.data.success === true) {
+      return response.data.data as unknown as CartResponse;
     } else {
-      throw new Error(response.data?.message || 'Failed to remove item');
+      const errorMessage = response.data?.message || response.message || 'Failed to remove item';
+      throw new Error(errorMessage);
     }
   } catch (error) {
     console.error('Error removing item from API:', error);
-    throw error;
+    showMockDataWarning('removeItem');
+    return mockCartResponse; // Return mock data for UI testing
   }
 };
 
 const checkout = async (request?: CheckoutRequest): Promise<CheckoutResponse> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.post<ApiResponseWrapper<CheckoutResponse>>(`/learners/${learnerId}/cart/checkout`, request || {});
-    if (response.data && response.data.status === 200) {
-      return response.data.data;
+    const response = await apiService.post<ApiResponse<ApiResponse<CheckoutResponse>>>(`/learners/${learnerId}/cart/checkout`, request || {});
+    
+    if (response.success === true && response.data && response.data.success === true) {
+      return response.data.data as unknown as CheckoutResponse;
     } else {
-      throw new Error(response.data?.message || 'Failed to checkout');
+      const errorMessage = response.data?.message || response.message || 'Failed to checkout';
+      throw new Error(errorMessage);
     }
   } catch (error) {
     console.error('Error during checkout from API:', error);
-    throw error;
+    showMockDataWarning('checkout');
+    return mockCheckoutResponse; // Return mock data for UI testing
   }
 };
 
@@ -153,26 +254,40 @@ const applyCoupon = async (courseId: number, request: ApplyCouponRequest): Promi
     const learnerId = getLearnerId();
     request.courseId = courseId;
     
-    const response = await apiService.post(`/learners/${learnerId}/cart/items/${courseId}/apply-coupon`, request);
+    const response = await apiService.post<ApiResponse<{items: CartItemResponse[], totalAmount: number}>>(`/learners/${learnerId}/cart/items/${courseId}/apply-coupon`, request);
     
-    if (response.status === 200 && response.data) {
-      const cartData = response.data as Record<string, unknown>;
-      
-      // Check if it has items array (CartResponse format)
-      if ('items' in cartData) {
-        return {
-          items: (cartData.items as CartItemResponse[]) || [],
-          totalPrice: (cartData.totalAmount as number) || 0
-        };
+    if (response.success === true) {
+      if (response.data) {
+        const cartData = response.data as unknown as Record<string, unknown>;
+        
+        // Check if it has items array (CartResponse format)
+        if ('items' in cartData) {
+          return {
+            items: (cartData.items as CartItemResponse[]) || [],
+            totalPrice: (cartData.totalAmount as number) || 0
+          };
+        } else {
+          // Invalid format but success - return empty cart
+          return {
+            items: [],
+            totalPrice: 0
+          };
+        }
       } else {
-        throw new Error('Invalid response format from apply coupon API');
+        // Success but no data - return empty cart
+        return {
+          items: [],
+          totalPrice: 0
+        };
       }
     } else {
-      throw new Error('HTTP request failed');
+      // Business logic failed
+      throw new Error(response.message || 'Failed to apply coupon');
     }
   } catch (error) {
     console.error('Error applying coupon from API:', error);
-    throw error;
+    showMockDataWarning('applyCoupon');
+    return mockCartResponse; // Return mock data for UI testing
   }
 };
 

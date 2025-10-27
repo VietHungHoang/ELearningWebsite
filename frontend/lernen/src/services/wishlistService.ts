@@ -1,94 +1,112 @@
 import apiService from './apiService';
+import { store } from '../lib/store';
+import type { ApiResponse } from '../types/api';
 
-// WishlistItemResponse từ BE
+// Request interfaces
+export interface AddToWishlistRequest {
+  courseId: number;
+}
+
+// Response interfaces
 export interface WishlistItemResponse {
   id: number;
   courseId: number;
+  addedAt: string;
+}
+
+// Full wishlist item with course details (nếu BE trả về joined data)
+export interface WishlistItemWithCourse extends WishlistItemResponse {
   name: string;
   category: string;
-  tutor: string;
   price: number;
   image: string;
   rating: number;
   reviews: number;
   instructorName: string;
-  instructorAvatar: string;
-  description: string;
   level: string;
-  listPrice: number;
-  discountPrice: number;
-  totalStudents: number;
   duration: string;
   language: string;
-  lessons: number;
-  hasCertificate: boolean;
-  lastUpdated: string;
-  whatYouWillLearn: string[];
-  requirements: string[];
-  includes: string[];
-  addedAt: string;
 }
 
-class WishlistService {
-  async getWishlist(): Promise<WishlistItemResponse[]> {
-    try {
-      const learnerId = this.getLearnerId();
-      const response = await apiService.get(`/learners/${learnerId}/wishlist`);
+// TEMPORARY: Hardcode learnerId = 1 để test khi không có user
+// TODO: Sau khi hoàn thành authentication, bỏ điều kiện !user
+const getLearnerId = (): string => {
+  const user = store.getState().auth.user;
+  if (!user) return '1'; // Temporary fallback for testing
+  return user.id;
+};
 
-      if (response.status === 200 && response.data) {
-        const data = response.data as Record<string, unknown>;
+const getWishlist = async (): Promise<WishlistItemResponse[]> => {
+  try {
+    const learnerId = getLearnerId();
+    const response = await apiService.get<ApiResponse<{items: WishlistItemResponse[]}>>(`/learners/${learnerId}/wishlist`);
+
+    if (response.success === true) {
+      if (response.data) {
+        const data = response.data as unknown as Record<string, unknown>;
         if ('items' in data && Array.isArray(data.items)) {
           return data.items as WishlistItemResponse[];
         }
       }
       return [];
-    } catch (error) {
-      console.error('Error fetching wishlist from API:', error);
-      throw error;
+    } else {
+      throw new Error(response.message || 'Failed to fetch wishlist');
     }
+  } catch (error) {
+    console.error('Error fetching wishlist from API:', error);
+    // Return empty array instead of throwing for better UX
+    return [];
   }
+};
 
-  async addToWishlist(courseId: number): Promise<void> {
-    try {
-      const learnerId = this.getLearnerId();
-      await apiService.post(`/learners/${learnerId}/wishlist`, { courseId });
-    } catch (error) {
-      console.error('Error adding to wishlist from API:', error);
-      throw error;
-    }
-  }
+const addToWishlist = async (courseId: number): Promise<WishlistItemResponse> => {
+  try {
+    const learnerId = getLearnerId();
+    const request: AddToWishlistRequest = { courseId };
+    const response = await apiService.post<ApiResponse<WishlistItemResponse>>(`/learners/${learnerId}/wishlist`, request);
 
-  async removeFromWishlist(courseId: number): Promise<void> {
-    try {
-      const learnerId = this.getLearnerId();
-      await apiService.delete(`/learners/${learnerId}/wishlist/${courseId}`);
-    } catch (error) {
-      console.error('Error removing from wishlist from API:', error);
-      throw error;
-    }
-  }
-
-  async isInWishlist(courseId: number): Promise<boolean> {
-    try {
-      const learnerId = this.getLearnerId();
-      const response = await apiService.get(`/learners/${learnerId}/wishlist/check/${courseId}`);
-
-      if (response.status === 200 && response.data) {
-        const data = response.data as Record<string, unknown>;
-        return Boolean(data.inWishlist);
+    if (response.success === true) {
+      if (response.data) {
+        return response.data as unknown as WishlistItemResponse;
       }
-      return false;
-    } catch (error) {
-      console.error('Error checking wishlist status from API:', error);
-      return false;
+      throw new Error('No data returned from add to wishlist');
+    } else {
+      throw new Error(response.message || 'Failed to add to wishlist');
     }
+  } catch (error) {
+    console.error('Error adding to wishlist from API:', error);
+    throw error;
   }
+};
 
-  private getLearnerId(): string {
-    // TODO: Get from auth store
-    return '1001';
+const removeFromWishlist = async (courseId: number): Promise<void> => {
+  try {
+    const learnerId = getLearnerId();
+    const response = await apiService.delete<ApiResponse<void>>(`/learners/${learnerId}/wishlist/${courseId}`);
+
+    if (response.success !== true) {
+      throw new Error(response.message || 'Failed to remove from wishlist');
+    }
+  } catch (error) {
+    console.error('Error removing from wishlist from API:', error);
+    throw error;
   }
-}
+};
 
-const wishlistService = new WishlistService();
-export default wishlistService;
+const isInWishlist = async (courseId: number): Promise<boolean> => {
+  try {
+    const learnerId = getLearnerId();
+    const response = await apiService.get<ApiResponse<{inWishlist: boolean}>>(`/learners/${learnerId}/wishlist/check/${courseId}`);
+
+    if (response.success === true && response.data) {
+      const data = response.data as unknown as Record<string, unknown>;
+      return Boolean(data.inWishlist);
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking wishlist status from API:', error);
+    return false;
+  }
+};
+
+export default { getWishlist, addToWishlist, removeFromWishlist, isInWishlist };

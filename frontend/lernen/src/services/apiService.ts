@@ -5,6 +5,7 @@ import type { ApiResponse } from '../types/api';
 class ApiService {
   // GET request
   async get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await axiosInstance.get(url, { params });
       return response.data; // Assuming backend returns ApiResponse<T>
@@ -15,6 +16,7 @@ class ApiService {
 
   // POST request
   async post<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await axiosInstance.post(url, data);
       return response.data;
@@ -25,6 +27,7 @@ class ApiService {
 
   // PUT request
   async put<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await axiosInstance.put(url, data);
       return response.data;
@@ -35,6 +38,7 @@ class ApiService {
 
   // DELETE request
   async delete<T>(url: string): Promise<ApiResponse<T>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await axiosInstance.delete(url);
       return response.data;

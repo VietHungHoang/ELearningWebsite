@@ -176,7 +176,7 @@ const CartDetailPage: React.FC = () => {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <a href="#" onClick={(e) => {e.preventDefault(); navigate('/courseDetail');}} className="font-bold text-lg text-gray-800 hover:text-[#0b6459]">{item.name}</a>
-                                            <p className="text-sm text-gray-500 mt-1">by <a href="#" onClick={(e) => {e.preventDefault(); navigate('/tutorDetail');}} className="font-medium text-gray-600 hover:underline">{item.tutor}</a></p>
+                                            <p className="text-sm text-gray-500 mt-1">by <a href="#" onClick={(e) => {e.preventDefault(); navigate('/tutorDetail');}} className="font-medium text-gray-600 hover:underline">{item.instructor.name}</a></p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xl font-bold text-gray-800">${item.price.toFixed(2)}</p>
