@@ -1,0 +1,22 @@
+server:
+  port: 3000
+
+spring:
+  main:
+    web-application-type: servlet
+
+services:
+  auth: https://auth.lms.com
+  learner: https://learner.lms.com
+  course: https://course.lms.com
+  notification: https://noti.lms.com
+
+logging:
+  level:
+    root: WARN
+    '[com.elearning.apigateway]':  INFO
+
+eureka:
+  client:
+    service-url:
+      defaultZone: https://eureka.lms.com/eureka/ #update sau
