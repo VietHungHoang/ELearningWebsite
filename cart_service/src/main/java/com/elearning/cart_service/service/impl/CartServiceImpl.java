@@ -21,9 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -52,12 +49,29 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("Course already exists in cart");
         }
 
-        // Create new cart item
+        // Create new cart item with mock data
         CartItem cartItem = CartItem.builder()
                 .cart(cart)
                 .courseId(request.getCourseId())
-                .priceSnapshot(BigDecimal.valueOf(99.99)) // Mock price - should get from course service
-                .finalPrice(BigDecimal.valueOf(99.99)) // Mock price
+                .priceSnapshot(getMockPrice(request.getCourseId()))
+                .finalPrice(getMockPrice(request.getCourseId()))
+
+                .name(getMockCourseName(request.getCourseId()))
+                .category(getMockCourseCategory(request.getCourseId()))
+                .tutor(getMockInstructorName(request.getCourseId()))
+                .image(getMockThumbnailUrl(request.getCourseId()))
+                .rating(getMockRating(request.getCourseId()))
+                .reviews(getMockReviews(request.getCourseId()))
+                .level(getMockLevel(request.getCourseId()))
+                .language(getMockLanguage(request.getCourseId()))
+                .lessons(getMockLessons(request.getCourseId()))
+                .duration(getMockDuration(request.getCourseId()))
+                .totalStudents(getMockTotalStudents(request.getCourseId()))
+                .description(getMockDescription(request.getCourseId()))
+                .instructorAvatar(getMockInstructorAvatar(request.getCourseId()))
+                .hasCertificate(getMockHasCertificate(request.getCourseId()))
+                .lastUpdated(LocalDateTime.now().toString())
+                .availableCoupon(getMockAvailableCoupon(request.getCourseId()))
                 .build();
 
         cart.getItems().add(cartItem);
@@ -66,22 +80,173 @@ public class CartServiceImpl implements CartService {
         return mapToCartResponse(cart);
     }
 
+    private String getMockCourseName(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "Mastering Algebra";
+            case 2 -> "Intro to Physics";
+            case 3 -> "Digital Art Fundamentals";
+            default -> "Course " + courseId;
+        };
+    }
+
+    private String getMockCourseCategory(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "Mathematics";
+            case 2 -> "Science";
+            case 3 -> "Art";
+            default -> "General";
+        };
+    }
+
+    private String getMockInstructorName(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "Cynthia Hunter";
+            case 2 -> "Steven Ford";
+            case 3 -> "Arianne Kearns";
+            default -> "Unknown Instructor";
+        };
+    }
+
+    private String getMockThumbnailUrl(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "https://picsum.photos/seed/course1/128/128";
+            case 2 -> "https://picsum.photos/seed/course2/128/128";
+            case 3 -> "https://picsum.photos/seed/course4/128/128";
+            default -> "/assets/images/course/default.jpg";
+        };
+    }
+
+    private Double getMockRating(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> 4.9;
+            case 2 -> 4.8;
+            case 3 -> 4.9;
+            default -> 4.0;
+        };
+    }
+
+    private Integer getMockReviews(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> 150;
+            case 2 -> 142;
+            case 3 -> 212;
+            case 4 -> 320;
+            default -> 0;
+        };
+    }
+
+    private BigDecimal getMockPrice(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> BigDecimal.valueOf(99.99);
+            case 2 -> BigDecimal.valueOf(129.99);
+            case 3 -> BigDecimal.valueOf(149.99);
+            case 4 -> BigDecimal.valueOf(199.99);
+            default -> BigDecimal.valueOf(99.99);
+        };
+    }
+
+    private String getMockLevel(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "Beginner";
+            case 2 -> "Intermediate";
+            case 3 -> "Advanced";
+            case 4 -> "All Levels";
+            default -> "Beginner";
+        };
+    }
+
+    private String getMockLanguage(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "English";
+            case 2 -> "English";
+            case 3 -> "Vietnamese";
+            case 4 -> "English";
+            default -> "English";
+        };
+    }
+
+    private Integer getMockLessons(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> 24;
+            case 2 -> 18;
+            case 3 -> 32;
+            case 4 -> 42;
+            default -> 12;
+        };
+    }
+
+    private String getMockDuration(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "12 hours";
+            case 2 -> "8 hours";
+            case 3 -> "16 hours";
+            case 4 -> "20 hours";
+            default -> "6 hours";
+        };
+    }
+
+    private Integer getMockTotalStudents(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> 2500;
+            case 2 -> 1800;
+            case 3 -> 3200;
+            case 4 -> 5400;
+            default -> 500;
+        };
+    }
+
+    private String getMockDescription(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "Master algebraic concepts with step-by-step guidance from industry experts.";
+            case 2 ->
+                "Explore the fundamentals of physics through interactive experiments and real-world applications.";
+            case 3 -> "Learn digital art techniques using professional tools and industry-standard practices.";
+            case 4 -> "Complete Python programming course from basics to advanced projects with hands-on coding.";
+            default -> "Learn this amazing course with our expert instructors.";
+        };
+    }
+
+    private String getMockInstructorAvatar(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "https://picsum.photos/seed/avatar1/64/64";
+            case 2 -> "https://picsum.photos/seed/avatar2/64/64";
+            case 3 -> "https://picsum.photos/seed/avatar3/64/64";
+            case 4 -> "https://picsum.photos/seed/avatar4/64/64";
+            default -> "/assets/images/team/avatar.jpg";
+        };
+    }
+
+    private Boolean getMockHasCertificate(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> true;
+            case 2 -> true;
+            case 3 -> true;
+            case 4 -> true;
+            default -> true;
+        };
+    }
+
+    private String getMockAvailableCoupon(Long courseId) {
+        return switch (courseId.intValue()) {
+            case 1 -> "{\"code\":\"SAVE20\",\"type\":\"percentage\",\"value\":20}";
+            case 2 -> "{\"code\":\"LEARN15\",\"type\":\"percentage\",\"value\":15}";
+            case 3 -> "{\"code\":\"ARTIST30\",\"type\":\"percentage\",\"value\":30}";
+            case 4 -> "{\"code\":\"CODE25\",\"type\":\"percentage\",\"value\":25}";
+            default -> "{\"code\":\"SAVE20\",\"type\":\"percentage\",\"value\":20}";
+        };
+    }
+
     @Override
     @Transactional
     public CartResponse removeItem(Long learnerId, Long courseId) {
-        // Find cart of learner
+
         Cart cart = cartRepository.findByLearnerIdAndStatus(learnerId, CartStatus.OPEN)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
-
-        // Check if item exists before deleting
         if (!cartItemRepository.existsByCartIdAndCourseId(cart.getId(), courseId)) {
             throw new ResourceNotFoundException("Cart item not found for courseId: " + courseId);
         }
-
-        // Delete item from cart using repository method
         cartItemRepository.deleteByCartIdAndCourseId(cart.getId(), courseId);
 
-        // Refresh cart after delete to get updated data
         Cart updatedCart = cartRepository.findById(cart.getId())
                 .orElseThrow(() -> new RuntimeException("Cart not found after delete"));
 
@@ -93,16 +258,13 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByLearnerIdAndStatus(learnerId, CartStatus.OPEN)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        // Mark cart as converted
         cart.setStatus(CartStatus.CONVERTED);
         cartRepository.save(cart);
 
-        // Calculate total amount
         BigDecimal totalAmount = cart.getItems().stream()
                 .map(CartItem::getFinalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Create checkout response
         CheckoutResponse response = new CheckoutResponse();
         response.setOrderId(12345L);
         response.setTotalAmount(totalAmount);
@@ -116,13 +278,11 @@ public class CartServiceImpl implements CartService {
     public CartResponse applyCoupon(Long learnerId, ApplyCouponRequest request) {
         Cart cart = getOrCreateCart(learnerId);
 
-        // Find the item and apply coupon (mock logic)
         cart.getItems().stream()
                 .filter(item -> item.getCourseId().equals(request.getCourseId()))
                 .findFirst()
                 .ifPresent(item -> {
                     item.setCouponCode(request.getCouponCode());
-                    // Mock discount logic
                     if ("SAVE10".equals(request.getCouponCode())) {
                         BigDecimal discount = item.getFinalPrice().multiply(BigDecimal.valueOf(0.1));
                         item.setFinalPrice(item.getFinalPrice().subtract(discount));
@@ -140,11 +300,9 @@ public class CartServiceImpl implements CartService {
             return existingCart.get();
         }
 
-        // Create new cart
         Cart newCart = Cart.builder()
                 .learnerId(learnerId)
                 .status(CartStatus.OPEN)
-                .expiresAt(LocalDateTime.now().plusDays(15))
                 .build();
 
         return cartRepository.save(newCart);
@@ -155,15 +313,12 @@ public class CartServiceImpl implements CartService {
         response.setId(cart.getId());
         response.setLearnerId(cart.getLearnerId());
         response.setStatus(cart.getStatus().name());
-        response.setExpiresAt(cart.getExpiresAt());
 
-        // Calculate total amount
         BigDecimal totalAmount = cart.getItems().stream()
                 .map(CartItem::getFinalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         response.setTotalAmount(totalAmount);
 
-        // Map items
         response.setItems(cart.getItems().stream()
                 .map(this::mapToCartItemResponse)
                 .toList());
@@ -172,262 +327,24 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartItemResponse mapToCartItemResponse(CartItem item) {
-    CartItemResponse response = new CartItemResponse();
-    response.setId(item.getId());
-    response.setCourseId(item.getCourseId());
+        CartItemResponse response = CartItemResponse.builder()
+                .id(item.getId()) 
+                .courseId(item.getCourseId()) 
+                .name(item.getName() != null ? item.getName() : "Course " + item.getCourseId())
+                .category(item.getCategory() != null ? item.getCategory() : "General")
+                .tutor(item.getTutor() != null ? item.getTutor() : "Unknown Instructor")
+                .price(item.getFinalPrice() != null ? item.getFinalPrice() : BigDecimal.ZERO)
+                .image(item.getImage() != null ? item.getImage() : "/assets/images/course/default.jpg")
+                .rating(item.getRating() != null ? item.getRating() : 0.0)
+                .reviews(item.getReviews() != null ? item.getReviews() : 0)
+                .level(item.getLevel() != null ? item.getLevel() : "Beginner")
+                .language(item.getLanguage() != null ? item.getLanguage() : "English")
+                .lessons(item.getLessons() != null ? item.getLessons() : 0)
+                .duration(item.getDuration() != null ? item.getDuration() : "Self-paced")
+                .availableCoupon(java.util.Map.of("code", "SAVE20", "type", "percentage", "value", 20))
+                .build();
 
-    // =========================
-    // 🔹 MOCK COURSE-SERVICE DATA (UDEMY-STYLE)
-    // =========================
-    String title = "Unknown Course";
-    String instructor = "N/A";
-    String instructorAvatar = "/assets/images/team/avatar.jpg";
-    String thumbnail = "/assets/images/course/default.jpg";
-    String description = "Course description not available";
-    String category = "Uncategorized";
-    String level = "All Levels";
-    BigDecimal listPrice = item.getPriceSnapshot() != null ? item.getPriceSnapshot() : BigDecimal.valueOf(100);
-    BigDecimal discount = BigDecimal.ZERO;
-    Double rating = 0.0;
-    Integer totalRatings = 0;
-    Integer totalStudents = 0;
-    String duration = "0 hours";
-    String language = "English";
-    Boolean hasCertificate = true;
-    String lastUpdated = LocalDateTime.now().minusDays(30).toString();
-    List<String> whatYouWillLearn = new ArrayList<>();
-    List<String> requirements = new ArrayList<>();
-    List<String> includes = new ArrayList<>();
-
-    // Mock data based on courseId
-    switch (item.getCourseId().intValue()) {
-        case 1:
-            title = "Spring Boot Masterclass: Build Production-Ready Applications";
-            instructor = "John Doe";
-            instructorAvatar = "/assets/images/team/avatar-01.jpg";
-            thumbnail = "/assets/images/course/spring-boot-masterclass.jpg";
-            description = "Learn Spring Boot from scratch and build production-ready applications with this comprehensive masterclass.";
-            category = "Development";
-            level = "Intermediate";
-            listPrice = BigDecimal.valueOf(129.99);
-            discount = BigDecimal.valueOf(25.00);
-            rating = 4.7;
-            totalRatings = 1250;
-            totalStudents = 8500;
-            duration = "12.5 hours";
-            language = "English";
-            lastUpdated = LocalDateTime.now().minusDays(15).toString();
-            whatYouWillLearn = Arrays.asList(
-                "Build REST APIs with Spring Boot",
-                "Implement Spring Security",
-                "Work with Spring Data JPA",
-                "Deploy applications to production"
-            );
-            requirements = Arrays.asList(
-                "Basic Java knowledge",
-                "Understanding of web development"
-            );
-            includes = Arrays.asList(
-                "12.5 hours on-demand video",
-                "Downloadable resources",
-                "Full lifetime access",
-                "Access on mobile and TV",
-                "Certificate of completion"
-            );
-            break;
-            
-        case 2:
-            title = "React for Beginners: Complete Guide to Modern React";
-            instructor = "Jane Smith";
-            instructorAvatar = "/assets/images/team/avatar-02.jpg";
-            thumbnail = "/assets/images/course/react-beginners.jpg";
-            description = "Master React fundamentals and build modern web applications with hooks, context, and best practices.";
-            category = "Development";
-            level = "Beginner";
-            listPrice = BigDecimal.valueOf(99.99);
-            discount = BigDecimal.valueOf(15.00);
-            rating = 4.5;
-            totalRatings = 890;
-            totalStudents = 6200;
-            duration = "8.5 hours";
-            language = "English";
-            lastUpdated = LocalDateTime.now().minusDays(45).toString();
-            whatYouWillLearn = Arrays.asList(
-                "Understand React fundamentals",
-                "Work with components and props",
-                "Master React hooks",
-                "Build real-world applications"
-            );
-            requirements = Arrays.asList(
-                "Basic JavaScript knowledge",
-                "HTML and CSS fundamentals"
-            );
-            includes = Arrays.asList(
-                "8.5 hours on-demand video",
-                "5 coding exercises",
-                "Full lifetime access",
-                "Certificate of completion"
-            );
-            break;
-            
-        case 3:
-            title = "Docker Deep Dive: Containerization for Developers";
-            instructor = "Alex Johnson";
-            instructorAvatar = "/assets/images/team/avatar-03.jpg";
-            thumbnail = "/assets/images/course/docker-deep-dive.jpg";
-            description = "Master Docker containerization, orchestration, and deployment strategies for modern applications.";
-            category = "DevOps";
-            level = "Advanced";
-            listPrice = BigDecimal.valueOf(149.99);
-            discount = BigDecimal.valueOf(30.00);
-            rating = 4.8;
-            totalRatings = 650;
-            totalStudents = 3200;
-            duration = "15.5 hours";
-            language = "English";
-            lastUpdated = LocalDateTime.now().minusDays(7).toString();
-            whatYouWillLearn = Arrays.asList(
-                "Master Docker fundamentals",
-                "Work with Docker Compose",
-                "Implement container orchestration",
-                "Deploy to production environments"
-            );
-            requirements = Arrays.asList(
-                "Basic Linux knowledge",
-                "Understanding of virtualization"
-            );
-            includes = Arrays.asList(
-                "15.5 hours on-demand video",
-                "Docker cheat sheets",
-                "Full lifetime access",
-                "Certificate of completion",
-                "Access on mobile and TV"
-            );
-            break;
-            
-        case 4:
-            title = "Python Data Science: Complete Machine Learning Bootcamp";
-            instructor = "Dr. Sarah Wilson";
-            instructorAvatar = "/assets/images/team/avatar-04.jpg";
-            thumbnail = "/assets/images/course/python-data-science.jpg";
-            description = "Complete guide to Python data science, machine learning, and AI with real-world projects.";
-            category = "Data Science";
-            level = "Intermediate";
-            listPrice = BigDecimal.valueOf(199.99);
-            discount = BigDecimal.valueOf(50.00);
-            rating = 4.6;
-            totalRatings = 2100;
-            totalStudents = 15800;
-            duration = "22 hours";
-            language = "English";
-            lastUpdated = LocalDateTime.now().minusDays(20).toString();
-            whatYouWillLearn = Arrays.asList(
-                "Master Python for data science",
-                "Build machine learning models",
-                "Work with pandas and numpy",
-                "Create data visualizations"
-            );
-            requirements = Arrays.asList(
-                "Basic Python programming",
-                "Mathematics fundamentals"
-            );
-            includes = Arrays.asList(
-                "22 hours on-demand video",
-                "50+ coding exercises",
-                "Full lifetime access",
-                "Certificate of completion",
-                "Downloadable resources"
-            );
-            break;
-            
-        case 5:
-            title = "AWS Cloud Architecture: Solutions Architect Professional";
-            instructor = "Mike Chen";
-            instructorAvatar = "/assets/images/team/avatar-05.jpg";
-            thumbnail = "/assets/images/course/aws-cloud-architecture.jpg";
-            description = "Master AWS cloud architecture, design patterns, and best practices for enterprise applications.";
-            category = "Cloud Computing";
-            level = "Advanced";
-            listPrice = BigDecimal.valueOf(179.99);
-            discount = BigDecimal.valueOf(40.00);
-            rating = 4.9;
-            totalRatings = 780;
-            totalStudents = 4500;
-            duration = "18 hours";
-            language = "English";
-            lastUpdated = LocalDateTime.now().minusDays(10).toString();
-            whatYouWillLearn = Arrays.asList(
-                "Design scalable AWS architectures",
-                "Implement security best practices",
-                "Master cost optimization",
-                "Deploy high-availability systems"
-            );
-            requirements = Arrays.asList(
-                "AWS fundamentals knowledge",
-                "Basic networking concepts"
-            );
-            includes = Arrays.asList(
-                "18 hours on-demand video",
-                "Architecture diagrams",
-                "Full lifetime access",
-                "Certificate of completion",
-                "AWS practice exams"
-            );
-            break;
-            
-        default:
-            // Default mock data for unknown courses
-            title = "Premium Course #" + item.getCourseId();
-            instructor = "Expert Instructor";
-            thumbnail = "/assets/images/course/course-" + (item.getCourseId() % 5 + 1) + ".jpg";
-            description = "This is a premium course with comprehensive content and practical exercises.";
-            category = "Technology";
-            level = "Beginner";
-            listPrice = BigDecimal.valueOf(89.99);
-            discount = BigDecimal.valueOf(10.00);
-            rating = 4.0;
-            totalRatings = 100;
-            totalStudents = 500;
-            duration = "6 hours";
-            whatYouWillLearn = Arrays.asList(
-                "Learn fundamental concepts",
-                "Practice with real examples",
-                "Build practical projects"
-            );
-            includes = Arrays.asList(
-                "6 hours on-demand video",
-                "Full lifetime access",
-                "Certificate of completion"
-            );
-            break;
+        return response;
     }
 
-    // =========================
-    // 🔹 Build Response with Udemy-style data
-    // =========================
-    response.setCourseTitle(title);
-    response.setInstructorName(instructor);
-    response.setInstructorAvatar(instructorAvatar);
-    response.setThumbnailUrl(thumbnail);
-    response.setDescription(description);
-    response.setCategory(category);
-    response.setLevel(level);
-    response.setListPrice(listPrice);
-    response.setDiscountPrice(discount);
-    response.setFinalPrice(item.getFinalPrice() != null ? item.getFinalPrice() : listPrice.subtract(discount));
-    response.setRating(rating);
-    response.setTotalRatings(totalRatings);
-    response.setTotalStudents(totalStudents);
-    response.setDuration(duration);
-    response.setLanguage(language);
-    response.setHasCertificate(hasCertificate);
-    response.setLastUpdated(lastUpdated);
-    response.setWhatYouWillLearn(whatYouWillLearn);
-    response.setRequirements(requirements);
-    response.setIncludes(includes);
-    response.setAppliedCoupon(item.getCouponCode());
-    response.setValid(true);
-
-    return response;
-}
 }
