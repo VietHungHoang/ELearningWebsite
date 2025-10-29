@@ -1,38 +1,12 @@
 import apiService from './apiService';
 import { store } from '../lib/store';
 import type { ApiResponse } from '../types/api';
+import type { AddToWishlistRequest, WishlistItemResponse } from '../types/wishlist';
 
-// Request interfaces
-export interface AddToWishlistRequest {
-  courseId: number;
-}
 
-// Response interfaces
-export interface WishlistItemResponse {
-  id: number;
-  courseId: number;
-  addedAt: string;
-}
-
-// Full wishlist item with course details (nếu BE trả về joined data)
-export interface WishlistItemWithCourse extends WishlistItemResponse {
-  name: string;
-  category: string;
-  price: number;
-  image: string;
-  rating: number;
-  reviews: number;
-  instructorName: string;
-  level: string;
-  duration: string;
-  language: string;
-}
-
-// TEMPORARY: Hardcode learnerId = 1 để test khi không có user
-// TODO: Sau khi hoàn thành authentication, bỏ điều kiện !user
 const getLearnerId = (): string => {
   const user = store.getState().auth.user;
-  if (!user) return '1'; // Temporary fallback for testing
+  if (!user) return '1';
   return user.id;
 };
 
@@ -54,7 +28,6 @@ const getWishlist = async (): Promise<WishlistItemResponse[]> => {
     }
   } catch (error) {
     console.error('Error fetching wishlist from API:', error);
-    // Return empty array instead of throwing for better UX
     return [];
   }
 };
