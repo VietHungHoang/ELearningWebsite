@@ -24,20 +24,14 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    /**
-     * Tạo notification (có gửi WebSocket)
-     */
     @PostMapping
     public ResponseEntity<ApiResponse<NotificationResponse>> createNotification(
             @RequestBody NotificationRequest request) {
 
         NotificationResponse response = notificationService.createNotification(request);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(response, "Notification created successfully."));
     }
 
-    /**
-     * Lấy notification của user theo phân trang
-     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<NotificationResponse>>> getUserNotifications(
             @PathVariable Long userId,
@@ -48,34 +42,22 @@ public class NotificationController {
         List<NotificationResponse> notifications = notificationService
                 .getUserNotifications(userId, pageable);
 
-        return ResponseEntity.ok(ApiResponse.success(notifications));
+        return ResponseEntity.ok(ApiResponse.success(notifications, "Fetch notifications successfully."));
     }
-
-    /**
-     * Lấy số lượng notification chưa đọc
-     */
     @GetMapping("/user/{userId}/unread-count")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(@PathVariable Long userId) {
         long count = notificationService.getUnreadCount(userId);
-        return ResponseEntity.ok(ApiResponse.success(count));
+        return ResponseEntity.ok(ApiResponse.success(count, "Fetch unread count successfully."));
     }
-
-    /**
-     * Đánh dấu tất cả notification là đã đọc
-     */
     @PostMapping("/user/{userId}/mark-all-read")
     public ResponseEntity<ApiResponse<Long>> markAllAsRead(@PathVariable Long userId) {
         long updatedCount = notificationService.markAllAsRead(userId);
-        return ResponseEntity.ok(ApiResponse.success(updatedCount));
+        return ResponseEntity.ok(ApiResponse.success(updatedCount, "All notifications marked as read."));
     }
-
-    /**
-     * Đánh dấu 1 notification là đã đọc
-     */
     @PostMapping("/{notificationId}/user/{userId}/mark-read")
     public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(@PathVariable String notificationId,
             @PathVariable Long userId) {
         NotificationResponse response = notificationService.markAsRead(notificationId, userId);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(response, "Notification marked as read."));
     }
 }
