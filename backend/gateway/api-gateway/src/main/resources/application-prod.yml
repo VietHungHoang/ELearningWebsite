@@ -1,0 +1,17 @@
+server:
+  port: 3000
+
+spring:
+  main:
+    web-application-type: servlet
+
+services:
+  cart-service:
+    url: ${CART_SERVICE_URL} 
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL}
+
+logging:
+  level:
+    root: WARN
+    "[com.elearning.apigateway]": INFO
