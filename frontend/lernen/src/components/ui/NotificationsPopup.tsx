@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import notificationsService from '../../services/notificationsService';
-import type { Notification } from '../../services/notificationsService';
+import type { Notification } from '../../types/notifications';
 import Loading from './Loading';
 
 const NOTIFICATIONS_PER_PAGE = 3; // Number of notifications to load at a time
