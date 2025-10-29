@@ -1,6 +1,6 @@
 spring:
   application:
-    name: notification-service        # tên duy nhất cho service khi đăng ký Eureka
+    name: notification-service       
 
   data:
     mongodb:
