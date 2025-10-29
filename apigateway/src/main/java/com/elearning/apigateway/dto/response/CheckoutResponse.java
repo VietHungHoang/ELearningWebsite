@@ -16,9 +16,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CheckoutResponse {
 
-    private Long orderId; // ID của order vừa tạo
-    private BigDecimal totalAmount; // Tổng tiền của đơn hàng
-    private String status; // PENDING, PAID, FAILED, COMPLETED
-    private String message; // Thông báo cho FE
-    private String paymentUrl; // URL để redirect FE đến payment gateway (nếu cần)
+    private Long orderId; 
+    private BigDecimal totalAmount; 
+    private String status; 
+    private String message; 
 }

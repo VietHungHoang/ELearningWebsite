@@ -9,14 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO Cart Page Response - Tổng hợp thông tin cart đầy đủ cho FE
- * Bao gồm:
- * - Danh sách items trong cart
- * - Giá, discount, coupon
- * - Thông tin user
- * - Gợi ý sản phẩm
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,29 +18,17 @@ public class CartPageBFFResponse {
     private Long cartId;
     private Long userId;
 
-    // =====================
-    // Cart Items
-    // =====================
     private List<CartItemDetailDTO> items;
     private Integer itemCount;
 
-    // =====================
-    // Pricing
-    // =====================
-    private BigDecimal subtotal; // Tổng tiền trước discount
-    private BigDecimal discountAmount; // Tiền giảm
-    private BigDecimal totalAmount; // Tổng tiền cuối cùng
+    private BigDecimal subtotal;
+    private BigDecimal discountAmount;
+    private BigDecimal totalAmount;
 
-    // =====================
-    // Coupon
-    // =====================
     private String appliedCoupon;
     private Integer discountPercentage;
-    private List<String> availableCoupons; // Gợi ý coupons khác
+    private List<String> availableCoupons;
 
-    /**
-     * Cart Item Detail
-     */
     @Data
     @Builder
     @NoArgsConstructor

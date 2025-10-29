@@ -1,7 +1,6 @@
 package com.elearning.apigateway.service.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -56,20 +55,12 @@ public class CartServiceImpl implements CartService {
     public CheckoutResponse checkout(Long learnerId, CheckoutRequest request) {
         log.info("Checkout initiated for learner: {}", learnerId);
 
-        // Prepare checkout data
-        Map<String, Object> checkoutData = new HashMap<>();
-        if (request != null) {
-            checkoutData.put("paymentMethod", request.getPaymentMethod());
-            checkoutData.put("couponCode", request.getCouponCode());
-            if (request.getMetadata() != null) {
-                checkoutData.putAll(request.getMetadata());
-            }
+        if (request == null) {
+            request = new CheckoutRequest(); 
         }
 
-        // Call cart service to process checkout
-        CheckoutResponse response = cartServiceClient.checkout(learnerId, checkoutData);
+        CheckoutResponse response = cartServiceClient.checkout(learnerId, request);
 
-        // Log checkout action
         log.info("Checkout response for learner: {}, status: {}", learnerId, response.getStatus());
 
         return response;
