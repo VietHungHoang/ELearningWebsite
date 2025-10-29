@@ -19,8 +19,6 @@ public class EmailServiceImpl implements EmailService {
     public EmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
-
-    // Gửi email text thuần
     @Override
     public void sendSimpleEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -31,8 +29,6 @@ public class EmailServiceImpl implements EmailService {
         mailSender.send(message);
         log.info("📧 Sent simple email to {} with subject {}", to, subject);
     }
-
-    // Gửi email HTML
     @Override
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {

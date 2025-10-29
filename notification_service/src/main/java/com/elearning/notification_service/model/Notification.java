@@ -16,14 +16,11 @@ public class Notification {
 
     @Id
     private String id;
-
-    private Long userId; // người nhận thông báo
-    private String type; // ví dụ: ORDER_SUCCESS, COURSE_UPDATE
+    private Long userId; 
+    private String type; 
     private String title;
     private String message;
-    private boolean isRead; // đã đọc hay chưa
+    private boolean isRead; 
     private LocalDateTime createdAt;
-
-    // Cho phép lưu thêm metadata tùy từng loại notification
     private Map<String, Object> metadata;
 }

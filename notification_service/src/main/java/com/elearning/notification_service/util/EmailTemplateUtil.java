@@ -4,9 +4,6 @@ import java.util.Map;
 
 public class EmailTemplateUtil {
 
-    /**
-     * Chọn template dựa trên type
-     */
     public static String buildTemplate(String type, Map<String, Object> metadata) {
         return switch (type) {
             case "ORDER_SUCCESS" -> orderSuccess(
@@ -39,10 +36,6 @@ public class EmailTemplateUtil {
                         (courseName != null ? "<p>Khoá học: <strong>" + courseName + "</strong></p>" : "") +
                         "<a href='http://localhost:5173/my-courses' class='btn'>Bắt đầu học ngay</a>");
     }
-
-    /**
-     * Template cho email COURSE_UPDATE
-     */
     public static String courseUpdate(String title, String message, String courseName) {
         return baseWrapper(
                 "<h2>" + title + "</h2>" +
@@ -50,10 +43,6 @@ public class EmailTemplateUtil {
                         "<p>" + message + "</p>" +
                         "<a href='http://localhost:5173/my-courses' class='btn'>Xem chi tiết</a>");
     }
-
-    /**
-     * Template cho email QUIZ_RESULT
-     */
     public static String quizResult(String title, String learnerName, String courseName, int score) {
         return baseWrapper(
                 "<h2>" + title + "</h2>" +
@@ -62,10 +51,6 @@ public class EmailTemplateUtil {
                         "<p>Điểm của bạn: <strong style='color:blue;'>" + score + " / 100</strong></p>" +
                         "<a href='http://localhost:5173/my-quizzes' class='btn'>Xem kết quả chi tiết</a>");
     }
-
-    /**
-     * Khung HTML chung cho tất cả template
-     */
     private static String baseWrapper(String content) {
         return "<!DOCTYPE html>" +
                 "<html>" +

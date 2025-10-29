@@ -9,12 +9,12 @@ import java.util.Map;
 @Builder
 public class NotificationResponse {
 
-    private String id; // Phải là String vì Notification.id là String
-    private Long userId; // thêm userId cho FE nếu cần
+    private String id; 
+    private Long userId; 
     private String type;
     private String title;
     private String message;
-    private boolean read; // đổi tên biến tránh conflict với Lombok getter
+    private boolean read; 
     private LocalDateTime createdAt;
     private Map<String, Object> metadata;
 }
