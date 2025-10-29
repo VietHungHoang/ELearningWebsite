@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
-@RequestMapping("/api/notifications")
+@RequestMapping("/api/v1/notifications")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -44,19 +43,22 @@ public class NotificationController {
 
         return ResponseEntity.ok(ApiResponse.success(notifications, "Fetch notifications successfully."));
     }
+
     @GetMapping("/user/{userId}/unread-count")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(@PathVariable Long userId) {
         long count = notificationService.getUnreadCount(userId);
         return ResponseEntity.ok(ApiResponse.success(count, "Fetch unread count successfully."));
     }
-    @PostMapping("/user/{userId}/mark-all-read")
+
+    @PutMapping("/user/{userId}/mark-all-as-read")
     public ResponseEntity<ApiResponse<Long>> markAllAsRead(@PathVariable Long userId) {
         long updatedCount = notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(ApiResponse.success(updatedCount, "All notifications marked as read."));
     }
-    @PostMapping("/{notificationId}/user/{userId}/mark-read")
+
+    @PutMapping("/{notificationId}/mark-as-read")
     public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(@PathVariable String notificationId,
-            @PathVariable Long userId) {
+            @RequestParam Long userId) {
         NotificationResponse response = notificationService.markAsRead(notificationId, userId);
         return ResponseEntity.ok(ApiResponse.success(response, "Notification marked as read."));
     }
