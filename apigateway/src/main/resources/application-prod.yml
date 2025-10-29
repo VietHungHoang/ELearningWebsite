@@ -6,17 +6,18 @@ spring:
     web-application-type: servlet
 
 services:
-  auth: https://auth.lms.com
-  learner: https://learner.lms.com
-  course: https://course.lms.com
-  notification: https://noti.lms.com
+  cart:
+    base-url: ${CART_SERVICE_URL}
+  course:
+    base-url: ${COURSE_SERVICE_URL}
+  learner:
+    base-url: ${LEARNER_SERVICE_URL}
+  auth:
+    base-url: ${AUTH_SERVICE_URL}
+  notification:
+    base-url: ${NOTIFICATION_SERVICE_URL}
 
 logging:
   level:
     root: WARN
-    '[com.elearning.apigateway]':  INFO
-
-eureka:
-  client:
-    service-url:
-      defaultZone: https://eureka.lms.com/eureka/ #update sau
+    "[com.elearning.apigateway]": INFO

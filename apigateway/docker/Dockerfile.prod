@@ -37,13 +37,8 @@ RUN mkdir -p /var/log/apigateway && chown appuser:appuser /var/log/apigateway
 USER appuser
 
 # Expose port
-EXPOSE 8083
+EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD java -cp app.jar org.springframework.boot.loader.PropertiesLauncher \
-    -Dspring.profiles.active=prod \
-    -Dmanagement.endpoints.web.exposure.include=health || exit 1
 
 # Run application with production profile
 ENTRYPOINT ["java", \
