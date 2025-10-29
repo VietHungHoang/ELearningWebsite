@@ -1,16 +1,6 @@
 import axiosInstance from '../lib/axiosInstance';
 import type { ApiResponse } from '../types/api';
-
-export interface Notification {
-  id: string;
-  userId: number;
-  title: string;
-  message: string;
-  type: 'info' | 'warning' | 'success' | 'error';
-  read: boolean; // Backend uses 'read', not 'isRead'
-  createdAt: string;
-  metadata?: Record<string, unknown>;
-}
+import type { Notification } from '../types/notifications';
 
 // TEMPORARY: Hardcode userId = 1001 để test
 const getUserId = (): string => {
