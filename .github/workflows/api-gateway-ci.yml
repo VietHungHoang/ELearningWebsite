@@ -28,3 +28,5 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway:latest
           
+      - name: Trigger OnRender Deploy for API Gateway
+        run: curl -X POST ${{ secrets.ONRENDER_HOOK_API_GATEWAY }}
