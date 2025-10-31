@@ -5,7 +5,7 @@ on:
     branches: ["main"]
     paths:
       - 'backend/gateway/api-gateway/**'
-      - './github/workflows/api-gateway-ci.yml'
+      - '.github/workflows/api-gateway-ci.yml'
 
 jobs:
   build-and-push-api-gateway:
