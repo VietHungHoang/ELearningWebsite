@@ -1,0 +1,28 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080
+  cloud:
+    gateway:
+      routes:
+        - id: bff-route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/bff/**
+
+        - id: auth-service-route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/auth/**
+
+        - id: user-service-route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/users/**
+
+        - id: course-service-route
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/courses/**

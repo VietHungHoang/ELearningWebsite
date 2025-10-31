@@ -1,4 +1,4 @@
-# ---- Stage 1: Build (Maven + Java)
+# Build stage
 FROM maven:3.9.9-eclipse-temurin-17-alpine AS builder
 WORKDIR /app
 COPY pom.xml .
@@ -6,11 +6,9 @@ RUN mvn -B dependency:go-offline
 COPY src ./src
 RUN mvn -B clean package -DskipTests
 
-# ---- Stage 2: Run (Java + FFmpeg)
+# Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
 COPY --from=builder /app/target/*.jar app.jar
-
 EXPOSE 8080
-CMD exec java -Xms128m -Xmx350m -jar app.jar
+CMD ["java", "-jar", "app.jar"]
