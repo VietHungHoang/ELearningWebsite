@@ -4,12 +4,13 @@ import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.UUID;
 
 @Data
 public class NotificationRequest {
 
     @NotNull(message = "UserId cannot be null")
-    private Long userId;
+    private UUID userId;
 
     @NotBlank(message = "Notification type is required")
     private String type; // ORDER_SUCCESS, COURSE_UPDATE

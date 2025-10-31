@@ -6,6 +6,7 @@ import com.elearning.notification_service.model.Notification;
 import com.elearning.notification_service.repository.NotificationRepository;
 import com.elearning.notification_service.service.NotificationService;
 import com.elearning.notification_service.util.EmailTemplateUtil; // <-- util cho template
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,30 +14,19 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
-
-    // === Thêm phần gửi email ===
     private final JavaMailSender mailSender;
-
-    public NotificationServiceImpl(NotificationRepository notificationRepository,
-            SimpMessagingTemplate messagingTemplate,
-            JavaMailSender mailSender) {
-        this.notificationRepository = notificationRepository;
-        this.messagingTemplate = messagingTemplate;
-        this.mailSender = mailSender;
-    }
 
     @Override
     public NotificationResponse createNotification(NotificationRequest request) {
@@ -50,37 +40,29 @@ public class NotificationServiceImpl implements NotificationService {
                 .metadata(request.getMetadata())
                 .build();
 
-        // Lưu DB
         Notification saved = notificationRepository.save(notification);
 
-        // Convert sang response DTO
         NotificationResponse response = mapToResponse(saved);
 
-        // 🔥 Gửi realtime tới đúng user (WebSocket)
-        String userTopic = "/topic/notifications/" + saved.getUserId();
+        String userTopic = "/topic/notifications/" + saved.getUserId().toString();
         messagingTemplate.convertAndSend(userTopic, response);
-        log.debug("Sent new notification to {}: {}", userTopic, response);
 
-        // === 🔥 Gửi email ===
         try {
             String to = (String) (request.getMetadata() != null
                     ? request.getMetadata().get("email")
                     : null);
             if (to != null && !to.isBlank()) {
                 sendEmail(to, request.getTitle(), request.getType(), request.getMetadata());
-                log.info("📧 Email notification sent to {}", to);
-            } else {
-                log.warn("No recipient email provided in metadata, skipping email send.");
             }
         } catch (Exception e) {
-            log.error("❌ Failed to send email notification: {}", e.getMessage(), e);
+            // Handle email send failure silently or rethrow if needed
         }
 
         return response;
     }
 
     @Override
-    public List<NotificationResponse> getUserNotifications(Long userId, Pageable pageable) {
+    public List<NotificationResponse> getUserNotifications(UUID userId, Pageable pageable) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
                 .stream()
                 .map(this::mapToResponse)
@@ -88,12 +70,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public long getUnreadCount(Long userId) {
+    public long getUnreadCount(UUID userId) {
         return notificationRepository.countByUserIdAndIsReadFalse(userId);
     }
 
     @Override
-    public long markAllAsRead(Long userId) {
+    public long markAllAsRead(UUID userId) {
         List<Notification> notifications = notificationRepository
                 .findByUserIdOrderByCreatedAtDesc(userId, Pageable.unpaged());
 
@@ -105,17 +87,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
 
         responses.forEach(resp -> {
-            String userTopic = "/topic/notifications/" + userId;
+            String userTopic = "/topic/notifications/" + resp.getUserId().toString();
             messagingTemplate.convertAndSend(userTopic, resp);
             messagingTemplate.convertAndSend("/topic/notifications", resp);
-            log.debug("Sent markAllAsRead update to {} and /topic/notifications: {}", userTopic, resp);
         });
 
         return notifications.size();
     }
 
     @Override
-    public NotificationResponse markAsRead(String notificationId, Long userId) {
+    public NotificationResponse markAsRead(UUID notificationId, UUID userId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
 
@@ -128,10 +109,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         NotificationResponse response = mapToResponse(saved);
 
-        String userTopic = "/topic/notifications/" + userId;
+        String userTopic = "/topic/notifications/" + userId.toString();
         messagingTemplate.convertAndSend(userTopic, response);
         messagingTemplate.convertAndSend("/topic/notifications", response);
-        log.debug("Sent markAsRead update to {} and /topic/notifications: {}", userTopic, response);
 
         return response;
     }

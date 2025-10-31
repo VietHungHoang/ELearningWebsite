@@ -4,33 +4,34 @@ import com.elearning.notification_service.dto.request.NotificationRequest;
 import com.elearning.notification_service.dto.response.NotificationResponse;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
 
     /**
-     * Tạo thông báo mới và push qua WebSocket tới user
+     * Create a new notification and push it via WebSocket to the user
      */
     NotificationResponse createNotification(NotificationRequest request);
 
     /**
-     * Lấy toàn bộ thông báo của user
+     * Get all notifications of the user
      */
-    List<NotificationResponse> getUserNotifications(Long userId, Pageable pageable);
+    List<NotificationResponse> getUserNotifications(UUID userId, Pageable pageable);
 
     /**
-     * Đếm số thông báo chưa đọc
+     * Count the number of unread notifications
      */
-    long getUnreadCount(Long userId);
+    long getUnreadCount(UUID userId);
 
     /**
-     * Đánh dấu toàn bộ thông báo là đã đọc
+     * Mark all notifications as read
      */
-    long markAllAsRead(Long userId);
+    long markAllAsRead(UUID userId);
 
     /**
-     * Đánh dấu 1 notification là đã đọc và push update qua WebSocket
+     * Mark one notification as read and push the update via WebSocket
      */
-    NotificationResponse markAsRead(String notificationId, Long userId);
+    NotificationResponse markAsRead(UUID notificationId, UUID userId);
 }

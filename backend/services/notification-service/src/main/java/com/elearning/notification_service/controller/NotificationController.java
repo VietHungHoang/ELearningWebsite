@@ -3,6 +3,9 @@ package com.elearning.notification_service.controller;
 import com.elearning.notification_service.dto.request.NotificationRequest;
 import com.elearning.notification_service.dto.response.NotificationResponse;
 import com.elearning.notification_service.service.NotificationService;
+
+import lombok.RequiredArgsConstructor;
+
 import com.elearning.notification_service.dto.response.ApiResponse;
 
 import org.springframework.data.domain.PageRequest;
@@ -12,16 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/notifications")
 public class NotificationController {
 
     private final NotificationService notificationService;
-
-    public NotificationController(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<NotificationResponse>> createNotification(
@@ -33,7 +34,7 @@ public class NotificationController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<NotificationResponse>>> getUserNotifications(
-            @PathVariable Long userId,
+            @PathVariable UUID userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
@@ -45,20 +46,20 @@ public class NotificationController {
     }
 
     @GetMapping("/user/{userId}/unread-count")
-    public ResponseEntity<ApiResponse<Long>> getUnreadCount(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Long>> getUnreadCount(@PathVariable UUID userId) {
         long count = notificationService.getUnreadCount(userId);
         return ResponseEntity.ok(ApiResponse.success(count, "Fetch unread count successfully."));
     }
 
     @PutMapping("/user/{userId}/mark-all-as-read")
-    public ResponseEntity<ApiResponse<Long>> markAllAsRead(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Long>> markAllAsRead(@PathVariable UUID userId) {
         long updatedCount = notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(ApiResponse.success(updatedCount, "All notifications marked as read."));
     }
 
     @PutMapping("/{notificationId}/mark-as-read")
-    public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(@PathVariable String notificationId,
-            @RequestParam Long userId) {
+    public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(@PathVariable UUID notificationId,
+            @RequestParam UUID userId) {
         NotificationResponse response = notificationService.markAsRead(notificationId, userId);
         return ResponseEntity.ok(ApiResponse.success(response, "Notification marked as read."));
     }

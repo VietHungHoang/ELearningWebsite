@@ -2,16 +2,9 @@ spring:
   application:
     name: notification-service
   profiles:
-    active: prod
+    active: dev
 server:
   port: 8083
-
-logging:
-  level:
-    root: INFO
-    "[org.springframework.web]": DEBUG
-  file:
-    name: logs/notification-service.log
 
 springdoc:
   api-docs:

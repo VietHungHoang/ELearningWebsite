@@ -3,22 +3,18 @@ package com.elearning.notification_service.service.impl;
 import com.elearning.notification_service.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
-    private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     private final JavaMailSender mailSender;
 
-    public EmailServiceImpl(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
     @Override
     public void sendSimpleEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -27,8 +23,8 @@ public class EmailServiceImpl implements EmailService {
         message.setText(text);
 
         mailSender.send(message);
-        log.info("📧 Sent simple email to {} with subject {}", to, subject);
     }
+    
     @Override
     public void sendHtmlEmail(String to, String subject, String htmlContent) {
         try {
@@ -40,9 +36,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setText(htmlContent, true); // true = HTML
 
             mailSender.send(mimeMessage);
-            log.info("📧 Sent HTML email to {} with subject {}", to, subject);
         } catch (MessagingException e) {
-            log.error("❌ Failed to send HTML email to {}", to, e);
             throw new RuntimeException("Failed to send email", e);
         }
     }

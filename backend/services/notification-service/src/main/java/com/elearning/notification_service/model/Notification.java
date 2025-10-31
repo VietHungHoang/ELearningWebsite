@@ -6,8 +6,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
-@Document(collection = "notifications") // MongoDB collection
+@Document(collection = "notifications") 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,8 +16,8 @@ import java.util.Map;
 public class Notification {
 
     @Id
-    private String id;
-    private Long userId; 
+    private UUID id;
+    private UUID userId; 
     private String type; 
     private String title;
     private String message;
