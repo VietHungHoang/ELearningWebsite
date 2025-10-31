@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/notifications")
+@RequestMapping("/api/notification")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -62,5 +62,11 @@ public class NotificationController {
             @RequestParam UUID userId) {
         NotificationResponse response = notificationService.markAsRead(notificationId, userId);
         return ResponseEntity.ok(ApiResponse.success(response, "Notification marked as read."));
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<ApiResponse<Void>> sendOtpEmail(@RequestParam String email, @RequestParam String otp) {
+        notificationService.sendOtpEmail(email, otp);
+        return ResponseEntity.ok(ApiResponse.success(null, "OTP email sent successfully."));
     }
 }

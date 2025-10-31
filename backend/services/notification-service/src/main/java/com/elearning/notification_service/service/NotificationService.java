@@ -34,4 +34,9 @@ public interface NotificationService {
      * Mark one notification as read and push the update via WebSocket
      */
     NotificationResponse markAsRead(UUID notificationId, UUID userId);
+
+    /**
+     * Send OTP email to user
+     */
+    void sendOtpEmail(String email, String otp);
 }

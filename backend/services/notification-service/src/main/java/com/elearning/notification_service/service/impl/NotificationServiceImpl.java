@@ -2,6 +2,10 @@ package com.elearning.notification_service.service.impl;
 
 import com.elearning.notification_service.dto.request.NotificationRequest;
 import com.elearning.notification_service.dto.response.NotificationResponse;
+import com.elearning.notification_service.exception.EmailSendException;
+import com.elearning.notification_service.exception.NotificationAccessDeniedException;
+import com.elearning.notification_service.exception.NotificationNotFoundException;
+import com.elearning.notification_service.mapper.NotificationMapper;
 import com.elearning.notification_service.model.Notification;
 import com.elearning.notification_service.repository.NotificationRepository;
 import com.elearning.notification_service.service.NotificationService;
@@ -15,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,22 +30,15 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final JavaMailSender mailSender;
+    private final NotificationMapper notificationMapper;
 
     @Override
     public NotificationResponse createNotification(NotificationRequest request) {
-        Notification notification = Notification.builder()
-                .userId(request.getUserId())
-                .type(request.getType())
-                .title(request.getTitle())
-                .message(request.getMessage())
-                .isRead(false)
-                .createdAt(LocalDateTime.now())
-                .metadata(request.getMetadata())
-                .build();
+        Notification notification = notificationMapper.mapToEntity(request);
 
         Notification saved = notificationRepository.save(notification);
 
-        NotificationResponse response = mapToResponse(saved);
+        NotificationResponse response = notificationMapper.mapToResponse(saved);
 
         String userTopic = "/topic/notifications/" + saved.getUserId().toString();
         messagingTemplate.convertAndSend(userTopic, response);
@@ -55,7 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
                 sendEmail(to, request.getTitle(), request.getType(), request.getMetadata());
             }
         } catch (Exception e) {
-            // Handle email send failure silently or rethrow if needed
+            throw new EmailSendException("Failed to send notification email to " + request.getUserId(), e);
         }
 
         return response;
@@ -65,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
     public List<NotificationResponse> getUserNotifications(UUID userId, Pageable pageable) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
                 .stream()
-                .map(this::mapToResponse)
+                .map(notificationMapper::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -83,7 +79,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.saveAll(notifications);
 
         List<NotificationResponse> responses = notifications.stream()
-                .map(this::mapToResponse)
+                .map(notificationMapper::mapToResponse)
                 .collect(Collectors.toList());
 
         responses.forEach(resp -> {
@@ -98,16 +94,16 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationResponse markAsRead(UUID notificationId, UUID userId) {
         Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+                .orElseThrow(() -> new NotificationNotFoundException("Notification not found"));
 
         if (!notification.getUserId().equals(userId)) {
-            throw new RuntimeException("Not authorized to modify this notification");
+            throw new NotificationAccessDeniedException("Not authorized to modify this notification");
         }
 
         notification.setRead(true);
         Notification saved = notificationRepository.save(notification);
 
-        NotificationResponse response = mapToResponse(saved);
+        NotificationResponse response = notificationMapper.mapToResponse(saved);
 
         String userTopic = "/topic/notifications/" + userId.toString();
         messagingTemplate.convertAndSend(userTopic, response);
@@ -116,21 +112,16 @@ public class NotificationServiceImpl implements NotificationService {
         return response;
     }
 
-    // Helper
-    private NotificationResponse mapToResponse(Notification n) {
-        return NotificationResponse.builder()
-                .id(n.getId())
-                .userId(n.getUserId())
-                .type(n.getType())
-                .title(n.getTitle())
-                .message(n.getMessage())
-                .read(n.isRead())
-                .createdAt(n.getCreatedAt())
-                .metadata(n.getMetadata())
-                .build();
+    @Override
+    public void sendOtpEmail(String email, String otp) {
+        try {
+            java.util.Map<String, Object> metadata = java.util.Map.of("otp", otp);
+            sendEmail(email, "Your OTP Code", "OTP", metadata);
+        } catch (Exception e) {
+            throw new EmailSendException("Failed to send OTP email to " + email, e);
+        }
     }
 
-    // === Helper gửi email ===
     private void sendEmail(String to, String subject, String type, java.util.Map<String, Object> metadata)
             throws Exception {
         MimeMessage message = mailSender.createMimeMessage();

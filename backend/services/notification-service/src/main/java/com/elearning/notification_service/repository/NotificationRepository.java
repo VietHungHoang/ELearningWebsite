@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface NotificationRepository extends MongoRepository<Notification, UUID> {
+    
     List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
+
     List<Notification> findByUserId(UUID userId, Pageable pageable);
-    long countByUserIdAndIsReadFalse(UUID userId);
+
+    Long countByUserIdAndIsReadFalse(UUID userId);
 }
