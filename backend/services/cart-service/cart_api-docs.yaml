@@ -1,0 +1,235 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/carts/{learnerId}/items:
+    post:
+      tags:
+      - cart-controller
+      operationId: addToCart
+      parameters:
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCartResponse"
+  /api/carts/{learnerId}/items/{courseId}/apply-coupon:
+    post:
+      tags:
+      - cart-controller
+      operationId: applyCoupon
+      parameters:
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplyCouponRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCartResponse"
+  /api/carts/{learnerId}/checkout:
+    post:
+      tags:
+      - cart-controller
+      operationId: checkout
+      parameters:
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCheckoutResponse"
+  /api/carts/{learnerId}:
+    get:
+      tags:
+      - cart-controller
+      operationId: getCart
+      parameters:
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCartResponse"
+  /api/carts/{learnerId}/items/{courseId}:
+    delete:
+      tags:
+      - cart-controller
+      operationId: removeItem
+      parameters:
+      - name: learnerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: courseId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponseCartResponse"
+components:
+  schemas:
+    AddToCartRequest:
+      type: object
+      properties:
+        courseId:
+          type: integer
+          format: int64
+        couponCode:
+          type: string
+    ApiResponseCartResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/CartResponse"
+    CartItemResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        courseId:
+          type: integer
+          format: int64
+        courseTitle:
+          type: string
+        listPrice:
+          type: number
+        discountPrice:
+          type: number
+        finalPrice:
+          type: number
+        appliedCoupon:
+          type: string
+        valid:
+          type: boolean
+    CartResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        learnerId:
+          type: integer
+          format: int64
+        status:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        totalAmount:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItemResponse"
+    ApplyCouponRequest:
+      type: object
+      properties:
+        courseId:
+          type: integer
+          format: int64
+        couponCode:
+          type: string
+    CheckoutRequest:
+      type: object
+      properties:
+        learnerId:
+          type: integer
+          format: int64
+    ApiResponseCheckoutResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/CheckoutResponse"
+    CheckoutResponse:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+        totalAmount:
+          type: number
+        status:
+          type: string
+        message:
+          type: string
+
+# API_key:
+# POSTGRES_URL: jdbc:postgresql://dpg-d3hj17ggjchc73ahmakg-a.singapore-postgres.render.com:5432/cart-service
+# POSTGRES_USER: my_app_db_hwrr_user
+# POSTGRES_PASSWORD: KrRD1ZaZ5pb9K0TzTDP5e8eU1V8z1v12
+# EUREKA_SERVER_URL: https://eureka-server-73wv.onrender.com

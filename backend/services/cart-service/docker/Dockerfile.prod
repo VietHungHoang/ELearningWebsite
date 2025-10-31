@@ -1,0 +1,32 @@
+# ----------- STAGE 1: Build ứng dụng -----------
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS builder
+
+# Thư mục làm việc trong container
+WORKDIR /app
+
+# Copy file pom.xml trước để cache dependencies
+COPY pom.xml .
+
+# Download dependencies trước (để tăng tốc độ build)
+RUN mvn -B dependency:go-offline
+
+# Copy code nguồn vào container
+COPY src ./src
+
+# Build project, bỏ qua test
+RUN mvn -B clean package -DskipTests
+
+
+# ----------- STAGE 2: Runtime -----------
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+
+# Copy file JAR từ stage build sang stage runtime
+COPY --from=builder /app/target/*.jar app.jar
+
+# Mở port của container
+EXPOSE 8082
+
+# Lệnh chạy app
+CMD exec java -Xms128m -Xmx350m -jar app.jar
