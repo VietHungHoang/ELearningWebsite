@@ -26,5 +26,5 @@ jobs:
           context: ./backend/gateway/api-gateway
           file: ./backend/gateway/api-gateway/docker/Dockerfile.prod
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/lernen/api-gateway:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway:latest
           
