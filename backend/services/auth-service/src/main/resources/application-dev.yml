@@ -1,0 +1,8 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+notification-service:
+  url: http://localhost:8085

@@ -1,0 +1,10 @@
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:null}
+      ssl: ${REDIS_SSL:true}
+
+notification-service:
+  url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
