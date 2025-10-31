@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: notification-service       
+
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+
+  mail:
+    host: smtp.gmail.com
+    port: ${MAIl_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
