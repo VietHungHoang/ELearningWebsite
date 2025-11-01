@@ -6,3 +6,8 @@ spring:
     name: auth-service
   profiles:
     active: dev
+
+logging:
+  level:
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG
