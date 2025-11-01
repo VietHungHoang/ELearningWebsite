@@ -1,6 +1,7 @@
 spring:
-  redis:
-    url: rediss://red-d42g8bbuibrs73dv5ou0:HopCfDDFzZhoWeOgf5jZ9vKWNVtmxzqZ@singapore-keyvalue.render.com:6379
+  data:
+    redis:
+      url: localhost:6379
 
 notification-service:
   url: http://localhost:8085

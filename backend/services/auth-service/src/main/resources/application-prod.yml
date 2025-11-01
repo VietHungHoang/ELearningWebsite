@@ -1,6 +1,7 @@
 spring:
-  redis:
-    url: ${REDIS_URL:http://localhost:8085}
+  data:
+    redis:
+      url: ${REDIS_URL:http://localhost:8085}
 
 notification-service:
   url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
