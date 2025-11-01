@@ -1,27 +1,24 @@
 package com.elearning.apigateway.service;
 
+import com.elearning.apigateway.bff.response.AddToCartBFFResponse;
+import com.elearning.apigateway.bff.response.ApplyCouponBFFResponse;
+import com.elearning.apigateway.bff.response.CheckoutBFFResponse;
+import com.elearning.apigateway.bff.response.RemoveFromCartBFFResponse;
+import com.elearning.apigateway.bff.response.ViewCartBFFResponse;
 import com.elearning.apigateway.dto.request.AddToCartRequest;
 import com.elearning.apigateway.dto.request.ApplyCouponRequest;
 import com.elearning.apigateway.dto.request.CheckoutRequest;
-import com.elearning.apigateway.dto.response.CartResponse;
-import com.elearning.apigateway.dto.response.CheckoutResponse;
 
 public interface CartService {
 
+    AddToCartBFFResponse addToCart(String learnerId, AddToCartRequest request);
 
-    CartResponse getCart(Long learnerId);
+    ViewCartBFFResponse getCart(String learnerId);
 
-    CartResponse addToCart(Long learnerId, AddToCartRequest request);
+    RemoveFromCartBFFResponse removeItem(String learnerId, Long courseId);
 
+    CheckoutBFFResponse checkout(String learnerId, CheckoutRequest request);
 
-    CartResponse removeItem(Long learnerId, Long courseId);
+    ApplyCouponBFFResponse applyCoupon(String learnerId, ApplyCouponRequest request);
 
-   
-    CheckoutResponse checkout(Long learnerId, CheckoutRequest request);
-
- 
-    CartResponse applyCoupon(Long learnerId, ApplyCouponRequest request);
-
-  
-    void clearCart(Long learnerId);
 }

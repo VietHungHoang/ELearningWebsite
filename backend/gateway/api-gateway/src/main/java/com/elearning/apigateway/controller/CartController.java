@@ -9,79 +9,124 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.elearning.apigateway.bff.response.AddToCartBFFResponse;
 import com.elearning.apigateway.dto.request.AddToCartRequest;
-import com.elearning.apigateway.dto.request.ApplyCouponRequest;
-import com.elearning.apigateway.dto.request.CheckoutRequest;
 import com.elearning.apigateway.dto.response.ApiResponse;
-import com.elearning.apigateway.dto.response.CartResponse;
-import com.elearning.apigateway.dto.response.CheckoutResponse;
+import com.elearning.apigateway.bff.response.ApplyCouponBFFResponse;
+import com.elearning.apigateway.dto.request.ApplyCouponRequest;
+import com.elearning.apigateway.bff.response.CheckoutBFFResponse;
+import com.elearning.apigateway.dto.request.CheckoutRequest;
+import com.elearning.apigateway.bff.response.RemoveFromCartBFFResponse;
+import com.elearning.apigateway.bff.response.ViewCartBFFResponse;
 import com.elearning.apigateway.service.CartService;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/learners/{learnerId}/cart")
 @RequiredArgsConstructor
 public class CartController {
 
         private final CartService cartService;
-        @GetMapping
-        public ResponseEntity<ApiResponse<CartResponse>> getCart(@PathVariable Long learnerId) {
-                log.info("GET cart for learner: {}", learnerId);
-                CartResponse cart = cartService.getCart(learnerId);
-                ApiResponse<CartResponse> response = ApiResponse.success(cart, "Fetch cart successfully.");
-                return ResponseEntity.ok(response);
-        }
-        @PostMapping("/items")
-        public ResponseEntity<ApiResponse<CartResponse>> addToCart(
-                        @PathVariable Long learnerId,
-                        @RequestBody AddToCartRequest request) {
-                log.info("POST add to cart for learner: {}, course: {}", learnerId, request.getCourseId());
 
-                CartResponse cart = cartService.addToCart(learnerId, request);
-                ApiResponse<CartResponse> response = ApiResponse.success(cart, "Course added to cart successfully.");
-                return ResponseEntity.ok(response);
+        @PostMapping("/items")
+        public ResponseEntity<ApiResponse<AddToCartBFFResponse>> addToCart(
+                        @PathVariable String learnerId,
+                        @RequestBody AddToCartRequest request) {
+                String effectiveLearnerId = (learnerId == null || learnerId.trim().isEmpty()) ? "1" : learnerId;
+                try {
+                        if (request.getCourseId() == null || request.getCourseId() <= 0) {
+                                ApiResponse<AddToCartBFFResponse> errorResponse = ApiResponse.error(400,
+                                                "Invalid courseId");
+                                return ResponseEntity.badRequest().body(errorResponse);
+                        }
+                        AddToCartBFFResponse bffResponse = cartService.addToCart(effectiveLearnerId, request);
+                        ApiResponse<AddToCartBFFResponse> response = ApiResponse.success(bffResponse,
+                                        "Item added to cart successfully");
+                        return ResponseEntity.ok(response);
+
+                } catch (IllegalArgumentException e) {
+                        ApiResponse<AddToCartBFFResponse> errorResponse = ApiResponse.error(409, e.getMessage());
+                        return ResponseEntity.status(409).body(errorResponse);
+                } catch (Exception e) {
+                        ApiResponse<AddToCartBFFResponse> errorResponse = ApiResponse.error(500,
+                                        "Failed to add item: " + e.getMessage());
+                        return ResponseEntity.status(500).body(errorResponse);
+                }
+        }
+
+        @GetMapping
+        public ResponseEntity<ApiResponse<ViewCartBFFResponse>> getCart(
+                        @PathVariable String learnerId) {
+                String effectiveLearnerId = (learnerId == null || learnerId.trim().isEmpty()) ? "1" : learnerId;
+                try {
+                        ViewCartBFFResponse cartResponse = cartService.getCart(effectiveLearnerId);
+                        ApiResponse<ViewCartBFFResponse> response = ApiResponse.success(cartResponse,
+                                        "Cart retrieved successfully");
+                        return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                        ApiResponse<ViewCartBFFResponse> errorResponse = ApiResponse.error(500,
+                                        "Failed to get cart: " + e.getMessage());
+                        return ResponseEntity.status(500).body(errorResponse);
+                }
         }
         @DeleteMapping("/items/{courseId}")
-        public ResponseEntity<ApiResponse<CartResponse>> removeItem(
-                        @PathVariable Long learnerId,
+        public ResponseEntity<ApiResponse<RemoveFromCartBFFResponse>> removeItem(
+                        @PathVariable String learnerId,
                         @PathVariable Long courseId) {
-                log.info("DELETE item from cart for learner: {}, course: {}", learnerId, courseId);
+                String effectiveLearnerId = (learnerId == null || learnerId.trim().isEmpty()) ? "1" : learnerId;
+                try {
+                        if (courseId == null || courseId <= 0) {
+                                ApiResponse<RemoveFromCartBFFResponse> errorResponse = ApiResponse.error(400,
+                                                "Invalid courseId");
+                                return ResponseEntity.badRequest().body(errorResponse);
+                        }
+                        RemoveFromCartBFFResponse bffResponse = cartService.removeItem(effectiveLearnerId,
+                                        courseId);
+                        ApiResponse<RemoveFromCartBFFResponse> response = ApiResponse.success(bffResponse,
+                                        "Item removed from cart successfully");
+                        return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                        ApiResponse<RemoveFromCartBFFResponse> errorResponse = ApiResponse.error(500,
+                                        "Failed to remove item: " + e.getMessage());
+                        return ResponseEntity.status(500).body(errorResponse);
+                }
+        }
 
-                CartResponse cart = cartService.removeItem(learnerId, courseId);
-                ApiResponse<CartResponse> response = ApiResponse.success(cart, "Item removed successfully.");
-                return ResponseEntity.ok(response);
+        @PostMapping("/apply-coupon")
+        public ResponseEntity<ApiResponse<ApplyCouponBFFResponse>> applyCoupon(
+                        @PathVariable String learnerId,
+                        @RequestBody ApplyCouponRequest request) {
+                String effectiveLearnerId = (learnerId == null || learnerId.trim().isEmpty()) ? "1" : learnerId;
+                try {
+                        if (request.getCouponCode() == null || request.getCouponCode().trim().isEmpty()) {
+                                ApiResponse<ApplyCouponBFFResponse> errorResponse = ApiResponse.error(400,
+                                                "Invalid couponCode");
+                                return ResponseEntity.badRequest().body(errorResponse);
+                        }
+                        ApplyCouponBFFResponse bffResponse = cartService.applyCoupon(effectiveLearnerId, request);
+                        ApiResponse<ApplyCouponBFFResponse> response = ApiResponse.success(bffResponse,
+                                        "Coupon applied successfully");
+                        return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                        ApiResponse<ApplyCouponBFFResponse> errorResponse = ApiResponse.error(500,
+                                        "Failed to apply coupon: " + e.getMessage());
+                        return ResponseEntity.status(500).body(errorResponse);
+                }
         }
 
         @PostMapping("/checkout")
-        public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(
-                        @PathVariable Long learnerId,
-                        @RequestBody(required = false) CheckoutRequest request) {
-                log.info("POST checkout for learner: {}", learnerId);
-
-                if (request == null) {
-                        request = new CheckoutRequest(); // tránh null
+        public ResponseEntity<ApiResponse<CheckoutBFFResponse>> checkout(
+                        @PathVariable String learnerId,
+                        @RequestBody CheckoutRequest request) {
+                String effectiveLearnerId = (learnerId == null || learnerId.trim().isEmpty()) ? "1" : learnerId;
+                try {
+                        CheckoutBFFResponse bffResponse = cartService.checkout(effectiveLearnerId, request);
+                        ApiResponse<CheckoutBFFResponse> response = ApiResponse.success(bffResponse,
+                                        "Checkout processed successfully");
+                        return ResponseEntity.ok(response);
+                } catch (Exception e) {
+                        ApiResponse<CheckoutBFFResponse> errorResponse = ApiResponse.error(500,
+                                        "Failed to checkout: " + e.getMessage());
+                        return ResponseEntity.status(500).body(errorResponse);
                 }
-
-                // Gọi service
-                CheckoutResponse checkoutResult = cartService.checkout(learnerId, request);
-
-                ApiResponse<CheckoutResponse> response = ApiResponse.success(checkoutResult, "Checkout successfully.");
-
-                return ResponseEntity.ok(response);
-        }
-        @PostMapping("/items/{courseId}/apply-coupon")
-        public ResponseEntity<ApiResponse<CartResponse>> applyCoupon(
-                        @PathVariable Long learnerId,
-                        @PathVariable Long courseId,
-                        @RequestBody ApplyCouponRequest request) {
-                log.info("POST apply coupon for learner: {}, course: {}, coupon: {}",
-                                learnerId, courseId, request.getCouponCode());
-
-                request.setCourseId(courseId); // đảm bảo DTO có courseId
-                CartResponse cart = cartService.applyCoupon(learnerId, request);
-
-                ApiResponse<CartResponse> response = ApiResponse.success(cart, "Coupon applied successfully.");
-                return ResponseEntity.ok(response);
         }
 }

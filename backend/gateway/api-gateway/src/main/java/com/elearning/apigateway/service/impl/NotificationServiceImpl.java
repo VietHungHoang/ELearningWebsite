@@ -1,16 +1,18 @@
 package com.elearning.apigateway.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.elearning.apigateway.client.NotificationServiceClient;
 import com.elearning.apigateway.dto.request.NotificationRequest;
 import com.elearning.apigateway.dto.response.NotificationResponse;
 import com.elearning.apigateway.service.NotificationService;
+import com.elearning.apigateway.bff.response.MarkAllAsReadBFFResponse;
+import com.elearning.apigateway.bff.response.MarkAsReadBFFResponse;
+import com.elearning.apigateway.bff.response.ViewNotificationBFFResponse;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -19,33 +21,55 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public NotificationResponse createNotification(NotificationRequest request) {
-        log.info("Creating notification for user: {}, type: {}", request.getUserId(), request.getType());
         return notificationServiceClient.createNotification(request);
     }
 
     @Override
-    public List<NotificationResponse> getUserNotifications(Long userId, Pageable pageable) {
-        log.info("Getting notifications for user: {}, page: {}, size: {}",
-                userId, pageable.getPageNumber(), pageable.getPageSize());
-        return notificationServiceClient.getUserNotifications(userId, pageable.getPageNumber(), pageable.getPageSize());
+    public ViewNotificationBFFResponse getUserNotifications(String userId, Pageable pageable) {
+        List<NotificationResponse> notifications = notificationServiceClient.getUserNotifications(userId,
+                pageable.getPageNumber(), pageable.getPageSize());
+        long unreadCount = notificationServiceClient.getUnreadCount(userId);
+        List<ViewNotificationBFFResponse.NotificationItemBFF> notificationItems = notifications.stream()
+                .map(n -> ViewNotificationBFFResponse.NotificationItemBFF.builder()
+                        .id(n.getId())
+                        .type(n.getType())
+                        .title(n.getTitle())
+                        .message(n.getMessage())
+                        .read(n.isRead())
+                        .createdAt(n.getCreatedAt() != null ? n.getCreatedAt().toString() : null)
+                        .metadata(n.getMetadata())
+                        .build())
+                .collect(Collectors.toList());
+
+        return ViewNotificationBFFResponse.builder()
+                .userId(userId)
+                .notifications(notificationItems)
+                .totalCount(notificationItems.size())
+                .page(pageable.getPageNumber())
+                .pageSize(pageable.getPageSize())
+                .unreadCount(unreadCount)
+                .build();
     }
 
     @Override
-    public long getUnreadCount(Long userId) {
-        log.info("Getting unread count for user: {}", userId);
-        return notificationServiceClient.getUnreadCount(userId);
+    public MarkAllAsReadBFFResponse markAllAsRead(String userId) {
+        long updatedCount = notificationServiceClient.markAllAsRead(userId);
+        return MarkAllAsReadBFFResponse.builder()
+                .userId(userId)
+                .updatedCount(updatedCount)
+                .message("All notifications marked as read")
+                .build();
     }
 
     @Override
-    public long markAllAsRead(Long userId) {
-        log.info("Marking all notifications as read for user: {}", userId);
-        return notificationServiceClient.markAllAsRead(userId);
-    }
-
-    @Override
-    public NotificationResponse markAsRead(String notificationId, Long userId) {
-        log.info("Marking notification as read: {} for user: {}", notificationId, userId);
-        return notificationServiceClient.markAsRead(notificationId, userId);
+    public MarkAsReadBFFResponse markAsRead(String notificationId, String userId) {
+        NotificationResponse response = notificationServiceClient.markAsRead(notificationId, userId);
+        return MarkAsReadBFFResponse.builder()
+                .notificationId(notificationId)
+                .userId(userId)
+                .read(response != null ? response.isRead() : false)
+                .message("Notification marked as read")
+                .build();
     }
 
 }

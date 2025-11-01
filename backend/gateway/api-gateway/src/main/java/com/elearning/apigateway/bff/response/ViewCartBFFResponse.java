@@ -1,9 +1,7 @@
 package com.elearning.apigateway.bff.response;
 
 import java.math.BigDecimal;
-
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,19 +11,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CartPageBFFResponse {
+public class ViewCartBFFResponse {
 
     private Long cartId;
-    private Long userId;
+    private String learnerId;
 
-    private List<CartItemDetailDTO> items;
-    private Integer itemCount;
-
+    private List<CartItemBFF> items;
     private BigDecimal subtotal;
     private BigDecimal discountAmount;
     private BigDecimal totalAmount;
-
-    private String appliedCoupon;
     private Integer discountPercentage;
     private List<String> availableCoupons;
 
@@ -33,19 +27,20 @@ public class CartPageBFFResponse {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class CartItemDetailDTO {
+    public static class CartItemBFF {
+        private Long id;
         private Long courseId;
         private String courseTitle;
         private String category;
+        private String instructorId;
         private String instructorName;
-        private Long instructorId;
-        private String thumbnailUrl;
-        private BigDecimal listPrice;
-        private BigDecimal discountPrice;
-        private BigDecimal finalPrice;
+        private BigDecimal price;
+        private String image;
         private Double rating;
-        private Integer students;
-        private String appliedCoupon;
-        private Boolean valid;
+        private Integer reviews;
+        private String level;
+        private String language;
+        private Integer lessons;
+        private String duration;
     }
 }

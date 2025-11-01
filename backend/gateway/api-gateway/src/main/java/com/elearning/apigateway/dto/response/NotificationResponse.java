@@ -7,22 +7,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO for notification response
- * Trả về thông tin notification cho FE
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationResponse {
 
-    private String id; // Notification ID (String vì MongoDB có thể dùng)
-    private Long userId; // User ID nhận notification
-    private String type; // Type của notification
-    private String title; // Tiêu đề
-    private String message; // Nội dung
-    private boolean read; // Đã đọc hay chưa
-    private LocalDateTime createdAt; // Thời điểm tạo
-    private Map<String, Object> metadata; // Additional data
+    private String id; 
+    private String userId; 
+    private String type; 
+    private String title; 
+    private String message; 
+    private boolean read; 
+    private LocalDateTime createdAt; 
+    private Map<String, Object> metadata; 
 }

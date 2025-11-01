@@ -1,21 +1,20 @@
 package com.elearning.apigateway.service;
 
-import java.util.List;
 import org.springframework.data.domain.Pageable;
 import com.elearning.apigateway.dto.request.NotificationRequest;
 import com.elearning.apigateway.dto.response.NotificationResponse;
-
+import com.elearning.apigateway.bff.response.MarkAllAsReadBFFResponse;
+import com.elearning.apigateway.bff.response.MarkAsReadBFFResponse;
+import com.elearning.apigateway.bff.response.ViewNotificationBFFResponse;
 
 public interface NotificationService {
 
     NotificationResponse createNotification(NotificationRequest request);
 
-    List<NotificationResponse> getUserNotifications(Long userId, Pageable pageable);
+    ViewNotificationBFFResponse getUserNotifications(String userId, Pageable pageable);
 
-    long getUnreadCount(Long userId);
+    MarkAllAsReadBFFResponse markAllAsRead(String userId);
 
-    long markAllAsRead(Long userId);
-
-    NotificationResponse markAsRead(String notificationId, Long userId);
+    MarkAsReadBFFResponse markAsRead(String notificationId, String userId);
 
 }
