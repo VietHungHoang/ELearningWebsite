@@ -8,14 +8,13 @@ import com.elearning.cart_service.dto.response.CheckoutResponse;
 
 public interface CartService {
 
-    CartResponse addToCart(Long learnerId, AddToCartRequest request);
+    CartResponse addToCart(String learnerId, AddToCartRequest request);
 
-    CartResponse getCart(Long learnerId);
+    CartResponse getCart(String learnerId);
 
-    CartResponse removeItem(Long learnerId, Long courseId);
+    CartResponse removeItem(String learnerId, Long courseId);
 
-    CheckoutResponse checkout(Long learnerId, CheckoutRequest request);
+    CheckoutResponse checkout(String learnerId, CheckoutRequest request);
 
-    // Apply coupon cho 1 course trong cart
-    CartResponse applyCoupon(Long learnerId, ApplyCouponRequest request);
+    CartResponse applyCoupon(String learnerId, ApplyCouponRequest request);
 }

@@ -8,11 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-
-    // Check course đã tồn tại trong cart chưa
     boolean existsByCartIdAndCourseId(Long cartId, Long courseId);
-
-    // Xoá 1 item trong cart
+    
     @Modifying
     @Query("DELETE FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.courseId = :courseId")
     void deleteByCartIdAndCourseId(Long cartId, Long courseId);

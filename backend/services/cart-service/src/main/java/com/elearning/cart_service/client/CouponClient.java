@@ -5,9 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Gọi API Coupon Service
- */
 @Component
 @RequiredArgsConstructor
 public class CouponClient {
@@ -15,17 +12,12 @@ public class CouponClient {
     private final RestTemplate restTemplate;
     private final CartServiceConfig config;
 
-    /**
-     * Validate coupon cho 1 course
-     */
     public CouponValidationResponse validateCoupon(Long courseId, String couponCode, Long learnerId) {
         String url = String.format("%s/validate?courseId=%d&couponCode=%s&learnerId=%d",
                 config.getCouponUrl(), courseId, couponCode, learnerId);
 
         return restTemplate.getForObject(url, CouponValidationResponse.class);
     }
-
-    // ========== DTO nội bộ ==========
 
     @lombok.Data
     public static class CouponValidationResponse {

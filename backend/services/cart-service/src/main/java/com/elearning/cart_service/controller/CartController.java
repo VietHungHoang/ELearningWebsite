@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/learners/{learnerId}/cart")
 @RequiredArgsConstructor
@@ -19,9 +18,8 @@ public class CartController {
 
     private final CartService cartService;
 
-
     @GetMapping
-    public ResponseEntity<ApiResponse<CartResponse>> getCart(@PathVariable Long learnerId) {
+    public ResponseEntity<ApiResponse<CartResponse>> getCart(@PathVariable String learnerId) {
         CartResponse cart = cartService.getCart(learnerId);
         ApiResponse<CartResponse> response = ApiResponse.success(cart, "Fetch cart successfully.");
         return ResponseEntity.ok(response);
@@ -29,7 +27,7 @@ public class CartController {
 
     @PostMapping("/items")
     public ResponseEntity<ApiResponse<CartResponse>> addToCart(
-            @PathVariable Long learnerId,
+            @PathVariable String learnerId,
             @RequestBody AddToCartRequest request) {
 
         CartResponse cart = cartService.addToCart(learnerId, request);
@@ -37,10 +35,9 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-
     @DeleteMapping("/items/{courseId}")
     public ResponseEntity<ApiResponse<CartResponse>> removeItem(
-            @PathVariable Long learnerId,
+            @PathVariable String learnerId,
             @PathVariable Long courseId) {
 
         CartResponse cart = cartService.removeItem(learnerId, courseId);
@@ -48,16 +45,14 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/checkout")
     public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(
-            @PathVariable Long learnerId,
+            @PathVariable String learnerId,
             @RequestBody(required = false) CheckoutRequest request) {
 
         if (request == null) {
             request = new CheckoutRequest();
         }
-
 
         CheckoutResponse checkoutResult = cartService.checkout(learnerId, request);
 
@@ -66,10 +61,9 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/items/{courseId}/apply-coupon")
     public ResponseEntity<ApiResponse<CartResponse>> applyCoupon(
-            @PathVariable Long learnerId,
+            @PathVariable String learnerId,
             @PathVariable Long courseId,
             @RequestBody ApplyCouponRequest request) {
 
