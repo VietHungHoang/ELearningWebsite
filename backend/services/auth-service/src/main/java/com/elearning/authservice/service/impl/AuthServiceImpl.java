@@ -1,12 +1,15 @@
 package com.elearning.authservice.service.impl;
 
-import com.elearning.authservice.client.NotificationClient;
+import com.elearning.authservice.dto.request.LoginRequest;
 import com.elearning.authservice.dto.request.RegistrationStartRequest;
 import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
+import com.elearning.authservice.dto.response.LoginResponse;
 import com.elearning.authservice.dto.response.VerifyOtpResponse;
 import com.elearning.authservice.exception.InvalidTokenException;
 import com.elearning.authservice.service.AuthService;
+import com.elearning.authservice.client.NotificationClient;
+import com.elearning.authservice.config.KeycloakProperties;
 import com.elearning.authservice.util.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -15,11 +18,19 @@ import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -30,6 +41,8 @@ public class AuthServiceImpl implements AuthService {
     private final NotificationClient notificationClient;
     private final JwtUtil jwtUtil;
     private final Keycloak keycloak;
+    private final RestTemplate restTemplate;
+    private final KeycloakProperties keycloakProperties;
 
     @Override
     public void startRegistration(RegistrationStartRequest request) {
@@ -109,5 +122,41 @@ public class AuthServiceImpl implements AuthService {
 
         // Clean up Redis
         redisTemplate.delete("reg_name:" + email);
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+        String tokenUrl = keycloakProperties.getAuthServerUrl() + "/realms/" + keycloakProperties.getRealm() + "/protocol/openid-connect/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "password");
+        body.add("client_id", keycloakProperties.getResource());
+        body.add("client_secret", keycloakProperties.getClientSecret());
+        body.add("username", request.getEmail());
+        body.add("password", request.getPassword());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(tokenUrl, org.springframework.http.HttpMethod.POST, entity, new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {});
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> bodyMap = response.getBody();
+                LoginResponse loginResponse = LoginResponse.builder()
+                        .accessToken((String) bodyMap.get("access_token"))
+                        .refreshToken((String) bodyMap.get("refresh_token"))
+                        .tokenType((String) bodyMap.get("token_type"))
+                        .expiresIn((Integer) bodyMap.get("expires_in"))
+                        .scope((String) bodyMap.get("scope"))
+                        .build();
+                return loginResponse;
+            } else {
+                throw new RuntimeException("Login failed: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Login failed", e);
+        }
     }
 }
