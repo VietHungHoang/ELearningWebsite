@@ -6,6 +6,7 @@ import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
 import com.elearning.authservice.dto.response.LoginResponse;
 import com.elearning.authservice.dto.response.VerifyOtpResponse;
+import com.elearning.authservice.exception.AuthenticationFailedException;
 import com.elearning.authservice.exception.InvalidTokenException;
 import com.elearning.authservice.service.AuthService;
 import com.elearning.authservice.client.NotificationClient;
@@ -13,6 +14,7 @@ import com.elearning.authservice.config.KeycloakProperties;
 import com.elearning.authservice.util.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -20,12 +22,15 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import jakarta.ws.rs.core.Response;
@@ -35,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final StringRedisTemplate redisTemplate;
@@ -123,14 +129,42 @@ public class AuthServiceImpl implements AuthService {
         // Clean up Redis
         redisTemplate.delete("reg_name:" + email);
     }
-
+    
     @Override
     public LoginResponse login(LoginRequest request) {
+        log.info("Login attempt for email: {}", request.getEmail());
         String tokenUrl = keycloakProperties.getAuthServerUrl() + "/realms/" + keycloakProperties.getRealm() + "/protocol/openid-connect/token";
+        HttpEntity<MultiValueMap<String, String>> entity = buildLoginRequestEntity(request);
 
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                tokenUrl, 
+                HttpMethod.POST, 
+                entity, 
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> bodyMap = response.getBody();
+                LoginResponse loginResponse = buildLoginResponse(bodyMap);
+                return loginResponse;
+            } else {
+                Map<String, Object> errorBody = response.getBody();
+                String errorJson = errorBody != null ? errorBody.toString() : "No body";
+                log.warn("Login failed for email {}: {} - {}", request.getEmail(), response.getStatusCode(), errorJson);
+                
+                String message = getErrorMessage(response.getStatusCode().value());
+                throw new AuthenticationFailedException(message, response.getStatusCode(), errorJson);
+            }
+        } catch (Exception e) {
+            log.error("Login API call failed for email {}: {}", request.getEmail(), e.getMessage(), e);
+            throw new RuntimeException("Login failed due to Jeycloak API call error: " + e.getMessage(), e);
+        }
+    }
+    
+    private HttpEntity<MultiValueMap<String, String>> buildLoginRequestEntity(LoginRequest request) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
+        
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "password");
         body.add("client_id", keycloakProperties.getResource());
@@ -138,25 +172,31 @@ public class AuthServiceImpl implements AuthService {
         body.add("username", request.getEmail());
         body.add("password", request.getPassword());
 
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+        return new HttpEntity<>(body, headers);
+    }
 
-        try {
-            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(tokenUrl, org.springframework.http.HttpMethod.POST, entity, new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {});
-            if (response.getStatusCode().is2xxSuccessful()) {
-                Map<String, Object> bodyMap = response.getBody();
-                LoginResponse loginResponse = LoginResponse.builder()
-                        .accessToken((String) bodyMap.get("access_token"))
-                        .refreshToken((String) bodyMap.get("refresh_token"))
-                        .tokenType((String) bodyMap.get("token_type"))
-                        .expiresIn((Integer) bodyMap.get("expires_in"))
-                        .scope((String) bodyMap.get("scope"))
-                        .build();
-                return loginResponse;
-            } else {
-                throw new RuntimeException("Login failed: " + response.getStatusCode());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Login failed", e);
+    private LoginResponse buildLoginResponse(Map<String, Object> bodyMap) {
+        return LoginResponse.builder()
+                .accessToken((String) bodyMap.get("access_token"))
+                .refreshToken((String) bodyMap.get("refresh_token"))
+                .tokenType((String) bodyMap.get("token_type"))
+                .expiresIn((Integer) bodyMap.get("expires_in"))
+                .scope((String) bodyMap.get("scope"))
+                .build();
+    }
+
+    private String getErrorMessage(int statusCode) {
+        switch (statusCode) {
+            case 400:
+                return "Bad request: Invalid parameters";
+            case 401:
+                return "Unauthorized: Invalid credentials";
+            case 403:
+                return "Forbidden: Client not authorized for this grant type";
+            case 500:
+                return "Internal server error: Keycloak server error";
+            default:
+                return "Login failed: " + statusCode;
         }
     }
 }
