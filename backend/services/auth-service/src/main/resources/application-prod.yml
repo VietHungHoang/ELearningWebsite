@@ -8,3 +8,17 @@ spring:
 
 notification-service:
   url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+
+jwt:
+  secret: ${JWT_SECRET:mySuperSecretKeyForInternalJwtThatIsAtLeast256BitsLongEnough}
+  expiry: ${JWT_EXPIRY:600000}
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8080}
+  realm: ${KEYCLOAK_REALM:elearning}
+  resource: ${KEYCLOAK_RESOURCE:auth-service}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET:your-client-secret}
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
