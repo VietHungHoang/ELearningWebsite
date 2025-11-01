@@ -16,9 +16,7 @@ import com.elearning.apigateway.dto.response.CartResponse;
 @Component
 @RequiredArgsConstructor
 public class CartServiceClient {
-
     private final RestTemplate restTemplate;
-
     @Value("${services.cart-service.url}")
     private String cartServiceBaseUrl;
 

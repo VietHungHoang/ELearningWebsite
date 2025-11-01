@@ -19,12 +19,10 @@ import com.elearning.apigateway.dto.request.CheckoutRequest;
 import com.elearning.apigateway.bff.response.RemoveFromCartBFFResponse;
 import com.elearning.apigateway.bff.response.ViewCartBFFResponse;
 import com.elearning.apigateway.service.CartService;
-
 @RestController
 @RequestMapping("/api/learners/{learnerId}/cart")
 @RequiredArgsConstructor
 public class CartController {
-
         private final CartService cartService;
 
         @PostMapping("/items")

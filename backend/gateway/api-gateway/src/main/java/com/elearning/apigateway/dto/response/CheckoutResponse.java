@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CheckoutResponse {
-
     private Long orderId; 
     private BigDecimal totalAmount; 
     private String message; 

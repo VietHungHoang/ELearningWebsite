@@ -20,5 +20,4 @@ public interface CartService {
     CheckoutBFFResponse checkout(String learnerId, CheckoutRequest request);
 
     ApplyCouponBFFResponse applyCoupon(String learnerId, ApplyCouponRequest request);
-
 }
