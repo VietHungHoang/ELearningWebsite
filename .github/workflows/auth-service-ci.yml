@@ -1,0 +1,32 @@
+name: Auth Service CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'backend/services/auth-service/**'
+      - '.github/workflows/auth-service-ci.yml'
+
+jobs:
+  build-and-push-api-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push Auth Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/services/auth-service
+          file: ./backend/services/auth-service/docker/Dockerfile.prod
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-auth-service:latest
+          
+      - name: Trigger OnRender Deploy for Auth Service
+        run: curl -X POST ${{ secrets.ONRENDER_HOOK_AUTH_SERVICE }}
