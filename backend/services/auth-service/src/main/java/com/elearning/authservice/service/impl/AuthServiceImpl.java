@@ -2,16 +2,13 @@ package com.elearning.authservice.service.impl;
 
 import com.elearning.authservice.dto.request.LoginRequest;
 import com.elearning.authservice.dto.request.RegistrationStartRequest;
-import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
 import com.elearning.authservice.dto.response.LoginResponse;
-import com.elearning.authservice.dto.response.VerifyOtpResponse;
 import com.elearning.authservice.exception.AuthenticationFailedException;
 import com.elearning.authservice.exception.InvalidTokenException;
 import com.elearning.authservice.service.AuthService;
 import com.elearning.authservice.client.NotificationClient;
 import com.elearning.authservice.config.KeycloakProperties;
-import com.elearning.authservice.util.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +20,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -45,59 +41,37 @@ public class AuthServiceImpl implements AuthService {
 
     private final StringRedisTemplate redisTemplate;
     private final NotificationClient notificationClient;
-    private final JwtUtil jwtUtil;
     private final Keycloak keycloak;
     private final RestTemplate restTemplate;
     private final KeycloakProperties keycloakProperties;
 
     @Override
     public void startRegistration(RegistrationStartRequest request) {
+        log.info("Starting registration for email: {}", request.getEmail());
         String email = request.getEmail();
         String fullname = request.getFullname();
 
-        String otp = String.format("%06d", (int) (Math.random() * 1000000));
+        // String otp = String.format("%06d", (int) (Math.random() * 1000000));
+        String otp = "000000";
         redisTemplate.opsForValue().set("reg:" + email, otp, 300, TimeUnit.SECONDS);
         redisTemplate.opsForValue().set("reg_name:" + email, fullname, 300, TimeUnit.SECONDS);
-        notificationClient.sendOtpEmail(email, otp);
+        // notificationClient.sendOtpEmail(email, otp);
     }
 
     @Override
-    public VerifyOtpResponse verifyOtp(VerifyOtpRequest request) {
+    public void verifyOtp(VerifyOtpRequest request) {
         String email = request.getEmail();
         String otp = request.getOtp();
-
         String storedOtp = redisTemplate.opsForValue().get("reg:" + email);
         if (storedOtp == null || !storedOtp.equals(otp)) {
             throw new IllegalArgumentException("OTP sai");
         }
-
         // Delete the OTP
         redisTemplate.delete("reg:" + email);
-
-        // Create internal JWT token (10 min expiry)
-        String token = jwtUtil.generateToken(email);
-
-        return new VerifyOtpResponse(token);
     }
 
     @Override
-    public void setPassword(String token, SetPasswordRequest request) {
-        // Remove "Bearer " prefix if present
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
-        // Validate JWT token
-        if (!jwtUtil.validateToken(token)) {
-            throw new InvalidTokenException("Invalid or expired token");
-        }
-
-        // Extract email from token
-        String email = jwtUtil.extractEmail(token);
-        if (email == null) {
-            throw new InvalidTokenException("Email not found in token");
-        }
-
+    public void setPassword(String email, String password) {
         // Get fullname from Redis
         String fullname = redisTemplate.opsForValue().get("reg_name:" + email);
         if (fullname == null) {
@@ -105,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Create user in Keycloak
-        RealmResource realmResource = keycloak.realm("elearning");
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
         UsersResource usersResource = realmResource.users();
 
         UserRepresentation user = new UserRepresentation();
@@ -117,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
 
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(request.getPassword());
+        credential.setValue(password);
         credential.setTemporary(false);
         user.setCredentials(Arrays.asList(credential));
 

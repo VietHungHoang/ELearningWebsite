@@ -1,6 +1,8 @@
 package com.elearning.authservice.config;
 
 import lombok.RequiredArgsConstructor;
+
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.context.annotation.Bean;
@@ -19,8 +21,7 @@ public class KeycloakConfig {
                 .realm(keycloakProperties.getRealm())
                 .clientId(keycloakProperties.getResource())
                 .clientSecret(keycloakProperties.getClientSecret())
-                .username(keycloakProperties.getAdminUsername())
-                .password(keycloakProperties.getAdminPassword())
+                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .build();
     }
 }
