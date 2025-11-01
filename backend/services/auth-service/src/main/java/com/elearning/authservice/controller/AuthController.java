@@ -1,12 +1,22 @@
 package com.elearning.authservice.controller;
 
 import com.elearning.authservice.dto.request.LoginRequest;
+import com.elearning.authservice.dto.request.RegistrationStartRequest;
+import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
 import com.elearning.authservice.dto.response.ApiResponse;
 import com.elearning.authservice.dto.response.LoginResponse;
 import com.elearning.authservice.dto.response.VerifyOtpResponse;
 import com.elearning.authservice.service.AuthService;
-import org.springframework.web.bind.annotation.*;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
