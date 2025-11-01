@@ -6,3 +6,15 @@ spring:
 
 notification-service:
   url: http://localhost:8085
+
+jwt:
+  secret: mySuperSecretKeyForInternalJwtThatIsAtLeast256BitsLongEnough
+  expiry: 600000
+
+keycloak:
+  auth-server-url: http://localhost:8080
+  realm: elearning
+  resource: auth-service
+  client-secret: your-client-secret
+  admin-username: admin
+  admin-password: admin
