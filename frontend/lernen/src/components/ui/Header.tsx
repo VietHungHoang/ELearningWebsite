@@ -5,6 +5,7 @@ import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from 'react-ic
 import { currencyOptions, languageOptions } from '../../constants/headerConstants';
 import CartPopup from '../../features/cart/components/CartPopup';
 import { LernenLogo } from '../LernenLogo';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface LanguageOption {
   name: string;
@@ -16,6 +17,7 @@ const Header: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [cartCount, setCartCount] = useState(0);
 
   const [selectedCurrency, setSelectedCurrency] = useState('USD $');
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(languageOptions[0]);
@@ -25,6 +27,9 @@ const Header: React.FC = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const currencyRef = useRef<HTMLDivElement>(null);
   const languageRef = useRef<HTMLDivElement>(null);
+
+  // Use WebSocket context for notification count
+  const { notificationCount } = useWebSocket();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -127,11 +132,29 @@ const Header: React.FC = () => {
             {/* Action Icons */}
             <div className="flex items-center space-x-3">
                <div ref={cartRef} className="relative">
-                <LnIconButton onClick={() => setIsCartOpen(!isCartOpen)}><FiShoppingCart size={24} /></LnIconButton>
-                {isCartOpen && <CartPopup />}
+                <LnIconButton onClick={() => setIsCartOpen(!isCartOpen)}>
+                  <div className="relative">
+                    <FiShoppingCart size={24} />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-4 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </div>
+                </LnIconButton>
+                {isCartOpen && <CartPopup onCartCountChange={setCartCount} />}
               </div>
                <div ref={notificationsRef} className="relative">
-                 <LnIconButton onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} hasDot={true}><FiBell size={24} /></LnIconButton>
+                 <LnIconButton onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
+                   <div className="relative">
+                     <FiBell size={24} />
+                     {notificationCount > 0 && (
+                       <span className="absolute -top-4 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                         {notificationCount > 99 ? '99+' : notificationCount}
+                       </span>
+                     )}
+                   </div>
+                 </LnIconButton>
                 {isNotificationsOpen && <NotificationsPopup />}
               </div>
               <LnIconButton hasDot={true}><FiMessageSquare size={24} /></LnIconButton>
