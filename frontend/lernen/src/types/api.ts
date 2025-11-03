@@ -5,7 +5,6 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-<<<<<<< HEAD
 export interface CartItemDetail {
   id: number;
   name: string;
@@ -121,5 +120,3 @@ export interface SignUpResponse {
   };
 }
 
-=======
->>>>>>> a691ed1f7e409c02119473b77f37bfff3b328ec8

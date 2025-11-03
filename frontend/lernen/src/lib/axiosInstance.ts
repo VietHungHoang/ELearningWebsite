@@ -53,8 +53,10 @@ axiosInstance.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          // No refresh token, dispatch logout
-          store.dispatch(logout());
+          // No refresh token, clear storage and redirect
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/login';
           return Promise.reject(error);
         }
 
@@ -88,8 +90,10 @@ axiosInstance.interceptors.response.use(
 
         isRefreshing = false;
 
-        // Refresh failed, dispatch logout
-        store.dispatch(logout());
+        // Refresh failed, clear storage and redirect
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

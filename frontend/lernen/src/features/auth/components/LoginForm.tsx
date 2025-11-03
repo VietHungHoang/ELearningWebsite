@@ -6,16 +6,19 @@ import { FcGoogle } from 'react-icons/fc';
 
 interface LoginFormProps {
   handleLogin: (email: string, password: string) => void;
+  isLoading?: boolean;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ handleLogin }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleLogin(email, password);
+    if (!isLoading) {
+      handleLogin(email, password);
+    }
   };
 
   return (
@@ -35,9 +38,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin }) => {
               type="email"
               autoComplete="email"
               required
+              disabled={isLoading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm disabled:opacity-50"
               placeholder="Email address"
             />
           </div>
@@ -52,9 +56,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin }) => {
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               required
+              disabled={isLoading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
+              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm disabled:opacity-50"
               placeholder="Password"
             />
             <button
@@ -97,9 +102,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin }) => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Login
+              {isLoading ? 'Logging in...' : 'Login'}
             </button>
           </div>
         </form>
