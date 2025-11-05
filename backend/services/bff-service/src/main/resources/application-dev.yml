@@ -10,6 +10,8 @@ services:
     url: http://localhost:8083
   course-service:
     url: http://localhost:8081
+  common-service:
+    url: http://localhost:8084
 # Định nghĩa logging trong local
 logging:
   level:

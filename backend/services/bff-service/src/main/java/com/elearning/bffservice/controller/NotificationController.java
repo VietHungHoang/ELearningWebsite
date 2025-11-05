@@ -21,7 +21,7 @@ import com.elearning.bffservice.bff.response.MarkAsReadBFFResponse;
 import com.elearning.bffservice.bff.response.ViewNotificationBFFResponse;
 
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping("/v1/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 

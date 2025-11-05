@@ -20,7 +20,7 @@ import com.elearning.bffservice.bff.response.RemoveFromCartBFFResponse;
 import com.elearning.bffservice.bff.response.ViewCartBFFResponse;
 import com.elearning.bffservice.service.CartService;
 @RestController
-@RequestMapping("/api/learners/{learnerId}/cart")
+@RequestMapping("/v1/learners/{learnerId}/cart")
 @RequiredArgsConstructor
 public class CartController {
         private final CartService cartService;
