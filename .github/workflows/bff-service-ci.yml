@@ -8,7 +8,7 @@ on:
       - '.github/workflows/bff-service-ci.yml'
 
 jobs:
-  build-and-push-api-gateway:
+  build-and-push-bff-service:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
