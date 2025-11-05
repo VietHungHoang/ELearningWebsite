@@ -1,0 +1,19 @@
+server:
+  port: 3000
+
+services:
+  auth-service:
+    url: http://localhost:8085
+  cart-service:
+    url: http://localhost:8082
+  notification-service:
+    url: http://localhost:8083
+  course-service:
+    url: http://localhost:8081
+  common-service:
+    url: http://localhost:8084
+# Định nghĩa logging trong local
+logging:
+  level:
+    root: INFO
+    "[com.elearning.apigateway]": DEBUG
