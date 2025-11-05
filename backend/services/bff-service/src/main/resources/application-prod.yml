@@ -1,0 +1,7 @@
+services:
+  cart-service:
+    url: ${CART_SERVICE_URL}
+  course-service:
+    url: ${COURSE_SERVICE_URL:http://localhost:8081}
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL}
