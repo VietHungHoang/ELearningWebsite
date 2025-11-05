@@ -39,7 +39,7 @@ public class CommonServiceImpl implements CommonService {
                 .map(tz -> TutorFilterResponse.TimezoneFilterItem.builder()
                         .id(tz.getId())
                         .name(tz.getName())
-                        .offset(tz.getOffset())
+                        .utcOffset(tz.getUtcOffset())
                         .build())
                 .collect(Collectors.toList());
 

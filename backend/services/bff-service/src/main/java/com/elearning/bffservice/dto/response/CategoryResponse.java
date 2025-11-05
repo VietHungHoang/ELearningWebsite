@@ -1,4 +1,4 @@
-package com.elearning.commonservice.dto.response;
+package com.elearning.bffservice.dto.response;
 
 import lombok.Builder;
 import lombok.Data;

@@ -18,7 +18,7 @@ public class TutorFilterResponse {
     public static class TimezoneFilterItem {
         private UUID id;
         private String name;
-        private String offset;
+        private String utcOffset;
     }
 
     @Data

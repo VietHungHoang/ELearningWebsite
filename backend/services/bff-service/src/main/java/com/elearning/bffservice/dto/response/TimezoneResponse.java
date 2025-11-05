@@ -11,7 +11,7 @@ import java.util.UUID;
 public class TimezoneResponse {
     private UUID id;
     private String name;
-    private String offset;
+    private String utcOffset;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
