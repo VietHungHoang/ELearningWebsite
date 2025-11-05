@@ -2,8 +2,8 @@ services:
   common-service:
     url: ${COMMON_SERVICE_URL:http://localhost:8082}
   cart-service:
-    url: ${CART_SERVICE_URL}
+    url: ${CART_SERVICE_URL:http://localhost:8082}
   course-service:
     url: ${COURSE_SERVICE_URL:http://localhost:8081}
   notification-service:
-    url: ${NOTIFICATION_SERVICE_URL}
+    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8082}
