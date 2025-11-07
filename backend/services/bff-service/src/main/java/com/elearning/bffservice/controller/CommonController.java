@@ -1,5 +1,6 @@
 package com.elearning.bffservice.controller;
 
+import com.elearning.bffservice.dto.response.ApiResponse;
 import com.elearning.bffservice.dto.response.TutorFilterResponse;
 import com.elearning.bffservice.service.CommonService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,9 @@ public class CommonController {
     private final CommonService commonService;
 
     @GetMapping("/tutor-filter")
-    public ResponseEntity<TutorFilterResponse> getTutorFilter() {
+    public ResponseEntity<ApiResponse<TutorFilterResponse>> getTutorFilter() {
         TutorFilterResponse response = commonService.getTutorFilter();
-        return ResponseEntity.ok(response);
+        ApiResponse<TutorFilterResponse> apiResponse = ApiResponse.success(response, "Tutor filter data retrieved successfully");
+        return ResponseEntity.ok(apiResponse);
     }
 }

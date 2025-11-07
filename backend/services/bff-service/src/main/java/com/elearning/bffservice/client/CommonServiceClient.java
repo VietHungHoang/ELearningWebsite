@@ -1,6 +1,5 @@
 package com.elearning.bffservice.client;
 
-import com.elearning.bffservice.dto.response.ApiResponse;
 import com.elearning.bffservice.dto.response.CategoryResponse;
 import com.elearning.bffservice.dto.response.LanguageResponse;
 import com.elearning.bffservice.dto.response.TimezoneResponse;
@@ -24,13 +23,13 @@ public class CommonServiceClient {
     public List<CategoryResponse> getAllCategories() {
         try {
             String url = commonServiceBaseUrl + "/api/v1/common/categories";
-            ApiResponse<List<CategoryResponse>> apiResponse = restTemplate.exchange(
+            List<CategoryResponse> result = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponse<List<CategoryResponse>>>() {
+                    new ParameterizedTypeReference<List<CategoryResponse>>() {
                     }).getBody();
-            return apiResponse != null ? apiResponse.getData() : null;
+            return result;
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch categories", e);
         }
@@ -39,13 +38,13 @@ public class CommonServiceClient {
     public List<LanguageResponse> getAllLanguages() {
         try {
             String url = commonServiceBaseUrl + "/api/v1/common/languages";
-            ApiResponse<List<LanguageResponse>> apiResponse = restTemplate.exchange(
+            List<LanguageResponse> result = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponse<List<LanguageResponse>>>() {
+                    new ParameterizedTypeReference<List<LanguageResponse>>() {
                     }).getBody();
-            return apiResponse != null ? apiResponse.getData() : null;
+            return result;
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch languages", e);
         }
@@ -54,13 +53,13 @@ public class CommonServiceClient {
     public List<TimezoneResponse> getAllTimezones() {
         try {
             String url = commonServiceBaseUrl + "/api/v1/common/timezones";
-            ApiResponse<List<TimezoneResponse>> apiResponse = restTemplate.exchange(
+            List<TimezoneResponse> result = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<ApiResponse<List<TimezoneResponse>>>() {
+                    new ParameterizedTypeReference<List<TimezoneResponse>>() {
                     }).getBody();
-            return apiResponse != null ? apiResponse.getData() : null;
+            return result;
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch timezones", e);
         }
