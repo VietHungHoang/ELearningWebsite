@@ -92,6 +92,41 @@ export interface Tutor {
   bookedSessionsCount: number;
 }
 
+export interface TutorDetail {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  isVerified: boolean;
+  specialization: string;
+  nationalityCode: string;
+  currentSessionFee: number;
+  currency: string;
+  averageRating: number;
+  reviewCount: number;
+  languages: {
+    code: string;
+    level: string;
+  }[];
+  categoryIds: string[];
+  teachesInGroups: boolean;
+  maxGroupMembers: number;
+  videoUrl: string;
+  videoThumbnailUrl: string;
+  bio: string;
+  studentCount: number;
+  sessionDurationMinutes: number;
+  bookedSessionsCount: number;
+  socials: {
+    id: string;
+    url: string;
+    platform: string;
+  }[];
+  subjects: {
+    id: string;
+    subjectName: string;
+  }[];
+}
+
 export interface PaginatedResponse<T> {
   content: T[]; // Array of items (Java standard naming)
   pageable: {

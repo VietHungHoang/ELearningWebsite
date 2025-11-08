@@ -9,7 +9,7 @@ import { getCountryFlag } from '../../../../lib/countryUtils';
 import { flagComponents } from '../../../../lib/flagMapping';
 
 // Flag Icon Component
-const FlagIcon: React.FC<{ countryCode: string; className?: string }> = ({ countryCode, className = "" }) => {
+export const FlagIcon: React.FC<{ countryCode: string; className?: string }> = ({ countryCode, className = "" }) => {
   const FlagComponent = flagComponents[countryCode];
   
   if (FlagComponent) {
