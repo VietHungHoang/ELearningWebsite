@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8083
 
 spring:
   application:
@@ -9,5 +9,5 @@ spring:
 
 logging:
   level:
-    org.springframework.data.jpa: DEBUG
-    org.hibernate.SQL: DEBUG
+    org.springframework.web: TRACE
+    root: DEBUG
