@@ -2,20 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { Tutor, TutorSearchFilters as IFilters, PaginatedResponse } from '../../../types/api';
 import Layout from '../../../components/ui/Layout';
 import Breadcrumb from '../../../components/ui/Breadcrumb';
-import TutorSearchFilters from '../components/TutorSearchFilters';
-import TutorList from '../components/TutorList';
+import TutorSearchFilters from '../components/find-tutor/TutorSearchFilters';
+import TutorList from '../components/find-tutor/TutorList';
 import Pagination from '../../../components/ui/Pagination';
-import SearchNotFound from '../components/SearchNotFound';
-import TipsSidebar from '../components/TipsSidebar';
+import SearchNotFound from '../components/find-tutor/SearchNotFound';
+import TipsSidebar from '../components/find-tutor/TipsSidebar';
 import { tutorService } from '../../../services/tutorService';
 import Loading from '../../../components/ui/Loading';
-import BookingModal from '../components/BookingModal';
+import BookingModal from '../components/find-tutor/BookingModal';
 
 const FindTutorsPage: React.FC = () => {
   const [tutors, setTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<PaginatedResponse<Tutor>['pagination'] | null>(null);
+  const [pagination, setPagination] = useState<PaginatedResponse<Tutor> | null>(null);
   const [currentFilters, setCurrentFilters] = useState<IFilters>({});
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
@@ -39,15 +39,15 @@ const FindTutorsPage: React.FC = () => {
       const searchFilters: IFilters = {
         ...filters,
         page,
-        limit: 10 // Items per page
+        limit: 10
       };
       
       setCurrentFilters(searchFilters);
       
       const response = await tutorService.searchTutors(searchFilters);
       if (response.success) {
-        setTutors(response.data.data);
-        setPagination(response.data.pagination);
+        setTutors(response.data.content);
+        setPagination(response.data);
       } else {
         setError(response.message);
         setTutors([]);
@@ -100,10 +100,10 @@ const FindTutorsPage: React.FC = () => {
                         <TutorList tutors={tutors} onBookTrial={handleOpenBookingModal} />
                         {pagination && (
                             <Pagination
-                                currentPage={pagination.page}
+                                currentPage={pagination.number + 1} // Convert 0-based to 1-based
                                 totalPages={pagination.totalPages}
-                                totalItems={pagination.total}
-                                itemsPerPage={pagination.limit}
+                                totalItems={pagination.totalElements}
+                                itemsPerPage={pagination.size}
                                 onPageChange={handlePageChange}
                             />
                         )}

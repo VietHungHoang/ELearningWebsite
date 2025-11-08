@@ -1,11 +1,12 @@
 import apiService from './apiService';
-import { store } from '../lib/store';
+import { decodeJwt } from '../lib/jwt';
 import type { Notification } from '../types/notifications';
 
 const getUserId = (): string => {
-  const user = store.getState().auth.user;
-  if (!user) return '1001'; // Fallback for testing
-  return user.id;
+  const token = localStorage.getItem('accessToken');
+  if (!token) return '1001'; // Fallback for testing
+  const decoded = decodeJwt(token);
+  return decoded?.sub || '1001';
 };
 
 class NotificationsService {

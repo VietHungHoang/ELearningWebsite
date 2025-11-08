@@ -1,11 +1,10 @@
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
-import { store } from './store';
-import { logout } from '../features/auth/store/authSlice';
 
 // Create axios instance with base configuration
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api', // Placeholder base URL
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api',
+  // baseURL: import.meta.env.VITE_API_BASE_URL || 'https://lernen-api-gateway.onrender.com/api',
+  timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
   },

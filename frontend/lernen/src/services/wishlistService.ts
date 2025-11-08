@@ -1,13 +1,14 @@
 import apiService from './apiService';
-import { store } from '../lib/store';
+import { decodeJwt } from '../lib/jwt';
 import type { ApiResponse } from '../types/api';
 import type { AddToWishlistRequest, WishlistItemResponse } from '../types/wishlist';
 
 
 const getLearnerId = (): string => {
-  const user = store.getState().auth.user;
-  if (!user) return '1';
-  return user.id;
+  const token = localStorage.getItem('accessToken');
+  if (!token) return '1';
+  const decoded = decodeJwt(token);
+  return decoded?.sub || '1';
 };
 
 const getWishlist = async (): Promise<WishlistItemResponse[]> => {

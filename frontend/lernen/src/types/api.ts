@@ -6,7 +6,7 @@ export interface ApiResponse<T> {
 }
 
 export interface CartItemDetail {
-  id: number;
+  id: string;
   name: string;
   category: string;
   tutor: string;
@@ -27,36 +27,42 @@ export interface CartItemDetail {
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
 export interface Subcategory {
-  id: number;
-  categoryId: number;
+  id: string;
+  categoryId: string;
   name: string;
 }
 
 export interface Location {
-  id: number;
+  id: string;
+  name: string;
+  offset: string;
+}
+
+export interface Language {
+  id: string;
   name: string;
   code: string;
 }
 
-export interface Language {
-  id: number;
-  name: string;
-  code: string;
+export interface FilterData {
+  timezones: Location[];
+  languages: Language[];
+  categories: Category[];
 }
 
 export interface TutorSearchFilters {
   category?: string;
   subcategories?: string[];
-  locations?: string[];
+  languages?: string[];
   minFee?: number;
   maxFee?: number;
   sortBy?: string;
-  language?: string;
+  timezone?: string;
   keyword?: string;
   sessionType?: 'online' | 'offline';
   page?: number;
@@ -64,33 +70,44 @@ export interface TutorSearchFilters {
 }
 
 export interface Tutor {
-  id: number;
+  id: string;
   name: string;
-  avatar: string;
-  verified: boolean;
+  avatarUrl: string;
+  isVerified: boolean;
   specialization: string;
-  specializationIcon: 'learning' | 'academic';
-  rating: number;
-  reviews: number;
-  bookedSessions: number;
-  currentSessions: number;
-  languages: string;
-  bio: string;
-  sessionFee: number;
+  nationalityCode: string;
+  currentSessionFee: number;
+  currency: string;
+  averageRating: number;
+  reviewCount: number;
+  languages: string[];
+  categoryIds: string[];
+  teachesInGroups: boolean;
+  maxGroupMembers: number;
   videoUrl: string;
-  videoThumbnail: string;
+  videoThumbnailUrl: string;
+  bio: string;
+  studentCount: number;
+  sessionDurationMinutes: number;
+  bookedSessionsCount: number;
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
+  content: T[]; // Array of items (Java standard naming)
+  pageable: {
+    pageNumber: number; // Current page number (0-based)
+    pageSize: number; // Page size
+    offset: number; // Offset from start
+    paged: boolean; // Whether pagination is enabled
   };
+  totalPages: number; // Total number of pages
+  totalElements: number; // Total number of elements
+  last: boolean; // Whether this is the last page
+  first: boolean; // Whether this is the first page
+  numberOfElements: number; // Number of elements in current page
+  size: number; // Page size
+  number: number; // Current page number (0-based)
+  empty: boolean; // Whether the page is empty
 }
 
 export interface LoginRequest {

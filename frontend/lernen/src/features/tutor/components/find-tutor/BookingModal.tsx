@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IoClose, IoChevronBack, IoChevronForward, IoCheckmarkCircle, IoReload } from 'react-icons/io5';
-import type { Tutor } from './TutorList';
+import type { Tutor } from '../../../../types/api';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -92,7 +92,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
             <div className={`bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden transition-all duration-300 ${isOpen ? 'animate-modal-in' : 'animate-modal-out'}`} onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center p-5 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                        <img src={tutor.avatar} alt={tutor.name} className="w-10 h-10 rounded-full" />
+                        <img src={tutor.avatarUrl} alt={tutor.name} className="w-10 h-10 rounded-full" />
                         <div>
                             <h2 className="font-bold text-gray-800">Book a Trial Lesson</h2>
                             <p className="text-sm text-gray-500">with {tutor.name}</p>

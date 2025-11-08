@@ -5,7 +5,7 @@ import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from 'react-ic
 import { currencyOptions, languageOptions } from '../../constants/headerConstants';
 import CartPopup from '../../features/cart/components/CartPopup';
 import { LernenLogo } from '../LernenLogo';
-import { useWebSocket } from '../../hooks/useWebSocket';
+// import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface LanguageOption {
   name: string;
@@ -29,7 +29,7 @@ const Header: React.FC = () => {
   const languageRef = useRef<HTMLDivElement>(null);
 
   // Use WebSocket context for notification count
-  const { notificationCount } = useWebSocket();
+  // const { notificationCount } = useWebSocket();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -148,11 +148,11 @@ const Header: React.FC = () => {
                  <LnIconButton onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
                    <div className="relative">
                      <FiBell size={24} />
-                     {notificationCount > 0 && (
+                     {/* {notificationCount > 0 && (
                        <span className="absolute -top-4 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                          {notificationCount > 99 ? '99+' : notificationCount}
                        </span>
-                     )}
+                     )} */}
                    </div>
                  </LnIconButton>
                 {isNotificationsOpen && <NotificationsPopup />}

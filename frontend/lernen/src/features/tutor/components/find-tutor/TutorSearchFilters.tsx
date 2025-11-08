@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import CustomDropdown from '../../../components/ui/CustomDropdown';
-import { categoryService } from '../../../services/categoryService';
-import { tutorService } from '../../../services/tutorService';
-import type { Category, Subcategory, Location, Language, TutorSearchFilters as IFilters } from '../../../types/api';
+import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import { tutorService } from '../../../../services/tutorService';
+import type { Category, Subcategory, Location, Language, TutorSearchFilters as IFilters } from '../../../../types/api';
 
 // --- Type Definitions ---
 interface TutorSearchFiltersProps {
@@ -18,6 +17,7 @@ interface MultiSelectDropdownProps {
     dropdownId: string;
     openDropdown: string | null;
     setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
+    loading?: boolean;
 }
 
 interface MultiSelectDropdownWithSearchProps {
@@ -30,10 +30,11 @@ interface MultiSelectDropdownWithSearchProps {
     openDropdown: string | null;
     setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
     searchPlaceholder?: string;
+    loading?: boolean;
 }
 
 // --- Reusable Multi-Select Dropdown Component ---
-const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown }) => {
+const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const tagsContainerRef = useRef<HTMLDivElement>(null);
     const isOpen = openDropdown === dropdownId;
@@ -74,7 +75,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, option
                 <div className="flex items-center justify-between">
                     <div ref={tagsContainerRef} className="flex-1 min-w-0 flex flex-nowrap gap-1 items-center overflow-x-auto no-scrollbar">
                         {selectedOptions.length === 0 ? (
-                            <span className="text-sm font-medium text-[rgba(88,88,88,0.4)]">{placeholder}</span>
+                            <span className="text-sm font-normal text-[rgba(88,88,88,0.4)]">{placeholder}</span>
                         ) : (
                             selectedOptions.map(option => (
                                 <div key={option} className="flex-shrink-0 bg-gray-100 text-gray-800 text-xs font-semibold pl-2.5 pr-1 py-1 rounded-full flex items-center gap-1.5">
@@ -92,17 +93,29 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, option
             {isOpen && (
                 <div className="dropdown-modal absolute z-20 mt-1 w-full bg-white rounded-xl shadow-lg border border-gray-200/80 p-2">
                     <ul className="space-y-1 max-h-60 overflow-y-auto">
-                        {options.map((option, index) => {
-                            const isSelected = selectedOptions.includes(option);
-                            return (
-                                <li key={index} onClick={() => onToggleOption(option)} className={`dropdown-option p-2 text-sm font-medium rounded-lg cursor-pointer flex justify-between items-center ${isSelected ? 'bg-gray-100 font-semibold text-gray-900' : 'text-gray-800 hover:bg-gray-50'}`}>
-                                    <span>{option}</span>
-                                    {isSelected && (
-                                        <svg className="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                    )}
-                                </li>
-                            );
-                        })}
+                        {loading ? (
+                            <li className="p-2 text-sm text-gray-500 text-center">
+                                <div className="flex items-center justify-center">
+                                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </div>
+                            </li>
+                        ) : (
+                            options.map((option, index) => {
+                                const isSelected = selectedOptions.includes(option);
+                                return (
+                                    <li key={index} onClick={() => onToggleOption(option)} className={`dropdown-option p-2 text-sm font-medium rounded-lg cursor-pointer flex justify-between items-center ${isSelected ? 'bg-gray-100 font-semibold text-gray-900' : 'text-gray-800 hover:bg-gray-50'}`}>
+                                        <span>{option}</span>
+                                        {isSelected && (
+                                            <svg className="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                        )}
+                                    </li>
+                                );
+                            })
+                        )}
                     </ul>
                 </div>
             )}
@@ -111,7 +124,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, option
 };
 
 // --- Reusable Multi-Select Dropdown with Search Component ---
-const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search..." }) => {
+const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search...", loading = false }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const tagsContainerRef = useRef<HTMLDivElement>(null);
@@ -166,7 +179,7 @@ const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps
                 <div className="flex items-center justify-between">
                     <div ref={tagsContainerRef} className="flex-1 min-w-0 flex flex-nowrap gap-1 items-center overflow-x-auto no-scrollbar">
                         {selectedOptions.length === 0 ? (
-                            <span className="text-sm font-medium text-[rgba(88,88,88,0.4)]">{placeholder}</span>
+                            <span className="text-sm font-normal text-[rgba(88,88,88,0.4)]">{placeholder}</span>
                         ) : (
                             selectedOptions.map(option => (
                                 <div key={option} className="flex-shrink-0 bg-gray-100 text-gray-800 text-xs font-semibold pl-2.5 pr-1 py-1 rounded-full flex items-center gap-1.5">
@@ -195,17 +208,29 @@ const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps
                         />
                     </div>
                     <ul className="space-y-1 max-h-60 overflow-y-auto">
-                        {filteredOptions.map((option, index) => {
-                            const isSelected = selectedOptions.includes(option);
-                            return (
-                                <li key={index} onClick={() => onToggleOption(option)} className={`dropdown-option p-2 text-sm font-medium rounded-lg cursor-pointer flex justify-between items-center ${isSelected ? 'bg-gray-100 font-semibold text-gray-900' : 'text-gray-800 hover:bg-gray-50'}`}>
-                                    <span>{option}</span>
-                                    {isSelected && (
-                                        <svg className="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                    )}
-                                </li>
-                            );
-                        })}
+                        {loading ? (
+                            <li className="p-2 text-sm text-gray-500 text-center">
+                                <div className="flex items-center justify-center">
+                                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </div>
+                            </li>
+                        ) : (
+                            filteredOptions.map((option, index) => {
+                                const isSelected = selectedOptions.includes(option);
+                                return (
+                                    <li key={index} onClick={() => onToggleOption(option)} className={`dropdown-option p-2 text-sm font-medium rounded-lg cursor-pointer flex justify-between items-center ${isSelected ? 'bg-gray-100 font-semibold text-gray-900' : 'text-gray-800 hover:bg-gray-50'}`}>
+                                        <span>{option}</span>
+                                        {isSelected && (
+                                            <svg className="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                                        )}
+                                    </li>
+                                );
+                            })
+                        )}
                     </ul>
                 </div>
             )}
@@ -228,99 +253,67 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
     const MAX_FEE = 200;
     const FEE_GAP = 10;
 
-    // Category cache states
+    // Category cache states with loading flags
     const [categories, setCategories] = useState<Category[]>([]);
     const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-    const [locations, setLocations] = useState<Location[]>([]);
+    const [timezones, setTimezones] = useState<Location[]>([]);
     const [languages, setLanguages] = useState<Language[]>([]);
-    const [loadingCategories, setLoadingCategories] = useState<boolean>(false);
+    
+    // Loading states for lazy loading
+    const [loadingFilterData, setLoadingFilterData] = useState<boolean>(false);
+    const [loadingSubcategories, setLoadingSubcategories] = useState<boolean>(false);
 
     const placeholders = {
         category: 'Choose category',
         subcategory: 'Choose subcategory',
-        location: 'Search by country',
+        languages: 'Select languages',
         sortBy: 'Sort by',
-        language: 'Select language',
+        timezone: 'Select timezone',
     };
     
     const [selectedValues, setSelectedValues] = useState({
         category: placeholders.category,
         sortBy: placeholders.sortBy,
-        language: placeholders.language,
+        timezone: placeholders.timezone,
     });
     const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
-    const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+    const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
 
     const tabs: string[] = ['All Sessions', 'Private Sessions', 'Group Sessions'];
     const activeShadowClass = 'shadow-[0px_1px_3px_0px_rgba(16,24,40,0.1),_0px_1px_2px_0px_rgba(16,24,40,0.06)]';
 
-    // Fetch categories on mount (cached in memory)
+    // Lazy load filter data on mount with caching - load once and cache to avoid repeated API calls
     useEffect(() => {
-        const fetchCategories = async () => {
-            if (categories.length > 0) return; // Already cached
-            
-            setLoadingCategories(true);
-            try {
-                const response = await categoryService.getCategories();
-                if (response.success) {
-                    setCategories(response.data);
+        const fetchFilterData = async () => {
+            // Fetch all filter data (timezones, languages, categories) in one API call
+            if ((categories.length === 0 || timezones.length === 0 || languages.length === 0) && !loadingFilterData) {
+                setLoadingFilterData(true);
+                try {
+                    const response = await tutorService.getFilterData();
+                    if (response.success) {
+                        const { timezones: fetchedTimezones, languages: fetchedLanguages, categories: fetchedCategories } = response.data;
+                        setTimezones(fetchedTimezones);
+                        setLanguages(fetchedLanguages);
+                        setCategories(fetchedCategories);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch filter data:', error);
+                } finally {
+                    setLoadingFilterData(false);
                 }
-            } catch (error) {
-                console.error('Failed to fetch categories:', error);
-            } finally {
-                setLoadingCategories(false);
             }
+
+            // Fetch subcategories only when a category is selected
+            // This is handled in handleSelect when category changes
         };
 
-        const fetchSubcategories = async () => {
-            if (subcategories.length > 0) return; // Already cached
-            
-            try {
-                const response = await categoryService.getSubcategories();
-                if (response.success) {
-                    setSubcategories(response.data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch subcategories:', error);
-            }
-        };
-
-        const fetchLocations = async () => {
-            if (locations.length > 0) return; // Already cached
-            
-            try {
-                const response = await tutorService.getLocations();
-                if (response.success) {
-                    setLocations(response.data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch locations:', error);
-            }
-        };
-
-        const fetchLanguages = async () => {
-            if (languages.length > 0) return; // Already cached
-            
-            try {
-                const response = await tutorService.getLanguages();
-                if (response.success) {
-                    setLanguages(response.data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch languages:', error);
-            }
-        };
-
-        fetchCategories();
-        fetchSubcategories();
-        fetchLocations();
-        fetchLanguages();
-    }, [categories.length, subcategories.length, locations.length, languages.length]);
+        fetchFilterData();
+    }, []); // Empty dependency array - only run once on mount
 
     // Convert to string arrays for dropdowns
     const categoryOptions: string[] = categories.map(cat => cat.name);
     const subcategoryOptions: string[] = subcategories.map(sub => sub.name);
-    const locationOptions: string[] = locations.map(loc => loc.name);
+    const timezoneOptions: string[] = timezones.map(tz => tz.name);
     const sortByOptions: string[] = ['Relevance', 'Newest First', 'Oldest First'];
     const languageOptions: string[] = languages.map(lang => lang.name);
     const availabilityDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -329,14 +322,38 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
 
     const handleSelect = (dropdownId: keyof typeof selectedValues, value: string) => {
         setSelectedValues(prev => ({ ...prev, [dropdownId]: value }));
+        
+        // When category is selected, fetch subcategories for that category
+        if (dropdownId === 'category' && value !== placeholders.category) {
+            const selectedCategory = categories.find(cat => cat.name === value);
+            if (selectedCategory) {
+                fetchSubcategoriesForCategory(selectedCategory.id);
+            }
+        }
+    };
+
+    const fetchSubcategoriesForCategory = async (categoryId: string) => {
+        if (loadingSubcategories) return; // Prevent multiple calls
+        
+        setLoadingSubcategories(true);
+        try {
+            const response = await tutorService.getSubcategories(categoryId);
+            if (response.success) {
+                setSubcategories(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch subcategories for category:', error);
+        } finally {
+            setLoadingSubcategories(false);
+        }
     };
 
     const handleSubcategoryToggle = (subcategory: string) => {
         setSelectedSubcategories(prev => prev.includes(subcategory) ? prev.filter(s => s !== subcategory) : [...prev, subcategory]);
     };
     
-    const handleLocationToggle = (location: string) => {
-        setSelectedLocations(prev => prev.includes(location) ? prev.filter(l => l !== location) : [...prev, location]);
+    const handleLanguageToggle = (language: string) => {
+        setSelectedLanguages(prev => prev.includes(language) ? prev.filter(l => l !== language) : [...prev, language]);
     };
 
     const handleAvailabilityToggle = (slot: string) => {
@@ -360,8 +377,8 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
         const filters: IFilters = {
             category: selectedValues.category !== placeholders.category ? selectedValues.category : undefined,
             subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
-            locations: selectedLocations.length > 0 ? selectedLocations : undefined,
-            language: selectedValues.language !== placeholders.language ? selectedValues.language : undefined,
+            languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
+            timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined,
             sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
             sessionType: activeTab === 'Online' ? 'online' : activeTab === 'Offline' ? 'offline' : undefined,
             keyword: keyword.trim() || undefined,
@@ -370,7 +387,7 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
         };
             onFilterChange(filters);
 
-    }, [selectedValues, selectedSubcategories, selectedLocations, feeRange, activeTab, keyword]);
+    }, [selectedValues, selectedSubcategories, selectedLanguages, feeRange, activeTab, keyword]);
 
     return (
         <>
@@ -405,6 +422,7 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                                 setOpenDropdown={setOpenDropdown}
                                 hasSearch={true}
                                 searchPlaceholder="Search..."
+                                loading={loadingFilterData}
                             />
                             <MultiSelectDropdown 
                                 label="Choose subcategory"
@@ -415,6 +433,7 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                                 dropdownId="subcategory"
                                 openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
+                                loading={loadingSubcategories}
                             />
                             <div className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] flex flex-col justify-center">
                                 <div className="flex justify-between items-center mb-2">
@@ -458,15 +477,16 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                                 </div>
                             </div>
                             <MultiSelectDropdownWithSearch 
-                                label="Tutor location"
-                                options={locationOptions}
-                                selectedOptions={selectedLocations}
-                                onToggleOption={handleLocationToggle}
-                                placeholder={placeholders.location}
-                                dropdownId="location"
+                                label="Tutor languages"
+                                options={languageOptions}
+                                selectedOptions={selectedLanguages}
+                                onToggleOption={handleLanguageToggle}
+                                placeholder={placeholders.languages}
+                                dropdownId="languages"
                                 openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
-                                searchPlaceholder="Search by country..."
+                                searchPlaceholder="Search by language..."
+                                loading={loadingFilterData}
                             />
 
                             {/* Availability Filter */}
@@ -474,7 +494,7 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                                 <div onClick={() => setOpenDropdown(openDropdown === 'availability' ? null : 'availability')} className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] cursor-pointer flex flex-col justify-center">
                                     <label className="text-xs text-[#585858] block mb-1.5">Availability</label>
                                     <div className="flex items-center justify-between">
-                                        <span className={`text-sm font-medium ${selectedAvailability.length === 0 ? 'text-[rgba(88,88,88,0.6)]' : 'text-gray-800'}`}>
+                                        <span className={`text-sm font-normal  ${selectedAvailability.length === 0 ? 'text-[rgba(88,88,88,0.4)]' : 'text-gray-800'}`}>
                                             {selectedAvailability.length === 0 ? 'Anytime' : `${selectedAvailability.length} slots selected`}
                                         </span>
                                         <svg className={`flex-shrink-0 ml-2 w-4 h-4 text-gray-500 transition-transform duration-200 ${openDropdown === 'availability' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
@@ -538,7 +558,7 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                         </div>
                     </div>
                     <div className="w-48">
-                        <CustomDropdown options={languageOptions} selectedValue={selectedValues.language} placeholder={placeholders.language} onSelect={(value) => handleSelect('language', value)} dropdownId="language" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} />
+                        <CustomDropdown options={timezoneOptions} selectedValue={selectedValues.timezone} placeholder={placeholders.timezone} onSelect={(value) => handleSelect('timezone', value)} dropdownId="timezone" openDropdown={openDropdown} setOpenDropdown={setOpenDropdown} loading={loadingFilterData} />
                     </div>
                 </div>
             </div>

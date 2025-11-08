@@ -3,10 +3,76 @@ import { Link } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-const SignUpForm: React.FC = () => {
+interface SignUpFormProps {
+  onSubmit: (data: { email: string; password: string; fullName: string }) => void;
+  loading?: boolean;
+}
+
+const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!termsAgreed) {
+      newErrors.terms = 'You must agree to the terms and conditions';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (validateForm()) {
+      onSubmit({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName
+      });
+    }
+  };
 
   return (
     <div className="bg-[#F8F7F4] p-10 flex flex-col justify-center">
@@ -14,20 +80,25 @@ const SignUpForm: React.FC = () => {
         <h2 className="text-xl font-bold text-[#0b6459]">Create an Account</h2>
         <p className="text-gray-600 mt-2">Start your learning journey today.</p>
 
-        <form className="mt-6 space-y-4">
+        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="full-name" className="text-sm font-medium text-gray-700">
               Full Name <span className="text-red-500">*</span>
             </label>
             <input
               id="full-name"
-              name="fullname"
+              name="fullName"
               type="text"
               autoComplete="name"
               required
-              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm ${
+                errors.fullName ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="Your full name"
             />
+            {errors.fullName && <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>}
           </div>
 
           <div>
@@ -40,9 +111,14 @@ const SignUpForm: React.FC = () => {
               type="email"
               autoComplete="email"
               required
-              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
+              value={formData.email}
+              onChange={handleInputChange}
+              className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="Email address"
             />
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
 
           <div className="relative">
@@ -55,9 +131,14 @@ const SignUpForm: React.FC = () => {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
-              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
+              value={formData.password}
+              onChange={handleInputChange}
+              className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="Password"
             />
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -73,13 +154,18 @@ const SignUpForm: React.FC = () => {
             </label>
             <input
               id="confirm-password"
-              name="confirm-password"
+              name="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
-              className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm ${
+                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+              }`}
               placeholder="Confirm Password"
             />
+            {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -111,15 +197,16 @@ const SignUpForm: React.FC = () => {
               I agree to the <a href="#" className="font-medium text-[#0b6459] hover:text-[#084c43]">Terms and Conditions</a>
             </span>
           </label>
+          {errors.terms && <p className="text-sm text-red-600">{errors.terms}</p>}
 
 
           <div>
             <button
               type="submit"
-              disabled={!termsAgreed}
+              disabled={!termsAgreed || loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
         </form>

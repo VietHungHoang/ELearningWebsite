@@ -5,6 +5,7 @@ import cartRoutes from '../features/cart/routes';
 import tutorRoutes from '../features/tutor/routes';
 import courseRoutes from '../features/course/routes';
 import instructorRoutes from '../features/instructor/routes';
+import apiDocsRoutes from '../features/api-docs/routes';
 
 const router = createBrowserRouter([
   ...authRoutes,
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
   ...tutorRoutes,
   ...courseRoutes,
   ...instructorRoutes,
+  ...apiDocsRoutes,
 ]);
 
 export default router;
