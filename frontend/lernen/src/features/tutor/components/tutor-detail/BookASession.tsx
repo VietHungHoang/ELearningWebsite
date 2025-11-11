@@ -38,6 +38,9 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
     const filterRef = useRef<HTMLDivElement>(null);
+    const datePickerRef = useRef<HTMLDivElement>(null);
+    const datePickerButtonRef = useRef<HTMLButtonElement>(null);
+    const [popoverPosition, setPopoverPosition] = useState<'top' | 'bottom'>('bottom');
     
     const timezonePlaceholder = '(GMT+07:00) Asia/Ho_Chi_Minh';
     const [selectedTimezone, setSelectedTimezone] = useState(timezonePlaceholder);
@@ -74,12 +77,15 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
             if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
                 setIsFilterPopoverOpen(false);
             }
+            if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+                setIsDatePickerOpen(false);
+            }
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [filterRef]);
+    }, []);
 
     const getWeekRange = (date: Date) => {
         const startDate = new Date(date);
@@ -117,6 +123,17 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
         setIsDatePickerOpen(false);
     };
 
+    const handleToggleDatePicker = () => {
+        if (!isDatePickerOpen && datePickerButtonRef.current) {
+            const buttonRect = datePickerButtonRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - buttonRect.bottom;
+            const modalHeight = 420; // Estimated height of the date picker modal
+            // If not enough space below AND there is enough space above, position top. Otherwise, default to bottom.
+            setPopoverPosition(spaceBelow < modalHeight && buttonRect.top > modalHeight ? 'top' : 'bottom');
+        }
+        setIsDatePickerOpen(prev => !prev);
+    };
+
     const handleSelectDay = (date: Date) => {
         setSelectedDate(date);
     };
@@ -147,14 +164,22 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
         setWeekRange(getWeekRange(today));
     };
 
+    const handleRequestSessionClick = () => {
+        if (selectedTime) {
+            onOpenModal();
+        } else {
+            alert('Please select a time slot before requesting a session.');
+        }
+    };
+
     return (
         <div>
             {/* Header */}
             <div className="flex justify-between items-center pb-4 border-b border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-800">Book a session</h2>
                 <button 
-                    onClick={onOpenModal}
-                    className="bg-[#FF5A1F] text-white font-semibold py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors"
+                    onClick={handleRequestSessionClick}
+                    className="bg-[#FF5A1F] text-white font-medium text-sm py-2.5 px-4 rounded-lg hover:bg-orange-600 transition-colors"
                 >
                     Request a Session
                 </button>
@@ -163,14 +188,30 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
             {/* Controls */}
             <div className="mt-6 flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-2">
-                    <button onClick={handleTodayClick} className="bg-[#F9F3EB] text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-opacity-80">Today</button>
-                    <button onClick={() => setIsDatePickerOpen(true)} className="flex items-center gap-2 bg-[#F9F3EB] p-2 rounded-lg hover:bg-opacity-80">
-                        <span className="text-sm font-medium text-gray-700">{displayedDateRange}</span>
-                        <FiCalendar />
+                    <button 
+                        onClick={handleTodayClick}
+                        className="bg-[#F9F3EB] text-gray-700 text-sm font-semibold py-2.5 px-4 rounded-lg hover:bg-[#e9e0d4]">
+                        Today
                     </button>
+                    <div ref={datePickerRef} className="relative">
+                        <button 
+                          ref={datePickerButtonRef} 
+                          onClick={handleToggleDatePicker}
+                          className="flex items-center gap-16.5 bg-[#F9F3EB] px-4 py-2.5 rounded-lg hover:bg-[#e9e0d4]">
+                            <span className="text-sm font-normal text-sm text-gray-700">{displayedDateRange}</span>
+                            <FiCalendar />
+                        </button>
+                         <DatePickerModal 
+                            isOpen={isDatePickerOpen}
+                            onClose={() => setIsDatePickerOpen(false)}
+                            onApply={handleDateApply}
+                            selectedDate={selectedDate}
+                            position={popoverPosition}
+                        />
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-56">
+                    <div className="w-70">
                        <CustomDropdown
                             options={timezoneOptions}
                             selectedValue={selectedTimezone}
@@ -186,7 +227,7 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
                      <div ref={filterRef} className="relative">
                         <button 
                             onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
-                            className="p-2.5 border border-gray-300 rounded-lg hover:bg-gray-100"
+                            className="p-2.75 border border-gray-300 rounded-lg hover:bg-gray-100"
                             aria-haspopup="true"
                             aria-expanded={isFilterPopoverOpen}
                         >
@@ -198,7 +239,7 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
             </div>
 
             {/* Calendar */}
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-7 flex items-center justify-between">
                 <button onClick={handlePrevWeek} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"><FiChevronLeft /></button>
                 <div className="grid grid-cols-7 gap-x-2 flex-grow mx-1">
                     {weekDays.map((d, index) => {
@@ -219,7 +260,7 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
                                             <button 
                                                 key={time}
                                                 onClick={() => setSelectedTime(`${d.fullDate.toDateString()}-${time}`)}
-                                                className={`w-full text-xs py-2 rounded-md font-semibold transition-colors ${
+                                                className={`w-full text-xs py-2.5 rounded-md font-semibold transition-colors ${
                                                     selectedTime === `${d.fullDate.toDateString()}-${time}` 
                                                     ? 'bg-[#0b6459] text-white' 
                                                     : 'bg-[#F9F3EB] text-gray-700 hover:bg-[#e9e0d4]'
@@ -229,7 +270,7 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
                                             </button>
                                         ))
                                     ) : (
-                                        <div className="bg-gray-100 text-gray-400 text-xs py-2 rounded-md">
+                                        <div className="bg-gray-100 text-gray-400 text-xs py-2.5 rounded-md">
                                             No sessions
                                         </div>
                                     )}
@@ -240,13 +281,6 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
                 </div>
                 <button onClick={handleNextWeek} className="p-2 rounded-lg bg-[#F9F3EB] text-gray-500 hover:bg-opacity-80"><FiChevronRight /></button>
             </div>
-
-            <DatePickerModal 
-                isOpen={isDatePickerOpen}
-                onClose={() => setIsDatePickerOpen(false)}
-                onApply={handleDateApply}
-                selectedDate={selectedDate}
-            />
         </div>
     );
 };

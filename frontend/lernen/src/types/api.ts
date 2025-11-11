@@ -100,6 +100,7 @@ export interface TutorDetail {
   specialization: string;
   nationalityCode: string;
   currentSessionFee: number;
+  originalSessionFee?: number; // Optional old price for discount display
   currency: string;
   averageRating: number;
   reviewCount: number;

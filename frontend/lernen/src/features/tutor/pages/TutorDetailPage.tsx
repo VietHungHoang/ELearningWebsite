@@ -20,6 +20,7 @@ const mockTutor = {
     specialization: 'Mathematics Tutor',
     nationalityCode: 'US',
     currentSessionFee: 40.00,
+    originalSessionFee: 60.00, // Old price for discount display
     currency: 'USD',
     averageRating: 5.0,
     reviewCount: 1,
@@ -53,39 +54,39 @@ const TutorDetailPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   return (
-    <Layout>
+    <Layout pageColor='#FAf8F5'>
       {/* Container for content before full-width section */}
-      <main className="container mx-auto px-4 py-8">
-        <Breadcrumb paths={[
-          { name: 'Home', path: '/' },
-          { name: 'Find Tutors', path: '/find-tutors' },
-          { name: 'Cynthia Hunter', path: '/tutors/1' }
-        ]} />
-        <div className="mt-6">
+      <main className="mx-auto py-8">
+        <div className="max-w-7xl mx-auto">
+          <Breadcrumb
+            paths={[
+              { name: 'Home', path: '/' },
+              { name: 'Find Tutors', path: '/find-tutors' },
+              { name: 'Cynthia Hunter', path: '/tutors/1' }
+          ]} />
+        </div>
+        <div className="mt-6 max-w-7xl mx-auto">
             <TutorProfileHeader tutor={mockTutor} />
         </div>
         
-        <div className="mt-10">
+        <div className="max-w-7xl mx-auto mt-10">
             <TutorDetailsTabs />
+        </div>
             
-            <div id="introduction" className="pt-4">
-                <AboutMeSection />
+        <div id="introduction" className="max-w-7xl mx-auto pt-1 px-8">
+          <AboutMeSection />
+        </div>
+
+        <div id="availability" className=" mx-auto py-10 min-h-[700px] bg-white">
+            <div className="max-w-7xl mx-auto px-8">
+                <BookASession onOpenModal={() => setIsModalOpen(true)} />
             </div>
         </div>
-      </main>
 
-      {/* Full-width Availability Section */}
-      <div id="availability" className="pt-16 -mt-16 bg-white">
-        <div className="container mx-auto px-4 py-8">
-          <BookASession onOpenModal={() => setIsModalOpen(true)} />
-        </div>
-      </div>
-
-      {/* Container for content after full-width section */}
-      <div className="container mx-auto px-4 py-8">
-        <div id="courses" className="pt-16 -mt-16">
-            <CoursesSection />
-        </div>
+        <div className="container mx-auto px-8 py-8">
+          <div id="courses" className="pt-16 -mt-16">
+              <CoursesSection />
+          </div>
         <div id="resume-highlights" className="pt-16 -mt-16">
             <ResumeHighlights />
         </div>
@@ -98,9 +99,11 @@ const TutorDetailPage: React.FC = () => {
         <div id="similar-tutors">
           <SimilarTutors />
         </div>
-      </div>
+        </div>
 
       <RequestSessionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      </main>
     </Layout>
   );
 };

@@ -238,15 +238,20 @@ const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps
     );
 };
 
+interface TutorSearchFiltersProps {
+    onSearch: (keyword: string) => void;
+    onFilterChange: (filters: IFilters) => void;
+}
+
 
 // --- Main Filters Component ---
-export default function TutorSearchFilters({ onFilterChange }: TutorSearchFiltersProps): React.ReactElement {
+export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSearchFiltersProps): React.ReactElement {
     const [activeTab, setActiveTab] = useState<string>('All Sessions');
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [feeRange, setFeeRange] = useState([20, 150]);
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
-    const [keyword, setKeyword] = useState<string>('');
     const availabilityRef = useRef<HTMLDivElement>(null);
+    const [keyword, setKeyword] = useState<string>('');
 
 
     const MIN_FEE = 0;
@@ -281,6 +286,17 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
 
     const tabs: string[] = ['All Sessions', 'Private Sessions', 'Group Sessions'];
     const activeShadowClass = 'shadow-[0px_1px_3px_0px_rgba(16,24,40,0.1),_0px_1px_2px_0px_rgba(16,24,40,0.06)]';
+
+    const handleSearch = () => {
+        onSearch(keyword);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSearch();
+        }
+    };
 
     // Lazy load filter data on mount with caching - load once and cache to avoid repeated API calls
     useEffect(() => {
@@ -435,8 +451,8 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                                 setOpenDropdown={setOpenDropdown}
                                 loading={loadingSubcategories}
                             />
-                            <div className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] flex flex-col justify-center">
-                                <div className="flex justify-between items-center mb-2">
+                            <div className="bg-white pt-2.5 px-3 pb-2.5 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] flex flex-col justify-center">
+                                <div className="flex justify-between items-center mb-1.5">
                                     <label className="text-xs text-[#585858]">Fee per session</label>
                                     <span className="text-sm font-semibold text-gray-800">${feeRange[0]} - ${feeRange[1]}</span>
                                 </div>
@@ -536,14 +552,24 @@ export default function TutorSearchFilters({ onFilterChange }: TutorSearchFilter
                 <div className="mt-6 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-grow">
                         <div className="relative flex-grow max-w-xs">
-                            <input 
-                                type="text" 
-                                placeholder="Search by keyword" 
+                            <input
+                                type="text"
+                                placeholder="Search by keyword"
+                                className="w-full bg-white p-2.5 pl-10 pr-12 text-sm font-medium text-gray-800 rounded-xl border border-gray-200/80 shadow-sm focus:border-[#065a46] focus:outline-none"
                                 value={keyword}
                                 onChange={(e) => setKeyword(e.target.value)}
-                                className="w-full bg-white p-2.5 pl-10 text-sm font-medium text-gray-800 rounded-xl border border-gray-200/80 shadow-sm focus:border-[#065a46] focus:outline-none placeholder:text-[rgba(88,88,88,0.4)]"
+                                onKeyDown={handleKeyDown}
                             />
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                             <button
+                                onClick={handleSearch}
+                                aria-label="Search"
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
                         </div>
                         <div className="w-48">
                             <CustomDropdown

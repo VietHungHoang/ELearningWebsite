@@ -47,7 +47,7 @@ const TutorDetailsTabs: React.FC = () => {
                  top: offsetPosition,
                  behavior: "smooth"
             });
-            // setActiveTab(id); // Set active tab immediately on click
+            setActiveTab(id); // Set active tab immediately on click
         }
     };
 

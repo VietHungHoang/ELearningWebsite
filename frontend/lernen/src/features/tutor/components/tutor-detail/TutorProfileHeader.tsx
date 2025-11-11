@@ -7,6 +7,7 @@ import { FiCalendar, FiMessageSquare } from 'react-icons/fi';
 import { FaHeart, FaPlay } from 'react-icons/fa';
 import type { TutorDetail } from '../../../../types/api';
 import { RiSpeakLine } from "react-icons/ri";
+import { AiOutlineGlobal } from 'react-icons/ai';
 const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -38,56 +39,88 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
             {/* Left Column: Tutor Details */}
             <div className="lg:col-span-2">
                 <div className="flex flex-col sm:flex-row justify-between items-start">
-                    <div className="flex items-start gap-4">
+                    <div className="flex items-center gap-4">
                         <div className="relative">
-                            <img src={tutor.avatarUrl} alt={tutor.name} className="w-24 h-24 rounded-2xl object-cover" />
+                            <img src={tutor.avatarUrl} alt={tutor.name} className="w-18 h-18 rounded-2xl object-cover" />
                              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-[#F8F7F4]"></div>
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-3xl font-bold text-gray-800">{tutor.name}</h1>
+                                <h1 className="text-3xl font-medium text-gray-800">{tutor.name}</h1>
                                 {tutor.isVerified && <VscVerified style={{ color: 'rgb(51, 204, 94)', fontSize: '18px' }} title="Verified tutor" />}
                                 <FlagIcon countryCode={tutor.nationalityCode} className="ml-1" />
                             </div>
-                            {/* <p className="text-gray-600 mt-1">{tutor.tagline}</p> */}
+                            <p className="text-base text-[#585858]">{tutor.specialization}</p>
                         </div>
                     </div>
                     <div className="text-left sm:text-right mt-4 sm:mt-0 flex-shrink-0">
-                        <p className="text-3xl font-bold text-gray-800">${tutor.currentSessionFee.toFixed(2)}<span className="text-base font-normal text-gray-500">/session</span></p>
-                        <p className="text-sm text-gray-500">Starting from</p>
+                        <div className="flex flex-col items-end gap-1">
+                            <div className="flex items-center justify-end gap-2">
+                                <span className="text-base text-gray-400 line-through font-normal">$50.00</span>
+                                <p className="text-xs text-gray-500">Session fee</p>
+                            </div>
+                            <p className="text-3xl font-bold text-gray-800">${tutor.currentSessionFee.toFixed(2)}<span className="text-base font-normal text-gray-500">/{tutor.sessionDurationMinutes} minutes</span></p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="my-6 py-6 border-y border-gray-200">
+                <div className="my-1 py-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         {/* Left stats column */}
                         <div className="space-y-4">
-                            <StatItem icon={<PiStar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />} text={<><span className="font-bold">{tutor.averageRating.toFixed(1)} /5.0</span> ({tutor.reviewCount} review{tutor.reviewCount !== 1 ? 's' : ''})</>} />
-                            <StatItem icon={<PiCalendar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />} text={<><span className="font-bold">{tutor.bookedSessionsCount}</span> Booked sessions</>} />
-                            <StatItem icon={<PiStudentLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />} text={<><span className="font-bold">{tutor.studentCount}</span> Students</>} />
+                            <StatItem
+                                icon={<PiStar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+                                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.averageRating.toFixed(1)}/5.0</span> ({tutor.reviewCount} review{tutor.reviewCount !== 1 ? 's' : ''})</>}
+                            />
+                            <StatItem
+                                icon={<PiCalendar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+                                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.bookedSessionsCount}</span> Booked sessions</>}
+                            />
+                            <StatItem
+                                icon={<PiStudentLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+                                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.studentCount}</span> Students</>}
+                            />
                             {/* <StatItem icon={<ClockIcon />} text={<><span className="font-bold">{tutor.responseTime}</span> Response time</>} /> */}
-                            <StatItem icon={<svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>} text={<span className="font-medium text-gray-500">Social Profiles</span>} content={
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    {tutor.socials.map((social) => (
-                                        <a key={social.id} href={social.url} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
-                                            {socialIcons[social.platform.toLowerCase()]}
-                                        </a>
-                                    ))}
-                                </div>
+                            <StatItem 
+                                icon={<AiOutlineGlobal style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+                                text={<>Social profiles</>} content={
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        {tutor.socials.map((social) => (
+                                            <a 
+                                            key={social.id}
+                                            href={social.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-11 h-11 flex items-center justify-center rounded-lg transition-colors"
+                                            style={{backgroundColor: '#f8f2e8', color: '#295c51'}}
+                                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f6eddc'}
+                                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8f2e8'}>
+                                                <span style={{transform: 'scale(1.4)'}}>
+                                                    {socialIcons[social.platform.toLowerCase()]}
+                                                </span>
+                                            </a>
+                                        ))}
+                                    </div>
                             }/>
                         </div>
                          {/* Right stats column */}
                         <div className="space-y-4">
-                            <StatItem icon={<PiBookOpenTextLight  />} text={<span className="font-medium text-gray-500">I can teach</span>} content={
+                            <StatItem 
+                                icon={<PiBookOpenTextLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+                                text={<>I can teach</>} content={
                                 <div>
-                                    <span className="font-semibold text-gray-800">{tutor.subjects.map(subject => subject.subjectName).join(', ')}</span>
+                                    <span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>
+                                        {tutor.subjects.map(subject => subject.subjectName).join(', ')}
+                                    </span>
                                 </div>
                             }/>
-                            <StatItem icon={<RiSpeakLine />} text={<span className="font-medium text-gray-500">I can speak</span>} content={
+                            <StatItem 
+                                icon={<RiSpeakLine />}
+                                text={<>I can speak</>} content={
                                 <div>
                                     {tutor.languages.map((lang, index: number) => (
                                         <React.Fragment key={lang.code}>
-                                            <span className="font-semibold text-gray-800">{lang.code}</span>
+                                            <span className="font-medium" style={{ color: 'rgb(88, 88, 88)'}}>{lang.code}</span>
                                             {lang.level && <span className="ml-1 px-2 py-0.5 bg-gray-100 text-xs font-medium rounded-md">{lang.level}</span>}
                                             {index < tutor.languages.length - 1 && <span className="mx-1">,</span>}
                                         </React.Fragment>
@@ -105,28 +138,28 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                     </div>
                 </div>
 
-                <div className="mt-8 flex items-center gap-3">
-                    <button className="flex items-center justify-center gap-2 bg-[#0b6459] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#084c43] transition-colors">
+                <div className="mt-2 flex items-center gap-3">
+                    <button className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] transition-colors">
                         Book a session <FiCalendar />
                     </button>
-                    <button className="flex items-center justify-center gap-2 border border-gray-300 bg-white text-gray-800 font-semibold py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors">
                         Send message <FiMessageSquare />
                     </button>
-                    <button className="p-3.5 border border-gray-300 bg-white text-gray-500 rounded-lg hover:bg-gray-50 hover:text-red-500 transition-colors">
+                    <button className="p-3.5 text-gray-500 rounded-lg hover:border hover:border-gray-300 hover:bg-gray-50 hover:text-red-500 transition-colors">
                         <FaHeart />
                     </button>
                 </div>
 
             </div>
             {/* Right Column: Video Player */}
-            <div className="w-full lg:col-span-1">
-                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden group shadow-lg">
+            <div className="w-full lg:col-span-1 pl-2">
+                <div className="relative aspect-[16/9] rounded-2xl overflow-hidden group shadow-lg p-2 bg-white">
                      <video
                         ref={videoRef}
                         poster={tutor.videoThumbnailUrl}
                         controls={isPlaying}
                         onEnded={() => setIsPlaying(false)}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover border-2 border-gray-200 rounded-2xl"
                     >
                         <source src={tutor.videoUrl} type="video/mp4" />
                         Your browser does not support the video tag.
@@ -153,9 +186,9 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
 // A helper component to avoid repetition
 const StatItem: React.FC<{ icon: React.ReactNode, text: React.ReactNode, content?: React.ReactNode }> = ({ icon, text, content }) => (
     <div className="flex items-start text-sm text-gray-600">
-      <div className="w-5 h-5 mr-3 mt-0.5 text-gray-500 flex-shrink-0 flex items-center justify-center">{icon}</div>
+      <div className="w-5 h-5 mr-1 flex-shrink-0 flex items-center justify-center">{icon}</div>
       <div className="flex-grow">
-          <div className="flex items-center">{text}</div>
+          <span>{text}</span>
           {content && <div className="mt-1">{content}</div>}
       </div>
     </div>

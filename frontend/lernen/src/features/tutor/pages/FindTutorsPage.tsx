@@ -13,12 +13,14 @@ import BookingModal from '../components/find-tutor/BookingModal';
 
 const FindTutorsPage: React.FC = () => {
   const [tutors, setTutors] = useState<Tutor[]>([]);
+  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginatedResponse<Tutor> | null>(null);
   const [currentFilters, setCurrentFilters] = useState<IFilters>({});
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+  const [isSearchPerformed, setIsSearchPerformed] = useState(false);
 
   const handleOpenBookingModal = (tutor: Tutor) => {
     setSelectedTutor(tutor);
@@ -47,6 +49,7 @@ const FindTutorsPage: React.FC = () => {
       const response = await tutorService.searchTutors(searchFilters);
       if (response.success) {
         setTutors(response.data.content);
+        setFilteredTutors(response.data.content);
         setPagination(response.data);
       } else {
         setError(response.message);
@@ -68,14 +71,30 @@ const FindTutorsPage: React.FC = () => {
     handleFilterChange(currentFilters, page);
   }, [handleFilterChange, currentFilters]);
 
+  const handleSearch = (keyword: string) => {
+      setIsSearchPerformed(true);
+      if (!keyword.trim()) {
+          setFilteredTutors(tutors);
+          return;
+      }
+      const lowercasedKeyword = keyword.toLowerCase();
+      const results = tutors.filter(tutor => 
+          tutor.name.toLowerCase().includes(lowercasedKeyword) ||
+          tutor.specialization.toLowerCase().includes(lowercasedKeyword) ||
+          tutor.bio.toLowerCase().includes(lowercasedKeyword)
+      );
+      setFilteredTutors(results);
+  };
+
   // Initial load - fetch all tutors with no filters
   useEffect(() => {
     handleFilterChange({});
   }, []);
 
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container max-w-7xl mx-auto px-4 py-8">
         <Breadcrumb paths={[
           { name: 'Home', path: '/' },
           { name: 'Find Tutors', path: '/find-tutors' }
@@ -87,7 +106,10 @@ const FindTutorsPage: React.FC = () => {
             </p>
         </div>
 
-        <TutorSearchFilters onFilterChange={(filters) => handleFilterChange(filters)} />
+        <TutorSearchFilters 
+          onFilterChange={(filters) => handleFilterChange(filters)}
+          onSearch={handleSearch}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
             <div className="lg:col-span-3">
@@ -97,7 +119,7 @@ const FindTutorsPage: React.FC = () => {
                     <div className="text-red-600 p-4">{error}</div>
                 ) : tutors.length > 0 ? (
                     <>
-                        <TutorList tutors={tutors} onBookTrial={handleOpenBookingModal} />
+                        <TutorList tutors={filteredTutors} onBookTrial={handleOpenBookingModal} />
                         {pagination && (
                             <Pagination
                                 currentPage={pagination.number + 1} // Convert 0-based to 1-based

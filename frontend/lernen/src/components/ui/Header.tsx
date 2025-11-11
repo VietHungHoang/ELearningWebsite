@@ -70,7 +70,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-[#F8F7F4] border-b border-gray-200">
+    <header className="bg-[var(--page-bg-color)] border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-8">
