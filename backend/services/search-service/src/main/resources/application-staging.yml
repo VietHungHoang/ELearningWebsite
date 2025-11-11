@@ -1,0 +1,18 @@
+spring:
+  # Elasticsearch service available in docker-compose at host 'elasticsearch'
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://elasticsearch:9200}
+
+app:
+  elastic:
+    index:
+      tutors: tutors
+
+services:
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+
+logging:
+  level:
+    root: INFO
+    "com.elearning.searchservice": DEBUG
