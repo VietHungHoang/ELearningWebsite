@@ -1,6 +1,3 @@
-server:
-  port: 3000
-
 services:
   auth-service:
     url: http://localhost:8085
@@ -12,6 +9,8 @@ services:
     url: http://localhost:8081
   common-service:
     url: http://localhost:8084
+  tutor-service:
+    url: http://localhost:8086
 # Định nghĩa logging trong local
 logging:
   level:
