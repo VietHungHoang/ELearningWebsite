@@ -1,0 +1,123 @@
+
+.overview-container {
+    margin-bottom: 25px; 
+    width: 100%; 
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px; 
+    width: 100%; 
+
+    ::ng-deep > * {
+        .trezo-card {
+            height: 100%;
+            min-height: 280px; 
+            display: flex;
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 8px; 
+    }
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr; 
+        gap: 10px; 
+    }
+}
+
+.chart-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    margin-top: 10px; 
+
+    @media (max-width: 1023px) {
+        flex-direction: column;
+    }
+
+    .chart-item {
+        flex: 1; 
+        display: flex;
+        flex-direction: column;
+        min-height: 400px;
+
+        ::ng-deep > * {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+
+            .trezo-card {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+        }
+    }
+}
+
+.bottom-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+
+    @media (max-width: 1023px) {
+        flex-direction: column;
+    }
+
+    .bottom-item {
+        flex: 1; 
+        display: flex;
+        flex-direction: column;
+        min-height: 400px;
+
+        ::ng-deep > * {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+
+            .trezo-card {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+        }
+    }
+}
+
+.full-width-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+
+    @media (min-width: 1024px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .hidden-mobile {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .hidden-tablet {
+        display: none;
+    }
+}
+
+@media (max-width: 1536px) {
+    .hidden-desktop {
+        display: none;
+    }
+}

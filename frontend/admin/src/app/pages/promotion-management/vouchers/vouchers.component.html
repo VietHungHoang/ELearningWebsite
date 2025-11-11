@@ -1,0 +1,143 @@
+
+<div class="mb-[25px] md:flex items-center justify-between">
+    <h5 class="!mb-0">
+        Voucher Management
+    </h5>
+    <ol class="breadcrumb mt-[12px] md:mt-0">
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+                    home
+                </i>
+                Dashboard
+            </a>
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Promotion Management
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Vouchers
+        </li>
+    </ol>
+</div>
+
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
+        <div class="trezo-card-title">
+            <form class="relative sm:w-[265px]">
+                <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
+                    <i class="material-symbols-outlined !text-[20px]">search</i>
+                </label>
+                <input
+                    type="text"
+                    placeholder="Search Voucher Code..."
+                    (change)="onSearchChange($event)"
+                    class="bg-gray-50 border border-gray-50 h-[36px] text-xs rounded-md w-full block text-black pt-[11px] pb-[12px] ltr:pl-[38px] rtl:pr-[38px] ltr:pr-[13px] ltr:md:pr-[16px] rtl:pl-[13px] rtl:md:pl-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
+            </form>
+        </div>
+        <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex gap-[10px]">
+            <button type="button" routerLink="/dashboard/promotion/vouchers/create" class="inline-block transition-all text-primary-500 hover:text-primary-600 font-medium py-[8px] px-[16px] bg-primary-50 rounded-md hover:bg-primary-100 dark:bg-[#15203c] dark:hover:bg-[#1a2a4a]">
+                <i class="ri-add-line mr-[4px]"></i>
+                Create New Voucher
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-[20px] flex flex-wrap gap-[12px]">
+
+        <div class="relative">
+            <button type="button" class="inline-block px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm hover:bg-gray-100 dark:bg-[#15203c] dark:border-[#172036] dark:hover:bg-[#1a2a4a]" (click)="toggleFilterMenu()">
+                Creator <i class="ri-arrow-down-s-line ml-[4px]"></i>
+            </button>
+            @if (isFilterMenuOpen) {
+                <div class="absolute top-full mt-[8px] bg-white border border-gray-200 rounded-md shadow-lg z-10 dark:bg-[#0c1427] dark:border-[#172036]">
+                    <button type="button" (click)="onCreatorChange('all')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                        All
+                    </button>
+                    <button type="button" (click)="onCreatorChange('admin')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                        Created by Admin
+                    </button>
+                    <button type="button" (click)="onCreatorChange('instructor')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c]">
+                        Created by Instructor
+                    </button>
+                </div>
+            }
+        </div>
+
+        <select [(ngModel)]="selectedStatus" (change)="onStatusChange(selectedStatus)" class="px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm dark:bg-[#15203c] dark:border-[#172036] dark:text-white">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
+            <option value="paused">Paused</option>
+            <option value="upcoming">Upcoming</option>
+        </select>
+
+        <select [(ngModel)]="selectedType" (change)="onTypeChange(selectedType)" class="px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm dark:bg-[#15203c] dark:border-[#172036] dark:text-white">
+            <option value="all">All Types</option>
+            <option value="%">Percentage Discount</option>
+            <option value="đ">Fixed Amount</option>
+        </select>
+    </div>
+
+    <div class="table-responsive overflow-x-auto">
+        <table class="w-full">
+            <thead class="text-black dark:text-white">
+                <tr>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Code</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Creator</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Product Type</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Value</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Scope</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Usage</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Duration</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Status</th>
+                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-black dark:text-white">
+                @for (voucher of filteredVouchers; track voucher.id) {
+                    <tr class="border-b border-gray-100 dark:border-[#172036]">
+                        <td class="px-[20px] py-[15px] font-medium">{{ voucher.code }}</td>
+                        <td class="px-[20px] py-[15px]">
+                            <span class="inline-block px-[8px] py-[4px] rounded text-xs" [ngClass]="voucher.createdBy === 'Admin' ? 'bg-primary-50 text-primary-600' : 'bg-warning-50 text-warning-600'">
+                                {{ voucher.creatorName }}
+                            </span>
+                        </td>
+                        <td class="px-[20px] py-[15px]">{{ voucher.productType }}</td>
+                        <td class="px-[20px] py-[15px]">{{ voucher.value }}</td>
+                        <td class="px-[20px] py-[15px]">{{ voucher.scope }}</td>
+                        <td class="px-[20px] py-[15px]">{{ voucher.usage }}</td>
+                        <td class="px-[20px] py-[15px]">{{ voucher.date }}</td>
+                        <td class="px-[20px] py-[15px]">
+                            <span class="inline-block px-[8px] py-[4px] rounded text-xs" [ngClass]="getStatusClass(voucher.status)">
+                                {{ getStatusText(voucher.status) }}
+                            </span>
+                        </td>
+                        <td class="px-[20px] py-[15px]">
+                            <div class="flex gap-[8px]">
+                                @if (voucher.createdBy === 'Admin') {
+                                    <button type="button" [routerLink]="['/dashboard/promotion/vouchers/edit', voucher.id]" class="px-6 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-all duration-200" title="Edit">
+                                        <i class="ri-edit-line"></i>
+                                    </button>
+                                }
+                                <button type="button" (click)="pauseVoucher(voucher)" class="text-warning-500 hover:text-warning-600 transition-colors" title="Pause/Resume">
+                                    <i class="ri-pause-line"></i>
+                                </button>
+                                <button type="button" (click)="deleteVoucher(voucher.id)" class="text-danger-500 hover:text-danger-600 transition-colors" title="Delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (filteredVouchers.length === 0) {
+                    <tr>
+                        <td colspan="9" class="px-[20px] py-[30px] text-center text-gray-500">
+                            No vouchers found
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

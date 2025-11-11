@@ -1,0 +1,108 @@
+
+<div class="mb-[25px] md:flex items-center justify-between">
+    <div class="flex items-center gap-[20px]">
+        <h5 class="!mb-0">
+            Revenue Dashboard
+        </h5>
+
+        <div class="trezo-card-dropdown relative">
+            <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[5px] md:py-[6.5px] px-[12px] md:px-[19px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19]" (click)="toggleDateRangeDropdown()">
+                <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
+                    {{ getDateRangeDisplayText() }}
+                    <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
+                </span>
+            </button>
+            @if (isDateRangeDropdownOpen) {
+                <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[195px] z-[5] dark:bg-dark dark:shadow-none">
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('today')">
+                            Today
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('7days')">
+                            Last 7 Days
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('30days')">
+                            Last 30 Days
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('thisMonth')">
+                            This Month
+                        </button>
+                    </li>
+                </ul>
+            }
+        </div>
+    </div>
+    <ol class="breadcrumb mt-[12px] md:mt-0">
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+                    home
+                </i>
+                Dashboard
+            </a>
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Finance
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Revenue Dashboard
+        </li>
+    </ol>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[20px] mb-[25px]">
+
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+        <div class="mb-[12px]">
+            <h6 class="text-black dark:text-white font-medium">Gross Revenue</h6>
+        </div>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.grossRevenue) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Total from all orders</p>
+    </div>
+
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+        <div class="mb-[12px]">
+            <h6 class="text-black dark:text-white font-medium">Instructor Earnings</h6>
+        </div>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.instructorEarnings) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Payouts owed</p>
+    </div>
+
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+        <div class="mb-[12px]">
+            <h6 class="text-black dark:text-white font-medium">Platform Profit</h6>
+        </div>
+        <p class="!mb-0 text-[28px] font-bold text-success-500">{{ formatCurrency(kpis.platformProfit) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Revenue - Payouts</p>
+    </div>
+
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+        <div class="mb-[12px]">
+            <h6 class="text-black dark:text-white font-medium">Total Orders</h6>
+        </div>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ kpis.totalOrders }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Completed orders</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-[25px] mb-[25px]">
+
+    <div class="lg:col-span-2">
+        <app-revenue-trend />
+    </div>
+
+    <div class="lg:col-span-1">
+        <app-payment-method-chart />
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-[25px] mb-[25px]">
+
+    <app-top-instructors-chart />
+</div>
