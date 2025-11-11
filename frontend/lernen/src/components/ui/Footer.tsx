@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
 import useIntersectionObserver from '../../hooks/useIntersectionObserver';
-import { LernenLogo } from '../../icon/LernenLogo';
+import { LernenLogo } from '../LernenLogo';
 
 const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => (
     <li>

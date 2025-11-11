@@ -1,11 +1,10 @@
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
-import { store } from './store';
-import { logout } from '../features/auth/store/authSlice';
 
 // Create axios instance with base configuration
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api', // Placeholder base URL
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api',
+  // baseURL: import.meta.env.VITE_API_BASE_URL || 'https://lernen-api-gateway.onrender.com/api',
+  timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -53,8 +52,10 @@ axiosInstance.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) {
-          // No refresh token, dispatch logout
-          store.dispatch(logout());
+          // No refresh token, clear storage and redirect
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/login';
           return Promise.reject(error);
         }
 
@@ -88,8 +89,10 @@ axiosInstance.interceptors.response.use(
 
         isRefreshing = false;
 
-        // Refresh failed, dispatch logout
-        store.dispatch(logout());
+        // Refresh failed, clear storage and redirect
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

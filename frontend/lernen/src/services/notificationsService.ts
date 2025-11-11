@@ -1,0 +1,88 @@
+import apiService from './apiService';
+import { decodeJwt } from '../lib/jwt';
+import type { Notification } from '../types/notifications';
+
+const getUserId = (): string => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return '1001'; // Fallback for testing
+  const decoded = decodeJwt(token);
+  return decoded?.sub || '1001';
+};
+
+class NotificationsService {
+  async getNotifications(): Promise<Notification[]> {
+    try {
+      const userId = getUserId();
+      const response = await apiService.get<Notification[]>(`/notifications/user/${userId}`, {
+        page: 0,
+        size: 3
+      });
+      
+      if (response.success === true && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Failed to fetch notifications');
+      }
+    } catch (error) {
+      console.error('Error fetching notifications from API:', error);
+      throw error;
+    }
+  }
+
+  async loadMoreNotifications(page: number, size: number): Promise<Notification[]> {
+    try {
+      const userId = getUserId();
+      const response = await apiService.get<Notification[]>(`/notifications/user/${userId}`, {
+        page,
+        size
+      });
+      
+      if (response.success === true && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Failed to load more notifications');
+      }
+    } catch (error) {
+      console.error('Error loading more notifications from API:', error);
+      throw error;
+    }
+  }
+
+  async getUnreadCount(): Promise<number> {
+    try {
+      const userId = getUserId();
+      const response = await apiService.get<number>(`/notifications/user/${userId}/unread-count`);
+      if (response.success === true && typeof response.data === 'number') {
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Failed to fetch unread count');
+      }
+    } catch (error) {
+      console.error('Error fetching unread count from API:', error);
+      throw error;
+    }
+  }
+
+  async markAsRead(notificationId: string): Promise<void> {
+    try {
+      const userId = getUserId();
+      await apiService.post<void>(`/notifications/${notificationId}/user/${userId}/mark-read`);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  }
+
+  async markAllAsRead(): Promise<void> {
+    try {
+      const userId = getUserId();
+      await apiService.post<void>(`/notifications/user/${userId}/mark-all-read`);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
+    }
+  }
+}
+
+const notificationsService = new NotificationsService();
+export default notificationsService;
