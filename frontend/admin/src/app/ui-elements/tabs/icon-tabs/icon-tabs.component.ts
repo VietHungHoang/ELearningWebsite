@@ -9,7 +9,6 @@ import { Component } from '@angular/core';
 })
 export class IconTabsComponent {
 
-    // Tabs
     currentTab = 'tab1';
     switchTab(event: MouseEvent, tab: string) {
         event.preventDefault();

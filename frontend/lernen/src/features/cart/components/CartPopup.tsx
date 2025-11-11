@@ -30,7 +30,7 @@ const CartPopup: React.FC<{ onCartCountChange?: (count: number) => void }> = ({ 
         fetchCart();
     }, [onCartCountChange]);
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
 
     return (
         <div className="absolute top-full right-0 mt-2 w-72 sm:w-80 bg-white rounded-xl shadow-xl z-50 border border-gray-100 animate-dropdown-in">
@@ -50,15 +50,15 @@ const CartPopup: React.FC<{ onCartCountChange?: (count: number) => void }> = ({ 
                                 <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover flex-shrink-0" />
                                 <div className="flex-grow min-w-0">
                                     <p className="text-sm font-semibold text-gray-800 truncate" title={item.name}>{item.name}</p>
-                                    <p className="text-xs text-gray-500 mt-1">by {item.tutor}</p>
+                                    <p className="text-xs text-gray-500 mt-1">by {item.instructor.name}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <AiFillStar className="w-4 h-4 text-orange-400" />
-                                        <span className="text-xs font-bold text-gray-800">{item.rating.toFixed(1)}</span>
-                                        <span className="text-xs text-gray-500">({item.reviews})</span>
+                                        <span className="text-xs font-bold text-gray-800">{(item.rating || 0).toFixed(1)}</span>
+                                        <span className="text-xs text-gray-500">({item.reviews || 0})</span>
                                     </div>
                                     <div className="flex items-center justify-between mt-2">
                                         <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{item.category}</span>
-                                        <p className="text-sm font-bold text-gray-800">${item.price.toFixed(2)}</p>
+                                        <p className="text-sm font-bold text-gray-800">${(item.price || 0).toFixed(2)}</p>
                                     </div>
                                 </div>
                             </div>

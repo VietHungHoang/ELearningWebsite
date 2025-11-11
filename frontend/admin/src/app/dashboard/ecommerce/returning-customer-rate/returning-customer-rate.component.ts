@@ -9,13 +9,13 @@ import { ReturningCustomerRateService } from './returning-customer-rate.service'
 })
 export class ReturningCustomerRateComponent {
 
-    selectedTimeframe: string = 'This Year'; // Default dropdown text
+    selectedTimeframe: string = 'This Year'; 
     chartData: { [key: string]: { series: { name: string; data: number[] }[]; categories: string[] } };
 
     constructor(
         private returningCustomerRateService: ReturningCustomerRateService
     ) {
-        // Define the data for each timeframe
+
         this.chartData = {
             'This Day': {
                 series: [
@@ -49,18 +49,17 @@ export class ReturningCustomerRateComponent {
     }
 
     ngOnInit(): void {
-        // Load the default chart
+
         const defaultData = this.chartData[this.selectedTimeframe];
         this.returningCustomerRateService.loadChart(defaultData.series, defaultData.categories);
     }
 
     onTimeframeChange(timeframe: string): void {
-        this.selectedTimeframe = timeframe; // Update button text
+        this.selectedTimeframe = timeframe; 
         const selectedData = this.chartData[timeframe];
         this.returningCustomerRateService.updateChart(selectedData.series, selectedData.categories);
     }
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

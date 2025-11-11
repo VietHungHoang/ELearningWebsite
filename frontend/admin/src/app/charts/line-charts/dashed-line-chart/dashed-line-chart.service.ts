@@ -15,10 +15,9 @@ export class DashedLineChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -53,14 +52,7 @@ export class DashedLineChartService {
                         dashArray: [0, 8, 5]
                     },
                     title: {
-                        // text: "Page Statistics",
-                        // align: "left",
-                        // offsetX: -9,
-                        // style: {
-                        //     fontWeight: '500',
-                        //     fontSize: '14px',
-                        //     color: '#64748B'
-                        // }
+
                     },
                     legend: {
                         show: true,
@@ -169,7 +161,6 @@ export class DashedLineChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#dashed_line_chart'), options);
                 chart.render();
             } catch (error) {

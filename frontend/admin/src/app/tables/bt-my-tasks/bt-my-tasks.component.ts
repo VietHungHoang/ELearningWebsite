@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 })
 export class BtMyTasksComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

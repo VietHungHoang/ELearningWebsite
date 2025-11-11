@@ -11,7 +11,7 @@ import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 })
 export class RichTextEditorComponent {
 
-    editor!: Editor | null;  // Make it nullable
+    editor!: Editor | null;  
     toolbar: Toolbar = [
         ['bold', 'italic'],
         ['underline', 'strike'],
@@ -27,7 +27,7 @@ export class RichTextEditorComponent {
 
     ngOnInit(): void {
         if (isPlatformBrowser(this.platformId)) {
-            // Initialize the editor only in the browser
+
             this.editor = new Editor();
         }
     }

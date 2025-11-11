@@ -15,10 +15,9 @@ export class GradientRadialbarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [75],
                     chart: {
@@ -49,7 +48,7 @@ export class GradientRadialbarChartService {
                             track: {
                                 background: "#ffffff",
                                 strokeWidth: "67%",
-                                margin: 0, // margin is in pixels
+                                margin: 0, 
                                 dropShadow: {
                                     enabled: true,
                                     top: -3,
@@ -87,7 +86,7 @@ export class GradientRadialbarChartService {
                             inverseColors: true,
                             opacityFrom: 1,
                             opacityTo: 1,
-                            // stops: [0, 100]
+
                         }
                     },
                     stroke: {
@@ -96,7 +95,6 @@ export class GradientRadialbarChartService {
                     labels: ["Percent"]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#gradient_radialbar_chart'), options);
                 chart.render();
             } catch (error) {

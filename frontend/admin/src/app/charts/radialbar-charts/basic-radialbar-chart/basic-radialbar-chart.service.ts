@@ -15,10 +15,9 @@ export class BasicRadialbarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [70],
                     chart: {
@@ -36,7 +35,6 @@ export class BasicRadialbarChartService {
                     colors: ["#605DFF"]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#basic_radialbar_chart'), options);
                 chart.render();
             } catch (error) {

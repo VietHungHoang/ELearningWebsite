@@ -18,7 +18,6 @@ export class ReturningCustomerRateService {
             try {
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: series,
                     chart: {
@@ -72,8 +71,7 @@ export class ReturningCustomerRateService {
                         }
                     },
                     yaxis: {
-                        // tickAmount: 5,
-                        // max: 100,
+
                         min: 0,
                         labels: {
                             formatter: (val:any) => {

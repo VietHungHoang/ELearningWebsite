@@ -8,7 +8,6 @@ import { Component, HostListener } from '@angular/core';
 })
 export class RecentTransactionsComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

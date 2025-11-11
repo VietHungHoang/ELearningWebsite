@@ -15,10 +15,9 @@ export class BasicTreemapChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -97,7 +96,6 @@ export class BasicTreemapChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#basic_treemap_chart'), options);
                 chart.render();
             } catch (error) {

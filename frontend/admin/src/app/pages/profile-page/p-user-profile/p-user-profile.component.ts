@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 })
 export class PUserProfileComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     isCardHeaderOpen2 = false;
     toggleCardHeaderMenu() {

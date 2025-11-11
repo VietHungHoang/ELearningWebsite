@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 })
 export class TopSellingProductsComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

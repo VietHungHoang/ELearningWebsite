@@ -29,10 +29,9 @@ export class SyncingLineChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -331,7 +330,6 @@ export class SyncingLineChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#syncing_line_chart'), options);
                 const chart2 = new ApexCharts(document.querySelector('#syncing_line_chart2'), options2);
                 const chart3 = new ApexCharts(document.querySelector('#syncing_line_chart3'), options3);

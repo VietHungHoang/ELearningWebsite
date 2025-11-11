@@ -16,10 +16,9 @@ export class OrderSummaryService {
     async loadChart(series: number[], labels: string[]): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: series,
                     chart: {
@@ -53,7 +52,7 @@ export class OrderSummaryService {
                         enabled: false
                     }
                 };
-                // Initialize and render the chart
+
                 this.chartInstance = new ApexCharts(document.querySelector('#ecommerce_order_summary_chart'), options);
                 this.chartInstance.render();
             } catch (error) {

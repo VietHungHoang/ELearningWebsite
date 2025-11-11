@@ -15,10 +15,9 @@ export class BasicPolarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         14, 23, 21, 17, 15, 10, 12, 17, 21
@@ -61,7 +60,6 @@ export class BasicPolarChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#basic_polar_chart'), options);
                 chart.render();
             } catch (error) {

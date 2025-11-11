@@ -88,22 +88,15 @@ const CartDetailPage: React.FC = () => {
             .filter(item => item.appliedCoupon && item.availableCoupon)
             .map(item => {
                 const coupon = item.availableCoupon!;
-                const discount = coupon.type === 'percentage' ? item.price * (coupon.value / 100) : coupon.value;
+                const discount =  item.price * (coupon.value / 100);
                 return { name: item.name, discount, code: coupon.code };
             });
     }, [cartItems]);
     
     const itemDiscountsTotal = useMemo(() => itemDiscounts.reduce((sum, d) => sum + d.discount, 0), [itemDiscounts]);
     const totalDiscount = itemDiscountsTotal;
-    const total = subtotal - totalDiscount;    const handleRemoveTutorCoupon = async (itemId: number) => {
-        try {
-            setCartItems(items => items.map(item => 
-                item.id === itemId ? { ...item, appliedCoupon: undefined } : item
-            ));
-        } catch (error) {
-            console.error('Failed to remove coupon:', error);
-        }
-    };
+    const tax = (subtotal - itemDiscountsTotal) * 0.1; // Tax calculated after item discounts
+    const total = subtotal + tax - totalDiscount;
 
     const handleToggleCouponDisplay = (itemId: number) => {
         setShowCouponCode(prev => ({
@@ -206,13 +199,13 @@ const CartDetailPage: React.FC = () => {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <a href="#" onClick={(e) => {e.preventDefault(); navigate(`/course-detail/${item.courseId}`);}} className="font-bold text-lg text-gray-800 hover:text-[#0b6459]">{item.name}</a>
-                                            <p className="text-sm text-gray-500 mt-1">by <a href="#" onClick={(e) => {e.preventDefault(); navigate(`/instructor-detail/${item.tutorId}`);}} className="font-medium text-gray-600 hover:underline">{item.tutor}</a></p>
+                                            <p className="text-sm text-gray-500 mt-1">by <a href="#" onClick={(e) => {e.preventDefault(); navigate(`/instructor-detail/${item.instructor.id}`);}} className="font-medium text-gray-600 hover:underline">{item.instructor.name}</a></p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-xl font-bold text-gray-800">${item.price.toFixed(2)}</p>
+                                            <p className="text-xl font-bold text-gray-800">${(item.price || 0).toFixed(2)}</p>
                                             {item.appliedCoupon && item.availableCoupon && (
                                                 <p className="text-sm font-semibold text-green-600">
-                                                    -${(item.availableCoupon.type === 'percentage' ? item.price * (item.availableCoupon.value/100) : item.availableCoupon.value).toFixed(2)}
+                                                    -${((item.price || 0) * (item.availableCoupon.value / 100)).toFixed(2)}
                                                 </p>
                                             )}
                                         </div>
@@ -222,7 +215,7 @@ const CartDetailPage: React.FC = () => {
                                         <span className="text-xs font-semibold bg-gray-100 text-gray-700 px-2 py-1 rounded-md">{item.category}</span>
                                         <div className="flex items-center gap-1 text-sm">
                                             <AiFillStar className="w-4 h-4 text-orange-400" />
-                                            <span className="font-bold">{item.rating.toFixed(1)}</span>
+                                            <span className="font-bold">{(item.rating || 0).toFixed(1)}</span>
                                             <span className="text-gray-500">({item.reviews} reviews)</span>
                                         </div>
                                     </div>
@@ -258,10 +251,7 @@ const CartDetailPage: React.FC = () => {
                                                             Coupon Code: <span className="font-mono bg-blue-100 px-2 py-1 rounded text-blue-900">{item.availableCoupon.code}</span>
                                                         </p>
                                                         <p className="text-xs text-blue-600 mt-1">
-                                                            {item.availableCoupon.type === 'percentage'
-                                                                ? `${item.availableCoupon.value}% off`
-                                                                : `$${item.availableCoupon.value} off`
-                                                            }
+                                                            ${item.availableCoupon.value}% off
                                                         </p>
                                                     </div>
                                                     {!item.appliedCoupon ? (
@@ -352,28 +342,6 @@ const CartDetailPage: React.FC = () => {
                                         Have a coupon code?
                                     </label>
 
-                                    {/* Applied Coupons Display */}
-                                    {cartItems.some(item => item.appliedCoupon) && (
-                                        <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded-md">
-                                            <div className="flex flex-wrap gap-2">
-                                                {cartItems
-                                                    .filter(item => item.appliedCoupon)
-                                                    .map(item => (
-                                                        <div key={item.id} className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded border border-green-300">
-                                                            <span className="font-mono font-semibold text-green-700 text-sm">{item.appliedCoupon}</span>
-                                                            <button
-                                                                onClick={() => handleRemoveTutorCoupon(item.id)}
-                                                                className="text-red-500 hover:text-red-700 font-bold text-sm cursor-pointer transition-colors"
-                                                                title="Remove this coupon"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                            </div>
-                                        </div>
-                                    )}
-
                                     <div className="flex gap-2">
                                         <input
                                             id="coupon-input"
@@ -424,10 +392,7 @@ const CartDetailPage: React.FC = () => {
                                                         <AiOutlineTag className="w-4 h-4" />
                                                         <span className="font-mono">{item.availableCoupon!.code}</span>
                                                         <span className="text-xs">
-                                                            ({item.availableCoupon!.type === 'percentage'
-                                                                ? `${item.availableCoupon!.value}%`
-                                                                : `$${item.availableCoupon!.value}`
-                                                            } off)
+                                                            ({item.availableCoupon!.value}% off)
                                                         </span>
                                                         {item.appliedCoupon && <span className="text-green-600">✓</span>}
                                                     </button>

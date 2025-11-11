@@ -15,10 +15,9 @@ export class MissingNullValuesAreaChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -220,7 +219,6 @@ export class MissingNullValuesAreaChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#missing_null_values_area_chart'), options);
                 chart.render();
             } catch (error) {

@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+
 @import "tailwindcss";
 
 @custom-variant dark (&:where([class=dark], [class=dark] *));
@@ -111,12 +111,10 @@
     --shadow-3xl: rgba(149, 157, 165, 0.2) 0px 8px 24px;
 }
 
-/** Body */
 body {
     @apply font-body text-sm md:text-base text-gray-500 bg-gray-50 leading-normal dark:bg-[#0a0e19] dark:text-gray-400;
 }
 
-/** Paragraph */
 p {
     @apply mb-[15px] leading-[1.8];
 
@@ -125,7 +123,6 @@ p {
     }
 }
 
-/** Heading */
 h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1, .display-6, .display-5, .display-4, .display-3, .display-2, .display-1 {
     @apply text-black font-bold leading-tight mb-[10px] dark:text-white;
 }
@@ -148,12 +145,10 @@ h6, .h6, h5, .h5, h4, .h4, h3, .h3, h2, .h2, h1, .h1, .display-6, .display-5, .d
     @apply text-4xl;
 }
 
-/** Button */
 button {
     @apply cursor-pointer;
 }
 
-/** Sidebar */
 .sidebar-area {
     @apply w-[260px] ltr:-left-full ltr:xl:left-0 rtl:-right-full rtl:xl:right-0;
 
@@ -221,7 +216,7 @@ button {
                             }
                             &.open, &.active {
                                 @apply bg-gray-50 text-primary-500 dark:bg-[#15203c];
-                                
+
                                 &::after {
                                     @apply border-primary-500;
                                 }
@@ -295,7 +290,6 @@ button {
     }
 }
 
-/** Header */
 .header-area {
     @apply left-[15px] right-[15px] md:left-[25px] md:right-[25px] ltr:xl:left-[285px] rtl:xl:right-[285px];
 
@@ -380,7 +374,6 @@ button {
     }
 }
 
-/** Main Content */
 .main-content {
     @apply pt-[143px] px-[15px] md:pt-[95px] md:pl-[25px] md:pr-[25px] ltr:xl:pl-[285px] rtl:xl:pr-[285px];
 
@@ -394,7 +387,6 @@ button {
     }
 }
 
-/** Card */
 .trezo-card {
     .trezo-card-header {
         .analytics-overview-buttons {
@@ -514,7 +506,7 @@ button {
                     }
                     &.active {
                         @apply text-primary-500;
-        
+
                         .custom-border {
                             @apply scale-x-100;
                         }
@@ -690,7 +682,7 @@ button {
 
                 [class*=owl-] {
                     @apply p-0 w-[31px] h-[31px] my-0 mx-[4px] text-[22px] leading-[29px] text-gray-500 dark:text-gray-400 bg-white dark:bg-[#0c1427] border border-gray-100 dark:border-[#172036];
-                    
+
                     &:hover {
                         @apply bg-primary-500 border-primary-500 text-white;
                     }
@@ -913,7 +905,7 @@ button {
         }
         .toc-accordion-collapse {
             @apply hidden;
-        
+
             &.open {
                 @apply block;
             }
@@ -942,7 +934,6 @@ button {
     }
 }
 
-/** Apexcharts */
 html[dir="rtl"] {
     .sidebar-area {
         .accordion {
@@ -1013,7 +1004,7 @@ html[dir="rtl"] {
         .trezo-card-content {
             .chat-body {
                 direction: ltr;
-    
+
                 ul {
                     li {
                         direction: rtl;
@@ -1192,7 +1183,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Table */
 .table-responsive {
     -webkit-overflow-scrolling: touch;
 
@@ -1217,7 +1207,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Checkbox */
 .form-check {
     input {
         &[type=checkbox] {
@@ -1245,7 +1234,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Add New Popup */
 .add-new-popup {
     background-color: rgba(0, 0, 0, 0.5);
     @apply opacity-0 invisible ltr:md:-mr-[15px] rtl:md:-ml-[15px];
@@ -1262,7 +1250,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Working Schedule Calendar */
 #workingScheduleCalendar {
     #prevBtn, #nextBtn {
         i {
@@ -1289,7 +1276,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Breadcrumb */
 .breadcrumb {
     .breadcrumb-item {
         &::before {
@@ -1313,7 +1299,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Full Calendar */
 #fullCalendar {
     &.fc {
         .fc-toolbar-title {
@@ -1331,7 +1316,7 @@ html[dir="rtl"] {
 
             .fc-button {
                 @apply p-0 w-[35px] h-[35px] shadow-none rounded-sm inline-block text-black dark:text-white bg-white dark:bg-[#0c1427] transition-all border border-gray-100 dark:border-[#172036] hover:bg-primary-500 hover:border-primary-500 hover:text-white mx-[5px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0;
-                
+
                 .fc-icon {
                     @apply rtl:-scale-x-[1];
                 }
@@ -1394,11 +1379,10 @@ html[dir="rtl"] {
     }
 }
 
-/** Rich Text Editor */
 .light, .dark {
     .NgxEditor__Wrapper {
         @apply rounded-md border-gray-100 dark:border-[#172036];
-    
+
         .NgxEditor__MenuBar {
             @apply bg-primary-50 dark:bg-[#15203c] border-0 rounded-t-md;
         }
@@ -1427,7 +1411,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Custom Tooltip */
 .tooltip-text {
     @apply w-auto bg-black text-white text-center rounded-sm py-[5px] px-[10px] absolute z-[1] bottom-[127%] ltr:left-1/2 rtl:right-1/2 ltr:-translate-x-1/2 rtl:translate-x-1/2 text-sm font-medium whitespace-nowrap;
 
@@ -1446,7 +1429,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Custom Popover */
 .popover-text {
     @apply w-auto bg-black text-white text-center rounded-sm py-[5px] px-[10px] absolute z-[1] bottom-[127%] ltr:left-1/2 rtl:right-1/2 ltr:-translate-x-1/2 rtl:translate-x-1/2 text-sm font-medium whitespace-nowrap;
 
@@ -1465,7 +1447,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Tabs */
 .product-details-tabs {
     .navs {
         .nav-item {
@@ -1634,7 +1615,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Radio */
 .form-radio {
     input {
         &[type=radio] {
@@ -1647,7 +1627,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Front Page Navbar */
 #navbar {
     &.is-sticky {
         @apply z-[999] bg-white dark:bg-dark;
@@ -1685,7 +1664,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Front Page Team Slides */
 #frontPageTeamSlides {
     .owl-theme {
         .owl-nav {
@@ -1702,7 +1680,6 @@ html[dir="rtl"] {
     }
 }
 
-/** Price Range Slider */
 .range-slider, .range-slider2 {
     .number-group, .number-group2 {
 		.number-input, .number-input2 {
@@ -1747,7 +1724,6 @@ html[dir="rtl"] {
 	}
 }
 
-/** File Uploader */
 .file-uploader {
     &[_nghost-ng-c2826451337] {
         @apply dark:bg-[#0a0e19] dark:outline-[#172036] min-h-[200px];

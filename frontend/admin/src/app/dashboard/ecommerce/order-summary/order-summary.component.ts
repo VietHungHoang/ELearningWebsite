@@ -9,13 +9,13 @@ import { OrderSummaryService } from './order-summary.service';
 })
 export class OrderSummaryComponent {
 
-    selectedTimeframe: string = 'This Year'; // Default dropdown text
+    selectedTimeframe: string = 'This Year'; 
     chartData: { [key: string]: { series: number[]; labels: string[] } };
 
     constructor(
         private orderSummaryService: OrderSummaryService
     ) {
-        // Define the data for each timeframe
+
         this.chartData = {
             'This Day': {
                 series: [40, 30, 30],
@@ -37,18 +37,17 @@ export class OrderSummaryComponent {
     }
 
     ngOnInit(): void {
-        // Load the default chart
+
         const defaultData = this.chartData[this.selectedTimeframe];
         this.orderSummaryService.loadChart(defaultData.series, defaultData.labels);
     }
 
     onTimeframeChange(timeframe: string): void {
-        this.selectedTimeframe = timeframe; // Update the button text
+        this.selectedTimeframe = timeframe; 
         const selectedData = this.chartData[timeframe];
         this.orderSummaryService.updateChart(selectedData.series, selectedData.labels);
     }
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

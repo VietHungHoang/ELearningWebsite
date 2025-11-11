@@ -20,13 +20,11 @@ export class ComingSoonComponent {
     }
 
     ngOnInit(): void {
-        // Initialize theme and direction on component load
+
         this.toggleService.initializeTheme();
-        
-        // Set your target date and time for the countdown
+
         const targetDate = new Date('2025-12-31T23:59:59').getTime();
 
-        // Update the countdown every second
         this.ngZone.runOutsideAngular(() => {
             this.countdownInterval = setInterval(() => {
                 const now = new Date().getTime();
@@ -40,7 +38,7 @@ export class ComingSoonComponent {
                     this.countdown.seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
                 });
                 } else {
-                    // Countdown has ended, do something here
+
                     this.ngZone.run(() => {
                         this.countdown = { days: 0, hours: 0, minutes: 0, seconds: 0 };
                     });
@@ -51,16 +49,14 @@ export class ComingSoonComponent {
     }
 
     ngOnDestroy(): void {
-        // Clear the interval to prevent memory leaks
+
         clearInterval(this.countdownInterval);
     }
 
-    // Toggle theme between light and dark
     toggleTheme() {
         this.toggleService.toggleTheme();
     }
 
-    // Toggle direction between LTR and RTL
     toggleDirection() {
         this.toggleService.toggleDirection();
     }

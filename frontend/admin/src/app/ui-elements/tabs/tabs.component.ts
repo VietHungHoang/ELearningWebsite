@@ -11,7 +11,6 @@ import { IconTabsComponent } from './icon-tabs/icon-tabs.component';
 })
 export class TabsComponent {
 
-    // Tabs
     currentTab = 'tab1';
     switchTab(event: MouseEvent, tab: string) {
         event.preventDefault();

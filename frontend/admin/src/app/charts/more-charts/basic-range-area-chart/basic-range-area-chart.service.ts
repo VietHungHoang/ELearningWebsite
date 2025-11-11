@@ -15,10 +15,9 @@ export class BasicRangeAreaChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -149,7 +148,6 @@ export class BasicRangeAreaChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#basic_range_area_chart'), options);
                 chart.render();
             } catch (error) {

@@ -10,7 +10,6 @@ import { NgClass } from '@angular/common';
 })
 export class FaqPageComponent {
 
-    // Accordion
     openSectionIndex: number = 0;
     toggleSection(index: number): void {
         if (this.openSectionIndex === index) {

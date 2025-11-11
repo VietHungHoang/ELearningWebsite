@@ -10,7 +10,6 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 })
 export class ReadComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

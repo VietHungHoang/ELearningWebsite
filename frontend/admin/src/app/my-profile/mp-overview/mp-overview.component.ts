@@ -9,13 +9,13 @@ import { MpOverviewService } from './mp-overview.service';
 })
 export class MpOverviewComponent {
 
-    selectedTimeframe: string = 'Last Week'; // Default dropdown text
+    selectedTimeframe: string = 'Last Week'; 
     chartData: { [key: string]: { series: { name: string; data: number[] }[]; categories: string[] } };
 
     constructor(
         private mpOverviewService: MpOverviewService
     ) {
-        // Define the data for each timeframe
+
         this.chartData = {
             'Last Day': {
                 series: [
@@ -53,18 +53,17 @@ export class MpOverviewComponent {
     }
 
     ngOnInit(): void {
-        // Load the default chart
+
         const defaultData = this.chartData[this.selectedTimeframe];
         this.mpOverviewService.loadChart(defaultData.series, defaultData.categories);
     }
 
     onTimeframeChange(timeframe: string): void {
-        this.selectedTimeframe = timeframe; // Update button text
+        this.selectedTimeframe = timeframe; 
         const selectedData = this.chartData[timeframe];
         this.mpOverviewService.updateChart(selectedData.series, selectedData.categories);
     }
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

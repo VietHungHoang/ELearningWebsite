@@ -13,7 +13,7 @@ export class TotalSalesService {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
 
-    async loadChart(series: { name: string; data: number[] }[], categories: string[]): Promise<void> {
+    async loadChart(series: { name: string; data: number[] }[], categories: string[], chartId: string): Promise<void> {
         if (this.isBrowser) {
             try {
                 const ApexCharts = (await import('apexcharts')).default;
@@ -69,8 +69,7 @@ export class TotalSalesService {
                         }
                     },
                     yaxis: {
-                        // tickAmount: 5,
-                        // max: 100,
+
                         min: 0,
                         labels: {
                             formatter: (val:any) => {
@@ -117,7 +116,7 @@ export class TotalSalesService {
                         }
                     }
                 };
-                this.chartInstance = new ApexCharts(document.querySelector('#ecommerce_total_sales_chart'), options);
+                this.chartInstance = new ApexCharts(document.querySelector('#' + chartId), options);
                 this.chartInstance.render();
             } catch (error) {
                 console.error('Error loading ApexCharts:', error);

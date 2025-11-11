@@ -15,10 +15,9 @@ export class LineColumnChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -42,16 +41,7 @@ export class LineColumnChartService {
                     stroke: {
                         width: [0, 4]
                     },
-                    // title: {
-                    //     text: "Traffic Sources",
-                    //     align: "left",
-                    //     offsetX: -9,
-                    //     style: {
-                    //         fontWeight: '500',
-                    //         fontSize: '14px',
-                    //         color: '#64748B'
-                    //     }
-                    // },
+
                     dataLabels: {
                         enabled: true,
                         enabledOnSeries: [1],
@@ -167,7 +157,6 @@ export class LineColumnChartService {
                     ]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#line_column_chart'), options);
                 chart.render();
             } catch (error) {

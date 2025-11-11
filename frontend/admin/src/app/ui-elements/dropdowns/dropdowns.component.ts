@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 })
 export class DropdownsComponent {
 
-    // Dropdown
     isCardHeaderOpen = false;
     isCardHeaderOpen2 = false;
     isCardHeaderOpen3 = false;

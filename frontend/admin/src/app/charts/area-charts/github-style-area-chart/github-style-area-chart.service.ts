@@ -16,10 +16,9 @@ export class GithubStyleAreaChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     dataLabels: {
                         enabled: false
@@ -174,7 +173,6 @@ export class GithubStyleAreaChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#github_style_area_chart'), options);
                 const chart2 = new ApexCharts(document.querySelector('#github_style_area_chart2'), options2);
                 chart.render();

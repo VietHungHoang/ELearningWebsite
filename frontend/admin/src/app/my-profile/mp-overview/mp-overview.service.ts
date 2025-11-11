@@ -16,10 +16,9 @@ export class MpOverviewService {
     async loadChart(series: { name: string; data: number[] }[], categories: string[]): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: series,
                     chart: {
@@ -68,13 +67,10 @@ export class MpOverviewService {
                         }
                     },
                     yaxis: {
-                        // tickAmount: 6,
-                        // max: 150,
+
                         min: 0,
                         labels: {
-                            // formatter: (val:any) => {
-                            //     return '$' + val + 'k'
-                            // },
+
                             style: {
                                 colors: "#64748B",
                                 fontSize: "12px"

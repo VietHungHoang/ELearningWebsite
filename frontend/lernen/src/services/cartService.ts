@@ -1,6 +1,6 @@
 import apiService from './apiService';
 import { store } from '../lib/store';
-import type { ApiResponse } from '../types/api';
+import courseService from './courseService';
 import type {
   CartItem as FrontendCartItem,
   CartResponse,
@@ -8,38 +8,98 @@ import type {
   AddToCartRequest,
   ApplyCouponRequest,
   CheckoutRequest,
-  CartItemResponse
+  AddToCartBFFResponse,
+  ViewCartBFFResponse,
+  CartItemBFF,
+  ApplyCouponBFFResponse,
+  CheckoutBFFResponse,
+  CourseLevel
 } from '../types/cart';
 
-// Mock data for testing when API fails
+
+// Helper function to enrich cart item with course data
+const enrichCartItemWithCourseData = async (cartItem: FrontendCartItem): Promise<FrontendCartItem> => {
+  try {
+    // Try to fetch course data from courseService
+    const courseData = await courseService.getCourseByCourseId(cartItem.courseId);
+
+    if (courseData && courseData.id !== 0 && courseData.name && courseData.name !== 'Unknown Course') {
+      // Use real course data if it's good quality
+      return {
+        ...cartItem,
+        name: courseData.name,
+        category: courseData.category || 'Technology',
+        instructor: {
+          id: courseData.instructorId || 1,
+          name: courseData.instructorName || 'Expert Instructor'
+        },
+        price: courseData.price || 99.99,
+        image: courseData.image || "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop&crop=center",
+        rating: courseData.rating || 4.8,
+        reviews: courseData.reviews || 1500,
+        level: courseData.level as CourseLevel || 'Intermediate',
+        language: courseData.language || 'English',
+        lessons: courseData.lessons || 50,
+        duration: courseData.duration || '10 hours'
+      };
+    }
+  } catch (error) {
+    console.warn(`Failed to fetch course data for courseId ${cartItem.courseId}, using mock data:`, error);
+  }
+  
+  // Fallback to mock data if courseService fails or returns null
+  return cartItem;
+};
 const mockCartItems: FrontendCartItem[] = [
   {
     id: 1,
     courseId: 101,
-    name: "React Masterclass",
+    name: "Complete React Developer Bootcamp",
     category: "Web Development",
-    tutor: "John Doe",
-    tutorId: 1,
+    instructor: {
+      id: 1,
+      name: "Sarah Johnson"
+    },
     price: 99.99,
     image: "/images/courses/react.jpg",
     rating: 4.8,
-    reviews: 1250,
+    reviews: 2847,
     level: "Intermediate",
     language: "English",
-    lessons: 45,
-    duration: "8 hours",
+    lessons: 67,
+    duration: "12 hours",
     availableCoupon: {
       code: "REACT25",
-      type: "percentage",
       value: 25
     }
-  }
+  },
+  {
+    id: 2,
+    courseId: 102,
+    name: "Python for Data Science & Machine Learning",
+    category: "Data Science",
+    instructor: {
+      id: 2,
+      name: "Dr. Michael Chen"
+    },
+    price: 129.99,
+    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=250&fit=crop&crop=center",
+    rating: 4.9,
+    reviews: 1923,
+    level: "Advanced",
+    language: "English",
+    lessons: 89,
+    duration: "18 hours",
+    availableCoupon: {
+      code: "DATA30",
+      value: 30
+    }
+  },
 ];
 
 const mockCartResponse: CartResponse = {
   id: 1,
   learnerId: 1,
-  status: 'OPEN',
   totalAmount: 99.99,
   items: mockCartItems
 };
@@ -49,30 +109,59 @@ const mockCheckoutResponse: CheckoutResponse = {
   totalAmount: 99.99
 };
 
-function transformCartItem(item: CartItemResponse): FrontendCartItem {
-  if (!item) {
-    throw new Error('Cart item is undefined');
-  }
-  const fallbackTutor = "Unknown Instructor";
-  const fallbackTutorId = 0;
-  const courseId = item.courseId || item.id;
+function transformBFFCartItem(item: CartItemBFF): FrontendCartItem {
   return {
     id: item.id,
-    courseId: courseId,
-    name: item.name || "Untitled Course",
-    category: item.category || "Uncategorized",
-    tutor: item.instructor?.name || fallbackTutor,
-    tutorId: item.instructor?.id || item.instructorId || fallbackTutorId,
-    price: item.price || 0,
-    image: item.image || "/images/default-course.jpg",
-    rating: item.rating || 0,
-    reviews: item.reviews || 0,
-    level: item.level || "Beginner",
-    language: item.language || "English",
-    lessons: item.lessons || 0,
-    duration: item.duration || "0h",
-    availableCoupon: item.availableCoupon,
-    appliedCoupon: item.appliedCoupon
+    courseId: item.courseId,
+    name: item.courseTitle,
+    category: item.category,
+    instructor: {
+      id: typeof item.instructorId === 'string' ? parseInt(item.instructorId, 10) : item.instructorId,
+      name: item.instructorName
+    },
+    price: item.price,
+    image: item.image,
+    rating: item.rating,
+    reviews: item.reviews,
+    level: item.level,
+    language: item.language,
+    lessons: item.lessons,
+    duration: item.duration
+  };
+}
+
+function transformAddToCartBFFResponse(response: AddToCartBFFResponse, learnerId: string): CartResponse {
+  return {
+    id: response.cartId,
+    learnerId: parseInt(learnerId),
+    totalAmount: response.totalAmount,
+    items: []
+  };
+}
+
+function transformViewCartBFFResponse(response: ViewCartBFFResponse): CartResponse {
+  return {
+    id: response.cartId,
+    learnerId: parseInt(response.learnerId),
+    totalAmount: response.totalAmount,
+    items: response.items?.map(transformBFFCartItem) || []
+  };
+}
+
+function transformApplyCouponBFFResponse(response: ApplyCouponBFFResponse, learnerId: string): CartResponse {
+  // ApplyCoupon only gives us summary, call getCart() to get full details
+  return {
+    id: response.cartId,
+    learnerId: parseInt(learnerId),
+    totalAmount: response.totalAmount,
+    items: []
+  };
+}
+
+function transformCheckoutBFFResponse(response: CheckoutBFFResponse): CheckoutResponse {
+  return {
+    orderId: response.orderId,
+    totalAmount: response.totalAmount
   };
 }
 
@@ -85,28 +174,11 @@ const getLearnerId = (): string => {
 const getCart = async (): Promise<FrontendCartItem[]> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.get<{ items: CartItemResponse[] }>(`/learners/${learnerId}/cart`);
+    const response = await apiService.get<ViewCartBFFResponse>(`/learners/${learnerId}/cart`);
     if (response.success === true && response.data) {
       try {
-        const cartItems = response.data.items;
-        if (Array.isArray(cartItems)) {
-          return cartItems
-            .filter((item): item is CartItemResponse => 
-              item !== null && 
-              typeof item === 'object' && 
-              'id' in item
-            )
-            .map(item => {
-              try {
-                return transformCartItem(item);
-              } catch (transformError) {
-                console.error('Error transforming cart item:', transformError, item);
-                return null;
-              }
-            })
-            .filter((item): item is FrontendCartItem => item !== null); 
-        }
-        return [];
+        const cartResponse = transformViewCartBFFResponse(response.data);
+        return cartResponse.items;
       } catch {
         throw new Error('Invalid cart data format');
       }
@@ -115,18 +187,28 @@ const getCart = async (): Promise<FrontendCartItem[]> => {
     }
   } catch (error) {
     console.error('Error fetching cart from API:', error);
-    return mockCartItems; 
+    
+    // Try to enrich mock data with real course data before returning
+    try {
+      const enrichedItems = await Promise.all(
+        mockCartItems.map(item => enrichCartItemWithCourseData(item))
+      );
+      return enrichedItems;
+    } catch (enrichError) {
+      console.warn('Failed to enrich mock data with course data, using basic mock:', enrichError);
+      return mockCartItems;
+    }
   }
 };
 
 const addToCart = async (request: AddToCartRequest): Promise<CartResponse> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.post<ApiResponse<ApiResponse<CartResponse>>>(`/learners/${learnerId}/cart/items`, request);
-    if (response.success === true && response.data && response.data.success === true) {
-      return response.data.data as unknown as CartResponse;
+    const response = await apiService.post<AddToCartBFFResponse>(`/learners/${learnerId}/cart/items`, request);
+    if (response.success === true && response.data) {
+      return transformAddToCartBFFResponse(response.data, learnerId);
     } else {
-      const errorMessage = response.data?.message || response.message || 'Failed to add to cart';
+      const errorMessage = response.message || 'Failed to add to cart';
       throw new Error(errorMessage);
     }
   } catch (error) {
@@ -138,14 +220,7 @@ const addToCart = async (request: AddToCartRequest): Promise<CartResponse> => {
 const removeItem = async (courseId: number): Promise<CartResponse> => {
   try {
     const learnerId = getLearnerId();
-    type CartApiResponse = {
-      id: number;
-      learnerId: number;
-      status: 'OPEN' | 'CHECKED_OUT';
-      totalAmount: number;
-      items: CartItemResponse[];
-    };
-    const response = await apiService.delete<ApiResponse<CartApiResponse>>(`/learners/${learnerId}/cart/items/${courseId}`);
+    const response = await apiService.delete<ViewCartBFFResponse>(`/learners/${learnerId}/cart/items/${courseId}`);
     if (!response?.success || !response?.data) {
       const errorMsg = response?.message || 'Failed to remove item from cart';
       console.error('API Error:', {
@@ -155,23 +230,7 @@ const removeItem = async (courseId: number): Promise<CartResponse> => {
       });
       throw new Error(errorMsg);
     }
-    const cartData = response.data.data as CartApiResponse;
-    if (!cartData?.items || !Array.isArray(cartData.items)) {
-      return {
-        id: 0,
-        learnerId: parseInt(getLearnerId()),
-        status: 'OPEN',
-        items: [],
-        totalAmount: 0
-      };
-    }
-    return {
-      id: cartData.id || 0,
-      learnerId: cartData.learnerId || parseInt(getLearnerId()),
-      status: cartData.status || 'OPEN',
-      items: cartData.items.map((item: CartItemResponse) => transformCartItem(item)),
-      totalAmount: cartData.totalAmount || 0
-    };
+    return transformViewCartBFFResponse(response.data);
   } catch (error) {
     console.error('Error removing item from API:', error);
     return mockCartResponse;
@@ -181,11 +240,11 @@ const removeItem = async (courseId: number): Promise<CartResponse> => {
 const checkout = async (request?: CheckoutRequest): Promise<CheckoutResponse> => {
   try {
     const learnerId = getLearnerId();
-    const response = await apiService.post<ApiResponse<ApiResponse<CheckoutResponse>>>(`/learners/${learnerId}/cart/checkout`, request || {});
-    if (response.success === true && response.data && response.data.success === true) {
-      return response.data.data as unknown as CheckoutResponse;
+    const response = await apiService.post<CheckoutBFFResponse>(`/learners/${learnerId}/cart/checkout`, request || {});
+    if (response.success === true && response.data) {
+      return transformCheckoutBFFResponse(response.data);
     } else {
-      const errorMessage = response.data?.message || response.message || 'Failed to checkout';
+      const errorMessage = response.message || 'Failed to checkout';
       throw new Error(errorMessage);
     }
   } catch (error) {
@@ -198,36 +257,9 @@ const applyCoupon = async (courseId: number, request: ApplyCouponRequest): Promi
   try {
     const learnerId = getLearnerId();
     request.courseId = courseId;
-    const response = await apiService.post<ApiResponse<{items: CartItemResponse[], totalAmount: number}>>(`/learners/${learnerId}/cart/items/${courseId}/apply-coupon`, request);
-    if (response.success === true) {
-      if (response.data) {
-        const cartData = response.data as unknown as Record<string, unknown>;
-        if ('items' in cartData) {
-          return {
-            id: 0,
-            learnerId: parseInt(getLearnerId()),
-            status: 'OPEN',
-            items: (cartData.items as CartItemResponse[]).map(item => transformCartItem(item)) || [],
-            totalAmount: (cartData.totalAmount as number) || 0
-          };
-        } else {
-          return {
-            id: 0,
-            learnerId: parseInt(getLearnerId()),
-            status: 'OPEN',
-            items: [],
-            totalAmount: 0
-          };
-        }
-      } else {
-        return {
-          id: 0,
-          learnerId: parseInt(getLearnerId()),
-          status: 'OPEN',
-          items: [],
-          totalAmount: 0
-        };
-      }
+    const response = await apiService.post<ApplyCouponBFFResponse>(`/learners/${learnerId}/cart/items/${courseId}/apply-coupon`, request);
+    if (response.success === true && response.data) {
+      return transformApplyCouponBFFResponse(response.data, learnerId);
     } else {
       throw new Error(response.message || 'Failed to apply coupon');
     }
