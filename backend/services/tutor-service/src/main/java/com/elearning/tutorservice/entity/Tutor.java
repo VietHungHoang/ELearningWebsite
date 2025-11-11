@@ -76,9 +76,6 @@ public class Tutor extends BaseEntity {
     private List<TutorAvailability> availabilities;
 
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TutorCategory> categories;
-
-    @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TutorSocial> socialLinks;
 
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

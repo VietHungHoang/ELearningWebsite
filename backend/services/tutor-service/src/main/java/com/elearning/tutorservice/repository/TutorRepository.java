@@ -19,11 +19,9 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
            "WHERE t.isVerified = true " +
            "AND (:languageCodes IS NULL OR EXISTS (SELECT 1 FROM TutorLanguage tl WHERE tl.tutor = t AND tl.languageCode IN :languageCodes)) " +
            "AND (:minPrice IS NULL OR t.currentSessionFee >= :minPrice) " +
-           "AND (:maxPrice IS NULL OR t.currentSessionFee <= :maxPrice) " +
-           "AND (:categoryIds IS NULL OR EXISTS (SELECT 1 FROM TutorCategory tc WHERE tc.tutor = t AND tc.categoryId IN :categoryIds))")
+           "AND (:maxPrice IS NULL OR t.currentSessionFee <= :maxPrice)")
     Page<Tutor> findTutorsWithFilters(@Param("languageCodes") List<String> languageCodes,
                                       @Param("minPrice") BigDecimal minPrice,
                                       @Param("maxPrice") BigDecimal maxPrice,
-                                      @Param("categoryIds") List<UUID> categoryIds,
                                       Pageable pageable);
 }

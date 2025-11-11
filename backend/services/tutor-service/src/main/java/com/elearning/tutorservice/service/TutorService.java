@@ -6,8 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 public interface TutorService {
-    Page<TutorSearchResponse> searchTutors(List<String> languageCodes, BigDecimal minPrice, BigDecimal maxPrice, List<UUID> categoryIds, List<String> availableDays, Pageable pageable);
+    Page<TutorSearchResponse> searchTutors(List<String> languageCodes, BigDecimal minPrice, BigDecimal maxPrice, List<String> availableDays, Pageable pageable);
 }

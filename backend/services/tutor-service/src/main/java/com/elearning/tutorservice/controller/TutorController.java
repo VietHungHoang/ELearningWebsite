@@ -28,13 +28,12 @@ public class TutorController {
             @RequestParam(required = false) List<String> languageCodes,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) List<UUID> categoryIds,
             @RequestParam(required = false) List<String> availableDays,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<TutorSearchResponse> results = tutorService.searchTutors(languageCodes, minPrice, maxPrice, categoryIds, availableDays, pageable);
+        Page<TutorSearchResponse> results = tutorService.searchTutors(languageCodes, minPrice, maxPrice, availableDays, pageable);
 
         return ResponseEntity.ok(results);
     }

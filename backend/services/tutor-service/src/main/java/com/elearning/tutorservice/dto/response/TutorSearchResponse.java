@@ -25,7 +25,6 @@ public class TutorSearchResponse {
     private Double averageRating;
     private Integer reviewCount;
     private List<String> languages;
-    private List<UUID> categoryIds;
     private Boolean teachesInGroups;
     private Integer maxGroupMembers;
     private Boolean isVerified;

@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageImpl;
 import com.elearning.tutorservice.dto.request.AvailabilityFilter;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,16 +23,16 @@ public class TutorServiceImpl implements TutorService {
     private final TutorRepository tutorRepository;
 
     @Override
-    public Page<TutorSearchResponse> searchTutors(List<String> languageCodes, BigDecimal minPrice, BigDecimal maxPrice, List<UUID> categoryIds, List<String> availableDays, Pageable pageable) {
+    public Page<TutorSearchResponse> searchTutors(List<String> languageCodes, BigDecimal minPrice, BigDecimal maxPrice, List<String> availableDays, Pageable pageable) {
         List<AvailabilityFilter> availabilityFilters = AvailabilityUtils.parseAvailableDays(availableDays);
 
         if (availabilityFilters == null || availabilityFilters.isEmpty()) {
             // No availability filter, use pagination
-            Page<Tutor> tutorPage = tutorRepository.findTutorsWithFilters(languageCodes, minPrice, maxPrice, categoryIds, pageable);
+            Page<Tutor> tutorPage = tutorRepository.findTutorsWithFilters(languageCodes, minPrice, maxPrice, pageable);
             return tutorPage.map(this::mapToSearchResponse);
         } else {
             // Has availability filter, get all matching other filters, then filter and page
-            Page<Tutor> allTutorsPage = tutorRepository.findTutorsWithFilters(languageCodes, minPrice, maxPrice, categoryIds, Pageable.unpaged());
+            Page<Tutor> allTutorsPage = tutorRepository.findTutorsWithFilters(languageCodes, minPrice, maxPrice, Pageable.unpaged());
             List<Tutor> allTutors = allTutorsPage.getContent();
             List<Tutor> filteredTutors = allTutors.stream()
                 .filter(tutor -> tutor.getAvailabilities().stream()
@@ -64,10 +63,6 @@ public class TutorServiceImpl implements TutorService {
                 .map(lang -> lang.getLanguageCode() + " (" + lang.getProficiencyLevel() + ")")
                 .collect(Collectors.toList());
 
-        List<UUID> categoryIds = tutor.getCategories().stream()
-                .map(tc -> tc.getCategoryId())
-                .collect(Collectors.toList());
-
         return TutorSearchResponse.builder()
                 .id(tutor.getId())
                 .name(tutor.getName())
@@ -80,7 +75,6 @@ public class TutorServiceImpl implements TutorService {
                 .averageRating(averageRating)
                 .reviewCount(reviewCount)
                 .languages(languages)
-                .categoryIds(categoryIds)
                 .teachesInGroups(tutor.getTeachesInGroups())
                 .maxGroupMembers(tutor.getMaxGroupMembers())
                 .isVerified(tutor.getIsVerified())
