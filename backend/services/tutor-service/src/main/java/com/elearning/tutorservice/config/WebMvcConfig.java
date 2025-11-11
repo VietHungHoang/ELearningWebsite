@@ -9,6 +9,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.addPathPrefix("/api", c -> true);
+        configurer.addPathPrefix("/api/v1", c -> true);
     }
 }
