@@ -1,0 +1,19 @@
+spring:
+  data:
+    redis:
+      url: ${REDIS_URL}
+
+notification-service:
+  url: ${NOTIFICATION_SERVICE_URL}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiry: ${JWT_EXPIRY}
+
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
+  realm: ${KEYCLOAK_REALM}
+  resource: ${KEYCLOAK_RESOURCE}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  admin-username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+  admin-password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}

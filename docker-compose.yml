@@ -1,0 +1,168 @@
+services:
+  db:
+    image: postgres:15
+    container_name: lernen-db
+    environment:
+      POSTGRES_DB: lernen
+      POSTGRES_USER: lernen
+      POSTGRES_PASSWORD: lernen
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8-alpine
+    container_name: lernen-redis
+    ports:
+      - "6379:6379"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.4
+    container_name: lernen-keycloak
+    command: ["start-dev"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/lernen
+      KC_DB_USERNAME: lernen
+      KC_DB_PASSWORD: lernen
+      KC_DB_SCHEMA: keycloak
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.2.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  api-gateway:
+    build:
+      context: ./backend/gateway/api-gateway
+      dockerfile: docker/Dockerfile.dev
+    container_name: api-gateway
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/gateway/api-gateway/src:/app/src
+      - ./backend/gateway/api-gateway/pom.xml:/app/pom.xml
+    depends_on:
+      - bff-service
+      - auth-service
+      - common-service
+
+  auth-service:
+    build:
+      context: ./backend/services/auth-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: auth-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/auth-service/src:/app/src
+      - ./backend/services/auth-service/pom.xml:/app/pom.xml
+    depends_on:
+      - redis
+      - keycloak
+
+  bff-service:
+    build:
+      context: ./backend/services/bff-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: bff-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+      - SERVICES_COMMON_SERVICE_URL=${COMMON_SERVICE_URL}
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/bff-service/src:/app/src
+      - ./backend/services/bff-service/pom.xml:/app/pom.xml
+    depends_on:
+      - common-service
+
+  common-service:
+    build:
+      context: ./backend/services/common-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: common-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/common-service/src:/app/src
+      - ./backend/services/common-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+
+  tutor-service:
+    build:
+      context: ./backend/services/tutor-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: tutor-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/tutor-service/src:/app/src
+      - ./backend/services/tutor-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+  
+  search-service:
+    build:
+      context: ./backend/services/search-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: search-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/search-service/src:/app/src
+      - ./backend/services/search-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
+  esdata:
+    driver: local

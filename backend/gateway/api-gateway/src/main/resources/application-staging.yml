@@ -1,0 +1,28 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+  cloud:
+    gateway:
+      routes:
+        - id: bff-route
+          uri: ${BFF_SERVICE_URL}
+          predicates:
+            - Path=/api/v1/**
+
+        - id: auth-service-route
+          uri: ${AUTH_SERVICE_URL}
+          predicates:
+            - Path=/api/auth/**
+
+        - id: user-service-route
+          uri: ${USER_SERVICE_URL}
+          predicates:
+            - Path=/api/users/**
+
+        - id: course-service-route
+          uri: ${COURSE_SERVICE_URL}
+          predicates:
+            - Path=/api/courses/**
