@@ -30,27 +30,24 @@ export class OnlineClassesService {
                         }
                     ],
                     chart: {
-                        type: "bar",
-                        height: 100,
+                        height: 150,
+                        type: "line",
+                        zoom: {
+                            enabled: false
+                        },
                         toolbar: {
                             show: false
-                        }
-                    },
-                    colors: [
-                        "#1F64F1", "#C2CDFF"
-                    ],
-                    plotOptions: {
-                        bar: {
-                            columnWidth: "85%"
                         }
                     },
                     dataLabels: {
                         enabled: false
                     },
+                    colors: [
+                        "#605DFF", "#C2CDFF"
+                    ],
                     stroke: {
                         width: 2,
-                        show: true,
-                        colors: ["transparent"]
+                        curve: "straight"
                     },
                     grid: {
                         show: true,
@@ -97,13 +94,6 @@ export class OnlineClassesService {
                         axisTicks: {
                             show: false,
                             color: '#ECEEF2'
-                        }
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val:any) {
-                                return val + " Classes";
-                            }
                         }
                     },
                     legend: {

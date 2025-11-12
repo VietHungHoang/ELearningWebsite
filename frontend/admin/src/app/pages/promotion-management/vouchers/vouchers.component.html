@@ -36,7 +36,7 @@
             </form>
         </div>
         <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex gap-[10px]">
-            <button type="button" routerLink="/dashboard/promotion/vouchers/create" class="inline-block transition-all text-primary-500 hover:text-primary-600 font-medium py-[8px] px-[16px] bg-primary-50 rounded-md hover:bg-primary-100 dark:bg-[#15203c] dark:hover:bg-[#1a2a4a]">
+            <button type="button" routerLink="/dashboard/promotion/vouchers/create" class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-primary-500 rounded-md hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700">
                 <i class="ri-add-line mr-[4px]"></i>
                 Create New Voucher
             </button>
@@ -116,7 +116,7 @@
                         <td class="px-[20px] py-[15px]">
                             <div class="flex gap-[8px]">
                                 @if (voucher.createdBy === 'Admin') {
-                                    <button type="button" [routerLink]="['/dashboard/promotion/vouchers/edit', voucher.id]" class="px-6 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-all duration-200" title="Edit">
+                                    <button type="button" [routerLink]="['/dashboard/promotion/vouchers/edit', voucher.id]" class="text-primary-500 hover:text-primary-600 transition-colors" title="Edit">
                                         <i class="ri-edit-line"></i>
                                     </button>
                                 }

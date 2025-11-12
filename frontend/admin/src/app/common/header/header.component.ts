@@ -11,7 +11,7 @@ import { ToggleService } from './toggle.service';
 })
 export class HeaderComponent {
 
-    isSidebarVisible = true;  
+    isSidebarVisible = true;
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
@@ -45,6 +45,7 @@ export class HeaderComponent {
     buttonStates: { [key: string]: boolean } = {
         connectedAppsMenuBtn: false,
         languageMenuButton: false,
+        currencyMenuButton: false,
         notificationsMenuBtn: false,
         profileMenuBtn: false,
         settingsMenuBtn: false
@@ -86,11 +87,11 @@ export class HeaderComponent {
             };
             if (element.requestFullscreen) {
                 element.requestFullscreen();
-            } else if (element.mozRequestFullScreen) { 
+            } else if (element.mozRequestFullScreen) {
                 element.mozRequestFullScreen();
-            } else if (element.webkitRequestFullscreen) { 
+            } else if (element.webkitRequestFullscreen) {
                 element.webkitRequestFullscreen();
-            } else if (element.msRequestFullscreen) { 
+            } else if (element.msRequestFullscreen) {
                 element.msRequestFullscreen();
             }
         }
@@ -104,11 +105,11 @@ export class HeaderComponent {
             };
             if (document.exitFullscreen) {
                 document.exitFullscreen();
-            } else if (doc.mozCancelFullScreen) { 
+            } else if (doc.mozCancelFullScreen) {
                 doc.mozCancelFullScreen();
-            } else if (doc.webkitExitFullscreen) { 
+            } else if (doc.webkitExitFullscreen) {
                 doc.webkitExitFullscreen();
-            } else if (doc.msExitFullscreen) { 
+            } else if (doc.msExitFullscreen) {
                 doc.msExitFullscreen();
             }
         }

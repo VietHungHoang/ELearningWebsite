@@ -43,161 +43,70 @@
                 <thead class="text-black dark:text-white">
                     <tr>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            Rank
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             Name
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Ratings
+                            Rating
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Online Hours
+                            Revenue
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Courses
+                            Hours
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            Students
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    <tr>
+                    <tr *ngFor="let instructor of paginatedInstructors">
+                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <div class="flex items-center justify-center">
+                                <span class="bg-primary-500 text-white text-sm font-medium px-2 py-1 rounded-full"
+                                      [ngClass]="{
+                                          'bg-primary-500': instructor.rank === 1,
+                                          'bg-gray-500': instructor.rank === 2,
+                                          'bg-amber-500': instructor.rank === 3,
+                                          'bg-gray-400': instructor.rank > 3
+                                      }">
+                                    {{ instructor.rank }}
+                                </span>
+                            </div>
+                        </td>
                         <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                             <div class="flex items-center">
                                 <div class="w-[44px] h-[44px] ltr:mr-[12px] rtl:ml-[12px]">
-                                    <img src="images/users/user13.jpg" class="rounded-full inline-block" alt="user-image">
+                                    <img [src]="instructor.image" class="rounded-full inline-block" alt="user-image">
                                 </div>
                                 <div>
                                     <span class="block font-medium">
-                                        Olivia Clark
-                                    </span>
-                                    <span class="text-gray-500 dark:text-gray-400 block mt-px">
-                                        Big Data
+                                        {{ instructor.name }}
                                     </span>
                                 </div>
                             </div>
                         </td>
                         <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="text-[15px] leading-none text-orange-400">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
+                            <span class="text-gray-500 dark:text-gray-400">
+                                {{ instructor.rating }}/5
+                            </span>
                         </td>
                         <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                245h
+                            <span class="text-gray-500 dark:text-gray-400 font-medium text-green-600">
+                                {{ instructor.revenue }}
                             </span>
                         </td>
                         <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                             <span class="text-gray-500 dark:text-gray-400">
-                                55
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="flex items-center">
-                                <div class="w-[44px] h-[44px] ltr:mr-[12px] rtl:ml-[12px]">
-                                    <img src="images/users/user16.jpg" class="rounded-full inline-block" alt="user-image">
-                                </div>
-                                <div>
-                                    <span class="block font-medium">
-                                        Ava Turner
-                                    </span>
-                                    <span class="text-gray-500 dark:text-gray-400 block mt-px">
-                                        UX/UI
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="text-[15px] leading-none text-orange-400">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-half-fill"></i>
-                            </div>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                189h
+                                {{ instructor.hours }}
                             </span>
                         </td>
                         <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                120
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="flex items-center">
-                                <div class="w-[44px] h-[44px] ltr:mr-[12px] rtl:ml-[12px]">
-                                    <img src="images/users/user17.jpg" class="rounded-full inline-block" alt="user-image">
-                                </div>
-                                <div>
-                                    <span class="block font-medium">
-                                        Lucas Morgan
-                                    </span>
-                                    <span class="text-gray-500 dark:text-gray-400 block mt-px">
-                                        Developer
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="text-[15px] leading-none text-orange-400">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-line"></i>
-                            </div>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                156h
-                            </span>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                86
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="flex items-center">
-                                <div class="w-[44px] h-[44px] ltr:mr-[12px] rtl:ml-[12px]">
-                                    <img src="images/users/user18.jpg" class="rounded-full inline-block" alt="user-image">
-                                </div>
-                                <div>
-                                    <span class="block font-medium">
-                                        Isabella Cooper
-                                    </span>
-                                    <span class="text-gray-500 dark:text-gray-400 block mt-px">
-                                        Designer
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <div class="text-[15px] leading-none text-orange-400">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-half-fill"></i>
-                            </div>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                203h
-                            </span>
-                        </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                            <span class="text-gray-500 dark:text-gray-400">
-                                75
+                            <span class="text-gray-500 dark:text-gray-400 font-medium text-blue-600">
+                                {{ instructor.students }}
                             </span>
                         </td>
                     </tr>
@@ -206,32 +115,38 @@
         </div>
         <div class="px-[20px] md:px-[25px] pt-[12px] md:pt-[14px] flex items-center justify-between">
             <p class="!mb-0 text-sm">
-                Items per pages: <strong>5</strong>
+                Items per pages: <strong>{{ itemsPerPage }}</strong>
             </p>
             <div class="flex items-center">
                 <p class="!mb-0 text-sm">
-                    1 – 5 of 10
+                    {{ startItem }} – {{ endItem }} of {{ totalItems }}
                 </p>
                 <ol class="ltr:ml-[10px] rtl:mr-[10px]">
                     <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                        <a routerLink="." class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500">
+                        <button type="button"
+                                class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                [disabled]="currentPage === 1"
+                                (click)="previousPage()">
                             <span class="opacity-0">
                                 0
                             </span>
                             <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">
                                 chevron_left
                             </i>
-                        </a>
+                        </button>
                     </li>
                     <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                        <a routerLink="." class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500">
+                        <button type="button"
+                                class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                [disabled]="currentPage === totalPages"
+                                (click)="nextPage()">
                             <span class="opacity-0">
                                 0
                             </span>
                             <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">
                                 chevron_right
                             </i>
-                        </a>
+                        </button>
                     </li>
                 </ol>
             </div>

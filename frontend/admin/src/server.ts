@@ -1,5 +1,6 @@
 import {
     AngularNodeAppEngine,
+    createNodeRequestHandler,
     isMainModule,
     writeResponseToNodeResponse,
 } from '@angular/ssr/node';
@@ -34,7 +35,7 @@ if (isMainModule(import.meta.url)) {
         if (error) {
             throw error;
         }
-        console.log(`Node Express server listening on http:
+        console.log(`Node Express server listening on http://localhost:${port}`);
     });
 }
 

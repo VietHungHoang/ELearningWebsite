@@ -27,7 +27,8 @@ export class FRevenueDashboardComponent implements OnInit {
         grossRevenue: 0,
         instructorEarnings: 0,
         platformProfit: 0,
-        totalOrders: 0
+        totalOrders: 0,
+        gatewayFees: 0
     };
 
     constructor() {}
@@ -42,7 +43,7 @@ export class FRevenueDashboardComponent implements OnInit {
 
     setDateRange(range: string): void {
         this.selectedDateRange = range;
-        this.isDateRangeDropdownOpen = false; 
+        this.isDateRangeDropdownOpen = false;
         this.loadDashboardData();
     }
 
@@ -53,25 +54,29 @@ export class FRevenueDashboardComponent implements OnInit {
                 grossRevenue: 1500000,
                 instructorEarnings: 450000,
                 platformProfit: 1050000,
-                totalOrders: 5
+                totalOrders: 5,
+                gatewayFees: 33000
             },
             '7days': {
                 grossRevenue: 8500000,
                 instructorEarnings: 2550000,
                 platformProfit: 5950000,
-                totalOrders: 28
+                totalOrders: 28,
+                gatewayFees: 187000
             },
             '30days': {
                 grossRevenue: 35000000,
                 instructorEarnings: 10500000,
                 platformProfit: 24500000,
-                totalOrders: 112
+                totalOrders: 112,
+                gatewayFees: 770000
             },
             thisMonth: {
                 grossRevenue: 32000000,
                 instructorEarnings: 9600000,
                 platformProfit: 22400000,
-                totalOrders: 105
+                totalOrders: 105,
+                gatewayFees: 704000
             }
         };
 

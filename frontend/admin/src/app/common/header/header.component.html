@@ -171,6 +171,45 @@
                     </ul>
                 </div>
             </li>
+            <li class="relative language-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                <button type="button" class="leading-none pr-[12px] inline-block transition-all relative top-[2px] hover:text-primary-500" id="currencyMenuButton" (click)="toggleClass('currencyMenuButton')" [class.active]="buttonStates['currencyMenuButton']">
+                    <i class="material-symbols-outlined !text-[20px] md:!text-[22px]">
+                        currency_exchange
+                    </i>
+                    <i class="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2 -mt-[2px]"></i>
+                </button>
+                <div class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
+                    <span class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
+                        Choose Currency
+                    </span>
+                    <ul>
+                        <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
+                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                                <div class="flex items-center">
+                                    <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">₫</span>
+                                    VND (Vietnamese Dong)
+                                </div>
+                            </button>
+                        </li>
+                        <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
+                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                                <div class="flex items-center">
+                                    <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">$</span>
+                                    USD (US Dollar)
+                                </div>
+                            </button>
+                        </li>
+                        <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
+                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                                <div class="flex items-center">
+                                    <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">€</span>
+                                    EUR (Euro)
+                                </div>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </li>
             <li class="relative mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                 <button type="button" class="leading-none inline-block transition-all relative top-[2px] hover:text-primary-500" (click)="toggleFullscreen()">
                     <i class="material-symbols-outlined !text-[22px] md:!text-xl">

@@ -69,6 +69,9 @@
                     "configurations": {
                         "production": {
                             "buildTarget": "trezo:build:production"
+                        },
+                        "development": {
+                            "buildTarget": "trezo:build:development"
                         }
                     },
                     "defaultConfiguration": "development"

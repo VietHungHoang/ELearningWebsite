@@ -56,7 +56,7 @@
     </ol>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[20px] mb-[25px]">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[20px] mb-[25px]">
 
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
         <div class="mb-[12px]">
@@ -64,6 +64,14 @@
         </div>
         <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.grossRevenue) }}</p>
         <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Total from all orders</p>
+    </div>
+
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+        <div class="mb-[12px]">
+            <h6 class="text-black dark:text-white font-medium">Gateway Fees</h6>
+        </div>
+        <p class="!mb-0 text-[28px] font-bold text-red-500">{{ formatCurrency(kpis.gatewayFees) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Payment processing</p>
     </div>
 
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">

@@ -40,15 +40,44 @@
 <div *ngIf="!isLoading && learner && !errorMessage">
 
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md mb-[20px]">
-        <h4 class="text-base font-semibold text-black dark:text-white mb-[15px]">Additional Information</h4>
+        <h4 class="text-base font-semibold text-black dark:text-white mb-[20px]">Additional Information</h4>
 
-        <div class="flex items-center gap-[15px] mb-[20px]">
-            <div class="relative">
-                <img [src]="learner.avatar" [alt]="learner.name" class="w-[60px] h-[60px] rounded-full object-cover">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-[15px] mb-[20px] overflow-visible">
+            <div class="flex items-center gap-[15px] flex-1 min-w-0">
+                <div class="relative flex-shrink-0">
+                    <img [src]="learner.avatar" [alt]="learner.name" class="w-[60px] h-[60px] rounded-full object-cover">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg font-semibold text-black dark:text-white">{{ learner.name }}</h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">ID: {{ learner.id }}</p>
+                </div>
             </div>
-            <div>
-                <h3 class="text-lg font-semibold text-black dark:text-white">{{ learner.name }}</h3>
-                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">ID: {{ learner.id }}</p>
+            <div class="flex gap-3 flex-shrink-0 relative z-10 sm:justify-end">
+                <button
+                    *ngIf="!isEditing"
+                    (click)="toggleEditMode()"
+                    class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md text-white font-medium text-sm transition-all hover:bg-blue-600 whitespace-nowrap relative z-20"
+                    style="background-color: #3b82f6 !important;"
+                >
+                    <i class="material-symbols-outlined text-base mr-2">edit</i>
+                    Edit Profile
+                </button>
+                <button
+                    *ngIf="isEditing"
+                    (click)="saveAllFields()"
+                    class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md bg-green-500 text-white font-medium text-sm transition-all hover:bg-green-600 whitespace-nowrap"
+                >
+                    <i class="material-symbols-outlined text-base mr-2">save</i>
+                    Save Changes
+                </button>
+                <button
+                    *ngIf="isEditing"
+                    (click)="cancelEdit()"
+                    class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md bg-gray-500 text-white font-medium text-sm transition-all hover:bg-gray-600 whitespace-nowrap"
+                >
+                    <i class="material-symbols-outlined text-base mr-2">cancel</i>
+                    Cancel
+                </button>
             </div>
         </div>
 
@@ -173,33 +202,6 @@
                     No certifications yet
                 </div>
             </ng-template>
-        </div>
-
-        <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 relative z-10">
-            <button
-                *ngIf="!isEditing"
-                (click)="toggleEditMode()"
-                class="px-6 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 active:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl border border-blue-600"
-            >
-                <i class="material-symbols-outlined text-base mr-2">edit</i>
-                Edit Profile
-            </button>
-            <button
-                *ngIf="isEditing"
-                (click)="saveAllFields()"
-                class="px-6 py-2.5 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 active:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl border border-green-600"
-            >
-                <i class="material-symbols-outlined text-base mr-2">save</i>
-                Save Changes
-            </button>
-            <button
-                *ngIf="isEditing"
-                (click)="cancelEdit()"
-                class="px-6 py-2.5 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 active:bg-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-600"
-            >
-                <i class="material-symbols-outlined text-base mr-2">cancel</i>
-                Cancel
-            </button>
         </div>
     </div>
 
