@@ -1,6 +1,6 @@
 import React from 'react';
 import { InteractiveImagePanel } from "./InteractiveImagePanel.tsx";
-import { LernenLogo } from "../../icon/LernenLogo.tsx";
+import { LernenLogo } from "../LernenLogo.tsx";
 
 
 const IntroducePanel: React.FC = () => {

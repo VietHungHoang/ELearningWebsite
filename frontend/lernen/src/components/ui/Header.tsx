@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LernenLogo } from '../../features/home/components/icons/LernenLogo';
-import { ChevronDownIcon } from '../../features/home/components/icons/ChevronDownIcon';
-import NotificationsPopup from '../../features/home/components/NotificationsPopup';
-import { FiShoppingCart, FiBell, FiMessageSquare } from 'react-icons/fi';
+import NotificationsPopup from './NotificationsPopup';
+import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from 'react-icons/fi';
 import { currencyOptions, languageOptions } from '../../constants/headerConstants';
+import CartPopup from '../../features/cart/components/CartPopup';
+import { LernenLogo } from '../LernenLogo';
+// import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface LanguageOption {
   name: string;
@@ -16,6 +17,7 @@ const Header: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [cartCount, setCartCount] = useState(0);
 
   const [selectedCurrency, setSelectedCurrency] = useState('USD $');
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(languageOptions[0]);
@@ -25,6 +27,9 @@ const Header: React.FC = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   const currencyRef = useRef<HTMLDivElement>(null);
   const languageRef = useRef<HTMLDivElement>(null);
+
+  // Use WebSocket context for notification count
+  // const { notificationCount } = useWebSocket();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -65,7 +70,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-[#F8F7F4] border-b border-gray-200">
+    <header className="bg-[var(--page-bg-color)] border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-8">
@@ -88,7 +93,7 @@ const Header: React.FC = () => {
             <div ref={currencyRef} className="relative">
               <button onClick={() => handleDropdownToggle('currency')} className="hidden sm:flex items-center space-x-1 text-gray-600 cursor-pointer">
                 <span className="font-medium">{selectedCurrency}</span>
-                <ChevronDownIcon />
+                <FiChevronDown size={20} />
               </button>
               {openDropdown === 'currency' && (
                 <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-xl z-50 p-2 border border-gray-100 transform transition-all duration-150 ease-out opacity-100 scale-100">
@@ -108,7 +113,7 @@ const Header: React.FC = () => {
               <button onClick={() => handleDropdownToggle('language')} className="hidden sm:flex items-center space-x-2 text-gray-600 cursor-pointer">
                 <div style={{width: '20px', height: '15px'}}>{selectedLanguage.icon}</div>
                 <span>{selectedLanguage.name}</span>
-                <ChevronDownIcon />
+                <FiChevronDown size={20} />
               </button>
               {openDropdown === 'language' && (
                 <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-xl z-50 p-2 border border-gray-100 transform transition-all duration-150 ease-out opacity-100 scale-100">
@@ -127,11 +132,29 @@ const Header: React.FC = () => {
             {/* Action Icons */}
             <div className="flex items-center space-x-3">
                <div ref={cartRef} className="relative">
-                <LnIconButton onClick={() => setIsCartOpen(!isCartOpen)}><FiShoppingCart size={24} /></LnIconButton>
-                {isCartOpen && <div>Cart Popup Placeholder</div>}
+                <LnIconButton onClick={() => setIsCartOpen(!isCartOpen)}>
+                  <div className="relative">
+                    <FiShoppingCart size={24} />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-4 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </div>
+                </LnIconButton>
+                {isCartOpen && <CartPopup onCartCountChange={setCartCount} />}
               </div>
                <div ref={notificationsRef} className="relative">
-                 <LnIconButton onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} hasDot={true}><FiBell size={24} /></LnIconButton>
+                 <LnIconButton onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
+                   <div className="relative">
+                     <FiBell size={24} />
+                     {/* {notificationCount > 0 && (
+                       <span className="absolute -top-4 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                         {notificationCount > 99 ? '99+' : notificationCount}
+                       </span>
+                     )} */}
+                   </div>
+                 </LnIconButton>
                 {isNotificationsOpen && <NotificationsPopup />}
               </div>
               <LnIconButton hasDot={true}><FiMessageSquare size={24} /></LnIconButton>
