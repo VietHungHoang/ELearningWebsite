@@ -1,19 +1,24 @@
 package com.elearning.authservice.service.impl;
 
+import com.elearning.authservice.dto.event.EmailOtpEvent;
+import com.elearning.authservice.dto.request.GoogleLoginRequest;
 import com.elearning.authservice.dto.request.LoginRequest;
 import com.elearning.authservice.dto.request.RegistrationStartRequest;
+import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
+import com.elearning.authservice.entity.Role;
 import com.elearning.authservice.dto.response.LoginResponse;
 import com.elearning.authservice.exception.AuthenticationFailedException;
 import com.elearning.authservice.exception.InvalidTokenException;
 import com.elearning.authservice.service.AuthService;
-import com.elearning.authservice.client.NotificationClient;
+import com.elearning.authservice.service.producer.KafkaProducer;
 import com.elearning.authservice.config.KeycloakProperties;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -31,6 +36,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class AuthServiceImpl implements AuthService {
 
     private final StringRedisTemplate redisTemplate;
-    private final NotificationClient notificationClient;
+    private final KafkaProducer kafkaProducer;
     private final Keycloak keycloak;
     private final RestTemplate restTemplate;
     private final KeycloakProperties keycloakProperties;
@@ -51,11 +57,19 @@ public class AuthServiceImpl implements AuthService {
         String email = request.getEmail();
         String fullname = request.getFullname();
 
-        // String otp = String.format("%06d", (int) (Math.random() * 1000000));
-        String otp = "000000";
+        // Check if user already exists in Keycloak
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
+        UsersResource usersResource = realmResource.users();
+        List<UserRepresentation> existingUsers = usersResource.searchByEmail(email, true);
+        if (!existingUsers.isEmpty()) {
+            log.warn("User with email {} already exists in Keycloak", email);
+            throw new IllegalArgumentException("Email đã được đăng ký");
+        }
+
+        String otp = String.format("%06d", (int) (Math.random() * 1000000));
         redisTemplate.opsForValue().set("reg:" + email, otp, 300, TimeUnit.SECONDS);
         redisTemplate.opsForValue().set("reg_name:" + email, fullname, 300, TimeUnit.SECONDS);
-        // notificationClient.sendOtpEmail(email, otp);
+        kafkaProducer.sendToNotificationOTPEmail(new EmailOtpEvent(email, otp));
     }
 
     @Override
@@ -71,7 +85,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void setPassword(String email, String password) {
+    public void createAccount(SetPasswordRequest request) {
+        String email = request.getEmail();
+        String password = request.getPassword();
+        Role role = request.getRole();
+
         // Get fullname from Redis
         String fullname = redisTemplate.opsForValue().get("reg_name:" + email);
         if (fullname == null) {
@@ -98,6 +116,26 @@ public class AuthServiceImpl implements AuthService {
         Response response = usersResource.create(user);
         if (response.getStatus() != 201) {
             throw new RuntimeException("Failed to create user in Keycloak");
+        }
+
+        // Assign role to user
+        if (role != null) {
+            try {
+                String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+                UserResource userResource = usersResource.get(userId);
+
+                // Get role from realm (use uppercase role name)
+                var roleResource = realmResource.roles().get(role.name());
+                var roleRepresentation = roleResource.toRepresentation();
+
+                // Assign role to user
+                userResource.roles().realmLevel().add(Arrays.asList(roleRepresentation));
+
+                log.info("Assigned role {} to user {}", role.name(), email);
+            } catch (Exception e) {
+                log.error("Failed to assign role {} to user {}: {}", role.name(), email, e.getMessage());
+                throw new RuntimeException("Failed to assign role to user", e);
+            }
         }
 
         // Clean up Redis
@@ -157,6 +195,91 @@ public class AuthServiceImpl implements AuthService {
                 .expiresIn((Integer) bodyMap.get("expires_in"))
                 .scope((String) bodyMap.get("scope"))
                 .build();
+    }
+    @Override
+    public void bulkCreateAccounts(List<RegistrationStartRequest> requests) {
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
+        UsersResource usersResource = realmResource.users();
+
+        for (RegistrationStartRequest request : requests) {
+            UserRepresentation user = new UserRepresentation();
+            user.setUsername(request.getEmail());
+            user.setEmail(request.getEmail());
+            String fullname = request.getFullname();
+            user.setFirstName(fullname.split(" ")[0]);
+            user.setLastName(fullname.substring(fullname.indexOf(" ") + 1));
+            user.setEnabled(true);
+
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue("admin"); // Default password
+            credential.setTemporary(false);
+            user.setCredentials(Arrays.asList(credential));
+
+            Response response = usersResource.create(user);
+            if (response.getStatus() != 201) {
+                log.error("Failed to create user {} in Keycloak", request.getEmail());
+                throw new RuntimeException("Failed to create user in Keycloak");
+            }
+        }
+    }
+
+    @Override
+    public String getGoogleAuthUrl(String redirectUri) {
+        // Build Keycloak's Google OAuth URL (use public URL for browser access)
+        String authUrl = String.format(
+            "%s/realms/%s/protocol/openid-connect/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=openid email profile&kc_idp_hint=google",
+            keycloakProperties.getPublicUrl(),
+            keycloakProperties.getRealm(),
+            keycloakProperties.getResource(),
+            redirectUri
+        );
+        log.info("Generated Google auth URL: {}", authUrl);
+        return authUrl;
+    }
+
+    @Override
+    public LoginResponse loginWithGoogle(GoogleLoginRequest request) {
+        log.info("Processing Google login with code");
+        String tokenUrl = keycloakProperties.getAuthServerUrl() + "/realms/" + keycloakProperties.getRealm() + "/protocol/openid-connect/token";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "authorization_code");
+        body.add("client_id", keycloakProperties.getResource());
+        body.add("client_secret", keycloakProperties.getClientSecret());
+        body.add("code", request.getCode());
+        body.add("redirect_uri", request.getRedirectUri());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                tokenUrl, 
+                HttpMethod.POST, 
+                entity, 
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> bodyMap = response.getBody();
+                LoginResponse loginResponse = buildLoginResponse(bodyMap);
+                log.info("Google login successful");
+                return loginResponse;
+            } else {
+                Map<String, Object> errorBody = response.getBody();
+                String errorJson = errorBody != null ? errorBody.toString() : "No body";
+                log.warn("Google login failed: {} - {}", response.getStatusCode(), errorJson);
+                
+                String message = getErrorMessage(response.getStatusCode().value());
+                throw new AuthenticationFailedException(message, response.getStatusCode(), errorJson);
+            }
+        } catch (Exception e) {
+            log.error("Google login API call failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Google login failed due to Keycloak API call error: " + e.getMessage(), e);
+        }
     }
 
     private String getErrorMessage(int statusCode) {
