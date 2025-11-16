@@ -1,14 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaPinterest, FaYoutube, FaDribbble, FaBehance } from 'react-icons/fa';
+import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaPinterest, FaYoutube, } from 'react-icons/fa';
 import { VscVerified } from 'react-icons/vsc';
 import { FlagIcon } from '../find-tutor/TutorCard';
 import { PiStar, PiStudentLight, PiCalendar, PiBookOpenTextLight } from 'react-icons/pi';
 import { FiCalendar, FiMessageSquare } from 'react-icons/fi';
 import { FaHeart, FaPlay } from 'react-icons/fa';
-import type { TutorDetail } from '../../../../types/api';
 import { RiSpeakLine } from "react-icons/ri";
 import { AiOutlineGlobal } from 'react-icons/ai';
-const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
+import type { Tutor } from '../../../../types/api';
+const TutorProfileHeader: React.FC<{ tutor: Tutor }> = ({ tutor }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -85,7 +85,7 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                 icon={<AiOutlineGlobal style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
                                 text={<>Social profiles</>} content={
                                     <div className="flex items-center gap-3 flex-wrap">
-                                        {tutor.socials.map((social) => (
+                                        {tutor.socials && tutor.socials.map((social) => (
                                             <a 
                                             key={social.id}
                                             href={social.url}
@@ -110,7 +110,7 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                 text={<>I can teach</>} content={
                                 <div>
                                     <span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>
-                                        {tutor.subjects.map(subject => subject.subjectName).join(', ')}
+                                        {tutor.subjects && tutor.subjects.map(subject => subject.name).join(', ')}
                                     </span>
                                 </div>
                             }/>
@@ -118,7 +118,7 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                 icon={<RiSpeakLine />}
                                 text={<>I can speak</>} content={
                                 <div>
-                                    {tutor.languages.map((lang, index: number) => (
+                                    {tutor.languages && tutor.languages.map((lang, index: number) => (
                                         <React.Fragment key={lang.code}>
                                             <span className="font-medium" style={{ color: 'rgb(88, 88, 88)'}}>{lang.code}</span>
                                             {lang.level && <span className="ml-1 px-2 py-0.5 bg-gray-100 text-xs font-medium rounded-md">{lang.level}</span>}

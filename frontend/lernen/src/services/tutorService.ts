@@ -1,4 +1,4 @@
-import type { ApiResponse, Location, Language, Tutor, TutorSearchFilters, PaginatedResponse, Category, Subcategory, FilterData } from '../types/api';
+import type { ApiResponse, Location, Language, Tutor, TutorSearchFilters, PaginatedResponse, Category, Subcategory, FilterData, TutorScheduleResponse } from '../types/api';
 import apiService from './apiService';
 
 // Mock data fallback
@@ -53,7 +53,7 @@ const mockTutors: Tutor[] = [
     currency: 'USD',
     averageRating: 5.0,
     reviewCount: 1,
-    languages: ['Armenian', 'Asturian'],
+    languages: [{ code: 'EN', level: 'Native' }, { code: 'ES', level: 'Conversational' }],
     categoryIds: ['550e8400-e29b-41d4-a716-446655440002'],
     teachesInGroups: true,
     maxGroupMembers: 5,
@@ -62,7 +62,19 @@ const mockTutors: Tutor[] = [
     bio: 'Hi! I am Cynthia Hunter, a dedicated and experienced tutor with a passion for helping students excel in their academic pursuits. With expertise across a variety of subjects, including mathematics, science, and language arts, I create engaging and personalized learning experiences that cater to each student\'s unique needs and learning style.',
     studentCount: 45,
     sessionDurationMinutes: 120,
-    bookedSessionsCount: 156
+    bookedSessionsCount: 156,
+    socials: [
+      { id: '1', url: 'https://facebook.com/cynthia', platform: 'facebook' },
+      { id: '2', url: 'https://twitter.com/cynthia', platform: 'twitter' },
+      { id: '3', url: 'https://linkedin.com/in/cynthia', platform: 'linkedin' },
+      { id: '4', url: 'https://instagram.com/cynthia', platform: 'instagram' }
+    ],
+    subjects: [
+      { id: '1', name: 'C++', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '2', name: 'Java', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '3', name: 'Databases', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' }
+    ],
+    hasTrialSession: false
   },
   {
     id: 'e9f0a1b2-c3d4-5678-2345-901234567890',
@@ -75,7 +87,7 @@ const mockTutors: Tutor[] = [
     currency: 'GBP',
     averageRating: 5.0,
     reviewCount: 2,
-    languages: ['Azerbaijani', 'Basque'],
+    languages: [{ code: 'EN', level: 'Native' }],
     categoryIds: ['550e8400-e29b-41d4-a716-446655440002'],
     teachesInGroups: false,
     maxGroupMembers: 1,
@@ -84,7 +96,16 @@ const mockTutors: Tutor[] = [
     bio: 'Hello! My name is Antony Clara, and I\'m a passionate tutor dedicated to helping students unlock their full academic potential. With a strong focus on creating engaging learning environments, I specialize in mathematics and science education, helping students build confidence and achieve their academic goals.',
     studentCount: 23,
     sessionDurationMinutes: 90,
-    bookedSessionsCount: 89
+    bookedSessionsCount: 89,
+    socials: [
+      { id: '5', url: 'https://facebook.com/antony', platform: 'facebook' },
+      { id: '6', url: 'https://linkedin.com/in/antony', platform: 'linkedin' }
+    ],
+    subjects: [
+      { id: '4', name: 'Python', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '5', name: 'Web Development', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' }
+    ],
+    hasTrialSession: true
   },
   {
     id: 'f0a1b2c3-d4e5-6789-3456-012345678901',
@@ -97,7 +118,7 @@ const mockTutors: Tutor[] = [
     currency: 'USD',
     averageRating: 4.8,
     reviewCount: 15,
-    languages: ['English', 'Spanish'],
+    languages: [{ code: 'EN', level: 'Native' }, { code: 'ES', level: 'Fluent' }],
     categoryIds: ['550e8400-e29b-41d4-a716-446655440002'],
     teachesInGroups: true,
     maxGroupMembers: 8,
@@ -106,7 +127,16 @@ const mockTutors: Tutor[] = [
     bio: 'Experienced mathematics tutor with 10+ years of teaching experience. I specialize in making complex mathematical concepts accessible and enjoyable for students of all levels. My approach combines traditional teaching methods with modern technology to create an engaging learning experience.',
     studentCount: 127,
     sessionDurationMinutes: 60,
-    bookedSessionsCount: 234
+    bookedSessionsCount: 234,
+    socials: [
+      { id: '7', url: 'https://twitter.com/johnsmith', platform: 'x' },
+      { id: '8', url: 'https://instagram.com/johnsmith', platform: 'instagram' }
+    ],
+    subjects: [
+      { id: '6', name: 'Calculus', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '7', name: 'Algebra', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' }
+    ],
+    hasTrialSession: false
   },
   {
     id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
@@ -119,7 +149,7 @@ const mockTutors: Tutor[] = [
     currency: 'CAD',
     averageRating: 4.9,
     reviewCount: 8,
-    languages: ['English', 'French'],
+    languages: [{ code: 'EN', level: 'Native' }, { code: 'FR', level: 'Fluent' }],
     categoryIds: ['550e8400-e29b-41d4-a716-446655440002'],
     teachesInGroups: false,
     maxGroupMembers: 1,
@@ -128,7 +158,15 @@ const mockTutors: Tutor[] = [
     bio: 'Passionate about making science accessible and exciting for all students. With a background in biology and chemistry, I help students develop a deep understanding of scientific concepts while fostering curiosity and critical thinking skills. I believe in hands-on learning and real-world applications.',
     studentCount: 89,
     sessionDurationMinutes: 75,
-    bookedSessionsCount: 178
+    bookedSessionsCount: 178,
+    socials: [
+      { id: '9', url: 'https://facebook.com/sarahj', platform: 'facebook' }
+    ],
+    subjects: [
+      { id: '8', name: 'Biology', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '9', name: 'Chemistry', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' }
+    ],
+    hasTrialSession: true
   },
   {
     id: 'b2c3d4e5-f6a7-8901-bcde-f23456789012',
@@ -141,7 +179,7 @@ const mockTutors: Tutor[] = [
     currency: 'USD',
     averageRating: 4.7,
     reviewCount: 22,
-    languages: ['English', 'Mandarin', 'Japanese'],
+    languages: [{ code: 'EN', level: 'Fluent' }, { code: 'ZH', level: 'Native' }, { code: 'JA', level: 'Intermediate' }],
     categoryIds: ['550e8400-e29b-41d4-a716-446655440002'],
     teachesInGroups: true,
     maxGroupMembers: 10,
@@ -150,7 +188,17 @@ const mockTutors: Tutor[] = [
     bio: 'Native speaker with extensive experience teaching multiple languages. I specialize in immersive language learning techniques that help students achieve fluency quickly and naturally. My teaching philosophy emphasizes cultural understanding alongside linguistic proficiency.',
     studentCount: 156,
     sessionDurationMinutes: 45,
-    bookedSessionsCount: 312
+    bookedSessionsCount: 312,
+    socials: [
+      { id: '10', url: 'https://linkedin.com/in/michaelchen', platform: 'linkedin' },
+      { id: '11', url: 'https://youtube.com/michaelchen', platform: 'youtube' }
+    ],
+    subjects: [
+      { id: '10', name: 'English', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '11', name: 'Mandarin', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' },
+      { id: '12', name: 'Japanese', categoryId: 'a3b4c5d6-e7f8-9012-6789-345678901234' }
+    ],
+    hasTrialSession: false
   }
 ];
 
@@ -258,5 +306,68 @@ export const tutorService = {
         data
       };
     }
+  }
+};
+
+export const getTutorSchedule = async (tutorId: string, includeBooked: boolean = false): Promise<TutorScheduleResponse[]> => {
+  try {
+    const response = await apiService.get<TutorScheduleResponse[]>(`/api/v1/tutors/${tutorId}/schedule?includeBooked=${includeBooked}`);
+    return response.data;
+  } catch (error) {
+    console.warn('Failed to fetch tutor schedule from API, using mock data:', error);
+    // Mock schedule data for current week (Nov 10-16, 2025)
+    const mockSchedule: TutorScheduleResponse[] = [
+      {
+        tutorId,
+        availabilityId: 1,
+        dayOfWeek: 1, // Monday (Nov 10)
+        startTime: '09:00:00',
+        endTime: '12:00:00',
+        effectiveStartDate: '2025-11-10',
+        effectiveEndDate: '2025-11-16',
+        status: 'AVAILABLE'
+      },
+      {
+        tutorId,
+        availabilityId: 2,
+        dayOfWeek: 2, // Tuesday (Nov 11)
+        startTime: '10:00:00',
+        endTime: '13:00:00',
+        effectiveStartDate: '2025-11-10',
+        effectiveEndDate: '2025-11-16',
+        status: 'AVAILABLE'
+      },
+      {
+        tutorId,
+        availabilityId: 3,
+        dayOfWeek: 3, // Wednesday (Nov 12)
+        startTime: '14:00:00',
+        endTime: '17:00:00',
+        effectiveStartDate: '2025-11-10',
+        effectiveEndDate: '2025-11-16',
+        status: 'AVAILABLE'
+      },
+      {
+        tutorId,
+        availabilityId: 4,
+        dayOfWeek: 4, // Thursday (Nov 13)
+        startTime: '15:00:00',
+        endTime: '18:00:00',
+        effectiveStartDate: '2025-11-10',
+        effectiveEndDate: '2025-11-16',
+        status: 'AVAILABLE'
+      },
+      {
+        tutorId,
+        availabilityId: 5,
+        dayOfWeek: 5, // Friday (Nov 14)
+        startTime: '09:00:00',
+        endTime: '12:00:00',
+        effectiveStartDate: '2025-11-10',
+        effectiveEndDate: '2025-11-16',
+        status: 'AVAILABLE'
+      }
+    ];
+    return mockSchedule;
   }
 };
