@@ -1,9 +1,8 @@
 package com.elearning.notificationservice.service;
 
-import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.domain.Pageable;
+// import org.springframework.data.domain.Pageable;
 
 import com.elearning.notificationservice.dto.request.NotificationRequest;
 import com.elearning.notificationservice.dto.response.NotificationResponse;
@@ -18,7 +17,7 @@ public interface NotificationService {
     /**
      * Get all notifications of the user
      */
-    List<NotificationResponse> getUserNotifications(UUID userId, Pageable pageable);
+    // List<NotificationResponse> getUserNotifications(UUID userId, Pageable pageable);
 
     /**
      * Count the number of unread notifications

@@ -23,10 +23,10 @@
 
     <dependencies>
         <!-- MongoDB -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
+        </dependency> -->
 
         <!-- RESTful APIs -->
         <dependency>
@@ -35,10 +35,10 @@
         </dependency>
 
         <!-- WebSocket + STOMP -->
-        <dependency>
+        <!-- <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
+        </dependency> -->
 
         <!-- Validation -->
         <dependency>

@@ -41,4 +41,17 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Failed to send email", e);
         }
     }
+
+    @Override
+    public void sendOTPEmail(String to, String otp) {
+        String subject = "Your OTP Code";
+        String htmlContent = "<html><body>" +
+                "<h2>Your OTP Code</h2>" +
+                "<p>Your one-time password (OTP) is: <strong>" + otp + "</strong></p>" +
+                "<p>This code will expire in 5 minutes.</p>" +
+                "<p>If you did not request this code, please ignore this email.</p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
 }
