@@ -77,29 +77,6 @@ export interface Tutor {
   specialization: string;
   nationalityCode: string;
   currentSessionFee: number;
-  currency: string;
-  averageRating: number;
-  reviewCount: number;
-  languages: string[];
-  categoryIds: string[];
-  teachesInGroups: boolean;
-  maxGroupMembers: number;
-  videoUrl: string;
-  videoThumbnailUrl: string;
-  bio: string;
-  studentCount: number;
-  sessionDurationMinutes: number;
-  bookedSessionsCount: number;
-}
-
-export interface TutorDetail {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  isVerified: boolean;
-  specialization: string;
-  nationalityCode: string;
-  currentSessionFee: number;
   originalSessionFee?: number; // Optional old price for discount display
   currency: string;
   averageRating: number;
@@ -124,8 +101,11 @@ export interface TutorDetail {
   }[];
   subjects: {
     id: string;
-    subjectName: string;
+    name: string;
+    categoryId: string;
   }[];
+  availability?: string[];
+  hasTrialSession: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -164,12 +144,57 @@ export interface SignUpRequest {
   fullName: string;
 }
 
+export type UserRole = 'student' | 'tutor' | 'admin';
+
+export interface StartSignUpRequest {
+  email: string;
+  fullname: string;
+  role: UserRole;
+}
+
 export interface SignUpResponse {
   message: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
+}
+
+export interface TutorScheduleResponse {
+  tutorId: string;
+  availabilityId: number;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  effectiveStartDate: string;
+  effectiveEndDate: string;
+  status: string;
+}
+
+export interface Course {
+  id: number;
+  image: string;
+  title: string;
+  lessons: number;
+  students: number;
+  price: number;
+  duration: string;
+  review: number;
+}
+
+export interface TimezoneResponse {
+  id: string;
+  name: string;
+  utcOffset: string;
+}
+
+export interface PaymentRequest {
+  paymentMethod: 'momo' | 'zalopay' | 'credit-card' | 'paypal';
+  amount: number;
+  currency: string;
+}
+
+export interface PaymentResponse {
+  paymentId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  paymentUrl?: string; // For QR code payments like Momo, ZaloPay
+  transactionId?: string;
+  message: string;
 }
 

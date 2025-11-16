@@ -1,25 +1,96 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import authService from '../../../services/authService';
 
-const CreateNewPasswordForm: React.FC = () => {
+interface CreateNewPasswordFormProps {
+  mode?: 'signup' | 'reset';
+}
+
+const CreateNewPasswordForm: React.FC<CreateNewPasswordFormProps> = ({ mode = 'signup' }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    password: '',
+    confirmPassword: ''
+  });
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const email = searchParams.get('email');
+  const role = searchParams.get('role') || 'student';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!email) {
+      navigate('/signup');
+      return;
+    }
+
+    const signupDataStr = localStorage.getItem('signupVerification');
+    if (!signupDataStr) {
+      navigate('/signup');
+      return;
+    }
+
+    const signupData = JSON.parse(signupDataStr);
+    if (!signupData.verified) {
+      navigate('/signup');
+    }
+  }, [email, navigate]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError(null);
+  };
+
+  const validateForm = () => {
+    if (!formData.password) {
+      setError('Password is required');
+      return false;
+    }
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically call an API to update the password.
-    // After a successful API call, navigate to the login page.
-    alert('Password has been reset successfully!');
-    navigate('/login');
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await authService.createAccount({ email: email!, password: formData.password, role });
+      localStorage.removeItem('signupVerification');
+      navigate('/login');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create password');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="bg-[#F8F7F4] p-10 flex flex-col justify-center">
       <div className="max-w-md mx-auto w-full">
-        <h2 className="text-xl font-bold text-[#0b6459]">Create New Password</h2>
-        <p className="text-gray-600 mt-2">Your new password must be different from previous used passwords.</p>
+        <h2 className="text-xl font-bold text-[#0b6459]">
+          {mode === 'reset' ? 'Reset Password' : 'Create New Password'}
+        </h2>
+        <p className="text-gray-600 mt-2">
+          {mode === 'reset' 
+            ? 'Enter your new password below.' 
+            : 'Your new password must be different from previous used passwords.'
+          }
+        </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
@@ -32,6 +103,8 @@ const CreateNewPasswordForm: React.FC = () => {
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
+              value={formData.password}
+              onChange={handleInputChange}
               className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
               placeholder="New Password"
             />
@@ -50,10 +123,12 @@ const CreateNewPasswordForm: React.FC = () => {
             </label>
             <input
               id="confirm-password"
-              name="confirm-password"
+              name="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               autoComplete="new-password"
               required
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
               className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm"
               placeholder="Confirm New Password"
             />
@@ -69,11 +144,15 @@ const CreateNewPasswordForm: React.FC = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Reset Password
+              {loading ? 'Creating...' : mode === 'reset' ? 'Reset Password' : 'Create Password'}
             </button>
           </div>
+          {error && (
+            <p className="mt-2 text-sm text-red-600">{error}</p>
+          )}
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-600">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
+import authService from '../../../services/authService';
 
 
 interface LoginFormProps {
@@ -126,6 +127,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
         <div className="mt-5">
            <button
               type="button"
+              onClick={async () => {
+                try {
+                  const authUrl = await authService.getGoogleAuthUrl(window.location.origin + '/login');
+                  window.location.href = authUrl;
+                } catch (error) {
+                  console.error('Failed to get Google auth URL:', error);
+                }
+              }}
               className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer"
             >
               <FcGoogle />
