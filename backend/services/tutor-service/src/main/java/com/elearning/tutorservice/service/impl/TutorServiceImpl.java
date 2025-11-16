@@ -1,7 +1,10 @@
 package com.elearning.tutorservice.service.impl;
 
 import com.elearning.tutorservice.dto.response.TutorSearchResponse;
+import com.elearning.tutorservice.dto.response.TutorScheduleResponse;
 import com.elearning.tutorservice.entity.Tutor;
+import com.elearning.tutorservice.entity.TutorAvailability;
+import com.elearning.tutorservice.entity.AvailabilityStatus;
 import com.elearning.tutorservice.repository.TutorRepository;
 import com.elearning.tutorservice.service.TutorService;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +85,29 @@ public class TutorServiceImpl implements TutorService {
                 .videoThumbnailUrl(tutor.getVideoThumbnailUrl())
                 .previousSessionFee(tutor.getPreviousSessionFee())
                 .sessionDurationMinutes(tutor.getSessionDurationMinutes())
+                .build();
+    }
+
+    @Override
+    public List<TutorScheduleResponse> getTutorSchedule(Long tutorId, boolean includeBooked) {
+        Tutor tutor = tutorRepository.findById(tutorId)
+                .orElseThrow(() -> new RuntimeException("Tutor not found"));
+        return tutor.getAvailabilities().stream()
+                .filter(availability -> includeBooked || availability.getStatus() == AvailabilityStatus.FREE)
+                .map(this::mapToScheduleResponse)
+                .collect(Collectors.toList());
+    }
+
+    private TutorScheduleResponse mapToScheduleResponse(TutorAvailability availability) {
+        return TutorScheduleResponse.builder()
+                .tutorId(availability.getTutor().getId())
+                .availabilityId(availability.getId())
+                .dayOfWeek(availability.getDayOfWeek())
+                .startTime(availability.getStartTime())
+                .endTime(availability.getEndTime())
+                .effectiveStartDate(availability.getEffectiveStartDate())
+                .effectiveEndDate(availability.getEffectiveEndDate())
+                .status(availability.getStatus().name())
                 .build();
     }
 }

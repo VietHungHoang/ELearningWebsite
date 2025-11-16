@@ -10,10 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
-public interface TutorRepository extends JpaRepository<Tutor, UUID> {
+public interface TutorRepository extends JpaRepository<Tutor, Long> {
 
     @Query("SELECT DISTINCT t FROM Tutor t " +
            "WHERE t.isVerified = true " +
