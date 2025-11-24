@@ -20,7 +20,7 @@ public class SecurityConfig {
             .authorizeExchange(exchanges -> exchanges
                     .pathMatchers(
                         "/api/v1/auth/**",
-                        "/api/v1/public/**"
+                        "/api/public/v1**"
                         ).permitAll()
                     .anyExchange().authenticated()
             )
