@@ -1,0 +1,42 @@
+server:
+  port: 8089
+  
+spring:
+  application:
+    name: chat-service
+  profiles:
+    active: dev
+  data:
+    mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      database: ${MONGO_DATABASE:chat_db}
+      username: ${MONGO_USERNAME:}
+      password: ${MONGO_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      enabled: true
+
+# File Upload Configuration
+file:
+  upload:
+    directory: ${FILE_UPLOAD_DIR:./uploads}
+    max-size: 52428800  # 50MB in bytes
+
+# WebSocket Configuration
+websocket:
+  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:4200}
+  message-broker:
+    relay-host: ${STOMP_RELAY_HOST:localhost}
+    relay-port: ${STOMP_RELAY_PORT:61613}
+    client-login: ${STOMP_CLIENT_LOGIN:guest}
+    client-passcode: ${STOMP_CLIENT_PASSCODE:guest}
+
+# Logging
+logging:
+  level:
+    com.elearning.chatservice: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
