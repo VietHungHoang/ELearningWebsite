@@ -1,12 +1,18 @@
 package com.elearning.searchservice.service.impl;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import com.elearning.searchservice.dto.request.SearchTutorRequest;
+import com.elearning.searchservice.dto.response.SearchFacets;
+import com.elearning.searchservice.dto.response.TutorSearchResult;
 import com.elearning.searchservice.entity.TutorDocument;
 import com.elearning.searchservice.service.SearchService;
-
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import com.elearning.searchservice.service.query.TutorFilterBuilder;
+import com.elearning.searchservice.service.query.TutorQueryBuilder;
+import com.elearning.searchservice.service.query.TutorRankingBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -17,136 +23,103 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SearchServiceImpl implements SearchService {
 
     private final ElasticsearchOperations elasticsearchOperations;
-
-    private final List<String> tutorsFields = Arrays.asList(
-        "name_vn",
-        "name_en", 
-        "bio_vn",
-        "bio_en",
-        "specialization_vn",
-        "specialization_en"
-    );
+    private final TutorQueryBuilder queryBuilder;
+    private final TutorFilterBuilder filterBuilder;
+    private final TutorRankingBuilder rankingBuilder;
 
     @Override
-    public Page<UUID> searchTutors(
-        String keyword,
-        Boolean teachesInGroups,
-        String categoryName,
-        BigDecimal minPrice,
-        BigDecimal maxPrice,
-        List<String> languageCodes,
-        Pageable pageable
-    ) {
+    public Page<TutorSearchResult> searchTutors(SearchTutorRequest request) {
+        log.info("Searching tutors with request: {}", request);
         
-        Query query = null;
+        // 1. Build search query
+        Query searchQuery = queryBuilder.buildSearchQuery(request);
         
-        // Add keyword search if provided
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            query = Query.of(q -> q
-                .multiMatch(mm -> mm
-                    .query(keyword)
-                    .fields(tutorsFields)
-                    .fuzziness("AUTO")
-                    )
-                );
-        } else {
-            query = Query.of(q -> q
-                .matchAll(ma -> ma)
-            );
-        }
-
-        List<Query> filters = new ArrayList<>();
-
-        // Add group filter if provided
-        if(teachesInGroups != null && teachesInGroups == true) {
-            filters.add(Query.of(q -> q
-                .term(t -> t
-                    .field("teachesInGroups")
-                    .value(teachesInGroups)
-                )
-            ));
-        }
-
-        // Add category filter if provided
-        if (categoryName != null && !categoryName.trim().isEmpty()) {
-            filters.add(Query.of(q -> q
-                .term(t -> t
-                    .field("category_name")
-                    .value(categoryName)
-                )
-            ));
-        }
-
-        // Add price range filter if provided
-        if (minPrice != null || maxPrice != null) {
-            filters.add(Query.of(q -> q
-                .range(rq -> rq
-                    .number(r -> {
-                        r.field("currentSessionFee");
-                        if (minPrice != null) {
-                            r.gte(minPrice.doubleValue());
-                        }
-                        if (maxPrice != null) {
-                            r.lte(maxPrice.doubleValue());
-                        }
-                        return r;
-                    })
-                )
-            ));
-        }
-
-        // Add language filter if provided
-        if (languageCodes != null && !languageCodes.isEmpty()) {
-
-            List<FieldValue> values = languageCodes.stream()
-                    .map(FieldValue::of)
-                    .collect(Collectors.toList());
-
-            filters.add(Query.of(q -> q
-                    .terms(t -> t
-                            .field("languages")
-                            .terms(tv -> tv.value(values))
-                    )
-            ));
-        }
-
-        Query finalQuery = query;
+        // 2. Build filters
+        List<Query> filters = filterBuilder.buildFilters(request);
+        
+        // 3. Combine query and filters
         Query boolQuery = Query.of(q -> q
                 .bool(b -> b
-                    .must(finalQuery)
-                    .filter(filters)
+                        .must(searchQuery)
+                        .filter(filters)
                 )
         );
-
+        
+        // 4. Wrap with function score for ranking
+        Query finalQuery = rankingBuilder.buildFunctionScoreQuery(boolQuery);
+        
+        // 5. Build pageable
+        Pageable pageable = PageRequest.of(
+                request.getPage() != null ? request.getPage() : 0,
+                request.getSize() != null ? request.getSize() : 10
+        );
+        
+        // 6. Build native query
         NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(boolQuery)
+                .withQuery(finalQuery)
                 .withPageable(pageable)
                 .build();
-
-        // 5. GỬI ĐI: Thực thi truy vấn
+        
+        // 7. Execute search
         SearchHits<TutorDocument> searchHits = elasticsearchOperations.search(
                 nativeQuery,
                 TutorDocument.class,
-                IndexCoordinates.of("tutors") // Chỉ định index
+                IndexCoordinates.of("tutors_v1")
         );
-
-        // 6. Xử lý kết quả (Giống code cũ)
+        
+        log.info("Found {} tutors", searchHits.getTotalHits());
+        
+        // 8. Map to results
         return SearchHitSupport.searchPageFor(searchHits, pageable)
-                .map(this::mapToDTO);
+                .map(this::mapToSearchResult);
     }
 
-    private UUID mapToDTO(SearchHit<TutorDocument> hit) {
-        return hit.getContent().getId();
+    @Override
+    public SearchFacets getSearchFacets(SearchTutorRequest request) {
+        // TODO: Implement aggregations
+        return SearchFacets.builder().build();
+    }
+
+    @Override
+    @Deprecated
+    public Page<UUID> searchTutors(
+            String keyword,
+            Boolean teachesInGroups,
+            String categoryName,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<String> languageCodes,
+            Pageable pageable
+    ) {
+        // Convert to new request format
+        SearchTutorRequest request = SearchTutorRequest.builder()
+                .keyword(keyword)
+                .teachesInGroups(teachesInGroups)
+                .minPrice(minPrice)
+                .maxPrice(maxPrice)
+                .languageCodes(languageCodes)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .build();
+        
+        // Call new method and extract IDs
+        return searchTutors(request).map(TutorSearchResult::getTutorId);
+    }
+
+    private TutorSearchResult mapToSearchResult(SearchHit<TutorDocument> hit) {
+        return TutorSearchResult.builder()
+                .tutorId(hit.getContent().getId())
+                .score(hit.getScore())
+                .highlights(new HashMap<>()) // TODO: implement highlights
+                .matchedFields(new ArrayList<>()) // TODO: extract matched fields
+                .build();
     }
 }
