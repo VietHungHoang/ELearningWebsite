@@ -3,7 +3,7 @@ server:
   
 spring:
   application:
-    name: apigateway
+    name: bff-service
   profiles:
     active: dev
 

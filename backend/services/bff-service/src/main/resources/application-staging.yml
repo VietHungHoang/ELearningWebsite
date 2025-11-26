@@ -11,6 +11,14 @@ services:
     url: ${COMMON_SERVICE_URL}
   tutor-service:
     url: ${TUTOR_SERVICE_URL}
+  class-service:
+    url: ${CLASS_SERVICE_URL}
+  user-service:
+    url: ${USER_SERVICE_URL}
+  student-service:
+    url: ${STUDENT_SERVICE_URL}
+  search-service:
+    url: ${SEARCH_SERVICE_URL:http://search-service:8086}
 
 logging:
   level:
