@@ -19,18 +19,12 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Tutor extends BaseEntity {
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(name = "avatar_url")
-    private String avatarUrl;
-
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
     private Boolean isVerified = false;
 
-    @Column(columnDefinition = "TEXT")
-    private String bio;
+    @Column(columnDefinition = "TEXT", name = "introduction")
+    private String introduction;
 
     @Column(name = "specialization")
     private String specialization;
@@ -80,4 +74,10 @@ public class Tutor extends BaseEntity {
 
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TutorSubject> subjects;
+
+    @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CareerEntry> careerEntries;
+
+    @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Certification> certifications;
 }

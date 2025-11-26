@@ -41,5 +41,5 @@ public class TutorAvailability extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @Builder.Default
-    private AvailabilityStatus status = AvailabilityStatus.FREE;
+    private AvailabilityStatus status = AvailabilityStatus.AVAILABLE;
 }
