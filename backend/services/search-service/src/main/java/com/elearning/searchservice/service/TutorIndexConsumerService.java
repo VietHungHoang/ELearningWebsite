@@ -1,0 +1,91 @@
+package com.elearning.searchservice.service;
+
+import com.elearning.searchservice.dto.event.TutorIndexEvent;
+import com.elearning.searchservice.entity.TutorDocument;
+import com.elearning.searchservice.mapper.TutorIndexMapper;
+import com.elearning.searchservice.repository.TutorSearchRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+
+/**
+ * Kafka consumer service for syncing tutor data to Elasticsearch
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class TutorIndexConsumerService {
+
+    private final ObjectMapper objectMapper;
+    private final TutorIndexMapper tutorIndexMapper;
+    private final TutorSearchRepository tutorSearchRepository;
+
+    private static final String TUTOR_INDEX_SYNC_TOPIC = "tutor-index-sync";
+
+    /**
+     * Listen to tutor-index-sync topic and index/update/delete tutor documents
+     */
+    @KafkaListener(topics = TUTOR_INDEX_SYNC_TOPIC, groupId = "search-service-group")
+    public void handleTutorIndexEvent(String message) {
+        try {
+            log.debug("Received tutor index event: {}", message);
+            
+            // Deserialize event
+            TutorIndexEvent event = objectMapper.readValue(message, TutorIndexEvent.class);
+            
+            log.info("Processing tutor index event: type={}, tutorId={}", 
+                    event.getEventType(), event.getTutorId());
+            
+            // Handle based on event type
+            switch (event.getEventType()) {
+                case "CREATED", "UPDATED" -> indexTutor(event);
+                case "DELETED" -> deleteTutor(event);
+                default -> log.warn("Unknown event type: {}", event.getEventType());
+            }
+            
+        } catch (JsonProcessingException e) {
+            log.error("Failed to deserialize tutor index event: {}", message, e);
+        } catch (Exception e) {
+            log.error("Failed to process tutor index event", e);
+        }
+    }
+
+    /**
+     * Index or update tutor document
+     */
+    private void indexTutor(TutorIndexEvent event) {
+        try {
+            // Map event to document
+            TutorDocument document = tutorIndexMapper.toDocument(event);
+            
+            // Save to Elasticsearch
+            TutorDocument saved = tutorSearchRepository.save(document);
+            
+            log.info("Successfully indexed tutor: id={}, name={}", 
+                    saved.getId(), saved.getNameEn());
+            
+        } catch (Exception e) {
+            log.error("Failed to index tutor: tutorId={}", event.getTutorId(), e);
+            // TODO: Send to dead letter queue or retry
+            throw e;
+        }
+    }
+
+    /**
+     * Delete tutor document
+     */
+    private void deleteTutor(TutorIndexEvent event) {
+        try {
+            tutorSearchRepository.deleteById(event.getTutorId());
+            
+            log.info("Successfully deleted tutor from index: id={}", event.getTutorId());
+            
+        } catch (Exception e) {
+            log.error("Failed to delete tutor: tutorId={}", event.getTutorId(), e);
+            throw e;
+        }
+    }
+}
