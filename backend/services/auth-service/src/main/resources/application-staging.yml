@@ -27,5 +27,3 @@ keycloak:
   realm: ${KEYCLOAK_REALM}
   resource: ${KEYCLOAK_RESOURCE}
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
-  admin-username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-  admin-password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}

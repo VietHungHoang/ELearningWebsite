@@ -2,6 +2,7 @@ package com.elearning.authservice.service;
 
 import com.elearning.authservice.dto.request.GoogleLoginRequest;
 import com.elearning.authservice.dto.request.LoginRequest;
+import com.elearning.authservice.dto.request.RefreshTokenRequest;
 import com.elearning.authservice.dto.request.RegistrationStartRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
 import com.elearning.authservice.dto.response.LoginResponse;
@@ -18,6 +19,8 @@ public interface AuthService {
     void createAccount(SetPasswordRequest request);
 
     LoginResponse login(LoginRequest request);
+    
+    LoginResponse refreshToken(RefreshTokenRequest request);
     
     String getGoogleAuthUrl(String redirectUri);
     

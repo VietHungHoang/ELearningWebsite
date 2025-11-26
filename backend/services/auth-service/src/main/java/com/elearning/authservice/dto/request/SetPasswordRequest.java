@@ -9,5 +9,4 @@ public class SetPasswordRequest {
     private String email;
     private String password;
     private Role role;
-
 }

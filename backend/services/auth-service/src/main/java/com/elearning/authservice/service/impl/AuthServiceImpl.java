@@ -1,8 +1,10 @@
 package com.elearning.authservice.service.impl;
 
+import com.elearning.authservice.dto.event.AccountCreatedEvent;
 import com.elearning.authservice.dto.event.EmailOtpEvent;
 import com.elearning.authservice.dto.request.GoogleLoginRequest;
 import com.elearning.authservice.dto.request.LoginRequest;
+import com.elearning.authservice.dto.request.RefreshTokenRequest;
 import com.elearning.authservice.dto.request.RegistrationStartRequest;
 import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
@@ -60,6 +62,9 @@ public class AuthServiceImpl implements AuthService {
         // Check if user already exists in Keycloak
         RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
         UsersResource usersResource = realmResource.users();
+
+        log.info("Checking if user with email {} in Keycloak, realm: {}, clientSecret: {}", email, keycloakProperties.getRealm(), keycloakProperties.getClientSecret());
+
         List<UserRepresentation> existingUsers = usersResource.searchByEmail(email, true);
         if (!existingUsers.isEmpty()) {
             log.warn("User with email {} already exists in Keycloak", email);
@@ -118,24 +123,40 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Failed to create user in Keycloak");
         }
 
+        // Get user ID from response
+        String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+
         // Assign role to user
         if (role != null) {
             try {
-                String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
                 UserResource userResource = usersResource.get(userId);
 
-                // Get role from realm (use uppercase role name)
-                var roleResource = realmResource.roles().get(role.name());
+                // Get role from realm (use lowercase role name)
+                var roleResource = realmResource.roles().get(role.toValue());
                 var roleRepresentation = roleResource.toRepresentation();
 
                 // Assign role to user
                 userResource.roles().realmLevel().add(Arrays.asList(roleRepresentation));
 
-                log.info("Assigned role {} to user {}", role.name(), email);
+                log.info("Assigned role {} to user {}", role.toValue(), email);
             } catch (Exception e) {
-                log.error("Failed to assign role {} to user {}: {}", role.name(), email, e.getMessage());
+                log.error("Failed to assign role {} to user {}: {}", role.toValue(), email, e.getMessage());
                 throw new RuntimeException("Failed to assign role to user", e);
             }
+        }
+
+        // Produce Kafka event for user-service
+        try {
+            AccountCreatedEvent event = AccountCreatedEvent.builder()
+                    .id(userId)
+                    .email(email)
+                    .fullname(fullname)
+                    .role(role != null ? role.toValue() : null)
+                    .build();
+            kafkaProducer.sendAccountCreatedEvent(event);
+            log.info("Sent account created event for user: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send account created event for {}: {}", email, e.getMessage(), e);
         }
 
         // Clean up Redis
@@ -196,6 +217,50 @@ public class AuthServiceImpl implements AuthService {
                 .scope((String) bodyMap.get("scope"))
                 .build();
     }
+    
+    @Override
+    public LoginResponse refreshToken(RefreshTokenRequest request) {
+        log.info("Refreshing access token");
+        String tokenUrl = keycloakProperties.getAuthServerUrl() + "/realms/" + keycloakProperties.getRealm() + "/protocol/openid-connect/token";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("client_id", keycloakProperties.getResource());
+        body.add("client_secret", keycloakProperties.getClientSecret());
+        body.add("refresh_token", request.getRefreshToken());
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                tokenUrl, 
+                HttpMethod.POST, 
+                entity, 
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+            );
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                Map<String, Object> bodyMap = response.getBody();
+                LoginResponse loginResponse = buildLoginResponse(bodyMap);
+                log.info("Token refresh successful");
+                return loginResponse;
+            } else {
+                Map<String, Object> errorBody = response.getBody();
+                String errorJson = errorBody != null ? errorBody.toString() : "No body";
+                log.warn("Token refresh failed: {} - {}", response.getStatusCode(), errorJson);
+                
+                String message = getErrorMessage(response.getStatusCode().value());
+                throw new AuthenticationFailedException(message, response.getStatusCode(), errorJson);
+            }
+        } catch (Exception e) {
+            log.error("Token refresh API call failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Token refresh failed: " + e.getMessage(), e);
+        }
+    }
+    
     @Override
     public void bulkCreateAccounts(List<RegistrationStartRequest> requests) {
         RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
@@ -265,8 +330,64 @@ public class AuthServiceImpl implements AuthService {
             
             if (response.getStatusCode().is2xxSuccessful()) {
                 Map<String, Object> bodyMap = response.getBody();
+                String accessToken = (String) bodyMap.get("access_token");
+                
+                // Decode JWT to get user email
+                String email = extractEmailFromToken(accessToken);
+                log.info("Extracted email from token: {}", email);
+                
+                // Check if user is new (first-time login)
+                RealmResource realmResource = keycloak.realm(keycloakProperties.getRealm());
+                UsersResource usersResource = realmResource.users();
+                List<UserRepresentation> existingUsers = usersResource.searchByEmail(email, true);
+                
+                if (!existingUsers.isEmpty() && request.getRole() != null) {
+                    // User exists and role is provided -> assign role if not already assigned
+                    UserRepresentation user = existingUsers.get(0);
+                    String userId = user.getId();
+                    
+                    try {
+                        var userResource = usersResource.get(userId);
+                        var existingRoles = userResource.roles().realmLevel().listEffective();
+                        
+                        // Check if user already has the role
+                        boolean hasRole = existingRoles.stream()
+                            .anyMatch(r -> r.getName().equals(request.getRole().toValue()));
+                        
+                        if (!hasRole) {
+                            // Assign role
+                            var roleResource = realmResource.roles().get(request.getRole().toValue());
+                            var roleRepresentation = roleResource.toRepresentation();
+                            userResource.roles().realmLevel().add(Arrays.asList(roleRepresentation));
+                            log.info("Assigned role {} to existing user {}", request.getRole().toValue(), email);
+                            
+                            // Send account created event for first-time role assignment
+                            try {
+                                String fullname = (user.getFirstName() != null ? user.getFirstName() : "") + 
+                                                  " " + 
+                                                  (user.getLastName() != null ? user.getLastName() : "");
+                                AccountCreatedEvent event = AccountCreatedEvent.builder()
+                                        .id(userId)
+                                        .email(email)
+                                        .fullname(fullname.trim())
+                                        .role(request.getRole().toValue())
+                                        .build();
+                                kafkaProducer.sendAccountCreatedEvent(event);
+                                log.info("Sent account created event for Google user: {}", email);
+                            } catch (Exception e) {
+                                log.error("Failed to send account created event for {}: {}", email, e.getMessage(), e);
+                            }
+                        } else {
+                            log.info("User {} already has role {}", email, request.getRole().toValue());
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to assign role to user {}: {}", email, e.getMessage());
+                        // Continue anyway - don't fail the login
+                    }
+                }
+                
                 LoginResponse loginResponse = buildLoginResponse(bodyMap);
-                log.info("Google login successful");
+                log.info("Google login successful for user: {}", email);
                 return loginResponse;
             } else {
                 Map<String, Object> errorBody = response.getBody();
@@ -279,6 +400,32 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             log.error("Google login API call failed: {}", e.getMessage(), e);
             throw new RuntimeException("Google login failed due to Keycloak API call error: " + e.getMessage(), e);
+        }
+    }
+    
+    private String extractEmailFromToken(String token) {
+        // Decode JWT token to extract email (simple base64 decode of payload)
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) {
+                throw new RuntimeException("Invalid JWT token format");
+            }
+            
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            // Parse JSON to get email
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> claims = mapper.readValue(payload, Map.class);
+            
+            String email = (String) claims.get("email");
+            if (email == null) {
+                email = (String) claims.get("preferred_username");
+            }
+            
+            return email;
+        } catch (Exception e) {
+            log.error("Failed to extract email from token: {}", e.getMessage());
+            throw new RuntimeException("Failed to decode token", e);
         }
     }
 

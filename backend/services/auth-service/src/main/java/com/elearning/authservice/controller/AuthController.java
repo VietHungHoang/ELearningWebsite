@@ -2,6 +2,7 @@ package com.elearning.authservice.controller;
 
 import com.elearning.authservice.dto.request.GoogleLoginRequest;
 import com.elearning.authservice.dto.request.LoginRequest;
+import com.elearning.authservice.dto.request.RefreshTokenRequest;
 import com.elearning.authservice.dto.request.RegistrationStartRequest;
 import com.elearning.authservice.dto.request.SetPasswordRequest;
 import com.elearning.authservice.dto.request.VerifyOtpRequest;
@@ -81,6 +82,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> googleCallback(@RequestBody GoogleLoginRequest request) {
         LoginResponse tokens = authService.loginWithGoogle(request);
         return ResponseEntity.ok(ApiResponse.success("Google login successful", tokens));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@RequestBody RefreshTokenRequest request) {
+        LoginResponse tokens = authService.refreshToken(request);
+        return ResponseEntity.ok(ApiResponse.success("Token refreshed successfully", tokens));
     }
 
     

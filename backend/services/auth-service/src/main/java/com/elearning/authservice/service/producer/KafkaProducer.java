@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import com.elearning.authservice.dto.event.AccountCreatedEvent;
 import com.elearning.authservice.dto.event.EmailOtpEvent;
 
 @Service
@@ -18,6 +19,7 @@ public class KafkaProducer {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final String notificationOTPEmailTopic = "notifications_otp_email";
+    private final String accountCreatedTopic = "user_account_created";
 
     public void sendMessage(String topic, String key, Object message) {
         try {
@@ -38,6 +40,17 @@ public class KafkaProducer {
         } catch (JsonProcessingException e) {
             log.error("Error converting EmailOtpEvent to JSON: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to serialize EmailOtpEvent", e);
+        }
+    }
+
+    public void sendAccountCreatedEvent(AccountCreatedEvent message) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(message);
+            kafkaTemplate.send(accountCreatedTopic, jsonMessage);
+            log.info("Sent account created event to topic {}: {}", accountCreatedTopic, jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting AccountCreatedEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize AccountCreatedEvent", e);
         }
     }
 }
