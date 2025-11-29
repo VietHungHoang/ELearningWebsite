@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaPlay, FaHeart } from 'react-icons/fa';
 import { FiCalendar, FiMessageSquare } from 'react-icons/fi';
 import { VscVerified } from 'react-icons/vsc';
-import { PiStar, PiStudentLight, PiCalendar } from 'react-icons/pi';
+import { PiStar, PiStudentLight, PiCalendar, PiBookOpenTextLight } from 'react-icons/pi';
 import { HiOutlineLanguage } from 'react-icons/hi2';
 import type { Tutor } from '../../../../types/api';
 import { getCountryFlag } from '../../../../lib/countryUtils';
@@ -33,6 +34,9 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const navigate = useNavigate();
+
+  const toggleBio = () => setShowFullBio(!showFullBio);
 
   const handlePlayClick = () => {  
     if (videoRef.current) {
@@ -41,8 +45,8 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
     }
   };
 
-  const toggleBio = () => {
-    setShowFullBio(!showFullBio);
+  const handleTutorClick = () => {
+    navigate(`/tutor/${tutor.id}`, { state: { tutor } });
   };
 
   const truncatedBio = tutor.bio.length > 250 ? tutor.bio.substring(0, 250) + '...' : tutor.bio;
@@ -57,8 +61,8 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow duration-200">
       {/* Left side: Video and actions */}
-      <div className="flex-shrink-0 w-full md:w-[280px] flex flex-col">
-        <div className="relative aspect-[16/10] rounded-xl overflow-hidden mb-3 group">
+      <div className="flex-shrink-0 w-full md:w-[300px] flex flex-col">
+        <div className="relative aspect-[18/10] rounded-2xl overflow-hidden group shadow-lg p-2 bg-white mb-3">
           <video
             ref={videoRef}
             poster={tutor.videoThumbnailUrl}
@@ -106,10 +110,10 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
       <div className="flex-grow flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
-            <img src={tutor.avatarUrl} alt={tutor.name} className="w-13 h-13 rounded-lg object-cover" />
+            <img src={tutor.avatarUrl} alt={tutor.name} className="w-13 h-13 rounded-lg object-cover cursor-pointer" onClick={handleTutorClick} />
             <div>
               <div className="flex items-center gap-1">
-                <h3 className="text-lg font-semibold text-gray-800">{tutor.name}</h3>
+                <h3 className="text-lg font-semibold text-gray-800 cursor-pointer hover:text-[#295C51] transition-colors" onClick={handleTutorClick}>{tutor.name}</h3>
                 {tutor.isVerified && <VscVerified style={{ color: 'rgb(51, 204, 94)', fontSize: '18px' }} title="Verified tutor" />}
                 <FlagIcon countryCode={tutor.nationalityCode} className="ml-1" />
               </div>
@@ -125,24 +129,42 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
           </div>
         </div>
 
-        <div className="space-y-1.5 mb-2">
-          <StatItem
-            icon={<PiStar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-            text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.averageRating.toFixed(1)}/5.0</span> ({tutor.reviewCount} review{tutor.reviewCount !== 1 ? 's' : ''})</>}
-          />
-          <StatItem
-            icon={<PiCalendar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-            text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.bookedSessionsCount}</span> Booked sessions</>}
-          />
-          <StatItem
-            icon={<PiStudentLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-            text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.studentCount}</span> Students</>}
-          />
-          <StatItem
-            icon={<HiOutlineLanguage style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-            text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>Languages:</span> {tutor.languages.join(', ')}</>}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 mb-0.5">
+          {/* Left stats column */}
+          <div className="space-y-2">
+            <StatItem
+              icon={<PiStar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.averageRating.toFixed(1)}/5.0</span> ({tutor.reviewCount} review{tutor.reviewCount !== 1 ? 's' : ''})</>}
+            />
+            <StatItem
+              icon={<PiCalendar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.bookedSessionsCount}</span> Booked sessions</>}
+            />
+            <StatItem
+              icon={<PiStudentLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.studentCount}</span> Students</>}
+            />
+          </div>
+          {/* Right stats column */}
+          <div className="space-y-2">
+            <StatItem
+              icon={<HiOutlineLanguage style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>Languages:</span> {tutor.languages.map((lang, index) => (
+                <React.Fragment key={lang.code}>
+                  {lang.code}
+                  {lang.level && <span className="ml-1 px-1 py-0.5 bg-gray-100 text-xs font-medium rounded">({lang.level})</span>}
+                  {index < tutor.languages.length - 1 && ', '}
+                </React.Fragment>
+              ))}</>}
+            />
+            <StatItem
+              icon={<PiBookOpenTextLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>I can teach:</span> {tutor.subjects?.map(s => s.name).join(', ') || 'N/A'}</>}
+            />
+          </div>
         </div>
+
+        <hr className="my-3 border-t border-gray-200" />
 
         <div className="mb-auto">
           <p className="text-sm text-gray-600">

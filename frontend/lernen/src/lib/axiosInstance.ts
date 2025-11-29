@@ -60,11 +60,11 @@ axiosInstance.interceptors.response.use(
         }
 
         // Attempt to refresh token
-        const response = await axios.post(`${axiosInstance.defaults.baseURL}/auth/refresh`, {
+        const response = await axios.post(`${axiosInstance.defaults.baseURL}/v1/auth/refresh-token`, {
           refreshToken,
         });
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
         // Update tokens in storage
         localStorage.setItem('accessToken', accessToken);

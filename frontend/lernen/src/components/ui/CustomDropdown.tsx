@@ -83,6 +83,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
             `}>
                 {label && <label className="text-xs text-[#585858] block mb-1.5">{label}</label>}
                 <button 
+                    type="button"
                     onClick={handleToggle} 
                     className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[42px]'}`}
                 >

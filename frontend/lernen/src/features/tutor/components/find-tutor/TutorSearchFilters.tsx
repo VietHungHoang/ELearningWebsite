@@ -390,19 +390,22 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
     // Trigger filter change when any filter updates (debounced)
     useEffect(() => {
-        const filters: IFilters = {
-            category: selectedValues.category !== placeholders.category ? selectedValues.category : undefined,
-            subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
-            languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
-            timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined,
-            sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
-            sessionType: activeTab === 'Online' ? 'online' : activeTab === 'Offline' ? 'offline' : undefined,
-            keyword: keyword.trim() || undefined,
-            minFee: feeRange[0],
-            maxFee: feeRange[1],
-        };
+        const timer = setTimeout(() => {
+            const filters: IFilters = {
+                category: selectedValues.category !== placeholders.category ? selectedValues.category : undefined,
+                subcategories: selectedSubcategories.length > 0 ? selectedSubcategories : undefined,
+                languages: selectedLanguages.length > 0 ? selectedLanguages : undefined,
+                timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined,
+                sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
+                sessionType: activeTab === 'Online' ? 'online' : activeTab === 'Offline' ? 'offline' : undefined,
+                keyword: keyword.trim() || undefined,
+                minFee: feeRange[0],
+                maxFee: feeRange[1],
+            };
             onFilterChange(filters);
+        }, 300); // Debounce 300ms to avoid multiple API calls
 
+        return () => clearTimeout(timer);
     }, [selectedValues, selectedSubcategories, selectedLanguages, feeRange, activeTab, keyword]);
 
     return (

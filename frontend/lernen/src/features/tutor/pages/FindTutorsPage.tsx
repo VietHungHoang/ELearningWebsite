@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { Tutor, TutorSearchFilters as IFilters, PaginatedResponse } from '../../../types/api';
 import Layout from '../../../components/ui/Layout';
 import Breadcrumb from '../../../components/ui/Breadcrumb';
@@ -85,12 +85,6 @@ const FindTutorsPage: React.FC = () => {
       );
       setFilteredTutors(results);
   };
-
-  // Initial load - fetch all tutors with no filters
-  useEffect(() => {
-    handleFilterChange({});
-  }, []);
-
 
   return (
     <Layout>

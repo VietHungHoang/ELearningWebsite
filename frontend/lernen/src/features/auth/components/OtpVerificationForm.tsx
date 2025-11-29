@@ -1,10 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import authService from '../../../services/authService';
 
 const OtpVerificationForm: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+  }, []);
 
   const handleChange = (element: HTMLInputElement, index: number) => {
     if (isNaN(Number(element.value))) return;
@@ -35,16 +42,38 @@ const OtpVerificationForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const enteredOtp = otp.join('');
-    console.log('Verifying OTP:', enteredOtp);
-    // Here you would verify the OTP via an API call.
-    // On success, navigate to a new password creation page.
-    if (enteredOtp.length === 6) {
-      navigate('/create-new-password');
-    } else {
-      alert('Please enter a valid 6-digit OTP.');
+    if (enteredOtp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      let signupDataStr = localStorage.getItem('signupVerification');
+      if (!signupDataStr) {
+        setError('No verification session found. Please sign up first.');
+        return;
+      }
+
+      const signupData = JSON.parse(signupDataStr);
+      const { email } = signupData;
+      await authService.verifyOtp({ email, otp: enteredOtp });
+
+      // Update verification status
+      signupData.verified = true;
+      localStorage.setItem('signupVerification', JSON.stringify(signupData));
+
+      // Navigate to create new password or login
+      navigate(`/create-new-password?email=${email}&role=${signupData.role}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'OTP verification failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,7 +93,7 @@ const OtpVerificationForm: React.FC = () => {
                 ref={(el) => {
                   inputRefs.current[index] = el;
                 }}
-                className="w-12 h-14 text-center text-2xl font-semibold bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent transition"
+                className="w-11 h-13 text-center text-2xl font-semibold bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent transition"
                 type="text"
                 name="otp"
                 maxLength={1}
@@ -80,11 +109,15 @@ const OtpVerificationForm: React.FC = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Verify
+              {loading ? 'Verifying...' : 'Verify'}
             </button>
           </div>
+          {error && (
+            <p className="mt-2 text-sm text-red-600">{error}</p>
+          )}
         </form>
 
         <p className="mt-4 text-sm text-gray-600">

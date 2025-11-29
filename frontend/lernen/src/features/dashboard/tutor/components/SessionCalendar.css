@@ -1,0 +1,77 @@
+/* Modern Calendar Styles */
+.modern-calendar {
+    width: 100%;
+    border: none;
+    font-family: inherit;
+}
+
+.modern-calendar .react-calendar__tile {
+    padding: 12px 6px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.modern-calendar .react-calendar__tile:hover {
+    background-color: #f0fdf4;
+    transform: scale(1.05);
+}
+
+.modern-calendar .react-calendar__tile--active {
+    background: linear-gradient(135deg, #059669 0%, #0b6459 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.modern-calendar .react-calendar__tile--active:hover {
+    background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
+}
+
+.modern-calendar .react-calendar__tile.has-session {
+    background-color: #dcfce7;
+    font-weight: 600;
+}
+
+.modern-calendar .react-calendar__tile.has-session:hover {
+    background-color: #bbf7d0;
+}
+
+.modern-calendar .react-calendar__month-view__days__day--weekend {
+    color: #dc2626;
+}
+
+.modern-calendar .react-calendar__navigation button {
+    font-weight: 600;
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.modern-calendar .react-calendar__navigation button:hover {
+    background-color: #f3f4f6;
+}
+
+.modern-calendar .react-calendar__navigation button:disabled {
+    opacity: 0.5;
+}
+
+.session-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: linear-gradient(135deg, #059669 0%, #0b6459 100%);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.modern-calendar abbr {
+    text-decoration: none;
+}
