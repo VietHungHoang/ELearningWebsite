@@ -4,42 +4,60 @@ import { FaPlay } from 'react-icons/fa';
 
 export const InteractiveImagePanel: React.FC = () => {
     return (
-        <div className="relative">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] group">
-                <img src="https://picsum.photos/seed/teacher/800/600" alt="Online tutoring session" className="w-full h-full object-cover zoom-image" />
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <button className="w-20 h-20 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-all duration-300 transform group-hover:scale-110 cursor-pointer">
-                        <FaPlay size={28} />
+        <div className="relative w-full max-w-sm mx-auto">
+            {/* Main Video Frame */}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[16/10] group border-4 border-white/20 backdrop-blur-sm bg-gradient-to-br from-teal-600/20 to-emerald-600/20">
+                <img 
+                    src="https://picsum.photos/seed/teacher/800/600" 
+                    alt="Online tutoring session" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                />
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"></div>
+                
+                {/* Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <button className="w-16 h-16 bg-white/95 rounded-full flex items-center justify-center shadow-xl hover:bg-white transition-all duration-300 transform group-hover:scale-110 cursor-pointer border-4 border-teal-500/30">
+                        <FaPlay size={22} className="text-[#0b6459] ml-1" />
                     </button>
                 </div>
-            </div>
 
-            {/* Floating UI elements */}
-            <div className="absolute -top-6 left-4 bg-white/50 p-3 rounded-2xl backdrop-blur-md shadow-lg flex items-center space-x-2 z-10 animate-float" style={{ animationDelay: '0.2s' }}>
-                <p className="text-gray-800 font-semibold text-sm">4k+ Registered Tutors</p>
-                <div className="flex -space-x-3">
-                    <img src="https://picsum.photos/seed/person1/32/32" alt="Tutor 1" className="w-8 h-8 rounded-full border-2 border-white" />
-                    <img src="https://picsum.photos/seed/person2/32/32" alt="Tutor 2" className="w-8 h-8 rounded-full border-2 border-white" />
-                    <img src="https://picsum.photos/seed/person3/32/32" alt="Tutor 3" className="w-8 h-8 rounded-full border-2 border-white" />
-                    <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center border-2 border-white text-white font-bold text-sm">+</div>
+                {/* Video duration badge */}
+                <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg">
+                    <span className="text-white text-xs font-semibold">2:45</span>
                 </div>
             </div>
 
-            <div className="absolute -bottom-10 right-4 bg-white/80 p-3 rounded-2xl backdrop-blur-md shadow-lg flex items-center space-x-3 text-gray-800 z-10 animate-float">
-                <img src="https://picsum.photos/seed/albert/48/48" alt="Albert Flores" className="w-12 h-12 rounded-lg object-cover" />
+            {/* Floating Tutor Stats Card - Top */}
+            <div className="absolute -top-3 left-0 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-xl flex items-center gap-2 z-20 border border-gray-100">
+                <div className="flex -space-x-2">
+                    <img src="https://picsum.photos/seed/person1/32/32" alt="Tutor 1" className="w-7 h-7 rounded-full border-2 border-white shadow-sm" />
+                    <img src="https://picsum.photos/seed/person2/32/32" alt="Tutor 2" className="w-7 h-7 rounded-full border-2 border-white shadow-sm" />
+                    <img src="https://picsum.photos/seed/person3/32/32" alt="Tutor 3" className="w-7 h-7 rounded-full border-2 border-white shadow-sm" />
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center border-2 border-white text-white font-bold text-xs shadow-sm">+</div>
+                </div>
                 <div>
-                    <p className="font-bold">Albert Flores</p>
-                    <p className="text-sm text-gray-600">Science</p>
-                    <p className="text-xs text-gray-500 mt-1">🇬🇧 Manchester, UK</p>
-                </div>
-                <div className="flex items-center text-orange-500 font-bold">
-                    <AiFillStar />
-                    <span className="ml-1 text-sm text-gray-800">4.8</span>
+                    <p className="text-gray-800 font-bold text-xs leading-tight">4k+ Tutors</p>
+                    <p className="text-gray-500 text-[10px]">Active Now</p>
                 </div>
             </div>
-            {/* <div className="absolute -bottom-12 -left-12 z-10">
-                <FaCircle className="w-16 h-16 text-blue-500" />
-            </div> */}
+
+            {/* Floating Tutor Profile Card - Bottom Right */}
+            <div className="absolute -bottom-4 -right-2 bg-white/95 backdrop-blur-md p-3 rounded-xl shadow-xl flex items-center gap-2.5 z-20 border border-gray-100 max-w-[200px]">
+                <div className="relative">
+                    <img src="https://picsum.photos/seed/albert/48/48" alt="Albert Flores" className="w-12 h-12 rounded-lg object-cover shadow-md border-2 border-white" />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="font-bold text-xs text-gray-800 truncate">Albert Flores</p>
+                    <p className="text-[10px] text-gray-600 truncate">Science Tutor</p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                        <AiFillStar size={12} className="text-orange-500" />
+                        <span className="text-xs font-bold text-gray-800">4.8</span>
+                        <span className="text-[10px] text-gray-500 ml-1">(120)</span>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
