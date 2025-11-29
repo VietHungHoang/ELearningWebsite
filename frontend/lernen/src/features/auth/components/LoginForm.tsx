@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
@@ -14,6 +14,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Auto-fill email and password for student after account creation
+  useEffect(() => {
+    const studentLoginData = localStorage.getItem('studentLoginData');
+    if (studentLoginData) {
+      try {
+        const parsed = JSON.parse(studentLoginData);
+        setEmail(parsed.email || '');
+        setPassword(parsed.password || '');
+        // Clear the data after using it
+        localStorage.removeItem('studentLoginData');
+      } catch (err) {
+        console.error('Failed to parse student login data:', err);
+      }
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,10 +127,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
           </div>
         </form>
 
-        <p className="mt-5 text-center text-sm text-gray-600">
-          Don't have an Account?{' '}
-          <Link to="/signup" className="font-medium text-[#0b6459] hover:text-[#084c43]">
-            Sign up
+        <p className="mt-3 text-center text-sm text-gray-600">
+          Don't have an Account?
+        </p>
+        <p className="mt-1 text-center text-sm">
+          <Link to="/signup?role=student" className="font-medium text-[#0b6459] hover:text-[#084c43] underline">
+            Sign up as Student
+          </Link>
+          {' '}or{' '}
+          <Link to="/signup?role=tutor" className="font-medium text-[#0b6459] hover:text-[#084c43] underline">
+            Sign up as Tutor
           </Link>
         </p>
 

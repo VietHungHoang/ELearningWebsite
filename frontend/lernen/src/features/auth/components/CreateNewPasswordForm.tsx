@@ -69,9 +69,35 @@ const CreateNewPasswordForm: React.FC<CreateNewPasswordFormProps> = ({ mode = 's
     setError(null);
 
     try {
-      await authService.createAccount({ email: email!, password: formData.password, role });
-      localStorage.removeItem('signupVerification');
-      navigate('/login');
+      const accountData = await authService.createAccount({ email: email!, password: formData.password, role });
+
+      // Redirect based on role
+      if (role === 'tutor') {
+        // Store tutor account data for onboarding step 1
+        localStorage.setItem('tutorAccountData', JSON.stringify({
+          id: accountData.id,
+          email: accountData.email,
+          name: accountData.name,
+        }));
+        
+        // Clean up signup verification data
+        localStorage.removeItem('signupVerification');
+        
+        // Tutors go to onboarding flow, start at step 1
+        navigate('/onboarding/tutor?step=1');
+      } else {
+        // Store student credentials for auto-fill login
+        localStorage.setItem('studentLoginData', JSON.stringify({
+          email: accountData.email,
+          password: formData.password,
+        }));
+        
+        // Clean up signup verification data
+        localStorage.removeItem('signupVerification');
+        
+        // Students go directly to login
+        navigate('/login');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create password');
     } finally {
@@ -86,10 +112,9 @@ const CreateNewPasswordForm: React.FC<CreateNewPasswordFormProps> = ({ mode = 's
           {mode === 'reset' ? 'Reset Password' : 'Create New Password'}
         </h2>
         <p className="text-gray-600 mt-2">
-          {mode === 'reset' 
-            ? 'Enter your new password below.' 
-            : 'Your new password must be different from previous used passwords.'
-          }
+          {mode === 'reset'
+            ? 'Enter your new password below.'
+            : 'Your new password must be different from previous used passwords.'}
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>

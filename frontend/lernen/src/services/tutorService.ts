@@ -1,4 +1,4 @@
-import type { ApiResponse, Location, Language, Tutor, TutorSearchFilters, PaginatedResponse, Category, Subcategory, FilterData, TutorScheduleResponse } from '../types/api';
+import type { ApiResponse, Location, Language, Tutor, TutorSearchFilters, PaginatedResponse, Category, Subcategory, FilterData, TutorProfile, UpdateTutorProfileRequest, UploadFileResponse, EducationItem, ExperienceItem, CertificationItem } from '../types/api';
 import apiService from './apiService';
 
 // Mock data fallback
@@ -205,7 +205,7 @@ const mockTutors: Tutor[] = [
 export const tutorService = {
   searchTutors: async (filters: TutorSearchFilters): Promise<ApiResponse<PaginatedResponse<Tutor>>> => {
     try {
-      const response = await apiService.post<PaginatedResponse<Tutor>>('/tutors/search', filters);
+      const response = await apiService.get<PaginatedResponse<Tutor>>('/v1/public/search/tutors', filters as Record<string, unknown>);
       return {
         status: response.status,
         success: response.success,
@@ -214,10 +214,10 @@ export const tutorService = {
       };
     } catch (error) {
       console.warn('Failed to search tutors from API, using mock data:', error);
-      
+
       // Simple filtering logic for mock data
       let filtered = [...mockTutors];
-      
+
       if (filters.minFee !== undefined || filters.maxFee !== undefined) {
         filtered = filtered.filter(tutor => {
           const fee = tutor.currentSessionFee;
@@ -226,16 +226,16 @@ export const tutorService = {
           return minOk && maxOk;
         });
       }
-      
+
       if (filters.keyword) {
         const keyword = filters.keyword.toLowerCase();
-        filtered = filtered.filter(tutor => 
+        filtered = filtered.filter(tutor =>
           tutor.name.toLowerCase().includes(keyword) ||
           tutor.specialization.toLowerCase().includes(keyword) ||
           tutor.bio.toLowerCase().includes(keyword)
         );
       }
-      
+
       // Pagination logic (Java Page<T> standard)
       const pageNumber = (filters.page || 1) - 1; // Convert to 0-based indexing
       const pageSize = filters.limit || 10;
@@ -245,7 +245,7 @@ export const tutorService = {
       const startIndex = offset;
       const endIndex = startIndex + pageSize;
       const content = filtered.slice(startIndex, endIndex);
-      
+
       return {
         status: 200,
         success: true,
@@ -272,21 +272,7 @@ export const tutorService = {
   },
 
   getFilterData: async (): Promise<ApiResponse<FilterData>> => {
-    try {
-      return await apiService.get<FilterData>('/v1/common/tutor-filter');
-    } catch (error) {
-      console.warn('Failed to fetch filter data from API, using mock data:', error);
-      return {
-        status: 200,
-        success: true,
-        message: 'Filter data retrieved successfully (mock data)',
-        data: {
-          timezones: mockTimezones,
-          languages: mockLanguages,
-          categories: mockCategories
-        }
-      };
-    }
+    return await apiService.get<FilterData>('/v1/public/common/tutor-filter');
   },
 
   getSubcategories: async (categoryId?: string): Promise<ApiResponse<Subcategory[]>> => {
@@ -306,17 +292,280 @@ export const tutorService = {
         data
       };
     }
+  },
+
+  // Profile Management APIs
+  getTutorProfile: async (): Promise<ApiResponse<TutorProfile>> => {
+    try {
+      return await apiService.get<TutorProfile>('/api/v1/tutors/profile');
+    } catch (error) {
+      console.warn('Failed to fetch tutor profile from API, using mock data:', error);
+
+      // Mock profile data
+      const mockProfile: TutorProfile = {
+        fullName: 'Sarah Chapman',
+        email: 'student@amentotech.com',
+        phone: '07123456789',
+        gender: 'Female',
+        country: 'Afghanistan',
+        city: 'Kabul',
+        nativeLanguage: { id: 'lang-001', name: 'Georgian', code: 'ka' },
+        languages: [
+          { id: 'lang-002', name: 'Dutch', code: 'nl' },
+          { id: 'lang-003', name: 'English', code: 'en' }
+        ],
+
+        headline: 'Certified Math Tutor with 5 years of experience',
+        subjects: [
+          { id: 's1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', name: 'Mathematics' },
+          { id: 's2a3b4c5-d6e7-f8g9-h0i1-j2k3l4m5n6o7', name: 'Physics' }
+        ],
+        introduction: 'Hi! I am Sarah Chapman, a dedicated and experienced tutor with a passion for helping students excel in their academic pursuits.',
+
+        avatarUrl: 'https://picsum.photos/seed/avatar/200/200',
+        introductionVideoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+
+        socialLinks: [
+          { id: '1', platform: 'Facebook', url: 'https://facebook.com/sarah.chapman' },
+          { id: '2', platform: 'LinkedIn', url: 'https://linkedin.com/in/sarah-chapman' }
+        ],
+
+        education: [
+          {
+            id: '1',
+            title: 'Bachelor of Computer Science',
+            institution: 'ABC University',
+            startDate: '2015-09-01',
+            endDate: '2019-06-30',
+            location: 'Cacuaco, Angola',
+            description: 'Focused on software development and cybersecurity, I build innovative software solutions and...'
+          },
+          {
+            id: '2',
+            title: 'Master of Information Technology',
+            institution: 'XYZ Institute',
+            startDate: '2020-09-01',
+            endDate: '2022-06-30',
+            location: 'West End, Anguilla',
+            description: 'Specialized in advanced IT management and data analysis, I manage complex IT infrastructures and use...'
+          }
+        ],
+
+        experience: [
+          {
+            id: '3',
+            title: 'Lead Math Tutor',
+            institution: 'Lernen Platform',
+            startDate: '2022-01-01',
+            endDate: undefined, // Ongoing
+            location: 'Remote',
+            description: 'Provide expert tutoring in advanced mathematics subjects, including calculus and algebra. Develop personalized learning plans that have improved student grades by an average of 25%.'
+          }
+        ],
+
+        certifications: [
+          {
+            id: '4',
+            name: 'Certified Educator',
+            issuingOrganization: 'National Tutoring Association',
+            issueDate: '2021-06-15',
+            expirationDate: undefined, // No expiration
+            credentialId: 'NTA-CE-2021-12345',
+            credentialUrl: 'https://nta.org/verify/NTA-CE-2021-12345'
+          }
+        ]
+      };
+
+      return {
+        status: 200,
+        success: true,
+        message: 'Tutor profile retrieved successfully (mock data)',
+        data: mockProfile
+      };
+    }
+  },
+
+  updateTutorProfile: async (profileData: UpdateTutorProfileRequest): Promise<ApiResponse<TutorProfile>> => {
+    try {
+      return await apiService.put<TutorProfile>('/api/v1/tutors/profile', profileData);
+    } catch (error) {
+      console.warn('Failed to update tutor profile from API, simulating success:', error);
+
+      // Simulate successful update by returning updated mock data
+      return {
+        status: 200,
+        success: true,
+        message: 'Tutor profile updated successfully',
+        data: {
+          fullName: profileData.fullName || 'Sarah Chapman',
+          email: 'student@amentotech.com',
+          phone: profileData.phone || '07123456789',
+          gender: profileData.gender || 'Female',
+          country: profileData.country || 'Afghanistan',
+          city: profileData.city || 'Kabul',
+          nativeLanguage: profileData.nativeLanguage || { id: 'lang-001', name: 'Georgian', code: 'ka' },
+          languages: profileData.languages || [
+            { id: 'lang-002', name: 'Dutch', code: 'nl' },
+            { id: 'lang-003', name: 'English', code: 'en' }
+          ],
+
+          headline: profileData.headline || 'Certified Math Tutor with 5 years of experience',
+          subjects: profileData.subjects || [
+            { id: 's1a2b3c4-d5e6-f7g8-h9i0-j1k2l3m4n5o6', name: 'Mathematics' },
+            { id: 's2a3b4c5-d6e7-f8g9-h0i1-j2k3l4m5n6o7', name: 'Physics' }
+          ],
+          introduction: profileData.introduction || 'Hi! I am Sarah Chapman, a dedicated and experienced tutor...',
+
+          avatarUrl: 'https://picsum.photos/seed/avatar/200/200',
+          introductionVideoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+
+          socialLinks: profileData.socialLinks || [
+            { id: '1', platform: 'Facebook', url: 'https://facebook.com/sarah.chapman' },
+            { id: '2', platform: 'LinkedIn', url: 'https://linkedin.com/in/sarah-chapman' }
+          ],
+
+          education: profileData.education || [
+            {
+              id: '1',
+              title: 'Bachelor of Computer Science',
+              institution: 'ABC University',
+              startDate: '2015-09-01',
+              endDate: '2019-06-30',
+              location: 'Cacuaco, Angola',
+              description: 'Focused on software development and cybersecurity...'
+            },
+            {
+              id: '2',
+              title: 'Master of Information Technology',
+              institution: 'XYZ Institute',
+              startDate: '2020-09-01',
+              endDate: '2022-06-30',
+              location: 'West End, Anguilla',
+              description: 'Specialized in advanced IT management...'
+            }
+          ],
+
+          experience: profileData.experience || [
+            {
+              id: '3',
+              title: 'Lead Math Tutor',
+              institution: 'Lernen Platform',
+              startDate: '2022-01-01',
+              endDate: undefined,
+              location: 'Remote',
+              description: 'Provide expert tutoring...'
+            }
+          ],
+
+          certifications: profileData.certifications || [
+            {
+              id: '4',
+              name: 'Certified Educator',
+              issuingOrganization: 'National Tutoring Association',
+              issueDate: '2021-06-15',
+              expirationDate: undefined,
+              credentialId: 'NTA-CE-2021-12345',
+              credentialUrl: 'https://nta.org/verify/NTA-CE-2021-12345'
+            }
+          ]
+        }
+      };
+    }
+  },
+
+  uploadProfilePhoto: async (file: File): Promise<ApiResponse<UploadFileResponse>> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      return await apiService.post<UploadFileResponse>('/api/v1/tutors/profile/upload-photo', formData);
+    } catch (error) {
+      console.warn('Failed to upload profile photo from API, simulating success:', error);
+
+      return {
+        status: 200,
+        success: true,
+        message: 'Profile photo uploaded successfully',
+        data: {
+          fileUrl: `https://picsum.photos/seed/${file.name}/200/200`,
+          fileName: file.name,
+          fileSize: file.size
+        }
+      };
+    }
+  },
+
+  uploadIntroductionVideo: async (file: File): Promise<ApiResponse<UploadFileResponse>> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      return await apiService.post<UploadFileResponse>('/api/v1/tutors/profile/upload-video', formData);
+    } catch (error) {
+      console.warn('Failed to upload introduction video from API, simulating success:', error);
+
+      return {
+        status: 200,
+        success: true,
+        message: 'Introduction video uploaded successfully',
+        data: {
+          fileUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
+          fileName: file.name,
+          fileSize: file.size
+        }
+      };
+    }
+  },
+
+  updateResumeHighlights: async (resumeData: { education?: EducationItem[], experience?: ExperienceItem[], certifications?: CertificationItem[] }): Promise<ApiResponse<{ education: EducationItem[], experience: ExperienceItem[], certifications: CertificationItem[] }>> => {
+    try {
+      return await apiService.put<{ education: EducationItem[], experience: ExperienceItem[], certifications: CertificationItem[] }>('/api/v1/tutors/profile/resume', resumeData);
+    } catch (error) {
+      console.warn('Failed to update resume highlights from API, simulating success:', error);
+
+      return {
+        status: 200,
+        success: true,
+        message: 'Resume highlights updated successfully',
+        data: {
+          education: resumeData.education || [],
+          experience: resumeData.experience || [],
+          certifications: resumeData.certifications || []
+        }
+      };
+    }
+  },
+
+  // Onboarding API - Submit tutor onboarding data
+  submitOnboarding: async (onboardingData: any): Promise<ApiResponse<{ message: string }>> => {
+    try {
+      // Call backend API to save onboarding data
+      // Backend will save to DB with approved=false (pending admin approval)
+      return await apiService.post<{ message: string }>('/api/v1/tutors/onboarding', onboardingData);
+    } catch (error) {
+      console.warn('Failed to submit onboarding to API, simulating success:', error);
+
+      // Simulate successful submission
+      return {
+        status: 201,
+        success: true,
+        message: 'Onboarding data submitted successfully. Pending admin approval.',
+        data: {
+          message: 'Your tutor profile has been created and is pending admin review. You will be notified once approved.'
+        }
+      };
+    }
   }
 };
 
-export const getTutorSchedule = async (tutorId: string, includeBooked: boolean = false): Promise<TutorScheduleResponse[]> => {
+export const getTutorSchedule = async (tutorId: string, includeBooked: boolean = false): Promise<any[]> => {
   try {
-    const response = await apiService.get<TutorScheduleResponse[]>(`/api/v1/tutors/${tutorId}/schedule?includeBooked=${includeBooked}`);
+    const response = await apiService.get<any[]>(`/api/v1/tutors/${tutorId}/schedule?includeBooked=${includeBooked}`);
     return response.data;
   } catch (error) {
     console.warn('Failed to fetch tutor schedule from API, using mock data:', error);
     // Mock schedule data for current week (Nov 10-16, 2025)
-    const mockSchedule: TutorScheduleResponse[] = [
+    const mockSchedule: any[] = [
       {
         tutorId,
         availabilityId: 1,

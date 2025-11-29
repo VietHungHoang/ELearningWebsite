@@ -9,6 +9,7 @@ import apiDocsRoutes from '../features/api-docs/routes';
 import profileRoutes from '../features/profile/routes';
 import checkoutRoutes from '../features/checkout/routes';
 import becomeTutorRoutes from '../features/become-a-tutor/route';
+import dashboardRoutes from '../features/dashboard/routes';
 
 const router = createBrowserRouter([
   ...authRoutes,
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
   ...profileRoutes,
   ...checkoutRoutes,
   ...becomeTutorRoutes,
+  ...dashboardRoutes,
 ]);
 
 export default router;
