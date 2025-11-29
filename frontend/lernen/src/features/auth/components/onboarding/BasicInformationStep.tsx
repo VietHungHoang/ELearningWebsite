@@ -26,7 +26,7 @@ const GenderButton: React.FC<{
     <button
         type="button"
         onClick={() => setSelected(label)}
-        className={`flex-1 px-2 py-2 text-sm font-medium transition-colors duration-200 rounded-lg focus:outline-none ${selected === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:bg-white/60'
+        className={`flex-1 px-2 py-1.5 text-sm font-medium transition-colors duration-200 rounded-md focus:outline-none ${selected === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-600 hover:bg-white/60'
             }`}
     >
         {label}
@@ -35,7 +35,7 @@ const GenderButton: React.FC<{
 
 const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onChange }) => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const { countries, languages } = useCommon();
+    const { countries, languages, loading: commonLoading } = useCommon();
 
     const timezones = Intl.supportedValuesOf('timeZone');
 
@@ -86,10 +86,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                         Gender <span className="text-red-500">*</span>
                     </label>
-                    <div className="bg-gray-100 p-1 rounded-xl flex items-center gap-1">
+                    <div className="w-full bg-gray-100 rounded-lg px-2 py-1.5 flex items-center gap-1.5 min-h-[42px]">
                         <GenderButton
                             label="Male"
                             selected={data.gender}
@@ -142,6 +142,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                             setOpenDropdown={setOpenDropdown}
                             hasSearch={true}
                             searchPlaceholder="Search country..."
+                            loading={commonLoading && countries.length === 0}
+                            position="bottom"
+                            maxVisibleItems={3}
                         />
                     </div>
                     <div>
@@ -158,6 +161,8 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                             setOpenDropdown={setOpenDropdown}
                             hasSearch={true}
                             searchPlaceholder="Search timezone..."
+                            position="bottom"
+                            maxVisibleItems={3}
                         />
                     </div>
                     <div>
@@ -179,6 +184,9 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                             setOpenDropdown={setOpenDropdown}
                             hasSearch={true}
                             searchPlaceholder="Search language..."
+                            loading={commonLoading && languages.length === 0}
+                            position="bottom"
+                            maxVisibleItems={3}
                         />
                     </div>
                 </div>
@@ -189,43 +197,45 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                     Languages I know <span className="text-red-500">*</span>
                 </label>
-                <div className="p-2 bg-gray-100 border border-transparent rounded-lg flex flex-wrap gap-2 items-center focus-within:border-[#0b6459] transition-colors">
-                    {data.languages.map((lang) => (
-                        <span
-                            key={lang.id}
-                            className="bg-white px-3 py-1 rounded-md text-sm font-medium flex items-center gap-2 border border-gray-200"
-                        >
-                            {lang.name}
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onChange({
-                                        languages: data.languages.filter((l) => l.id !== lang.id)
-                                    })
-                                }
-                                className="text-gray-400 hover:text-gray-600"
+                {data.languages.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-1.5">
+                        {data.languages.map((lang) => (
+                            <span
+                                key={lang.id}
+                                className="bg-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1.5 border border-gray-200"
                             >
-                                &times;
-                            </button>
-                        </span>
-                    ))}
-                    <div className="flex-grow min-w-[150px]">
-                        <CustomDropdown
-                            options={availableLanguages.map(l => l.name)}
-                            selectedValue="Add a language..."
-                            placeholder="Add a language..."
-                            onSelect={(value) => {
-                                const lang = availableLanguages.find(l => l.name === value);
-                                if (lang) handleAddLanguage(lang);
-                            }}
-                            dropdownId="languages"
-                            openDropdown={openDropdown}
-                            setOpenDropdown={setOpenDropdown}
-                            hasSearch={true}
-                            searchPlaceholder="Search language..."
-                        />
+                                {lang.name}
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        onChange({
+                                            languages: data.languages.filter((l) => l.id !== lang.id)
+                                        })
+                                    }
+                                    className="text-gray-400 hover:text-gray-600 text-sm"
+                                >
+                                    &times;
+                                </button>
+                            </span>
+                        ))}
                     </div>
-                </div>
+                )}
+                <CustomDropdown
+                    options={availableLanguages.map(l => l.name)}
+                    selectedValue="Add a language..."
+                    placeholder="Add a language..."
+                    onSelect={(value) => {
+                        const lang = availableLanguages.find(l => l.name === value);
+                        if (lang) handleAddLanguage(lang);
+                    }}
+                    dropdownId="languages"
+                    openDropdown={openDropdown}
+                    setOpenDropdown={setOpenDropdown}
+                    hasSearch={true}
+                    searchPlaceholder="Search language..."
+                    position="top"
+                    maxVisibleItems={4}
+                />
             </div>
         </div>
     );
