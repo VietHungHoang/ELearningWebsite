@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginForm from "../components/LoginForm.tsx";
 import AuthLayout from "../components/AuthLayout.tsx";
-import IntroducePanel from "../../../components/auth/IntroducePanel.tsx";
+import IntroducePanelLogin from "../../../components/auth/IntroducePanelLogin.tsx";
 import { useAuth } from "../../../context/AuthContext.tsx";
 import authService from "../../../services/authService";
 import { useEffect, useRef } from "react";
@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
     return (
         <AuthLayout>
             <main className="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 shadow-2xl rounded-2xl overflow-hidden">
-                <IntroducePanel />
+                <IntroducePanelLogin />
                 <LoginForm handleLogin={handleLogin} isLoading={state.status === "loading"} />
             </main>
         </AuthLayout>

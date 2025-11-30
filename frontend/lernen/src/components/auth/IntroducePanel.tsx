@@ -15,10 +15,10 @@ const IntroducePanel: React.FC = () => {
                 <div className="mt-5">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
                         <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-xs font-semibold">4k+ Registered Tutors</span>
+                        <span className="text-sm font-semibold">4k+ Registered Tutors</span>
                     </div>
-                    <h1 className="text-xl font-bold mt-4 leading-tight">Yes! we're making progress!</h1>
-                    <p className="text-sm mt-2 text-teal-100">every minute & every second</p>
+                    <h1 className="text-2xl font-bold mt-4 leading-tight">Yes! we're making progress!</h1>
+                    <p className="text-base mt-2 text-teal-100">every minute & every second</p>
                 </div>
             </div>
 
@@ -26,8 +26,8 @@ const IntroducePanel: React.FC = () => {
                 <InteractiveImagePanel />
             </div>
 
-            <div className="relative z-10 flex items-end mt-4">
-                <p className="text-xs text-teal-50 leading-relaxed font-medium">Begin your learning journey today and experience the transformative power of personalized education.</p>
+            <div className="relative z-10 flex items-end mt-0 -mb-2">
+                <p className="text-sm text-teal-50 leading-relaxed font-medium">Begin your learning journey today and experience the transformative power of personalized education.</p>
             </div>
         </div>
     );

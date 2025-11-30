@@ -9,7 +9,8 @@ import CertificationsStep from '../components/onboarding/CertificationsStep';
 import AvailabilityStep from '../components/onboarding/AvailabilityStep';
 import StepIndicator from '../components/onboarding/StepIndicator';
 import authService from '../../../services/authService';
-import { HiArrowLeft, HiArrowRight } from 'react-icons/hi';
+import { HiArrowLeft, HiArrowRight, HiAcademicCap } from 'react-icons/hi';
+import { LernenLogo } from '../../../components/LernenLogo';
 
 const STEPS = [
     { number: 1, label: 'Basic Info' },
@@ -274,41 +275,92 @@ const TutorOnboardingPage: React.FC = () => {
                     <div className="w-20 h-1 bg-[#0b6459] mt-2"></div>
                 </div>
             </div>
-            <main className="relative w-full max-w-4xl mx-auto mt-8 mb-8 bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in-horizontal">
-                <div className="bg-gradient-to-r from-[#0b6459] to-[#084c43] text-white p-8">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold">Welcome to Your Teaching Journey! </h1>
-                            <p className="text-teal-100 mt-2">Let's set up your profile in 6 easy steps</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-4xl font-bold">Lernen</p>
-                            <p className="text-xs text-teal-200 mt-1">Learn. Teach. Grow.</p>
+            <main className="relative w-full max-w-4xl mx-auto mt-2 mb-2 bg-white rounded-tl-2xl rounded-tr-2xl rounded-b-2xl shadow-2xl overflow-visible animate-fade-in-horizontal">
+                <div className="overflow-hidden rounded-tl-2xl rounded-tr-2xl">
+                    <div className="bg-gradient-to-r from-[#0b6459] via-[#0a5a4f] to-[#084c43] text-white p-5 relative overflow-hidden">
+                        {/* Complex background pattern */}
+                        {/* Large blurred circles */}
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-white/6 rounded-full -mr-40 -mt-40 blur-3xl"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/6 rounded-full -ml-32 -mb-32 blur-3xl"></div>
+                        <div className="absolute top-1/2 left-1/4 w-56 h-56 bg-teal-200/8 rounded-full blur-2xl"></div>
+                        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
+                        
+                        {/* Hexagon pattern overlay */}
+                        <div className="absolute inset-0 opacity-8" style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0 L50 15 L50 45 L30 60 L10 45 L10 15 Z' fill='none' stroke='white' stroke-width='0.5'/%3E%3C/svg%3E")`,
+                            backgroundSize: '60px 60px',
+                            backgroundPosition: '0 0'
+                        }}></div>
+                        
+                        {/* Diagonal stripes */}
+                        <div className="absolute inset-0 opacity-6" style={{
+                            backgroundImage: `repeating-linear-gradient(
+                                45deg,
+                                transparent,
+                                transparent 2px,
+                                white 2px,
+                                white 3px
+                            )`,
+                            backgroundSize: '20px 20px'
+                        }}></div>
+                        
+                        {/* Radial gradient overlay */}
+                        <div className="absolute inset-0 opacity-15" style={{
+                            background: `radial-gradient(ellipse at top left, white 0%, transparent 50%),
+                                        radial-gradient(ellipse at bottom right, white 0%, transparent 50%)`
+                        }}></div>
+                        
+                        {/* Shine effect from top */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/12 via-white/4 to-transparent"></div>
+                        
+                        {/* Corner accents */}
+                        <div className="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-white/20"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 border-b-2 border-l-2 border-white/20"></div>
+                        
+                        <div className="relative z-10 flex items-center justify-between">
+                            {/* Left: Logo and Welcome Text */}
+                            <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0">
+                                    <LernenLogo variant="white" className="h-8 w-auto" />
+                                </div>
+                                <div className="h-12 w-px bg-white/20"></div>
+                                <div>
+                                    <h1 className="text-xl font-bold tracking-tight">Welcome to Your Teaching Journey!</h1>
+                                    <p className="text-teal-100 text-sm mt-1 font-medium">Let's set up your profile in 6 easy steps</p>
+                                </div>
+                            </div>
+                            
+                            {/* Right: Icon */}
+                            <div className="flex-shrink-0">
+                                <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
+                                    <HiAcademicCap className="w-6 h-6 text-teal-200" />
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <StepIndicator currentStep={currentStep} steps={STEPS} />
                 </div>
-                <StepIndicator currentStep={currentStep} steps={STEPS} />
-                <div className="px-8 pt-4 pb-8">
+                <div className="px-6 pt-3 pb-4 overflow-visible">
                     {error && (
-                        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p className="text-red-800 text-sm">{error}</p>
+                        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-red-800 text-xs">{error}</p>
                         </div>
                     )}
                     {renderStep()}
-                    <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-                        <button onClick={handleBack} disabled={currentStep === 1} className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                            <HiArrowLeft className="w-5 h-5" />
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+                        <button onClick={handleBack} disabled={currentStep === 1} className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                            <HiArrowLeft className="w-4 h-4" />
                             Back
                         </button>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             {currentStep >= 4 && currentStep < STEPS.length && (
-                                <button onClick={handleSkip} disabled={saving} className="px-6 py-3 text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
+                                <button onClick={handleSkip} disabled={saving} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
                                     Skip
                                 </button>
                             )}
-                            <button onClick={handleNext} disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button onClick={handleNext} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                                 {saving ? 'Saving...' : currentStep === STEPS.length ? 'Complete' : 'Next'}
-                                {!saving && <HiArrowRight className="w-5 h-5" />}
+                                {!saving && <HiArrowRight className="w-4 h-4" />}
                             </button>
                         </div>
                     </div>
@@ -319,3 +371,4 @@ const TutorOnboardingPage: React.FC = () => {
 };
 
 export default TutorOnboardingPage;
+
