@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import IntroducePanel from '../../../components/auth/IntroducePanel';
+import IntroducePanelLogin from '../../../components/auth/IntroducePanelLogin';
 import AuthLayout from '../components/AuthLayout';
 import SignUpForm from '../components/SignUpForm';
 import authService from '../../../services/authService';
@@ -36,7 +36,7 @@ const SignUpPage: React.FC = () => {
   return (
     <AuthLayout>
       <main className="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 shadow-2xl rounded-2xl overflow-hidden animate-fade-in-horizontal">
-        <IntroducePanel />
+        <IntroducePanelLogin />
         <SignUpForm onSubmit={handleSignUp} loading={loading} role={role} error={error} />
       </main>
     </AuthLayout>
