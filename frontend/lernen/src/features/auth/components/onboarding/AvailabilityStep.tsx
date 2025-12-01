@@ -40,7 +40,8 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
     const [initialAvailability, setInitialAvailability] = useState<string[]>([]);
     const gridRef = useRef<HTMLDivElement>(null);
 
-    const timeSlots = Array.from({ length: 16 }, (_, i) => `${String(i + 7).padStart(2, '0')}:00`);
+    // Reduced time slots: 8:00 AM - 8:00 PM (12 hours instead of 16)
+    const timeSlots = Array.from({ length: 12 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
 
     const handleCellClick = (date: Date, hour: number) => {
         const slotDate = new Date(date);
@@ -142,143 +143,195 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
         setAvailability(Array.from(newAvailability));
     }, [selectionRect, selectionMode, initialAvailability, isDragging]);
 
+    // Group slots by day and convert to time ranges
+    const groupedSlots: { [key: string]: Date[] } = {};
+    availability.forEach(slot => {
+        const date = new Date(slot);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        if (!groupedSlots[dayName]) {
+            groupedSlots[dayName] = [];
+        }
+        groupedSlots[dayName].push(date);
+    });
+
+    // Convert time slots to ranges for each day
+    const timeRangesByDay: { [key: string]: { start: string; end: string }[] } = {};
+    Object.keys(groupedSlots).forEach(day => {
+        const slots = groupedSlots[day].sort((a, b) => a.getTime() - b.getTime());
+        const ranges: { start: string; end: string }[] = [];
+
+        if (slots.length === 0) return;
+
+        let rangeStart = slots[0];
+        let rangeEnd = slots[0];
+
+        for (let i = 1; i < slots.length; i++) {
+            const currentSlot = slots[i];
+            const prevSlot = slots[i - 1];
+            const timeDiff = currentSlot.getTime() - prevSlot.getTime();
+
+            // If slots are consecutive (1 hour apart = 3600000 ms)
+            if (timeDiff === 3600000) {
+                rangeEnd = currentSlot;
+            } else {
+                // Save current range
+                ranges.push({
+                    start: rangeStart.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    }),
+                    end: new Date(rangeEnd.getTime() + 3600000).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                });
+                // Start new range
+                rangeStart = currentSlot;
+                rangeEnd = currentSlot;
+            }
+        }
+
+        // Add last range
+        ranges.push({
+            start: rangeStart.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }),
+            end: new Date(rangeEnd.getTime() + 3600000).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            })
+        });
+
+        timeRangesByDay[day] = ranges;
+    });
+
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const sortedDays = Object.keys(timeRangesByDay).sort((a, b) =>
+        dayOrder.indexOf(a) - dayOrder.indexOf(b)
+    );
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-2">
             <div>
-                <h3 className="text-xl font-bold text-gray-800">Availability Schedule</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="text-lg font-bold text-gray-800">Availability Schedule</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
                     Click or drag on time slots to mark when you're available (optional)
                 </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                    <strong>💡 Tip:</strong> Click on any time slot to toggle availability.
-                    You can also click and drag to select multiple slots at once.
-                    Green slots = available.
-                </p>
-            </div>
-
-            {/* Simplified Weekly Calendar Grid */}
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="overflow-x-auto relative" ref={gridRef}>
-                    <div className="grid min-w-[400px]" style={{ gridTemplateColumns: `auto repeat(7, 1fr)` }}>
-                        {/* Time Column Header */}
-                        <div className="sticky left-0 bg-white z-10"></div>
-
-                        {/* Day Headers */}
-                        {weekDays.map(day => (
-                            <div key={day.toISOString()} className="text-center p-3 border-b border-gray-200 bg-gray-50">
-                                <p className="text-sm font-semibold text-gray-700">
-                                    {day.toLocaleDateString('en-US', { weekday: 'short' })}
-                                </p>
-                            </div>
-                        ))}
-
-                        {/* Time Slots and Availability Grid */}
-                        {timeSlots.map(time => (
-                            <React.Fragment key={time}>
-                                <div className="text-right pr-4 py-2 border-r border-gray-200 text-xs text-gray-500 sticky left-0 bg-white z-10 h-12 flex items-center justify-end">
-                                    {time}
-                                </div>
-
-                                {weekDays.map(day => {
-                                    const hour = parseInt(time.split(':')[0]);
-                                    const slotDate = new Date(day);
-                                    slotDate.setHours(hour, 0, 0, 0);
-                                    const slotISO = slotDate.toISOString();
-                                    const isAvailable = availability.includes(slotISO);
-
-                                    return (
-                                        <div
-                                            key={day.toISOString()}
-                                            data-iso={slotISO}
-                                            className="calendar-cell border-b border-r border-gray-200 h-12 cursor-pointer select-none hover:bg-gray-50 transition"
-                                            onMouseDown={(e) => handleMouseDown(e, day, hour)}
-                                            onClick={() => handleCellClick(day, hour)}
-                                        >
-                                            {isAvailable && (
-                                                <div className="h-full w-full bg-green-200 opacity-70"></div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </React.Fragment>
-                        ))}
+            {/* Main Content: Grid Layout - Calendar Left, Selected Slots Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-2.5">
+                {/* Left: Calendar Grid */}
+                <div className="space-y-1.5">
+                    {/* Tips and Timezone - Same row */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-1.5 flex items-center justify-between">
+                        <p className="text-xs text-blue-800">
+                            <strong>💡 Tip:</strong> Click to toggle, drag to select multiple. Green = available.
+                        </p>
+                        <p className="text-xs text-blue-800">
+                            🌍 <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong>
+                        </p>
                     </div>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto relative max-h-[400px] overflow-y-auto" ref={gridRef}>
+                            <div className="grid min-w-[400px]" style={{ gridTemplateColumns: `auto repeat(7, 1fr)` }}>
+                                {/* Time Column Header */}
+                                <div className="sticky left-0 bg-white z-10"></div>
 
-                    {/* Marquee Selection Rectangle */}
-                    {isDragging && selectionRect && (
-                        <div
-                            className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
-                            style={{
-                                left: selectionRect.left,
-                                top: selectionRect.top,
-                                width: selectionRect.width,
-                                height: selectionRect.height
-                            }}
-                        />
+                                {/* Day Headers */}
+                                {weekDays.map(day => (
+                                    <div key={day.toISOString()} className="text-center p-1.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                                        <p className="text-xs font-semibold text-gray-700">
+                                            {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                                        </p>
+                                    </div>
+                                ))}
+
+                                {/* Time Slots and Availability Grid */}
+                                {timeSlots.map(time => (
+                                    <React.Fragment key={time}>
+                                        <div className="text-right pr-2 py-1 border-r border-gray-200 text-xs text-gray-500 sticky left-0 bg-white z-10 h-6 flex items-center justify-end">
+                                            {time}
+                                        </div>
+
+                                        {weekDays.map(day => {
+                                            const hour = parseInt(time.split(':')[0]);
+                                            const slotDate = new Date(day);
+                                            slotDate.setHours(hour, 0, 0, 0);
+                                            const slotISO = slotDate.toISOString();
+                                            const isAvailable = availability.includes(slotISO);
+
+                                            return (
+                                                <div
+                                                    key={day.toISOString()}
+                                                    data-iso={slotISO}
+                                                    className="calendar-cell border-b border-r border-gray-200 h-6 cursor-pointer select-none hover:bg-gray-50 transition"
+                                                    onMouseDown={(e) => handleMouseDown(e, day, hour)}
+                                                    onClick={() => handleCellClick(day, hour)}
+                                                >
+                                                    {isAvailable && (
+                                                        <div className="h-full w-full bg-green-200 opacity-70"></div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            {/* Marquee Selection Rectangle */}
+                            {isDragging && selectionRect && (
+                                <div
+                                    className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
+                                    style={{
+                                        left: selectionRect.left,
+                                        top: selectionRect.top,
+                                        width: selectionRect.width,
+                                        height: selectionRect.height
+                                    }}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right: Selected Slots List - Sticky */}
+                <div className="lg:sticky lg:top-4 h-fit">
+                    {availability.length > 0 ? (
+                        <div className="bg-white border border-gray-200 rounded-lg p-2.5 max-h-[380px] overflow-y-auto">
+                            <h4 className="font-semibold text-xs text-gray-800 mb-2">
+                                Selected Slots ({availability.length})
+                            </h4>
+                            <div className="space-y-1.5">
+                                {sortedDays.map(day => (
+                                    <div key={day} className="bg-gray-50 rounded-md p-2">
+                                        <p className="font-semibold text-xs text-gray-800 mb-1">{day}</p>
+                                        <div className="space-y-0.5">
+                                            {timeRangesByDay[day].map((range, idx) => (
+                                                <div key={idx} className="text-xs text-gray-700 bg-white px-2 py-1 rounded border border-gray-200">
+                                                    {range.start} - {range.end}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                            <p className="text-xs text-gray-500">
+                                No time slots selected yet.<br />
+                                Click on the calendar to add availability.
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-600">
-                        ⏰ Time slots: <strong>7:00 AM - 10:00 PM</strong>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        🌍 Timezone: <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong>
-                    </p>
-                </div>
-            </div>
-
-            {/* Selected Slots List */}
-            {availability.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg p-6">
-                    <h4 className="font-semibold text-gray-800 mb-4">
-                        Selected Time Slots ({availability.length})
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {(() => {
-                            // Group slots by day
-                            const groupedSlots: { [key: string]: string[] } = {};
-                            availability.forEach(slot => {
-                                const date = new Date(slot);
-                                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-                                const time = date.toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                });
-                                if (!groupedSlots[dayName]) {
-                                    groupedSlots[dayName] = [];
-                                }
-                                groupedSlots[dayName].push(time);
-                            });
-
-                            // Sort days and times
-                            const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                            const sortedDays = Object.keys(groupedSlots).sort((a, b) =>
-                                dayOrder.indexOf(a) - dayOrder.indexOf(b)
-                            );
-
-                            return sortedDays.map(day => (
-                                <div key={day} className="bg-gray-50 rounded-lg p-4">
-                                    <p className="font-semibold text-gray-800 mb-2">{day}</p>
-                                    <div className="space-y-1">
-                                        {groupedSlots[day].sort().map((time, idx) => (
-                                            <p key={idx} className="text-sm text-gray-600">
-                                                • {time}
-                                            </p>
-                                        ))}
-                                    </div>
-                                </div>
-                            ));
-                        })()}
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

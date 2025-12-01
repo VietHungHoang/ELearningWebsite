@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useRef } from "react";
 import { FiUserPlus, FiCalendar, FiTrendingUp } from "react-icons/fi";
+import useIntersectionObserver from "./useIntersectionObserver";
 
-const StepCard: React.FC<{
+interface StepCardProps {
     icon: React.ReactNode;
     title: string;
     description: string;
-}> = ({ icon, title, description }) => (
-    <div className="flex flex-col items-center text-center">
+    delay: string;
+    isVisible: boolean;
+}
+
+const StepCard: React.FC<StepCardProps> = ({ icon, title, description, delay, isVisible }) => (
+    <div className={`flex flex-col items-center text-center transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: delay }}>
         <div className="bg-[#f9f3eb] w-20 h-20 rounded-full flex items-center justify-center transition-transform hover:scale-110">
             <div className="w-10 h-10 text-[#0b6459]">{icon}</div>
         </div>
@@ -16,10 +21,13 @@ const StepCard: React.FC<{
 );
 
 const HowToStart: React.FC = () => {
+    const sectionRef = useRef<HTMLElement>(null);
+    const isVisible = useIntersectionObserver(sectionRef as React.RefObject<Element>, { threshold: 0.1 });
+
     return (
-        <section className="bg-white py-16 sm:py-24">
-            <div className="container mx-auto px-4 text-center">
-                <h2 className="text-4xl font-bold text-gray-800">
+        <section ref={sectionRef} className="bg-white py-16 sm:py-24">
+            <div className="max-w-7xl mx-auto px-4 text-center">
+                <h2 className={`text-4xl font-bold text-gray-800 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
                     Start in Just a Few Minutes
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-12">
@@ -27,16 +35,22 @@ const HowToStart: React.FC = () => {
                         icon={<FiUserPlus size={40} />}
                         title="1. Create Your Profile"
                         description="Complete our simple application to showcase your skills and qualifications."
+                        delay="0.1s"
+                        isVisible={isVisible}
                     />
                     <StepCard
                         icon={<FiCalendar size={40} />}
                         title="2. Set Your Availability"
                         description="You decide when and how often you want to teach. Total flexibility."
+                        delay="0.2s"
+                        isVisible={isVisible}
                     />
                     <StepCard
                         icon={<FiTrendingUp size={40} />}
                         title="3. Start Earning"
                         description="Once approved, students can book sessions and you can start earning."
+                        delay="0.3s"
+                        isVisible={isVisible}
                     />
                 </div>
             </div>

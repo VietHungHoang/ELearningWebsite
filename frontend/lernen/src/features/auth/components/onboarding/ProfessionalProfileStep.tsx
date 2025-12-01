@@ -152,17 +152,21 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
             </div>
 
             {/* A brief introduction */}
-            <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">A brief introduction</label>
-                <button
-                    type="button"
-                    className="absolute top-0 right-0 flex items-center gap-2 text-sm font-semibold bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-200"
-                >
-                    <HiSparkles className="w-4 h-4" />
-                    Write with AI
-                </button>
-                <div className="mt-1 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-4 p-3 border-b border-gray-200">
+            <div>
+                <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                        A brief introduction
+                    </label>
+                    <button
+                        type="button"
+                        className="flex items-center gap-1.5 text-xs font-semibold bg-purple-100 text-purple-700 px-2.5 py-1 rounded-md hover:bg-purple-200"
+                    >
+                        <HiSparkles className="w-3.5 h-3.5" />
+                        Write with AI
+                    </button>
+                </div>
+                <div className="border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-2 p-2 border-b border-gray-200">
                         <button
                             type="button"
                             onClick={() => toggleFormat("bold")}
@@ -195,10 +199,10 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
                         </button>
                     </div>
                     <textarea
-                        rows={6}
+                        rows={4}
                         value={data.introduction}
                         onChange={(e) => onChange({ introduction: e.target.value })}
-                        className="w-full p-3 focus:outline-none resize-none"
+                        className="w-full p-2.5 text-sm focus:outline-none resize-none"
                         placeholder="Tell students about yourself, your teaching style, experience, and what makes you unique..."
                     ></textarea>
                 </div>

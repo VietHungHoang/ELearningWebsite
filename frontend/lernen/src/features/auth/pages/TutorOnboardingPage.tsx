@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import BasicInformationStep from '../components/onboarding/BasicInformationStep';
@@ -9,8 +9,8 @@ import CertificationsStep from '../components/onboarding/CertificationsStep';
 import AvailabilityStep from '../components/onboarding/AvailabilityStep';
 import { LernenLogo } from '../../../components/LernenLogo';
 import authService from '../../../services/authService';
-import { HiArrowLeft, HiArrowRight } from 'react-icons/hi';
 import type {Tutor} from "../../../types/api.ts";
+import { HiArrowLeft, HiArrowRight, HiCheckCircle, HiX } from 'react-icons/hi';
 
 const STEPS = [
     { number: 1, label: 'Basic Info' },
@@ -29,6 +29,7 @@ const TutorOnboardingPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showCompletionModal, setShowCompletionModal] = useState(false);
 
     useEffect(() => {
         const stepParam = searchParams.get('step');
@@ -93,9 +94,9 @@ const TutorOnboardingPage: React.FC = () => {
         }
     };
 
-    const handleStepDataChange = (updates: any) => {
+    const handleStepDataChange = useCallback((updates: any) => {
         setStepData((prev: any) => ({ ...prev, ...updates }));
-    };
+    }, []);
 
     const validateStep = (step: number): boolean => {
         setError(null);
@@ -140,6 +141,14 @@ const TutorOnboardingPage: React.FC = () => {
         if (!currentStep || !validateStep(currentStep)) {
             return;
         }
+
+        // Temporarily comment out to test notification
+        if (currentStep === STEPS.length) {
+            // Show completion modal for testing
+            setShowCompletionModal(true);
+            return;
+        }
+
         setSaving(true);
         setError(null);
         try {
@@ -153,7 +162,8 @@ const TutorOnboardingPage: React.FC = () => {
             if (currentStep < STEPS.length) {
                 navigate(`/onboarding/tutor?step=${currentStep + 1}`);
             } else {
-                navigate('/dashboard');
+                // Show completion modal instead of navigating immediately
+                // setShowCompletionModal(true);
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save data');
@@ -249,7 +259,7 @@ const TutorOnboardingPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Compact Step Indicator */}
                 <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
                     <div className="max-w-3xl mx-auto">
@@ -290,32 +300,105 @@ const TutorOnboardingPage: React.FC = () => {
                 </div>
                 <div className="px-8 pt-4 pb-8">
                     {error && (
-                        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                            <p className="text-red-800 text-sm">{error}</p>
+                        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-red-800 text-xs">{error}</p>
                         </div>
                     )}
                     {renderStep()}
-                    <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
-                        <button onClick={handleBack} disabled={currentStep === 1} className="flex items-center gap-2 px-6 py-3 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                            <HiArrowLeft className="w-5 h-5" />
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
+                        <button onClick={handleBack} disabled={currentStep === 1} className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                            <HiArrowLeft className="w-4 h-4" />
                             Back
                         </button>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                             {currentStep >= 4 && currentStep < STEPS.length && (
-                                <button onClick={handleSkip} disabled={saving} className="px-6 py-3 text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
+                                <button onClick={handleSkip} disabled={saving} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
                                     Skip
                                 </button>
                             )}
-                            <button onClick={handleNext} disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button onClick={handleNext} disabled={saving} className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                                 {saving ? 'Saving...' : currentStep === STEPS.length ? 'Complete' : 'Next'}
-                                {!saving && <HiArrowRight className="w-5 h-5" />}
+                                {!saving && <HiArrowRight className="w-4 h-4" />}
                             </button>
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* Completion Modal */}
+            {showCompletionModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-fade-in-horizontal">
+                        {/* Header with gradient */}
+                        <div className="bg-gradient-to-r from-[#0b6459] via-[#0a5a4f] to-[#084c43] p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                        <HiCheckCircle className="w-7 h-7 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">Yêu cầu đã được gửi!</h3>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setShowCompletionModal(false);
+                                        navigate('/dashboard');
+                                    }}
+                                    className="text-white/80 hover:text-white transition p-1"
+                                >
+                                    <HiX className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            <div className="text-center space-y-2">
+                                <p className="text-gray-700 text-base leading-relaxed">
+                                    Chúng tôi đã nhận được yêu cầu của bạn. Đội ngũ của chúng tôi sẽ xem xét và phản hồi lại trong vòng <strong className="text-[#0b6459]">24-48 giờ</strong>.
+                                </p>
+                                <p className="text-sm text-gray-500 mt-3">
+                                    Bạn sẽ nhận được thông báo qua email khi hồ sơ của bạn được duyệt.
+                                </p>
+                            </div>
+
+                            {/* Info Box */}
+                            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+                                            <span className="text-teal-600 text-lg">📧</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-teal-900 mb-1">Kiểm tra email của bạn</p>
+                                        <p className="text-xs text-teal-700">
+                                            Chúng tôi đã gửi email xác nhận đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư đến và thư mục spam.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <button
+                                onClick={() => {
+                                    setShowCompletionModal(false);
+                                    navigate('/dashboard');
+                                }}
+                                className="w-full py-3 px-4 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold text-sm flex items-center justify-center gap-2"
+                            >
+                                <span>Đi đến Dashboard</span>
+                                <HiArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthLayout>
     )
 };
 
 export default TutorOnboardingPage;
+
