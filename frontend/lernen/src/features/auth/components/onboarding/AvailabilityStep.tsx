@@ -36,7 +36,8 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
     // Update parent when availability changes
     useEffect(() => {
         onChange({ availability });
-    }, [availability, onChange]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [availability]);
 
     // Marquee Selection State
     const [isDragging, setIsDragging] = useState(false);
@@ -149,24 +150,75 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
         setAvailability(Array.from(newAvailability));
     }, [selectionRect, selectionMode, initialAvailability, isDragging]);
 
-    // Group slots by day for display
-    const groupedSlots: { [key: string]: string[] } = {};
+    // Group slots by day and convert to time ranges
+    const groupedSlots: { [key: string]: Date[] } = {};
     availability.forEach(slot => {
         const date = new Date(slot);
         const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-        const time = date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
         if (!groupedSlots[dayName]) {
             groupedSlots[dayName] = [];
         }
-        groupedSlots[dayName].push(time);
+        groupedSlots[dayName].push(date);
+    });
+
+    // Convert time slots to ranges for each day
+    const timeRangesByDay: { [key: string]: { start: string; end: string }[] } = {};
+    Object.keys(groupedSlots).forEach(day => {
+        const slots = groupedSlots[day].sort((a, b) => a.getTime() - b.getTime());
+        const ranges: { start: string; end: string }[] = [];
+        
+        if (slots.length === 0) return;
+        
+        let rangeStart = slots[0];
+        let rangeEnd = slots[0];
+        
+        for (let i = 1; i < slots.length; i++) {
+            const currentSlot = slots[i];
+            const prevSlot = slots[i - 1];
+            const timeDiff = currentSlot.getTime() - prevSlot.getTime();
+            
+            // If slots are consecutive (1 hour apart = 3600000 ms)
+            if (timeDiff === 3600000) {
+                rangeEnd = currentSlot;
+            } else {
+                // Save current range
+                ranges.push({
+                    start: rangeStart.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    }),
+                    end: new Date(rangeEnd.getTime() + 3600000).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                });
+                // Start new range
+                rangeStart = currentSlot;
+                rangeEnd = currentSlot;
+            }
+        }
+        
+        // Add last range
+        ranges.push({
+            start: rangeStart.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }),
+            end: new Date(rangeEnd.getTime() + 3600000).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            })
+        });
+        
+        timeRangesByDay[day] = ranges;
     });
 
     const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const sortedDays = Object.keys(groupedSlots).sort((a, b) =>
+    const sortedDays = Object.keys(timeRangesByDay).sort((a, b) =>
         dayOrder.indexOf(a) - dayOrder.indexOf(b)
     );
 
@@ -179,16 +231,19 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                 </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                <p className="text-xs text-blue-800">
-                    <strong>💡 Tip:</strong> Click to toggle, drag to select multiple. Green = available.
-                </p>
-            </div>
-
             {/* Main Content: Grid Layout - Calendar Left, Selected Slots Right */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-2.5">
                 {/* Left: Calendar Grid */}
                 <div className="space-y-1.5">
+                    {/* Tips and Timezone - Same row */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-1.5 flex items-center justify-between">
+                        <p className="text-xs text-blue-800">
+                            <strong>💡 Tip:</strong> Click to toggle, drag to select multiple. Green = available.
+                        </p>
+                        <p className="text-xs text-blue-800">
+                            🌍 <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong>
+                        </p>
+                    </div>
                     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div className="overflow-x-auto relative max-h-[400px] overflow-y-auto" ref={gridRef}>
                             <div className="grid min-w-[400px]" style={{ gridTemplateColumns: `auto repeat(7, 1fr)` }}>
@@ -250,14 +305,6 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                             )}
                         </div>
                     </div>
-
-                    {/* Time Info Bar */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-1.5">
-                        <div className="flex items-center justify-between text-xs text-gray-600">
-                            <span>⏰ <strong>8:00 AM - 8:00 PM</strong></span>
-                            <span>🌍 <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong></span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Right: Selected Slots List - Sticky */}
@@ -271,11 +318,11 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                                 {sortedDays.map(day => (
                                     <div key={day} className="bg-gray-50 rounded-md p-2">
                                         <p className="font-semibold text-xs text-gray-800 mb-1">{day}</p>
-                                        <div className="flex flex-wrap gap-1">
-                                            {groupedSlots[day].sort().map((time, idx) => (
-                                                <span key={idx} className="inline-block text-xs text-gray-600 bg-white px-1.5 py-0.5 rounded border border-gray-200">
-                                                    {time}
-                                                </span>
+                                        <div className="space-y-0.5">
+                                            {timeRangesByDay[day].map((range, idx) => (
+                                                <div key={idx} className="text-xs text-gray-700 bg-white px-2 py-1 rounded border border-gray-200">
+                                                    {range.start} - {range.end}
+                                                </div>
                                             ))}
                                         </div>
                                     </div>

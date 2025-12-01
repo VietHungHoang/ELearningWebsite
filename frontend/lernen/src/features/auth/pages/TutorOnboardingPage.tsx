@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import BasicInformationStep from '../components/onboarding/BasicInformationStep';
@@ -9,7 +9,7 @@ import CertificationsStep from '../components/onboarding/CertificationsStep';
 import AvailabilityStep from '../components/onboarding/AvailabilityStep';
 import StepIndicator from '../components/onboarding/StepIndicator';
 import authService from '../../../services/authService';
-import { HiArrowLeft, HiArrowRight, HiAcademicCap } from 'react-icons/hi';
+import { HiArrowLeft, HiArrowRight, HiAcademicCap, HiCheckCircle, HiX } from 'react-icons/hi';
 import { LernenLogo } from '../../../components/LernenLogo';
 
 const STEPS = [
@@ -53,6 +53,7 @@ const TutorOnboardingPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showCompletionModal, setShowCompletionModal] = useState(false);
 
     useEffect(() => {
         const stepParam = searchParams.get('step');
@@ -117,9 +118,9 @@ const TutorOnboardingPage: React.FC = () => {
         }
     };
 
-    const handleStepDataChange = (updates: any) => {
+    const handleStepDataChange = useCallback((updates: any) => {
         setStepData((prev: any) => ({ ...prev, ...updates }));
-    };
+    }, []);
 
     const validateStep = (step: number): boolean => {
         setError(null);
@@ -167,6 +168,14 @@ const TutorOnboardingPage: React.FC = () => {
         if (!currentStep || !validateStep(currentStep)) {
             return;
         }
+        
+        // Temporarily comment out to test notification
+        if (currentStep === STEPS.length) {
+            // Show completion modal for testing
+            setShowCompletionModal(true);
+            return;
+        }
+        
         setSaving(true);
         setError(null);
         try {
@@ -180,7 +189,8 @@ const TutorOnboardingPage: React.FC = () => {
             if (currentStep < STEPS.length) {
                 navigate(`/onboarding/tutor?step=${currentStep + 1}`);
             } else {
-                navigate('/dashboard');
+                // Show completion modal instead of navigating immediately
+                // setShowCompletionModal(true);
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to save data');
@@ -366,6 +376,78 @@ const TutorOnboardingPage: React.FC = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Completion Modal */}
+            {showCompletionModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-fade-in-horizontal">
+                        {/* Header with gradient */}
+                        <div className="bg-gradient-to-r from-[#0b6459] via-[#0a5a4f] to-[#084c43] p-6 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                        <HiCheckCircle className="w-7 h-7 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">Yêu cầu đã được gửi!</h3>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setShowCompletionModal(false);
+                                        navigate('/dashboard');
+                                    }}
+                                    className="text-white/80 hover:text-white transition p-1"
+                                >
+                                    <HiX className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4">
+                            <div className="text-center space-y-2">
+                                <p className="text-gray-700 text-base leading-relaxed">
+                                    Chúng tôi đã nhận được yêu cầu của bạn. Đội ngũ của chúng tôi sẽ xem xét và phản hồi lại trong vòng <strong className="text-[#0b6459]">24-48 giờ</strong>.
+                                </p>
+                                <p className="text-sm text-gray-500 mt-3">
+                                    Bạn sẽ nhận được thông báo qua email khi hồ sơ của bạn được duyệt.
+                                </p>
+                            </div>
+
+                            {/* Info Box */}
+                            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+                                            <span className="text-teal-600 text-lg">📧</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium text-teal-900 mb-1">Kiểm tra email của bạn</p>
+                                        <p className="text-xs text-teal-700">
+                                            Chúng tôi đã gửi email xác nhận đến địa chỉ email của bạn. Vui lòng kiểm tra hộp thư đến và thư mục spam.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <button
+                                onClick={() => {
+                                    setShowCompletionModal(false);
+                                    navigate('/dashboard');
+                                }}
+                                className="w-full py-3 px-4 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold text-sm flex items-center justify-center gap-2"
+                            >
+                                <span>Đi đến Dashboard</span>
+                                <HiArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthLayout>
     );
 };
