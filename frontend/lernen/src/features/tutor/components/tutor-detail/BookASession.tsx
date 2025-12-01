@@ -3,7 +3,6 @@ import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import { FiCalendar, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import FilterSessionPopover from './FilterSessionPopover';
 import DatePickerModal from './DatePickerModal';
-import { getTimezones } from '../../../../services/commonService';
 import type { TimezoneResponse, Tutor } from '../../../../types/api';
 
 interface BookASessionProps {

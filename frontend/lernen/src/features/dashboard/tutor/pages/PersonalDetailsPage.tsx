@@ -23,7 +23,6 @@ import Toast from "../../../../components/ui/Toast";
 import WriteWithAIModal from "./components/WriteWithAIModal";
 import Breadcrumb from "../../components/Breadcrumb";
 import { useTutorProfile } from "../../../../hooks/useTutorProfile";
-import { getCountries, getLanguages, getSubjects, type Country, type Language, type Subject } from "../../../../services/commonService";
 import type { SocialLink, Language as ApiLanguage, Subject as ApiSubject, EducationItem, ExperienceItem, CertificationItem } from "../../../../types/api";
 
 type DetailTab =

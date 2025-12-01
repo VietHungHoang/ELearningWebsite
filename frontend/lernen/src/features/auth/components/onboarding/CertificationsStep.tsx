@@ -1,48 +1,36 @@
 import React, { useState } from 'react';
 import { HiPlus, HiPencil, HiTrash, HiDocumentText, HiUpload } from 'react-icons/hi';
-
-interface CertificationWithFile {
-    id?: string;
-    name: string;
-    issuingOrganization: string;
-    issueDate: string;
-    expirationDate?: string;
-    credentialId?: string;
-    credentialUrl?: string;
-    file?: File;
-    fileUrl?: string;
-}
+import { uploadService } from '../../../../services/uploadService';
+import type { Tutor, CertificationItem } from '../../../../types/api.ts';
 
 interface CertificationsStepProps {
-    data: {
-        certifications: CertificationWithFile[];
-    };
-    onChange: (data: { certifications: CertificationWithFile[] }) => void;
+    data: Partial<Tutor>;
+    onChange: (data: Partial<Tutor>) => void;
 }
 
 const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingCert, setEditingCert] = useState<CertificationWithFile | null>(null);
+    const [editingCert, setEditingCert] = useState<CertificationItem | null>(null);
 
     const handleAdd = () => {
         setEditingCert(null);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (cert: CertificationWithFile) => {
+    const handleEdit = (cert: CertificationItem) => {
         setEditingCert(cert);
         setIsModalOpen(true);
     };
 
     const handleDelete = (id: string) => {
-        onChange({ certifications: data.certifications.filter(c => c.id !== id) });
+        onChange({ certifications: (data.certifications || []).filter(c => c.id !== id) });
     };
 
-    const handleSave = (cert: CertificationWithFile) => {
+    const handleSave = (cert: CertificationItem) => {
         if (cert.id) {
-            onChange({ certifications: data.certifications.map(c => c.id === cert.id ? cert : c) });
+            onChange({ certifications: (data.certifications || []).map(c => c.id === cert.id ? cert : c) });
         } else {
-            onChange({ certifications: [...data.certifications, { ...cert, id: `cert-${Date.now()}` }] });
+            onChange({ certifications: [...(data.certifications || []), { ...cert, id: `cert-${Date.now()}` }] });
         }
         setIsModalOpen(false);
     };
@@ -57,7 +45,7 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
             </div>
 
             <div className="space-y-3">
-                {data.certifications.map(cert => (
+                {(data.certifications || []).map(cert => (
                     <div key={cert.id} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
                         <div className="flex justify-between items-start gap-4">
                             <div className="flex-grow min-w-0">
@@ -73,7 +61,7 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
                                             <p className="text-xs text-gray-400 mt-1">ID: {cert.credentialId}</p>
                                         )}
                                     </div>
-                                    {(cert.file || cert.fileUrl) && (
+                                    {cert.credentialUrl && (
                                         <HiDocumentText className="w-5 h-5 text-[#0b6459] flex-shrink-0" title="Certificate attached" />
                                     )}
                                 </div>
@@ -98,7 +86,7 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
                     </div>
                 ))}
 
-                {data.certifications.length === 0 && (
+                {(data.certifications || []).length === 0 && (
                     <div className="text-center py-6 text-gray-400 text-sm">
                         No certifications added yet
                     </div>
@@ -126,11 +114,12 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
 
 // Modal Component
 const CertModal: React.FC<{
-    certification: CertificationWithFile | null;
-    onSave: (cert: CertificationWithFile) => void;
+    certification: CertificationItem | null;
+    onSave: (cert: CertificationItem) => void;
     onClose: () => void;
 }> = ({ certification, onSave, onClose }) => {
-    const [formData, setFormData] = useState<CertificationWithFile>(certification || {
+    const [formData, setFormData] = useState<CertificationItem>(certification || {
+        id: '',
         name: '',
         issuingOrganization: '',
         issueDate: '',
@@ -138,17 +127,33 @@ const CertModal: React.FC<{
         credentialId: '',
         credentialUrl: '',
     });
-    const [file, setFile] = useState<File | null>(null);
+    const [uploading, setUploading] = useState(false);
 
-    const handleFileChange = (e: React.FormEvent<HTMLInputElement>) => {
-        if (e.currentTarget.files && e.currentTarget.files[0]) {
-            setFile(e.currentTarget.files[0]);
+    const handleFileChange = async (e: React.FormEvent<HTMLInputElement>) => {
+        const selectedFile = e.currentTarget.files?.[0];
+        if (selectedFile) {
+            setUploading(true);
+            try {
+                // Get pre-signed URL
+                const { uploadUrl, fileUrl } = await uploadService.getPreSignedUrl(selectedFile.name, selectedFile.type);
+
+                // Upload to S3
+                await uploadService.uploadFileToS3(uploadUrl, selectedFile);
+
+                // Update formData with fileUrl
+                setFormData({ ...formData, credentialUrl: fileUrl });
+            } catch (error) {
+                console.error('Failed to upload file:', error);
+                // Handle error, maybe show toast
+            } finally {
+                setUploading(false);
+            }
         }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSave({ ...formData, file: file || formData.file });
+        onSave(formData);
     };
 
     const inputStyles = 'w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition';
@@ -253,18 +258,19 @@ const CertModal: React.FC<{
                                 <HiUpload className="w-12 h-12 text-gray-400 mb-3" />
                                 <label className="cursor-pointer">
                                     <span className="text-sm font-semibold text-[#0b6459] hover:text-[#084c43]">
-                                        Choose file
+                                        {uploading ? 'Uploading...' : 'Choose file'}
                                     </span>
                                     <input
                                         type="file"
                                         accept=".pdf,.jpg,.jpeg,.png"
                                         onChange={handleFileChange}
                                         className="hidden"
+                                        disabled={uploading}
                                     />
                                 </label>
                                 <p className="text-xs text-gray-500 mt-2">PDF, JPG, PNG (max 5MB)</p>
-                                {file && (
-                                    <p className="text-sm text-[#0b6459] font-medium mt-3">✓ {file.name}</p>
+                                {formData.credentialUrl && (
+                                    <p className="text-sm text-[#0b6459] font-medium mt-3">✓ File uploaded</p>
                                 )}
                             </div>
                         </div>

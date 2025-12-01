@@ -1,56 +1,72 @@
 import React, { useState } from 'react';
 import { HiCloudUpload, HiTrash } from 'react-icons/hi';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaYoutube } from 'react-icons/fa';
-import type { SocialLink } from '../../../../types/api';
-
-interface MediaPortfolioData {
-    profilePhoto: { name: string; url: string } | null;
-    introVideo: File | null;
-    socialLinks: SocialLink[];
-}
+import type { TutorSocial, Tutor } from '../../../../types/api';
+import { uploadService } from '../../../../services/uploadService';
 
 interface MediaPortfolioStepProps {
-    data: MediaPortfolioData;
-    onChange: (data: Partial<MediaPortfolioData>) => void;
+    data: Partial<Tutor>;
+    onChange: (data: Partial<Tutor>) => void;
 }
 
 const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange }) => {
     const [photoPreview, setPhotoPreview] = useState<string | null>(
-        data.profilePhoto?.url || null
+        data.avatarUrl || null
     );
     const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
-    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPhotoPreview(reader.result as string);
-                // Temporarily not saving profilePhoto, keep as null
-                // onChange({
-                //     profilePhoto: {
-                //         name: file.name,
-                //         url: reader.result as string,
-                //     },
-                // });
-            };
-            reader.readAsDataURL(file);
+            try {
+                // Get pre-signed URL
+                const { uploadUrl, fileUrl } = await uploadService.getPreSignedUrl(file.name, file.type);
+
+                // Upload to S3
+                await uploadService.uploadFileToS3(uploadUrl, file);
+
+                // Update data with fileUrl
+                onChange({ avatarUrl: fileUrl });
+
+                // Set preview
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setPhotoPreview(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('Failed to upload photo:', error);
+                // Handle error, maybe show toast
+            }
         }
     };
 
-    const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const url = URL.createObjectURL(file);
-            setVideoPreview(url);
-            onChange({ introVideo: file });
+            try {
+                // Get pre-signed URL
+                const { uploadUrl, fileUrl } = await uploadService.getPreSignedUrl(file.name, file.type);
+
+                // Upload to S3
+                await uploadService.uploadFileToS3(uploadUrl, file);
+
+                // Update data with fileUrl
+                onChange({ videoUrl: fileUrl });
+
+                // Set preview
+                const url = URL.createObjectURL(file);
+                setVideoPreview(url);
+            } catch (error) {
+                console.error('Failed to upload video:', error);
+                // Handle error
+            }
         }
     };
 
     const handleRemovePhoto = () => {
         setPhotoPreview(null);
-        // Temporarily not saving profilePhoto, keep as null
-        // onChange({ profilePhoto: null });
+        onChange({ avatarUrl: undefined });
     };
 
     const handleRemoveVideo = () => {
@@ -58,7 +74,7 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
             URL.revokeObjectURL(videoPreview);
         }
         setVideoPreview(null);
-        onChange({ introVideo: null });
+        onChange({ videoUrl: undefined });
     };
 
     const socialPlatforms = [
@@ -71,9 +87,9 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
 
     const handleSocialLinkChange = (platform: string, url: string) => {
         const existingLinks = data.socialLinks || [];
-        const linkIndex = existingLinks.findIndex(link => link.id === platform);
+        const linkIndex = existingLinks.findIndex(link => link.platform === platform);
 
-        let updatedLinks: SocialLink[];
+        let updatedLinks: TutorSocial[];
         if (linkIndex >= 0) {
             // Update existing link
             updatedLinks = existingLinks.map((link, idx) =>
@@ -81,14 +97,14 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
             );
         } else {
             // Add new link
-            updatedLinks = [...existingLinks, { id: platform, platform: platform, url }];
+            updatedLinks = [...existingLinks, { platform, url }];
         }
 
         onChange({ socialLinks: updatedLinks });
     };
 
     const getSocialLinkValue = (platform: string): string => {
-        return data.socialLinks?.find(link => link.id === platform)?.url || '';
+        return data.socialLinks?.find(link => link.platform === platform)?.url || '';
     };
 
     const inputStyles =

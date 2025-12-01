@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { HiPlus, HiPencil, HiTrash, HiAcademicCap, HiBriefcase } from 'react-icons/hi';
-import type { EducationItem, ExperienceItem } from '../../../../types/api';
-
-interface EducationExperienceData {
-    education: EducationItem[];
-    experience: ExperienceItem[];
-}
+import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import commonUtils from '../../../../lib/commonUtils';
+import type { EducationItem, ExperienceItem, Tutor } from '../../../../types/api';
 
 interface EducationExperienceStepProps {
-    data: EducationExperienceData;
-    onChange: (data: Partial<EducationExperienceData>) => void;
+    data: Partial<Tutor>;
+    onChange: (data: Partial<Tutor>) => void;
 }
 
 const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data, onChange }) => {
@@ -32,24 +29,24 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
 
     const handleDelete = (id: string, type: 'education' | 'experience') => {
         if (type === 'education') {
-            onChange({ education: data.education.filter(e => e.id !== id) });
+            onChange({ educations: (data.educations || []).filter(e => e.id !== id) });
         } else {
-            onChange({ experience: data.experience.filter(e => e.id !== id) });
+            onChange({ experiences: (data.experiences || []).filter(e => e.id !== id) });
         }
     };
 
     const handleSave = (item: any) => {
         if (editingType === 'education') {
             if (item.id) {
-                onChange({ education: data.education.map(e => e.id === item.id ? item : e) });
+                onChange({ educations: (data.educations || []).map(e => e.id === item.id ? item : e) });
             } else {
-                onChange({ education: [...data.education, { ...item, id: `edu-${Date.now()}` }] });
+                onChange({ educations: [...(data.educations || []), { ...item, id: `edu-${Date.now()}` }] });
             }
         } else {
             if (item.id) {
-                onChange({ experience: data.experience.map(e => e.id === item.id ? item : e) });
+                onChange({ experiences: (data.experiences || []).map(e => e.id === item.id ? item : e) });
             } else {
-                onChange({ experience: [...data.experience, { ...item, id: `exp-${Date.now()}` }] });
+                onChange({ experiences: [...(data.experiences || []), { ...item, id: `exp-${Date.now()}` }] });
             }
         }
         setIsModalOpen(false);
@@ -77,7 +74,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                 >
                     <div className="flex items-center gap-2">
                         <HiAcademicCap className="w-5 h-5" />
-                        Education ({data.education.length})
+                        Education ({(data.educations || []).length})
                     </div>
                 </button>
                 <button
@@ -89,7 +86,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                 >
                     <div className="flex items-center gap-2">
                         <HiBriefcase className="w-5 h-5" />
-                        Experience ({data.experience.length})
+                        Experience ({(data.experiences || []).length})
                     </div>
                 </button>
             </div>
@@ -98,7 +95,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
             <div className="space-y-4">
                 {activeTab === 'education' ? (
                     <>
-                        {data.education.map(edu => (
+                        {(data.educations || []).map(edu => (
                             <div key={edu.id} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
                                 <div className="flex justify-between items-start gap-4">
                                     <div className="flex-grow min-w-0">
@@ -131,7 +128,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                                 </div>
                             </div>
                         ))}
-                        {data.education.length === 0 && (
+                        {(data.educations || []).length === 0 && (
                             <div className="text-center py-6 text-gray-400 text-sm">
                                 No education added yet
                             </div>
@@ -146,7 +143,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                     </>
                 ) : (
                     <>
-                        {data.experience.map(exp => (
+                        {(data.experiences || []).map(exp => (
                             <div key={exp.id} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
                                 <div className="flex justify-between items-start gap-4">
                                     <div className="flex-grow min-w-0">
@@ -179,7 +176,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                                 </div>
                             </div>
                         ))}
-                        {data.experience.length === 0 && (
+                        {(data.experiences || []).length === 0 && (
                             <div className="text-center py-6 text-gray-400 text-sm">
                                 No experience added yet
                             </div>
@@ -217,12 +214,14 @@ const ItemModal: React.FC<{
     onClose: () => void;
     inputStyles: string;
 }> = ({ type, item, onSave, onClose, inputStyles }) => {
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [formData, setFormData] = useState(item || {
         title: '',
         institution: '',
         startDate: '',
         endDate: '',
         location: '',
+        timezone: '',
         description: '',
     });
 
@@ -306,6 +305,23 @@ const ItemModal: React.FC<{
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             className={inputStyles}
                             placeholder="e.g., Boston, MA"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Timezone
+                        </label>
+                        <CustomDropdown
+                            options={commonUtils.getAllTimezones().map(tz => tz.name)}
+                            selectedValue={formData.timezone || ''}
+                            placeholder="Select timezone"
+                            onSelect={(value) => setFormData({ ...formData, timezone: value })}
+                            dropdownId="timezone"
+                            openDropdown={openDropdown}
+                            setOpenDropdown={setOpenDropdown}
+                            hasSearch={true}
+                            searchPlaceholder="Search timezone..."
                         />
                     </div>
 

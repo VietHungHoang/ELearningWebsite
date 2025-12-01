@@ -7,9 +7,10 @@ import MediaPortfolioStep from '../components/onboarding/MediaPortfolioStep';
 import EducationExperienceStep from '../components/onboarding/EducationExperienceStep';
 import CertificationsStep from '../components/onboarding/CertificationsStep';
 import AvailabilityStep from '../components/onboarding/AvailabilityStep';
-import StepIndicator from '../components/onboarding/StepIndicator';
+import { LernenLogo } from '../../../components/LernenLogo';
 import authService from '../../../services/authService';
 import { HiArrowLeft, HiArrowRight } from 'react-icons/hi';
+import type {Tutor} from "../../../types/api.ts";
 
 const STEPS = [
     { number: 1, label: 'Basic Info' },
@@ -24,31 +25,7 @@ const TutorOnboardingPage: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [currentStep, setCurrentStep] = useState<number | null>(null);
-    const [stepData, setStepData] = useState<any>({
-        fullName: '',
-        email: '',
-        gender: 'Male',
-        country: '',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        nativeLanguage: null,
-        languages: [],
-        subjects: [],
-        headline: '',
-        introduction: '',
-        profilePhoto: null,
-        introVideo: null,
-        socialLinks: [
-            { platform: 'facebook', url: '' },
-            { platform: 'twitter', url: '' },
-            { platform: 'linkedin', url: '' },
-            { platform: 'instagram', url: '' },
-            { platform: 'youtube', url: '' }
-        ],
-        education: [],
-        experience: [],
-        certifications: [],
-        availability: []
-    });
+    const [stepData, setStepData] = useState<Partial<Tutor>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -132,14 +109,11 @@ const TutorOnboardingPage: React.FC = () => {
                     setError('Please select your gender');
                     return false;
                 }
-                if (!stepData.country) {
+                if (!stepData.countryCode) {
                     setError('Country is required');
                     return false;
                 }
-                if (!stepData.city?.trim()) {
-                    setError('City is required');
-                    return false;
-                }
+
                 if (!stepData.languages || stepData.languages.length === 0) {
                     setError('Please add at least one language');
                     return false;
@@ -257,37 +231,63 @@ const TutorOnboardingPage: React.FC = () => {
                     </div>
                 </div>
             </AuthLayout>
-        );
+        )
     }
 
     return (
         <AuthLayout>
-            <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0b6459]/5 via-transparent to-teal-500/5" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="transform -rotate-45 opacity-[0.03]">
-                        <p className="text-[20rem] font-bold text-[#0b6459] whitespace-nowrap">Lernen</p>
-                    </div>
-                </div>
-                <div className="absolute top-8 left-8 opacity-10">
-                    <p className="text-6xl font-bold text-[#0b6459]">Lernen</p>
-                    <div className="w-20 h-1 bg-[#0b6459] mt-2"></div>
-                </div>
-            </div>
-            <main className="relative w-full max-w-4xl mx-auto mt-8 mb-8 bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-in-horizontal">
-                <div className="bg-gradient-to-r from-[#0b6459] to-[#084c43] text-white p-8">
+            <main className="relative w-full max-w-4xl mx-auto mt-8 mb-8 bg-white rounded-lg shadow-lg overflow-hidden">
+                {/* Simple Header */}
+                <div className="border-b border-gray-200 bg-white px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold">Welcome to Your Teaching Journey! </h1>
-                            <p className="text-teal-100 mt-2">Let's set up your profile in 6 easy steps</p>
+                            <h1 className="text-xl font-semibold text-gray-900">Tutor Onboarding</h1>
+                            <p className="text-sm text-gray-500 mt-0.5">Complete your profile to start teaching</p>
                         </div>
-                        <div className="text-right">
-                            <p className="text-4xl font-bold">Lernen</p>
-                            <p className="text-xs text-teal-200 mt-1">Learn. Teach. Grow.</p>
+                        <div className="text-right w-24">
+                            <LernenLogo />
                         </div>
                     </div>
                 </div>
-                <StepIndicator currentStep={currentStep} steps={STEPS} />
+                
+                {/* Compact Step Indicator */}
+                <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
+                    <div className="max-w-3xl mx-auto">
+                        {/* Icons and Lines */}
+                        <div className="flex items-center justify-between mb-2">
+                            {STEPS.map((step, index) => (
+                                <React.Fragment key={step.number}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
+                                        currentStep === step.number
+                                            ? 'bg-[#0b6459] text-white'
+                                            : currentStep > step.number
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-gray-200 text-gray-500'
+                                    }`}>
+                                        {currentStep > step.number ? '✓' : step.number}
+                                    </div>
+                                    {index < STEPS.length - 1 && (
+                                        <div className={`flex-1 h-0.5 mx-2 ${
+                                            currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
+                                        }`} />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </div>
+                        {/* Labels */}
+                        <div className="flex items-center justify-between">
+                            {STEPS.map((step) => (
+                                <div key={step.number} className="w-8 flex justify-center">
+                                    <span className={`text-xs whitespace-nowrap ${
+                                        currentStep === step.number ? 'text-[#0b6459] font-medium' : 'text-gray-500'
+                                    }`}>
+                                        {step.label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
                 <div className="px-8 pt-4 pb-8">
                     {error && (
                         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -315,7 +315,7 @@ const TutorOnboardingPage: React.FC = () => {
                 </div>
             </main>
         </AuthLayout>
-    );
+    )
 };
 
 export default TutorOnboardingPage;

@@ -1,16 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-interface TimeSlot {
-    start: string;
-    end: string;
-}
+import type { Tutor } from '../../../../types/api.ts'
 
 interface AvailabilityStepProps {
-    data: {
-        availability: string[];
-        timezone: string;
-    };
-    onChange: (data: { availability?: string[]; timezone?: string }) => void;
+    data?: Partial<Tutor>;
+    onChange: (data: Partial<Tutor>) => void;
 }
 
 const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) => {
@@ -31,11 +24,12 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
     };
 
     const [weekDays] = useState(getCurrentWeek());
-    const [availability, setAvailability] = useState<string[]>(data.availability || []);
+    const [availability, setAvailability] = useState<string[]>(((data as any)?.availability) || []);
 
-    // Update parent when availability changes
+    // Update parent when availability changes - write into `availability` field of parent data
     useEffect(() => {
-        onChange({ availability });
+        // cast because `availability` is not declared on Tutor type; parent uses Partial<Tutor>
+        onChange({ availability } as unknown as Partial<Tutor>);
     }, [availability, onChange]);
 
     // Marquee Selection State
