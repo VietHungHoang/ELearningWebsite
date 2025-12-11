@@ -1,4 +1,7 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, AfterViewInit, Input } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { PopularSubject, TimePeriod } from '../../../types/dashboard';
+import { DashboardService } from '../../../services/dashboard.service';
 import { StudentsInterestedTopicsService } from './students-interested-topics.service';
 
 @Component({
@@ -7,56 +10,22 @@ import { StudentsInterestedTopicsService } from './students-interested-topics.se
     templateUrl: './students-interested-topics.component.html',
     styleUrl: './students-interested-topics.component.scss'
 })
-export class StudentsInterestedTopicsComponent implements OnInit {
+export class StudentsInterestedTopicsComponent implements OnInit, OnDestroy, AfterViewInit {
+    @Input() popularSubjects?: PopularSubject[];
 
-    selectedTimeframe: string = 'Last 6 Months'; 
+    selectedTimeframe: TimePeriod = 'month';
     instanceId: string;
     private initialized = false;
-    chartData: { [key: string]: { series: { name: string; data: number[] }[]; categories: string[] } };
+    private chartLoaded = false;
+    private subscriptions: Subscription[] = [];
+
+    subjectsData: PopularSubject[] = [];
 
     constructor(
+        private dashboardService: DashboardService,
         private studentsInterestedTopicsService: StudentsInterestedTopicsService
     ) {
         this.instanceId = 'students-interested-' + Math.random().toString(36).substr(2, 9);
-
-        this.chartData = {
-            'Last 2 Months': {
-                series: [
-                    { name: 'Courses', data: [10, 15, 8, 5, 7, 12] }
-                ],
-                categories: ['UX/UI Design', 'WordPress', 'Motion Design', 'Video Editing', 'Angular', 'Python']
-            },
-            'Last 4 Months': {
-                series: [
-                    { name: 'Courses', data: [20, 30, 18, 10, 14, 25] }
-                ],
-                categories: ['UX/UI Design', 'WordPress', 'Motion Design', 'Video Editing', 'Angular', 'Python']
-            },
-            'Last 6 Months': {
-                series: [
-                    { name: 'Courses', data: [47, 69, 37, 17, 28, 40] }
-                ],
-                categories: ['UX/UI Design', 'WordPress', 'Motion Design', 'Video Editing', 'Angular', 'Python']
-            },
-            'Last 8 Months': {
-                series: [
-                    { name: 'Courses', data: [55, 80, 50, 20, 35, 60] }
-                ],
-                categories: ['UX/UI Design', 'WordPress', 'Motion Design', 'Video Editing', 'Angular', 'Python']
-            },
-            'Last 10 Months': {
-                series: [
-                    { name: 'Courses', data: [65, 90, 60, 30, 50, 80] }
-                ],
-                categories: ['UX/UI Design', 'WordPress', 'Motion Design', 'Video Editing', 'Angular', 'Python']
-            },
-            'Last 12 Months': {
-                series: [
-                    { name: 'Courses', data: [80, 100, 70, 40, 60, 100] }
-                ],
-                categories: ['UX/UI Design', 'WordPress', 'Motion Design', 'Video Editing', 'Angular', 'Python']
-            }
-        };
     }
 
     ngOnInit(): void {
@@ -65,14 +34,53 @@ export class StudentsInterestedTopicsComponent implements OnInit {
         }
         this.initialized = true;
 
-        const defaultData = this.chartData[this.selectedTimeframe];
-        this.studentsInterestedTopicsService.loadChart(defaultData.series, defaultData.categories);
+        // If popularSubjects provided via Input, use them
+        if (this.popularSubjects && this.popularSubjects.length > 0) {
+            this.subjectsData = this.popularSubjects;
+        } else {
+            // Otherwise, load from service
+            this.loadPopularSubjects();
+        }
     }
 
-    onTimeframeChange(timeframe: string): void {
-        this.selectedTimeframe = timeframe; 
-        const selectedData = this.chartData[timeframe];
-        this.studentsInterestedTopicsService.updateChart(selectedData.series, selectedData.categories);
+    ngAfterViewInit(): void {
+        // Load chart after view is initialized
+        if (this.subjectsData.length > 0) {
+            this.loadChartData();
+        }
+    }
+
+    ngOnDestroy() {
+        this.subscriptions.forEach(sub => sub.unsubscribe());
+    }
+
+    private loadPopularSubjects() {
+        const sub = this.dashboardService.getPopularSubjects(this.selectedTimeframe).subscribe(subjects => {
+            this.subjectsData = subjects;
+            // Load chart after data is loaded
+            setTimeout(() => this.loadChartData(), 100);
+        });
+        this.subscriptions.push(sub);
+    }
+
+    private loadChartData() {
+        // Transform subjects data to chart format
+        const series = [{ name: 'Students', data: this.subjectsData.map(s => s.studentCount || s.instructors) }];
+        const categories = this.subjectsData.map(s => s.subject);
+
+        // Use the chart service to render/update chart
+        // Always load chart first time, then update for subsequent calls
+        if (!this.chartLoaded) {
+            this.studentsInterestedTopicsService.loadChart(series, categories);
+            this.chartLoaded = true;
+        } else {
+            this.studentsInterestedTopicsService.updateChart(series, categories);
+        }
+    }
+
+    onTimeframeChange(timeframe: TimePeriod): void {
+        this.selectedTimeframe = timeframe;
+        this.loadPopularSubjects();
     }
 
     isCardHeaderOpen = false;

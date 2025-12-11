@@ -1,0 +1,248 @@
+// Dropdown styling
+.trezo-card-dropdown {
+    position: relative;
+
+    &-btn {
+        display: inline-block;
+        padding: 5px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        background-color: white;
+        color: #1f2937;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background-color: #f9fafb;
+        }
+
+        @media (min-width: 768px) {
+            padding: 6.5px 19px;
+        }
+
+        &:dark {
+            background-color: transparent;
+            border-color: #172036;
+            color: #f3f4f6;
+
+            &:hover {
+                background-color: #0a0e19;
+            }
+        }
+    }
+
+    &-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        width: 140px;
+        margin-top: 8px;
+        padding: 15px 0;
+        background-color: white;
+        border-radius: 6px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 5;
+        transition: all 0.3s ease;
+
+        @media (prefers-color-scheme: dark) {
+            background-color: #0a0e19;
+            box-shadow: none;
+        }
+
+        li {
+            list-style: none;
+
+            button {
+                width: 100%;
+                padding: 8px 20px;
+                text-align: left;
+                color: #1f2937;
+                background-color: transparent;
+                border: none;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                    background-color: #f9fafb;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                    color: #f3f4f6;
+
+                    &:hover {
+                        background-color: #0f0f0f;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Table styling
+table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        tr {
+            th {
+                font-weight: 500;
+                text-align: left;
+                padding: 12px 15px;
+                background-color: #fafbfc;
+                color: #1f2937;
+                font-size: 14px;
+                white-space: nowrap;
+
+                @media (prefers-color-scheme: dark) {
+                    background-color: #15203c;
+                    color: #f3f4f6;
+                }
+            }
+        }
+    }
+
+    tbody {
+        color: #1f2937;
+
+        @media (prefers-color-scheme: dark) {
+            color: #f3f4f6;
+        }
+
+        tr {
+            border-bottom: 1px solid #f3f4f6;
+
+            @media (prefers-color-scheme: dark) {
+                border-bottom-color: #172036;
+            }
+
+            td {
+                padding: 15px;
+                font-size: 14px;
+
+                // Rank column styling
+                &:first-child {
+                    font-weight: 500;
+
+                    span {
+                        display: inline-block;
+                        width: 28px;
+                        height: 28px;
+                        line-height: 28px;
+                        text-align: center;
+                        border-radius: 50%;
+                        font-size: 12px;
+
+                        &.rank-1 {
+                            background-color: #fef3c7;
+                            color: #92400e;
+
+                            @media (prefers-color-scheme: dark) {
+                                background-color: rgba(180, 83, 9, 0.3);
+                                color: #fcd34d;
+                            }
+                        }
+
+                        &.rank-2 {
+                            background-color: #f3f4f6;
+                            color: #4b5563;
+
+                            @media (prefers-color-scheme: dark) {
+                                background-color: rgba(55, 65, 81, 0.3);
+                                color: #d1d5db;
+                            }
+                        }
+
+                        &.rank-3 {
+                            background-color: #fed7aa;
+                            color: #9a3412;
+
+                            @media (prefers-color-scheme: dark) {
+                                background-color: rgba(124, 45, 18, 0.3);
+                                color: #fb923c;
+                            }
+                        }
+
+                        &.rank-other {
+                            background-color: #f3f4f6;
+                            color: #4b5563;
+
+                            @media (prefers-color-scheme: dark) {
+                                background-color: rgba(55, 65, 81, 0.3);
+                                color: #d1d5db;
+                            }
+                        }
+                    }
+                }
+
+                // Sessions badge
+                .sessions-badge {
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    background-color: #dbeafe;
+                    color: #1e40af;
+                    font-size: 12px;
+                    font-weight: 500;
+
+                    @media (prefers-color-scheme: dark) {
+                        background-color: rgba(30, 58, 138, 0.3);
+                        color: #60a5fa;
+                    }
+                }
+
+                // Total Earnings
+                &:nth-child(4) {
+                    font-weight: bold;
+                    color: #605dff;
+                }
+
+                // Avg/Session
+                &:nth-child(5) {
+                    color: #4b5563;
+
+                    @media (prefers-color-scheme: dark) {
+                        color: #9ca3af;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Chart container
+#top_instructors_chart {
+    margin-top: -20px;
+    margin-bottom: -22px;
+}
+
+// Scrollable table wrapper
+.overflow-x-auto {
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 3px;
+
+        &:hover {
+            background-color: #9ca3af;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            background-color: #4b5563;
+
+            &:hover {
+                background-color: #6b7280;
+            }
+        }
+    }
+}

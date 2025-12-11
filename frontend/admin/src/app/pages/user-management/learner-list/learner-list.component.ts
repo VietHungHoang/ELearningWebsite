@@ -2,49 +2,66 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink, Router } from '@angular/router';
-import { UserService, Learner } from '../../../services/user.service';
+import { UserService, Student } from '../../../services/user.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 
 @Component({
     selector: 'app-learner-list',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent],
+    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe],
     templateUrl: './learner-list.component.html',
     styleUrl: './learner-list.component.scss'
 })
 export class LearnerListComponent implements OnInit {
-    learners: Learner[] = [];
+    learners: Student[] = [];
     showDeleteDialog = false;
-    learnerToDelete: Learner | null = null;
+    learnerToDelete: Student | null = null;
 
     itemsPerPage = 5;
     currentPage = 1;
     totalLearners = 0;
-    paginatedLearners: Learner[] = [];
+    paginatedLearners: Student[] = [];
+    isLoading = false;
 
     constructor(private userService: UserService, private router: Router) {}
 
     ngOnInit(): void {
-        this.userService.getLearners().subscribe(learners => {
-            this.learners = learners;
-            this.totalLearners = learners.length;
-            this.applyPagination(learners);
+        this.loadLearners();
+    }
+
+    /**
+     * Load learners from API (with fallback to mock data)
+     */
+    loadLearners(): void {
+        this.isLoading = true;
+        this.userService.getStudents().subscribe({
+            next: (learners) => {
+                this.learners = learners;
+                this.totalLearners = learners.length;
+                this.paginatedLearners = learners;
+                this.isLoading = false;
+            },
+            error: (error) => {
+                console.error('Error loading learners:', error);
+                this.isLoading = false;
+            }
         });
     }
 
-    viewDetail(learner: Learner): void {
+    viewDetail(learner: Student): void {
         this.router.navigate(['/dashboard/user-management/learner-detail', learner.id.toString()]);
     }
 
-    openDeleteDialog(learner: Learner): void {
+    openDeleteDialog(learner: Student): void {
         this.learnerToDelete = learner;
         this.showDeleteDialog = true;
     }
 
     confirmDelete(): void {
         if (this.learnerToDelete) {
-            this.userService.deleteLearner(this.learnerToDelete.id);
+            this.userService.deleteStudent(this.learnerToDelete.id);
             this.showDeleteDialog = false;
             this.learnerToDelete = null;
         }
@@ -56,24 +73,23 @@ export class LearnerListComponent implements OnInit {
     }
 
     onSearchLearners(searchTerm: string): void {
+        this.currentPage = 1;
         if (searchTerm.trim()) {
-            this.userService.searchLearners(searchTerm).subscribe(filteredLearners => {
-                this.totalLearners = filteredLearners.length;
-                this.currentPage = 1;
-                this.applyPagination(filteredLearners);
+            // Call search method with search term
+            this.userService.searchStudents(searchTerm).subscribe({
+                next: (learners) => {
+                    this.learners = learners;
+                    this.totalLearners = learners.length;
+                    this.paginatedLearners = learners;
+                },
+                error: (error) => console.error('Error searching learners:', error)
             });
         } else {
-
-            this.userService.getLearners().subscribe(learners => {
-                this.learners = learners;
-                this.totalLearners = learners.length;
-                this.currentPage = 1;
-                this.applyPagination(learners);
-            });
+            this.loadLearners();
         }
     }
 
-    private applyPagination(allLearners: Learner[]): void {
+    private applyPagination(allLearners: Student[]): void {
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
         this.paginatedLearners = allLearners.slice(startIndex, endIndex);
@@ -91,18 +107,15 @@ export class LearnerListComponent implements OnInit {
     }
 
     goToPage(page: number): void {
-        if (page >= 1 && page <= this.totalPages) {
-            this.currentPage = page;
-            this.userService.getLearners().subscribe(learners => {
-                this.applyPagination(learners);
-            });
-        }
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.loadLearners();
     }
 
     previousPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
-            this.userService.getLearners().subscribe(learners => {
+            this.userService.getStudents().subscribe(learners => {
                 this.applyPagination(learners);
             });
         }
@@ -111,7 +124,7 @@ export class LearnerListComponent implements OnInit {
     nextPage(): void {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.userService.getLearners().subscribe(learners => {
+            this.userService.getStudents().subscribe(learners => {
                 this.applyPagination(learners);
             });
         }

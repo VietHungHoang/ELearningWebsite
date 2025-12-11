@@ -32,7 +32,7 @@
     </div>
     <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
-            <table class="w-full min-w-[900px] bg-white dark:bg-[#0c1427]">
+            <table id="instructors-list-table" class="w-full bg-white dark:bg-[#0c1427]">
                 <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                     <tr>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
@@ -44,14 +44,15 @@
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
                             Email
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
-                            Phone
-                        </th>
+
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
                             Join Date
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Courses
+                            Rating
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Country
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
                             Action
@@ -59,24 +60,17 @@
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    @for (instructor of instructors; track instructor.id) {
+                    @for (instructor of paginatedInstructors; track instructor.id) {
                         <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">
-                                    #{{ instructor.id }}
+                                <span class="text-gray-500 dark:text-gray-400 font-medium" [title]="instructor.id">
+                                    #{{ instructor.id | truncate }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <div class="flex items-center">
-                                    <div class="rounded-full w-[40px]">
-                                        <img [src]="instructor.avatar" class="inline-block rounded-full" alt="user-image">
-                                    </div>
-                                    <div class="ltr:ml-[12px] rtl:mr-[12px]">
-                                        <span class="block font-medium">
-                                            {{ instructor.name }}
-                                        </span>
-                                    </div>
-                                </div>
+                                <span class="text-gray-600 dark:text-gray-300 font-medium">
+                                    {{ instructor.name }}
+                                </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
                                 <span class="text-gray-500 dark:text-gray-400">
@@ -85,17 +79,18 @@
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ instructor.phone }}
+                                    {{ instructor.joinDate | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </span>
+                            </td>
+
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ getRating(instructor) }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ instructor.joinDate }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ instructor.coursesCreated }}
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ getCountryCode(instructor) }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
@@ -120,9 +115,9 @@
                             </td>
                         </tr>
                     }
-                    @if (instructors.length === 0) {
+                    @if (paginatedInstructors.length === 0) {
                         <tr>
-                            <td [attr.colspan]="7" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                            <td [attr.colspan]="6" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
                                 No instructors found
                             </td>
                         </tr>
@@ -134,7 +129,8 @@
             <p class="!mb-0 text-sm">
                 {{ showingText }}
             </p>
-            <ol class="mt-[10px] sm:mt-0" *ngIf="totalPages > 1">
+            @if (totalPages > 1) {
+            <ol class="mt-[10px] sm:mt-0">
                 <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                     <button
                         type="button"
@@ -145,7 +141,8 @@
                         <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_left</i>
                     </button>
                 </li>
-                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0" *ngFor="let page of visiblePages">
+                @for (page of visiblePages; track page) {
+                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                     <button
                         type="button"
                         class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500"
@@ -154,6 +151,7 @@
                         {{ page }}
                     </button>
                 </li>
+                }
                 <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                     <button
                         type="button"
@@ -165,6 +163,7 @@
                     </button>
                 </li>
             </ol>
+            }
         </div>
     </div>
 </div>

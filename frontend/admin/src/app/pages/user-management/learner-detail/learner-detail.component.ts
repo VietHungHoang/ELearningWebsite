@@ -1,41 +1,52 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UserService, Learner } from '../../../services/user.service';
-import { CourseService, Course } from '../../../services/course.service';
+import { UserService, StudentDetail } from '../../../services/user.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
+import { LocaleUtilsService } from '../../../shared/utils';
 
 @Component({
     selector: 'app-learner-detail',
     standalone: true,
-    imports: [RouterLink, CommonModule, FormsModule],
-    providers: [UserService, CourseService],
+    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe],
+    providers: [UserService],
     templateUrl: './learner-detail.component.html',
     styleUrl: './learner-detail.component.scss'
 })
 export class LearnerDetailComponent implements OnInit, OnDestroy {
     learnerId: string = '';
-    learner: Learner | null = null;
-    enrolledCourses: Course[] = [];
+    learner: StudentDetail | null = null;
     isLoading = true;
     errorMessage = '';
     private destroy$ = new Subject<void>();
-    Object = Object; 
+    Object = Object;
 
     isEditing = false;
 
     editedValues: { [key: string]: any } = {};
 
+    // Country dropdown properties
+    countryOptions: any[] = [];
+    countrySearchText: string = '';
+    openPopover: string | null = null;
+
+    // Avatar upload properties
+    selectedAvatarFile: File | null = null;
+    avatarPreviewUrl: string | null = null;
+
     constructor(
         private route: ActivatedRoute,
         private router: Router,
         private userService: UserService,
-        private courseService: CourseService
+        private localeUtils: LocaleUtilsService
     ) {}
 
     ngOnInit() {
+        this.countryOptions = this.localeUtils.getAllCountries();
+
         this.route.paramMap
             .pipe(takeUntil(this.destroy$))
             .subscribe(params => {
@@ -56,72 +67,22 @@ export class LearnerDetailComponent implements OnInit, OnDestroy {
 
     loadLearner(): void {
         this.isLoading = true;
-        this.userService.getLearners()
+        this.userService.getStudentDetail(this.learnerId)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (learners) => {
-                    this.learner = learners.find(l => l.id === this.learnerId) || null;
-                    if (this.learner) {
-                        this.loadEnrolledCourses();
-                    } else {
+                next: (learner: StudentDetail | undefined) => {
+                    this.learner = learner || null;
+                    if (!this.learner) {
                         this.errorMessage = 'Learner not found';
-                        this.isLoading = false;
                     }
+                    this.isLoading = false;
                 },
-                error: (error) => {
+                error: (error: any) => {
                     console.error('Error loading learner:', error);
                     this.errorMessage = 'Failed to load learner details';
                     this.isLoading = false;
                 }
             });
-    }
-
-    loadEnrolledCourses(): void {
-        if (this.learner?.courses) {
-
-            this.enrolledCourses = this.learner.courses.map(course => ({
-                id: course.id,
-                name: course.title,
-                category: 'General', 
-                instructor: {
-                    name: 'Unknown Instructor', 
-                    avatar: 'images/users/default.jpg'
-                },
-                enrolled: course.studentsEnrolled,
-                startDate: 'N/A', 
-                lessons: 0, 
-                price: `$${course.price}`,
-                rating: course.rating, 
-                status: 'approved' as const
-            }));
-
-            this.courseService.getCourses()
-                .pipe(takeUntil(this.destroy$))
-                .subscribe({
-                    next: (courses) => {
-                        this.enrolledCourses = this.enrolledCourses.map(enrolledCourse => {
-                            const fullCourse = courses.find(c => c.id === enrolledCourse.id);
-                            if (fullCourse) {
-                                return {
-                                    ...enrolledCourse,
-                                    category: fullCourse.category,
-                                    instructor: fullCourse.instructor,
-                                    startDate: fullCourse.startDate,
-                                    lessons: fullCourse.lessons
-                                };
-                            }
-                            return enrolledCourse;
-                        });
-                        this.isLoading = false;
-                    },
-                    error: () => {
-
-                        this.isLoading = false;
-                    }
-                });
-        } else {
-            this.isLoading = false;
-        }
     }
 
     toggleEditMode(): void {
@@ -136,26 +97,42 @@ export class LearnerDetailComponent implements OnInit, OnDestroy {
         if (!this.learner) return;
 
         this.editedValues = {
+            fullname: this.learner.fullname,
+            avatar: this.learner.avatar || '',
             email: this.learner.email,
             phone: this.learner.phone,
+            bio: this.learner.bio,
+            dateOfBirth: this.learner.dateOfBirth,
+            address: this.learner.address,
+            city: this.learner.city,
+            country: this.learner.country || '',
             joinDate: this.learner.joinDate,
-            level: this.learner.level || '',
-            learningGoal: this.learner.learningGoal || '',
-            languages: this.learner.languages?.join(', ') || '',
-            certificates: this.learner.certificates?.join(', ') || ''
+            learningGoals: this.learner.learningGoals,
+            strengths: this.learner.strengths,
+            weaknesses: this.learner.weaknesses
         };
     }
 
     saveAllFields(): void {
         if (!this.learner) return;
 
+        this.learner.fullname = this.editedValues['fullname'];
+        this.learner.avatar = this.avatarPreviewUrl || this.learner.avatar;
         this.learner.email = this.editedValues['email'];
         this.learner.phone = this.editedValues['phone'];
+        this.learner.bio = this.editedValues['bio'];
+        this.learner.dateOfBirth = this.editedValues['dateOfBirth'];
+        this.learner.address = this.editedValues['address'];
+        this.learner.city = this.editedValues['city'];
+        this.learner.country = this.editedValues['country'];
         this.learner.joinDate = this.editedValues['joinDate'];
-        this.learner.level = this.editedValues['level'];
-        this.learner.learningGoal = this.editedValues['learningGoal'];
-        this.learner.languages = this.editedValues['languages'].split(',').map((lang: string) => lang.trim()).filter((lang: string) => lang.length > 0);
-        this.learner.certificates = this.editedValues['certificates'].split(',').map((cert: string) => cert.trim()).filter((cert: string) => cert.length > 0);
+        this.learner.learningGoals = this.editedValues['learningGoals'];
+        this.learner.strengths = this.editedValues['strengths'];
+        this.learner.weaknesses = this.editedValues['weaknesses'];
+
+        // Reset avatar upload state
+        this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = null;
 
         this.isEditing = false;
     }
@@ -163,5 +140,79 @@ export class LearnerDetailComponent implements OnInit, OnDestroy {
     cancelEdit(): void {
         this.isEditing = false;
         this.editedValues = {};
+        // Reset avatar upload state
+        this.selectedAvatarFile = null;
+        this.avatarPreviewUrl = null;
+    }
+
+    // Avatar upload methods
+    onAvatarSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+
+        if (file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                return;
+            }
+
+            this.selectedAvatarFile = file;
+
+            // Create preview URL
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.avatarPreviewUrl = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Country dropdown methods
+    getCountryName(countryCode: string | undefined): string {
+        if (!countryCode || countryCode.trim() === '') return 'Not Specified';
+        const country = this.countryOptions.find(c => c.code === countryCode);
+        return country ? country.name : countryCode;
+    }
+
+    getFilteredCountries(): any[] {
+        if (!this.countrySearchText.trim()) {
+            return this.countryOptions;
+        }
+        const searchLower = this.countrySearchText.toLowerCase();
+        return this.countryOptions.filter((country: any) =>
+            country.code.toLowerCase().includes(searchLower) ||
+            country.name.toLowerCase().includes(searchLower)
+        );
+    }
+
+    selectCountry(code: string): void {
+        this.editedValues['country'] = code;
+        this.countrySearchText = '';
+        this.closePopover();
+    }
+
+    openArrayPopover(popoverId: string, data: any[]): void {
+        this.openPopover = popoverId;
+        this.countrySearchText = '';
+    }
+
+    closePopover(): void {
+        this.openPopover = null;
+        this.countrySearchText = '';
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: Event): void {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.popover-container') && !target.closest('.popover-trigger')) {
+            this.closePopover();
+        }
     }
 }

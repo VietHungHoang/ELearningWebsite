@@ -2,40 +2,63 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink, Router } from '@angular/router';
-import { UserService, Instructor } from '../../../services/user.service';
+import { UserService, Tutor } from '../../../services/user.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { TruncatePipe } from '../../../shared/pipes';
+import { LocaleUtilsService } from '../../../shared/utils';
 
 @Component({
     selector: 'app-instructor-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent],
+    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe],
     templateUrl: './instructor-list.component.html',
     styleUrl: './instructor-list.component.scss'
 })
 export class InstructorListComponent implements OnInit {
-    instructors: Instructor[] = [];
-    selectedInstructor: Instructor | null = null;
+    instructors: Tutor[] = []; // Full list từ API (backup)
+    allInstructors: Tutor[] = []; // Original data from API để restore sau search
+    selectedInstructor: Tutor | null = null;
     showDetailModal = false;
     showDeleteDialog = false;
-    instructorToDelete: Instructor | null = null;
+    instructorToDelete: Tutor | null = null;
 
-    itemsPerPage = 5;
+    itemsPerPage = 3;
     currentPage = 1;
     totalInstructors = 0;
-    paginatedInstructors: Instructor[] = [];
+    paginatedInstructors: Tutor[] = [];
+    isLoading = false;
 
-    constructor(private userService: UserService, private router: Router) {}
+    constructor(private userService: UserService, private router: Router, private localeUtils: LocaleUtilsService) {}
 
     ngOnInit(): void {
-        this.userService.getInstructors().subscribe(instructors => {
-            this.instructors = instructors;
-            this.totalInstructors = instructors.length;
-            this.applyPagination(instructors);
+        this.loadInstructors();
+    }
+
+    /**
+     * Load instructors from API (with fallback to mock data)
+     * Gọi API lần đầu và cache dữ liệu cho phân trang
+     */
+    loadInstructors(): void {
+        this.isLoading = true;
+        this.userService.getTutor().subscribe({
+            next: (instructors) => {
+                this.allInstructors = instructors; // Lưu backup
+                this.instructors = instructors; // Dùng cho phân trang hiện tại
+                this.totalInstructors = instructors.length;
+                this.currentPage = 1; // Reset trang về 1
+                this.applyPagination(instructors);
+                this.isLoading = false;
+                console.log('[InstructorList] Data loaded from API:', instructors.length, 'items');
+            },
+            error: (error: any) => {
+                console.error('Error loading instructors:', error);
+                this.isLoading = false;
+            }
         });
     }
 
-    viewDetail(instructor: Instructor): void {
+    viewDetail(instructor: Tutor): void {
         this.router.navigate(['/dashboard/user-management/instructor-detail', instructor.id.toString()]);
     }
 
@@ -44,7 +67,7 @@ export class InstructorListComponent implements OnInit {
         this.selectedInstructor = null;
     }
 
-    openDeleteDialog(instructor: Instructor): void {
+    openDeleteDialog(instructor: Tutor): void {
         this.instructorToDelete = instructor;
         this.showDeleteDialog = true;
     }
@@ -63,28 +86,52 @@ export class InstructorListComponent implements OnInit {
     }
 
     onSearchInstructors(searchTerm: string): void {
+        this.currentPage = 1;
         if (searchTerm.trim()) {
-            this.userService.searchInstructors(searchTerm).subscribe(filteredInstructors => {
-                this.totalInstructors = filteredInstructors.length;
-                this.currentPage = 1;
-                this.applyPagination(filteredInstructors);
+            // Call search method with search term
+            this.userService.searchInstructors(searchTerm).subscribe({
+                next: (searchResults) => {
+                    this.instructors = searchResults; // Update instructors cho pagination
+                    this.totalInstructors = searchResults.length;
+                    this.applyPagination(searchResults); // Apply pagination cho search results
+                    console.log('[InstructorList] Search results:', searchResults.length, 'items');
+                },
+                error: (error) => console.error('Error searching instructors:', error)
             });
         } else {
-
-            this.userService.getInstructors().subscribe(instructors => {
-                this.instructors = instructors;
-                this.totalInstructors = instructors.length;
-                this.currentPage = 1;
-                this.applyPagination(instructors);
-            });
+            // Restore original data từ backup
+            this.instructors = this.allInstructors;
+            this.totalInstructors = this.allInstructors.length;
+            this.applyPagination(this.allInstructors);
+            console.log('[InstructorList] Cleared search, restored original data');
         }
     }
 
-    private applyPagination(allInstructors: Instructor[]): void {
+    /**
+     * Get the rating of an instructor
+     */
+    getRating(instructor: Tutor): number {
+        return instructor.rating || 0;
+    }
+
+    /**
+     * Get the country code of an instructor
+     */
+    getCountryCode(instructor: Tutor): string {
+        if (!instructor.countryCode) return 'N/A';
+        try {
+            const country = this.localeUtils.getCountryByCode(instructor.countryCode);
+            return country ? country.name.common : instructor.countryCode;
+        } catch (error) {
+            return instructor.countryCode || 'N/A';
+        }
+    }
+
+    private applyPagination(allInstructors: Tutor[]): void {
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
         this.paginatedInstructors = allInstructors.slice(startIndex, endIndex);
-        this.instructors = this.paginatedInstructors;
+        // NOT: this.instructors = this.paginatedInstructors; - Keep full list in instructors!
     }
 
     get totalPages(): number {
@@ -98,29 +145,25 @@ export class InstructorListComponent implements OnInit {
     }
 
     goToPage(page: number): void {
-        if (page >= 1 && page <= this.totalPages) {
-            this.currentPage = page;
-            this.userService.getInstructors().subscribe(instructors => {
-                this.applyPagination(instructors);
-            });
-        }
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyPagination(this.instructors);
+        console.log('[InstructorList] Navigated to page', page);
     }
 
     previousPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
-            this.userService.getInstructors().subscribe(instructors => {
-                this.applyPagination(instructors);
-            });
+            this.applyPagination(this.instructors);
+            console.log('[InstructorList] Previous page:', this.currentPage);
         }
     }
 
     nextPage(): void {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.userService.getInstructors().subscribe(instructors => {
-                this.applyPagination(instructors);
-            });
+            this.applyPagination(this.instructors);
+            console.log('[InstructorList] Next page:', this.currentPage);
         }
     }
 

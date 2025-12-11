@@ -3,11 +3,13 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface Voucher {
   id: string;
+  voucherId?: string;
   code: string;
   description?: string;
   createdBy: 'Admin' | 'Instructor';
   creatorName: string;
   productType: string;
+  targetAudience?: 'all' | 'top-spenders' | 'new-students' | 'no-spending-1month'; // New field: target student segment
   value: string;
   scope: string;
   usage: string;
@@ -31,10 +33,12 @@ export class VoucherService {
   private vouchersSubject = new BehaviorSubject<Voucher[]>([
     {
       id: '1',
+      voucherId: 'VOI-2025-001',
       code: 'BLACKFRIDAY',
       createdBy: 'Admin',
       creatorName: 'Admin',
       productType: 'All Products',
+      targetAudience: 'all',
       value: '30% off (Max 200k)',
       scope: 'All Products',
       usage: '150/500',
@@ -43,10 +47,12 @@ export class VoucherService {
     },
     {
       id: '2',
+      voucherId: 'VOI-2025-002',
       code: 'JSDETHA',
       createdBy: 'Instructor',
       creatorName: 'Inst: A.Nguyen',
-      productType: 'Courses',
+      productType: 'Classes',
+      targetAudience: 'top-spenders',
       value: '50% off (Max 500k)',
       scope: 'Instructor Package',
       usage: '25/1000',
@@ -55,10 +61,12 @@ export class VoucherService {
     },
     {
       id: '3',
+      voucherId: 'VOI-2025-003',
       code: 'WELCOME10',
       createdBy: 'Admin',
       creatorName: 'Admin',
-      productType: 'Courses',
+      productType: 'Classes',
+      targetAudience: 'new-students',
       value: '100,000 VND off',
       scope: 'Category: Marketing',
       usage: '5/1000',
@@ -67,10 +75,12 @@ export class VoucherService {
     },
     {
       id: '4',
+      voucherId: 'VOI-2025-004',
       code: 'TUTOR_B',
       createdBy: 'Instructor',
       creatorName: 'Inst: B.Tran',
       productType: '1-on-1 Classes',
+      targetAudience: 'no-spending-1month',
       value: '200,000 VND off',
       scope: 'Instructor Package',
       usage: '0/500',
@@ -98,11 +108,11 @@ export class VoucherService {
           id: Date.now().toString(),
           code: voucherData.code || '',
           description: voucherData.description || '',
-          createdBy: 'Admin', 
+          createdBy: 'Admin',
           creatorName: 'Admin',
           productType: voucherData.productType || 'course',
           value: this.formatVoucherValue(voucherData),
-          scope: 'All Products', 
+          scope: 'All Products',
           usage: '0/' + (voucherData.totalUsageLimit || 1000),
           date: this.formatDateRange(voucherData.startDate, voucherData.endDate, voucherData.isUnlimited),
           status: 'active',

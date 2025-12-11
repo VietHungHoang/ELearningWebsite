@@ -16,6 +16,7 @@ export class ClassDetailsComponent implements OnInit {
   financialReport: ClassFinancialReport | null = null;
   loading = true;
   error: string | null = null;
+  weekDays: any[] = [];
 
   constructor(
     private classService: ClassService,
@@ -62,8 +63,59 @@ export class ClassDetailsComponent implements OnInit {
   loadFinancialReport(classId: string): void {
     this.classService.calculateFinancialReport(classId).subscribe(report => {
       this.financialReport = report;
+      this.generateWeeklySchedule();
       this.loading = false;
     });
+  }
+
+  private generateWeeklySchedule(): void {
+    if (!this.groupClass) return;
+
+    const classDate = new Date(this.groupClass.start_datetime);
+    const weekStart = this.getMonday(classDate);
+    const classDay = classDate.getDay();
+
+    this.weekDays = [];
+
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(weekStart);
+      day.setDate(day.getDate() + i);
+
+      const dayName = this.formatDayName(day.getDay());
+      const dateStr = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric'
+      }).format(day);
+
+      const hasClass = day.getDay() === classDay;
+      const time = hasClass ? new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }).format(new Date(this.groupClass.start_datetime)) : '';
+
+      this.weekDays.push({
+        dayIndex: i,
+        dayName: dayName,
+        date: dateStr,
+        hasClass: hasClass,
+        time: time
+      });
+    }
+  }
+
+  private getMonday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(d.setDate(diff));
+    monday.setHours(0, 0, 0, 0);
+    return monday;
+  }
+
+  private formatDayName(dayIndex: number): string {
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    return dayNames[dayIndex];
   }
 
   getStatusText(status: string): string {

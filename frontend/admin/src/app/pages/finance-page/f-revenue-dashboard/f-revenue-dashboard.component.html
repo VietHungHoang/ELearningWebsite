@@ -56,47 +56,68 @@
     </ol>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-[20px] mb-[25px]">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[20px] mb-[25px]">
 
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+    <!-- Tiền Vào từ Admin Account -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md border-l-4 border-l-success-500">
         <div class="mb-[12px]">
-            <h6 class="text-black dark:text-white font-medium">Gross Revenue</h6>
+            <div class="flex items-center justify-between">
+                <h6 class="text-black dark:text-white font-medium">Admin Account Income</h6>
+                <i class="ri-arrow-down-line text-success-500 text-xl"></i>
+            </div>
         </div>
-        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.grossRevenue) }}</p>
-        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Total from all orders</p>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.adminAccountIncome) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">From learner payments</p>
     </div>
 
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+    <!-- Tiền Ra cho Giảng Viên -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md border-l-4 border-l-warning-500">
         <div class="mb-[12px]">
-            <h6 class="text-black dark:text-white font-medium">Gateway Fees</h6>
+            <div class="flex items-center justify-between">
+                <h6 class="text-black dark:text-white font-medium">Admin Account Payout</h6>
+                <i class="ri-arrow-up-line text-warning-500 text-xl"></i>
+            </div>
         </div>
-        <p class="!mb-0 text-[28px] font-bold text-red-500">{{ formatCurrency(kpis.gatewayFees) }}</p>
-        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Payment processing</p>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.adminAccountPayout) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">To instructors (Fixed: {{kpis.payoutFixedDate}}th)</p>
     </div>
 
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+    <!-- Peak Transaction -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md border-l-4 border-l-primary-500">
         <div class="mb-[12px]">
-            <h6 class="text-black dark:text-white font-medium">Instructor Earnings</h6>
+            <h6 class="text-black dark:text-white font-medium">Peak Transaction</h6>
         </div>
-        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.instructorEarnings) }}</p>
-        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Payouts owed</p>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ formatCurrency(kpis.peakTransactionAmount) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Highest payment amount</p>
     </div>
 
+    <!-- Total Transactions -->
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
         <div class="mb-[12px]">
-            <h6 class="text-black dark:text-white font-medium">Platform Profit</h6>
+            <h6 class="text-black dark:text-white font-medium">Total Transactions</h6>
         </div>
-        <p class="!mb-0 text-[28px] font-bold text-success-500">{{ formatCurrency(kpis.platformProfit) }}</p>
-        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Revenue - Payouts</p>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ kpis.totalTransactions }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Completed payments</p>
     </div>
 
+    <!-- Total Payouts -->
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
         <div class="mb-[12px]">
-            <h6 class="text-black dark:text-white font-medium">Total Orders</h6>
+            <h6 class="text-black dark:text-white font-medium">Total Payouts</h6>
         </div>
-        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ kpis.totalOrders }}</p>
-        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Completed orders</p>
+        <p class="!mb-0 text-[28px] font-bold text-black dark:text-white">{{ kpis.totalPayouts }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Instructor payments</p>
     </div>
+
+    <!-- Net Balance -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md border-l-4 border-l-info-500">
+        <div class="mb-[12px]">
+            <h6 class="text-black dark:text-white font-medium">Net Balance</h6>
+        </div>
+        <p class="!mb-0 text-[28px] font-bold text-info-500">{{ formatCurrency(kpis.adminAccountIncome - kpis.adminAccountPayout) }}</p>
+        <p class="!mb-0 text-xs text-gray-500 mt-[8px]">Income - Payout</p>
+    </div>
+
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-[25px] mb-[25px]">

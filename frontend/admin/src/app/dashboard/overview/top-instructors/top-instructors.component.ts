@@ -1,15 +1,8 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface Instructor {
-    rank: number;
-    name: string;
-    rating: number;
-    revenue: string;
-    hours: number;
-    students: number;
-    image: string;
-}
+import { Subscription } from 'rxjs';
+import { TopInstructor, RankingCriteria, TimePeriod } from '../../../types/dashboard';
+import { DashboardService } from '../../../services/dashboard.service';
 
 @Component({
     selector: 'app-top-instructors',
@@ -17,80 +10,102 @@ interface Instructor {
     templateUrl: './top-instructors.component.html',
     styleUrl: './top-instructors.component.scss'
 })
-export class TopInstructorsComponent {
+export class TopInstructorsComponent implements OnInit, OnDestroy {
+    @Input() instructors?: TopInstructor[];
 
     isCardHeaderOpen = false;
+    isTimePeriodOpen = false;
+    rankingCriteria: RankingCriteria = 'revenue';
+    rankingLabel = 'Revenue';
+    timePeriod: TimePeriod = 'month';
+    timePeriodLabel = 'This Month';
 
     // Pagination properties
     currentPage = 1;
     itemsPerPage = 5;
     totalItems = 0;
 
-    instructors: Instructor[] = [
-        {
-            rank: 1,
-            name: 'Nguyễn Văn A',
-            rating: 4.9,
-            revenue: '150.000.000đ',
-            hours: 150,
-            students: 20,
-            image: 'images/users/user13.jpg'
-        },
-        {
-            rank: 2,
-            name: 'Trần Thị B',
-            rating: 4.8,
-            revenue: '120.000.000đ',
-            hours: 100,
-            students: 35,
-            image: 'images/users/user16.jpg'
-        },
-        {
-            rank: 3,
-            name: 'Lê Văn C',
-            rating: 4.5,
-            revenue: '90.000.000đ',
-            hours: 180,
-            students: 10,
-            image: 'images/users/user17.jpg'
-        },
-        {
-            rank: 4,
-            name: 'Phạm Thị D',
-            rating: 4.2,
-            revenue: '85.000.000đ',
-            hours: 95,
-            students: 15,
-            image: 'images/users/user18.jpg'
-        },
-        {
-            rank: 5,
-            name: 'Hoàng Văn E',
-            rating: 4.0,
-            revenue: '75.000.000đ',
-            hours: 80,
-            students: 12,
-            image: 'images/users/user19.jpg'
-        },
-        {
-            rank: 6,
-            name: 'Nguyễn Thị F',
-            rating: 3.8,
-            revenue: '65.000.000đ',
-            hours: 70,
-            students: 8,
-            image: 'images/users/user20.jpg'
-        }
-    ];
+    instructorsData: TopInstructor[] = [];
+    private subscriptions: Subscription[] = [];
 
-    constructor() {
-        this.totalItems = this.instructors.length;
+    constructor(private dashboardService: DashboardService) {}
+
+    ngOnInit(): void {
+        // If instructors provided via Input, use them
+        if (this.instructors && this.instructors.length > 0) {
+            this.instructorsData = this.instructors;
+            this.totalItems = this.instructorsData.length;
+        } else {
+            // Otherwise, load from service
+            this.loadInstructors();
+        }
     }
 
-    get paginatedInstructors(): Instructor[] {
+    ngOnDestroy() {
+        this.subscriptions.forEach(sub => sub.unsubscribe());
+    }
+
+    private loadInstructors() {
+        const sub = this.dashboardService.getTopInstructorsFull(
+            this.rankingCriteria,
+            this.timePeriod,
+            10
+        ).subscribe(instructors => {
+            this.instructorsData = instructors;
+            this.totalItems = instructors.length;
+            this.sortAndRankInstructors();
+        });
+        this.subscriptions.push(sub);
+    }
+
+    sortAndRankInstructors(): void {
+        let sorted = [...this.instructorsData];
+
+        switch (this.rankingCriteria) {
+            case 'revenue':
+                sorted.sort((a, b) => b.revenue - a.revenue);
+                break;
+            case 'rating':
+                sorted.sort((a, b) => b.rating - a.rating);
+                break;
+            case 'bookings':
+                sorted.sort((a, b) => b.totalBookings - a.totalBookings);
+                break;
+        }
+
+        sorted.forEach((instructor, index) => {
+            (instructor as any).rank = index + 1;
+        });
+
+        this.instructorsData = sorted;
+    }
+
+    changeRankingCriteria(criteria: RankingCriteria, label: string): void {
+        this.rankingCriteria = criteria;
+        this.rankingLabel = label;
+        this.loadInstructors(); // Reload data with new criteria
+        this.currentPage = 1;
+        this.isCardHeaderOpen = false;
+    }
+
+    toggleTimePeriodMenu(): void {
+        this.isTimePeriodOpen = !this.isTimePeriodOpen;
+        if (this.isTimePeriodOpen) {
+            this.isCardHeaderOpen = false;
+        }
+    }
+
+    changeTimePeriod(period: TimePeriod, label: string): void {
+        this.timePeriod = period;
+        this.timePeriodLabel = label;
+        this.isTimePeriodOpen = false;
+        this.loadInstructors(); // Reload data with new time period
+    }
+
+    get paginatedInstructors(): TopInstructor[] {
         const startIndex = (this.currentPage - 1) * this.itemsPerPage;
         const endIndex = startIndex + this.itemsPerPage;
-        return this.instructors.slice(startIndex, endIndex);
+        return this.instructorsData.slice(startIndex, endIndex);
     }
 
     get totalPages(): number {
@@ -126,6 +141,9 @@ export class TopInstructorsComponent {
 
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;
+        if (this.isCardHeaderOpen) {
+            this.isTimePeriodOpen = false;
+        }
     }
 
     @HostListener('document:click', ['$event'])
@@ -133,6 +151,7 @@ export class TopInstructorsComponent {
         const target = event.target as HTMLElement;
         if (!target.closest('.trezo-card-dropdown')) {
             this.isCardHeaderOpen = false;
+            this.isTimePeriodOpen = false;
         }
     }
 

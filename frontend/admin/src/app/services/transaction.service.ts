@@ -1,59 +1,118 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { CourseService } from './course.service';
+import { ClassService } from './class.service';
 import { UserService } from './user.service';
 
-export type OrderStatus = 'completed' | 'failed';
-export type PaymentMethod = 'momo' | 'vnpay';
-export type OrderType = 'course' | '1 and 1' | '1 and n';
+// Payment statuses for learner payment
+export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+export type PaymentMethod = 'momo' | 'vnpay' | 'banking';
+export type ClassType = '1 and 1' | '1 and n';
 
-export interface OrderCourseItem {
-    courseId: string;
-    courseName: string;
-    instructorId: string;
-    instructorName: string;
-    price: number;
-    commission: number;
-}
+// Payout status - monthly release to tutor
+export type PayoutStatus = 'pending' | 'approved' | 'processing' | 'paid' | 'cancelled';
 
-export interface Order {
-    id: string; 
-    orderNumber: string; 
-    learnerName: string; 
-    learnerEmail: string; 
-    learnerAvatar?: string; 
-    type: OrderType; 
-    coursesIds?: string[]; 
-    courses?: OrderCourseItem[]; 
-    courseName?: string; 
-    instructorId?: string; 
-    instructorName?: string; 
-    totalAmount: number; 
-    currency: string; 
-    paymentMethod: PaymentMethod; 
-    status: OrderStatus; 
-    createdDate: string; 
-    completedDate?: string; 
-    transactionId?: string; 
-    notes?: string; 
-    instructorCommissionPercentage?: number; 
-}
-
-export interface InstructorPayout {
+// Tutor wallet ledger - Auto-update when payout is paid to tutor's bank
+// This is just a record/ledger, not an actual wallet (money goes to tutor's bank account)
+export interface TutorWalletLedger {
     id: string;
+    ledgerId: string;  // e.g., LEDGER-2025-NOV-001
+    tutorId: string;
+    tutorName: string;
+    type: 'credit' | 'debit';  // 'credit' = payout received, 'debit' = tutor withdrawal
+    amount: number;  // VND
+    relatedPayoutId: string;  // Reference to MonthlyPayout that triggered this
+    description: string;  // e.g., "November 2025 Payout"
+    bankTransferInfo?: {
+        bankName: string;
+        accountNumber: string;
+        transferDate: string;  // When transferred to tutor bank
+        transferId: string;    // Bank transaction ID
+    };
+    createdDate: string;  // When ledger entry is created (after payout.status = 'paid')
+    status: 'recorded';   // Always 'recorded' once payout is paid
+}
+
+// Session/Class booking that generates payment
+export interface TutoringSession {
+    id: string;
+    classId: string;
+    className: string;
     instructorId: string;
     instructorName: string;
-    orderId: string;
-    orderNumber: string;
-    payableAmount: number;
-    payoutPercentage: number;
-    status: 'pending' | 'paid' | 'cancelled';
+    learnerIds: string[];  // Can be 1 (1-1) or multiple (group)
+    classType: ClassType;
+    startTime: string;
+    endTime: string;
+    durationMinutes: number;
+    ratePerHour: number;   // VND/hour from instructor
+    totalAmount: number;   // Calculated from duration + rate
+    platformFeePercentage: number;  // Admin's cut (20%, 30%, etc)
+}
+
+// Payment record - Learner pays
+export interface Payment {
+    id: string;
+    paymentNumber: string;
+    learnerName: string;
+    learnerEmail: string;
+    learnerAvatar?: string;
+    sessionId: string;
+    session?: TutoringSession;
+    totalAmount: number;  // Full amount learner pays
+    currency: string;  // VND
+    paymentMethod: PaymentMethod;
+    status: PaymentStatus;  // 'pending', 'completed', 'failed'
     createdDate: string;
-    paidDate?: string;
+    completedDate?: string;
+    transactionId?: string;  // Payment gateway transaction ID
+    notes?: string;
+
+    // After payment completes, these are set
+    adminHoldAmount?: number;  // Amount held in admin account
+    platformFeeAmount?: number;  // Platform fee (percentage-based)
+    instructorEarnings?: number; // What instructor will get (totalAmount - platformFee)
+}
+
+// Monthly payout - Admin pays tutor from held funds
+// Flow: pending → approved → processing → paid
+// When status changes to 'paid': money transfers to tutor's bank → tutor wallet ledger auto-updates
+export interface MonthlyPayout {
+    id: string;
+    payoutNumber: string;
+    tutorId: string;
+    tutorName: string;
+    payoutMonth: string;  // YYYY-MM format
+    totalEarnings: number;  // Sum of all instructor earnings from payments that month
+    totalSessions: number;  // Count of completed sessions
+    totalHours: number;  // Total hours delivered
+    status: PayoutStatus;  // 'pending' → 'approved' → 'processing' → 'paid'
+
+    // Bank transfer info (filled when admin initiates transfer)
+    bankAccountInfo: {
+        accountNumber: string;
+        bankName: string;
+        accountHolder: string;
+    };
+    paymentMethod: PaymentMethod;  // How transfer happens (banking, momo, vnpay)
+    relatedPaymentIds: string[];  // List of payment IDs included in this payout
+
+    // Timestamps
+    createdDate: string;  // When payout record created (end of month)
+    approvedDate?: string;  // When admin approved
+    paidDate?: string;  // When transferred to tutor's bank account
+
+    // Transfer confirmation
+    bankTransferInfo?: {
+        transferId: string;  // Bank transaction ID
+        transferDate: string;  // When money arrived at tutor's bank
+        confirmationCode: string;  // Bank confirmation
+    };
+
+    notes?: string;
 }
 
 export interface TransactionFilters {
-    status?: OrderStatus;
+    status?: PaymentStatus;
     paymentMethod?: PaymentMethod;
     startDate?: string;
     endDate?: string;
@@ -68,12 +127,12 @@ export interface PaginationMeta {
 }
 
 export interface TransactionListResponse {
-    data: Order[];
+    data: Payment[];
     pagination: PaginationMeta;
     summary?: {
         totalRevenue: number;
-        completedOrders: number;
-        failedOrders: number;
+        completedPayments: number;
+        failedPayments: number;
     };
 }
 
@@ -81,621 +140,913 @@ export interface TransactionListResponse {
     providedIn: 'root'
 })
 export class TransactionService {
-    private ordersSubject = new BehaviorSubject<Order[]>([]);
-    public orders$ = this.ordersSubject.asObservable();
+    private paymentsSubject = new BehaviorSubject<Payment[]>([]);
+    public payments$ = this.paymentsSubject.asObservable();
 
-    private payoutsSubject = new BehaviorSubject<InstructorPayout[]>([]);
+    private payoutsSubject = new BehaviorSubject<MonthlyPayout[]>([]);
     public payouts$ = this.payoutsSubject.asObservable();
+
+    private walletLedgerSubject = new BehaviorSubject<TutorWalletLedger[]>([]);
+    public walletLedger$ = this.walletLedgerSubject.asObservable();
 
     private currentFiltersSubject = new BehaviorSubject<TransactionFilters>({});
 
     constructor(
-        private courseService: CourseService,
+        private classService: ClassService,
         private userService: UserService
     ) {
         this.loadMockData();
     }
 
     private loadMockData(): void {
-        const mockOrders: Order[] = [
-
+        const mockPayments: Payment[] = [
             {
-                id: '12345',
-                orderNumber: 'ORD-2025-00001',
+                id: 'pay_001',
+                paymentNumber: 'PAY-2025-NOV-001',
                 learnerName: 'John Smith',
                 learnerEmail: 'john.smith@example.com',
                 learnerAvatar: 'images/users/user1.jpg',
-                type: 'course',
-                coursesIds: ['c1'],
-                courseName: 'JavaScript Essentials',
-                courses: [
-                    { courseId: 'c1', courseName: 'JavaScript Essentials', instructorId: '1', instructorName: 'Đặng Minh Tuấn', price: 1000000, commission: 250000 }
-                ],
+                sessionId: 'session_2025_nov_05_001',
+                session: {
+                    id: 'session_2025_nov_05_001',
+                    classId: 'class_001',
+                    className: 'React Advanced - 1-1',
+                    instructorId: 'tutor_001',
+                    instructorName: 'Đặng Minh Tuấn',
+                    learnerIds: ['learner_001'],
+                    classType: '1 and 1',
+                    startTime: '2025-11-05T09:00:00',
+                    endTime: '2025-11-05T11:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 500000,
+                    totalAmount: 1000000,
+                    platformFeePercentage: 20
+                },
                 totalAmount: 1000000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '05 Nov 2025',
-                completedDate: '05 Nov 2025',
+                createdDate: '2025-11-05',
+                completedDate: '2025-11-05',
                 transactionId: 'TXN-MOMO-12345',
-                instructorId: '1',
-                instructorName: 'Đặng Minh Tuấn',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 1000000,
+                platformFeeAmount: 200000,
+                instructorEarnings: 800000
             },
             {
-                id: '12346',
-                orderNumber: 'ORD-2025-00002',
+                id: 'pay_002',
+                paymentNumber: 'PAY-2025-NOV-002',
                 learnerName: 'Sarah Johnson',
                 learnerEmail: 'sarah.johnson@example.com',
                 learnerAvatar: 'images/users/user2.jpg',
-                type: '1 and 1',
-                coursesIds: ['c2'],
-                courseName: 'TypeScript Pro',
-                courses: [
-                    { courseId: 'c2', courseName: 'TypeScript Pro', instructorId: '1', instructorName: 'Đặng Minh Tuấn', price: 1000000, commission: 250000 }
-                ],
+                sessionId: 'session_2025_nov_04_001',
+                session: {
+                    id: 'session_2025_nov_04_001',
+                    classId: 'class_002',
+                    className: 'TypeScript Pro - 1-1',
+                    instructorId: 'tutor_001',
+                    instructorName: 'Đặng Minh Tuấn',
+                    learnerIds: ['learner_002'],
+                    classType: '1 and 1',
+                    startTime: '2025-11-04T14:00:00',
+                    endTime: '2025-11-04T16:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 500000,
+                    totalAmount: 1000000,
+                    platformFeePercentage: 20
+                },
                 totalAmount: 1000000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '04 Nov 2025',
-                completedDate: '04 Nov 2025',
+                createdDate: '2025-11-04',
+                completedDate: '2025-11-04',
                 transactionId: 'TXN-VNPAY-12346',
-                instructorId: '1',
-                instructorName: 'Đặng Minh Tuấn',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 1000000,
+                platformFeeAmount: 200000,
+                instructorEarnings: 800000
             },
             {
-                id: '12347',
-                orderNumber: 'ORD-2025-00003',
+                id: 'pay_003',
+                paymentNumber: 'PAY-2025-NOV-003',
                 learnerName: 'Michael Chen',
                 learnerEmail: 'michael.chen@example.com',
                 learnerAvatar: 'images/users/user3.jpg',
-                type: '1 and n',
-                coursesIds: ['c3'],
-                courseName: 'Python Fundamentals',
-                courses: [
-                    { courseId: 'c3', courseName: 'Python Fundamentals', instructorId: '1', instructorName: 'Đặng Minh Tuấn', price: 1100000, commission: 275000 }
-                ],
-                totalAmount: 1100000,
+                sessionId: 'session_2025_nov_03_001',
+                session: {
+                    id: 'session_2025_nov_03_001',
+                    classId: 'class_003',
+                    className: 'Python Fundamentals - Group',
+                    instructorId: 'tutor_002',
+                    instructorName: 'Nguyễn Thị Hương',
+                    learnerIds: ['learner_003', 'learner_004', 'learner_005'],
+                    classType: '1 and n',
+                    startTime: '2025-11-03T10:00:00',
+                    endTime: '2025-11-03T12:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 400000,
+                    totalAmount: 800000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 800000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '03 Nov 2025',
-                completedDate: '03 Nov 2025',
+                createdDate: '2025-11-03',
+                completedDate: '2025-11-03',
                 transactionId: 'TXN-MOMO-12347',
-                instructorId: '1',
-                instructorName: 'Đặng Minh Tuấn',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 800000,
+                platformFeeAmount: 160000,
+                instructorEarnings: 640000
             },
             {
-                id: '12348',
-                orderNumber: 'ORD-2025-00004',
+                id: 'pay_004',
+                paymentNumber: 'PAY-2025-NOV-004',
                 learnerName: 'Emily Davis',
                 learnerEmail: 'emily.davis@example.com',
                 learnerAvatar: 'images/users/user4.jpg',
-                type: 'course',
-                coursesIds: ['c7'],
-                courseName: 'Vue.js Mastery',
-                courses: [
-                    { courseId: 'c7', courseName: 'Vue.js Mastery', instructorId: '1', instructorName: 'Đặng Minh Tuấn', price: 950000, commission: 237500 }
-                ],
-                totalAmount: 950000,
+                sessionId: 'session_2025_nov_02_001',
+                session: {
+                    id: 'session_2025_nov_02_001',
+                    classId: 'class_004',
+                    className: 'Vue.js Mastery - 1-1',
+                    instructorId: 'tutor_003',
+                    instructorName: 'Trần Văn A',
+                    learnerIds: ['learner_006'],
+                    classType: '1 and 1',
+                    startTime: '2025-11-02T09:00:00',
+                    endTime: '2025-11-02T10:00:00',
+                    durationMinutes: 60,
+                    ratePerHour: 400000,
+                    totalAmount: 400000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 400000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '02 Nov 2025',
-                completedDate: '02 Nov 2025',
+                createdDate: '2025-11-02',
+                completedDate: '2025-11-02',
                 transactionId: 'TXN-VNPAY-12348',
-                instructorId: '1',
-                instructorName: 'Đặng Minh Tuấn',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 400000,
+                platformFeeAmount: 80000,
+                instructorEarnings: 320000
             },
             {
-                id: '12349',
-                orderNumber: 'ORD-2025-00005',
+                id: 'pay_005',
+                paymentNumber: 'PAY-2025-NOV-005',
                 learnerName: 'David Wilson',
                 learnerEmail: 'david.wilson@example.com',
                 learnerAvatar: 'images/users/user5.jpg',
-                type: '1 and 1',
-                coursesIds: ['c8'],
-                courseName: 'Angular Basics',
-                courses: [
-                    { courseId: 'c8', courseName: 'Angular Basics', instructorId: '1', instructorName: 'Đặng Minh Tuấn', price: 700000, commission: 175000 }
-                ],
+                sessionId: 'session_2025_nov_01_001',
+                session: {
+                    id: 'session_2025_nov_01_001',
+                    classId: 'class_001',
+                    className: 'Angular Basics - 1-1',
+                    instructorId: 'tutor_001',
+                    instructorName: 'Đặng Minh Tuấn',
+                    learnerIds: ['learner_007'],
+                    classType: '1 and 1',
+                    startTime: '2025-11-01T15:00:00',
+                    endTime: '2025-11-01T17:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 350000,
+                    totalAmount: 700000,
+                    platformFeePercentage: 20
+                },
                 totalAmount: 700000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '01 Nov 2025',
-                completedDate: '01 Nov 2025',
+                createdDate: '2025-11-01',
+                completedDate: '2025-11-01',
                 transactionId: 'TXN-MOMO-12349',
-                instructorId: '1',
-                instructorName: 'Đặng Minh Tuấn',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 700000,
+                platformFeeAmount: 140000,
+                instructorEarnings: 560000
             },
             {
-                id: '12350',
-                orderNumber: 'ORD-2025-00006',
+                id: 'pay_006',
+                paymentNumber: 'PAY-2025-OCT-006',
                 learnerName: 'Jessica Brown',
                 learnerEmail: 'jessica.brown@example.com',
                 learnerAvatar: 'images/users/user6.jpg',
-                type: '1 and n',
-                coursesIds: ['c1'],
-                courseName: 'JavaScript Essentials',
-                courses: [
-                    { courseId: 'c1', courseName: 'JavaScript Essentials', instructorId: '1', instructorName: 'Đặng Minh Tuấn', price: 1000000, commission: 250000 }
-                ],
-                totalAmount: 1000000,
+                sessionId: 'session_2025_oct_31_001',
+                session: {
+                    id: 'session_2025_oct_31_001',
+                    classId: 'class_002',
+                    className: 'JavaScript Essentials - Group',
+                    instructorId: 'tutor_004',
+                    instructorName: 'Lê Thị B',
+                    learnerIds: ['learner_008', 'learner_009'],
+                    classType: '1 and n',
+                    startTime: '2025-10-31T18:00:00',
+                    endTime: '2025-10-31T20:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 300000,
+                    totalAmount: 600000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 600000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '31 Oct 2025',
-                completedDate: '31 Oct 2025',
+                createdDate: '2025-10-31',
+                completedDate: '2025-10-31',
                 transactionId: 'TXN-VNPAY-12350',
-                instructorId: '1',
-                instructorName: 'Đặng Minh Tuấn',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 600000,
+                platformFeeAmount: 120000,
+                instructorEarnings: 480000
             },
-
             {
-                id: '12351',
-                orderNumber: 'ORD-2025-00007',
+                id: 'pay_007',
+                paymentNumber: 'PAY-2025-OCT-007',
                 learnerName: 'Robert Taylor',
                 learnerEmail: 'robert.taylor@example.com',
                 learnerAvatar: 'images/users/user7.jpg',
-                type: 'course',
-                coursesIds: ['c9'],
-                courseName: 'React Advanced',
-                courses: [
-                    { courseId: 'c9', courseName: 'React Advanced', instructorId: '2', instructorName: 'Nguyễn Thị Hương', price: 650000, commission: 195000 }
-                ],
-                totalAmount: 650000,
+                sessionId: 'session_2025_oct_30_001',
+                session: {
+                    id: 'session_2025_oct_30_001',
+                    classId: 'class_005',
+                    className: 'React Advanced - 1-1',
+                    instructorId: 'tutor_002',
+                    instructorName: 'Nguyễn Thị Hương',
+                    learnerIds: ['learner_010'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-30T13:00:00',
+                    endTime: '2025-10-30T14:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 500000,
+                    totalAmount: 750000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 750000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '30 Oct 2025',
-                completedDate: '30 Oct 2025',
+                createdDate: '2025-10-30',
+                completedDate: '2025-10-30',
                 transactionId: 'TXN-MOMO-12351',
-                instructorId: '2',
-                instructorName: 'Nguyễn Thị Hương',
-                instructorCommissionPercentage: 30
+                adminHoldAmount: 750000,
+                platformFeeAmount: 150000,
+                instructorEarnings: 600000
             },
             {
-                id: '12352',
-                orderNumber: 'ORD-2025-00008',
+                id: 'pay_008',
+                paymentNumber: 'PAY-2025-OCT-008',
                 learnerName: 'Lisa Anderson',
                 learnerEmail: 'lisa.anderson@example.com',
                 learnerAvatar: 'images/users/user8.jpg',
-                type: '1 and 1',
-                coursesIds: ['c10'],
-                courseName: 'Node.js Backend',
-                courses: [
-                    { courseId: 'c10', courseName: 'Node.js Backend', instructorId: '2', instructorName: 'Nguyễn Thị Hương', price: 750000, commission: 225000 }
-                ],
-                totalAmount: 750000,
+                sessionId: 'session_2025_oct_29_001',
+                session: {
+                    id: 'session_2025_oct_29_001',
+                    classId: 'class_006',
+                    className: 'Node.js Backend - 1-1',
+                    instructorId: 'tutor_003',
+                    instructorName: 'Trần Văn A',
+                    learnerIds: ['learner_011'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-29T11:00:00',
+                    endTime: '2025-10-29T13:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 450000,
+                    totalAmount: 900000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 900000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '29 Oct 2025',
-                completedDate: '29 Oct 2025',
+                createdDate: '2025-10-29',
+                completedDate: '2025-10-29',
                 transactionId: 'TXN-VNPAY-12352',
-                instructorId: '2',
-                instructorName: 'Nguyễn Thị Hương',
-                instructorCommissionPercentage: 30
+                adminHoldAmount: 900000,
+                platformFeeAmount: 180000,
+                instructorEarnings: 720000
             },
             {
-                id: '12353',
-                orderNumber: 'ORD-2025-00009',
+                id: 'pay_009',
+                paymentNumber: 'PAY-2025-OCT-009',
                 learnerName: 'James Martinez',
                 learnerEmail: 'james.martinez@example.com',
                 learnerAvatar: 'images/users/user9.jpg',
-                type: '1 and n',
-                coursesIds: ['c6'],
-                courseName: 'CSS Styling',
-                courses: [
-                    { courseId: 'c6', courseName: 'CSS Styling', instructorId: '2', instructorName: 'Nguyễn Thị Hương', price: 850000, commission: 255000 }
-                ],
-                totalAmount: 850000,
+                sessionId: 'session_2025_oct_28_001',
+                session: {
+                    id: 'session_2025_oct_28_001',
+                    classId: 'class_003',
+                    className: 'CSS Styling - Group',
+                    instructorId: 'tutor_001',
+                    instructorName: 'Đặng Minh Tuấn',
+                    learnerIds: ['learner_012', 'learner_013', 'learner_014', 'learner_015'],
+                    classType: '1 and n',
+                    startTime: '2025-10-28T19:00:00',
+                    endTime: '2025-10-28T21:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 250000,
+                    totalAmount: 500000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 500000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '28 Oct 2025',
-                completedDate: '28 Oct 2025',
+                createdDate: '2025-10-28',
+                completedDate: '2025-10-28',
                 transactionId: 'TXN-MOMO-12353',
-                instructorId: '2',
-                instructorName: 'Nguyễn Thị Hương',
-                instructorCommissionPercentage: 30
+                adminHoldAmount: 500000,
+                platformFeeAmount: 100000,
+                instructorEarnings: 400000
             },
             {
-                id: '12354',
-                orderNumber: 'ORD-2025-00010',
+                id: 'pay_010',
+                paymentNumber: 'PAY-2025-OCT-010',
                 learnerName: 'Nicole Garcia',
                 learnerEmail: 'nicole.garcia@example.com',
                 learnerAvatar: 'images/users/user10.jpg',
-                type: 'course',
-                coursesIds: ['c9'],
-                courseName: 'React Advanced',
-                courses: [
-                    { courseId: 'c9', courseName: 'React Advanced', instructorId: '2', instructorName: 'Nguyễn Thị Hương', price: 650000, commission: 195000 }
-                ],
-                totalAmount: 650000,
+                sessionId: 'session_2025_oct_27_001',
+                session: {
+                    id: 'session_2025_oct_27_001',
+                    classId: 'class_004',
+                    className: 'React Advanced - Group',
+                    instructorId: 'tutor_004',
+                    instructorName: 'Lê Thị B',
+                    learnerIds: ['learner_016', 'learner_017'],
+                    classType: '1 and n',
+                    startTime: '2025-10-27T10:00:00',
+                    endTime: '2025-10-27T12:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 350000,
+                    totalAmount: 700000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 700000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '27 Oct 2025',
-                completedDate: '27 Oct 2025',
+                createdDate: '2025-10-27',
+                completedDate: '2025-10-27',
                 transactionId: 'TXN-VNPAY-12354',
-                instructorId: '2',
-                instructorName: 'Nguyễn Thị Hương',
-                instructorCommissionPercentage: 30
+                adminHoldAmount: 700000,
+                platformFeeAmount: 140000,
+                instructorEarnings: 560000
             },
             {
-                id: '12355',
-                orderNumber: 'ORD-2025-00011',
+                id: 'pay_011',
+                paymentNumber: 'PAY-2025-OCT-011',
                 learnerName: 'Thomas Anderson',
                 learnerEmail: 'thomas.anderson@example.com',
                 learnerAvatar: 'images/users/user11.jpg',
-                type: '1 and 1',
-                coursesIds: ['c10'],
-                courseName: 'Node.js Backend',
-                courses: [
-                    { courseId: 'c10', courseName: 'Node.js Backend', instructorId: '2', instructorName: 'Nguyễn Thị Hương', price: 750000, commission: 225000 }
-                ],
-                totalAmount: 750000,
+                sessionId: 'session_2025_oct_26_001',
+                session: {
+                    id: 'session_2025_oct_26_001',
+                    classId: 'class_006',
+                    className: 'Node.js Backend - 1-1',
+                    instructorId: 'tutor_002',
+                    instructorName: 'Nguyễn Thị Hương',
+                    learnerIds: ['learner_018'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-26T16:00:00',
+                    endTime: '2025-10-26T17:00:00',
+                    durationMinutes: 60,
+                    ratePerHour: 500000,
+                    totalAmount: 500000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 500000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '26 Oct 2025',
-                completedDate: '26 Oct 2025',
+                createdDate: '2025-10-26',
+                completedDate: '2025-10-26',
                 transactionId: 'TXN-MOMO-12355',
-                instructorId: '2',
-                instructorName: 'Nguyễn Thị Hương',
-                instructorCommissionPercentage: 30
+                adminHoldAmount: 500000,
+                platformFeeAmount: 100000,
+                instructorEarnings: 400000
             },
-
             {
-                id: '12356',
-                orderNumber: 'ORD-2025-00012',
+                id: 'pay_012',
+                paymentNumber: 'PAY-2025-OCT-012',
                 learnerName: 'Patricia White',
                 learnerEmail: 'patricia.white@example.com',
                 learnerAvatar: 'images/users/user12.jpg',
-                type: '1 and n',
-                coursesIds: ['c4'],
-                courseName: 'Database Design',
-                courses: [
-                    { courseId: 'c4', courseName: 'Database Design', instructorId: '3', instructorName: 'Trần Văn A', price: 800000, commission: 200000 }
-                ],
-                totalAmount: 800000,
+                sessionId: 'session_2025_oct_25_001',
+                session: {
+                    id: 'session_2025_oct_25_001',
+                    classId: 'class_007',
+                    className: 'Database Design - Group',
+                    instructorId: 'tutor_003',
+                    instructorName: 'Trần Văn A',
+                    learnerIds: ['learner_019', 'learner_020'],
+                    classType: '1 and n',
+                    startTime: '2025-10-25T14:00:00',
+                    endTime: '2025-10-25T15:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 400000,
+                    totalAmount: 600000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 600000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '25 Oct 2025',
-                completedDate: '25 Oct 2025',
+                createdDate: '2025-10-25',
+                completedDate: '2025-10-25',
                 transactionId: 'TXN-VNPAY-12356',
-                instructorId: '3',
-                instructorName: 'Trần Văn A',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 600000,
+                platformFeeAmount: 120000,
+                instructorEarnings: 480000
             },
             {
-                id: '12357',
-                orderNumber: 'ORD-2025-00013',
+                id: 'pay_013',
+                paymentNumber: 'PAY-2025-OCT-013',
                 learnerName: 'Daniel Lee',
                 learnerEmail: 'daniel.lee@example.com',
                 learnerAvatar: 'images/users/user13.jpg',
-                type: 'course',
-                coursesIds: ['c5'],
-                courseName: 'Git & Version Control',
-                courses: [
-                    { courseId: 'c5', courseName: 'Git & Version Control', instructorId: '3', instructorName: 'Trần Văn A', price: 600000, commission: 150000 }
-                ],
-                totalAmount: 600000,
+                sessionId: 'session_2025_oct_24_001',
+                session: {
+                    id: 'session_2025_oct_24_001',
+                    classId: 'class_008',
+                    className: 'Git & Version Control - 1-1',
+                    instructorId: 'tutor_001',
+                    instructorName: 'Đặng Minh Tuấn',
+                    learnerIds: ['learner_021'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-24T12:00:00',
+                    endTime: '2025-10-24T13:00:00',
+                    durationMinutes: 60,
+                    ratePerHour: 300000,
+                    totalAmount: 300000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 300000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '24 Oct 2025',
-                completedDate: '24 Oct 2025',
+                createdDate: '2025-10-24',
+                completedDate: '2025-10-24',
                 transactionId: 'TXN-MOMO-12357',
-                instructorId: '3',
-                instructorName: 'Trần Văn A',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 300000,
+                platformFeeAmount: 60000,
+                instructorEarnings: 240000
             },
             {
-                id: '12358',
-                orderNumber: 'ORD-2025-00014',
+                id: 'pay_014',
+                paymentNumber: 'PAY-2025-OCT-014',
                 learnerName: 'Susan Harris',
                 learnerEmail: 'susan.harris@example.com',
                 learnerAvatar: 'images/users/user14.jpg',
-                type: '1 and 1',
-                coursesIds: ['c4'],
-                courseName: 'Database Design',
-                courses: [
-                    { courseId: 'c4', courseName: 'Database Design', instructorId: '3', instructorName: 'Trần Văn A', price: 800000, commission: 200000 }
-                ],
-                totalAmount: 800000,
+                sessionId: 'session_2025_oct_23_001',
+                session: {
+                    id: 'session_2025_oct_23_001',
+                    classId: 'class_005',
+                    className: 'Database Design - 1-1',
+                    instructorId: 'tutor_004',
+                    instructorName: 'Lê Thị B',
+                    learnerIds: ['learner_022'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-23T09:00:00',
+                    endTime: '2025-10-23T11:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 450000,
+                    totalAmount: 900000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 900000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '23 Oct 2025',
-                completedDate: '23 Oct 2025',
+                createdDate: '2025-10-23',
+                completedDate: '2025-10-23',
                 transactionId: 'TXN-VNPAY-12358',
-                instructorId: '3',
-                instructorName: 'Trần Văn A',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 900000,
+                platformFeeAmount: 180000,
+                instructorEarnings: 720000
             },
             {
-                id: '12359',
-                orderNumber: 'ORD-2025-00015',
+                id: 'pay_015',
+                paymentNumber: 'PAY-2025-OCT-015',
                 learnerName: 'Christopher Martin',
                 learnerEmail: 'christopher.martin@example.com',
                 learnerAvatar: 'images/users/user15.jpg',
-                type: '1 and n',
-                coursesIds: ['c5'],
-                courseName: 'Git & Version Control',
-                courses: [
-                    { courseId: 'c5', courseName: 'Git & Version Control', instructorId: '3', instructorName: 'Trần Văn A', price: 600000, commission: 150000 }
-                ],
-                totalAmount: 600000,
+                sessionId: 'session_2025_oct_22_001',
+                session: {
+                    id: 'session_2025_oct_22_001',
+                    classId: 'class_002',
+                    className: 'Git & Version Control - Group',
+                    instructorId: 'tutor_002',
+                    instructorName: 'Nguyễn Thị Hương',
+                    learnerIds: ['learner_023', 'learner_024', 'learner_025'],
+                    classType: '1 and n',
+                    startTime: '2025-10-22T17:00:00',
+                    endTime: '2025-10-22T18:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 300000,
+                    totalAmount: 450000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 450000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '22 Oct 2025',
-                completedDate: '22 Oct 2025',
+                createdDate: '2025-10-22',
+                completedDate: '2025-10-22',
                 transactionId: 'TXN-MOMO-12359',
-                instructorId: '3',
-                instructorName: 'Trần Văn A',
-                instructorCommissionPercentage: 25
+                adminHoldAmount: 450000,
+                platformFeeAmount: 90000,
+                instructorEarnings: 360000
             },
-
             {
-                id: '12360',
-                orderNumber: 'ORD-2025-00016',
+                id: 'pay_016',
+                paymentNumber: 'PAY-2025-OCT-016',
                 learnerName: 'Linda Thompson',
                 learnerEmail: 'linda.thompson@example.com',
                 learnerAvatar: 'images/users/user16.jpg',
-                type: 'course',
-                coursesIds: ['c2'],
-                courseName: 'TypeScript Pro',
-                courses: [
-                    { courseId: 'c2', courseName: 'TypeScript Pro', instructorId: '4', instructorName: 'Lê Thị B', price: 1000000, commission: 300000 }
-                ],
-                totalAmount: 1000000,
+                sessionId: 'session_2025_oct_21_001',
+                session: {
+                    id: 'session_2025_oct_21_001',
+                    classId: 'class_001',
+                    className: 'TypeScript Pro - Group',
+                    instructorId: 'tutor_003',
+                    instructorName: 'Trần Văn A',
+                    learnerIds: ['learner_026', 'learner_027'],
+                    classType: '1 and n',
+                    startTime: '2025-10-21T15:00:00',
+                    endTime: '2025-10-21T16:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 350000,
+                    totalAmount: 525000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 525000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '21 Oct 2025',
-                completedDate: '21 Oct 2025',
+                createdDate: '2025-10-21',
+                completedDate: '2025-10-21',
                 transactionId: 'TXN-VNPAY-12360',
-                instructorId: '4',
-                instructorName: 'Lê Thị B',
-                instructorCommissionPercentage: 30
+                adminHoldAmount: 525000,
+                platformFeeAmount: 105000,
+                instructorEarnings: 420000
             },
             {
-                id: '12361',
-                orderNumber: 'ORD-2025-00017',
+                id: 'pay_017',
+                paymentNumber: 'PAY-2025-OCT-017',
                 learnerName: 'Betty Jackson',
                 learnerEmail: 'betty.jackson@example.com',
                 learnerAvatar: 'images/users/user17.jpg',
-                type: '1 and 1',
-                coursesIds: ['c3'],
-                courseName: 'Python Fundamentals',
-                courses: [
-                    { courseId: 'c3', courseName: 'Python Fundamentals', instructorId: '4', instructorName: 'Lê Thị B', price: 1100000, commission: 330000 }
-                ],
-                totalAmount: 1100000,
-                currency: 'VND',
-                paymentMethod: 'momo',
-                status: 'completed',
-                createdDate: '20 Oct 2025',
-                completedDate: '20 Oct 2025',
-                transactionId: 'TXN-MOMO-12361',
-                instructorId: '4',
-                instructorName: 'Lê Thị B',
-                instructorCommissionPercentage: 30
-            },
-            {
-                id: '12362',
-                orderNumber: 'ORD-2025-00018',
-                learnerName: 'Mark Davies',
-                learnerEmail: 'mark.davies@example.com',
-                learnerAvatar: 'images/users/user18.jpg',
-                type: '1 and n',
-                coursesIds: ['c7'],
-                courseName: 'Vue.js Mastery',
-                courses: [
-                    { courseId: 'c7', courseName: 'Vue.js Mastery', instructorId: '4', instructorName: 'Lê Thị B', price: 950000, commission: 285000 }
-                ],
-                totalAmount: 950000,
-                currency: 'VND',
-                paymentMethod: 'vnpay',
-                status: 'completed',
-                createdDate: '19 Oct 2025',
-                completedDate: '19 Oct 2025',
-                transactionId: 'TXN-VNPAY-12362',
-                instructorId: '4',
-                instructorName: 'Lê Thị B',
-                instructorCommissionPercentage: 30
-            },
-
-            {
-                id: '12363',
-                orderNumber: 'ORD-2025-00019',
-                learnerName: 'Donald Miller',
-                learnerEmail: 'donald.miller@example.com',
-                learnerAvatar: 'images/users/user19.jpg',
-                type: 'course',
-                coursesIds: ['c1'],
-                courseName: 'JavaScript Essentials',
-                courses: [
-                    { courseId: 'c1', courseName: 'JavaScript Essentials', instructorId: '5', instructorName: 'Phạm Minh C', price: 1000000, commission: 200000 }
-                ],
+                sessionId: 'session_2025_oct_20_001',
+                session: {
+                    id: 'session_2025_oct_20_001',
+                    classId: 'class_009',
+                    className: 'Python Fundamentals - 1-1',
+                    instructorId: 'tutor_001',
+                    instructorName: 'Đặng Minh Tuấn',
+                    learnerIds: ['learner_028'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-20T10:00:00',
+                    endTime: '2025-10-20T12:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 500000,
+                    totalAmount: 1000000,
+                    platformFeePercentage: 20
+                },
                 totalAmount: 1000000,
                 currency: 'VND',
                 paymentMethod: 'momo',
                 status: 'completed',
-                createdDate: '18 Oct 2025',
-                completedDate: '18 Oct 2025',
-                transactionId: 'TXN-MOMO-12363',
-                instructorId: '5',
-                instructorName: 'Phạm Minh C',
-                instructorCommissionPercentage: 20
+                createdDate: '2025-10-20',
+                completedDate: '2025-10-20',
+                transactionId: 'TXN-MOMO-12361',
+                adminHoldAmount: 1000000,
+                platformFeeAmount: 200000,
+                instructorEarnings: 800000
             },
             {
-                id: '12364',
-                orderNumber: 'ORD-2025-00020',
-                learnerName: 'Dorothy Moore',
-                learnerEmail: 'dorothy.moore@example.com',
-                learnerAvatar: 'images/users/user20.jpg',
-                type: '1 and 1',
-                coursesIds: ['c6'],
-                courseName: 'CSS Styling',
-                courses: [
-                    { courseId: 'c6', courseName: 'CSS Styling', instructorId: '5', instructorName: 'Phạm Minh C', price: 850000, commission: 170000 }
-                ],
-                totalAmount: 850000,
+                id: 'pay_018',
+                paymentNumber: 'PAY-2025-OCT-018',
+                learnerName: 'Mark Davies',
+                learnerEmail: 'mark.davies@example.com',
+                learnerAvatar: 'images/users/user18.jpg',
+                sessionId: 'session_2025_oct_19_001',
+                session: {
+                    id: 'session_2025_oct_19_001',
+                    classId: 'class_004',
+                    className: 'Vue.js Mastery - Group',
+                    instructorId: 'tutor_004',
+                    instructorName: 'Lê Thị B',
+                    learnerIds: ['learner_029', 'learner_030', 'learner_031', 'learner_032'],
+                    classType: '1 and n',
+                    startTime: '2025-10-19T18:00:00',
+                    endTime: '2025-10-19T19:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 250000,
+                    totalAmount: 375000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 375000,
                 currency: 'VND',
                 paymentMethod: 'vnpay',
                 status: 'completed',
-                createdDate: '17 Oct 2025',
-                completedDate: '17 Oct 2025',
+                createdDate: '2025-10-19',
+                completedDate: '2025-10-19',
+                transactionId: 'TXN-VNPAY-12362',
+                adminHoldAmount: 375000,
+                platformFeeAmount: 75000,
+                instructorEarnings: 300000
+            },
+            {
+                id: 'pay_019',
+                paymentNumber: 'PAY-2025-OCT-019',
+                learnerName: 'Donald Miller',
+                learnerEmail: 'donald.miller@example.com',
+                learnerAvatar: 'images/users/user19.jpg',
+                sessionId: 'session_2025_oct_18_001',
+                session: {
+                    id: 'session_2025_oct_18_001',
+                    classId: 'class_003',
+                    className: 'JavaScript Essentials - 1-1',
+                    instructorId: 'tutor_002',
+                    instructorName: 'Nguyễn Thị Hương',
+                    learnerIds: ['learner_033'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-18T13:00:00',
+                    endTime: '2025-10-18T15:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 500000,
+                    totalAmount: 1000000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 1000000,
+                currency: 'VND',
+                paymentMethod: 'momo',
+                status: 'pending',
+                createdDate: '2025-10-18',
+                completedDate: undefined,
+                transactionId: 'TXN-MOMO-12363',
+                adminHoldAmount: 1000000,
+                platformFeeAmount: 200000,
+                instructorEarnings: 800000
+            },
+            {
+                id: 'pay_020',
+                paymentNumber: 'PAY-2025-OCT-020',
+                learnerName: 'Dorothy Moore',
+                learnerEmail: 'dorothy.moore@example.com',
+                learnerAvatar: 'images/users/user20.jpg',
+                sessionId: 'session_2025_oct_17_001',
+                session: {
+                    id: 'session_2025_oct_17_001',
+                    classId: 'class_008',
+                    className: 'CSS Styling - 1-1',
+                    instructorId: 'tutor_003',
+                    instructorName: 'Trần Văn A',
+                    learnerIds: ['learner_034'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-17T11:00:00',
+                    endTime: '2025-10-17T12:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 400000,
+                    totalAmount: 600000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 600000,
+                currency: 'VND',
+                paymentMethod: 'vnpay',
+                status: 'pending',
+                createdDate: '2025-10-17',
+                completedDate: undefined,
                 transactionId: 'TXN-VNPAY-12364',
-                instructorId: '5',
-                instructorName: 'Phạm Minh C',
-                instructorCommissionPercentage: 20
+                adminHoldAmount: 600000,
+                platformFeeAmount: 120000,
+                instructorEarnings: 480000
             }
         ];
 
-        this.ordersSubject.next(mockOrders);
+        this.paymentsSubject.next(mockPayments);
     }
 
-    getOrders(): Observable<Order[]> {
-        return this.orders$;
+    // Get all payments
+    getPayments(): Observable<Payment[]> {
+        return this.payments$;
     }
 
-    getOrdersFiltered(filters: TransactionFilters, page: number = 1, pageSize: number = 10): Order[] {
-        const allOrders = this.ordersSubject.value;
-        let filtered = [...allOrders];
+    // Get filtered payments
+    getPaymentsFiltered(filters: TransactionFilters, page: number = 1, pageSize: number = 10): Payment[] {
+        const allPayments = this.paymentsSubject.value;
+        let filtered = [...allPayments];
 
         if (filters.status) {
-            filtered = filtered.filter(order => order.status === filters.status);
+            filtered = filtered.filter(payment => payment.status === filters.status);
         }
 
         if (filters.paymentMethod) {
-            filtered = filtered.filter(order => order.paymentMethod === filters.paymentMethod);
+            filtered = filtered.filter(payment => payment.paymentMethod === filters.paymentMethod);
         }
 
         if (filters.startDate || filters.endDate) {
-            filtered = filtered.filter(order => {
-                const orderDate = new Date(order.createdDate);
+            filtered = filtered.filter(payment => {
+                const paymentDate = new Date(payment.createdDate);
                 const startDate = filters.startDate ? new Date(filters.startDate) : new Date('1900-01-01');
                 const endDate = filters.endDate ? new Date(filters.endDate) : new Date('2100-12-31');
-                return orderDate >= startDate && orderDate <= endDate;
+                return paymentDate >= startDate && paymentDate <= endDate;
             });
         }
 
         if (filters.searchTerm) {
             const searchLower = filters.searchTerm.toLowerCase();
-            filtered = filtered.filter(order =>
-                order.id.toLowerCase().includes(searchLower) ||
-                order.orderNumber.toLowerCase().includes(searchLower) ||
-                order.learnerName.toLowerCase().includes(searchLower) ||
-                order.learnerEmail.toLowerCase().includes(searchLower)
+            filtered = filtered.filter(payment =>
+                payment.id.toLowerCase().includes(searchLower) ||
+                payment.paymentNumber.toLowerCase().includes(searchLower) ||
+                payment.learnerName.toLowerCase().includes(searchLower) ||
+                payment.learnerEmail.toLowerCase().includes(searchLower)
             );
         }
 
-        return filtered;
+        // Pagination
+        const startIndex = (page - 1) * pageSize;
+        return filtered.slice(startIndex, startIndex + pageSize);
     }
 
-    getOrderById(id: string): Order | undefined {
-        return this.ordersSubject.value.find(order => order.id === id);
+    // Get single payment by ID
+    getPaymentById(id: string): Payment | undefined {
+        return this.paymentsSubject.value.find(payment => payment.id === id);
     }
 
-    approveOrderManually(orderId: string, notes?: string): boolean {
-        const orders = this.ordersSubject.value;
-        const order = orders.find(o => o.id === orderId);
+    // Manually approve a failed payment
+    approvePaymentManually(paymentId: string, notes?: string): boolean {
+        const payments = this.paymentsSubject.value;
+        const payment = payments.find(p => p.id === paymentId);
 
-        if (!order || order.status !== 'failed') {
-            console.error('Cannot approve order: Order not found or not failed');
+        if (!payment || payment.status !== 'failed') {
+            console.error('Cannot approve payment: Payment not found or not failed');
             return false;
         }
 
-        order.status = 'completed';
-        order.completedDate = this.getCurrentDate();
+        payment.status = 'completed';
+        payment.completedDate = this.getCurrentDate();
         if (notes) {
-            order.notes = notes;
+            payment.notes = notes;
         }
 
-        if (!order.transactionId) {
-            order.transactionId = `TXN-MANUAL-${orderId}-${Date.now()}`;
+        if (!payment.transactionId) {
+            payment.transactionId = `TXN-MANUAL-${paymentId}-${Date.now()}`;
         }
 
-        this.ordersSubject.next([...orders]);
-
-        this.createInstructorPayout(order);
-
+        this.paymentsSubject.next([...payments]);
         return true;
     }
 
-    private createInstructorPayout(order: Order): void {
-        if (!order.instructorId || order.status !== 'completed') {
-            return;
-        }
+    // Get all monthly payouts
+    getPayouts(): Observable<MonthlyPayout[]> {
+        return this.payouts$;
+    }
 
-        const payoutAmount = (order.totalAmount * (order.instructorCommissionPercentage || 30)) / 100;
+    // Get payouts by tutor
+    getPayoutsByTutor(tutorId: string): MonthlyPayout[] {
+        return this.payoutsSubject.value.filter(p => p.tutorId === tutorId);
+    }
 
-        const newPayout: InstructorPayout = {
-            id: `PAYOUT-${order.id}`,
-            instructorId: order.instructorId,
-            instructorName: 'Instructor Name', 
-            orderId: order.id,
-            orderNumber: order.orderNumber,
-            payableAmount: payoutAmount,
-            payoutPercentage: order.instructorCommissionPercentage || 30,
-            status: 'paid',
+    // Get pending payouts
+    getPendingPayouts(): MonthlyPayout[] {
+        return this.payoutsSubject.value.filter(p => p.status === 'pending' || p.status === 'approved');
+    }
+
+    // Create monthly payout from completed payments
+    createMonthlyPayout(tutorId: string, tutorName: string, month: string, paymentIds: string[]): MonthlyPayout {
+        const payments = this.paymentsSubject.value.filter(p => paymentIds.includes(p.id) && p.status === 'completed');
+
+        const totalEarnings = payments.reduce((sum, p) => sum + (p.instructorEarnings || 0), 0);
+        const totalHours = payments.reduce((sum, p) => sum + (p.session?.durationMinutes || 0), 0) / 60;
+
+        const payout: MonthlyPayout = {
+            id: `payout_${Date.now()}`,
+            payoutNumber: `PAYOUT-${month}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+            tutorId,
+            tutorName,
+            payoutMonth: month,
+            totalEarnings,
+            totalSessions: payments.length,
+            totalHours,
+            status: 'pending',
+            bankAccountInfo: {
+                accountNumber: '',
+                bankName: '',
+                accountHolder: tutorName
+            },
+            paymentMethod: 'banking',
+            relatedPaymentIds: paymentIds,
             createdDate: this.getCurrentDate()
         };
 
         const currentPayouts = this.payoutsSubject.value;
-        const existingPayout = currentPayouts.find(p => p.orderId === order.id);
+        this.payoutsSubject.next([...currentPayouts, payout]);
 
-        if (!existingPayout) {
-            this.payoutsSubject.next([...currentPayouts, newPayout]);
+        return payout;
+    }
+
+    // Update payout status
+    updatePayoutStatus(payoutId: string, status: PayoutStatus, notes?: string): boolean {
+        const payouts = this.payoutsSubject.value;
+        const payout = payouts.find(p => p.id === payoutId);
+
+        if (!payout) {
+            console.error('Payout not found');
+            return false;
         }
+
+        const previousStatus = payout.status;
+        payout.status = status;
+
+        if (notes) {
+            payout.notes = notes;
+        }
+
+        // Add timestamp when status changes
+        if (status === 'approved' && !payout.approvedDate) {
+            payout.approvedDate = this.getCurrentDate();
+        }
+
+        if (status === 'paid' && !payout.paidDate) {
+            payout.paidDate = this.getCurrentDate();
+
+            // Auto-create tutor wallet ledger entry when payout is paid
+            this.updateTutorWalletLedger(payout);
+        }
+
+        this.payoutsSubject.next([...payouts]);
+        return true;
     }
 
-    getPayouts(): Observable<InstructorPayout[]> {
-        return this.payouts$;
+    // Auto-update tutor wallet ledger when payout is confirmed paid
+    private updateTutorWalletLedger(payout: MonthlyPayout): void {
+        if (payout.status !== 'paid') {
+            return;
+        }
+
+        const ledgerEntry: TutorWalletLedger = {
+            id: `ledger_${Date.now()}`,
+            ledgerId: `LEDGER-${payout.payoutMonth}-${payout.tutorId}`,
+            tutorId: payout.tutorId,
+            tutorName: payout.tutorName,
+            type: 'credit',
+            amount: payout.totalEarnings,
+            relatedPayoutId: payout.id,
+            description: `${payout.payoutMonth} Payout - ${payout.totalSessions} sessions`,
+            bankTransferInfo: payout.bankTransferInfo ? {
+                bankName: payout.bankTransferInfo.transferId || '',
+                accountNumber: payout.bankAccountInfo.accountNumber,
+                transferDate: payout.paidDate || this.getCurrentDate(),
+                transferId: payout.bankTransferInfo.transferId
+            } : undefined,
+            createdDate: payout.paidDate || this.getCurrentDate(),
+            status: 'recorded'
+        };
+
+        const currentLedger = this.walletLedgerSubject.value;
+        this.walletLedgerSubject.next([...currentLedger, ledgerEntry]);
     }
 
-    getPayoutsByInstructor(instructorId: string): InstructorPayout[] {
-        return this.payoutsSubject.value.filter(p => p.instructorId === instructorId && p.status === 'pending');
+    // Get tutor wallet ledger
+    getTutorWalletLedger(): Observable<TutorWalletLedger[]> {
+        return this.walletLedger$;
     }
 
+    // Get wallet ledger for specific tutor
+    getTutorWalletLedgerByTutor(tutorId: string): TutorWalletLedger[] {
+        return this.walletLedgerSubject.value.filter(entry => entry.tutorId === tutorId);
+    }
+
+    // Get dashboard summary
     getSummary(): {
         totalRevenue: number;
-        completedOrders: number;
-        failedOrders: number;
-        pendingPayouts: number;
+        completedPayments: number;
+        failedPayments: number;
+        pendingPayments: number;
+        pendingPayoutAmount: number;
+        totalTutorPayouts: number;
     } {
-        const allOrders = this.ordersSubject.value;
+        const allPayments = this.paymentsSubject.value;
         const allPayouts = this.payoutsSubject.value;
 
         return {
-            totalRevenue: allOrders
-                .filter(o => o.status === 'completed')
-                .reduce((sum, o) => sum + o.totalAmount, 0),
-            completedOrders: allOrders.filter(o => o.status === 'completed').length,
-            failedOrders: allOrders.filter(o => o.status === 'failed').length,
-            pendingPayouts: allPayouts.filter(p => p.status === 'pending').length
+            totalRevenue: allPayments
+                .filter(p => p.status === 'completed')
+                .reduce((sum, p) => sum + p.totalAmount, 0),
+            completedPayments: allPayments.filter(p => p.status === 'completed').length,
+            failedPayments: allPayments.filter(p => p.status === 'failed').length,
+            pendingPayments: allPayments.filter(p => p.status === 'pending').length,
+            pendingPayoutAmount: allPayouts
+                .filter(p => p.status === 'pending' || p.status === 'approved')
+                .reduce((sum, p) => sum + p.totalEarnings, 0),
+            totalTutorPayouts: allPayouts
+                .filter(p => p.status === 'paid')
+                .reduce((sum, p) => sum + p.totalEarnings, 0)
         };
     }
 
     setFilters(filters: TransactionFilters): void {
-        this.currentFiltersSubject.next(filters);
-    }
-
-    getFilters(): Observable<TransactionFilters> {
-        return this.currentFiltersSubject.asObservable();
+        // Could be stored in localStorage or state management if needed
+        console.log('Filters set:', filters);
     }
 
     formatCurrency(amount: number): string {
@@ -711,78 +1062,66 @@ export class TransactionService {
         const day = String(now.getDate()).padStart(2, '0');
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
-        return `${day} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()]} ${year}`;
+        return `${day}/${month}/${year}`;
     }
 
-    getTopInstructorsByOrders(limit: number = 5): any[] {
-        const allOrders = this.ordersSubject.value;
-        const instructorMap = new Map<string, { instructorId: string; instructorName: string; orderCount: number; totalRevenue: number }>();
+    // Get top instructors by earnings
+    getTopInstructorsByEarnings(limit: number = 5): any[] {
+        const allPayments = this.paymentsSubject.value;
+        const instructorMap = new Map<string, { instructorId: string; instructorName: string; sessionCount: number; totalEarnings: number }>();
 
-        allOrders
-            .filter(order => order.status === 'completed')
-            .forEach(order => {
-                if (order.instructorId && order.instructorName) {
-                    const key = order.instructorId;
-                    const existing = instructorMap.get(key);
+        allPayments
+            .filter(payment => payment.status === 'completed' && payment.session)
+            .forEach(payment => {
+                const session = payment.session!;
+                const key = session.instructorId;
+                const existing = instructorMap.get(key);
 
-                    if (existing) {
-                        existing.orderCount += 1;
-                        existing.totalRevenue += order.totalAmount;
-                    } else {
-                        instructorMap.set(key, {
-                            instructorId: order.instructorId,
-                            instructorName: order.instructorName,
-                            orderCount: 1,
-                            totalRevenue: order.totalAmount
-                        });
-                    }
-                }
-            });
-
-        return Array.from(instructorMap.values())
-            .sort((a, b) => {
-                if (b.orderCount !== a.orderCount) {
-                    return b.orderCount - a.orderCount;
-                }
-                return b.totalRevenue - a.totalRevenue;
-            })
-            .slice(0, limit);
-    }
-
-    getTopCoursesBySales(limit: number = 5): any[] {
-        const allOrders = this.ordersSubject.value;
-        const courseMap = new Map<string, { courseId: string; courseName: string; orderCount: number; totalRevenue: number }>();
-
-        allOrders
-            .filter(order => order.status === 'completed')
-            .forEach(order => {
-                if (order.courses && order.courses.length > 0) {
-                    order.courses.forEach(course => {
-                        const key = course.courseId;
-                        const existing = courseMap.get(key);
-
-                        if (existing) {
-                            existing.orderCount += 1;
-                            existing.totalRevenue += course.price;
-                        } else {
-                            courseMap.set(key, {
-                                courseId: course.courseId,
-                                courseName: course.courseName,
-                                orderCount: 1,
-                                totalRevenue: course.price
-                            });
-                        }
+                if (existing) {
+                    existing.sessionCount += 1;
+                    existing.totalEarnings += payment.instructorEarnings || 0;
+                } else {
+                    instructorMap.set(key, {
+                        instructorId: session.instructorId,
+                        instructorName: session.instructorName,
+                        sessionCount: 1,
+                        totalEarnings: payment.instructorEarnings || 0
                     });
                 }
             });
 
-        return Array.from(courseMap.values())
-            .sort((a, b) => {
-                if (b.orderCount !== a.orderCount) {
-                    return b.orderCount - a.orderCount;
+        return Array.from(instructorMap.values())
+            .sort((a, b) => b.totalEarnings - a.totalEarnings)
+            .slice(0, limit);
+    }
+
+    // Get top classes by revenue
+    getTopClassesByRevenue(limit: number = 5): any[] {
+        const allPayments = this.paymentsSubject.value;
+        const classMap = new Map<string, { classId: string; className: string; sessionCount: number; totalRevenue: number }>();
+
+        allPayments
+            .filter(payment => payment.status === 'completed' && payment.session)
+            .forEach(payment => {
+                const session = payment.session!;
+                const key = session.classId;
+                const existing = classMap.get(key);
+
+                if (existing) {
+                    existing.sessionCount += 1;
+                    existing.totalRevenue += payment.totalAmount;
+                } else {
+                    classMap.set(key, {
+                        classId: session.classId,
+                        className: session.className,
+                        sessionCount: 1,
+                        totalRevenue: payment.totalAmount
+                    });
                 }
-                return b.totalRevenue - a.totalRevenue;
-            })
+            });
+
+        return Array.from(classMap.values())
+            .sort((a, b) => b.totalRevenue - a.totalRevenue)
             .slice(0, limit);
     }
 }

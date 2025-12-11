@@ -46,6 +46,57 @@
     </div>
 </div>
 
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] pb-[15px] pt-[20px] px-[20px] md:pb-[20px] md:pt-[25px] md:px-[25px] rounded-md">
+    <div class="trezo-card-header mb-[15px] md:mb-[20px]">
+        <h5 class="text-lg font-semibold text-black dark:text-white mb-[15px]">Filters</h5>
+        <div class="flex flex-wrap gap-[15px] items-end">
+            <!-- Status Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter by Status</label>
+                <select [(ngModel)]="statusFilter" name="statusFilter" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                    <option value="">All</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+
+            <!-- Payment Method Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter by Payment Method</label>
+                <select [(ngModel)]="paymentMethodFilter" name="paymentMethodFilter" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                    <option value="">All</option>
+                    <option value="momo">Momo</option>
+                    <option value="vnpay">VNPay</option>
+                </select>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From Date</label>
+                <input type="date" [(ngModel)]="startDate" name="startDate" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">To Date</label>
+                <input type="date" [(ngModel)]="endDate" name="endDate" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex gap-2">
+                <button type="button" (click)="applyFilters()" class="px-[16px] py-[8px] bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                    FILTER
+                </button>
+                @if (hasActiveFilters()) {
+                    <button type="button" (click)="clearFilters()" class="px-[16px] py-[8px] bg-gray-500 text-white rounded-md text-sm font-medium hover:bg-gray-600 transition-colors">
+                        CLEAR FILTERS
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
@@ -64,63 +115,6 @@
             </form>
         </div>
         <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex items-center gap-[15px]">
-
-            <div class="trezo-card-dropdown relative filter-dropdown">
-                <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleFilterMenu()">
-                    <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ getStatusFilterText() }} Status
-                        <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
-                    </span>
-                </button>
-                @if (isFilterMenuOpen) {
-                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onStatusFilterChange('')">
-                                All
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onStatusFilterChange('completed')">
-                                Completed
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onStatusFilterChange('failed')">
-                                Failed
-                            </button>
-                        </li>
-                    </ul>
-                }
-            </div>
-
-            <div class="trezo-card-dropdown relative payment-method-dropdown">
-                <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="togglePaymentMethodMenu()">
-                    <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ getPaymentMethodFilterText() }} Method
-                        <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
-                    </span>
-                </button>
-                @if (isPaymentMethodMenuOpen) {
-                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onPaymentMethodChange('')">
-                                All
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onPaymentMethodChange('momo')">
-                                Momo
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onPaymentMethodChange('vnpay')">
-                                VNPay
-                            </button>
-                        </li>
-                    </ul>
-                }
-            </div>
-
             <button type="button" class="inline-block transition-all rounded-md font-medium py-[8px] px-[20px] bg-primary-500 text-white hover:bg-primary-400 text-sm" (click)="exportToExcel()">
                 <span class="inline-block relative ltr:pr-[22px] rtl:pl-[22px]">
                     <i class="material-symbols-outlined ltr:right-0 rtl:left-0 absolute top-1/2 -translate-y-1/2 text-sm">
@@ -133,14 +127,20 @@
     </div>
     <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
-            <table class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
+            <table id="payments-table" class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
                 <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                     <tr>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                            Order ID
+                            Payment ID
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
                             Learner
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
+                            Class
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
+                            Tutor
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
                             Type
@@ -151,8 +151,8 @@
                         <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
                             Method
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Date
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[140px]">
+                            Date & Time
                             <button type="button" class="ml-1 text-primary-500 hover:text-primary-600 transition-colors" (click)="toggleSortOrder()">
                                 <i class="material-symbols-outlined !text-sm" [class.rotate-180]="sortOrder === 'desc'">
                                     arrow_upward
@@ -182,7 +182,17 @@
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400 font-medium">
-                                    {{ order.type }}
+                                    {{ order.session?.className }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ order.session?.instructorName }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-xs font-medium px-[8px] py-[4px] rounded-full inline-block" [ngClass]="order.session?.classType === '1 and 1' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'">
+                                    {{ order.session?.classType === '1 and 1' ? '1-on-1' : 'Group' }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
@@ -196,8 +206,8 @@
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ order.createdDate }}
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">
+                                    {{ order.createdDate | date: 'dd/MM/yyyy HH:mm:ss' }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
@@ -225,7 +235,7 @@
                     }
                     @if (filteredOrders.length === 0) {
                         <tr>
-                            <td [attr.colspan]="8" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                            <td [attr.colspan]="11" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
                                 No transactions found
                             </td>
                         </tr>
@@ -237,37 +247,41 @@
             <p class="!mb-0 text-sm">
                 Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ currentPage * pageSize > filteredOrders.length ? filteredOrders.length : currentPage * pageSize }} / {{ filteredOrders.length }}
             </p>
-            <ol class="mt-[10px] sm:mt-0" *ngIf="totalPages > 1">
-                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                    <button
-                        type="button"
-                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        [disabled]="currentPage === 1"
-                        (click)="prevPage()">
-                        <span class="opacity-0">0</span>
-                        <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_left</i>
-                    </button>
-                </li>
-                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0" *ngFor="let page of getPageNumbers()">
-                    <button
-                        type="button"
-                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500"
-                        [class]="page === currentPage ? 'border-primary-500 bg-primary-500 text-white' : 'border-gray-100 dark:border-[#172036]'"
-                        (click)="goToPage(page)">
-                        {{ page }}
-                    </button>
-                </li>
-                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                    <button
-                        type="button"
-                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        [disabled]="currentPage === totalPages"
-                        (click)="nextPage()">
-                        <span class="opacity-0">0</span>
-                        <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_right</i>
-                    </button>
-                </li>
-            </ol>
+            @if (totalPages > 1) {
+                <ol class="mt-[10px] sm:mt-0">
+                    <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                        <button
+                            type="button"
+                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            [disabled]="currentPage === 1"
+                            (click)="prevPage()">
+                            <span class="opacity-0">0</span>
+                            <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_left</i>
+                        </button>
+                    </li>
+                    @for (page of getPageNumbers(); track page) {
+                        <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                            <button
+                                type="button"
+                                class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500"
+                                [class]="page === currentPage ? 'border-primary-500 bg-primary-500 text-white' : 'border-gray-100 dark:border-[#172036]'"
+                                (click)="goToPage(page)">
+                                {{ page }}
+                            </button>
+                        </li>
+                    }
+                    <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                        <button
+                            type="button"
+                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            [disabled]="currentPage === totalPages"
+                            (click)="nextPage()">
+                            <span class="opacity-0">0</span>
+                            <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_right</i>
+                        </button>
+                    </li>
+                </ol>
+            }
         </div>
     </div>
 </div>
@@ -287,8 +301,8 @@
                         <p class="text-sm font-bold text-primary-500 mt-[4px]">{{ formatCurrency(selectedOrder.totalAmount) }}</p>
                     </div>
                     <div>
-                        <label class="text-xs text-gray-600 uppercase">Course</label>
-                        <p class="text-sm text-black dark:text-white mt-[4px]">{{ selectedOrder.courseName }}</p>
+                        <label class="text-xs text-gray-600 uppercase">Class</label>
+                        <p class="text-sm text-black dark:text-white mt-[4px]">{{ selectedOrder.className }}</p>
                     </div>
                     <div>
                         <label class="text-xs text-gray-600 uppercase">Status</label>

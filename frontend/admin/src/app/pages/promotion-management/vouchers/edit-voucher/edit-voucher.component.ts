@@ -17,6 +17,17 @@ export class EditVoucherComponent implements OnInit {
   isLoading = false;
   message: { type: 'success' | 'error', text: string } | null = null;
 
+  // Student Segment Management
+  studentSegments: { id: string; label: string; value: string }[] = [
+    { id: 'all', label: 'All Students', value: 'all' },
+    { id: 'top-spenders', label: 'Top Spenders (Highest spending in month)', value: 'top-spenders' },
+    { id: 'new-students', label: 'New Students (Registered < 30 days)', value: 'new-students' },
+    { id: 'no-spending-1month', label: 'No Spending (No purchase in 1 month)', value: 'no-spending-1month' }
+  ];
+  isAddingSegment = false;
+  newSegmentLabel = '';
+  isSegmentDropdownOpen = false;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -40,6 +51,7 @@ export class EditVoucherComponent implements OnInit {
       discountValue: ['', [Validators.required, this.discountValueValidator.bind(this)]],
       maxDiscount: [''],
       productType: ['course', Validators.required],
+      targetAudience: ['all', Validators.required], // New field
       minOrderValue: ['', [Validators.min(1)]],
       totalUsageLimit: ['', [Validators.min(1)]],
       usagePerUser: ['', [Validators.min(1)]],
@@ -148,5 +160,50 @@ export class EditVoucherComponent implements OnInit {
       type: 'error',
       text: errors.length > 0 ? errors.join('. ') : 'Please fill in all required fields correctly.'
     };
+  }
+
+  toggleSegmentDropdown(): void {
+    this.isSegmentDropdownOpen = !this.isSegmentDropdownOpen;
+  }
+
+  selectSegment(value: string): void {
+    this.voucherForm.patchValue({ targetAudience: value });
+    this.isSegmentDropdownOpen = false;
+  }
+
+  toggleAddSegmentMode(): void {
+    this.isAddingSegment = !this.isAddingSegment;
+    this.newSegmentLabel = '';
+  }
+
+  addNewSegment(): void {
+    if (this.newSegmentLabel.trim()) {
+      const newId = this.newSegmentLabel.toLowerCase().replace(/\s+/g, '-');
+
+      // Check if segment already exists
+      if (!this.studentSegments.some(s => s.value === newId)) {
+        this.studentSegments.push({
+          id: newId,
+          label: this.newSegmentLabel,
+          value: newId
+        });
+
+        // Select the newly added segment
+        this.voucherForm.patchValue({ targetAudience: newId });
+
+        // Reset the form
+        this.isAddingSegment = false;
+        this.newSegmentLabel = '';
+        this.isSegmentDropdownOpen = false;
+      } else {
+        this.message = { type: 'error', text: 'This student segment already exists!' };
+      }
+    }
+  }
+
+  getSelectedSegmentLabel(): string {
+    const selectedValue = this.voucherForm.get('targetAudience')?.value;
+    const segment = this.studentSegments.find(s => s.value === selectedValue);
+    return segment ? segment.label : 'Select Student Segment';
   }
 }

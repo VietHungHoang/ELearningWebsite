@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TransactionService, Order, OrderStatus, PaymentMethod, TransactionFilters } from '../../../services/transaction.service';
+import { TransactionService, Payment, PaymentStatus, PaymentMethod, TransactionFilters } from '../../../services/transaction.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -15,16 +15,21 @@ export class FTransactionsComponent implements OnInit {
 
     Math = Math;
 
-    orders: Order[] = [];
-    filteredOrders: Order[] = [];
-    selectedOrder: Order | null = null;
+    orders: Payment[] = [];
+    filteredOrders: Payment[] = [];
+    selectedOrder: Payment | null = null;
     topInstructors: any[] = [];
 
     searchTerm: string = '';
-    statusFilter: OrderStatus | '' = '';
+    statusFilter: PaymentStatus | '' = '';
     paymentMethodFilter: PaymentMethod | '' = '';
-    dateRangeFilter: string = 'all'; 
-    sortOrder: 'asc' | 'desc' = 'desc'; 
+    typeFilter: '1 and 1' | '1 and n' | '' = '';
+    dateRangeFilter: string = 'all';
+    sortOrder: 'asc' | 'desc' = 'desc';
+
+    // Date range filter
+    startDate: string = '';
+    endDate: string = '';
 
     currentPage: number = 1;
     pageSize: number = 10;
@@ -34,6 +39,7 @@ export class FTransactionsComponent implements OnInit {
     isApproveConfirmOpen = false;
     isFilterMenuOpen = false;
     isPaymentMethodMenuOpen = false;
+    isTypeMenuOpen = false;
     isDateMenuOpen = false;
     loadingApproval = false;
     approvalNotes: string = '';
@@ -58,7 +64,29 @@ export class FTransactionsComponent implements OnInit {
             paymentMethod: this.paymentMethodFilter || undefined
         };
 
-        this.filteredOrders = this.transactionService.getOrdersFiltered(filters);
+        this.filteredOrders = this.transactionService.getPaymentsFiltered(filters);
+
+        // Apply date range filter
+        if (this.startDate || this.endDate) {
+            this.filteredOrders = this.filteredOrders.filter(order => {
+                const orderDate = new Date(order.createdDate);
+
+                if (this.startDate) {
+                    const startDate = new Date(this.startDate);
+                    startDate.setHours(0, 0, 0, 0);
+                    if (orderDate < startDate) return false;
+                }
+
+                if (this.endDate) {
+                    const endDate = new Date(this.endDate);
+                    endDate.setHours(23, 59, 59, 999);
+                    if (orderDate > endDate) return false;
+                }
+
+                return true;
+            });
+        }
+
         this.calculatePagination();
     }
 
@@ -69,7 +97,7 @@ export class FTransactionsComponent implements OnInit {
         }
     }
 
-    getPaginatedOrders(): Order[] {
+    getPaginatedOrders(): Payment[] {
 
         const sortedOrders = [...this.filteredOrders].sort((a, b) => {
             const dateA = new Date(a.createdDate).getTime();
@@ -93,7 +121,7 @@ export class FTransactionsComponent implements OnInit {
         this.loadOrders();
     }
 
-    onStatusFilterChange(status: OrderStatus | ''): void {
+    onStatusFilterChange(status: PaymentStatus | ''): void {
         this.statusFilter = status;
         this.currentPage = 1;
         this.loadOrders();
@@ -112,7 +140,7 @@ export class FTransactionsComponent implements OnInit {
         this.isDateMenuOpen = false;
     }
 
-    openApproveConfirm(order: Order): void {
+    openApproveConfirm(order: Payment): void {
         this.selectedOrder = order;
         this.isApproveConfirmOpen = true;
         this.approvalNotes = '';
@@ -129,14 +157,14 @@ export class FTransactionsComponent implements OnInit {
         this.loadingApproval = true;
 
         setTimeout(() => {
-            const success = this.transactionService.approveOrderManually(
+            const success = this.transactionService.approvePaymentManually(
                 this.selectedOrder!.id,
                 this.approvalNotes
             );
 
             if (success) {
 
-                alert('✓ Đơn hàng đã được duyệt thủ công thành công!\nHệ thống tự động tính toán hoa hồng cho giảng viên.');
+                alert('✓ Thanh toán đã được duyệt thủ công thành công!\nHệ thống sẽ bao gồm trong bảng thanh toán hàng tháng cho giảng viên.');
 
                 this.loadOrders();
                 this.updateSummary();
@@ -144,7 +172,7 @@ export class FTransactionsComponent implements OnInit {
                 this.isDetailModalOpen = false;
                 this.selectedOrder = null;
             } else {
-                alert('✗ Lỗi: Không thể duyệt đơn hàng này (có thể đã hoàn thành hoặc không tồn tại)');
+                alert('✗ Lỗi: Không thể duyệt thanh toán này (có thể đã hoàn thành hoặc không tồn tại)');
             }
 
             this.loadingApproval = false;
@@ -155,8 +183,8 @@ export class FTransactionsComponent implements OnInit {
         const stats = this.transactionService.getSummary();
         this.summary = {
             totalRevenue: stats.totalRevenue,
-            completedOrders: stats.completedOrders,
-            failedOrders: stats.failedOrders
+            completedOrders: stats.completedPayments,
+            failedOrders: stats.failedPayments
         };
     }
 
@@ -195,12 +223,14 @@ export class FTransactionsComponent implements OnInit {
         return pages;
     }
 
-    getStatusClass(status: OrderStatus): string {
+    getStatusClass(status: PaymentStatus): string {
         switch (status) {
             case 'completed':
                 return 'bg-success-50 text-success-600';
             case 'failed':
                 return 'bg-danger-50 text-danger-600';
+            case 'pending':
+                return 'bg-warning-50 text-warning-600';
             default:
                 return 'bg-gray-50 text-gray-600';
         }
@@ -215,30 +245,54 @@ export class FTransactionsComponent implements OnInit {
         if (!this.paymentMethodFilter) return 'All';
         return this.getPaymentMethodDisplay(this.paymentMethodFilter);
     }
-    getStatusText(status: OrderStatus): string {
+
+    getTypeFilterText(): string {
+        if (!this.typeFilter) return 'All';
+        return this.typeFilter === '1 and 1' ? '1-on-1' : 'Group';
+    }
+
+    onTypeFilterChange(type: '1 and 1' | '1 and n' | ''): void {
+        this.typeFilter = type;
+        this.currentPage = 1;
+        this.loadOrders();
+        this.isTypeMenuOpen = false;
+    }
+
+    toggleTypeMenu(): void {
+        this.isTypeMenuOpen = !this.isTypeMenuOpen;
+        if (this.isTypeMenuOpen) {
+            this.isFilterMenuOpen = false;
+            this.isPaymentMethodMenuOpen = false;
+            this.isDateMenuOpen = false;
+        }
+    }
+
+    getStatusText(status: PaymentStatus): string {
         switch (status) {
             case 'completed':
                 return 'Completed';
             case 'failed':
                 return 'Failed';
+            case 'pending':
+                return 'Pending';
             default:
                 return status;
         }
     }
 
     getPaymentMethodDisplay(method: PaymentMethod): string {
-        return method === 'momo' ? 'Momo' : 'VNPay';
+        return method === 'momo' ? 'Momo' : method === 'vnpay' ? 'VNPay' : 'Banking';
     }
 
     getPaymentMethodIcon(method: PaymentMethod): string {
-        return method === 'momo' ? 'momo-icon' : 'vnpay-icon';
+        return method === 'momo' ? 'momo-icon' : method === 'vnpay' ? 'vnpay-icon' : 'banking-icon';
     }
 
     formatCurrency(amount: number): string {
         return this.transactionService.formatCurrency(amount);
     }
 
-    canApproveOrder(order: Order): boolean {
+    canApproveOrder(order: Payment): boolean {
         return order.status === 'failed';
     }
 
@@ -261,29 +315,33 @@ export class FTransactionsComponent implements OnInit {
     }
 
     exportToExcel(): void {
-        const dataToExport = this.filteredOrders.map(order => ({
-            'Order ID': order.id,
-            'Order Number': order.orderNumber,
-            'Learner Name': order.learnerName,
-            'Learner Email': order.learnerEmail,
-            'Type': order.type,
-            'Course Name': order.courseName,
-            'Total Amount': order.totalAmount,
-            'Currency': order.currency,
-            'Payment Method': this.getPaymentMethodDisplay(order.paymentMethod),
-            'Status': order.status,
-            'Created Date': order.createdDate,
-            'Completed Date': order.completedDate || '',
-            'Instructor Name': order.instructorName,
-            'Commission Percentage': order.instructorCommissionPercentage
+        const dataToExport = this.filteredOrders.map(payment => ({
+            'Payment ID': payment.id,
+            'Payment Number': payment.paymentNumber,
+            'Learner Name': payment.learnerName,
+            'Learner Email': payment.learnerEmail,
+            'Session ID': payment.sessionId,
+            'Class Name': payment.session?.className || '',
+            'Instructor Name': payment.session?.instructorName || '',
+            'Duration (Minutes)': payment.session?.durationMinutes || 0,
+            'Rate per Hour': payment.session?.ratePerHour || 0,
+            'Total Amount': payment.totalAmount,
+            'Currency': payment.currency,
+            'Platform Fee': payment.platformFeeAmount || 0,
+            'Instructor Earnings': payment.instructorEarnings || 0,
+            'Payment Method': this.getPaymentMethodDisplay(payment.paymentMethod),
+            'Status': payment.status,
+            'Created Date': payment.createdDate,
+            'Completed Date': payment.completedDate || '',
+            'Transaction ID': payment.transactionId || ''
         }));
 
         const worksheet = XLSX.utils.json_to_sheet(dataToExport);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Payments');
 
         const currentDate = new Date().toISOString().split('T')[0];
-        const filename = `transactions_${currentDate}.xlsx`;
+        const filename = `payments_${currentDate}.xlsx`;
 
         XLSX.writeFile(workbook, filename);
     }
@@ -300,5 +358,28 @@ export class FTransactionsComponent implements OnInit {
         if (!target.closest('.date-dropdown')) {
             this.isDateMenuOpen = false;
         }
+    }
+
+    // New filter methods
+    applyFilters(): void {
+        this.currentPage = 1;
+        this.loadOrders();
+    }
+
+    clearFilters(): void {
+        this.searchTerm = '';
+        this.statusFilter = '';
+        this.paymentMethodFilter = '';
+        this.typeFilter = '';
+        this.startDate = '';
+        this.endDate = '';
+        this.dateRangeFilter = 'all';
+        this.sortOrder = 'desc';
+        this.currentPage = 1;
+        this.loadOrders();
+    }
+
+    hasActiveFilters(): boolean {
+        return !!(this.searchTerm || this.statusFilter || this.paymentMethodFilter || this.typeFilter || this.startDate || this.endDate);
     }
 }

@@ -28,183 +28,116 @@
 
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-content">
-        <div class="mb-[20px] md:mb-[25px]">
-            <span class="block md:text-[15px] mb-[15px] md:mb-[25px]">
-                Transaction ID:
-                <span class="text-black dark:text-white">
-                    #1346
-                </span>
-            </span>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-[20px] items-start">
+        <!-- Transaction ID & Date (Header) -->
+        <div class="mb-[20px]">
+            <span class="block text-sm text-gray-500 dark:text-gray-400 mb-[4px]">Transaction ID:</span>
+            <span class="block text-lg font-bold text-black dark:text-white mb-[12px]">{{ transactionId }}</span>
+        </div>
 
-                <div>
-                    <span class="block mb-[4px] md:text-[15px]">
-                        Learner:
-                    </span>
-                    <span class="block mb-[4px] md:text-[15px] text-black dark:text-white">
-                        Shannon Nelson
-                    </span>
-                    <span class="block mb-[4px] md:text-[15px] text-black dark:text-white">
-                        shannon.nelson@example.com
-                    </span>
-                    <span class="block mb-[4px] md:text-[15px] text-black dark:text-white">
-                        +1 444 556 8899
-                    </span>
+        <!-- Main Content Grid: Learner (Left) vs Class (Right) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-[20px] mb-[25px]">
+            <!-- Learner Information (Left) -->
+            <div>
+                <h6 class="text-base font-medium text-black dark:text-white mb-[12px]">Learner Information</h6>
+                <div class="space-y-[8px]">
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Learner ID:</span>
+                        <span class="text-xs text-gray-600 dark:text-gray-400 font-mono">{{ learnerId }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Name:</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ learnerName }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Email:</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ learnerEmail }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Phone:</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ learnerPhone }}</span>
+                    </div>
                 </div>
+            </div>
 
-                <div>
-                    <span class="block mb-[4px] md:text-[15px]">
-                        Date:
-                        <span class="text-black dark:text-white">
-                            01 Dec 2025
-                        </span>
-                    </span>
-                    <span class="block mb-[4px] md:text-[15px]">
-                        Status:
-                    </span>
-                    <span class="block mb-[4px] md:text-[15px] px-[12px] py-[6px] rounded-full inline-block bg-success-50 text-success-600">
-                        Completed
-                    </span>
-                    <div class="flex items-center justify-between">
-                        <span class="block mb-[4px] md:text-[15px] text-black dark:text-white">
-                            Payment Method: VNPay
-                        </span>
-                        <div class="flex gap-[12px] -mt-5">
-                            <button type="button" class="font-medium inline-block transition-all rounded-md md:text-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-danger-500 text-white hover:bg-danger-400 text-sm">
-                                Print
-                            </button>
-                            <button type="button" class="font-medium inline-block transition-all rounded-md md:text-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-primary-500 text-white hover:bg-primary-400 text-sm">
-                                <span class="inline-block relative ltr:pl-[22px] rtl:pr-[22px]">
-                                    <i class="material-symbols-outlined ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 text-sm">
-                                        download
-                                    </i>
-                                    Download
-                                </span>
-                            </button>
-                        </div>
+            <!-- Class Information (Right) -->
+            <div>
+                <h6 class="text-base font-medium text-black dark:text-white mb-[12px]">Class Information</h6>
+                <div class="space-y-[8px]">
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Class ID:</span>
+                        <span class="text-xs text-gray-600 dark:text-gray-400 font-mono">{{ classId }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Name:</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ className }}</span>
+                    </div>
+                    <div class="flex items-center gap-[8px]">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Type:</span>
+                        <span class="inline-block text-xs bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-[8px] py-[4px] rounded-full font-medium">{{ classType }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">Instructor:</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ instructorName }}</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="table-responsive overflow-x-auto">
-            <table class="w-full">
-                <thead class="text-black dark:text-white">
-                    <tr>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md ltr:last:rounded-tr-md rtl:first:rounded-tr-md rtl:last:rounded-tl-md text-sm w-[5%]">
-                            No.
-                        </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md ltr:last:rounded-tr-md rtl:first:rounded-tr-md rtl:last:rounded-tl-md text-sm w-[35%]">
-                            Course Name
-                        </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md ltr:last:rounded-tr-md rtl:first:rounded-tr-md rtl:last:rounded-tl-md text-sm w-[25%]">
-                            Instructor
-                        </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md ltr:last:rounded-tr-md rtl:first:rounded-tr-md rtl:last:rounded-tl-md text-sm w-[15%]">
-                            Price
-                        </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md ltr:last:rounded-tr-md rtl:first:rounded-tr-md rtl:last:rounded-tl-md text-sm w-[15%]">
-                            Total
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="text-black dark:text-white">
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]">
-                            1
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%] truncate">
-                            React Fundamentals
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%] truncate">
-                            Nguyễn Thị Hương
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $80
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $80
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]">
-                            2
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%] truncate">
-                            Node.js Advanced
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%] truncate">
-                            Đặng Minh Tuấn
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $45
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $45
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]">
-                            3
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%] truncate">
-                            TypeScript Essentials
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%] truncate">
-                            Trần Văn A
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $30
-                        </td>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[100px]">
-                            $30
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%]"></td>
-                        <td class="font-medium ltr:text-right rtl:text-left whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            Sub Total
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $155
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%]"></td>
-                        <td class="font-medium ltr:text-right rtl:text-left whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            Tax (0.22%)
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $0.34
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%]"></td>
-                        <td class="font-medium ltr:text-right rtl:text-left whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            Discount (0.52%)
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            - $0.81
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-gray-500 dark:text-gray-400 ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[5%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[35%]"></td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[25%]"></td>
-                        <td class="font-medium ltr:text-right rtl:text-left whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            Grand Total
-                        </td>
-                        <td class="font-medium ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm w-[15%]">
-                            $154.53
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <!-- Payment Information (Bottom) -->
+        <div class="border-t border-gray-200 dark:border-[#172036] pt-[20px]">
+            <h6 class="text-base font-medium text-black dark:text-white mb-[15px]">Payment Information</h6>
+            
+            <div class="table-responsive overflow-x-auto mb-[20px]">
+                <table class="w-full">
+                    <thead class="text-black dark:text-white">
+                        <tr>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md rtl:first:rounded-tr-md text-sm">
+                                Total Amount
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap text-sm">
+                                Payment Time
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap text-sm">
+                                Payment Method
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:last:rounded-tr-md rtl:last:rounded-tl-md text-sm">
+                                Status
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-black dark:text-white">
+                        <tr>
+                            <td class="font-bold ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm text-primary-500">
+                                ${{ totalAmount }}
+                            </td>
+                            <td class="text-gray-600 dark:text-gray-300 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                                {{ paymentTime }}
+                            </td>
+                            <td class="text-gray-600 dark:text-gray-300 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                                {{ paymentMethod }}
+                            </td>
+                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                                <span class="inline-block text-xs px-[8px] py-[4px] rounded-full bg-success-50 text-success-600 dark:bg-success-500/20 dark:text-success-400 font-medium">{{ paymentStatus }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-[12px] justify-end">
+                <button type="button" class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-danger-500 text-white hover:bg-danger-400 text-sm">
+                    Print
+                </button>
+                <button type="button" class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-primary-500 text-white hover:bg-primary-400 text-sm">
+                    <span class="inline-block relative ltr:pl-[22px] rtl:pr-[22px]">
+                        <i class="material-symbols-outlined ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 text-sm">
+                            download
+                        </i>
+                        Download
+                    </span>
+                </button>
+            </div>
         </div>
     </div>
 </div>

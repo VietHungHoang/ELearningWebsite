@@ -47,6 +47,37 @@
     </div>
 </div>
 
+<!-- Search and Export Section (Common for all tabs) -->
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
+        <div class="trezo-card-title">
+            <form class="relative" (ngSubmit)="onSearchChange()">
+                <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
+                    <i class="material-symbols-outlined !text-[20px]">search</i>
+                </label>
+                <input
+                    type="text"
+                    placeholder="Search instructor name or batch number..."
+                    class="bg-gray-50 border border-gray-50 h-[36px] text-xs rounded-md w-full block text-black pt-[11px] pb-[12px] ltr:pl-[38px] rtl:pr-[38px] ltr:pr-[13px] rtl:pl-[13px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400"
+                    [(ngModel)]="searchQuery"
+                    name="searchQuery"
+                    (keydown.enter)="onSearchChange()"
+                >
+            </form>
+        </div>
+        <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex items-center gap-[15px]">
+            <button type="button" class="inline-block transition-all rounded-md font-medium py-[8px] px-[20px] bg-primary-500 text-white hover:bg-primary-400 text-sm" (click)="exportToExcel()">
+                <span class="inline-block relative ltr:pr-[22px] rtl:pl-[22px]">
+                    <i class="material-symbols-outlined ltr:right-0 rtl:left-0 absolute top-1/2 -translate-y-1/2 text-sm">
+                        download
+                    </i>
+                    Export Excel
+                </span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="border-b border-gray-100 dark:border-[#172036] mb-[20px]">
         <div class="flex gap-[20px]">
@@ -69,11 +100,49 @@
 
     @if (activeTab === 'pending') {
         <div class="space-y-[15px]">
+            <!-- Bulk confirmation toolbar -->
+            @if (selectedPayouts.size > 0) {
+                <div class="bg-blue-50 dark:bg-[#15203c] border border-blue-200 dark:border-blue-900 p-[15px] rounded-md flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-900 dark:text-blue-200">
+                            {{ selectedPayouts.size }} payout(s) selected
+                            <span class="font-bold text-blue-600 dark:text-blue-400 ml-[8px]">
+                                Total: {{ formatCurrency(getTotalSelectedAmount()) }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="flex gap-[10px]">
+                        <button
+                            type="button"
+                            class="px-[16px] py-[8px] rounded-md border border-blue-300 text-blue-700 hover:bg-blue-100 text-sm font-medium transition-colors dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900"
+                            (click)="selectedPayouts.clear()"
+                        >
+                            Clear
+                        </button>
+                        <button
+                            type="button"
+                            class="px-[16px] py-[8px] rounded-md bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium transition-colors disabled:opacity-50"
+                            [disabled]="loadingPayment"
+                            (click)="confirmBulkPayment()"
+                        >
+                            <i class="ri-check-line mr-[4px]"></i>Confirm All
+                        </button>
+                    </div>
+                </div>
+            }
+
             @if (pendingPayouts.length > 0) {
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table id="pending-payouts-table" class="w-full">
                         <thead>
                             <tr>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[50px]">
+                                    <input type="checkbox"
+                                        [checked]="isAllSelected()"
+                                        (change)="toggleSelectAll()"
+                                        class="cursor-pointer">
+                                </th>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">ID</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Instructor Name</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Bank</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Total Debt</th>
@@ -84,6 +153,15 @@
                         <tbody class="text-black dark:text-white">
                             @for (payout of pendingPayouts; track payout.id) {
                                 <tr class="border-b border-gray-100 dark:border-[#172036]">
+                                    <td class="px-[20px] py-[15px]">
+                                        <input type="checkbox"
+                                            [checked]="isPayoutSelected(payout.id)"
+                                            (change)="togglePayoutSelection(payout.id)"
+                                            class="cursor-pointer">
+                                    </td>
+                                    <td class="px-[20px] py-[15px]">
+                                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ payout.id }}</span>
+                                    </td>
                                     <td class="px-[20px] py-[15px]">
                                         <span class="font-medium">{{ payout.instructorName }}</span>
                                     </td>
@@ -138,22 +216,62 @@
 
     @if (activeTab === 'history') {
         <div class="space-y-[15px]">
-            @if (payoutHistory.length > 0) {
+            <!-- Filters Section -->
+            <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+                <div class="trezo-card-header mb-[10px] md:mb-[15px] sm:flex items-center justify-between">
+                    <div class="trezo-card-title">
+                        <h5 class="text-lg font-semibold text-black dark:text-white mb-[15px]">Filters</h5>
+                        <div class="flex flex-wrap gap-[15px] items-end">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter by Status</label>
+                                <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                                    <option value="all">All</option>
+                                    <option value="complete">Complete</option>
+                                    <option value="failed">Failed</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">From Date</label>
+                                <input type="datetime-local" [(ngModel)]="fromDate" (change)="onDateChange()" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">To Date</label>
+                                <input type="datetime-local" [(ngModel)]="toDate" (change)="onDateChange()" class="px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                            </div>
+                            <div class="flex gap-2">
+                                <button (click)="applyFiltersAndSearch()" class="px-[16px] py-[8px] bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                                    FILTER
+                                </button>
+                                <button (click)="clearFilters()" class="px-[16px] py-[8px] bg-gray-500 text-white rounded-md text-sm font-medium hover:bg-gray-600 transition-colors">
+                                    CLEAR FILTERS
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (filteredPayoutHistory.length > 0) {
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table id="payouts-history-table" class="w-full">
                         <thead>
                             <tr>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">ID</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Batch Number</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Instructor Name</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Amount</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Payment Date</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Approved By</th>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Status</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">Notes</th>
                             </tr>
                         </thead>
                         <tbody class="text-black dark:text-white">
-                            @for (history of payoutHistory; track history.id) {
+                            @for (history of filteredPayoutHistory; track history.id) {
                                 <tr class="border-b border-gray-100 dark:border-[#172036]">
+                                    <td class="px-[20px] py-[15px]">
+                                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ history.id }}</span>
+                                    </td>
                                     <td class="px-[20px] py-[15px]">
                                         <span class="font-medium text-primary-500">{{ history.batchNumber }}</span>
                                     </td>
@@ -164,10 +282,17 @@
                                         <span class="text-success-500 font-bold">{{ formatCurrency(history.paidAmount) }}</span>
                                     </td>
                                     <td class="px-[20px] py-[15px]">
-                                        <span class="text-gray-500 dark:text-gray-400 text-sm">{{ history.paidDate }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400 text-sm">{{ history.paidDate | date:'dd/MM/yyyy HH:mm:ss' }}</span>
                                     </td>
                                     <td class="px-[20px] py-[15px]">
                                         <span class="text-xs text-gray-600 dark:text-gray-400">{{ history.approvedBy }}</span>
+                                    </td>
+                                    <td class="px-[20px] py-[15px]">
+                                        @if (history.status === 'complete') {
+                                            <span class="inline-block px-[12px] py-[4px] bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs font-semibold rounded-full">Complete</span>
+                                        } @else if (history.status === 'failed') {
+                                            <span class="inline-block px-[12px] py-[4px] bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 text-xs font-semibold rounded-full">Failed</span>
+                                        }
                                     </td>
                                     <td class="px-[20px] py-[15px]">
                                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ history.notes }}</span>
@@ -233,10 +358,10 @@
                                     <div class="border border-gray-100 dark:border-[#172036] p-[10px] rounded text-sm">
                                         <div class="flex justify-between items-start mb-[4px]">
                                             <span class="font-medium text-black dark:text-white">{{ order.orderNumber }}</span>
-                                            <span class="font-bold text-black dark:text-white">{{ formatCurrency(order.commission) }}</span>
+                                            <span class="font-bold text-black dark:text-white">{{ formatCurrency(order.amount) }}</span>
                                         </div>
-                                        <p class="text-gray-600 dark:text-gray-400 text-xs">{{ order.learnerName }} - {{ order.courseName }}</p>
-                                        <p class="text-gray-500 dark:text-gray-500 text-xs mt-[2px]">{{ order.date }}</p>
+                                        <p class="text-gray-600 dark:text-gray-400 text-xs">{{ order.learnerName }} - {{ order.sessionName }} ({{ order.sessionType }})</p>
+                                        <p class="text-gray-500 dark:text-gray-500 text-xs mt-[2px]">{{ order.hourlyRate }}/h × {{ order.hours }}h | {{ order.date }}</p>
                                     </div>
                                 }
                             } @else {
@@ -345,6 +470,58 @@
                     </button>
                     <button type="button" class="px-[20px] py-[10px] rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-[#172036] dark:text-gray-300 dark:hover:bg-[#15203c]" (click)="closeQRModal()">
                         Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (isBulkConfirmModalOpen) {
+    <div class="modal-overlay" (click)="closeBulkConfirmModal()">
+        <div class="modal-content max-w-[600px]" (click)="$event.stopPropagation()">
+            <div class="modal-body">
+                <h3 class="text-lg font-bold text-black dark:text-white mb-[20px]">
+                    Confirm Bulk Payment
+                </h3>
+
+                <!-- Selected Payouts List -->
+                <div class="mb-[20px] p-[16px] rounded border border-gray-200 dark:border-[#172036] bg-gray-50 dark:bg-[#15203c]">
+                    <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-[12px]">Selected Instructors:</h4>
+                    <div class="space-y-[8px] max-h-[250px] overflow-y-auto">
+                        @for (payout of getSelectedPayoutsList(); track payout.id) {
+                            <div class="flex justify-between items-center text-sm p-[8px] rounded bg-white dark:bg-[#1a2a3c]">
+                                <span class="text-gray-700 dark:text-gray-300">{{ payout.instructorName }}</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(payout.totalOwed) }}</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="mb-[20px] p-[16px] rounded-md border-l-4 border-red-500 bg-red-50 dark:bg-red-500/10">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700 dark:text-gray-300">Total Amount:</span>
+                        <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ formatCurrency(getTotalSelectedAmount()) }}</span>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-[20px]">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-[8px]">
+                        Notes (Optional)
+                    </label>
+                    <textarea [(ngModel)]="bulkPaymentNotes" placeholder="Add payment notes..." class="w-full px-[12px] py-[10px] rounded-md border border-gray-300 dark:border-[#172036] bg-white dark:bg-[#15203c] text-gray-700 dark:text-gray-300 text-sm resize-none" rows="3"></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-[12px] justify-end">
+                    <button type="button" class="px-[20px] py-[10px] rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-[#172036] dark:text-gray-300 dark:hover:bg-[#15203c] font-medium" (click)="closeBulkConfirmModal()">
+                        Cancel
+                    </button>
+                    <button type="button" class="px-[20px] py-[10px] rounded-md bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 font-medium flex items-center gap-[6px]" (click)="processBulkPayment()">
+                        <i class="material-symbols-outlined !text-[18px]">check_circle</i>
+                        Confirm Payment
                     </button>
                 </div>
             </div>

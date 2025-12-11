@@ -1,0 +1,58 @@
+// Level option styling
+.level-option {
+    cursor: pointer;
+
+    &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.selected {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}
+
+// Certification viewer modal styling
+.certification-card {
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+// Filter tab styling
+.filter-tab {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background-color: transparent;
+
+    &:hover {
+        border-color: currentColor;
+        background-color: transparent;
+    }
+
+    &.active-tab {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        border-color: #3b82f6 !important;
+
+        &:hover {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            background-color: #3b82f6 !important;
+            color: white !important;
+            border-color: #3b82f6 !important;
+        }
+    }
+}
+
+// Table styling inherited from course-list (no custom styles needed)
+
+

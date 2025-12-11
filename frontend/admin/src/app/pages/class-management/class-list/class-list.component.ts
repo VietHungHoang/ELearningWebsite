@@ -27,7 +27,7 @@ export class ClassListComponent implements OnInit {
   selectedDateRange = { start: '', end: '' };
   searchQuery = '';
 
-  itemsPerPage = 10;
+  itemsPerPage = 5;
   currentPage = 1;
   totalClasses = 0;
   totalPages = 1;
@@ -106,10 +106,6 @@ export class ClassListComponent implements OnInit {
       result = result.filter(c => c.status === this.selectedStatus);
     }
 
-    if (this.selectedInstructor !== 'all') {
-      result = result.filter(c => c.instructor_id === this.selectedInstructor);
-    }
-
     if (this.searchQuery.trim()) {
       const lowerQuery = this.searchQuery.toLowerCase();
       result = result.filter(c =>
@@ -160,14 +156,14 @@ export class ClassListComponent implements OnInit {
   }
 
   getSelectedStatusText(): string {
-    if (this.selectedStatus === 'all') return 'Tất cả trạng thái';
+    if (this.selectedStatus === 'all') return 'All Status';
     return this.getStatusText(this.selectedStatus as ClassStatus);
   }
 
   getSelectedInstructorText(): string {
-    if (this.selectedInstructor === 'all') return 'Tất cả giảng viên';
+    if (this.selectedInstructor === 'all') return 'All Instructors';
     const instructor = this.instructors.find(i => i.id === this.selectedInstructor);
-    return instructor ? instructor.name : 'Tất cả giảng viên';
+    return instructor ? instructor.name : 'All Instructors';
   }
 
   @HostListener('document:click', ['$event'])
@@ -206,7 +202,7 @@ export class ClassListComponent implements OnInit {
       if (startPage > 1) {
         visiblePages.push(1);
         if (startPage > 2) {
-          visiblePages.push(-1); 
+          visiblePages.push(-1);
         }
       }
 
@@ -216,7 +212,7 @@ export class ClassListComponent implements OnInit {
 
       if (endPage < this.totalPages) {
         if (endPage < this.totalPages - 1) {
-          visiblePages.push(-1); 
+          visiblePages.push(-1);
         }
         visiblePages.push(this.totalPages);
       }

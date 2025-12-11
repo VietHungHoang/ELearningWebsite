@@ -24,11 +24,12 @@ export class FRevenueDashboardComponent implements OnInit {
     isDateRangeDropdownOpen: boolean = false;
 
     kpis = {
-        grossRevenue: 0,
-        instructorEarnings: 0,
-        platformProfit: 0,
-        totalOrders: 0,
-        gatewayFees: 0
+        adminAccountIncome: 0,        // Tiền vào từ transaction
+        adminAccountPayout: 0,         // Tiền ra cho giảng viên
+        peakTransactionAmount: 0,      // Lần thanh toán cao nhất
+        payoutFixedDate: 1,            // Ngày cố định hàng tháng (e.g., 1, 15, 25)
+        totalTransactions: 0,          // Tổng số giao dịch
+        totalPayouts: 0                // Tổng số lần thanh toán cho giảng viên
     };
 
     constructor() {}
@@ -51,32 +52,36 @@ export class FRevenueDashboardComponent implements OnInit {
 
         const mockData: { [key: string]: any } = {
             today: {
-                grossRevenue: 1500000,
-                instructorEarnings: 450000,
-                platformProfit: 1050000,
-                totalOrders: 5,
-                gatewayFees: 33000
+                adminAccountIncome: 15000000,         // 15M VND vào tài khoản admin
+                adminAccountPayout: 0,                 // Chưa có payout hôm nay
+                peakTransactionAmount: 2000000,        // Lần thanh toán cao nhất 2M VND
+                payoutFixedDate: 1,                    // Thanh toán vào ngày 1 hàng tháng
+                totalTransactions: 8,
+                totalPayouts: 0
             },
             '7days': {
-                grossRevenue: 8500000,
-                instructorEarnings: 2550000,
-                platformProfit: 5950000,
-                totalOrders: 28,
-                gatewayFees: 187000
+                adminAccountIncome: 85000000,         // 85M VND trong 7 ngày
+                adminAccountPayout: 0,                 // Chưa có payout trong tuần này
+                peakTransactionAmount: 3500000,        // Peak 3.5M VND
+                payoutFixedDate: 1,
+                totalTransactions: 42,
+                totalPayouts: 0
             },
             '30days': {
-                grossRevenue: 35000000,
-                instructorEarnings: 10500000,
-                platformProfit: 24500000,
-                totalOrders: 112,
-                gatewayFees: 770000
+                adminAccountIncome: 280000000,        // 280M VND trong 30 ngày
+                adminAccountPayout: 224000000,        // 224M VND trả cho giảng viên (80% của income)
+                peakTransactionAmount: 5000000,        // Peak 5M VND
+                payoutFixedDate: 1,                    // Thanh toán vào ngày 1 hàng tháng
+                totalTransactions: 168,
+                totalPayouts: 1                        // 1 lần thanh toán trong tháng
             },
             thisMonth: {
-                grossRevenue: 32000000,
-                instructorEarnings: 9600000,
-                platformProfit: 22400000,
-                totalOrders: 105,
-                gatewayFees: 704000
+                adminAccountIncome: 250000000,        // 250M VND trong tháng
+                adminAccountPayout: 200000000,        // 200M VND trả cho giảng viên
+                peakTransactionAmount: 4800000,        // Peak 4.8M VND
+                payoutFixedDate: 1,
+                totalTransactions: 155,
+                totalPayouts: 1
             }
         };
 

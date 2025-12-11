@@ -20,6 +20,7 @@ export class VouchersComponent implements OnInit, OnDestroy {
   selectedType: string = 'all';
   filteredVouchers: Voucher[] = [];
   isFilterMenuOpen = false;
+  selectedVouchers: Set<string> = new Set();
   private subscription: Subscription = new Subscription();
 
   constructor(private voucherService: VoucherService) {}
@@ -71,6 +72,16 @@ export class VouchersComponent implements OnInit, OnDestroy {
     return statusMap[status] || status;
   }
 
+  getActorLabel(actor?: string): string {
+    const actorMap: { [key: string]: string } = {
+      'all': 'All Students',
+      'top-spenders': 'Top Spenders',
+      'new-students': 'New Students',
+      'no-spending-1month': 'No Spending (1 month)'
+    };
+    return actorMap[actor || 'all'] || 'All Students';
+  }
+
   toggleFilterMenu(): void {
     this.isFilterMenuOpen = !this.isFilterMenuOpen;
   }
@@ -107,5 +118,39 @@ export class VouchersComponent implements OnInit, OnDestroy {
   onTypeChange(type: string): void {
     this.selectedType = type;
     this.filterVouchers();
+  }
+
+  toggleVoucherSelection(voucherId: string): void {
+    if (this.selectedVouchers.has(voucherId)) {
+      this.selectedVouchers.delete(voucherId);
+    } else {
+      this.selectedVouchers.add(voucherId);
+    }
+  }
+
+  toggleSelectAll(): void {
+    if (this.selectedVouchers.size === this.filteredVouchers.length) {
+      this.selectedVouchers.clear();
+    } else {
+      this.filteredVouchers.forEach(v => this.selectedVouchers.add(v.id));
+    }
+  }
+
+  isAllSelected(): boolean {
+    return this.filteredVouchers.length > 0 && this.selectedVouchers.size === this.filteredVouchers.length;
+  }
+
+  isIndeterminate(): boolean {
+    return this.selectedVouchers.size > 0 && this.selectedVouchers.size < this.filteredVouchers.length;
+  }
+
+  bulkDeleteVouchers(): void {
+    if (this.selectedVouchers.size === 0) return;
+
+    if (confirm(`Delete ${this.selectedVouchers.size} voucher(s)?`)) {
+      this.vouchers = this.vouchers.filter(v => !this.selectedVouchers.has(v.id));
+      this.selectedVouchers.clear();
+      this.filterVouchers();
+    }
   }
 }

@@ -15,18 +15,23 @@ export class TotalCoursesService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
+                console.log('Loading chart for Pending Approvals...');
 
                 const ApexCharts = (await import('apexcharts')).default;
 
                 const options = {
                     series: [
                         {
-                            name: "Published",
-                            data: [30, 35, 38, 42, 45, 48, 50]
+                            name: "Approved",
+                            data: [5, 7, 9, 12, 15, 18, 20]
                         },
                         {
-                            name: "Draft",
-                            data: [8, 10, 12, 10, 8, 6, 5]
+                            name: "Pending",
+                            data: [3, 5, 4, 6, 5, 7, 8]
+                        },
+                        {
+                            name: "Rejected",
+                            data: [1, 2, 1, 2, 3, 2, 3]
                         }
                     ],
                     chart: {
@@ -46,7 +51,7 @@ export class TotalCoursesService {
                         }
                     },
                     colors: [
-                        "#605DFF", "#C2CDFF"
+                        "#10B981", "#EAB308", "#EF4444"
                     ],
                     grid: {
                         show: true,
@@ -106,7 +111,7 @@ export class TotalCoursesService {
                     tooltip: {
                         y: {
                             formatter: function(val:any) {
-                                return val + " Courses";
+                                return val + " Requests";
                             }
                         }
                     },
@@ -131,11 +136,16 @@ export class TotalCoursesService {
                     }
                 };
 
+                console.log('Creating chart with options:', options);
                 const chart = new ApexCharts(document.querySelector('#overview_total_courses_chart'), options);
-                chart.render();
+                await chart.render();
+                console.log('Chart rendered successfully');
+
             } catch (error) {
                 console.error('Error loading ApexCharts:', error);
             }
+        } else {
+            console.log('Not in browser environment, skipping chart load');
         }
     }
 
