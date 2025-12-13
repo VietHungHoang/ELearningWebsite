@@ -3,5 +3,5 @@ import TutorDetailPage from '../pages/TutorDetailPage';
 
 export default [
   { path: '/find-tutors', element: <FindTutorsPage /> },
-  {path: '/tutor-detail/:tutorId', element: <TutorDetailPage /> }
+  {path: '/tutor/:tutorId', element: <TutorDetailPage /> }
 ];

@@ -1,42 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import { FiCalendar, FiFilter, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import FilterSessionPopover from './FilterSessionPopover';
 import DatePickerModal from './DatePickerModal';
+import type { TimezoneResponse, Tutor } from '../../../../types/api';
 
 interface BookASessionProps {
     onOpenModal: () => void;
+    onOpenTrialModal?: () => void;
+    tutor: Tutor;
 }
 
-const mockSessions = [
-    {
-        date: new Date('2025-10-20T00:00:00'), // Monday
-        timeSlots: ['09:00 AM', '11:00 AM', '02:00 PM']
-    },
-    {
-        date: new Date('2025-10-21T00:00:00'), // Tuesday
-        timeSlots: ['10:00 AM', '01:00 PM']
-    },
-    {
-        date: new Date('2025-10-23T00:00:00'), // Thursday
-        timeSlots: ['08:00 AM', '10:00 AM', '03:00 PM', '05:00 PM']
-    },
-    {
-        date: new Date('2025-10-24T00:00:00'), // Friday
-        timeSlots: ['09:30 AM']
-    },
-     {
-        date: new Date('2025-10-27T00:00:00'), // Next Monday
-        timeSlots: ['10:30 AM', '04:00 PM']
-    }
-];
-
-const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
-    const [selectedDate, setSelectedDate] = useState(new Date(2025, 9, 20)); // Oct 20, 2025
+const BookASession: React.FC<BookASessionProps> = ({ onOpenModal, onOpenTrialModal, tutor }) => {
+    console.log('tutor in BookASession:', tutor);
+    const [selectedDate, setSelectedDate] = useState(new Date()); // Today
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
+    const [timezones, setTimezones] = useState<TimezoneResponse[]>([]);
     const filterRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
     const datePickerButtonRef = useRef<HTMLButtonElement>(null);
@@ -45,47 +27,50 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
     const timezonePlaceholder = '(GMT+07:00) Asia/Ho_Chi_Minh';
     const [selectedTimezone, setSelectedTimezone] = useState(timezonePlaceholder);
 
-    const timezoneOptions = [
-        '(GMT-11:00) Pacific/Midway',
-        '(GMT-10:00) Pacific/Honolulu',
-        '(GMT-09:00) America/Anchorage',
-        '(GMT-08:00) America/Los_Angeles',
-        '(GMT-07:00) America/Denver',
-        '(GMT-06:00) America/Chicago',
-        '(GMT-05:00) America/New_York',
-        '(GMT-04:00) America/Caracas',
-        '(GMT-03:00) America/Sao_Paulo',
-        '(GMT-01:00) Atlantic/Azores',
-        '(GMT+00:00) Europe/London',
-        '(GMT+01:00) Europe/Paris',
-        '(GMT+02:00) Europe/Helsinki',
-        '(GMT+03:00) Europe/Moscow',
-        '(GMT+04:00) Asia/Dubai',
-        '(GMT+05:00) Asia/Karachi',
-        '(GMT+06:00) Asia/Dhaka',
-        '(GMT+07:00) Asia/Bangkok',
-        '(GMT+07:00) Asia/Ho_Chi_Minh',
-        '(GMT+08:00) Asia/Singapore',
-        '(GMT+09:00) Asia/Tokyo',
-        '(GMT+10:00) Australia/Sydney',
-        '(GMT+11:00) Pacific/Guadalcanal',
-        '(GMT+12:00) Pacific/Auckland'
-    ];
+        const timezoneOptions = timezones.map(tz => `(GMT${tz.utcOffset}) ${tz.name}`);
     
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-                setIsFilterPopoverOpen(false);
+    const buttonText = tutor.hasTrialSession ? 'Đăng ký học' : 'Đăng ký học thử';
+
+    const sessions = useMemo(() => {
+        if (!tutor.availability) return [];
+        console.log('tutor.availability:', tutor.availability);
+                    const result = tutor.availability.map((avail) => {
+            const parts = avail.split(' ');
+            const day = parts[0];
+            const timeRange = parts.slice(1).join(' ');
+            const [start, end] = timeRange.split(' - ');
+
+            const parseTime = (timeStr: string) => {
+                const [time, period] = timeStr.split(' ');
+                let [hours, minutes] = time.split(':').map(Number);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            };
+
+            const start24 = parseTime(start);
+            const end24 = parseTime(end);
+
+            const timeSlots = [];
+            let current = new Date(`1970-01-01T${start24}`);
+            const endTime = new Date(`1970-01-01T${end24}`);
+            while (current < endTime) {
+                timeSlots.push(current.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
+                current.setHours(current.getHours() + 1);
             }
-            if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
-                setIsDatePickerOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
+
+            const dayMap = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6, Sunday: 0 };
+            const today = new Date();
+            const mondayOfWeek = new Date(today);
+            mondayOfWeek.setDate(today.getDate() - today.getDay());
+            const targetDay = dayMap[day as keyof typeof dayMap] || 0;
+            const sessionDate = new Date(mondayOfWeek);
+            sessionDate.setDate(mondayOfWeek.getDate() + (targetDay - 1));
+            return { date: sessionDate, timeSlots };
+        });
+        console.log('sessions:', result);
+        return result;
+    }, [tutor.availability]);
 
     const getWeekRange = (date: Date) => {
         const startDate = new Date(date);
@@ -166,7 +151,11 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
 
     const handleRequestSessionClick = () => {
         if (selectedTime) {
-            onOpenModal();
+            if (true || tutor.hasTrialSession) {
+                onOpenModal();
+            } else {
+                onOpenTrialModal?.();
+            }
         } else {
             alert('Please select a time slot before requesting a session.');
         }
@@ -181,7 +170,7 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
                     onClick={handleRequestSessionClick}
                     className="bg-[#FF5A1F] text-white font-medium text-sm py-2.5 px-4 rounded-lg hover:bg-orange-600 transition-colors"
                 >
-                    Request a Session
+                    {buttonText}
                 </button>
             </div>
 
@@ -244,7 +233,8 @@ const BookASession: React.FC<BookASessionProps> = ({ onOpenModal }) => {
                 <div className="grid grid-cols-7 gap-x-2 flex-grow mx-1">
                     {weekDays.map((d, index) => {
                         const isSelected = selectedDate.toDateString() === d.fullDate.toDateString();
-                        const daySessions = mockSessions.find(session => session.date.toDateString() === d.fullDate.toDateString());
+                        const daySessions = sessions.find(session => session.date.toDateString() === d.fullDate.toDateString());
+                        console.log('daySessions for', d.fullDate.toDateString(), daySessions);
                         return (
                             <div key={index} className="text-center">
                                 <button

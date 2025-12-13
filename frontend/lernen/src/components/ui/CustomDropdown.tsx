@@ -12,9 +12,11 @@ export interface CustomDropdownProps {
     hasSearch?: boolean;
     searchPlaceholder?: string;
     loading?: boolean;
+    position?: 'top' | 'bottom'; // Position of dropdown: 'top' = above, 'bottom' = below
+    maxVisibleItems?: number; // Number of items to show without scrolling
 }
 
-const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selectedValue, placeholder, onSelect, dropdownId, openDropdown, setOpenDropdown, hasSearch = false, searchPlaceholder = "Search...", loading = false }) => {
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selectedValue, placeholder, onSelect, dropdownId, openDropdown, setOpenDropdown, hasSearch = false, searchPlaceholder = "Search...", loading = false, position = 'bottom', maxVisibleItems = 4 }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const isOpen = openDropdown === dropdownId;
@@ -34,6 +36,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
 
     const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
+        e.preventDefault();
         setOpenDropdown(isOpen ? null : dropdownId);
     };
 
@@ -73,17 +76,25 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
     }, [shouldRender, isOpen, hasSearch]);
 
     const isPlaceholder = selectedValue === placeholder;
+    
+    // Calculate max height based on maxVisibleItems
+    // Each item is approximately 40px (p-2 = 8px padding + ~32px content)
+    // Search bar adds ~48px if present
+    const itemHeight = 40;
+    const searchBarHeight = hasSearch ? 48 : 0;
+    const maxHeight = (maxVisibleItems * itemHeight) + searchBarHeight + 16; // +16 for padding
 
     return (
         <div className="relative" ref={dropdownRef}>
             <div className={`
                 bg-white rounded-lg border border-gray-200 shadow-sm 
-                 transition-colors
                 ${label ? 'p-3 min-h-[70px] flex flex-col justify-center' : ''}
             `}>
                 {label && <label className="text-xs text-[#585858] block mb-1.5">{label}</label>}
                 <button 
-                    onClick={handleToggle} 
+                    type="button"
+                    onClick={handleToggle}
+                    onMouseDown={(e) => e.preventDefault()}
                     className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[42px]'}`}
                 >
                     <span className={`dropdown-label text-sm font-normal truncate ${isPlaceholder && label ? 'text-[rgba(88,88,88,0.4)]' : 'text-[#585858]'}`}>{selectedValue}</span>
@@ -92,10 +103,11 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
             </div>
             {shouldRender && (
                 <div className={`
-                    dropdown-modal absolute z-20 mt-1 w-full bg-white rounded-xl shadow-lg border border-gray-200/80 p-2 
-                    transform-origin-top transition-all duration-150 ease-out
-                    ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}
-                `}>
+                    dropdown-modal absolute z-20 left-0 right-0 w-full bg-white rounded-xl shadow-lg border border-gray-200/80 p-2 
+                    ${position === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'}
+                    transition-opacity duration-150 ease-out
+                    ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                `} style={{ maxHeight: `${maxHeight}px` }}>
                     {hasSearch && (
                          <div className="p-1 mb-1">
                             <input
@@ -109,7 +121,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
                             />
                         </div>
                     )}
-                    <ul className="space-y-1 max-h-60 overflow-y-auto">
+                    <ul className="space-y-1 overflow-y-auto" style={{ maxHeight: `${maxHeight - searchBarHeight - 16}px` }}>
                         {loading ? (
                             <li className="p-2 text-sm text-gray-500 text-center">
                                 <div className="flex items-center justify-center">
@@ -119,6 +131,10 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
                                     </svg>
                                     Loading...
                                 </div>
+                            </li>
+                        ) : filteredOptions.length === 0 ? (
+                            <li className="p-2 text-sm text-gray-500 text-center">
+                                {searchTerm ? 'No results found' : 'No options available'}
                             </li>
                         ) : (
                             filteredOptions.map((option, index) => (

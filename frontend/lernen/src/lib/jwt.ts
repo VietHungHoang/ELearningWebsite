@@ -1,3 +1,5 @@
+import type { UserRole } from "../types/api";
+
 export interface DecodedUser {
   sub: string; // User ID
   name: string;
@@ -62,13 +64,12 @@ export const isTokenExpired = (token: string): boolean => {
  * @param decoded Decoded JWT payload
  * @returns User role or null if not found
  */
-export const extractUserRole = (decoded: DecodedUser): 'Student' | 'Tutor' | 'Admin' | null => {
-  const roles = decoded.realm_access?.roles || [];
+export const extractUserRole = (decoded: DecodedUser): UserRole => {
+  const roles = (decoded.realm_access?.roles || []).map(r => r.toLowerCase());
 
   // Example mapping - adjust based on your Keycloak realm configuration
-  if (roles.includes('admin')) return 'Admin';
-  if (roles.includes('tutor')) return 'Tutor';
-  if (roles.includes('student') || roles.includes('default-roles-lernen')) return 'Student';
+  if (roles.includes('tutor')) return 'tutor';
+  if (roles.includes('student') || roles.includes('default-roles-lernen')) return 'student';
 
   return null; // Default to null if no matching role
 };
@@ -77,7 +78,7 @@ export const extractUserRole = (decoded: DecodedUser): 'Student' | 'Tutor' | 'Ad
  * Get current user info from stored access token
  * @returns User object or null if not authenticated or token invalid
  */
-export const getCurrentUserFromToken = (): { id: string; name: string; email: string; role?: 'Student' | 'Tutor' | 'Admin' } | null => {
+export const getCurrentUserFromToken = (): { id: string; name: string; email: string; role?: UserRole } | null => {
   const token = localStorage.getItem('accessToken');
   if (!token) return null;
 

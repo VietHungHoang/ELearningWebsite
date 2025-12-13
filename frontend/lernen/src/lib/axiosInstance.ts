@@ -2,7 +2,7 @@ import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosReques
 
 // Create axios instance with base configuration
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://1mf17bgk-8081.asse.devtunnels.ms/api',
   // baseURL: import.meta.env.VITE_API_BASE_URL || 'https://lernen-api-gateway.onrender.com/api',
   timeout: 100000,
   headers: {
@@ -60,11 +60,11 @@ axiosInstance.interceptors.response.use(
         }
 
         // Attempt to refresh token
-        const response = await axios.post(`${axiosInstance.defaults.baseURL}/auth/refresh`, {
+        const response = await axios.post(`${axiosInstance.defaults.baseURL}/v1/auth/refresh-token`, {
           refreshToken,
         });
 
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
         // Update tokens in storage
         localStorage.setItem('accessToken', accessToken);

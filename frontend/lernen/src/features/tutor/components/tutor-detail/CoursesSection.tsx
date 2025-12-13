@@ -1,61 +1,15 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import type { AppPage } from '../../../../App';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import type { Course } from './CourseCard';
 import CourseCard from './CourseCard';
+import type { Course, Tutor } from '../../../../types/api';
 
-// Enhanced mock data with categories
-const mockCourses: Course[] = [
-    {
-        id: 1,
-        image: 'https://picsum.photos/seed/course1/400/225',
-        title: 'Mastering Algebra: A Comprehensive Guide',
-        lessons: 24,
-        students: 120,
-        price: 99.99,
-        category: 'Mathematics',
-        categoryColor: 'bg-blue-500',
-    },
-    {
-        id: 2,
-        image: 'https://picsum.photos/seed/course2/400/225',
-        title: 'Introduction to Physics: From Motion to Magnetism',
-        lessons: 32,
-        students: 85,
-        price: 119.99,
-        category: 'Science',
-        categoryColor: 'bg-green-500',
-    },
-    {
-        id: 3,
-        image: 'https://picsum.photos/seed/course3/400/225',
-        title: 'Creative Writing Workshop: Unleash Your Inner Author',
-        lessons: 18,
-        students: 250,
-        price: 79.99,
-        category: 'Writing',
-        categoryColor: 'bg-purple-500',
-    },
-    {
-        id: 4,
-        image: 'https://picsum.photos/seed/course4/400/225',
-        title: 'Digital Art Fundamentals with Procreate',
-        lessons: 20,
-        students: 180,
-        price: 89.99,
-        category: 'Art',
-        categoryColor: 'bg-red-500',
-    }
-];
+interface CoursesSectionProps {
+  courses: Course[];
+  tutor: Tutor;
+}
 
-// Mock tutor for the course card
-const mockTutor = {
-    name: 'Cynthia Hunter',
-    avatar: 'https://picsum.photos/seed/cynthia/96/96',
-};
-
-const CoursesSection: React.FC = () => {
+const CoursesSection: React.FC<CoursesSectionProps> = ({ courses, tutor }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -112,9 +66,9 @@ const CoursesSection: React.FC = () => {
             </div>
 
             <div ref={scrollContainerRef} className="flex space-x-6 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-                {mockCourses.map(course => (
-                    <div key={course.id} className="flex-shrink-0 w-80">
-                        <CourseCard course={course} tutor={mockTutor} />
+                {courses.map(course => (
+                    <div key={course.id} className="flex-shrink-0 w-70">
+                        <CourseCard course={course} tutor={tutor} />
                     </div>
                 ))}
             </div>

@@ -1,0 +1,339 @@
+import React, { useState, useEffect, useRef } from 'react';
+import type { Tutor } from '../../../../types/api.ts'
+
+interface AvailabilityStepProps {
+    data?: Partial<Tutor>;
+    onChange: (data: Partial<Tutor>) => void;
+}
+
+const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) => {
+    // Use current week
+    const getCurrentWeek = () => {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const dayOfWeek = startOfWeek.getDay();
+        const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+        startOfWeek.setDate(diff);
+
+        return Array.from({ length: 7 }, (_, i) => {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            return day;
+        });
+    };
+
+    const [weekDays] = useState(getCurrentWeek());
+    const [availability, setAvailability] = useState<string[]>(((data as any)?.availability) || []);
+
+    // Update parent when availability changes - write into `availability` field of parent data
+    useEffect(() => {
+        // cast because `availability` is not declared on Tutor type; parent uses Partial<Tutor>
+        onChange({ availability } as unknown as Partial<Tutor>);
+    }, [availability, onChange]);
+
+    // Marquee Selection State
+    const [isDragging, setIsDragging] = useState(false);
+    const [selectionMode, setSelectionMode] = useState<'adding' | 'removing' | null>(null);
+    const [dragStartCoords, setDragStartCoords] = useState<{ x: number; y: number } | null>(null);
+    const [selectionRect, setSelectionRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+    const [initialAvailability, setInitialAvailability] = useState<string[]>([]);
+    const gridRef = useRef<HTMLDivElement>(null);
+
+    // Reduced time slots: 8:00 AM - 8:00 PM (12 hours instead of 16)
+    const timeSlots = Array.from({ length: 12 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
+
+    const handleCellClick = (date: Date, hour: number) => {
+        const slotDate = new Date(date);
+        slotDate.setHours(hour, 0, 0, 0);
+        const slotISO = slotDate.toISOString();
+        const isCurrentlyAvailable = availability.includes(slotISO);
+
+        if (isCurrentlyAvailable) {
+            setAvailability(prev => prev.filter(s => s !== slotISO));
+        } else {
+            setAvailability(prev => [...prev, slotISO]);
+        }
+    };
+
+    const handleMouseDown = (e: React.MouseEvent, date: Date, hour: number) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+
+        const gridRect = gridRef.current?.getBoundingClientRect();
+        if (!gridRect) return;
+
+        const startX = e.clientX - gridRect.left;
+        const startY = e.clientY - gridRect.top;
+        setDragStartCoords({ x: startX, y: startY });
+
+        const slotDate = new Date(date);
+        slotDate.setHours(hour, 0, 0, 0);
+        const slotISO = slotDate.toISOString();
+        const mode = availability.includes(slotISO) ? 'removing' : 'adding';
+        setSelectionMode(mode);
+
+        setInitialAvailability([...availability]);
+        setIsDragging(true);
+    };
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isDragging || !dragStartCoords || !gridRef.current) return;
+            e.preventDefault();
+            const gridRect = gridRef.current.getBoundingClientRect();
+            const currentX = e.clientX - gridRect.left;
+            const currentY = e.clientY - gridRect.top;
+            const rect = {
+                left: Math.min(dragStartCoords.x, currentX),
+                top: Math.min(dragStartCoords.y, currentY),
+                width: Math.abs(dragStartCoords.x - currentX),
+                height: Math.abs(dragStartCoords.y - currentY)
+            };
+            setSelectionRect(rect);
+        };
+
+        const handleMouseUp = () => {
+            if (isDragging) {
+                setIsDragging(false);
+                setDragStartCoords(null);
+                setSelectionRect(null);
+                setSelectionMode(null);
+                setInitialAvailability([]);
+            }
+        };
+
+        if (isDragging) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isDragging, dragStartCoords]);
+
+    useEffect(() => {
+        if (!isDragging || !selectionRect || !selectionMode || !gridRef.current) return;
+
+        const newAvailability = new Set(initialAvailability);
+        const gridRect = gridRef.current.getBoundingClientRect();
+        const cellElements = gridRef.current.querySelectorAll('.calendar-cell');
+
+        cellElements.forEach(cell => {
+            const cellRect = cell.getBoundingClientRect();
+            const relativeCellRect = {
+                top: cellRect.top - gridRect.top,
+                bottom: cellRect.bottom - gridRect.top,
+                left: cellRect.left - gridRect.left,
+                right: cellRect.right - gridRect.left
+            };
+
+            if (selectionRect.left < relativeCellRect.right &&
+                selectionRect.left + selectionRect.width > relativeCellRect.left &&
+                selectionRect.top < relativeCellRect.bottom &&
+                selectionRect.top + selectionRect.height > relativeCellRect.top) {
+                const iso = (cell as HTMLElement).dataset.iso;
+                if (iso) {
+                    if (selectionMode === 'adding') newAvailability.add(iso);
+                    else if (selectionMode === 'removing') newAvailability.delete(iso);
+                }
+            }
+        });
+        setAvailability(Array.from(newAvailability));
+    }, [selectionRect, selectionMode, initialAvailability, isDragging]);
+
+    // Group slots by day and convert to time ranges
+    const groupedSlots: { [key: string]: Date[] } = {};
+    availability.forEach(slot => {
+        const date = new Date(slot);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        if (!groupedSlots[dayName]) {
+            groupedSlots[dayName] = [];
+        }
+        groupedSlots[dayName].push(date);
+    });
+
+    // Convert time slots to ranges for each day
+    const timeRangesByDay: { [key: string]: { start: string; end: string }[] } = {};
+    Object.keys(groupedSlots).forEach(day => {
+        const slots = groupedSlots[day].sort((a, b) => a.getTime() - b.getTime());
+        const ranges: { start: string; end: string }[] = [];
+
+        if (slots.length === 0) return;
+
+        let rangeStart = slots[0];
+        let rangeEnd = slots[0];
+
+        for (let i = 1; i < slots.length; i++) {
+            const currentSlot = slots[i];
+            const prevSlot = slots[i - 1];
+            const timeDiff = currentSlot.getTime() - prevSlot.getTime();
+
+            // If slots are consecutive (1 hour apart = 3600000 ms)
+            if (timeDiff === 3600000) {
+                rangeEnd = currentSlot;
+            } else {
+                // Save current range
+                ranges.push({
+                    start: rangeStart.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    }),
+                    end: new Date(rangeEnd.getTime() + 3600000).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    })
+                });
+                // Start new range
+                rangeStart = currentSlot;
+                rangeEnd = currentSlot;
+            }
+        }
+
+        // Add last range
+        ranges.push({
+            start: rangeStart.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }),
+            end: new Date(rangeEnd.getTime() + 3600000).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            })
+        });
+
+        timeRangesByDay[day] = ranges;
+    });
+
+    const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const sortedDays = Object.keys(timeRangesByDay).sort((a, b) =>
+        dayOrder.indexOf(a) - dayOrder.indexOf(b)
+    );
+
+    return (
+        <div className="space-y-2">
+            <div>
+                <h3 className="text-lg font-bold text-gray-800">Availability Schedule</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                    Click or drag on time slots to mark when you're available (optional)
+                </p>
+            </div>
+
+            {/* Main Content: Grid Layout - Calendar Left, Selected Slots Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-2.5">
+                {/* Left: Calendar Grid */}
+                <div className="space-y-1.5">
+                    {/* Tips and Timezone - Same row */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-1.5 flex items-center justify-between">
+                        <p className="text-xs text-blue-800">
+                            <strong>💡 Tip:</strong> Click to toggle, drag to select multiple. Green = available.
+                        </p>
+                        <p className="text-xs text-blue-800">
+                            🌍 <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong>
+                        </p>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <div className="overflow-x-auto relative max-h-[400px] overflow-y-auto" ref={gridRef}>
+                            <div className="grid min-w-[400px]" style={{ gridTemplateColumns: `auto repeat(7, 1fr)` }}>
+                                {/* Time Column Header */}
+                                <div className="sticky left-0 bg-white z-10"></div>
+
+                                {/* Day Headers */}
+                                {weekDays.map(day => (
+                                    <div key={day.toISOString()} className="text-center p-1.5 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                                        <p className="text-xs font-semibold text-gray-700">
+                                            {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                                        </p>
+                                    </div>
+                                ))}
+
+                                {/* Time Slots and Availability Grid */}
+                                {timeSlots.map(time => (
+                                    <React.Fragment key={time}>
+                                        <div className="text-right pr-2 py-1 border-r border-gray-200 text-xs text-gray-500 sticky left-0 bg-white z-10 h-6 flex items-center justify-end">
+                                            {time}
+                                        </div>
+
+                                        {weekDays.map(day => {
+                                            const hour = parseInt(time.split(':')[0]);
+                                            const slotDate = new Date(day);
+                                            slotDate.setHours(hour, 0, 0, 0);
+                                            const slotISO = slotDate.toISOString();
+                                            const isAvailable = availability.includes(slotISO);
+
+                                            return (
+                                                <div
+                                                    key={day.toISOString()}
+                                                    data-iso={slotISO}
+                                                    className="calendar-cell border-b border-r border-gray-200 h-6 cursor-pointer select-none hover:bg-gray-50 transition"
+                                                    onMouseDown={(e) => handleMouseDown(e, day, hour)}
+                                                    onClick={() => handleCellClick(day, hour)}
+                                                >
+                                                    {isAvailable && (
+                                                        <div className="h-full w-full bg-green-200 opacity-70"></div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
+                            {/* Marquee Selection Rectangle */}
+                            {isDragging && selectionRect && (
+                                <div
+                                    className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
+                                    style={{
+                                        left: selectionRect.left,
+                                        top: selectionRect.top,
+                                        width: selectionRect.width,
+                                        height: selectionRect.height
+                                    }}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right: Selected Slots List - Sticky */}
+                <div className="lg:sticky lg:top-4 h-fit">
+                    {availability.length > 0 ? (
+                        <div className="bg-white border border-gray-200 rounded-lg p-2.5 max-h-[380px] overflow-y-auto">
+                            <h4 className="font-semibold text-xs text-gray-800 mb-2">
+                                Selected Slots ({availability.length})
+                            </h4>
+                            <div className="space-y-1.5">
+                                {sortedDays.map(day => (
+                                    <div key={day} className="bg-gray-50 rounded-md p-2">
+                                        <p className="font-semibold text-xs text-gray-800 mb-1">{day}</p>
+                                        <div className="space-y-0.5">
+                                            {timeRangesByDay[day].map((range, idx) => (
+                                                <div key={idx} className="text-xs text-gray-700 bg-white px-2 py-1 rounded border border-gray-200">
+                                                    {range.start} - {range.end}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                            <p className="text-xs text-gray-500">
+                                No time slots selected yet.<br />
+                                Click on the calendar to add availability.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AvailabilityStep;
