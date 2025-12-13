@@ -11,7 +11,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "tutor_availabilities")
+@Table(name = "tutor_availabilities", indexes = {
+    @Index(name = "idx_tutor_availabilities_tutor_id", columnList = "tutor_id"),
+    @Index(name = "idx_tutor_availabilities_day_of_week", columnList = "day_of_week"),
+    @Index(name = "idx_tutor_availabilities_effective_dates", columnList = "effective_start_date, effective_end_date")
+})
 @Data
 @Builder
 @NoArgsConstructor
@@ -37,9 +41,4 @@ public class TutorAvailability extends BaseEntity {
 
     @Column(name = "effective_end_date")
     private LocalDate effectiveEndDate;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    @Builder.Default
-    private AvailabilityStatus status = AvailabilityStatus.AVAILABLE;
 }

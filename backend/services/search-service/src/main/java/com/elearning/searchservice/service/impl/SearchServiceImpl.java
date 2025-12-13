@@ -38,12 +38,17 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public Page<TutorSearchResult> searchTutors(SearchTutorRequest request) {
         log.info("Searching tutors with request: {}", request);
+        log.info("Request details - page: {}, size: {}, keyword: {}, languages: {}, price: {}-{}, categories: {}", 
+                request.getPage(), request.getSize(), request.getKeyword(), request.getLanguageCodes(), 
+                request.getMinPrice(), request.getMaxPrice(), request.getCategoryIds());
         
         // 1. Build search query
         Query searchQuery = queryBuilder.buildSearchQuery(request);
+        log.info("Built search query");
         
         // 2. Build filters
         List<Query> filters = filterBuilder.buildFilters(request);
+        log.info("Built {} filters", filters.size());
         
         // 3. Combine query and filters
         Query boolQuery = Query.of(q -> q
@@ -52,21 +57,23 @@ public class SearchServiceImpl implements SearchService {
                         .filter(filters)
                 )
         );
+        log.info("Combined query and filters");
         
         // 4. Wrap with function score for ranking
         Query finalQuery = rankingBuilder.buildFunctionScoreQuery(boolQuery);
+        log.info("Built function score query");
         
         // 5. Build pageable
-        Pageable pageable = PageRequest.of(
-                request.getPage() != null ? request.getPage() : 0,
-                request.getSize() != null ? request.getSize() : 10
-        );
+        int pageNumber = request.getPage() != null ? request.getPage() - 1 : 0; // Convert 1-based to 0-based
+        Pageable pageable = PageRequest.of(pageNumber, request.getSize() != null ? request.getSize() : 10);
+        log.info("Pageable: page={}, size={} (adjusted from request page {})", pageable.getPageNumber(), pageable.getPageSize(), request.getPage());
         
         // 6. Build native query
         NativeQuery nativeQuery = NativeQuery.builder()
                 .withQuery(finalQuery)
                 .withPageable(pageable)
                 .build();
+        log.info("Native query built with pageable");
         
         // 7. Execute search
         SearchHits<TutorDocument> searchHits = elasticsearchOperations.search(
@@ -76,6 +83,13 @@ public class SearchServiceImpl implements SearchService {
         );
         
         log.info("Found {} tutors", searchHits.getTotalHits());
+        log.info("Search hits count: {}", searchHits.getSearchHits().size());
+        
+        // Log tutor IDs found
+        List<UUID> foundTutorIds = searchHits.getSearchHits().stream()
+                .map(hit -> hit.getContent().getId())
+                .toList();
+        log.info("Tutor IDs found: {}", foundTutorIds);
         
         // 8. Map to results
         return SearchHitSupport.searchPageFor(searchHits, pageable)
@@ -102,7 +116,6 @@ public class SearchServiceImpl implements SearchService {
         // Convert to new request format
         SearchTutorRequest request = SearchTutorRequest.builder()
                 .keyword(keyword)
-                .teachesInGroups(teachesInGroups)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .languageCodes(languageCodes)

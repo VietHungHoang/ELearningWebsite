@@ -17,7 +17,7 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
 
     @Query("SELECT DISTINCT t FROM Tutor t " +
            "WHERE t.isVerified = true " +
-           "AND (:languageCodes IS NULL OR EXISTS (SELECT 1 FROM TutorLanguage tl WHERE tl.tutor = t AND tl.languageCode IN :languageCodes)) " +
+           "AND (:languageCodes IS NULL OR EXISTS (SELECT 1 FROM TutorLanguage tl WHERE tl.tutor = t AND tl.code IN :languageCodes)) " +
            "AND (:minPrice IS NULL OR t.currentSessionFee >= :minPrice) " +
            "AND (:maxPrice IS NULL OR t.currentSessionFee <= :maxPrice)")
     Page<Tutor> findTutorsWithFilters(@Param("languageCodes") List<String> languageCodes,

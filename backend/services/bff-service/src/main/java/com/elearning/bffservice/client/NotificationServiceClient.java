@@ -9,7 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import com.elearning.bffservice.dto.request.NotificationRequest;
-import com.elearning.bffservice.dto.response.ApiResponse;
+import com.elearning.bffservice.dto.ApiResponse;
 import com.elearning.bffservice.dto.response.NotificationResponse;
 
 @Component

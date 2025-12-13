@@ -3,6 +3,7 @@ package com.elearning.commonservice.entity;
 import java.util.List;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -14,7 +15,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "categories", indexes = {
+    @Index(name = "idx_categories_parent_id", columnList = "parent_id")
+})
 @Data
 @Builder
 @NoArgsConstructor

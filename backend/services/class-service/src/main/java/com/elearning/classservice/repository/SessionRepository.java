@@ -24,4 +24,12 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
      * Find booked sessions by tutor ID, date range, and statuses
      */
     List<Session> findByTutorIdAndStartTimeBetweenAndStatusIn(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate, List<ScheduleStatus> statuses);
+    
+    /**
+     * Count total sessions by tutor ID
+     */
+    long countByTutorId(UUID tutorId);
 }
+
+
+

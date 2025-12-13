@@ -2,6 +2,7 @@ package com.elearning.searchservice.service.query;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import com.elearning.searchservice.dto.request.ClassType;
 import com.elearning.searchservice.dto.request.SearchTutorRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -63,10 +64,16 @@ public class TutorFilterBuilder {
         }
         
         // Boolean filters
-        if (request.getTeachesInGroups() != null) {
-            filters.add(buildBooleanFilter("teachesInGroups", request.getTeachesInGroups()));
+        if (request.getHasGroup() != null) {
+            filters.add(buildBooleanFilter("teachesInGroups", request.getHasGroup()));
         }
-        
+
+        // Class type filter
+        if (request.getClassType() != null && request.getClassType() != ClassType.ALL) {
+            boolean teachesInGroups = request.getClassType() == ClassType.GROUP;
+            filters.add(buildBooleanFilter("teachesInGroups", teachesInGroups));
+        }
+
         if (Boolean.TRUE.equals(request.getOnlyVerified())) {
             filters.add(buildBooleanFilter("isVerified", true));
         }

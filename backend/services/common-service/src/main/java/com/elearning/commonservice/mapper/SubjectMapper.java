@@ -11,6 +11,7 @@ public class SubjectMapper {
         return SubjectResponse.builder()
                 .id(subject.getId())
                 .name(subject.getName())
+                .categoryId(subject.getCategory() != null ? subject.getCategory().getId() : null)
                 .createdAt(subject.getCreatedAt())
                 .updatedAt(subject.getUpdatedAt())
                 .build();

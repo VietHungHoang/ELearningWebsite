@@ -22,9 +22,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Session extends BaseEntity {
     
-    // Nullable để hỗ trợ phiên học thử (trial session) không thuộc lớp nào
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "class_id", nullable = true)
+    @JoinColumn(name = "class_id")
     private ClassEntity classEntity;
     
     @Column(name = "tutor_id", nullable = false)

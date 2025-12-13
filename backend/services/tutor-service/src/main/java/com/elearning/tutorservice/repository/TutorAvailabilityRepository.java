@@ -1,6 +1,5 @@
 package com.elearning.tutorservice.repository;
 
-import com.elearning.tutorservice.entity.AvailabilityStatus;
 import com.elearning.tutorservice.entity.TutorAvailability;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,17 +20,35 @@ public interface TutorAvailabilityRepository extends JpaRepository<TutorAvailabi
     @Query("SELECT a FROM TutorAvailability a WHERE a.tutor.id = :tutorId " +
            "AND a.effectiveStartDate <= :endDate " +
            "AND (a.effectiveEndDate >= :startDate OR a.effectiveEndDate IS NULL) " +
-           "AND a.status = :status " +
+           "ORDER BY a.dayOfWeek, a.startTime")
+    List<TutorAvailability> findByTutorIdAndDateRange(
+            @Param("tutorId") UUID tutorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+    
+    /**
+     * Find all availabilities for a tutor within a date range with status filter (legacy method)
+     */
+    @Query("SELECT a FROM TutorAvailability a WHERE a.tutor.id = :tutorId " +
+           "AND a.effectiveStartDate <= :endDate " +
+           "AND (a.effectiveEndDate >= :startDate OR a.effectiveEndDate IS NULL) " +
            "ORDER BY a.dayOfWeek, a.startTime")
     List<TutorAvailability> findByTutorIdAndDateRangeAndStatus(
             @Param("tutorId") UUID tutorId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("status") AvailabilityStatus status
+            @Param("status") String status
     );
     
     /**
      * Find availabilities by IDs and tutor ID (for security check)
      */
     List<TutorAvailability> findByIdInAndTutorId(List<UUID> ids, UUID tutorId);
+    
+    /**
+     * Delete availabilities for a tutor within a date range
+     */
+    void deleteByTutorIdAndEffectiveStartDateGreaterThanEqualAndEffectiveEndDateLessThanEqual(
+            UUID tutorId, LocalDate startDate, LocalDate endDate);
 }

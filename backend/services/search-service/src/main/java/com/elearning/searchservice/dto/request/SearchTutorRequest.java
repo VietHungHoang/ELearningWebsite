@@ -70,7 +70,8 @@ public class SearchTutorRequest {
     /**
      * Filter by class type
      */
-    private Boolean teachesInGroups;
+    private Boolean hasGroup;
+    private ClassType classType;
     
     /**
      * Only verified tutors

@@ -13,3 +13,7 @@ spring:
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_HOST}:${MONGO_PORT}/elearning_notifications

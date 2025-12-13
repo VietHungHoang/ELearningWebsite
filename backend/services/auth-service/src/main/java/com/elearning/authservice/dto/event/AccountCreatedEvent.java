@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class AccountCreatedEvent {
     private String id;
     private String email;
-    private String fullname;
+    private String fullName;
     private String role;
 }

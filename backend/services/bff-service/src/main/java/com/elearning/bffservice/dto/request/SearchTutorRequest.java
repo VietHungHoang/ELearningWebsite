@@ -31,7 +31,8 @@ public class SearchTutorRequest {
     private Double minRating;
     private List<String> availableDays;
     private String nationalityCode;
-    private Boolean teachesInGroups;
+    private Boolean hasGroup;
+    private ClassType classType;
     private Boolean onlyVerified;
     private Boolean hasVideo;
     private Boolean availableNow;

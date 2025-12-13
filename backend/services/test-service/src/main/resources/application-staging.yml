@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    keycloak:
+      jdbc-url: ${DB_URL}?currentSchema=keycloak
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+    main:
+      jdbc-url: ${DB_URL}?currentSchema=public
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+
+keycloak:
+  server-url: ${KEYCLOAK_AUTH_SERVER_URL}
+  realm: ${KEYCLOAK_REALM}
+  client-id: ${KEYCLOAK_RESOURCE}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+  password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL}
+  cart-service:
+    url: http://cart-service:8082
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL}
+  course-service:
+    url: ${COURSE_SERVICE_URL}
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL}
+
+logging:
+  level:
+    root: INFO
+    "[com.elearning.bffservice]": DEBUG

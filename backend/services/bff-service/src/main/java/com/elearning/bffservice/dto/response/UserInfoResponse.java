@@ -21,7 +21,7 @@ public class UserInfoResponse {
     private String email;
     private String phone;
     private String gender;
-    private UUID countryId;
+    private String countryCode;
     private String city;
     private String avatarUrl;
 }

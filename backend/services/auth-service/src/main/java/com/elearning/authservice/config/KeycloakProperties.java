@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class KeycloakProperties {
 
     private String authServerUrl;
-    private String publicUrl;  // URL accessible from browser
+    private String publicUrl;
     private String realm;
     private String resource;
     private String clientSecret;

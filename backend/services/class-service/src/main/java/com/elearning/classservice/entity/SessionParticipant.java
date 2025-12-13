@@ -11,10 +11,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Entity để track attendance và lịch sử tham gia của học viên trong mỗi phiên học
- * Tích hợp với Zoom để lưu thông tin participant
- */
 @Entity
 @Table(name = "session_participants")
 @Data

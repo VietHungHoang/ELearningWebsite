@@ -1,6 +1,6 @@
 package com.elearning.bffservice.dto.response;
 
-import com.elearning.bffservice.dto.response.enums.ScheduleStatus;
+import com.elearning.bffservice.dto.enums.ScheduleStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

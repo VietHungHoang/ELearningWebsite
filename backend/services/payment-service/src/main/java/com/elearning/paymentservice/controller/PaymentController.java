@@ -4,6 +4,7 @@ import com.elearning.paymentservice.dto.request.InitiatePaymentRequest;
 import com.elearning.paymentservice.dto.response.ApiResponse;
 import com.elearning.paymentservice.dto.response.InitiatePaymentResponse;
 import com.elearning.paymentservice.service.PaymentService;
+import com.elearning.paymentservice.strategy.dto.WebhookPayload;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +27,22 @@ public class PaymentController {
 
         InitiatePaymentResponse response = paymentService.initiatePayment(request);
 
-        return ResponseEntity.ok(
-                ApiResponse.<InitiatePaymentResponse>builder()
-                        .status(200)
-                        .message("Payment initiated successfully")
-                        .data(response)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.success(response, "Payment initiated successfully"));
+    }
+
+    @PostMapping("/webhook/{provider}")
+    public ResponseEntity<ApiResponse<Void>> handleWebhook(
+            @PathVariable String provider,
+            @RequestBody WebhookPayload payload) {
+
+        log.info("Received webhook from provider: {}", provider);
+
+        try {
+            paymentService.processWebhook(payload);
+            return ResponseEntity.ok(ApiResponse.success(null, "Webhook processed successfully"));
+        } catch (Exception e) {
+            log.error("Error processing webhook from provider {}: {}", provider, e.getMessage(), e);
+            return ResponseEntity.ok(ApiResponse.error("Failed to process webhook: " + e.getMessage(), 500));
+        }
     }
 }

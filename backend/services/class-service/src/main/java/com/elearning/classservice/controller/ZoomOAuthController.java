@@ -1,13 +1,15 @@
 package com.elearning.classservice.controller;
 
+import com.elearning.classservice.dto.request.ZoomOAuthCallbackRequest;
+import com.elearning.classservice.dto.response.ApiResponse;
+import com.elearning.classservice.dto.response.ZoomAuthorizationUrlResponse;
 import com.elearning.classservice.service.ZoomOAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -25,35 +27,32 @@ public class ZoomOAuthController {
 
     /**
      * GET /api/v1/zoom/oauth/authorize?tutorId={tutorId}
-     * Redirect tutor to Zoom OAuth page
+     * Get Zoom authorization URL for client to redirect
      */
     @GetMapping("/authorize")
-    public RedirectView authorize(@RequestParam UUID tutorId) {
+    public ResponseEntity<ApiResponse<ZoomAuthorizationUrlResponse>> authorize(@RequestParam UUID tutorId) {
         log.info("Initiating Zoom OAuth for tutor: {}", tutorId);
         String authUrl = zoomOAuthService.getAuthorizationUrl(tutorId);
-        return new RedirectView(authUrl);
+        
+        ZoomAuthorizationUrlResponse data = new ZoomAuthorizationUrlResponse(authUrl);
+        ApiResponse<ZoomAuthorizationUrlResponse> response = ApiResponse.success(data, "Authorization URL generated successfully");
+        
+        return ResponseEntity.ok(response);
     }
 
     /**
-     * GET /api/v1/zoom/oauth/callback?code={code}&statestate={tutorId}
+     * POST /api/v1/zoom/oauth/callback
      * Handle Zoom OAuth callback
      */
-    @GetMapping("/callback")
-    public ResponseEntity<Map<String, String>> callback(
-            @RequestParam String code,
-            @RequestParam String state) {
+    @PostMapping("/callback")
+    public ResponseEntity<ApiResponse<Void>> callback(@Valid @RequestBody ZoomOAuthCallbackRequest request) {
         
-        UUID tutorId = UUID.fromString(state);
+        UUID tutorId = UUID.fromString(request.getState());
         log.info("Handling Zoom OAuth callback for tutor: {}", tutorId);
         
-        zoomOAuthService.handleCallback(code, tutorId);
+        zoomOAuthService.handleCallback(request.getCode(), tutorId);
         
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Zoom account connected successfully");
-        response.put("tutorId", tutorId.toString());
-        response.put("status", "connected");
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(null, "Zoom account connected successfully"));
     }
 
     /**

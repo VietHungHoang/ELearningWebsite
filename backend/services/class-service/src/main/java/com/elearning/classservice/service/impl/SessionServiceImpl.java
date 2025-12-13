@@ -7,7 +7,6 @@ import com.elearning.classservice.dto.zoom.ZoomMeetingResponse;
 import com.elearning.classservice.entity.ClassEnrollment;
 import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.entity.SessionParticipant;
-import com.elearning.classservice.entity.enums.ScheduleStatus;
 import com.elearning.classservice.exception.SessionNotFoundException;
 import com.elearning.classservice.exception.UnauthorizedSessionAccessException;
 import com.elearning.classservice.repository.ClassEnrollmentRepository;
@@ -17,6 +16,8 @@ import com.elearning.classservice.service.SessionService;
 import com.elearning.classservice.service.ZoomMeetingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -153,38 +154,27 @@ public class SessionServiceImpl implements SessionService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<BookedSessionResponse> getBookedSessions(UUID tutorId, LocalDate startDate, LocalDate endDate, List<ScheduleStatus> statuses) {
+    public List<BookedSessionResponse> getBookedSessions(UUID tutorId, LocalDate startDate, LocalDate endDate) {
         log.info("Getting booked sessions for tutor {} from {} to {}", tutorId, startDate, endDate);
         
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
         
-        List<Session> sessions;
-        if (statuses == null || statuses.isEmpty()) {
-            sessions = sessionRepository.findByTutorIdAndStartTimeBetween(tutorId, startDateTime, endDateTime);
-        } else {
-            sessions = sessionRepository.findByTutorIdAndStartTimeBetweenAndStatusIn(tutorId, startDateTime, endDateTime, statuses);
-        }
+        List<Session> sessions = sessionRepository.findByTutorIdAndStartTimeBetween(tutorId, startDateTime, endDateTime);
         
         // Map sessions to response DTOs
         List<BookedSessionResponse> responses = new ArrayList<>();
         for (Session session : sessions) {
-            // Get first participant (for 1-on-1 or trial) or leave null for group
-            UUID studentId = null;
+            // Get all participants
+            List<UUID> studentIds = session.getParticipants().stream()
+                    .map(SessionParticipant::getStudentId)
+                    .collect(Collectors.toList());
+
             LocalDateTime bookedAt = null;
-            
             if (!session.getParticipants().isEmpty()) {
-                SessionParticipant firstParticipant = session.getParticipants().get(0);
-                studentId = firstParticipant.getStudentId();
-                bookedAt = firstParticipant.getCreatedAt();
+                bookedAt = session.getParticipants().get(0).getCreatedAt();
             }
-            
-            // Calculate duration
-            Integer durationMinutes = null;
-            if (session.getStartTime() != null && session.getEndTime() != null) {
-                durationMinutes = (int) java.time.Duration.between(session.getStartTime(), session.getEndTime()).toMinutes();
-            }
-            
+
             // Determine session type
             String sessionType;
             if (session.getIsTrial()) {
@@ -194,31 +184,30 @@ public class SessionServiceImpl implements SessionService {
             } else {
                 sessionType = "1-on-1"; // Default
             }
-            
+
             // Get class name
             String className = null;
             if (session.getClassEntity() != null) {
                 className = session.getClassEntity().getTitle();
             }
-            
+
             BookedSessionResponse response = BookedSessionResponse.builder()
-                    .id(session.getId())
-                    .studentId(studentId)
-                    .sessionDatetime(session.getStartTime())
-                    .durationMinutes(durationMinutes)
+                    .id(session.getId().toString())
+                    .studentIds(studentIds)
+                    .sessionDatetime(session.getStartTime().toString())
                     .className(className)
                     .sessionType(sessionType)
-                    .status(session.getStatus())
+                    .createdAt(bookedAt != null ? bookedAt.toString() : null)
+                    .updatedAt(session.getUpdatedAt().toString())
                     .meetingUrl(session.getZoomJoinUrl())
                     .notes(session.getNotes())
-                    .bookedAt(bookedAt)
-                    .updatedAt(session.getUpdatedAt())
                     .build();
-            
+
             responses.add(response);
-        }
-        
-        log.info("Found {} booked sessions for tutor {}", responses.size(), tutorId);
+        }        log.info("Found {} booked sessions for tutor {}", responses.size(), tutorId);
         return responses;
     }
 }
+
+
+

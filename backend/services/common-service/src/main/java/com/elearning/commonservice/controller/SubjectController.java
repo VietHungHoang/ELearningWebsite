@@ -1,5 +1,6 @@
 package com.elearning.commonservice.controller;
 
+import com.elearning.commonservice.dto.response.ApiResponse;
 import com.elearning.commonservice.dto.response.SubjectResponse;
 import com.elearning.commonservice.service.SubjectService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,8 @@ public class SubjectController {
     private final SubjectService subjectService;
 
     @GetMapping
-    public ResponseEntity<List<SubjectResponse>> getAll() {
-        return ResponseEntity.ok(subjectService.getAll());
+    public ResponseEntity<ApiResponse<List<SubjectResponse>>> getAll() {
+        List<SubjectResponse> subjects = subjectService.getAll();
+        return ResponseEntity.ok(ApiResponse.success(subjects, "Subjects retrieved successfully"));
     }
 }

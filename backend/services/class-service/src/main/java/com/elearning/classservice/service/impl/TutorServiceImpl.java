@@ -5,13 +5,13 @@ import com.elearning.classservice.dto.response.SessionInfoResponse;
 import com.elearning.classservice.dto.response.TutorClassResponse;
 import com.elearning.classservice.dto.response.TutorStudentDetailResponse;
 import com.elearning.classservice.dto.response.TutorStudentResponse;
+import com.elearning.classservice.dto.response.TutorStatsResponse;
+import com.elearning.classservice.dto.response.GroupClassResponse;
 import com.elearning.classservice.entity.*;
-import com.elearning.classservice.entity.enums.AttendanceStatus;
-import com.elearning.classservice.entity.enums.ClassType;
-import com.elearning.classservice.entity.enums.EnrollmentStatus;
-import com.elearning.classservice.entity.enums.ScheduleStatus;
+import com.elearning.classservice.entity.enums.*;
 import com.elearning.classservice.repository.*;
 import com.elearning.classservice.service.TutorService;
+import com.elearning.classservice.mapper.GroupClassMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,116 +37,13 @@ public class TutorServiceImpl implements TutorService {
     private final SessionRepository sessionRepository;
     private final ClassAnnouncementRepository classAnnouncementRepository;
     private final ClassAssignmentRepository classAssignmentRepository;
+    private final TrialSessionRepository trialSessionRepository;
+    private final GroupClassMapper groupClassMapper;
     
     @Override
     @Transactional(readOnly = true)
     public Page<TutorStudentResponse> getAllStudentsByTutorId(UUID tutorId, int page, int size) {
-        log.info("Getting all students for tutor: {} with pagination page={}, size={}", tutorId, page, size);
-        
-        Map<UUID, TutorStudentResponse> studentMap = new HashMap<>();
-        
-        // 1. Lấy học sinh từ enrollments (ONE_ON_ONE và GROUP)
-        List<ClassEnrollment> enrollments = classEnrollmentRepository.findByTutorId(tutorId);
-        
-        for (ClassEnrollment enrollment : enrollments) {
-            UUID studentId = enrollment.getStudentId();
-            ClassType classType = enrollment.getClassEntity().getClassType();
-            
-            // Determine student type based on class type
-            TutorStudentResponse.StudentType studentType = classType == ClassType.ONE_ON_ONE 
-                ? TutorStudentResponse.StudentType.ONE_ON_ONE 
-                : TutorStudentResponse.StudentType.GROUP;
-            
-            // Nếu student chưa có trong map, hoặc có nhưng đang là TRIAL -> update
-            if (!studentMap.containsKey(studentId) || 
-                studentMap.get(studentId).getStudentType() == TutorStudentResponse.StudentType.TRIAL) {
-                
-                TutorStudentResponse response = TutorStudentResponse.builder()
-                    .studentId(studentId)
-                    .studentType(studentType)
-                    .classId(enrollment.getClassEntity().getId())
-                    .classTitle(enrollment.getClassEntity().getTitle())
-                    .classType(classType)
-                    .enrollmentStatus(enrollment.getStatus().name())
-                    .paymentStatus(enrollment.getPaymentStatus() != null ? enrollment.getPaymentStatus().name() : null)
-                    .enrolledAt(enrollment.getCreatedAt())
-                    .build();
-                
-                studentMap.put(studentId, response);
-            }
-        }
-        
-        // 2. Lấy trial students từ session participants
-        List<SessionParticipant> trialParticipants = sessionParticipantRepository.findTrialParticipantsByTutorId(tutorId);
-        
-        for (SessionParticipant participant : trialParticipants) {
-            UUID studentId = participant.getStudentId();
-            
-            // Chỉ thêm trial student nếu họ chưa có trong map
-            // (nghĩa là họ chưa enroll vào class chính thức nào)
-            if (!studentMap.containsKey(studentId)) {
-                TutorStudentResponse response = TutorStudentResponse.builder()
-                    .studentId(studentId)
-                    .studentType(TutorStudentResponse.StudentType.TRIAL)
-                    .build();
-                
-                studentMap.put(studentId, response);
-            }
-        }
-        
-        // 3. Populate session history cho từng student
-        for (TutorStudentResponse student : studentMap.values()) {
-            // Lấy tất cả sessions của student
-            List<SessionParticipant> allSessions = sessionParticipantRepository.findByStudentId(student.getStudentId());
-            
-            // Convert to SessionInfo DTO
-            List<SessionInfoResponse> sessionInfoList = allSessions.stream()
-                .map(sp -> SessionInfoResponse.builder()
-                    .sessionId(sp.getSession().getId())
-                    .startTime(sp.getSession().getStartTime())
-                    .endTime(sp.getSession().getEndTime())
-                    .status(sp.getSession().getStatus().name())
-                    .isTrial(sp.getSession().getIsTrial())
-                    .attendanceStatus(sp.getAttendanceStatus().name())
-                    .build())
-                .sorted(Comparator.comparing(SessionInfoResponse::getStartTime).reversed())
-                .collect(Collectors.toList());
-            
-            student.setSessions(sessionInfoList);
-            
-            // Count attended sessions
-            Long attendedCount = sessionParticipantRepository.countAttendedSessions(student.getStudentId());
-            student.setTotalSessionsAttended(attendedCount != null ? attendedCount.intValue() : 0);
-            
-            // Total sessions
-            student.setTotalSessionsScheduled(allSessions.size());
-        }
-        
-        // Convert to list and sort
-        List<TutorStudentResponse> allStudents = studentMap.values().stream()
-            .sorted(Comparator.comparing(TutorStudentResponse::getStudentType)
-                .thenComparing(s -> {
-                    if (s.getEnrolledAt() != null) {
-                        return s.getEnrolledAt();
-                    } else if (s.getSessions() != null && !s.getSessions().isEmpty()) {
-                        return s.getSessions().get(0).getStartTime();
-                    } else {
-                        return LocalDateTime.MIN;
-                    }
-                }, Comparator.nullsLast(Comparator.reverseOrder())))
-            .collect(Collectors.toList());
-        
-        // Apply pagination using Spring Page
-        int totalElements = allStudents.size();
-        int startIndex = page * size;
-        int endIndex = Math.min(startIndex + size, totalElements);
-        
-        List<TutorStudentResponse> paginatedStudents = (startIndex < totalElements) 
-            ? allStudents.subList(startIndex, endIndex) 
-            : new ArrayList<>();
-        
-        Pageable pageable = PageRequest.of(page, size);
-        return new PageImpl<>(paginatedStudents, pageable, totalElements);
+        return null;
     }
     
     @Override
@@ -358,141 +255,58 @@ public class TutorServiceImpl implements TutorService {
     @Override
     @Transactional(readOnly = true)
     public ClassDetailResponse getClassDetail(UUID tutorId, UUID classId) {
-        log.info("Getting detail for class {} of tutor {}", classId, tutorId);
-        
-        ClassEntity classEntity = classRepository.findById(classId)
-            .orElseThrow(() -> new RuntimeException("Class not found"));
-            
-        if (!classEntity.getTutorId().equals(tutorId)) {
-            throw new RuntimeException("Class does not belong to tutor");
-        }
-        
-        // Get students
-        List<ClassDetailResponse.StudentInfo> students = classEntity.getEnrollments().stream()
-            .map(e -> ClassDetailResponse.StudentInfo.builder()
-                .id(e.getStudentId())
-                .build()) // Name/Avatar will be populated by BFF
-            .collect(Collectors.toList());
-            
-        // Get schedules
-        List<ClassDetailResponse.ScheduleInfo> schedules = classEntity.getSchedules().stream()
-            .flatMap(s -> {
-                List<ClassDetailResponse.ScheduleInfo> list = new ArrayList<>();
-                String[] days = s.getDayOfWeek().split(",");
-                for (String day : days) {
-                    list.add(ClassDetailResponse.ScheduleInfo.builder()
-                        .day(capitalize(day.trim()))
-                        .time(s.getStartTime().format(DateTimeFormatter.ofPattern("h:mm a")))
-                        .build());
-                }
-                return list.stream();
-            })
-            .collect(Collectors.toList());
-            
-        // Get materials
-        List<ClassDetailResponse.MaterialInfo> materials = classEntity.getMaterials().stream()
-            .map(m -> ClassDetailResponse.MaterialInfo.builder()
-                .id(m.getId())
-                .name(m.getName())
-                .type(m.getType())
-                .date(m.getUploadDate())
-                .build())
-            .collect(Collectors.toList());
-            
-        // Get announcements
-        List<ClassDetailResponse.AnnouncementInfo> announcements = classAnnouncementRepository.findByClassEntityIdOrderByDateDesc(classId).stream()
-            .map(a -> ClassDetailResponse.AnnouncementInfo.builder()
-                .id(a.getId())
-                .title(a.getTitle())
-                .content(a.getContent())
-                .date(a.getDate())
-                .author(a.getAuthor())
-                .build())
-            .collect(Collectors.toList());
-            
-        // Get assignments
-        List<ClassDetailResponse.AssignmentInfo> assignments = classAssignmentRepository.findByClassEntityIdOrderByDueDateAsc(classId).stream()
-            .map(a -> ClassDetailResponse.AssignmentInfo.builder()
-                .id(a.getId())
-                .title(a.getTitle())
-                .description(a.getDescription())
-                .dueDate(a.getDueDate())
-                .submissions(a.getSubmissionsCount())
-                .build())
-            .collect(Collectors.toList());
-            
-        // Get sessions
-        List<Session> sessions = sessionRepository.findByClassEntityIdOrderByStartTimeAsc(classId);
-        List<ClassDetailResponse.SessionDetailInfo> sessionDetails = sessions.stream()
-            .map(s -> {
-                List<ClassDetailResponse.AttendanceInfo> attendance = sessionParticipantRepository.findBySessionId(s.getId()).stream()
-                    .map(p -> ClassDetailResponse.AttendanceInfo.builder()
-                        .studentId(p.getStudentId())
-                        .status(p.getAttendanceStatus().name())
-                        .build())
-                    .collect(Collectors.toList());
-                    
-                return ClassDetailResponse.SessionDetailInfo.builder()
-                    .id(s.getId())
-                    .date(s.getStartTime().toLocalDate())
-                    .time(s.getStartTime().format(DateTimeFormatter.ofPattern("h:mm a")))
-                    .duration(calculateDuration(s.getStartTime(), s.getEndTime()))
-                    .topic(s.getTitle())
-                    .attendance(attendance)
-                    .materials(new ArrayList<>())
+        return null;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TutorStatsResponse> getTutorStats(List<UUID> tutorIds, UUID studentId) {
+        log.info("Getting stats for tutors: {}", tutorIds);
+
+        List<TutorStatsResponse> results = new ArrayList<>();
+
+        for (UUID tutorId : tutorIds) {
+            // Count booked sessions (all sessions where tutor participated)
+            int bookedSessionsCount = (int) sessionRepository.countByTutorId(tutorId);
+
+            // Count unique students for this tutor (all students enrolled in tutor's classes)
+            List<ClassEnrollment> enrollments = classEnrollmentRepository.findByTutorId(tutorId);
+            Set<UUID> uniqueStudents = enrollments.stream()
+                .map(ClassEnrollment::getStudentId)
+                .collect(Collectors.toSet());
+            int studentCount = uniqueStudents.size();
+
+            // Check if tutor has trial session with the specified student
+            boolean hasTrialSession = studentId != null ?
+             !trialSessionRepository.existsByTutorIdAndStudentId(tutorId, studentId)
+             : true;
+
+
+            TutorStatsResponse stats = TutorStatsResponse.builder()
+                    .tutorId(tutorId)
+                    .bookedSessionsCount(bookedSessionsCount)
+                    .studentCount(studentCount)
+                    .hasTrialSession(hasTrialSession)
                     .build();
-            })
-            .collect(Collectors.toList());
-            
-        // Calculate stats
-        int totalStudents = students.size();
-        int activeStudents = (int) classEntity.getEnrollments().stream()
-            .filter(e -> e.getStatus() == EnrollmentStatus.BOOKED)
-            .count();
-        int totalSessions = sessions.size();
-        int completedSessions = (int) sessions.stream()
-            .filter(s -> s.getStatus() == ScheduleStatus.BOOKED && s.getEndTime().isBefore(LocalDateTime.now()))
-            .count();
-            
-        // Calculate average attendance
-        double averageAttendance = 0.0;
-        if (completedSessions > 0) {
-            long totalPresent = sessions.stream()
-                .filter(s -> s.getStatus() == ScheduleStatus.BOOKED && s.getEndTime().isBefore(LocalDateTime.now()))
-                .flatMap(s -> sessionParticipantRepository.findBySessionId(s.getId()).stream())
-                .filter(p -> p.getAttendanceStatus() == AttendanceStatus.PRESENT)
-                .count();
-            
-            if (totalStudents > 0) {
-                averageAttendance = (double) totalPresent / (completedSessions * totalStudents) * 100;
-            }
+
+            log.info("Tutor {}: bookedSessionsCount={}, studentCount={}, hasTrialSession={}",
+                    tutorId, bookedSessionsCount, studentCount, hasTrialSession);
+
+            results.add(stats);
         }
-        
-        ClassDetailResponse.StatsInfo stats = ClassDetailResponse.StatsInfo.builder()
-            .totalStudents(totalStudents)
-            .activeStudents(activeStudents)
-            .completedSessions(completedSessions)
-            .totalSessions(totalSessions)
-            .averageAttendance(Math.round(averageAttendance * 10.0) / 10.0)
-            .averageProgress(0.0)
-            .build();
-            
-        return ClassDetailResponse.builder()
-            .id(classEntity.getId())
-            .courseTitle(classEntity.getTitle())
-            .students(students)
-            .type(classEntity.getClassType() == ClassType.ONE_ON_ONE ? "1-on-1" : "Group")
-            .status(classEntity.getStatus().name())
-            .schedules(schedules)
-            .startDate(classEntity.getCreatedAt().format(DateTimeFormatter.ofPattern("MMM d, yyyy")))
-            .completedSessions(completedSessions)
-            .totalSessions(totalSessions)
-            .quizzes(new ArrayList<>())
-            .materials(materials)
-            .stats(stats)
-            .sessions(sessionDetails)
-            .announcements(announcements)
-            .assignments(assignments)
-            .build();
+
+        log.info("Retrieved stats for {} tutors", results.size());
+        return results;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GroupClassResponse> getGroupClasses(UUID tutorId) {
+        // Lấy tất cả group classes (classes có maxStudents > 1) của tutor
+        List<ClassEntity> groupClassEntities = classRepository.findByTutorIdAndMaxStudentsGreaterThan(tutorId, 1);
+
+        return groupClassEntities.stream()
+                .map(groupClassMapper::mapToGroupClassResponse)
+                .collect(Collectors.toList());
     }
 }

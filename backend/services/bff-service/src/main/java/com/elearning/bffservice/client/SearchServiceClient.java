@@ -1,7 +1,9 @@
 package com.elearning.bffservice.client;
 
+import com.elearning.bffservice.dto.RestResponsePage;
 import com.elearning.bffservice.dto.request.SearchTutorRequest;
-import com.elearning.bffservice.dto.response.TutorSearchResult;
+import com.elearning.bffservice.dto.ApiResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorSearchResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,14 +44,19 @@ public class SearchServiceClient {
             
             HttpEntity<SearchTutorRequest> entity = new HttpEntity<>(request);
             
-            ResponseEntity<RestResponsePage<TutorSearchResult>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponse<RestResponsePage<TutorSearchResult>>> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     entity,
-                    new ParameterizedTypeReference<RestResponsePage<TutorSearchResult>>() {}
+                    new ParameterizedTypeReference<ApiResponse<RestResponsePage<TutorSearchResult>>>() {}
             );
             
-            return response.getBody();
+            if (response.getBody() != null && response.getBody().getData() != null) {
+                return response.getBody().getData();
+            } else {
+                log.warn("Search service returned null or empty data");
+                return Page.empty();
+            }
             
         } catch (Exception e) {
             log.error("Failed to search tutors via Search Service", e);

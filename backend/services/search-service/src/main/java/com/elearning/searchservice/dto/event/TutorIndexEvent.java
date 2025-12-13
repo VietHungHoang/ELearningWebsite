@@ -25,7 +25,7 @@ public class TutorIndexEvent {
      * Event metadata
      */
     private String eventType; // "CREATED", "UPDATED", "DELETED"
-    private LocalDateTime timestamp;
+    private String timestamp;
     private UUID tutorId;
     
     // ============= BASIC INFO =============

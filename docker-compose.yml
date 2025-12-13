@@ -17,20 +17,30 @@ services:
     ports:
       - "6379:6379"
 
+  mongodb:
+    image: mongo:latest
+    container_name: chat-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.4
-    container_name: lernen-keycloak
+    container_name: keycloak
     command: ["start-dev"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://db:5432/lernen
-      KC_DB_USERNAME: lernen
-      KC_DB_PASSWORD: lernen
+      KC_DB_URL: ${DB_URL}
+      KC_DB_USERNAME: ${DB_USERNAME}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
       KC_DB_SCHEMA: keycloak
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     depends_on:
       - db
 
@@ -55,6 +65,40 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+  
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      kAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "11273:8080"
 
   api-gateway:
     build:
@@ -92,6 +136,7 @@ services:
     depends_on:
       - redis
       - keycloak
+      - kafka
 
   bff-service:
     build:
@@ -102,7 +147,6 @@ services:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=staging
-      - SERVICES_COMMON_SERVICE_URL=${COMMON_SERVICE_URL}
     env_file:
       - .env
     volumes:
@@ -162,7 +206,113 @@ services:
     depends_on:
       - db
 
+  notification-service:
+    build:
+      context: ./backend/services/notification-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: notification-service
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/notification-service/src:/app/src
+      - ./backend/services/notification-service/pom.xml:/app/pom.xml
+    depends_on:
+      - kafka
+  
+  user-service:
+    build:
+      context: ./backend/services/user-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: user-service
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/user-service/src:/app/src
+      - ./backend/services/user-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+      - kafka
+  
+  student-service:
+    build:
+      context: ./backend/services/student-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: student-service
+    ports:
+      - "8089:8089"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/student-service/src:/app/src
+      - ./backend/services/student-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+  
+  class-service:
+    build:
+      context: ./backend/services/class-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: class-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/class-service/src:/app/src
+      - ./backend/services/class-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+      - kafka
+  
+  test-service:
+    build:
+      context: ./backend/services/test-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: test-service
+    ports:
+      - "9999:9999"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/test-service/src:/app/src
+      - ./backend/services/test-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+
+  chat-service:
+    build:
+      context: ./backend/services/chat-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: chat-service
+    ports:
+      - "8089:8089"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/chat-service/src:/app/src
+      - ./backend/services/chat-service/pom.xml:/app/pom.xml
+    depends_on:
+      - mongodb
+
 volumes:
   postgres_data:
   esdata:
+    driver: local
+  mongodb_data:
     driver: local

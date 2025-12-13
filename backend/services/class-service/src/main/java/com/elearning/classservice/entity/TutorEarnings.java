@@ -1,59 +1,49 @@
-// package com.elearning.classservice.entity;
+package com.elearning.classservice.entity;
 
-// import jakarta.persistence.*;
-// import lombok.AllArgsConstructor;
-// import lombok.Builder;
-// import lombok.Data;
-// import lombok.EqualsAndHashCode;
-// import lombok.NoArgsConstructor;
+ import jakarta.persistence.*;
+ import lombok.AllArgsConstructor;
+ import lombok.Builder;
+ import lombok.Data;
+ import lombok.EqualsAndHashCode;
+ import lombok.NoArgsConstructor;
 
-// import java.math.BigDecimal;
-// import java.time.LocalDateTime;
-// import java.util.UUID;
+ import java.math.BigDecimal;
+ import java.time.LocalDateTime;
+ import java.util.UUID;
 
-// /**
-//  * Entity để lưu thông tin thu nhập của tutor sau mỗi buổi dạy
-//  */
-// @Entity
-// @Table(name = "tutor_earnings")
-// @Data
-// @EqualsAndHashCode(callSuper = true)
-// @Builder
-// @NoArgsConstructor
-// @AllArgsConstructor
-// public class TutorEarnings extends BaseEntity {
+ @Entity
+ @Table(name = "tutor_earnings")
+ @Data
+ @EqualsAndHashCode(callSuper = true)
+ @Builder
+ @NoArgsConstructor
+ @AllArgsConstructor
+ public class TutorEarnings extends BaseEntity {
+     @OneToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "session_id", nullable = false)
+     private Session session;
 
-//     @ManyToOne(fetch = FetchType.LAZY)
-//     @JoinColumn(name = "tutor_id", nullable = false)
-//     private Tutor tutor;
+     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
+     private BigDecimal amount;
 
-//     @ManyToOne(fetch = FetchType.LAZY)
-//     @JoinColumn(name = "session_id", nullable = false)
-//     private Session session;
+     @Enumerated(EnumType.STRING)
+     @Column(name = "status", nullable = false)
+     @Builder.Default
+     private EarningsStatus status = EarningsStatus.PENDING;
 
-//     @Column(name = "student_id", nullable = false)
-//     private UUID studentId;
+     @Column(name = "paid_at")
+     private LocalDateTime paidAt;
 
-//     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
-//     private BigDecimal amount;
+     @Column(name = "payment_id")
+     private UUID paymentId;
 
-//     @Enumerated(EnumType.STRING)
-//     @Column(name = "status", nullable = false)
-//     @Builder.Default
-//     private EarningsStatus status = EarningsStatus.PENDING;
+     @Column(name = "notes")
+     private String notes;
 
-//     @Column(name = "paid_at")
-//     private LocalDateTime paidAt;
-
-//     @Column(name = "payment_reference")
-//     private String paymentReference;
-
-//     @Column(name = "notes")
-//     private String notes;
-
-//     public enum EarningsStatus {
-//         PENDING,    // Chờ thanh toán
-//         PAID,       // Đã thanh toán
-//         CANCELLED   // Đã hủy
-//     }
-// }
+     public enum EarningsStatus {
+         PENDING,
+         PROCESSING,
+         PAID,
+         CANCELLED
+     }
+ }

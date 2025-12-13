@@ -20,9 +20,9 @@ public class TutorLanguage extends BaseEntity {
     @JoinColumn(name = "tutor_id", nullable = false)
     private Tutor tutor;
 
-    @Column(name = "language_code", length = 5, nullable = false)
-    private String languageCode;
+    @Column(name = "code", length = 5, nullable = false)
+    private String code;
 
-    @Column(name = "proficiency_level", nullable = false)
-    private String proficiencyLevel;
+    @Column(name = "is_native", nullable = false)
+    private Boolean isNative;
 }

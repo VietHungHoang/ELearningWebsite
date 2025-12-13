@@ -56,9 +56,9 @@ public class ConversationController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping
+    @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<Page<ConversationResponse>>> getUserConversations(
-            @RequestHeader("X-User-Id") String userId,
+            @PathVariable String userId,
             @RequestParam(required = false) ConversationType type,
             Pageable pageable) {
         

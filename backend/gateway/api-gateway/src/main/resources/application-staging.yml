@@ -10,7 +10,6 @@ spring:
         - id: bff-route
           uri: ${BFF_SERVICE_URL}
           predicates:
-            - Path=/api/v1/**
             - Path=/api/v1/public/**
           filters:
             - RewritePath=/api/v1/public/(.*), /api/v1/bff/$1
@@ -19,3 +18,27 @@ spring:
           uri: ${AUTH_SERVICE_URL}
           predicates:
             - Path=/api/v1/auth/**
+
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL}
+  cart-service:
+    url: http://cart-service:8082
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL}
+  course-service:
+    url: ${COURSE_SERVICE_URL}
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL}
+  class-service:
+    url: ${CLASS_SERVICE_URL}
+  user-service:
+    url: ${USER_SERVICE_URL}
+  student-service:
+    url: ${STUDENT_SERVICE_URL}
+  search-service:
+    url: ${SEARCH_SERVICE_URL:http://search-service:8086}
+  chat-service:
+    url: ${CHAT_SERVICE_URL}

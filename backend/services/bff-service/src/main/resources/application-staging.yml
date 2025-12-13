@@ -19,6 +19,8 @@ services:
     url: ${STUDENT_SERVICE_URL}
   search-service:
     url: ${SEARCH_SERVICE_URL:http://search-service:8086}
+  chat-service:
+    url: ${CHAT_SERVICE_URL}
 
 logging:
   level:
