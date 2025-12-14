@@ -459,6 +459,20 @@
       "subtitle": "Xem những gì các nhà giáo dục khác đang nói về trải nghiệm của họ trên Lernen."
     }
   },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "subtitle": "Không Tìm Thấy Trang",
+      "description": "Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.",
+      "goHome": "Về Trang Chủ"
+    },
+    "systemError": {
+      "title": "500",
+      "subtitle": "Đã Xảy Ra Lỗi",
+      "description": "Chúng tôi xin lỗi, nhưng đã xảy ra lỗi từ phía chúng tôi. Vui lòng thử lại sau.",
+      "goHome": "Về Trang Chủ"
+    }
+  },
   "common": {
     "loading": "Đang tải...",
     "error": "Lỗi",

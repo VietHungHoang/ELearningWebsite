@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 })
 export class ModalComponent {
 
-    // Modal Trigger
     classApplied = false;
     toggleClass() {
         this.classApplied = !this.classApplied;

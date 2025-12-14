@@ -15,10 +15,9 @@ export class CustomAngleCircleRadialbarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [100, 90, 80, 70],
                     chart: {
@@ -72,7 +71,6 @@ export class CustomAngleCircleRadialbarChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#custom_angle_circle_radialbar_chart'), options);
                 chart.render();
             } catch (error) {

@@ -1,4 +1,4 @@
-<!-- Breadcrumb -->
+
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
         Inbox
@@ -24,11 +24,9 @@
     </ol>
 </div>
 
-<!-- Inbox -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-[25px] mb-[25px]">
     <div class="lg:col-span-1">
 
-        <!-- Sidebar -->
         <app-sidebar />
 
     </div>
@@ -150,7 +148,6 @@
             </div>
             <div class="trezo-card-content relative">
 
-                <!-- Nav Links -->
                 <ul class="inbox-nav-links">
                     <li class="inline-block ltr:mr-[38px] rtl:ml-[38px] ltr:last:mr-0 rtl:last:ml-0">
                         <a routerLink="/dashboard/apps/email" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="relative inline-block font-medium pb-[9px] md:pb-[14px] transition-all hover:text-primary-500">
@@ -176,7 +173,6 @@
                     </li>
                 </ul>
 
-                <!-- Router Outlet -->
                 <router-outlet />
 
             </div>

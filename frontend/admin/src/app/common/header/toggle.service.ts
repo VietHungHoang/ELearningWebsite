@@ -10,10 +10,9 @@ export class ToggleService {
     private isBrowser: boolean;
 
     constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-        this.isBrowser = isPlatformBrowser(this.platformId);  // Check if in browser
+        this.isBrowser = isPlatformBrowser(this.platformId);  
     }
 
-    // Initialize theme and direction based on saved preferences
     initializeTheme() {
         if (this.isBrowser) {
             const savedTheme = localStorage.getItem(this.themeKey) || 'light';

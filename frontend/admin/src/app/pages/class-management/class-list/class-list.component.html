@@ -1,0 +1,205 @@
+<div class="mb-[25px] md:flex items-center justify-between">
+    <h5 class="!mb-0">
+        Class Management
+    </h5>
+    <ol class="breadcrumb mt-[12px] md:mt-0">
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+                    home
+                </i>
+                Dashboard
+            </a>
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Class Management
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Class List
+        </li>
+    </ol>
+</div>
+
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
+        <div class="trezo-card-title">
+            <app-search-input
+                [placeholder]="'Search classes by name.....'"
+                [width]="'sm:w-[265px]'"
+                (search)="onSearchChange($event)">
+            </app-search-input>
+        </div>
+        <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex items-center gap-[15px]">
+
+            <div class="trezo-card-dropdown dropdown-container relative">
+                <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleStatusDropdown()">
+                    <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
+                        {{ getSelectedStatusText() }}
+                        <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
+                    </span>
+                </button>
+                @if (isStatusDropdownOpen) {
+                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
+                        <li>
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('all')">
+                                All Status
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('upcoming')">
+                                Upcoming
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('ongoing')">
+                                Ongoing
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('completed')">
+                                Completed
+                            </button>
+                        </li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
+        <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
+            <table id="classes-table" class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
+                <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                    <tr>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
+                            ID
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
+                            Class Name
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
+                            Instructor
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
+                            Start Date
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Duration
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Enrollment
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Type
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
+                            Status
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="text-black dark:text-white">
+                    @for (groupClass of paginatedClasses; track groupClass.id) {
+                        <tr>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ groupClass.id }}</span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <a [routerLink]="[groupClass.id]" class="inline-block font-medium transition-all text-gray-500 dark:text-gray-400 hover:text-primary-500">
+                                    {{ groupClass.class_name }}
+                                </a>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ groupClass.instructor_name }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ formatDateTime(groupClass.start_datetime) }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ formatDuration(groupClass.duration_in_minutes) }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ formatCapacity(groupClass.enrollment_count, groupClass.max_capacity) }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span [class]="'inline-block px-[8px] py-[4px] rounded text-xs font-medium ' + (groupClass.class_type === '1-on-1' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300')">
+                                    {{ groupClass.class_type }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <span [class]="'inline-block px-[12px] py-[6px] rounded-full text-xs font-medium ' + getStatusClass(groupClass.status)">
+                                    {{ getStatusText(groupClass.status) }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <div class="flex items-center gap-[9px]">
+                                    <a [routerLink]="[groupClass.id]" class="text-primary-500 leading-none hover:text-primary-600 transition-colors">
+                                        <i class="material-symbols-outlined !text-md">
+                                            visibility
+                                        </i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (paginatedClasses.length === 0) {
+                        <tr>
+                            <td [attr.colspan]="7" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                                No classes found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="px-[25px] pt-[12px] md:pt-[14px] sm:flex sm:items-center justify-between">
+            <p class="!mb-0 text-sm">
+                Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ getEndRange() }} of {{ totalClasses }} classes
+            </p>
+            @if (totalPages > 1) {
+                <ol class="mt-[10px] sm:mt-0">
+                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                    <button
+                        type="button"
+                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        [disabled]="currentPage === 1"
+                        (click)="goToPage(currentPage - 1)">
+                        <span class="opacity-0">0</span>
+                        <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_left</i>
+                    </button>
+                </li>
+                @for (page of getVisiblePages(); track page) {
+                    <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                        <button
+                            type="button"
+                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500"
+                            [class]="page === currentPage ? 'border-primary-500 bg-primary-500 text-white' : 'border-gray-100 dark:border-[#172036]'"
+                            (click)="goToPage(page)">
+                            {{ page }}
+                        </button>
+                    </li>
+                }
+                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                    <button
+                        type="button"
+                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        [disabled]="currentPage === totalPages"
+                        (click)="goToPage(currentPage + 1)">
+                        <span class="opacity-0">0</span>
+                        <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_right</i>
+                    </button>
+                </li>
+            </ol>
+            }
+        </div>
+    </div>
+</div>

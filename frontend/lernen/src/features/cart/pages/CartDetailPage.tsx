@@ -97,15 +97,8 @@ const CartDetailPage: React.FC = () => {
     
     const itemDiscountsTotal = useMemo(() => itemDiscounts.reduce((sum, d) => sum + d.discount, 0), [itemDiscounts]);
     const totalDiscount = itemDiscountsTotal;
-    const total = subtotal - totalDiscount;    const handleRemoveTutorCoupon = async (itemId: number) => {
-        try {
-            setCartItems(items => items.map(item => 
-                item.id === itemId ? { ...item, appliedCoupon: undefined } : item
-            ));
-        } catch (error) {
-            console.error('Failed to remove coupon:', error);
-        }
-    };
+    const tax = (subtotal - itemDiscountsTotal) * 0.1; // Tax calculated after item discounts
+    const total = subtotal + tax - totalDiscount;
 
     const handleToggleCouponDisplay = (itemId: number) => {
         setShowCouponCode(prev => ({
@@ -225,14 +218,14 @@ const CartDetailPage: React.FC = () => {
                                         <div className="flex items-center gap-1 text-sm">
                                             <AiFillStar className="w-4 h-4 text-orange-400" />
                                             <span className="font-bold">{item.rating.toFixed(1)}</span>
-                                            <span className="text-gray-500">({item.reviews} {t('cart.reviews')})</span>
+                                            <span className="text-gray-500">({item.reviews} reviews)</span>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-xs">
                                         <StatItem icon={<MdSchool className="w-4 h-4 text-gray-500" />} text={item.level} />
                                         <StatItem icon={<FaLanguage className="w-4 h-4 text-gray-500" />} text={item.language} />
-                                        <StatItem icon={<MdBook className="w-4 h-4 text-gray-500" />} text={`${item.lessons} ${t('cart.lessons')}`} />
+                                        <StatItem icon={<MdBook className="w-4 h-4 text-gray-500" />} text={`${item.lessons} lessons`} />
                                         <StatItem icon={<FaClock className="w-4 h-4 text-gray-500" />} text={item.duration} />
                                     </div>
 
@@ -260,10 +253,7 @@ const CartDetailPage: React.FC = () => {
                                                             Coupon Code: <span className="font-mono bg-blue-100 px-2 py-1 rounded text-blue-900">{item.availableCoupon.code}</span>
                                                         </p>
                                                         <p className="text-xs text-blue-600 mt-1">
-                                                            {item.availableCoupon.type === 'percentage'
-                                                                ? `${item.availableCoupon.value}% off`
-                                                                : `$${item.availableCoupon.value} off`
-                                                            }
+                                                            ${item.availableCoupon.value}% off
                                                         </p>
                                                     </div>
                                                     {!item.appliedCoupon ? (

@@ -15,10 +15,9 @@ export class DistributedColumnChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -31,7 +30,7 @@ export class DistributedColumnChartService {
                         type: "bar",
                         events: {
                             click: function(chart:any, w:any, e:any) {
-                                // console.log(chart, w, e)
+
                             }
                         },
                         toolbar: {
@@ -135,7 +134,6 @@ export class DistributedColumnChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#distributed_column_chart'), options);
                 chart.render();
             } catch (error) {

@@ -31,10 +31,9 @@ export class BasicHeatmapChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -164,7 +163,6 @@ export class BasicHeatmapChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#basic_heatmap_chart'), options);
                 chart.render();
             } catch (error) {

@@ -1,4 +1,4 @@
-<!-- Breadcrumb -->
+
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
         Settings
@@ -18,11 +18,9 @@
     </ol>
 </div>
 
-<!-- Settings -->
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-content">
 
-        <!-- Nav Links -->
         <ul class="nav-links mb-[10px]">
             <li class="inline-block mb-[15px] ltr:mr-[11px] rtl:ml-[11px] ltr:last:mr-0 rtl:last:ml-0">
                 <a routerLink="/dashboard/settings" class="block rounded-md font-medium py-[8.5px] px-[15px] text-primary-500 border border-primary-500 transition-all hover:bg-primary-500 hover:text-white" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
@@ -49,10 +47,14 @@
                     Terms & Conditions
                 </a>
             </li>
+            <li class="inline-block mb-[15px] ltr:mr-[11px] rtl:ml-[11px] ltr:last:mr-0 rtl:last:ml-0">
+                <a routerLink="/dashboard/settings/payment-method" class="block rounded-md font-medium py-[8.5px] px-[15px] text-primary-500 border border-primary-500 transition-all hover:bg-primary-500 hover:text-white" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                    Payment Method
+                </a>
+            </li>
         </ul>
 
-        <!-- Router Outlet -->
         <router-outlet />
-        
+
     </div>
 </div>

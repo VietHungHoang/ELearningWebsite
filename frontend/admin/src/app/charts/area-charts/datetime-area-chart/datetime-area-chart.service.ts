@@ -16,10 +16,9 @@ export class DatetimeAreaChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -103,7 +102,7 @@ export class DatetimeAreaChartService {
                             shadeIntensity: 1,
                             opacityFrom: 0.7,
                             opacityTo: 0.9,
-                            // stops: [0, 100]
+
                         }
                     },
                     yaxis: {
@@ -125,7 +124,6 @@ export class DatetimeAreaChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#datetime_area_chart'), options);
                 chart.render();
             } catch (error) {

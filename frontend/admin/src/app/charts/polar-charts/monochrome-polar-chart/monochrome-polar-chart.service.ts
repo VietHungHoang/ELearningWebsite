@@ -15,10 +15,9 @@ export class MonochromePolarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         42, 39, 35, 29, 26
@@ -68,14 +67,13 @@ export class MonochromePolarChartService {
                     },
                     theme: {
                         monochrome: {
-                            // enabled: true,
+
                             shadeTo: 'light',
                             shadeIntensity: 0.6
                         }
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#monochrome_polar_chart'), options);
                 chart.render();
             } catch (error) {

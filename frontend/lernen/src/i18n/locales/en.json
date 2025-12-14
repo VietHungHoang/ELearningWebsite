@@ -459,6 +459,20 @@
       "subtitle": "See what other educators are saying about their experience on Lernen."
     }
   },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "subtitle": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go Home"
+    },
+    "systemError": {
+      "title": "500",
+      "subtitle": "Something Went Wrong",
+      "description": "We're sorry, but something went wrong on our end. Please try again later.",
+      "goHome": "Go Home"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

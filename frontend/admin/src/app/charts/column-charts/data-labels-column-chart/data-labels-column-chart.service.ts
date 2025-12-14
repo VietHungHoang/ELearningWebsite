@@ -15,10 +15,9 @@ export class DataLabelsColumnChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -36,7 +35,7 @@ export class DataLabelsColumnChartService {
                     plotOptions: {
                         bar: {
                             dataLabels: {
-                                position: "top" // top, center, bottom
+                                position: "top" 
                             }
                         }
                     },
@@ -138,7 +137,6 @@ export class DataLabelsColumnChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#data_labels_column_chart'), options);
                 chart.render();
             } catch (error) {

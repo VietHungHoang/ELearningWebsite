@@ -8,7 +8,6 @@ import { Component } from '@angular/core';
 })
 export class BtToDoListComponent {
 
-    // Popup Trigger
     classApplied = false;
     toggleClass() {
         this.classApplied = !this.classApplied;

@@ -15,10 +15,9 @@ export class MultipleRadialbarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [44, 55, 67, 83],
                     chart: {
@@ -50,7 +49,6 @@ export class MultipleRadialbarChartService {
                     ]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#multiple_radialbar_chart'), options);
                 chart.render();
             } catch (error) {

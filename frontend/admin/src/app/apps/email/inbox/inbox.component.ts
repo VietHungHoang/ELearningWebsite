@@ -10,7 +10,6 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 })
 export class InboxComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     isCardHeaderOpen2 = false;
     toggleCardHeaderMenu() {

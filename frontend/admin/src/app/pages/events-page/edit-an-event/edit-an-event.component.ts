@@ -12,7 +12,7 @@ import { NgxEditorModule, Editor, Toolbar } from 'ngx-editor';
 })
 export class EditAnEventComponent {
 
-    editor!: Editor | null;  // Make it nullable
+    editor!: Editor | null;  
     toolbar: Toolbar = [
         ['bold', 'italic'],
         ['underline', 'strike'],
@@ -28,7 +28,7 @@ export class EditAnEventComponent {
 
     ngOnInit(): void {
         if (isPlatformBrowser(this.platformId)) {
-            // Initialize the editor only in the browser
+
             this.editor = new Editor();
         }
     }
@@ -39,7 +39,6 @@ export class EditAnEventComponent {
         }
     }
 
-    // File Uploader
     public multiple: boolean = false;
 
 }

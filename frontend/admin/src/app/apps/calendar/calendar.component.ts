@@ -13,10 +13,9 @@ import { WorkingScheduleComponent } from './working-schedule/working-schedule.co
 })
 export class CalendarComponent {
 
-    // Calendar
     calendarOptions: CalendarOptions = {
         initialView: 'dayGridMonth',
-        dayMaxEvents: true, // when too many events in a day, show the popover
+        dayMaxEvents: true, 
         weekends: true,
         events: [
             {

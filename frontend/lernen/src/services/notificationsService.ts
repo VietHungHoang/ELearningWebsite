@@ -1,25 +1,26 @@
 import apiService from './apiService';
-import { decodeJwt } from '../lib/jwt';
-import type { Notification } from '../types/notifications';
+import { store } from '../lib/store';
+import type { Notification, ViewNotificationBFFResponse } from '../types/notifications';
 
 const getUserId = (): string => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return '1001'; // Fallback for testing
-  const decoded = decodeJwt(token);
-  return decoded?.sub || '1001';
+  const user = store.getState().auth.user;
+  if (!user) return '1001'; // Fallback for testing
+  return user.id;
 };
 
 class NotificationsService {
   async getNotifications(): Promise<Notification[]> {
     try {
       const userId = getUserId();
-      const response = await apiService.get<Notification[]>(`/notifications/user/${userId}`, {
+      const response = await apiService.get<ViewNotificationBFFResponse>(`/v1/notifications/${userId}`, {
         page: 0,
         size: 3
       });
       
       if (response.success === true && response.data) {
-        return response.data;
+        // Extract notifications from BFF response
+        const notifications = response.data.notifications || [];
+        return notifications;
       } else {
         throw new Error(response.message || 'Failed to fetch notifications');
       }
@@ -32,13 +33,15 @@ class NotificationsService {
   async loadMoreNotifications(page: number, size: number): Promise<Notification[]> {
     try {
       const userId = getUserId();
-      const response = await apiService.get<Notification[]>(`/notifications/user/${userId}`, {
+      const response = await apiService.get<ViewNotificationBFFResponse>(`/v1/notifications/${userId}`, {
         page,
         size
       });
       
       if (response.success === true && response.data) {
-        return response.data;
+        // Extract notifications from BFF response
+        const notifications = response.data.notifications || [];
+        return notifications;
       } else {
         throw new Error(response.message || 'Failed to load more notifications');
       }
@@ -51,7 +54,7 @@ class NotificationsService {
   async getUnreadCount(): Promise<number> {
     try {
       const userId = getUserId();
-      const response = await apiService.get<number>(`/notifications/user/${userId}/unread-count`);
+      const response = await apiService.get<number>(`/v1/notifications/${userId}/unread-count`);
       if (response.success === true && typeof response.data === 'number') {
         return response.data;
       } else {
@@ -66,7 +69,7 @@ class NotificationsService {
   async markAsRead(notificationId: string): Promise<void> {
     try {
       const userId = getUserId();
-      await apiService.post<void>(`/notifications/${notificationId}/user/${userId}/mark-read`);
+      await apiService.post<void>(`/v1/notifications/${notificationId}/${userId}/mark-read`);
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;
@@ -76,7 +79,7 @@ class NotificationsService {
   async markAllAsRead(): Promise<void> {
     try {
       const userId = getUserId();
-      await apiService.post<void>(`/notifications/user/${userId}/mark-all-read`);
+      await apiService.post<void>(`/v1/notifications/${userId}/mark-all-read`);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       throw error;

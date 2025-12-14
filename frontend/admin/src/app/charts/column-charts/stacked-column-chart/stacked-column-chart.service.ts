@@ -15,10 +15,9 @@ export class StackedColumnChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -127,7 +126,6 @@ export class StackedColumnChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#stacked_column_chart'), options);
                 chart.render();
             } catch (error) {

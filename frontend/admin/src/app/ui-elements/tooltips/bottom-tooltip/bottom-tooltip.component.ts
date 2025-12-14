@@ -8,18 +8,16 @@ import { Component } from '@angular/core';
 })
 export class BottomTooltipComponent {
 
-    tooltipVisible = false;  // Controls visibility of the tooltip
-    tooltipText: string = ''; // Text content for the tooltip
+    tooltipVisible = false;  
+    tooltipText: string = ''; 
 
-    // Show tooltip when mouse enters the button
     showTooltip(): void {
-        this.tooltipText = 'Hey, Hello World!';  // Set the tooltip text
-        this.tooltipVisible = true;  // Set tooltip visibility to true
+        this.tooltipText = 'Hey, Hello World!';  
+        this.tooltipVisible = true;  
     }
 
-    // Hide tooltip when mouse leaves the button
     hideTooltip(): void {
-        this.tooltipVisible = false;  // Set tooltip visibility to false
+        this.tooltipVisible = false;  
     }
 
 }

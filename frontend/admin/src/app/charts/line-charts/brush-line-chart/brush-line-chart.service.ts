@@ -29,10 +29,9 @@ export class BrushLineChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const chartOptions1 = {
                     series: [
                         {
@@ -157,7 +156,7 @@ export class BrushLineChartService {
                         strokeDashArray: 5,
                         borderColor: "#e0e0e0",
                         row: {
-                            colors: ["#f4f6fc", "transparent"], // takes an array which will be repeated on columns
+                            colors: ["#f4f6fc", "transparent"], 
                             opacity: 0.5
                         }
                     },
@@ -199,7 +198,6 @@ export class BrushLineChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#brush_line_chart'), chartOptions1);
                 const chart2 = new ApexCharts(document.querySelector('#brush_line_chart2'), chartOptions2);
                 chart.render();

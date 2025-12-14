@@ -15,10 +15,9 @@ export class BasicTimelineChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -110,7 +109,6 @@ export class BasicTimelineChartService {
                     ]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#basic_timeline_chart'), options);
                 chart.render();
             } catch (error) {

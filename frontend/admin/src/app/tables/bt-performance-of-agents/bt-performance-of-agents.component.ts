@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 })
 export class BtPerformanceOfAgentsComponent {
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

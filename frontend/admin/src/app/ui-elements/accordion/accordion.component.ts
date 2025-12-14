@@ -10,7 +10,6 @@ import { RouterLink } from '@angular/router';
 })
 export class AccordionComponent {
 
-    // Accordion
     openSectionIndex: number = 0;
     toggleSection(index: number): void {
         if (this.openSectionIndex === index) {

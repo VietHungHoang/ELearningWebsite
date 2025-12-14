@@ -11,7 +11,7 @@ import { ToggleService } from './toggle.service';
 })
 export class HeaderComponent {
 
-    isSidebarVisible = true;  // Track sidebar visibility
+    isSidebarVisible = true;
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
@@ -20,24 +20,21 @@ export class HeaderComponent {
     ) {}
 
     ngOnInit(): void {
-        // Initialize theme and direction on component load
+
         this.toggleService.initializeTheme();
     }
 
-    // Toggle theme between light and dark
     toggleTheme() {
         this.toggleService.toggleTheme();
     }
 
-    // Toggle direction between LTR and RTL
     toggleDirection() {
         this.toggleService.toggleDirection();
     }
 
-    // Toggle boyd class between sidebar-hidden and sidebar-show
     toggleSidebar() {
         this.isSidebarVisible = !this.isSidebarVisible;
-        // Add or remove the 'sidebar-hidden' class on the <body> element
+
         if (this.isSidebarVisible) {
             this.renderer.removeClass(document.body, 'sidebar-hidden');
         } else {
@@ -45,30 +42,29 @@ export class HeaderComponent {
         }
     }
 
-    // Toogle Class
     buttonStates: { [key: string]: boolean } = {
         connectedAppsMenuBtn: false,
         languageMenuButton: false,
+        currencyMenuButton: false,
         notificationsMenuBtn: false,
         profileMenuBtn: false,
         settingsMenuBtn: false
     };
     toggleClass(buttonId: string) {
-        // Check if the clicked button is already active
+
         const isCurrentlyActive = this.buttonStates[buttonId];
-        // Set all buttons to inactive
+
         for (const key in this.buttonStates) {
             this.buttonStates[key] = false;
         }
-        // Toggle the clicked button based on its previous state
+
         this.buttonStates[buttonId] = !isCurrentlyActive;
     }
 
-    // Fullscreen
     isFullscreen: boolean = false;
     ngAfterViewInit() {
         if (isPlatformBrowser(this.platformId)) {
-            // Only add event listeners if the platform is the browser
+
             document.addEventListener('fullscreenchange', this.onFullscreenChange.bind(this));
             document.addEventListener('webkitfullscreenchange', this.onFullscreenChange.bind(this));
             document.addEventListener('mozfullscreenchange', this.onFullscreenChange.bind(this));
@@ -91,11 +87,11 @@ export class HeaderComponent {
             };
             if (element.requestFullscreen) {
                 element.requestFullscreen();
-            } else if (element.mozRequestFullScreen) { // Firefox
+            } else if (element.mozRequestFullScreen) {
                 element.mozRequestFullScreen();
-            } else if (element.webkitRequestFullscreen) { // Chrome, Safari, and Opera
+            } else if (element.webkitRequestFullscreen) {
                 element.webkitRequestFullscreen();
-            } else if (element.msRequestFullscreen) { // IE/Edge
+            } else if (element.msRequestFullscreen) {
                 element.msRequestFullscreen();
             }
         }
@@ -109,11 +105,11 @@ export class HeaderComponent {
             };
             if (document.exitFullscreen) {
                 document.exitFullscreen();
-            } else if (doc.mozCancelFullScreen) { // Firefox
+            } else if (doc.mozCancelFullScreen) {
                 doc.mozCancelFullScreen();
-            } else if (doc.webkitExitFullscreen) { // Chrome, Safari, and Opera
+            } else if (doc.webkitExitFullscreen) {
                 doc.webkitExitFullscreen();
-            } else if (doc.msExitFullscreen) { // IE/Edge
+            } else if (doc.msExitFullscreen) {
                 doc.msExitFullscreen();
             }
         }
