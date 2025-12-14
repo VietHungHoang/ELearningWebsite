@@ -20,7 +20,7 @@ import {
 export interface SidebarOption {
     icon: ReactNode;
     activeIcon: ReactNode;
-    label: string;
+    labelKey: string;
     path: string;
     count?: number;
 }
@@ -46,74 +46,74 @@ export const TUTOR_SIDEBAR_OPTIONS: SidebarOption[] = [
     {
         icon: <HiHome className="w-5 h-5" />,
         activeIcon: <HiHome className="w-5 h-5" />,
-        label: "Dashboard",
+        labelKey: "dashboard.sidebar.tutor.dashboard",
         path: "/dashboard",
     },
     {
         icon: <HiUserGroup className="w-5 h-5" />,
         activeIcon: <HiUserGroup className="w-5 h-5" />,
-        label: "My Students",
+        labelKey: "dashboard.sidebar.tutor.myStudents",
         path: "/dashboard/my-students",
     },
     {
         icon: <HiBookOpen className="w-5 h-5" />,
         activeIcon: <HiBookOpen className="w-5 h-5" />,
-        label: "My Courses",
+        labelKey: "dashboard.sidebar.tutor.myCourses",
         path: "/dashboard/my-courses",
     },
     {
         icon: <HiAcademicCap className="w-5 h-5" />,
         activeIcon: <HiAcademicCap className="w-5 h-5" />,
-        label: "My Class",
+        labelKey: "dashboard.sidebar.tutor.myClass",
         path: "/dashboard/my-class",
     },
     {
         icon: <HiCalendar className="w-5 h-5" />,
         activeIcon: <HiCalendar className="w-5 h-5" />,
-        label: "Schedule",
+        labelKey: "dashboard.sidebar.tutor.schedule",
         path: "/dashboard/schedule",
     },
     {
         icon: <HiCreditCard className="w-5 h-5" />,
         activeIcon: <HiCreditCard className="w-5 h-5" />,
-        label: "Payouts",
+        labelKey: "dashboard.sidebar.tutor.payouts",
         path: "/dashboard/payouts",
     },
     {
         icon: <HiTag className="w-5 h-5" />,
         activeIcon: <HiTag className="w-5 h-5" />,
-        label: "Deals & Coupons",
+        labelKey: "dashboard.sidebar.tutor.dealsCoupons",
         path: "/dashboard/deals-coupons",
     },
     {
         icon: <HiQuestionMarkCircle className="w-5 h-5" />,
         activeIcon: <HiQuestionMarkCircle className="w-5 h-5" />,
-        label: "My Quizzes",
+        labelKey: "dashboard.sidebar.tutor.myQuizzes",
         path: "/dashboard/quizzes",
     },
     {
         icon: <HiBell className="w-5 h-5" />,
         activeIcon: <HiBell className="w-5 h-5" />,
-        label: "Requests",
+        labelKey: "dashboard.sidebar.tutor.requests",
         path: "/dashboard/requests",
         count: 0,
     },
     {
         icon: <HiChat className="w-5 h-5" />,
         activeIcon: <HiChatAlt2 className="w-5 h-5" />,
-        label: "Inbox",
+        labelKey: "dashboard.sidebar.tutor.inbox",
         path: "/dashboard/inbox",
     },
     {
         icon: <HiCog className="w-5 h-5" />,
         activeIcon: <HiCog className="w-5 h-5" />,
-        label: "Profile Settings",
+        labelKey: "dashboard.sidebar.tutor.profileSettings",
         path: "/dashboard/profile-settings/personal-details",
     },
     {
         icon: <HiCode className="w-5 h-5" />,
         activeIcon: <HiCode className="w-5 h-5" />,
-        label: "API",
+        labelKey: "dashboard.sidebar.tutor.api",
         path: "/dashboard/api",
     },
 ];
@@ -121,45 +121,51 @@ export const TUTOR_SIDEBAR_OPTIONS: SidebarOption[] = [
 // Student sidebar options
 export const STUDENT_SIDEBAR_OPTIONS: SidebarOption[] = [
     {
-        icon: <HiHome className="w-5 h-5" />,
-        activeIcon: <HiHome className="w-5 h-5" />,
-        label: "Dashboard",
-        path: "/dashboard",
+        icon: <HiCalendar className="w-5 h-5" />,
+        activeIcon: <HiCalendar className="w-5 h-5" />,
+        labelKey: "dashboard.sidebar.student.myBookings",
+        path: "/dashboard/my-bookings",
+    },
+    {
+        icon: <HiAcademicCap className="w-5 h-5" />,
+        activeIcon: <HiAcademicCap className="w-5 h-5" />,
+        labelKey: "dashboard.sidebar.student.myClass",
+        path: "/dashboard/my-class",
+    },
+    {
+        icon: <HiQuestionMarkCircle className="w-5 h-5" />,
+        activeIcon: <HiQuestionMarkCircle className="w-5 h-5" />,
+        labelKey: "dashboard.sidebar.student.myQuizzes",
+        path: "/dashboard/my-quizzes",
     },
     {
         icon: <HiBookOpen className="w-5 h-5" />,
         activeIcon: <HiBookOpen className="w-5 h-5" />,
-        label: "My Courses",
+        labelKey: "dashboard.sidebar.student.myCourses",
         path: "/dashboard/my-courses",
     },
     {
         icon: <HiShoppingBag className="w-5 h-5" />,
         activeIcon: <HiShoppingBag className="w-5 h-5" />,
-        label: "My Purchases",
+        labelKey: "dashboard.sidebar.student.myPurchases",
         path: "/dashboard/purchases",
-    },
-    {
-        icon: <HiCalendar className="w-5 h-5" />,
-        activeIcon: <HiCalendar className="w-5 h-5" />,
-        label: "My Schedule",
-        path: "/dashboard/schedule",
     },
     {
         icon: <HiDocumentText className="w-5 h-5" />,
         activeIcon: <HiDocumentText className="w-5 h-5" />,
-        label: "Certificates",
+        labelKey: "dashboard.sidebar.student.certificates",
         path: "/dashboard/certificates",
     },
     {
         icon: <HiChat className="w-5 h-5" />,
         activeIcon: <HiChatAlt2 className="w-5 h-5" />,
-        label: "Messages",
+        labelKey: "dashboard.sidebar.student.messages",
         path: "/dashboard/messages",
     },
     {
         icon: <HiCog className="w-5 h-5" />,
         activeIcon: <HiCog className="w-5 h-5" />,
-        label: "Profile Settings",
+        labelKey: "dashboard.sidebar.student.profileSettings",
         path: "/dashboard/profile-settings/personal-details",
     },
 ];

@@ -1,3 +1,6 @@
+import type { Category, Language, Timezone, Subject } from "./common";
+import type { TutorResponse, EducationItem, ExperienceItem, CertificationItem, SocialLink, ClassScheduleItem } from "./tutor";
+
 export interface ApiResponse<T> {
     status: number;
     success: boolean;
@@ -5,119 +8,59 @@ export interface ApiResponse<T> {
     data: T;
 }
 
-export interface CartItemDetail {
-    id: string;
-    name: string;
-    category: string;
-    tutor: string;
-    price: number;
-    image: string;
-    rating: number;
-    reviews: number;
-    level: string;
-    language: string;
-    lessons: number;
-    duration: string;
-    availableCoupon?: {
-        code: string;
-        type: 'percentage' | 'fixed';
-        value: number;
-    };
-    appliedCouponCode?: string;
-}
-
-export interface Category {
-    id: string;
-    name: string;
-}
-
-export interface Subcategory {
-    id: string;
-    categoryId: string;
-    name: string;
-}
-
-export interface Location {
-    id: string;
-    name: string;
-    offset: string;
-}
-
-export interface Language {
-    code: string;
-    name: string;
-    isNative: boolean;
-}
-
-export interface Subject {
-    id: string;
-    name: string;
-    categoryId: string;
-}
-
 export interface FilterData {
-    timezones: Location[];
+    timezones: Timezone[];
     languages: Language[];
     categories: Category[];
 }
 
-export interface TutorSearchFilters {
+export type ClassType = '1-on-1' | 'Group';
+
+export interface TutorSearchFilter {
     category?: string;
-    subcategories?: string[];
-    languages?: string[];
+    subject?: string;
+    languageCodes?: string[];
     minFee?: number;
     maxFee?: number;
     sortBy?: string;
     timezone?: string;
     keyword?: string;
-    sessionType?: 'online' | 'offline';
+    sessionType?: ClassType;
     page?: number;
-    limit?: number;
+    size?: number;
 }
 
-export type Gender = 'Male' | 'Female' | 'Not specified';
+export type UserRole = 'student' | 'tutor' | 'admin';
 
-export interface Tutor {
+export interface CreateAccountRequest {
+    email: string;
+    password: string;
+    role: UserRole;
+}
+
+export interface AccountCreatedResponse {
+    id: string;
+    email: string;
+    fullName: string;
+}
+
+export interface Student {
     id: string;
     fullName: string;
-    email: string;
-    isVerified: boolean;
-    introduction: string;
-    headline: string;
-    countryCode: string;
-    gender: Gender;
     avatarUrl: string;
-    timeZone: string;
-    videoUrl: string;
-    videoThumbnailUrl: string;
-    currentSessionFee: number;
-    originalSessionFee?: number; // Optional old price for discount display
-    sessionDurationMinutes: number;
-    currency: string;
-    teachInGroups: boolean;
-    maxGroupNumbers: number;
-    languages: Language[];
-    reviews: TutorReview[];
-    availabilities: TutorAvailability[];
-    socialLinks: TutorSocial[];
-    subjects: Subject[];
-    educations: EducationItem[];
-    experiences: ExperienceItem[];
-    certifications: CertificationItem[];
 }
 
-export interface TutorReview {
-    id: string;
-    studentId: string;
-    studentName: string;
-    rating: number;
-    comment: string;
+export type StudentEnrollmentType = '1-on-1' | 'Group' | 'Trial';
+export type StudentStatus = 'Ongoing' | 'Completed';
+
+export interface StudentListItem extends Student {
+    email: string;
+    enrollmentTypes: StudentEnrollmentType[];
+    status: StudentStatus;
+    registeredDate: string;
 }
 
-export interface TutorSocial {
-    platform: string;
-    url: string;
-};
+
 
 export interface PaginatedResponse<T> {
     content: T[]; // Array of items (Java standard naming)
@@ -155,8 +98,6 @@ export interface SignUpRequest {
     fullName: string;
 }
 
-export type UserRole = 'student' | 'tutor' | null;
-
 export interface StartSignUpRequest {
     email: string;
     fullname: string;
@@ -167,112 +108,10 @@ export interface SignUpResponse {
     message: string;
 }
 
-export interface AccountCreatedResponse {
-    id: string;
-    email: string;
-    name: string;
-}
 
-// Schedule View Mode
-export type ScheduleViewMode = 'daily' | 'weekly' | 'monthly';
 
-// Tutor Availability (recurring pattern - matches backend entity)
-export interface TutorAvailability {
-    id?: string; // UUID - returned from backend, undefined when creating new
-    dayOfWeek: number; // 0-6 (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-    startTime: string; // HH:mm format (e.g., "09:00")
-    endTime: string; // HH:mm format (e.g., "17:00")
-    effectiveStartDate: string; // ISO date (YYYY-MM-DD)
-    effectiveEndDate?: string; // ISO date (YYYY-MM-DD), null if ongoing
-    status: 'AVAILABLE' | 'DELETED';
-}
 
-// Request to get availability (with date range for filtering)
-export interface GetAvailabilityRequest {
-    tutorId: string; // UUID of the tutor
-    startDate: string; // ISO date (YYYY-MM-DD) - for filtering/prefetch
-    endDate: string; // ISO date (YYYY-MM-DD) - for filtering/prefetch
-    // timezoneOffset removed - all times are UTC
-}
-
-// Response with availability list
-export interface GetAvailabilityResponse {
-    availabilities: TutorAvailability[]; // All active availability patterns
-}
-
-// Bulk update availability - single API call for both modes
-export interface BulkUpdateAvailabilityRequest {
-    tutorId: string; // UUID of the tutor
-    mode: 'this_period' | 'recurring'; // Apply to this week only OR update for all future
-    startDate: string; // YYYY-MM-DD - for determining which availabilities to update
-    endDate: string; // YYYY-MM-DD - for determining which availabilities to update
-    // timezoneOffset removed - all times are UTC
-    oldAvailabilityIds: string[]; // IDs of existing availabilities in this range (for backend to delete/update)
-    newAvailabilities: Omit<TutorAvailability, 'id'>[]; // New availabilities (without IDs, backend will generate)
-}
-
-export interface BulkUpdateAvailabilityResponse {
-    availabilities: TutorAvailability[]; // Updated availabilities with IDs
-    message: string;
-}
-
-// ===== BOOKED SESSIONS API =====
-// Represents an actual session booked by a student
-export interface BookedSession {
-    id: string; // UUID - session ID
-    studentId: string; // UUID
-    studentName: string;
-    studentAvatarUrl?: string;
-
-    // Session details
-    sessionDatetime: string; // ISO 8601 datetime (e.g., "2025-01-20T09:00:00.000Z")
-    durationMinutes: number; // Session duration (e.g., 60)
-    className: string; // Class/course name (e.g., "Mathematics Advanced", "English Conversation")
-    sessionType: '1-on-1' | 'Group' | 'Trial'; // Type of session
-
-    // Status tracking
-    status: 'PENDING' | 'BOOKED' | 'CANCELLED';
-
-    // Additional info
-    meetingUrl?: string; // Video call link (Zoom, Google Meet, etc.)
-    notes?: string; // Tutor notes about the session
-
-    // Timestamps
-    bookedAt: string; // When the session was booked
-    updatedAt?: string; // Last update time
-}
-
-// Request to get booked sessions
-export interface GetBookedSessionsRequest {
-    tutorId: string; // UUID of the tutor
-    startDate: string; // ISO date (YYYY-MM-DD) - start of range
-    endDate: string; // ISO date (YYYY-MM-DD) - end of range
-    statuses?: ('PENDING' | 'BOOKED' | 'CANCELLED')[]; // Filter by statuses
-    // timezoneOffset removed - all times are UTC
-}
-
-// Response with booked sessions
-export interface GetBookedSessionsResponse {
-    sessions: BookedSession[];
-}
-
-export interface Course {
-    id: string;
-    image: string;
-    title: string;
-    lessons: number;
-    students: number;
-    price: number;
-    duration: string;
-    review: number;
-}
-
-export interface TimezoneResponse {
-    id: string;
-    name: string;
-    utcOffset: string;
-}
-
+// Group Class Types
 export interface PaymentRequest {
     paymentMethod: 'momo' | 'zalopay' | 'credit-card' | 'paypal';
     amount: number;
@@ -285,16 +124,6 @@ export interface PaymentResponse {
     paymentUrl?: string; // For QR code payments like Momo, ZaloPay
     transactionId?: string;
     message: string;
-}
-
-export interface Student {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    registeredDate: string;
-    email: string;
-    enrollmentTypes: ('1-on-1' | 'Group' | 'Trial')[];
-    status: 'Ongoing' | 'Completed';
 }
 
 export interface StudentStats {
@@ -372,11 +201,6 @@ export interface ClassStudent {
     avatar: string;
 }
 
-export interface ClassSchedule {
-    day: string;
-    time: string;
-}
-
 export interface ClassQuiz {
     id: string;
     title: string;
@@ -396,7 +220,7 @@ export interface Class {
     students: ClassStudent[];
     type: '1-on-1' | 'Group';
     status: 'Ongoing' | 'Completed';
-    schedules: ClassSchedule[];
+    schedules: ClassScheduleItem[];
     startDate: string;
     completedSessions: number;
     totalSessions: number;
@@ -468,7 +292,7 @@ export interface PayoutFilters {
 export interface RecentEarning {
     id: string;
     course: string;
-    type: '1-on-1' | 'Group';
+    type: 'one-on-one' | 'Group';
     date: string;
     amount: number;
 }
@@ -476,73 +300,7 @@ export interface RecentEarning {
 export interface RecentEarningsFilters {
     type?: '1-on-1' | 'Group' | 'All';
     page?: number;
-    limit?: number;
-}
-
-// Tutor Profile Types
-export interface EducationItem {
-    id: string;
-    title: string; // Degree name
-    institution: string; // School name
-    startDate: string; // ISO date format (YYYY-MM-DD)
-    endDate?: string; // Null if ongoing
-    location?: string;
-    description?: string;
-}
-
-export interface ExperienceItem {
-    id: string;
-    title: string; // Position
-    institution: string; // Company name
-    startDate: string; // ISO date format (YYYY-MM-DD)
-    endDate?: string; // Null if ongoing
-    location?: string;
-    description?: string;
-}
-
-export interface CertificationItem {
-    id: string;
-    name: string; // Certificate name (e.g., IELTS 8.0)
-    issuingOrganization: string; // Issuing organization (e.g., British Council)
-    issueDate: string; // ISO date format (YYYY-MM-DD)
-    expirationDate?: string; // Null if no expiration
-    credentialId?: string; // Certificate ID for verification
-    credentialUrl?: string; // Online verification link
-}
-
-export interface SocialLink {
-    id: string;
-    platform: string;
-    url: string;
-}
-
-export interface TutorProfile {
-    // Basic Information
-    fullName: string;
-    email: string;
-    phone: string;
-    gender: 'Male' | 'Female' | 'Not specified';
-    country: string;
-    city: string;
-    nativeLanguage: Language;
-    languages: Language[];
-
-    // Professional Profile
-    headline: string;
-    subjects: Subject[];
-    introduction: string;
-
-    // Media & Portfolio
-    avatarUrl?: string;
-    introductionVideoUrl?: string;
-
-    // Social Links
-    socialLinks: SocialLink[];
-
-    // Resume Highlights
-    education: EducationItem[];
-    experience: ExperienceItem[];
-    certifications: CertificationItem[];
+    size?: number;
 }
 
 export interface UpdateTutorProfileRequest {
@@ -575,40 +333,24 @@ export interface UploadFileResponse {
     fileSize: number;
 }
 
-export interface OnboardingData {
-    // Step 1: Basic Information
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    gender: 'Male' | 'Female' | 'Not specified';
-    countryCode: string;
-    city: string;
-    languages: Language[];
-
-    // Step 2: Professional Profile
-    subjects: Subject[];
-    headline: string;
-    introduction: string;
-
-    // Step 3: Media Portfolio
-    profilePhoto: string | null;
-    introVideo: string | null;
-    socialLinks: {
-        facebook: string;
-        twitter: string;
-        linkedin: string;
-        instagram: string;
-        youtube: string;
-    };
-
-    // Step 4: Education & Experience
-    education: EducationItem[];
-    experience: ExperienceItem[];
-
-    // Step 5: Certifications
-    certifications: CertificationItem[];
-
-    // Step 6: Availability
-    availability: string[];
-    timeZone: string;
+// ===== TRIAL SESSION API =====
+export interface TrialSessionRequest {
+    tutorId: string; // UUID of the tutor
+    studentId: string; // UUID of the student
+    sessionDateTime: string; // ISO 8601 datetime (e.g., "2025-01-20T09:00:00.000Z") - UTC
+    message?: string; // Optional message from student
 }
+
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED';
+
+export interface TrialSessionRequestResponse {
+    id: string;
+    tutor?: TutorResponse;
+    student?: Student;
+    sessionDateTime: string;
+    message?: string;
+    status: RequestStatus;
+    sessionId: string;
+    createdAt: string;
+}
+

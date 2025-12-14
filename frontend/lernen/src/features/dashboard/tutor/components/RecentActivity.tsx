@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { HiUserAdd, HiStar, HiCheckCircle, HiCurrencyDollar } from 'react-icons/hi';
 import { formatDistanceToNow } from 'date-fns';
 import type { Activity } from '../types';
@@ -8,6 +9,7 @@ interface RecentActivityProps {
 }
 
 const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
+    const { t } = useTranslation();
     const getActivityIcon = (type: string) => {
         switch (type) {
             case 'enrollment':
@@ -40,7 +42,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
 
     return (
         <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Recent Activity</h3>
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('dashboard.common.recentActivity')}</h3>
 
             <div className="space-y-4">
                 {activities.map((activity, index) => (
@@ -93,7 +95,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => {
 
             {activities.length === 0 && (
                 <div className="text-center py-8">
-                    <p className="text-gray-400">No recent activity</p>
+                    <p className="text-gray-400">{t('dashboard.common.noRecentActivity')}</p>
                 </div>
             )}
         </div>

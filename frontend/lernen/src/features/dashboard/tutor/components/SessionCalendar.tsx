@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './SessionCalendar.css';
@@ -9,6 +10,7 @@ interface SessionCalendarProps {
 }
 
 const SessionCalendar: React.FC<SessionCalendarProps> = ({ sessionDates, onDateSelect }) => {
+    const { t } = useTranslation();
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
     const handleDateChange = (value: any) => {
@@ -42,14 +44,13 @@ const SessionCalendar: React.FC<SessionCalendarProps> = ({ sessionDates, onDateS
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Session Calendar</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('dashboard.common.sessionCalendar')}</h3>
             <Calendar
                 onChange={handleDateChange}
                 value={selectedDate}
                 tileClassName={tileClassName}
                 tileContent={tileContent}
-                className="modern-calendar"
             />
         </div>
     );

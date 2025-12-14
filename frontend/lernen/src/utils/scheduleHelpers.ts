@@ -1,4 +1,5 @@
-import type { TutorAvailability, BookedSession } from '../types/api';
+import type { BookedSession } from '../types/class';
+import type { TutorAvailability } from '../types/tutor';
 
 /**
  * Generate actual time slots from recurring availability patterns
@@ -28,8 +29,8 @@ export const generateSlotsFromPatterns = (
 ): DisplaySlot[] => {
   const slots: DisplaySlot[] = [];
   
-  // Filter only active patterns
-  const activePatterns = availabilities.filter(a => a.status === 'ACTIVE');
+  // Use all availability patterns (no status filtering needed)
+  const activePatterns = availabilities;
   
   // Iterate through each day in the range
   const currentDate = new Date(startDate);

@@ -1,6 +1,6 @@
 import React from 'react';
+import type { RequestStatus } from '../../../../types/api';
 
-export type RequestStatus = 'Pending' | 'Approved' | 'Declined';
 
 interface RequestStatusBadgeProps {
   status: RequestStatus;

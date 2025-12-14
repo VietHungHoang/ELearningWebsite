@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import MyBookingsContent from '../components/MyBookingsContent';
 import DashboardSidebar from '../components/DashboardSidebar';
 import DashboardHeader from '../components/DashboardHeader';
+import { useTranslation } from 'react-i18next';
 
 
 const mockSentRequests: any[] = [
@@ -47,6 +48,7 @@ const mockSentRequests: any[] = [
 ];
 
 const ProfileSettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const { view } = useParams<{ view: string }>();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -55,16 +57,16 @@ const ProfileSettingsPage: React.FC = () => {
   const [sentRequests, setSentRequests] = useState<any[]>(mockSentRequests);
 
   const viewToLabel: Record<string, string> = {
-    'profile-settings': 'Profile Settings',
-    'my-bookings': 'My Bookings',
-    'my-requests': 'My Requests',
-    'my-learning': 'My Learning',
-    'my-class': 'My Class',
-    'my-certificates': 'My Certificates',
-    'favourites': 'Favourites',
-    'my-quizzes': 'My Quizzes',
-    'inbox': 'Inbox',
-    'invoices': 'Invoices',
+    'profile-settings': t('profile.sidebar.profileSettings'),
+    'my-bookings': t('profile.sidebar.myBookings'),
+    'my-requests': t('profile.sidebar.myRequests'),
+    'my-learning': t('profile.sidebar.myLearning'),
+    'my-class': t('profile.sidebar.myClass'),
+    'my-certificates': t('profile.sidebar.myCertificates'),
+    'favourites': t('profile.sidebar.favourites'),
+    'my-quizzes': t('profile.sidebar.myQuizzes'),
+    'inbox': t('profile.sidebar.inbox'),
+    'invoices': t('profile.sidebar.invoices'),
   };
 
   useEffect(() => {

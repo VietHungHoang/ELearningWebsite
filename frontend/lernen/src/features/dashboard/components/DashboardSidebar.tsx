@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { HiCreditCard, HiLogout, HiMenu } from "react-icons/hi";
+import { useTranslation } from "react-i18next";
 import type { SidebarOption } from "../config/dashboardConfigs";
 import { LernenLogo } from "../../../components/LernenLogo";
 
@@ -12,13 +13,14 @@ interface DashboardSidebarProps {
 
 interface NavItemProps {
     icon: React.ReactNode;
-    label: string;
+    labelKey: string;
     path: string;
     isSidebarOpen: boolean;
     count?: number;
+    t: (key: string) => string;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, path, isSidebarOpen, count }) => (
+const NavItem: React.FC<NavItemProps> = ({ icon, labelKey, path, isSidebarOpen, count, t }) => (
     <li className="relative group">
         <NavLink
             to={path}
@@ -40,7 +42,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, path, isSidebarOpen, cou
                 className={`transition-all duration-200 ${isSidebarOpen ? "opacity-100 max-w-full" : "opacity-0 max-w-0 sr-only"
                     }`}
             >
-                {label}
+                {t(labelKey)}
             </span>
             {isSidebarOpen && count && count > 0 && (
                 <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -50,7 +52,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, path, isSidebarOpen, cou
         </NavLink>
         {!isSidebarOpen && (
             <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                {label}
+                {t(labelKey)}
             </div>
         )}
     </li>
@@ -61,6 +63,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     isOpen,
     onToggleSidebar,
 }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const handleWithdraw = () => {
@@ -69,7 +72,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
     return (
         <aside
-            className={`flex flex-col bg-white transition-all duration-300 ${isOpen ? "w-60" : "w-20"
+            className={`flex flex-col bg-white transition-all duration-300 ${isOpen ? "w-72" : "w-20"
                 }`}
         >
             <div
@@ -94,12 +97,13 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                 <ul className="space-y-1">
                     {options.map((item) => (
                         <NavItem
-                            key={item.label}
-                            label={item.label}
+                            key={item.labelKey}
+                            labelKey={item.labelKey}
                             path={item.path}
                             icon={item.icon}
                             isSidebarOpen={isOpen}
                             count={item.count}
+                            t={t}
                         />
                     ))}
                 </ul>
@@ -114,7 +118,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                                 </div>
                             </div>
                             <div className="col-span-2">
-                                <p className="text-xs text-gray-500">My Wallet</p>
+                                <p className="text-xs text-gray-500">{t('dashboard.common.myWallet')}</p>
                                 <p className="text-xl font-bold text-gray-800">$1,250.75</p>
                             </div>
                         </div>
@@ -122,7 +126,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             onClick={handleWithdraw}
                             className="mt-4 w-full text-sm font-bold bg-[#0b6459] text-white hover:bg-[#084c43] rounded-lg py-2 transition-colors"
                         >
-                            Withdraw
+                            {t('dashboard.common.withdraw')}
                         </button>
                     </div>
                 ) : (
@@ -136,7 +140,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             </div>
                         </button>
                         <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none z-20">
-                            My Wallet: $1,250.75
+                            {t('dashboard.common.myWallet')}: $1,250.75
                         </div>
                     </div>
                 )}
@@ -153,12 +157,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             className={`font-semibold transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 sr-only"
                                 }`}
                         >
-                            Sign out
+                            {t('dashboard.common.signOut')}
                         </span>
                     </button>
                     {!isOpen && (
                         <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                            Sign out
+                            {t('dashboard.common.signOut')}
                         </div>
                     )}
                 </div>

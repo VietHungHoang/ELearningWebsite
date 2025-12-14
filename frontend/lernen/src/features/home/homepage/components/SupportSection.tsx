@@ -1,6 +1,9 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 const SupportSection: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="py-20 bg-[#faf8f5]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,17 +22,17 @@ const SupportSection: React.FC = () => {
           {/* Right Side - Content */}
           <div>
             <div className="text-[#065A46] text-sm font-semibold uppercase tracking-wide mb-4">
-              24/7 Support
+              {t('support.sectionLabel')}
             </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Comprehensive Support at Every Step
+              {t('support.title')}
             </h2>
             <div className="space-y-4 text-gray-600 text-lg leading-relaxed">
               <p>
-                Our dedicated onboarding assistance and technical support team are here to help you get started and troubleshoot any issues you might encounter along the way.
+                {t('support.description1')}
               </p>
               <p>
-                Access our comprehensive library of tutorials, guides, FAQs, articles, and more to enhance your learning experience and make the most of our platform.
+                {t('support.description2')}
               </p>
             </div>
           </div>

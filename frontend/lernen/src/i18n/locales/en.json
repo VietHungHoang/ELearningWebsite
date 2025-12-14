@@ -1,0 +1,472 @@
+{
+  "header": {
+    "title": "E-Learning Platform",
+    "home": "Home",
+    "findTutors": "Find Tutors",
+    "becomeTutor": "Become a Tutor",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "footer": {
+    "description": "Empowering minds through accessible, personalized, and engaging online education for a brighter future.",
+    "secure": "Secure",
+    "verified": "Verified",
+    "trusted": "Trusted",
+    "forStudents": "For Students",
+    "findTutor": "Find a Tutor",
+    "myBookings": "My Bookings",
+    "myLearning": "My Learning",
+    "favourites": "Favourites",
+    "forTutors": "For Tutors",
+    "becomeTutor": "Become a Tutor",
+    "tutorDashboard": "Tutor Dashboard",
+    "payouts": "Payouts",
+    "schedule": "Schedule",
+    "stayUpdated": "Stay Updated",
+    "newsletterDescription": "Get the latest updates, tips, and exclusive offers delivered to your inbox.",
+    "enterEmail": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribed": "Subscribed!",
+    "copyright": "© {{year}} Lernen. All Rights Reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} results",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "booking": {
+    "bookTrialLesson": "Book a Trial Lesson",
+    "withTutor": "with {{tutorName}}",
+    "trialLessonBooked": "Trial Lesson Booked!",
+    "bookingConfirmation": "Your trial lesson with {{tutorName}} is confirmed for {{date}} at {{time}}.",
+    "done": "Done",
+    "availableTimesFor": "Available Times for {{date}}",
+    "confirmBooking": "Confirm Booking",
+    "booking": "Booking...",
+    "selectDateTime": "Please select a date and time for your trial lesson.",
+    "selectDate": "Select a date",
+    "selectDateDescription": "to see available time slots.",
+    "pleaseSelectDateTime": "Please select a date and time to proceed.",
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
+  "headerNoNavbar": {
+    "exit": "Exit"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "noNotifications": "You have no new notifications.",
+    "loading": "Loading...",
+    "loadMore": "Load more"
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Welcome back!",
+      "gladToHaveYouBack": "We're glad to have you back.",
+      "emailAddress": "Email address",
+      "password": "Password",
+      "emailPlaceholder": "Email address",
+      "passwordPlaceholder": "Password",
+      "rememberMe": "Remember Me",
+      "forgotPassword": "Forgot Password?",
+      "loggingIn": "Logging in...",
+      "login": "Login",
+      "dontHaveAccount": "Don't have an Account?",
+      "signUpAsStudent": "Sign up as Student",
+      "or": "or",
+      "signUpAsTutor": "Sign up as Tutor",
+      "orSeparator": "OR",
+      "signInWithGoogle": "Sign in with Google"
+    },
+    "signup": {
+      "signUpAsTutor": "Sign up as a Tutor",
+      "signUpAsStudent": "Sign up as a Student",
+      "tutorJourney": "Start your teaching journey today.",
+      "studentJourney": "Start your learning journey today.",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Your full name",
+      "emailAddress": "Email address",
+      "emailPlaceholder": "Email address",
+      "fullNameRequired": "Full name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Email is invalid",
+      "agreeToTerms": "You must agree to the terms and conditions",
+      "agreeTermsText": "I agree to the",
+      "termsAndConditions": "Terms and Conditions",
+      "creatingAccount": "Creating Account...",
+      "createAccount": "Create Account",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "orSeparator": "OR",
+      "signUpWithGoogle": "Sign up with Google"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "description": "No worries, we'll send you reset instructions.",
+      "emailAddress": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "sendResetLink": "Send Reset Link",
+      "backToLogin": "Back to Login"
+    }
+  },
+  "home": {
+    "hero": {
+      "badge": "#1 Online Learning Platform",
+      "title": "Empower Your Future",
+      "subtitle": "Start Learning Today",
+      "description": "Connect with {{expertTutors}} for personalized learning experiences. Achieve your goals faster with one-on-one guidance.",
+      "expertTutors": "expert tutors",
+      "searchPlaceholder": "Search for tutors, courses, or subjects...",
+      "tutorsOnline": "{{count}}+ tutors online now",
+      "rating": "4.9/5 Rating",
+      "studentsCount": "15,000+ Students",
+      "certifiedTutors": "Certified Tutors"
+    }
+  },
+  "whyChooseUs": {
+    "sectionLabel": "Why Choose Us",
+    "title": "Why Our Marketplace Stands Out",
+    "description": "Explore a wealth of articles, guides, tutorials, and more, curated by our experts to enhance your learning experience.",
+    "features": {
+      "flexibleScheduling": {
+        "title": "Flexible Scheduling",
+        "description": "Learn at your own pace with tutors available 24/7"
+      },
+      "expertTutors": {
+        "title": "Expert Tutors",
+        "description": "Verified professionals with proven teaching experience"
+      },
+      "affordableRates": {
+        "title": "Affordable Rates",
+        "description": "Competitive pricing with no hidden fees"
+      },
+      "personalizedLearning": {
+        "title": "Personalized Learning Plans",
+        "description": "Customized curriculum tailored to your goals"
+      },
+      "wideRangeSubjects": {
+        "title": "Wide Range of Subjects",
+        "description": "From academics to hobbies, find tutors for everything"
+      },
+      "learnersCommunity": {
+        "title": "Learner's community and access to infinite educational resources",
+        "description": "Join a global community of learners and educators"
+      }
+    },
+    "getStarted": "Get Started Now"
+  },
+  "stepGuide": {
+    "sectionLabel": "A Step-by-Step Guide",
+    "title": "Unlock Your Potential with Easy Steps",
+    "description": "Learn how our platform simplifies finding and booking top tutors to enhance your skills and achieve your learning goals",
+    "steps": {
+      "step1": {
+        "title": "Sign Up",
+        "description": "Create your account quickly to get started with our platform",
+        "button": "Get Started"
+      },
+      "step2": {
+        "title": "Find a Tutor",
+        "description": "Browse & select from qualified tutors based on your need",
+        "button": "Search Now"
+      },
+      "step3": {
+        "title": "Schedule a Lesson",
+        "description": "Book a convenient time for your lesson with ease",
+        "button": "Let's Begin"
+      },
+      "step4": {
+        "title": "Start Your Journey",
+        "description": "Begin your educational journey with us. Find a tutor and book your first session today!",
+        "button": "Get Started Now"
+      }
+    }
+  },
+  "testimonials": {
+    "sectionLabel": "Real Feedback from Our Clients",
+    "title": "What Our Users Are Saying",
+    "description": "Discover how Lernen is making a difference in the lives of students and educational institutions. Hear from our satisfied users.",
+    "items": [
+      {
+        "text": "We have tried several tutoring platforms, but none compare to Lernen. The tutors are top-notch, and the booking process is incredibly.",
+        "name": "Arlene M",
+        "title": "Agile District",
+        "companyName": "Agile District"
+      },
+      {
+        "text": "Lernen has been a game-changer for our students. The variety of tutors and the ease of booking sessions make it a breeze for parents and students alike. Our students' grades have improved significantly since we started using this platform.",
+        "name": "Marvin M",
+        "title": "Tutoring Specialist",
+        "companyName": "Learning Hub"
+      },
+      {
+        "text": "Lernen is a fantastic resource for our students. The diverse range of tutors ensures that we can find the perfect match for each student's.",
+        "name": "Devon L",
+        "title": "Classroom Teacher",
+        "companyName": "Wisdom Academy"
+      },
+      {
+        "text": "Lernen is a dependable and effective tool for our agency, offering knowledgeable and dedicated tutors.",
+        "name": "Ronald R",
+        "title": "Educational Consultant",
+        "companyName": "Xero Education"
+      },
+      {
+        "text": "We're delighted with Lernen its top-notch tutors and user-friendly platform have greatly boosted our students.",
+        "name": "Courtney H",
+        "title": "School Counselor",
+        "companyName": "Growth Learning"
+      },
+      {
+        "text": "Our experience with Lernen has been outstanding. The platform is user-friendly, & the tutors are highly qualified.",
+        "name": "Darlene R",
+        "title": "Academic Advisor",
+        "companyName": "EduTech Solutions"
+      }
+    ]
+  },
+  "expertGuide": {
+    "sectionLabel": "User Guide",
+    "title": "Our Experts Will Guide You to Mastery",
+    "description1": "Learn from our carefully selected expert tutors who bring years of knowledge, experience, and personalized instruction to help you succeed in your learning journey.",
+    "description2": "Whether you're looking to improve your grades, prepare for exams, learn new skills, or follow a customized learning plan, our experts will guide you to achieve your full potential."
+  },
+  "support": {
+    "sectionLabel": "24/7 Support",
+    "title": "Comprehensive Support at Every Step",
+    "description1": "Our dedicated onboarding assistance and technical support team are here to help you get started and troubleshoot any issues you might encounter along the way.",
+    "description2": "Access our comprehensive library of tutorials, guides, FAQs, articles, and more to enhance your learning experience and make the most of our platform."
+  },
+  "featureTutors": {
+    "sectionLabel": "Feature Tutors",
+    "title": "Explore Our Handpicked Tutors",
+    "description": "Explore a wealth of articles, guides, tutorials, and more, curated by our experts to enhance your learning experience.",
+    "viewAllTutors": "View All Tutors",
+    "perHour": "/hr",
+    "reviews": "reviews",
+    "activeStudents": "Active Students",
+    "viewProfile": "View Profile"
+  },
+  "cart": {
+    "shoppingCart": "Shopping Cart",
+    "byTutor": "by {{tutor}}",
+    "subtotal": "Subtotal",
+    "viewCartDetails": "View Cart Details",
+    "cartEmpty": "Your cart is empty.",
+    "continueShopping": "Continue Shopping",
+    "checkout": "Checkout",
+    "applyCoupon": "Apply Coupon",
+    "remove": "Remove",
+    "addToWishlist": "Add to Wishlist",
+    "removeFromWishlist": "Remove from Wishlist",
+    "total": "Total",
+    "discount": "Discount",
+    "grandTotal": "Grand Total",
+    "haveCouponCode": "Have a coupon code?",
+    "enterCouponCode": "Enter coupon code",
+    "apply": "Apply",
+    "seeAvailableCoupon": "See Available Coupon",
+    "availableCoupons": "Available Coupons",
+    "proceedToCheckout": "Proceed to Checkout",
+    "loadingCart": "Loading cart items...",
+    "reviews": "reviews",
+    "lessons": "lessons"
+  },
+  "dashboard": {
+    "sidebar": {
+      "tutor": {
+        "dashboard": "Dashboard",
+        "myStudents": "My Students",
+        "myCourses": "My Courses",
+        "myClass": "My Class",
+        "schedule": "Schedule",
+        "payouts": "Payouts",
+        "dealsCoupons": "Deals & Coupons",
+        "myQuizzes": "My Quizzes",
+        "requests": "Requests",
+        "inbox": "Inbox",
+        "profileSettings": "Profile Settings",
+        "api": "API"
+      },
+      "student": {
+        "myBookings": "My Bookings",
+        "myClass": "My Class",
+        "myQuizzes": "My Quizzes",
+        "myCourses": "My Courses",
+        "myPurchases": "My Purchases",
+        "certificates": "Certificates",
+        "messages": "Messages",
+        "profileSettings": "Profile Settings"
+      }
+    },
+    "header": {
+      "welcome": "Welcome back",
+      "balance": "Balance",
+      "quickActions": "Quick Actions"
+    },
+    "common": {
+      "loading": "Loading...",
+      "noData": "No data available",
+      "viewAll": "View All",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "myWallet": "My Wallet",
+      "withdraw": "Withdraw",
+      "signOut": "Sign out",
+      "selectDay": "Select a Day",
+      "selectWeek": "Select a Week",
+      "selectMonth": "Select a Month",
+      "time": "Time",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      },
+      "sessionCalendar": "Session Calendar",
+      "quickStats": "Quick Stats",
+      "averageRating": "Average Rating",
+      "reviews": "reviews",
+      "courseCompletion": "Course Completion",
+      "avgResponseTime": "Avg. Response Time",
+      "thisMonthsHighlight": "This Month's Highlight",
+      "topRatedTutor": "Top rated tutor in your category!",
+      "recentActivity": "Recent Activity",
+      "noRecentActivity": "No recent activity"
+    }
+  },
+  "profile": {
+    "sidebar": {
+      "profileSettings": "Profile Settings",
+      "myBookings": "My Bookings",
+      "myRequests": "My Requests",
+      "myLearning": "My Learning",
+      "myClass": "My Class",
+      "findTutors": "Find Tutors",
+      "myQuizzes": "My Quizzes",
+      "findCourses": "Find Courses",
+      "findCourseBundles": "Find Course Bundles",
+      "assignments": "Assignments",
+      "inbox": "Inbox",
+      "community": "Community",
+      "myCertificates": "My Certificates",
+      "favourites": "Favourites",
+      "billingDetails": "Billing Details",
+      "invoices": "Invoices",
+      "disputes": "Disputes",
+      "signOut": "Sign out"
+    },
+    "bookings": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "searchHere": "Search here",
+      "noSessions": "No sessions"
+    },
+    "session": {
+      "tutor": "Tutor",
+      "joinClass": "Join Class",
+      "reschedule": "Reschedule"
+    },
+    "header": {
+      "quickSearch": "Quick search here"
+    }
+  },
+  "course": {
+    "sections": {
+      "courses": "Courses",
+      "overview": "Overview",
+      "whatYoullLearn": "What You'll Learn",
+      "courseCurriculum": "Course Curriculum",
+      "prerequisites": "Prerequisites",
+      "reviews": "Reviews"
+    },
+    "card": {
+      "reviews": "reviews",
+      "addToCart": "Add to Cart"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "productivity": "Productivity",
+      "timeManagement": "Time Management"
+    },
+    "common": {
+      "lessons": "lessons",
+      "duration": "duration",
+      "price": "Price",
+      "originalPrice": "Original Price",
+      "enrollNow": "Enroll Now",
+      "viewDetails": "View Details"
+    }
+  },
+  "becomeTutor": {
+    "hero": {
+      "title": "Share Your Knowledge, Inspire the Future",
+      "description": "Join our community of passionate educators and start earning on your own schedule. Empower students worldwide and make a real impact.",
+      "ctaButton": "Start teaching today"
+    },
+    "whyTeach": {
+      "title": "Why Teach with Lernen?",
+      "subtitle": "Join a platform that values your expertise and supports your growth.",
+      "benefits": {
+        "earnings": {
+          "title": "Competitive Earnings",
+          "description": "Set your own hourly rate and get paid securely for every session you teach."
+        },
+        "schedule": {
+          "title": "Flexible Schedule",
+          "description": "Teach whenever you want, from wherever you are. You are in control of your calendar."
+        },
+        "global": {
+          "title": "Global Student Base",
+          "description": "Connect with and inspire eager learners from all around the world."
+        },
+        "community": {
+          "title": "Supportive Community",
+          "description": "Get access to resources, tools, and a community of fellow tutors to help you succeed."
+        }
+      }
+    },
+    "howToStart": {
+      "title": "Start in Just a Few Minutes",
+      "steps": {
+        "profile": {
+          "title": "1. Create Your Profile",
+          "description": "Complete our simple application to showcase your skills and qualifications."
+        },
+        "availability": {
+          "title": "2. Set Your Availability",
+          "description": "You decide when and how often you want to teach. Total flexibility."
+        },
+        "earning": {
+          "title": "3. Start Earning",
+          "description": "Once approved, students can book sessions and you can start earning."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Hear From Our Tutors",
+      "subtitle": "See what other educators are saying about their experience on Lernen."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View"
+  }
+}

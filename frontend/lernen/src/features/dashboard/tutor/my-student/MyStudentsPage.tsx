@@ -1,0 +1,288 @@
+import React, {useEffect, useMemo, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {HiChat, HiEye, HiSearch} from 'react-icons/hi';
+import EnrollmentTypeBadge from '../components/EnrollmentTypeBadge';
+import StudentStatusBadge from '../components/StudentStatusBadge';
+import Pagination from '../../../../components/ui/Pagination';
+import {type StudentFilters, studentService} from '../../../../services/studentService';
+import type {Student, StudentListItem} from '../../../../types/api';
+import {useAuth} from '../../../../context/AuthContext';
+import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import Breadcrumb from '../../components/Breadcrumb';
+
+export type StudentEnrollmentType = '1-on-1' | 'Group' | 'Trial';
+export type StudentStatus = 'Ongoing' | 'Completed';
+type FilterTab = 'All Students' | 'Ongoing' | 'Completed';
+type EnrollmentFilter = 'All Types' | '1-on-1' | 'Group' | 'Trial';
+
+const MyStudentsPage: React.FC = () => {
+    const { state } = useAuth();
+    const navigate = useNavigate();
+    const [students, setStudents] = useState<StudentListItem[]>([]);
+    const [totalElements, setTotalElements] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<FilterTab>('All Students');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [enrollmentFilter, setEnrollmentFilter] = useState<EnrollmentFilter>('All Types');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const itemsPerPage = 10;
+
+    // Fetch students data
+    useEffect(() => {
+        const fetchStudents = async () => {
+            if (!state.user?.id) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+
+                const filters: StudentFilters = {
+                    page: currentPage,
+                    size: itemsPerPage
+                };
+
+                const tutorId = state.user.id;
+                const response = await studentService.getStudentsByTutorId(tutorId, filters);
+
+                if (response.success) {
+                    setStudents(response.data.content);
+                    setTotalElements(response.data.totalElements);
+                } else {
+                    setError(response.message || 'Failed to fetch students');
+                }
+            } catch (err) {
+                setError('Failed to fetch students');
+                console.error('Error fetching students:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, [state.user?.id, currentPage]);
+
+    const handleMessageStudent = (student: Student) => {
+        console.log('Message student:', student);
+        // TODO: Implement messaging functionality
+    };
+
+    const filteredStudents = useMemo(() => {
+        return students
+            .filter(student => {
+                if (activeTab === 'All Students') return true;
+                return student.status === activeTab;
+            })
+            .filter(student => {
+                if (enrollmentFilter === 'All Types') return true;
+                return student.enrollmentTypes.includes(enrollmentFilter as StudentEnrollmentType);
+            })
+            .filter(student =>
+                student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                student.email.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+    }, [students, activeTab, searchTerm, enrollmentFilter]);
+
+    // Calculate tab counts
+    const tabCounts = useMemo(() => {
+        return {
+            'All Students': students.length,
+            'Ongoing': students.filter(s => s.status === 'Ongoing').length,
+            'Completed': students.filter(s => s.status === 'Completed').length,
+        };
+    }, [students]);
+
+    const TabButton: React.FC<{ label: FilterTab }> = ({ label }) => {
+        const count = tabCounts[label];
+        const isActive = activeTab === label;
+
+        return (
+            <button
+                onClick={() => setActiveTab(label)}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${isActive ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
+                    }`}
+            >
+                {label}
+                {count > 0 && ` (${count})`}
+            </button>
+        );
+    };
+
+    return (
+        <div className="mx-auto">
+            <Breadcrumb
+                items={[
+                    { label: 'Dashboard', onClick: () => navigate('/dashboard') },
+                    { label: 'My Students', isActive: true }
+                ]}
+                className="mb-6"
+            />
+
+            {/* Filters */}
+            <div className="flex flex-wrap justify-between items-center gap-4 mt-6">
+                <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center flex-wrap gap-1">
+                    <TabButton label="All Students" />
+                    <TabButton label="Ongoing" />
+                    <TabButton label="Completed" />
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="w-48">
+                        <CustomDropdown
+                            options={['All Types', '1-on-1', 'Group', 'Trial']}
+                            selectedValue={enrollmentFilter}
+                            placeholder="All Types"
+                            onSelect={(value: string) => setEnrollmentFilter(value as EnrollmentFilter)}
+                            dropdownId="enrollmentFilter"
+                            openDropdown={openDropdown}
+                            setOpenDropdown={setOpenDropdown}
+                        />
+                    </div>
+                    <div className="relative w-80">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <HiSearch className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search students..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0b6459]"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Students Table */}
+            <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
+                {loading ? (
+                    <div className="text-center py-16">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto"></div>
+                        <p className="text-gray-500 mt-4">Loading students...</p>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-16">
+                        <h3 className="text-lg font-bold text-red-600">Error Loading Students</h3>
+                        <p className="text-gray-500 mt-2">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition-colors"
+                        >
+                            Try Again
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-gray-50 text-gray-600 font-semibold">
+                                    <tr>
+                                        <th className="p-4 text-center">#</th>
+                                        <th className="p-4 text-center">Student Name</th>
+                                        <th className="p-4 text-center">Email</th>
+                                        <th className="p-4 text-center">Type</th>
+                                        <th className="p-4 text-center">Class</th>
+                                        <th className="p-4 text-center">Sessions</th>
+                                        <th className="p-4 text-center">Registered Date</th>
+                                        <th className="p-4 text-center">Status</th>
+                                        <th className="p-4 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {filteredStudents.map((student, index) => (
+                                        <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                                            {/* STT */}
+                                            <td className="p-4 text-center">
+                                                <p className="text-sm font-semibold text-gray-600">{index + 1}</p>
+                                            </td>
+
+                                            {/* Student Name (no avatar) */}
+                                            <td className="p-4 text-center">
+                                                <p className="font-semibold text-gray-800">{student.fullName}</p>
+                                            </td>
+
+                                            {/* Email */}
+                                            <td className="p-4 text-center">
+                                                <p className="text-sm text-gray-600">{student.email}</p>
+                                            </td>
+
+                                            {/* Type (enrollment badges only) */}
+                                            <td className="p-4 text-center">
+                                                <div className="flex gap-1 justify-center min-w-[140px]">
+                                                    {student.enrollmentTypes.map(type => (
+                                                        <EnrollmentTypeBadge key={type} type={type} />
+                                                    ))}
+                                                </div>
+                                            </td>
+
+                                            {/* Class - Placeholder for now */}
+                                            <td className="p-4 text-center">
+                                                <p className="text-sm text-gray-800 font-medium">Math A1</p>
+                                            </td>
+
+                                            {/* Sessions - Placeholder X/Y format */}
+                                            <td className="p-4 text-center">
+                                                <div className="text-sm">
+                                                    <span className="text-gray-800">8</span>
+                                                    <span className="text-gray-800"> / 10</span>
+                                                </div>
+                                            </td>
+
+                                            {/* Registered Date */}
+                                            <td className="p-4 text-center">
+                                                <p className="text-sm text-gray-600">{student.registeredDate}</p>
+                                            </td>
+
+                                            {/* Status */}
+                                            <td className="p-4 text-center">
+                                                <StudentStatusBadge status={student.status} />
+                                            </td>
+
+                                            {/* Actions */}
+                                            <td className="p-4 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => handleMessageStudent(student)}
+                                                        className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+                                                        title="Message student"
+                                                    >
+                                                        <HiChat className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => navigate(`/dashboard/my-students/${student.id}`)}
+                                                        className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+                                                        title="View details"
+                                                    >
+                                                        <HiEye className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        {filteredStudents.length === 0 && (
+                            <div className="text-center py-16">
+                                <h3 className="text-lg font-bold text-gray-800">No Students Found</h3>
+                                <p className="text-gray-500 mt-2">No students match your current filters.</p>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {filteredStudents.length > 0 && !loading && !error && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(totalElements / itemsPerPage)}
+                    totalItems={totalElements}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                />
+            )}
+        </div>
+    );
+};
+
+export default MyStudentsPage;

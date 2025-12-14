@@ -11,27 +11,27 @@ const RevenueChart: React.FC<RevenueChartProps> = ({ data }) => {
     const displayData = viewMode === '6months' ? data.slice(-6) : data;
 
     return (
-        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h3 className="text-lg font-bold text-gray-800">Revenue Overview</h3>
                     <p className="text-sm text-gray-500 mt-1">Track your earnings over time</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center gap-1">
                     <button
                         onClick={() => setViewMode('6months')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${viewMode === '6months'
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${viewMode === '6months'
+                                ? 'bg-white text-gray-800 shadow-sm'
+                                : 'text-gray-500 hover:bg-white/50'
                             }`}
                     >
                         6 Months
                     </button>
                     <button
                         onClick={() => setViewMode('12months')}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${viewMode === '12months'
-                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${viewMode === '12months'
+                                ? 'bg-white text-gray-800 shadow-sm'
+                                : 'text-gray-500 hover:bg-white/50'
                             }`}
                     >
                         12 Months

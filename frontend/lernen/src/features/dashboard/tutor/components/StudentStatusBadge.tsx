@@ -1,5 +1,5 @@
 import React from 'react';
-import type { StudentStatus } from '../pages/MyStudentsPage';
+import type { StudentStatus } from '../my-student/MyStudentsPage';
 
 interface StudentStatusBadgeProps {
     status: StudentStatus;

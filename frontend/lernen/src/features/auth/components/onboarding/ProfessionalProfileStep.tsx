@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { HiSparkles, HiChevronDown } from "react-icons/hi";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
 import * as commonService from "../../../../services/commonService";
-import type { Subject, Tutor, Category } from "../../../../types/api.ts";
+import type { Category, Subject } from "../../../../types/common";
+import type { TutorDetail } from "../../../../types/tutor";
 
 interface ProfessionalProfileStepProps {
-    data: Partial<Tutor>;
-    onChange: (data: Partial<Tutor>) => void;
+    data: Partial<TutorDetail>;
+    onChange: (data: Partial<TutorDetail>) => void;
 }
 
 const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data, onChange }) => {
@@ -84,6 +85,28 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
                 />
                 <p className="text-xs text-gray-500 mt-1">
                     This will be displayed under your name on your profile card.
+                </p>
+            </div>
+
+            {/* Session Fee */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Session Fee (per hour) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={data.currentSessionFee || ''}
+                        onChange={(e) => onChange({ currentSessionFee: parseFloat(e.target.value) || 0 })}
+                        placeholder="0.00"
+                        className={`${inputStyles} pl-8`}
+                    />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                    Set your hourly rate for tutoring sessions.
                 </p>
             </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { HiCurrencyDollar, HiCheckCircle, HiCreditCard, HiOfficeBuilding, HiPlus, HiDownload, HiCalendar, HiEye } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import Toast from '../../../../components/ui/Toast';
@@ -9,54 +9,52 @@ import Pagination from '../../../../components/ui/Pagination';
 import TransactionDetailModal from '../components/TransactionDetailModal';
 import Breadcrumb from '../../components/Breadcrumb';
 import { payoutService } from '../../../../services/payoutService';
+import { classService } from '../../../../services/classService';
 import type { PayoutMethod, PayoutHistoryItem, PayoutSummary, PayoutStatus, RecentEarning } from '../../../../types/api';
 import { useAuth } from '../../../../context/AuthContext';
 
-// Mock Data
-const mockMethods: PayoutMethod[] = [
-    { id: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p', type: 'PayPal', identifier: 'john.doe@example.com' },
-    { id: '2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q', type: 'Bank', identifier: '**** 4567' },
-    { id: '3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r', type: 'PayPal', identifier: 'sarah.smith@gmail.com' },
-    { id: '4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s', type: 'Bank', identifier: '**** 8901' }
-];
-
-const mockHistory: PayoutHistoryItem[] = [
-    { id: 'TXN20251122', date: 'Nov 22, 2025', amount: 1250.75, method: mockMethods[0], status: 'Completed' },
-    { id: 'TXN20251115', date: 'Nov 15, 2025', amount: 980.50, method: mockMethods[1], status: 'Completed' },
-    { id: 'TXN20251108', date: 'Nov 08, 2025', amount: 1450.25, method: mockMethods[0], status: 'Completed' },
-    { id: 'TXN20251101', date: 'Nov 01, 2025', amount: 750.00, method: mockMethods[2], status: 'Processing' },
-    { id: 'TXN20251025', date: 'Oct 25, 2025', amount: 2100.00, method: mockMethods[1], status: 'Completed' },
-    { id: 'TXN20251018', date: 'Oct 18, 2025', amount: 890.75, method: mockMethods[0], status: 'Completed' },
-    { id: 'TXN20251011', date: 'Oct 11, 2025', amount: 1650.50, method: mockMethods[3], status: 'Failed' },
-    { id: 'TXN20251004', date: 'Oct 04, 2025', amount: 1200.00, method: mockMethods[1], status: 'Completed' },
-    { id: 'TXN20250927', date: 'Sep 27, 2025', amount: 950.25, method: mockMethods[0], status: 'Processing' },
-    { id: 'TXN20250920', date: 'Sep 20, 2025', amount: 1800.00, method: mockMethods[2], status: 'Completed' },
-    { id: 'TXN20250913', date: 'Sep 13, 2025', amount: 1100.50, method: mockMethods[1], status: 'Completed' },
-    { id: 'TXN20250906', date: 'Sep 06, 2025', amount: 1350.75, method: mockMethods[0], status: 'Failed' },
-    { id: 'TXN20250830', date: 'Aug 30, 2025', amount: 950.00, method: mockMethods[3], status: 'Completed' },
-    { id: 'TXN20250823', date: 'Aug 23, 2025', amount: 1400.25, method: mockMethods[1], status: 'Processing' },
-    { id: 'TXN20250816', date: 'Aug 16, 2025', amount: 1150.50, method: mockMethods[0], status: 'Completed' },
-];
-
-const initialSummary: PayoutSummary = {
-    availableBalance: 1250.75,
-    pendingBalance: 750.00,
-    withdrawalCount: 3,
-    maxWithdrawals: 5,
-    minimumThreshold: 50,
-    commissionRate: 12,
-    nextPayoutDate: 'Dec 01, 2025',
-    totalEarned: 24500.00
-};
+// Payout data will be fetched from API
 
 const PayoutsPage = () => {
     const { state } = useAuth();
     const navigate = useNavigate();
 
     // Data states
-    const [summary, setSummary] = useState<PayoutSummary>(initialSummary);
+    const [summary, setSummary] = useState<PayoutSummary>(() => {
+        // Tính nextPayoutDate: ngày 15 của tháng hiện tại hoặc tháng sau
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        const currentDay = now.getDate();
+        
+        let payoutYear = currentYear;
+        let payoutMonth = currentMonth;
+        
+        // Nếu đã qua ngày 15, chuyển sang tháng sau
+        if (currentDay > 15) {
+            payoutMonth = currentMonth + 1;
+            if (payoutMonth > 11) {
+                payoutMonth = 0;
+                payoutYear = currentYear + 1;
+            }
+        }
+        
+        const nextPayoutDate = `${payoutYear}-${String(payoutMonth + 1).padStart(2, '0')}-15`;
+        
+        return {
+            availableBalance: 0,
+            pendingBalance: 0,
+            withdrawalCount: 0,
+            maxWithdrawals: 5,        // Fix cứng giới hạn rút tối đa
+            minimumThreshold: 10,     // Fix cứng ngưỡng rút tối thiểu
+            commissionRate: 15,       // Fix cứng phí hoa hồng
+            nextPayoutDate: nextPayoutDate, // Tính tự động dựa trên ngày hiện tại
+            totalEarned: 0,
+            currentPaymentMethod: undefined
+        };
+    });
     const [payoutMethods, setPayoutMethods] = useState<PayoutMethod[]>([]); // Khởi tạo rỗng, chỉ load khi cần
-    const [history, setHistory] = useState<PayoutHistoryItem[]>(mockHistory);
+    const [history, setHistory] = useState<PayoutHistoryItem[]>([]);
     const [recentEarnings, setRecentEarnings] = useState<RecentEarning[]>([]);
     const [earningsPagination, setEarningsPagination] = useState({
         currentPage: 1,
@@ -105,9 +103,12 @@ const PayoutsPage = () => {
         }
     }, [activeTab]);
 
-    // Set initial underline position on mount
-    useEffect(() => {
-        const timer = setTimeout(() => {
+    // Set initial underline position on mount and when loading completes
+    useLayoutEffect(() => {
+        if (loading) return; // Wait until loading is done
+        
+        // Small delay to ensure refs are set
+        setTimeout(() => {
             const activeRef = activeTab === 'earnings' ? earningsTabRef.current : historyTabRef.current;
             if (activeRef) {
                 const rect = activeRef.getBoundingClientRect();
@@ -119,13 +120,11 @@ const PayoutsPage = () => {
                     });
                 }
             }
-        }, 100);
-        return () => clearTimeout(timer);
-    }, []);
+        }, 10);
+    }, [activeTab, loading]);
 
-    // Fetch initial data when page loads: API 1 (summary + current payment method) và API 2 (recent earnings)
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const fetchSummary = async () => {
             if (!state.user?.id) return;
 
             try {
@@ -134,53 +133,77 @@ const PayoutsPage = () => {
 
                 const tutorId = state.user.id;
 
-                // API 1: Fetch summary cho 4 cards (bao gồm cả current payment method)
-                const summaryResponse = await payoutService.getPayoutSummary(tutorId);
+                const summaryResponse = await classService.getPayoutSummary(tutorId);
+                console.log('Summary response:', summaryResponse);
                 if (summaryResponse.success) {
-                    setSummary(summaryResponse.data);
-                    // Nếu có current payment method từ API, set selectedMethodId
+                    // Chỉ update các trường không fix cứng, giữ nguyên minimumThreshold, commissionRate, maxWithdrawals và nextPayoutDate
+                    setSummary(prev => ({
+                        ...prev,
+                        availableBalance: summaryResponse.data.availableBalance,
+                        pendingBalance: summaryResponse.data.pendingBalance,
+                        withdrawalCount: summaryResponse.data.withdrawalCount,
+                        // maxWithdrawals: giữ nguyên 5 (fix cứng)
+                        // minimumThreshold: giữ nguyên 10 (fix cứng)
+                        // commissionRate: giữ nguyên 15 (fix cứng)
+                        // nextPayoutDate: giữ nguyên giá trị tính toán (fix cứng)
+                        totalEarned: summaryResponse.data.totalEarned,
+                        currentPaymentMethod: summaryResponse.data.currentPaymentMethod
+                    }));
                     if (summaryResponse.data.currentPaymentMethod) {
                         setSelectedMethodId(summaryResponse.data.currentPaymentMethod.id);
                     }
                 }
-
-                // API 2: Fetch recent earnings (tab mặc định)
-                const earningsResponse = await payoutService.getRecentEarnings(tutorId, {
-                    page: earningsCurrentPage,
-                    limit: earningsItemsPerPage,
-                    type: earningsFilter !== 'All' ? earningsFilter : undefined
-                });
-                if (earningsResponse.success) {
-                    setRecentEarnings(earningsResponse.data.content);
-                    setEarningsPagination({
-                        currentPage: earningsResponse.data.pageable.pageNumber + 1, // Convert to 1-based
-                        totalPages: earningsResponse.data.totalPages,
-                        totalItems: earningsResponse.data.totalElements,
-                        itemsPerPage: earningsResponse.data.size
-                    });
-                } else {
-                    // Keep using mock data if API fails
-                    setRecentEarnings(mockEarnings);
-                    setEarningsPagination({
-                        currentPage: earningsCurrentPage,
-                        totalPages: Math.ceil(mockEarnings.length / earningsItemsPerPage),
-                        totalItems: mockEarnings.length,
-                        itemsPerPage: earningsItemsPerPage
-                    });
-                }
-
             } catch (err) {
                 setError('Failed to fetch payout data');
-                console.error('Error fetching payout data:', err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchInitialData();
-    }, [state.user?.id, earningsCurrentPage, earningsFilter]);
+        fetchSummary();
+    }, [state.user?.id]);
 
-    // API 3: Fetch transaction history chỉ khi user chuyển sang tab "history"
+    useEffect(() => {
+        const fetchRecentEarnings = async () => {
+            if (!state.user?.id || activeTab !== 'earnings') return;
+
+            try {
+                const tutorId = state.user.id;
+
+                const earningsResponse = await classService.getRecentEarnings(tutorId, {
+                    page: earningsCurrentPage,
+                    size: earningsItemsPerPage,
+                    type: earningsFilter !== 'All' ? earningsFilter : undefined
+                });
+                console.log('Earnings response:', earningsResponse);
+                if (earningsResponse.success) {
+                    setRecentEarnings(earningsResponse.data.content);
+                    setEarningsPagination({
+                        currentPage: earningsResponse.data.pageable.pageNumber + 1,
+                        totalPages: earningsResponse.data.totalPages,
+                        totalItems: earningsResponse.data.totalElements,
+                        itemsPerPage: earningsResponse.data.size
+                    });
+                } else {
+                    console.error('Failed to fetch recent earnings:', earningsResponse.message);
+                    setRecentEarnings([]);
+                    setEarningsPagination({
+                        currentPage: earningsCurrentPage,
+                        totalPages: 1,
+                        totalItems: 0,
+                        itemsPerPage: earningsItemsPerPage
+                    });
+                }
+
+            } catch (err) {
+                console.error('Error fetching recent earnings:', err);
+                setRecentEarnings([]);
+            }
+        };
+
+        fetchRecentEarnings();
+    }, [state.user?.id, activeTab, earningsCurrentPage, earningsFilter]);
+
     useEffect(() => {
         const fetchTransactionHistory = async () => {
             if (!state.user?.id || activeTab !== 'history') return;
@@ -188,21 +211,18 @@ const PayoutsPage = () => {
             try {
                 const tutorId = state.user.id;
 
-                const historyResponse = await payoutService.getPayoutHistory(tutorId, {
+                const historyResponse = await classService.getPayoutHistory(tutorId, {
                     page: currentPage,
                     limit: itemsPerPage
                 });
                 if (historyResponse.success) {
                     setHistory(historyResponse.data.content);
-                } else {
-                    // Keep using mock data if API fails
-                    setHistory(mockHistory);
                 }
 
             } catch (err) {
                 console.error('Error fetching transaction history:', err);
-                // Keep using mock data if API fails
-                setHistory(mockHistory);
+                // Keep history empty if API fails
+                setHistory([]);
             }
         };
 
@@ -239,7 +259,7 @@ const PayoutsPage = () => {
     // Filter and Pagination Logic
     // For Transaction History, we use the full mock data for pagination calculation
     // since API returns paginated results but we need to show all filtered results
-    const allHistoryData = mockHistory.filter(item => {
+    const allHistoryData = history.filter(item => {
         const matchesStatus = statusFilter === 'All' ? true : item.status === statusFilter;
         const matchesSearch = searchTerm === '' ||
             item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -253,30 +273,6 @@ const PayoutsPage = () => {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-
-    // Mock earnings data for filtering
-    const mockEarnings: RecentEarning[] = [
-        { id: 'ERN001', course: 'Web Development Bootcamp', type: '1-on-1', date: '22/11/2025', amount: 50.00 },
-        { id: 'ERN002', course: 'Advanced React Course', type: 'Group', date: '20/11/2025', amount: 45.00 },
-        { id: 'ERN003', course: 'JavaScript Fundamentals', type: '1-on-1', date: '19/11/2025', amount: 38.50 },
-        { id: 'ERN004', course: 'Python for Data Science', type: 'Group', date: '18/11/2025', amount: 42.00 },
-        { id: 'ERN005', course: 'UI/UX Design Principles', type: '1-on-1', date: '17/11/2025', amount: 55.00 },
-        { id: 'ERN006', course: 'Machine Learning Basics', type: 'Group', date: '16/11/2025', amount: 48.00 },
-        { id: 'ERN007', course: 'Node.js Backend Development', type: '1-on-1', date: '15/11/2025', amount: 52.00 },
-        { id: 'ERN008', course: 'Database Design & Management', type: 'Group', date: '14/11/2025', amount: 40.00 },
-        { id: 'ERN009', course: 'Mobile App Development', type: '1-on-1', date: '13/11/2025', amount: 60.00 },
-        { id: 'ERN010', course: 'Cloud Computing with AWS', type: 'Group', date: '12/11/2025', amount: 45.00 },
-        { id: 'ERN011', course: 'DevOps Essentials', type: '1-on-1', date: '11/11/2025', amount: 58.00 },
-        { id: 'ERN012', course: 'Cybersecurity Fundamentals', type: 'Group', date: '10/11/2025', amount: 43.00 },
-        { id: 'ERN013', course: 'Full Stack Development', type: '1-on-1', date: '09/11/2025', amount: 65.00 },
-        { id: 'ERN014', course: 'Data Structures & Algorithms', type: 'Group', date: '08/11/2025', amount: 47.00 },
-        { id: 'ERN015', course: 'API Development with REST', type: '1-on-1', date: '07/11/2025', amount: 53.00 },
-        { id: 'ERN016', course: 'Blockchain Technology', type: 'Group', date: '06/11/2025', amount: 49.00 },
-        { id: 'ERN017', course: 'iOS App Development', type: '1-on-1', date: '05/11/2025', amount: 62.00 },
-        { id: 'ERN018', course: 'Android Development', type: 'Group', date: '04/11/2025', amount: 44.00 },
-        { id: 'ERN019', course: 'System Design Interview Prep', type: '1-on-1', date: '03/11/2025', amount: 70.00 },
-        { id: 'ERN020', course: 'Agile Project Management', type: 'Group', date: '02/11/2025', amount: 41.00 },
-    ];
 
     // Recent earnings are now handled by API with server-side filtering and pagination
 
@@ -305,7 +301,7 @@ const PayoutsPage = () => {
     };
 
     const handleWithdraw = async (amount: number) => {
-        if (!state.user?.id || !selectedMethodId) return;
+        if (!state.user?.id || !selectedMethodId || !summary) return;
 
         if (summary.withdrawalCount >= summary.maxWithdrawals) {
             setToast({ message: 'Monthly limit reached!', type: 'error' });
@@ -364,7 +360,7 @@ const PayoutsPage = () => {
     };
 
     return (
-        <div className="min-h-screen">
+        <div className="">
             <div className="">
                 {/* Breadcrumb */}
                 <Breadcrumb
@@ -379,17 +375,6 @@ const PayoutsPage = () => {
                     <div className="text-center py-20">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto"></div>
                         <p className="text-gray-500 mt-4">Loading payout data...</p>
-                    </div>
-                ) : error ? (
-                    <div className="text-center py-20">
-                        <h3 className="text-lg font-bold text-red-600">Error Loading Payout Data</h3>
-                        <p className="text-gray-500 mt-2">{error}</p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="mt-4 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition-colors"
-                        >
-                            Try Again
-                        </button>
                     </div>
                 ) : (
                 <>
@@ -595,123 +580,144 @@ const PayoutsPage = () => {
                         />
                     </div>
 
-                    {/* Table */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 text-gray-600 font-semibold">
-                                <tr>
-                                    {activeTab === 'earnings' ? (
-                                        <>
-                                            <th className="p-4 text-center">ID</th>
-                                            <th className="p-4 text-center">Course/Service</th>
-                                            <th className="p-4 text-center">Type</th>
-                                            <th className="p-4 text-center">Date</th>
-                                            <th className="p-4 text-center">Amount</th>
-                                            <th className="p-4 text-center">Actions</th>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <th className="p-4 text-center">Transaction ID</th>
-                                            <th className="p-4 text-center">Date</th>
-                                            <th className="p-4 text-center">Amount</th>
-                                            <th className="p-4 text-center">Method</th>
-                                            <th className="p-4 text-center">Status</th>
-                                            <th className="p-4 text-center">Actions</th>
-                                        </>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {activeTab === 'earnings' ? (
-                                    /* Recent Earnings Data */
-                                    recentEarnings.map((item) => (
-                                        <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm font-medium text-gray-800">{item.id}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm font-medium text-gray-800">{item.course}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm text-gray-600">{item.type}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm text-gray-600">{item.date}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm font-semibold text-gray-800">+${item.amount.toFixed(2)}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <button
-                                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-[#0b6459] transition-colors"
-                                                    title="View Details"
-                                                >
-                                                    <HiEye className="w-5 h-5" />
-                                                </button>
-                                            </td>
+                    {/* Table or Empty State */}
+                    {(activeTab === 'earnings' ? recentEarnings.length > 0 : currentHistory.length > 0) ? (
+                        <>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-gray-50 text-gray-600 font-semibold">
+                                        <tr>
+                                            {activeTab === 'earnings' ? (
+                                                <>
+                                                    <th className="p-4 text-center">ID</th>
+                                                    <th className="p-4 text-center">Course/Service</th>
+                                                    <th className="p-4 text-center">Type</th>
+                                                    <th className="p-4 text-center">Date</th>
+                                                    <th className="p-4 text-center">Amount</th>
+                                                    <th className="p-4 text-center">Actions</th>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <th className="p-4 text-center">Transaction ID</th>
+                                                    <th className="p-4 text-center">Date</th>
+                                                    <th className="p-4 text-center">Amount</th>
+                                                    <th className="p-4 text-center">Method</th>
+                                                    <th className="p-4 text-center">Status</th>
+                                                    <th className="p-4 text-center">Actions</th>
+                                                </>
+                                            )}
                                         </tr>
-                                    ))
-                                ) : (
-                                    /* Transaction History Data */
-                                    currentHistory.map(item => (
-                                        <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm font-medium text-gray-800">{item.id}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm text-gray-600">{item.date}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm font-semibold text-gray-800">${item.amount.toFixed(2)}</p>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                                                        {item.method.type === 'PayPal' ? <HiCreditCard className="w-4 h-4 text-gray-600" /> : <HiOfficeBuilding className="w-4 h-4 text-gray-600" />}
-                                                    </div>
-                                                    <span className="text-sm text-gray-600">{item.method.type}</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <PayoutStatusBadge status={item.status} />
-                                            </td>
-                                            <td className="p-4 text-center">
-                                                <button
-                                                    onClick={() => handleViewDetails(item)}
-                                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-[#0b6459] transition-colors"
-                                                    title="View Details"
-                                                >
-                                                    <HiEye className="w-5 h-5" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {activeTab === 'earnings' ? (
+                                            /* Recent Earnings Data */
+                                            recentEarnings.map((item) => (
+                                                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm font-medium text-gray-800">{item.id}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm font-medium text-gray-800">{item.course}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm text-gray-600">{item.type}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm text-gray-600">{item.date}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm font-semibold text-gray-800">+${item.amount.toFixed(2)}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <button
+                                                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-[#0b6459] transition-colors"
+                                                            title="View Details"
+                                                        >
+                                                            <HiEye className="w-5 h-5" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            /* Transaction History Data */
+                                            currentHistory.map(item => (
+                                                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm font-medium text-gray-800">{item.id}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm text-gray-600">{item.date}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <p className="text-sm font-semibold text-gray-800">${item.amount.toFixed(2)}</p>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                                {item.method.type === 'PayPal' ? <HiCreditCard className="w-4 h-4 text-gray-600" /> : <HiOfficeBuilding className="w-4 h-4 text-gray-600" />}
+                                                            </div>
+                                                            <span className="text-sm text-gray-600">{item.method.type}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <PayoutStatusBadge status={item.status} />
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <button
+                                                            onClick={() => handleViewDetails(item)}
+                                                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-[#0b6459] transition-colors"
+                                                            title="View Details"
+                                                        >
+                                                            <HiEye className="w-5 h-5" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                    {/* Pagination - show for both tabs when needed */}
-                    {activeTab === 'history' && totalPages > 1 && (
-                        <div className="mt-6">
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                totalItems={allHistoryData.length}
-                                itemsPerPage={itemsPerPage}
-                                onPageChange={setCurrentPage}
-                            />
-                        </div>
-                    )}
-                    {activeTab === 'earnings' && earningsPagination.totalPages > 1 && (
-                        <div className="mt-6">
-                            <Pagination
-                                currentPage={earningsPagination.currentPage}
-                                totalPages={earningsPagination.totalPages}
-                                totalItems={earningsPagination.totalItems}
-                                itemsPerPage={earningsPagination.itemsPerPage}
-                                onPageChange={setEarningsCurrentPage}
-                            />
+                            {/* Pagination - show for both tabs when needed */}
+                            {activeTab === 'history' && totalPages > 1 && (
+                                <div className="mt-6">
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        totalItems={allHistoryData.length}
+                                        itemsPerPage={itemsPerPage}
+                                        onPageChange={setCurrentPage}
+                                    />
+                                </div>
+                            )}
+                            {activeTab === 'earnings' && earningsPagination.totalPages > 1 && (
+                                <div className="mt-6">
+                                    <Pagination
+                                        currentPage={earningsPagination.currentPage}
+                                        totalPages={earningsPagination.totalPages}
+                                        totalItems={earningsPagination.totalItems}
+                                        itemsPerPage={earningsPagination.itemsPerPage}
+                                        onPageChange={setEarningsCurrentPage}
+                                    />
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="flex items-center justify-center py-20">
+                            <div className="text-center">
+                                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <HiCurrencyDollar className="w-8 h-8 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                                    {activeTab === 'earnings' ? 'No Recent Earnings' : 'No Transaction History'}
+                                </h3>
+                                <p className="text-gray-500">
+                                    {activeTab === 'earnings'
+                                        ? 'You haven\'t earned any money yet. Start teaching to see your earnings here.'
+                                        : 'No transactions found. Your payout history will appear here once you make withdrawals.'
+                                    }
+                                </p>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -726,7 +732,7 @@ const PayoutsPage = () => {
                     onSave={handleAddMethod}
                 />
             )}
-            {isWithdrawModalOpen && (
+            {isWithdrawModalOpen && summary && (
                 <WithdrawModal
                     isOpen={isWithdrawModalOpen}
                     onClose={() => setIsWithdrawModalOpen(false)}
@@ -734,7 +740,7 @@ const PayoutsPage = () => {
                     balance={summary.availableBalance}
                 />
             )}
-            {isTransactionDetailOpen && selectedTransaction && (
+            {isTransactionDetailOpen && selectedTransaction && summary && (
                 <TransactionDetailModal
                     transaction={selectedTransaction}
                     commissionRate={summary.commissionRate}

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FiX, FiVideo, FiCalendar } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface Booking {
   id: number;
@@ -17,6 +18,7 @@ interface SessionDetailModalProps {
 }
 
 const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, position, onClose }) => {
+    const { t } = useTranslation();
     const modalRef = useRef<HTMLDivElement>(null);
     const [isLeft, setIsLeft] = useState(false);
 
@@ -67,7 +69,7 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
                 <img src={booking.tutorAvatar} alt={booking.tutorName} className="w-10 h-10 rounded-full" />
                 <div>
                     <p className="text-sm font-semibold text-gray-800">{booking.tutorName}</p>
-                    <p className="text-xs text-gray-500">Tutor</p>
+                    <p className="text-xs text-gray-500">{t('profile.session.tutor')}</p>
                 </div>
             </div>
 
@@ -80,11 +82,11 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
             <div className="mt-4 flex flex-col gap-2">
                 <button className="w-full flex items-center justify-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-[#084c43] transition-colors">
                     <FiVideo />
-                    Join Class
+                    {t('profile.session.joinClass')}
                 </button>
                 <button className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-200 transition-colors">
                     <FiCalendar />
-                    Reschedule
+                    {t('profile.session.reschedule')}
                 </button>
             </div>
         </div>

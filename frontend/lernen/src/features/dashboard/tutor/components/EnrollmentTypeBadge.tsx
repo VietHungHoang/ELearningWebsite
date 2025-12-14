@@ -1,6 +1,6 @@
 import React from 'react';
 import { HiUser, HiUserGroup, HiSparkles } from 'react-icons/hi';
-import type { StudentEnrollmentType } from '../pages/MyStudentsPage';
+import type { StudentEnrollmentType } from '../my-student/MyStudentsPage';
 
 interface EnrollmentTypeBadgeProps {
     type: StudentEnrollmentType;

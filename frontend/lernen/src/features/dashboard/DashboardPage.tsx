@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import DashboardLayout from "./components/DashboardLayout";
 import {
@@ -10,6 +10,8 @@ import {
 
 const DashboardPage = () => {
     const { state } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     // Redirect if not authenticated
     if (!state.isAuthenticated || !state.user) {
@@ -21,6 +23,12 @@ const DashboardPage = () => {
     }
 
     const { role, name, email } = state.user;
+
+    // Redirect students from /dashboard to /dashboard/my-bookings
+    if (role === "student" && location.pathname === "/dashboard") {
+        navigate("/dashboard/my-bookings", { replace: true });
+        return null;
+    }
 
     // Determine sidebar options based on role
     let sidebarOptions: SidebarOption[] = [];

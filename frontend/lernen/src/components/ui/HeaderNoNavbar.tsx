@@ -1,9 +1,11 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { LernenLogo } from '../LernenLogo';
 import { FiLogOut } from 'react-icons/fi';
 
 const HeaderNoNavbar: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -22,7 +24,7 @@ const HeaderNoNavbar: React.FC = () => {
               className="flex items-center gap-2 px-4 py-1 text-gray-700 border border-gray-300 rounded-lg hover:text-gray-800 hover:bg-gray-100 transition-colors"
             >
               <FiLogOut />
-              <span>Exit</span>
+              <span>{t('headerNoNavbar.exit')}</span>
             </button>
           </div>
         </div>

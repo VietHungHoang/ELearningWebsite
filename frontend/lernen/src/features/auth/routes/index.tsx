@@ -6,6 +6,7 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import OtpVerificationPage from '../pages/OtpVerificationPage';
 import CreateNewPasswordPage from '../pages/CreateNewPasswordPage';
 import TutorOnboardingPage from '../pages/TutorOnboardingPage';
+import TutorOnboardingCompletionPage from '../pages/TutorOnboardingCompletionPage';
 
 export default [
   { path: '/login', element: <LoginPage /> },
@@ -16,4 +17,5 @@ export default [
   { path: '/otp', element: <OtpVerificationPage /> },
   { path: '/create-new-password', element: <CreateNewPasswordPage /> },
   { path: '/onboarding/tutor', element: <TutorOnboardingPage /> },
+  { path: '/onboarding-completion', element: <TutorOnboardingCompletionPage /> },
 ];

@@ -4,6 +4,7 @@ import EnhancedStatCard from '../components/EnhancedStatCard';
 import SessionCalendar from '../components/SessionCalendar';
 import SessionCard from '../components/SessionCard';
 import RevenueChart from '../components/RevenueChart';
+import StudentsChart from '../components/StudentsChart';
 import RecentActivity from '../components/RecentActivity';
 import QuickStats from '../components/QuickStats';
 import EmptySessionState from '../components/EmptySessionState';
@@ -45,6 +46,22 @@ const revenueData = [
     { month: 'Apr', revenue: 14200 },
     { month: 'May', revenue: 15100 },
     { month: 'Jun', revenue: 16800 }
+];
+
+// Mock data for students growth chart
+const studentsGrowthData = [
+    { month: 'Jul', students: 120 },
+    { month: 'Aug', students: 125 },
+    { month: 'Sep', students: 135 },
+    { month: 'Oct', students: 142 },
+    { month: 'Nov', students: 148 },
+    { month: 'Dec', students: 150 },
+    { month: 'Jan', students: 138 },
+    { month: 'Feb', students: 145 },
+    { month: 'Mar', students: 152 },
+    { month: 'Apr', students: 160 },
+    { month: 'May', students: 168 },
+    { month: 'Jun', students: 175 }
 ];
 
 // Mock data for sessions
@@ -174,98 +191,118 @@ const TutorDashboardContent: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-10">
+        <div className="min-h-screen pb-10">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-gray-800">
                     Welcome back, Cynthia! 👋
                 </h1>
-                <p className="text-gray-600 mt-2">Here's an overview of your teaching activities</p>
+                <p className="text-gray-500 mt-2">Here's an overview of your teaching activities</p>
             </div>
 
-            {/* Enhanced Stats Grid */}
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <EnhancedStatCard
-                    title="Total Earnings"
-                    value="$12,345"
-                    change="12.5%"
-                    isPositive={true}
-                    icon={<HiCurrencyDollar className="w-7 h-7" />}
-                    gradient="bg-gradient-to-br from-green-500 to-emerald-600"
-                    chartData={earningsData}
-                />
-                <EnhancedStatCard
-                    title="Total Students"
-                    value="150"
-                    change="8.3%"
-                    isPositive={true}
-                    icon={<HiUserGroup className="w-7 h-7" />}
-                    gradient="bg-gradient-to-br from-blue-500 to-indigo-600"
-                    chartData={studentsData}
-                />
-                <EnhancedStatCard
-                    title="Active Courses"
-                    value="12"
-                    change="9.1%"
-                    isPositive={true}
-                    icon={<HiBookOpen className="w-7 h-7" />}
-                    gradient="bg-gradient-to-br from-purple-500 to-pink-600"
-                    chartData={coursesData}
-                />
-                <EnhancedStatCard
-                    title="Teaching Hours"
-                    value="2,400"
-                    change="4.2%"
-                    isPositive={true}
-                    icon={<HiClock className="w-7 h-7" />}
-                    gradient="bg-gradient-to-br from-amber-500 to-orange-600"
-                    chartData={hoursData}
-                />
+                {/* Total Earnings Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-500">Total Earnings</p>
+                            <h3 className="text-3xl font-bold text-gray-800 mt-1">$12,345</h3>
+                            <p className="text-xs text-green-600 mt-1 font-medium">↑ 12.5% from last month</p>
+                        </div>
+                        <div className="bg-[#0b6459]/10 p-3 rounded-lg">
+                            <HiCurrencyDollar className="w-6 h-6 text-[#0b6459]" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Total Students Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-500">Total Students</p>
+                            <h3 className="text-3xl font-bold text-gray-800 mt-1">150</h3>
+                            <p className="text-xs text-green-600 mt-1 font-medium">↑ 8.3% from last month</p>
+                        </div>
+                        <div className="bg-blue-100 p-3 rounded-lg">
+                            <HiUserGroup className="w-6 h-6 text-blue-600" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Active Courses Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-500">Active Courses</p>
+                            <h3 className="text-3xl font-bold text-gray-800 mt-1">12</h3>
+                            <p className="text-xs text-green-600 mt-1 font-medium">↑ 9.1% from last month</p>
+                        </div>
+                        <div className="bg-purple-100 p-3 rounded-lg">
+                            <HiBookOpen className="w-6 h-6 text-purple-600" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Teaching Hours Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-500">Teaching Hours</p>
+                            <h3 className="text-3xl font-bold text-gray-800 mt-1">2,400</h3>
+                            <p className="text-xs text-green-600 mt-1 font-medium">↑ 4.2% from last month</p>
+                        </div>
+                        <div className="bg-amber-100 p-3 rounded-lg">
+                            <HiClock className="w-6 h-6 text-amber-600" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Revenue Chart */}
-            <div className="mb-8">
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <RevenueChart data={revenueData} />
+                <StudentsChart data={studentsGrowthData} />
             </div>
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 {/* Upcoming Sessions - Takes 2 columns */}
                 <div className="lg:col-span-2">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-800">Upcoming Sessions</h2>
+                                <h2 className="text-lg font-bold text-gray-800">Upcoming Sessions</h2>
                                 <p className="text-sm text-gray-500 mt-1">
                                     {filteredSessions.length} session{filteredSessions.length !== 1 ? 's' : ''} scheduled
                                 </p>
                             </div>
 
                             {/* Filter Buttons */}
-                            <div className="flex gap-2 flex-wrap">
+                            <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center gap-1">
                                 <button
                                     onClick={() => setFilterMode('all')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${filterMode === 'all'
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${filterMode === 'all'
+                                        ? 'bg-white text-gray-800 shadow-sm'
+                                        : 'text-gray-500 hover:bg-white/50'
                                         }`}
                                 >
                                     All
                                 </button>
                                 <button
                                     onClick={() => setFilterMode('today')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${filterMode === 'today'
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${filterMode === 'today'
+                                        ? 'bg-white text-gray-800 shadow-sm'
+                                        : 'text-gray-500 hover:bg-white/50'
                                         }`}
                                 >
                                     Today
                                 </button>
                                 <button
                                     onClick={() => setFilterMode('week')}
-                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${filterMode === 'week'
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${filterMode === 'week'
+                                        ? 'bg-white text-gray-800 shadow-sm'
+                                        : 'text-gray-500 hover:bg-white/50'
                                         }`}
                                 >
                                     This Week
@@ -281,6 +318,7 @@ const TutorDashboardContent: React.FC = () => {
                                 ))
                             ) : (
                                 <EmptySessionState />
+
                             )}
                         </div>
                     </div>
@@ -293,14 +331,6 @@ const TutorDashboardContent: React.FC = () => {
                         sessionDates={sessionDates}
                         onDateSelect={handleDateSelect}
                     />
-
-                    {/* Quick Stats */}
-                    <QuickStats
-                        averageRating={4.8}
-                        totalReviews={127}
-                        completionRate={87}
-                        responseTime="< 2h"
-                    />
                 </div>
             </div>
 
@@ -308,7 +338,7 @@ const TutorDashboardContent: React.FC = () => {
             <div>
                 <RecentActivity activities={recentActivities} />
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -1,0 +1,472 @@
+{
+  "header": {
+    "title": "Nền Tảng Học Trực Tuyến",
+    "home": "Trang Chủ",
+    "findTutors": "Tìm Gia Sư",
+    "becomeTutor": "Trở Thành Gia Sư",
+    "signIn": "Đăng Nhập",
+    "getStarted": "Bắt Đầu",
+    "login": "Đăng Nhập",
+    "register": "Đăng Ký",
+    "logout": "Đăng Xuất"
+  },
+  "footer": {
+    "description": "Trao quyền cho tâm trí thông qua giáo dục trực tuyến dễ tiếp cận, cá nhân hóa và hấp dẫn cho một tương lai tươi sáng hơn.",
+    "secure": "An Toàn",
+    "verified": "Đã Xác Minh",
+    "trusted": "Đáng Tin Cậy",
+    "forStudents": "Dành Cho Học Sinh",
+    "findTutor": "Tìm Gia Sư",
+    "myBookings": "Đặt Lịch Của Tôi",
+    "myLearning": "Học Tập Của Tôi",
+    "favourites": "Yêu Thích",
+    "forTutors": "Dành Cho Gia Sư",
+    "becomeTutor": "Trở Thành Gia Sư",
+    "tutorDashboard": "Bảng Điều Khiển Gia Sư",
+    "payouts": "Thanh Toán",
+    "schedule": "Lịch Học",
+    "stayUpdated": "Cập Nhật Mới Nhất",
+    "newsletterDescription": "Nhận các cập nhật mới nhất, mẹo và ưu đãi độc quyền được gửi đến hộp thư của bạn.",
+    "enterEmail": "Nhập email của bạn",
+    "subscribe": "Đăng Ký",
+    "subscribed": "Đã Đăng Ký!",
+    "copyright": "© {{year}} Lernen. Tất cả quyền được bảo lưu.",
+    "privacyPolicy": "Chính Sách Bảo Mật",
+    "termsOfService": "Điều Khoản Dịch Vụ"
+  },
+  "pagination": {
+    "showing": "Hiển thị {{start}} đến {{end}} của {{total}} kết quả",
+    "previous": "Trước",
+    "next": "Tiếp"
+  },
+  "booking": {
+    "bookTrialLesson": "Đặt Lịch Học Thử",
+    "withTutor": "với {{tutorName}}",
+    "trialLessonBooked": "Đã Đặt Lịch Học Thử!",
+    "bookingConfirmation": "Lịch học thử của bạn với {{tutorName}} đã được xác nhận vào {{date}} lúc {{time}}.",
+    "done": "Hoàn Thành",
+    "availableTimesFor": "Thời Gian Có Sẵn Cho {{date}}",
+    "confirmBooking": "Xác Nhận Đặt Lịch",
+    "booking": "Đang Đặt Lịch...",
+    "selectDateTime": "Vui lòng chọn ngày và giờ cho buổi học thử của bạn.",
+    "selectDate": "Chọn ngày",
+    "selectDateDescription": "để xem các khung giờ có sẵn.",
+    "pleaseSelectDateTime": "Vui lòng chọn ngày và giờ để tiếp tục.",
+    "weekdays": ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
+  },
+  "headerNoNavbar": {
+    "exit": "Thoát"
+  },
+  "notifications": {
+    "title": "Thông Báo",
+    "markAllAsRead": "Đánh dấu tất cả đã đọc",
+    "noNotifications": "Bạn không có thông báo mới.",
+    "loading": "Đang tải...",
+    "loadMore": "Tải thêm"
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Chào mừng trở lại!",
+      "gladToHaveYouBack": "Chúng tôi rất vui khi bạn quay trở lại.",
+      "emailAddress": "Địa chỉ email",
+      "password": "Mật khẩu",
+      "emailPlaceholder": "Địa chỉ email",
+      "passwordPlaceholder": "Mật khẩu",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "loggingIn": "Đang đăng nhập...",
+      "login": "Đăng nhập",
+      "dontHaveAccount": "Chưa có tài khoản?",
+      "signUpAsStudent": "Đăng ký làm Học sinh",
+      "or": "hoặc",
+      "signUpAsTutor": "Đăng ký làm Gia sư",
+      "orSeparator": "HOẶC",
+      "signInWithGoogle": "Đăng nhập bằng Google"
+    },
+    "signup": {
+      "signUpAsTutor": "Đăng ký làm Gia sư",
+      "signUpAsStudent": "Đăng ký làm Học sinh",
+      "tutorJourney": "Bắt đầu hành trình dạy học của bạn ngay hôm nay.",
+      "studentJourney": "Bắt đầu hành trình học tập của bạn ngay hôm nay.",
+      "fullName": "Họ và tên",
+      "fullNamePlaceholder": "Họ và tên đầy đủ của bạn",
+      "emailAddress": "Địa chỉ email",
+      "emailPlaceholder": "Địa chỉ email",
+      "fullNameRequired": "Họ và tên là bắt buộc",
+      "emailRequired": "Email là bắt buộc",
+      "emailInvalid": "Email không hợp lệ",
+      "agreeToTerms": "Bạn phải đồng ý với các điều khoản và điều kiện",
+      "agreeTermsText": "Tôi đồng ý với",
+      "termsAndConditions": "Điều khoản và Điều kiện",
+      "creatingAccount": "Đang tạo tài khoản...",
+      "createAccount": "Tạo tài khoản",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "signIn": "Đăng nhập",
+      "orSeparator": "HOẶC",
+      "signUpWithGoogle": "Đăng ký bằng Google"
+    },
+    "forgotPassword": {
+      "title": "Quên mật khẩu?",
+      "description": "Đừng lo, chúng tôi sẽ gửi hướng dẫn đặt lại cho bạn.",
+      "emailAddress": "Địa chỉ email",
+      "emailPlaceholder": "Nhập email của bạn",
+      "sendResetLink": "Gửi liên kết đặt lại",
+      "backToLogin": "Quay lại đăng nhập"
+    }
+  },
+  "home": {
+    "hero": {
+      "badge": "Nền tảng học trực tuyến #1",
+      "title": "Trao quyền cho tương lai của bạn",
+      "subtitle": "Bắt đầu học tập ngay hôm nay",
+      "description": "Kết nối với {{expertTutors}} để có trải nghiệm học tập cá nhân hóa. Đạt được mục tiêu của bạn nhanh hơn với sự hướng dẫn một kèm một.",
+      "expertTutors": "gia sư chuyên nghiệp",
+      "searchPlaceholder": "Tìm kiếm gia sư, khóa học hoặc môn học...",
+      "tutorsOnline": "{{count}}+ gia sư đang trực tuyến",
+      "rating": "Đánh giá 4.9/5",
+      "studentsCount": "15,000+ Học sinh",
+      "certifiedTutors": "Gia sư được chứng nhận"
+    }
+  },
+  "whyChooseUs": {
+    "sectionLabel": "Tại Sao Chọn Chúng Tôi",
+    "title": "Tại Sao Thị Trường Của Chúng Tôi Xuất Chúng",
+    "description": "Khám phá kho tài liệu phong phú gồm bài viết, hướng dẫn, bài giảng và nhiều hơn nữa, được tuyển chọn bởi các chuyên gia của chúng tôi để nâng cao trải nghiệm học tập của bạn.",
+    "features": {
+      "flexibleScheduling": {
+        "title": "Lịch Học Linh Hoạt",
+        "description": "Học theo tốc độ của riêng bạn với gia sư có sẵn 24/7"
+      },
+      "expertTutors": {
+        "title": "Gia Sư Chuyên Nghiệp",
+        "description": "Các chuyên gia được xác minh với kinh nghiệm giảng dạy đã được chứng minh"
+      },
+      "affordableRates": {
+        "title": "Giá Cả Phải Chăng",
+        "description": "Giá cả cạnh tranh không có phí ẩn"
+      },
+      "personalizedLearning": {
+        "title": "Kế Hoạch Học Tập Cá Nhân Hóa",
+        "description": "Chương trình học được tùy chỉnh phù hợp với mục tiêu của bạn"
+      },
+      "wideRangeSubjects": {
+        "title": "Phạm Vi Môn Học Rộng",
+        "description": "Từ học thuật đến sở thích, tìm gia sư cho mọi thứ"
+      },
+      "learnersCommunity": {
+        "title": "Cộng đồng người học và truy cập vào vô số tài nguyên giáo dục",
+        "description": "Tham gia cộng đồng toàn cầu của người học và nhà giáo dục"
+      }
+    },
+    "getStarted": "Bắt Đầu Ngay"
+  },
+  "stepGuide": {
+    "sectionLabel": "Hướng Dẫn Bước Một",
+    "title": "Mở Khóa Tiềm Năng Của Bạn Với Các Bước Dễ Dàng",
+    "description": "Tìm hiểu cách nền tảng của chúng tôi đơn giản hóa việc tìm kiếm và đặt lịch gia sư hàng đầu để nâng cao kỹ năng và đạt được mục tiêu học tập của bạn",
+    "steps": {
+      "step1": {
+        "title": "Đăng Ký",
+        "description": "Tạo tài khoản của bạn nhanh chóng để bắt đầu với nền tảng của chúng tôi",
+        "button": "Bắt Đầu"
+      },
+      "step2": {
+        "title": "Tìm Gia Sư",
+        "description": "Duyệt và chọn từ các gia sư đủ điều kiện dựa trên nhu cầu của bạn",
+        "button": "Tìm Kiếm Ngay"
+      },
+      "step3": {
+        "title": "Lên Lịch Học",
+        "description": "Đặt thời gian thuận tiện cho bài học của bạn một cách dễ dàng",
+        "button": "Hãy Bắt Đầu"
+      },
+      "step4": {
+        "title": "Bắt Đầu Hành Trình",
+        "description": "Bắt đầu hành trình giáo dục của bạn với chúng tôi. Tìm gia sư và đặt lịch buổi học đầu tiên của bạn ngay hôm nay!",
+        "button": "Bắt Đầu Ngay"
+      }
+    }
+  },
+  "testimonials": {
+    "sectionLabel": "Phản Hồi Thực Tế Từ Khách Hàng Của Chúng Tôi",
+    "title": "Người Dùng Của Chúng Tôi Nói Gì",
+    "description": "Khám phá cách Lernen tạo nên sự khác biệt trong cuộc sống của học sinh và các tổ chức giáo dục. Nghe từ những người dùng hài lòng của chúng tôi.",
+    "items": [
+      {
+        "text": "Chúng tôi đã thử một số nền tảng gia sư, nhưng không có nền tảng nào sánh bằng Lernen. Các gia sư rất xuất sắc, và quy trình đặt lịch cực kỳ thuận tiện.",
+        "name": "Arlene M",
+        "title": "Agile District",
+        "companyName": "Agile District"
+      },
+      {
+        "text": "Lernen đã là một bước ngoặt cho học sinh của chúng tôi. Sự đa dạng của các gia sư và sự dễ dàng trong việc đặt lịch buổi học khiến nó trở nên dễ dàng cho cả phụ huynh và học sinh. Điểm của học sinh đã cải thiện đáng kể kể từ khi chúng tôi bắt đầu sử dụng nền tảng này.",
+        "name": "Marvin M",
+        "title": "Chuyên Gia Gia Sư",
+        "companyName": "Learning Hub"
+      },
+      {
+        "text": "Lernen là một nguồn tài nguyên tuyệt vời cho học sinh của chúng tôi. Sự đa dạng của các gia sư đảm bảo rằng chúng tôi có thể tìm được sự kết hợp hoàn hảo cho từng học sinh.",
+        "name": "Devon L",
+        "title": "Giáo Viên Lớp Học",
+        "companyName": "Wisdom Academy"
+      },
+      {
+        "text": "Lernen là một công cụ đáng tin cậy và hiệu quả cho cơ quan của chúng tôi, cung cấp các gia sư có kiến thức và tận tâm.",
+        "name": "Ronald R",
+        "title": "Tư Vấn Giáo Dục",
+        "companyName": "Xero Education"
+      },
+      {
+        "text": "Chúng tôi rất hài lòng với Lernen, các gia sư hàng đầu và nền tảng thân thiện với người dùng đã thúc đẩy đáng kể học sinh của chúng tôi.",
+        "name": "Courtney H",
+        "title": "Tư Vấn Học Đường",
+        "companyName": "Growth Learning"
+      },
+      {
+        "text": "Kinh nghiệm của chúng tôi với Lernen đã rất xuất sắc. Nền tảng này thân thiện với người dùng, và các gia sư có trình độ cao.",
+        "name": "Darlene R",
+        "title": "Tư Vấn Học Thuật",
+        "companyName": "EduTech Solutions"
+      }
+    ]
+  },
+  "expertGuide": {
+    "sectionLabel": "Hướng Dẫn Người Dùng",
+    "title": "Chuyên Gia Của Chúng Tôi Sẽ Hướng Dẫn Bạn Đến Sự Thành Thạo",
+    "description1": "Học hỏi từ các gia sư chuyên gia được chọn lọc kỹ càng của chúng tôi, những người mang đến hàng năm kinh nghiệm, kiến thức và hướng dẫn cá nhân hóa để giúp bạn thành công trong hành trình học tập.",
+    "description2": "Cho dù bạn muốn cải thiện điểm số, chuẩn bị cho kỳ thi, học kỹ năng mới, hoặc theo kế hoạch học tập tùy chỉnh, các chuyên gia của chúng tôi sẽ hướng dẫn bạn đạt được tiềm năng đầy đủ."
+  },
+  "support": {
+    "sectionLabel": "Hỗ Trợ 24/7",
+    "title": "Hỗ Trợ Toàn Diện Tại Mọi Bước",
+    "description1": "Đội ngũ hỗ trợ kỹ thuật và hỗ trợ onboarding tận tâm của chúng tôi luôn sẵn sàng giúp bạn bắt đầu và khắc phục mọi vấn đề bạn có thể gặp phải trên đường đi.",
+    "description2": "Truy cập thư viện toàn diện các hướng dẫn, bài viết, Câu hỏi thường gặp, bài viết và hơn thế nữa để nâng cao trải nghiệm học tập và tận dụng tối đa nền tảng của chúng tôi."
+  },
+  "featureTutors": {
+    "sectionLabel": "Gia Sư Nổi Bật",
+    "title": "Khám Phá Các Gia Sư Được Chọn Lọc Của Chúng Tôi",
+    "description": "Khám phá vô số bài viết, hướng dẫn, bài giảng và hơn thế nữa, được tuyển chọn bởi các chuyên gia của chúng tôi để nâng cao trải nghiệm học tập của bạn.",
+    "viewAllTutors": "Xem Tất Cả Gia Sư",
+    "perHour": "/giờ",
+    "reviews": "đánh giá",
+    "activeStudents": "Học Sinh Đang Hoạt Động",
+    "viewProfile": "Xem Hồ Sơ"
+  },
+  "cart": {
+    "shoppingCart": "Giỏ Hàng",
+    "byTutor": "bởi {{tutor}}",
+    "subtotal": "Tạm Tính",
+    "viewCartDetails": "Xem Chi Tiết Giỏ Hàng",
+    "cartEmpty": "Giỏ hàng của bạn đang trống.",
+    "continueShopping": "Tiếp Tục Mua Sắm",
+    "checkout": "Thanh Toán",
+    "applyCoupon": "Áp Dụng Mã Giảm Giá",
+    "remove": "Xóa",
+    "addToWishlist": "Thêm Vào Danh Sách Yêu Thích",
+    "removeFromWishlist": "Xóa Khỏi Danh Sách Yêu Thích",
+    "total": "Tổng Cộng",
+    "discount": "Giảm Giá",
+    "grandTotal": "Tổng Phải Trả",
+    "haveCouponCode": "Bạn có mã giảm giá?",
+    "enterCouponCode": "Nhập mã giảm giá",
+    "apply": "Áp Dụng",
+    "seeAvailableCoupon": "Xem Mã Giảm Giá Có Sẵn",
+    "availableCoupons": "Mã Giảm Giá Có Sẵn",
+    "proceedToCheckout": "Tiến Hành Thanh Toán",
+    "loadingCart": "Đang tải sản phẩm trong giỏ...",
+    "reviews": "đánh giá",
+    "lessons": "bài học"
+  },
+  "dashboard": {
+    "sidebar": {
+      "tutor": {
+        "dashboard": "Bảng Điều Khiển",
+        "myStudents": "Học Sinh Của Tôi",
+        "myCourses": "Khóa Học Của Tôi",
+        "myClass": "Lớp Học Của Tôi",
+        "schedule": "Lịch Học",
+        "payouts": "Thanh Toán",
+        "dealsCoupons": "Khuyến Mãi & Mã Giảm Giá",
+        "myQuizzes": "Bài Kiểm Tra Của Tôi",
+        "requests": "Yêu Cầu",
+        "inbox": "Hộp Thư",
+        "profileSettings": "Cài Đặt Hồ Sơ",
+        "api": "API"
+      },
+      "student": {
+        "myBookings": "Lịch Học Của Tôi",
+        "myClass": "Lớp Học Của Tôi",
+        "myQuizzes": "Bài Kiểm Tra Của Tôi",
+        "myCourses": "Khóa Học Của Tôi",
+        "myPurchases": "Mua Hàng Của Tôi",
+        "certificates": "Chứng Chỉ",
+        "messages": "Tin Nhắn",
+        "profileSettings": "Cài Đặt Hồ Sơ"
+      }
+    },
+    "header": {
+      "welcome": "Chào mừng trở lại",
+      "balance": "Số dư",
+      "quickActions": "Hành động nhanh"
+    },
+    "common": {
+      "loading": "Đang tải...",
+      "noData": "Không có dữ liệu",
+      "viewAll": "Xem Tất Cả",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "myWallet": "Ví Của Tôi",
+      "withdraw": "Rút tiền",
+      "signOut": "Đăng xuất",
+      "selectDay": "Chọn một ngày",
+      "selectWeek": "Chọn một tuần",
+      "selectMonth": "Chọn một tháng",
+      "time": "Thời gian",
+      "days": {
+        "sun": "CN",
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7"
+      },
+      "sessionCalendar": "Lịch Học",
+      "quickStats": "Thống Kê Nhanh",
+      "averageRating": "Đánh Giá Trung Bình",
+      "reviews": "đánh giá",
+      "courseCompletion": "Hoàn Thành Khóa Học",
+      "avgResponseTime": "Thời Gian Phản Hồi TB",
+      "thisMonthsHighlight": "Điểm Nổi Bật Tháng Này",
+      "topRatedTutor": "Gia sư được đánh giá cao nhất trong danh mục của bạn!",
+      "recentActivity": "Hoạt Động Gần Đây",
+      "noRecentActivity": "Không có hoạt động gần đây"
+    }
+  },
+  "profile": {
+    "sidebar": {
+      "profileSettings": "Cài Đặt Hồ Sơ",
+      "myBookings": "Lịch Học Của Tôi",
+      "myRequests": "Yêu Cầu Của Tôi",
+      "myLearning": "Học Tập Của Tôi",
+      "myClass": "Lớp Học Của Tôi",
+      "findTutors": "Tìm Gia Sư",
+      "myQuizzes": "Bài Kiểm Tra Của Tôi",
+      "findCourses": "Tìm Khóa Học",
+      "findCourseBundles": "Tìm Gói Khóa Học",
+      "assignments": "Bài Tập",
+      "inbox": "Hộp Thư",
+      "community": "Cộng Đồng",
+      "myCertificates": "Chứng Chỉ Của Tôi",
+      "favourites": "Yêu Thích",
+      "billingDetails": "Chi Tiết Thanh Toán",
+      "invoices": "Hóa Đơn",
+      "disputes": "Khiếu Nại",
+      "signOut": "Đăng Xuất"
+    },
+    "bookings": {
+      "daily": "Hàng Ngày",
+      "weekly": "Hàng Tuần",
+      "monthly": "Hàng Tháng",
+      "searchHere": "Tìm kiếm ở đây",
+      "noSessions": "Không có buổi học"
+    },
+    "session": {
+      "tutor": "Gia Sư",
+      "joinClass": "Tham Gia Lớp Học",
+      "reschedule": "Đổi Lịch"
+    },
+    "header": {
+      "quickSearch": "Tìm kiếm nhanh ở đây"
+    }
+  },
+  "course": {
+    "sections": {
+      "courses": "Khóa Học",
+      "overview": "Tổng Quan",
+      "whatYoullLearn": "Bạn Sẽ Học Được Gì",
+      "courseCurriculum": "Chương Trình Học",
+      "prerequisites": "Điều Kiện Tiên Quyết",
+      "reviews": "Đánh Giá"
+    },
+    "card": {
+      "reviews": "đánh giá",
+      "addToCart": "Thêm Vào Giỏ Hàng"
+    },
+    "breadcrumb": {
+      "home": "Trang Chủ",
+      "productivity": "Năng Suất",
+      "timeManagement": "Quản Lý Thời Gian"
+    },
+    "common": {
+      "lessons": "bài học",
+      "duration": "thời lượng",
+      "price": "Giá",
+      "originalPrice": "Giá Gốc",
+      "enrollNow": "Đăng Ký Ngay",
+      "viewDetails": "Xem Chi Tiết"
+    }
+  },
+  "becomeTutor": {
+    "hero": {
+      "title": "Chia Sẻ Kiến Thức, Truyền Cảm Hứng Cho Tương Lai",
+      "description": "Tham gia cộng đồng các nhà giáo dục đam mê và bắt đầu kiếm tiền theo lịch trình của riêng bạn. Trao quyền cho học sinh trên toàn thế giới và tạo ra tác động thực sự.",
+      "ctaButton": "Bắt đầu dạy học ngay hôm nay"
+    },
+    "whyTeach": {
+      "title": "Tại Sao Dạy Học Với Lernen?",
+      "subtitle": "Tham gia một nền tảng trân trọng chuyên môn của bạn và hỗ trợ sự phát triển của bạn.",
+      "benefits": {
+        "earnings": {
+          "title": "Thu Nhập Cạnh Tranh",
+          "description": "Tự đặt mức giá theo giờ của bạn và được thanh toán an toàn cho mỗi buổi học bạn dạy."
+        },
+        "schedule": {
+          "title": "Lịch Trình Linh Hoạt",
+          "description": "Dạy bất cứ khi nào bạn muốn, từ bất cứ đâu. Bạn kiểm soát lịch trình của mình."
+        },
+        "global": {
+          "title": "Cơ Sở Học Sinh Toàn Cầu",
+          "description": "Kết nối và truyền cảm hứng cho những người học viên nhiệt tình từ khắp nơi trên thế giới."
+        },
+        "community": {
+          "title": "Cộng Đồng Hỗ Trợ",
+          "description": "Truy cập vào tài nguyên, công cụ và cộng đồng các gia sư khác để giúp bạn thành công."
+        }
+      }
+    },
+    "howToStart": {
+      "title": "Bắt Đầu Chỉ Trong Vài Phút",
+      "steps": {
+        "profile": {
+          "title": "1. Tạo Hồ Sơ Của Bạn",
+          "description": "Hoàn thành đơn đăng ký đơn giản của chúng tôi để giới thiệu kỹ năng và trình độ của bạn."
+        },
+        "availability": {
+          "title": "2. Đặt Thời Gian Có Sẵn",
+          "description": "Bạn quyết định khi nào và tần suất bạn muốn dạy. Sự linh hoạt hoàn toàn."
+        },
+        "earning": {
+          "title": "3. Bắt Đầu Kiếm Tiền",
+          "description": "Sau khi được phê duyệt, học sinh có thể đặt lịch học và bạn có thể bắt đầu kiếm tiền."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Nghe Từ Các Gia Sư Của Chúng Tôi",
+      "subtitle": "Xem những gì các nhà giáo dục khác đang nói về trải nghiệm của họ trên Lernen."
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "view": "Xem"
+  }
+}

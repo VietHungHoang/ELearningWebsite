@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { FiDollarSign, FiGlobe, FiClock, FiUsers } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import useIntersectionObserver from "./useIntersectionObserver";
 
 interface BenefitCardProps {
@@ -21,6 +22,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description, del
 );
 
 const WhyTeach: React.FC = () => {
+    const { t } = useTranslation();
     const sectionRef = useRef<HTMLElement>(null);
     const isVisible = useIntersectionObserver(sectionRef as React.RefObject<Element>, { threshold: 0.1 });
 
@@ -29,39 +31,38 @@ const WhyTeach: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4">
                 <div className="text-center mb-12">
                     <h2 className={`text-4xl font-bold text-gray-800 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
-                        Why Teach with Lernen?
+                        {t('becomeTutor.whyTeach.title')}
                     </h2>
                     <p className={`mt-4 text-lg text-gray-600 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: "0.1s" }}>
-                        Join a platform that values your expertise and supports
-                        your growth.
+                        {t('becomeTutor.whyTeach.subtitle')}
                     </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     <BenefitCard
                         icon={<FiDollarSign size={24} />}
-                        title="Competitive Earnings"
-                        description="Set your own hourly rate and get paid securely for every session you teach."
+                        title={t('becomeTutor.whyTeach.benefits.earnings.title')}
+                        description={t('becomeTutor.whyTeach.benefits.earnings.description')}
                         delay="0.1s"
                         isVisible={isVisible}
                     />
                     <BenefitCard
                         icon={<FiClock size={24} />}
-                        title="Flexible Schedule"
-                        description="Teach whenever you want, from wherever you are. You are in control of your calendar."
+                        title={t('becomeTutor.whyTeach.benefits.schedule.title')}
+                        description={t('becomeTutor.whyTeach.benefits.schedule.description')}
                         delay="0.2s"
                         isVisible={isVisible}
                     />
                     <BenefitCard
                         icon={<FiGlobe size={24} />}
-                        title="Global Student Base"
-                        description="Connect with and inspire eager learners from all around the world."
+                        title={t('becomeTutor.whyTeach.benefits.global.title')}
+                        description={t('becomeTutor.whyTeach.benefits.global.description')}
                         delay="0.3s"
                         isVisible={isVisible}
                     />
                     <BenefitCard
                         icon={<FiUsers size={24} />}
-                        title="Supportive Community"
-                        description="Get access to resources, tools, and a community of fellow tutors to help you succeed."
+                        title={t('becomeTutor.whyTeach.benefits.community.title')}
+                        description={t('becomeTutor.whyTeach.benefits.community.description')}
                         delay="0.4s"
                         isVisible={isVisible}
                     />

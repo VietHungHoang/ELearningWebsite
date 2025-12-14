@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import notificationsService from '../../services/notificationsService';
 import type { Notification } from '../../types/notifications';
 import Loading from './Loading';
@@ -51,6 +52,7 @@ const NotificationItem: React.FC<{ notification: Notification; onClick: () => vo
 
 // Main Notifications Popup component
 const NotificationsPopup: React.FC = () => {
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [canLoadMore, setCanLoadMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -142,13 +144,13 @@ const NotificationsPopup: React.FC = () => {
       <div className="p-4">
         {/* Header */}
         <header className="flex justify-between items-center pb-3 border-b border-gray-200">
-          <h1 className="text-lg font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-lg font-bold text-gray-900">{t('notifications.title')}</h1>
           <button
             onClick={handleMarkAllAsRead}
             className="text-sm font-medium text-[#0b6459] hover:text-[#084c43] transition-colors"
             disabled={notifications.length === 0 || allRead}
           >
-            Mark all as read
+            {t('notifications.markAllAsRead')}
           </button>
         </header>
 
@@ -169,7 +171,7 @@ const NotificationsPopup: React.FC = () => {
             ))
           ) : (
             <div className="flex items-center justify-center text-center py-20">
-              <p className="text-gray-500">You have no new notifications.</p>
+              <p className="text-gray-500">{t('notifications.noNotifications')}</p>
             </div>
           )}
         </div>
@@ -189,10 +191,10 @@ const NotificationsPopup: React.FC = () => {
                     {isLoadingMore ? (
                       <>
                         <Loading size={16} className="mr-2" />
-                        Loading...
+                        {t('notifications.loading')}
                       </>
                     ) : (
-                      'Load more'
+                      t('notifications.loadMore')
                     )}
                 </button>
             </footer>

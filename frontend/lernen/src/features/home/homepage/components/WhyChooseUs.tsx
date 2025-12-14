@@ -1,37 +1,39 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const WhyChooseUs = () => {
+  const { t } = useTranslation();
 
   const features = [
     {
       icon: '🗓️',
-      title: 'Flexible Scheduling',
-      description: 'Learn at your own pace with tutors available 24/7'
+      title: t('whyChooseUs.features.flexibleScheduling.title'),
+      description: t('whyChooseUs.features.flexibleScheduling.description')
     },
     {
       icon: '👨‍🏫',
-      title: 'Expert Tutors',
-      description: 'Verified professionals with proven teaching experience'
+      title: t('whyChooseUs.features.expertTutors.title'),
+      description: t('whyChooseUs.features.expertTutors.description')
     },
     {
       icon: '💰',
-      title: 'Affordable Rates',
-      description: 'Competitive pricing with no hidden fees'
+      title: t('whyChooseUs.features.affordableRates.title'),
+      description: t('whyChooseUs.features.affordableRates.description')
     },
     {
       icon: '📚',
-      title: 'Personalized Learning Plans',
-      description: 'Customized curriculum tailored to your goals'
+      title: t('whyChooseUs.features.personalizedLearning.title'),
+      description: t('whyChooseUs.features.personalizedLearning.description')
     },
     {
       icon: '🎯',
-      title: 'Wide Range of Subjects',
-      description: 'From academics to hobbies, find tutors for everything'
+      title: t('whyChooseUs.features.wideRangeSubjects.title'),
+      description: t('whyChooseUs.features.wideRangeSubjects.description')
     },
     {
       icon: '🌍',
-      title: "Learner's community and access to infinite educational resources",
-      description: 'Join a global community of learners and educators'
+      title: t('whyChooseUs.features.learnersCommunity.title'),
+      description: t('whyChooseUs.features.learnersCommunity.description')
     }
   ]
 
@@ -68,19 +70,17 @@ const WhyChooseUs = () => {
             {/* Section label */}
             <div className="flex items-center space-x-4">
               <div className="h-px w-12 bg-white/30"></div>
-              <span className="text-white/80 text-sm font-medium tracking-wider uppercase">Why Choose Us</span>
+              <span className="text-white/80 text-sm font-medium tracking-wider uppercase">{t('whyChooseUs.sectionLabel')}</span>
               <div className="h-px w-12 bg-white/30"></div>
             </div>
 
             {/* Main heading */}
             <div>
               <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-                Why Our Marketplace<br />
-                Stands Out
+                {t('whyChooseUs.title')}
               </h2>
               <p className="text-white/80 text-lg">
-                Explore a wealth of articles, guides, tutorials, and more, curated
-                by our experts to enhance your learning experience.
+                {t('whyChooseUs.description')}
               </p>
             </div>
 
@@ -109,7 +109,7 @@ const WhyChooseUs = () => {
                 to="/get-started"
                 className="inline-flex items-center px-8 py-3.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105"
               >
-                Get Started Now
+                {t('whyChooseUs.getStarted')}
               </Link>
             </div>
           </div>

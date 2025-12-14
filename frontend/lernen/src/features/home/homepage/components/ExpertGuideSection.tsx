@@ -1,6 +1,9 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 const ExpertGuideSection: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -8,17 +11,17 @@ const ExpertGuideSection: React.FC = () => {
           {/* Left Side - Content */}
           <div>
             <div className="text-[#065A46] text-sm font-semibold uppercase tracking-wide mb-4">
-              User Guide
+              {t('expertGuide.sectionLabel')}
             </div>
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Our Experts Will Guide You to Mastery
+              {t('expertGuide.title')}
             </h2>
             <div className="space-y-4 text-gray-600 text-lg leading-relaxed">
               <p>
-                Learn from our carefully selected expert tutors who bring years of knowledge, experience, and personalized instruction to help you succeed in your learning journey.
+                {t('expertGuide.description1')}
               </p>
               <p>
-                Whether you're looking to improve your grades, prepare for exams, learn new skills, or follow a customized learning plan, our experts will guide you to achieve your full potential.
+                {t('expertGuide.description2')}
               </p>
             </div>
           </div>

@@ -49,7 +49,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
                 animation: slide-in 0.5s ease-out forwards;
             }
         `}</style>
-        <div className={`fixed top-20 right-5 z-[100] px-4 py-3 rounded-lg shadow-lg flex items-center border transition-transform transform animate-slide-in ${currentStyle.container}`}>
+        <div className={`fixed top-8 right-5 z-[100] px-4 py-3 rounded-lg shadow-lg flex items-center border transition-transform transform animate-slide-in ${currentStyle.container}`}>
             {currentStyle.icon}
             <span className="font-medium">{message}</span>
             <button onClick={onClose} className={`ml-4 -mr-1 p-1 rounded-full text-xl font-semibold leading-none transition-colors duration-150 ${currentStyle.buttonHover}`}>&times;</button>

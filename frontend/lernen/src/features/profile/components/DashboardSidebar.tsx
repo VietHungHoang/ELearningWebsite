@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiSettings, FiCalendar, FiBell, FiBookOpen, FiUsers, FiSearch, FiFileText, FiBook, FiPackage, FiClipboard, FiMessageSquare, FiAward, FiHeart, FiCreditCard, FiAlertTriangle, FiLogOut, FiHome } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -53,24 +54,26 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, active, isSidebarOpen, o
 );
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, activeView, onItemClick, handleLogout, pendingRequestsCount }) => {
+  const { t } = useTranslation();
+
   const navItems = [
-    { icon: <FiSettings />, activeIcon: <FiSettings />, label: 'Profile Settings' },
-    { icon: <FiCalendar />, activeIcon: <FiCalendar />, label: 'My Bookings' },
-    { icon: <FiBell />, activeIcon: <FiBell />, label: 'My Requests', count: pendingRequestsCount },
-    { icon: <FiBookOpen />, activeIcon: <FiBookOpen />, label: 'My Learning' },
-    { icon: <FiUsers />, activeIcon: <FiUsers />, label: 'My Class' },
-    { icon: <FiSearch />, activeIcon: <FiSearch />, label: 'Find Tutors' },
-    { icon: <FiFileText />, activeIcon: <FiFileText />, label: 'My Quizzes' },
-    { icon: <FiBook />, activeIcon: <FiBook />, label: 'Find Courses' },
-    { icon: <FiPackage />, activeIcon: <FiPackage />, label: 'Find Course Bundles' },
-    { icon: <FiClipboard />, activeIcon: <FiClipboard />, label: 'Assignments' },
-    { icon: <FiMessageSquare />, activeIcon: <FiMessageSquare />, label: 'Inbox' },
-    { icon: <FiUsers />, activeIcon: <FiUsers />, label: 'Community' },
-    { icon: <FiAward />, activeIcon: <FiAward />, label: 'My Certificates' },
-    { icon: <FiHeart />, activeIcon: <FiHeart />, label: 'Favourites' },
-    { icon: <FiCreditCard />, activeIcon: <FiCreditCard />, label: 'Billing Details' },
-    { icon: <FiFileText />, activeIcon: <FiFileText />, label: 'Invoices' },
-    { icon: <FiAlertTriangle />, activeIcon: <FiAlertTriangle />, label: 'Disputes' },
+    { icon: <FiSettings />, activeIcon: <FiSettings />, label: t('profile.sidebar.profileSettings') },
+    { icon: <FiCalendar />, activeIcon: <FiCalendar />, label: t('profile.sidebar.myBookings') },
+    { icon: <FiBell />, activeIcon: <FiBell />, label: t('profile.sidebar.myRequests'), count: pendingRequestsCount },
+    { icon: <FiBookOpen />, activeIcon: <FiBookOpen />, label: t('profile.sidebar.myLearning') },
+    { icon: <FiUsers />, activeIcon: <FiUsers />, label: t('profile.sidebar.myClass') },
+    { icon: <FiSearch />, activeIcon: <FiSearch />, label: t('profile.sidebar.findTutors') },
+    { icon: <FiFileText />, activeIcon: <FiFileText />, label: t('profile.sidebar.myQuizzes') },
+    { icon: <FiBook />, activeIcon: <FiBook />, label: t('profile.sidebar.findCourses') },
+    { icon: <FiPackage />, activeIcon: <FiPackage />, label: t('profile.sidebar.findCourseBundles') },
+    { icon: <FiClipboard />, activeIcon: <FiClipboard />, label: t('profile.sidebar.assignments') },
+    { icon: <FiMessageSquare />, activeIcon: <FiMessageSquare />, label: t('profile.sidebar.inbox') },
+    { icon: <FiUsers />, activeIcon: <FiUsers />, label: t('profile.sidebar.community') },
+    { icon: <FiAward />, activeIcon: <FiAward />, label: t('profile.sidebar.myCertificates') },
+    { icon: <FiHeart />, activeIcon: <FiHeart />, label: t('profile.sidebar.favourites') },
+    { icon: <FiCreditCard />, activeIcon: <FiCreditCard />, label: t('profile.sidebar.billingDetails') },
+    { icon: <FiFileText />, activeIcon: <FiFileText />, label: t('profile.sidebar.invoices') },
+    { icon: <FiAlertTriangle />, activeIcon: <FiAlertTriangle />, label: t('profile.sidebar.disputes') },
   ];
 
   return (
@@ -106,11 +109,11 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, activeView,
           <span className="w-5 h-5 flex-shrink-0">
             <FiLogOut />
           </span>
-          <span className={`font-semibold transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 sr-only'}`}>Sign out</span>
+          <span className={`font-semibold transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0 sr-only'}`}>{t('profile.sidebar.signOut')}</span>
         </button>
          {!isOpen && (
             <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                Sign out
+                {t('profile.sidebar.signOut')}
             </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiMenu, FiSearch, FiChevronDown, FiShoppingCart, FiBell, FiMessageSquare } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 // import { AppPage } from '../App';
 // import CartPopup from './CartPopup';
 // import NotificationsPopup from './NotificationsPopup';
@@ -16,6 +17,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar, activeView, onItemClick, detailViewName, onBackToListView }) => {
+    const { t } = useTranslation();
     // State for popups
     const [isCartOpen, setIsCartOpen] = useState(false);
     // Fix: Add state for cart loading to pass to the CartPopup component.
@@ -96,7 +98,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar, acti
                         <FiMenu />
                     </button>
                     <div className="text-sm text-gray-500 hidden md:block">
-                        <span className="hover:text-gray-700 cursor-pointer" onClick={() => onItemClick('Profile Settings')}>Profile Settings</span>
+                        <span className="hover:text-gray-700 cursor-pointer" onClick={() => onItemClick('Profile Settings')}>{t('profile.sidebar.profileSettings')}</span>
                         <span className="mx-2">/</span>
                         {detailViewName ? (
                             <>
@@ -120,7 +122,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar, acti
                         </div>
                         <input
                             type="text"
-                            placeholder="Quick search here"
+                            placeholder={t('profile.header.quickSearch')}
                             className="w-full bg-gray-100 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459]"
                         />
                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">

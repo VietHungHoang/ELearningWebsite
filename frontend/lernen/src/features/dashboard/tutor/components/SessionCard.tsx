@@ -27,17 +27,8 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, showActions = true }
         }
     };
 
-    const getTimeCategory = () => {
-        const hour = session.startTime.getHours();
-        if (hour < 12) return { label: 'Morning', color: 'bg-amber-50 border-amber-200' };
-        if (hour < 17) return { label: 'Afternoon', color: 'bg-blue-50 border-blue-200' };
-        return { label: 'Evening', color: 'bg-purple-50 border-purple-200' };
-    };
-
-    const timeCategory = getTimeCategory();
-
     return (
-        <div className={`${timeCategory.color} border-2 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm`}>
+        <div className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow duration-200">
             <div className="flex items-start justify-between gap-4">
                 {/* Left: Student Info */}
                 <div className="flex items-start gap-4 flex-1">
@@ -73,10 +64,10 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, showActions = true }
                                 <HiCalendar className="w-4 h-4 text-gray-500" />
                                 <span>{format(session.startTime, 'MMM dd')}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs bg-white/60 px-2 py-1 rounded-md">
+                            <div className="flex items-center gap-1.5 text-xs bg-gray-100 px-2 py-1 rounded-md">
                                 <span className="text-gray-600">{session.duration} mins</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs bg-white/60 px-2 py-1 rounded-md">
+                            <div className="flex items-center gap-1.5 text-xs bg-gray-100 px-2 py-1 rounded-md">
                                 <span>{getPlatformIcon(session.platform)}</span>
                                 <span className="text-gray-600">{session.platform}</span>
                             </div>
@@ -90,15 +81,15 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, showActions = true }
                 {/* Right: Actions */}
                 {showActions && (
                     <div className="flex flex-col gap-2">
-                        <button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2">
+                        <button className="bg-[#0b6459] text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-[#094d44] transition-colors duration-200 flex items-center gap-2">
                             <HiVideoCamera className="w-4 h-4" />
                             Join
                         </button>
                         <div className="flex gap-2">
-                            <button className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors duration-200 shadow-sm" title="Call">
+                            <button className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200" title="Call">
                                 <HiPhone className="w-4 h-4 text-gray-600" />
                             </button>
-                            <button className="p-2 bg-white/80 hover:bg-white rounded-lg transition-colors duration-200 shadow-sm" title="Message">
+                            <button className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200" title="Message">
                                 <HiChatAlt className="w-4 h-4 text-gray-600" />
                             </button>
                         </div>
