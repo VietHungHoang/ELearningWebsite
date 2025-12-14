@@ -9,10 +9,8 @@ public class CountryMapper {
 
     public CountryResponse toResponse(Country country) {
         return CountryResponse.builder()
-                .id(country.getId())
+                .code(country.getCode())
                 .name(country.getName())
-                .createdAt(country.getCreatedAt())
-                .updatedAt(country.getUpdatedAt())
                 .build();
     }
 }

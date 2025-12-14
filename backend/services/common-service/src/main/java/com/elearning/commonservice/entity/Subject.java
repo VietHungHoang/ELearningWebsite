@@ -1,6 +1,7 @@
 package com.elearning.commonservice.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -10,13 +11,14 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "subjects")
+@Table(name = "subjects", indexes = {
+    @Index(name = "idx_subjects_category_id", columnList = "category_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Subject extends BaseEntity {
-
     private String name;
 
     @ManyToOne

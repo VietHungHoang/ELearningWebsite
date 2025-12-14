@@ -11,6 +11,7 @@ import java.util.UUID;
 public class SubjectResponse {
     private UUID id;
     private String name;
+    private UUID categoryId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

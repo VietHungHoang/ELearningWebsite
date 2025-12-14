@@ -1,12 +1,11 @@
 package com.elearning.bffservice.dto.response;
 
-import com.elearning.bffservice.dto.response.enums.ScheduleStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,15 +16,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClassServiceBookedSessionResponse {
-    private UUID id;
-    private UUID studentId;
-    private LocalDateTime sessionDatetime;
-    private Integer durationMinutes;
+    private String id;
+    private List<UUID> studentIds;
+    private String sessionDatetime;
     private String className;
     private String sessionType;
-    private ScheduleStatus status;
+    private String createdAt;
+    private String updatedAt;
     private String meetingUrl;
     private String notes;
-    private LocalDateTime bookedAt;
-    private LocalDateTime updatedAt;
 }

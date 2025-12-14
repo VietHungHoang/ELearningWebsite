@@ -24,7 +24,9 @@ public class SecurityConfig {
         http
             .securityMatcher(new OrServerWebExchangeMatcher(
                 new PathPatternParserServerWebExchangeMatcher("/api/v1/auth/**"),
-                new PathPatternParserServerWebExchangeMatcher("/api/v1/public/**")
+                new PathPatternParserServerWebExchangeMatcher("/api/v1/public/**"),
+                new PathPatternParserServerWebExchangeMatcher("/test/**"),
+                new PathPatternParserServerWebExchangeMatcher("/**")
             ))
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges.anyExchange().permitAll());

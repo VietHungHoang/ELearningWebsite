@@ -1,6 +1,7 @@
 package com.elearning.studentservice.controller;
 
 import com.elearning.studentservice.dto.request.StudentRequest;
+import com.elearning.studentservice.dto.response.ApiResponse;
 import com.elearning.studentservice.dto.response.StudentResponse;
 import com.elearning.studentservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -21,37 +24,14 @@ public class StudentController {
     
     private final StudentService studentService;
     
-    @PostMapping
-    public ResponseEntity<StudentResponse> createStudent(@RequestBody StudentRequest request) {
-        StudentResponse response = studentService.createStudent(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-    
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentResponse> updateStudent(
-            @PathVariable UUID id,
-            @RequestBody StudentRequest request) {
-        StudentResponse response = studentService.updateStudent(id, request);
-        return ResponseEntity.ok(response);
-    }
-    
     @GetMapping("/{id}")
-    public ResponseEntity<StudentResponse> getStudentById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<StudentResponse>> getStudentById(@PathVariable UUID id) {
         StudentResponse response = studentService.getStudentById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response, "Student retrieved successfully"));
     }
     
-    /**
-     * Get list of students with pagination
-     * 
-     * @param page Page number (default: 0)
-     * @param size Page size (default: 10)
-     * @param sortBy Sort field (default: createdAt)
-     * @param sortDir Sort direction (asc/desc, default: desc)
-     * @return Paginated list of students
-     */
     @GetMapping
-    public ResponseEntity<Page<StudentResponse>> getListStudent(
+    public ResponseEntity<ApiResponse<Page<StudentResponse>>> getListStudent(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -64,12 +44,12 @@ public class StudentController {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<StudentResponse> students = studentService.getAllStudents(pageable);
         
-        return ResponseEntity.ok(students);
+        return ResponseEntity.ok(ApiResponse.success(students, "Students retrieved successfully"));
     }
-    
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStudent(@PathVariable UUID id) {
-        studentService.deleteStudent(id);
-        return ResponseEntity.noContent().build();
+
+    @GetMapping("/batch")
+    public ResponseEntity<ApiResponse<List<StudentResponse>>> getStudentsByIds(@RequestParam List<UUID> ids) {
+        List<StudentResponse> response = studentService.getStudentsListByIds(ids);
+        return ResponseEntity.ok(ApiResponse.success(response, "Students retrieved successfully"));
     }
 }

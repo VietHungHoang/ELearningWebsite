@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TutorProfileResponse {
-
     private UUID id;
     private Boolean isVerified;
     private String introduction;
@@ -36,65 +34,4 @@ public class TutorProfileResponse {
     private List<TutorSubjectResponse> subjects;
     private List<CareerEntryResponse> careerEntries;
     private List<CertificationResponse> certifications;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TutorLanguageResponse {
-        private UUID id;
-        private String languageCode;
-        private String proficiencyLevel;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TutorSocialResponse {
-        private UUID id;
-        private String platform;
-        private String url;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TutorSubjectResponse {
-        private UUID id;
-        private UUID subjectId;
-        private String subjectName;
-        private UUID categoryId;
-        private String categoryName;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CareerEntryResponse {
-        private UUID id;
-        private String type;
-        private String title;
-        private String institution;
-        private LocalDate startDate;
-        private LocalDate endDate;
-        private String location;
-        private String description;
-    }
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CertificationResponse {
-        private UUID id;
-        private String name;
-        private String issuingOrganization;
-        private LocalDate issueDate;
-        private LocalDate expirationDate;
-        private String credentialId;
-        private String credentialUrl;
-    }
 }

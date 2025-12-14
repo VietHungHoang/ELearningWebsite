@@ -6,8 +6,3 @@ spring:
     name: common-service
   profiles:
     active: dev
-
-logging:
-  level:
-    org.springframework.web: TRACE
-    root: DEBUG

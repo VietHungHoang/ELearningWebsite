@@ -15,7 +15,7 @@ import java.util.UUID;
 public class StudentResponse {
     private UUID id;
     private String email;
-    private String fullname;
+    private String fullName;
     private String phone;
     private String avatar;
     private String bio;

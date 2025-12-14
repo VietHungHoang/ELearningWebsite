@@ -1,9 +1,11 @@
 package com.elearning.studentservice.service.impl;
 
+import com.elearning.studentservice.dto.event.AccountCreatedEvent;
 import com.elearning.studentservice.dto.request.StudentRequest;
 import com.elearning.studentservice.dto.response.StudentResponse;
 import com.elearning.studentservice.entity.Student;
 import com.elearning.studentservice.repository.StudentRepository;
+import com.elearning.studentservice.mapper.StudentMapper;
 import com.elearning.studentservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -20,10 +24,11 @@ import java.util.UUID;
 public class StudentServiceImpl implements StudentService {
     
     private final StudentRepository studentRepository;
+    private final StudentMapper studentMapper;
     
     @Override
     @Transactional
-    public StudentResponse createStudent(StudentRequest request) {
+    public StudentResponse createStudent(AccountCreatedEvent request) {
         log.info("Creating new student with email: {}", request.getEmail());
         
         if (studentRepository.existsByEmail(request.getEmail())) {
@@ -32,45 +37,13 @@ public class StudentServiceImpl implements StudentService {
         
         Student student = Student.builder()
                 .email(request.getEmail())
-                .fullname(request.getFullname())
-                .phone(request.getPhone())
-                .avatar(request.getAvatar())
-                .bio(request.getBio())
-                .dateOfBirth(request.getDateOfBirth())
-                .address(request.getAddress())
-                .city(request.getCity())
-                .country(request.getCountry())
-                .learningGoals(request.getLearningGoals())
+                .fullName(request.getFullName())
                 .build();
-        
+
         Student savedStudent = studentRepository.save(student);
         log.info("Student created successfully with id: {}", savedStudent.getId());
         
-        return mapToResponse(savedStudent);
-    }
-    
-    @Override
-    @Transactional
-    public StudentResponse updateStudent(UUID id, StudentRequest request) {
-        log.info("Updating student with id: {}", id);
-        
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
-        
-        student.setFullname(request.getFullname());
-        student.setPhone(request.getPhone());
-        student.setAvatar(request.getAvatar());
-        student.setBio(request.getBio());
-        student.setDateOfBirth(request.getDateOfBirth());
-        student.setAddress(request.getAddress());
-        student.setCity(request.getCity());
-        student.setCountry(request.getCountry());
-        student.setLearningGoals(request.getLearningGoals());
-        
-        Student updatedStudent = studentRepository.save(student);
-        log.info("Student updated successfully with id: {}", updatedStudent.getId());
-        
-        return mapToResponse(updatedStudent);
+        return studentMapper.toStudentResponse(savedStudent);
     }
     
     @Override
@@ -81,7 +54,7 @@ public class StudentServiceImpl implements StudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found with id: " + id));
         
-        return mapToResponse(student);
+        return studentMapper.toStudentResponse(student);
     }
     
     @Override
@@ -92,37 +65,18 @@ public class StudentServiceImpl implements StudentService {
         
         Page<Student> studentsPage = studentRepository.findAll(pageable);
         
-        return studentsPage.map(this::mapToResponse);
+        return studentsPage.map(studentMapper::toStudentResponse);
     }
     
     @Override
-    @Transactional
-    public void deleteStudent(UUID id) {
-        log.info("Deleting student with id: {}", id);
-        
-        if (!studentRepository.existsById(id)) {
-            throw new IllegalArgumentException("Student not found with id: " + id);
-        }
-        
-        studentRepository.deleteById(id);
-        log.info("Student deleted successfully with id: {}", id);
-    }
-    
-    private StudentResponse mapToResponse(Student student) {
-        return StudentResponse.builder()
-                .id(student.getId())
-                .email(student.getEmail())
-                .fullname(student.getFullname())
-                .phone(student.getPhone())
-                .avatar(student.getAvatar())
-                .bio(student.getBio())
-                .dateOfBirth(student.getDateOfBirth())
-                .address(student.getAddress())
-                .city(student.getCity())
-                .country(student.getCountry())
-                .learningGoals(student.getLearningGoals())
-                .createdAt(student.getCreatedAt())
-                .updatedAt(student.getUpdatedAt())
-                .build();
+    @Transactional(readOnly = true)
+    public List<StudentResponse> getStudentsListByIds(List<UUID> ids) {
+        log.info("Fetching students list by ids: {}", ids);
+
+        List<Student> students = studentRepository.findAllById(ids);
+
+        return students.stream()
+                .map(studentMapper::toStudentResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

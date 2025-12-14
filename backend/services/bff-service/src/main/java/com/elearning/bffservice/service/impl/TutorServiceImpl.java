@@ -1,32 +1,42 @@
 package com.elearning.bffservice.service.impl;
 
+import com.elearning.bffservice.bff.tutor.request.TutorSearchBffRequest;
 import com.elearning.bffservice.client.ClassServiceClient;
-import com.elearning.bffservice.client.CommonServiceClient;
 import com.elearning.bffservice.client.SearchServiceClient;
 import com.elearning.bffservice.client.StudentServiceClient;
 import com.elearning.bffservice.client.TutorServiceClient;
-import com.elearning.bffservice.client.UserServiceClient;
+import com.elearning.bffservice.dto.clas.response.TutorStatsResponse;
+import com.elearning.bffservice.dto.clas.response.GroupClassResponse;
 import com.elearning.bffservice.dto.request.BulkUpdateAvailabilityRequest;
 import com.elearning.bffservice.dto.request.SearchTutorRequest;
-import com.elearning.bffservice.dto.response.AvailabilityResponse;
+import com.elearning.bffservice.dto.request.UpdateOnboardingRequest;
+import com.elearning.bffservice.dto.tutor.request.GetTutorStudentsRequest;
+import com.elearning.bffservice.dto.tutor.response.AvailabilityListResponse;
+import com.elearning.bffservice.bff.tutor.response.TutorDetailBffResponse;
+import com.elearning.bffservice.dto.ApiResponse;
 import com.elearning.bffservice.dto.response.BookedSessionResponse;
+import com.elearning.bffservice.dto.response.BookedSessionsData;
 import com.elearning.bffservice.dto.response.ClassResponse;
 import com.elearning.bffservice.dto.response.ClassServiceBookedSessionResponse;
+import com.elearning.bffservice.dto.response.SessionWithStudents;
+import com.elearning.bffservice.dto.response.StudentInSession;
 import com.elearning.bffservice.dto.response.StudentDetailResponse;
-import com.elearning.bffservice.dto.response.StudentResponse;
-import com.elearning.bffservice.dto.response.TutorSearchResponse;
-import com.elearning.bffservice.dto.response.TutorSearchResult;
+import com.elearning.bffservice.dto.student.response.StudentResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorDetailResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorSearchResult;
+import com.elearning.bffservice.dto.response.OnboardingResponse;
 import com.elearning.bffservice.dto.response.TutorProfileResponse;
 import com.elearning.bffservice.dto.response.TutorStudentResponse;
 import com.elearning.bffservice.dto.response.TutorStudentDetailResponse;
 import com.elearning.bffservice.dto.response.TutorClassResponse;
 import com.elearning.bffservice.dto.response.UserInfoResponse;
 import com.elearning.bffservice.dto.response.StudentProfileResponse;
-import com.elearning.bffservice.dto.response.CountryResponse;
-import com.elearning.bffservice.dto.response.LanguageResponse;
-import com.elearning.bffservice.dto.response.SubjectResponse;
-import com.elearning.bffservice.dto.response.enums.ScheduleStatus;
+import com.elearning.bffservice.dto.enums.ScheduleStatus;
+import com.elearning.bffservice.bff.tutor.response.TutorBffResponse;
+import com.elearning.bffservice.mapper.TutorMapper;
 import com.elearning.bffservice.service.TutorService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,7 +45,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,166 +56,147 @@ public class TutorServiceImpl implements TutorService {
 
     private final TutorServiceClient tutorServiceClient;
     private final SearchServiceClient searchServiceClient;
-    private final CommonServiceClient commonServiceClient;
     private final ClassServiceClient classServiceClient;
-    private final UserServiceClient userServiceClient;
     private final StudentServiceClient studentServiceClient;
+    private final TutorMapper tutorMapper;
 
     @Override
-    public Page<TutorSearchResponse> searchTutors(List<String> languageCodes, BigDecimal minPrice, BigDecimal maxPrice, UUID categoryId, boolean categoryIsParent, List<String> availableDays, int page, int size) {
-        log.info("BFF: Searching tutors - languages: {}, price: {}-{}, categoryId: {}, isParent: {}", 
-                languageCodes, minPrice, maxPrice, categoryId, categoryIsParent);
-        
-        // 1. Resolve category IDs if needed
-        List<UUID> categoryIdsToSearch = null;
-        if (categoryId != null) {
-            if (categoryIsParent) {
-                var categories = commonServiceClient.getAllCategories();
-                categoryIdsToSearch = categories.stream()
-                        .filter(c -> categoryId.equals(c.getParentId()))
-                        .map(c -> c.getId())
-                        .toList();
-                log.debug("Resolved parent category {} to child categories: {}", categoryId, categoryIdsToSearch);
-            } else {
-                categoryIdsToSearch = List.of(categoryId);
-            }
-        }
-
-        // 2. Build search request for Search Service
-        SearchTutorRequest searchRequest = SearchTutorRequest.builder()
-                .languageCodes(languageCodes)
-                .minPrice(minPrice)
-                .maxPrice(maxPrice)
-                .categoryIds(categoryIdsToSearch)
-                .availableDays(availableDays)
-                .page(page)
-                .size(size)
-                .build();
-
-        // 3. Call Search Service to get tutor IDs with scores
+    public Page<TutorBffResponse> searchTutors(TutorSearchBffRequest request) {
+        SearchTutorRequest searchRequest = tutorMapper.mapToSearchTutorRequest(request);
         Page<TutorSearchResult> searchResults = searchServiceClient.searchTutors(searchRequest);
-        
         log.info("Search Service returned {} results", searchResults.getTotalElements());
-        
+
         if (searchResults.isEmpty()) {
-            return new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
+            return new PageImpl<>(List.of(), PageRequest.of(request.getPage(), request.getSize()), 0);
         }
 
-        // 4. Extract tutor IDs in order
+        // Extract tutor IDs in order
         List<UUID> tutorIds = searchResults.getContent().stream()
                 .map(TutorSearchResult::getTutorId)
                 .toList();
+        log.info("Extracted tutor IDs: {}", tutorIds);
 
-        // 5. Fetch full tutor data from Tutor Service
-        List<TutorSearchResponse> tutorDetails = tutorServiceClient.getTutorsByIds(tutorIds);
-        
-        // 6. Create map for quick lookup
-        Map<UUID, TutorSearchResponse> tutorMap = tutorDetails.stream()
+//        List<TutorResponse> tutorDetails = tutorServiceClient.getTutorsByIds(tutorIds).getData();
+        List<TutorResponse> tutorDetails = new ArrayList<>();
+        log.info("Fetched {} tutor details from Tutor Service", tutorDetails.size());
+
+        List<TutorStatsResponse> tutorStats = classServiceClient.getTutorStats(tutorIds, request.getStudentId()).getData();
+        log.info("Fetched {} tutor stats from Class Service", tutorStats.size());
+
+        // Create map for quick lookup of stats
+        Map<UUID, TutorStatsResponse> statsMap = tutorStats.stream()
                 .collect(Collectors.toMap(
-                        t -> t.getId() != null ? t.getId() : UUID.randomUUID(), 
-                        t -> t
-                ));
+                        TutorStatsResponse::getTutorId,
+                        stats -> stats));
 
-        // 7. Reorder results according to search ranking (preserve order)
-        List<TutorSearchResponse> orderedResults = tutorIds.stream()
-                .map(tutorMap::get)
-                .filter(Objects::nonNull)
-                .toList();
+        // Reorder results according to search ranking (preserve order) and combine with
+        // stats
+        List<TutorBffResponse> orderedResults = createOrderedTutorBffResults(tutorDetails, tutorIds, statsMap);
 
-        log.info("Enriched {} tutors with details from Tutor Service", orderedResults.size());
-
-        // 8. Return paginated results
-        return new PageImpl<>(
+        Page<TutorBffResponse> result = new PageImpl<>(
                 orderedResults,
-                PageRequest.of(page, size),
-                searchResults.getTotalElements()
-        );
+
+                PageRequest.of(request.getPage(), request.getSize()),
+                searchResults.getTotalElements());
+        log.info("Returning page {} of {} with {} tutors", request.getPage(), result.getTotalPages(),
+                orderedResults.size());
+        return result;
     }
 
     @Override
-    public Page<StudentResponse> getTutorStudents(UUID tutorId, int page, int limit, String status, String enrollmentType, String search) {
-        log.info("BFF: Getting students for tutor {} with filters - status: {}, enrollmentType: {}, search: {}",
-                 tutorId, status, enrollmentType, search);
+    public TutorDetailBffResponse getTutorDetail(UUID tutorId, UUID studentId) {
+        log.info("Getting detailed tutor information for tutor: {}, student: {}", tutorId, studentId);
 
-        Page<TutorStudentResponse> classServiceData = classServiceClient.getTutorStudents(tutorId, 0, Integer.MAX_VALUE);
+        ApiResponse<TutorDetailResponse> tutorDetailResponse = tutorServiceClient.getTutorDetail(tutorId);
+        TutorDetailResponse tutorDetail = tutorDetailResponse.getData();
+
+        List<TutorStatsResponse> tutorStats = classServiceClient.getTutorStats(List.of(tutorId), studentId).getData();
+        List<GroupClassResponse> groupClasses = classServiceClient.getGroupClasses(tutorId).getData();
+        TutorDetailBffResponse result = tutorMapper.mapToTutorDetailBffResponse(tutorDetail, groupClasses, tutorStats.isEmpty() ? null : tutorStats.get(0));
+
+        log.info("Successfully mapped tutor detail with {} group classes",
+                groupClasses != null ? groupClasses.size() : 0);
+        return result;
+    }
+
+    @Override
+    public Page<StudentResponse> getTutorStudents(UUID tutorId, GetTutorStudentsRequest request) {
+
+        Page<TutorStudentResponse> classServiceData = classServiceClient.getTutorStudents(tutorId, 0,
+                Integer.MAX_VALUE);
 
         List<UUID> studentIds = classServiceData.getContent().stream()
-            .map(TutorStudentResponse::getStudentId)
-            .distinct()
-            .collect(Collectors.toList());
+                .map(TutorStudentResponse::getStudentId)
+                .distinct()
+                .toList();
 
         if (studentIds.isEmpty()) {
-            return new PageImpl<>(new ArrayList<>(), PageRequest.of(page, limit), 0);
+            return new PageImpl<>(new ArrayList<>(), PageRequest.of(request.getPage(), request.getSize()), 0);
         }
 
-        Map<UUID, UserInfoResponse> userInfoMap = userServiceClient.batchGetUsers(studentIds);
-
         List<StudentResponse> allStudents = classServiceData.getContent().stream()
-            .map(classStudent -> {
-                UserInfoResponse userInfo = userInfoMap.get(classStudent.getStudentId());
+                .map(classStudent -> {
+//                    UserInfoResponse userInfo = userInfoMap.get(classStudent.getStudentId());
+                    UserInfoResponse userInfo = null;
 
-                List<String> enrollmentTypes = new ArrayList<>();
-                if (classStudent.getStudentType() != null) {
-                    switch (classStudent.getStudentType()) {
-                        case ONE_ON_ONE -> enrollmentTypes.add("1-on-1");
-                        case GROUP -> enrollmentTypes.add("Group");
-                        case TRIAL -> enrollmentTypes.add("Trial");
+                    List<String> enrollmentTypes = new ArrayList<>();
+                    if (classStudent.getStudentType() != null) {
+                        switch (classStudent.getStudentType()) {
+                            case ONE_ON_ONE -> enrollmentTypes.add("1-on-1");
+                            case GROUP -> enrollmentTypes.add("Group");
+                            case TRIAL -> enrollmentTypes.add("Trial");
+                        }
                     }
-                }
 
-                String studentStatus = determineStudentStatus(classStudent);
+                    String studentStatus = determineStudentStatus(classStudent);
 
-                return StudentResponse.builder()
-                    .id(classStudent.getStudentId())
-                    .name(userInfo != null ? userInfo.getName() : null)
-                    .email(userInfo != null ? userInfo.getEmail() : null)
-                    .avatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
-                    .registeredDate(classStudent.getEnrolledAt())
-                    .enrollmentTypes(enrollmentTypes)
-                    .status(studentStatus)
-                    .build();
-            })
-            .collect(Collectors.toList());
+                    return StudentResponse.builder()
+                            .id(classStudent.getStudentId())
+                            .fullName(userInfo != null ? userInfo.getName() : null)
+                            .email(userInfo != null ? userInfo.getEmail() : null)
+                            .avatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
+                            .registeredDate(classStudent.getEnrolledAt())
+                            .enrollmentTypes(enrollmentTypes)
+                            .status(studentStatus)
+                            .build();
+                })
+                .toList();
 
         List<StudentResponse> filteredStudents = allStudents.stream()
-            .filter(student -> {
-                if (status != null && !status.isBlank()) {
-                    if (!status.equalsIgnoreCase(student.getStatus())) {
-                        return false;
+                .filter(student -> {
+                    if (request.getStatus() != null && !request.getStatus().isBlank()) {
+                        if (!request.getStatus().equalsIgnoreCase(student.getStatus())) {
+                            return false;
+                        }
                     }
-                }
-                
-                if (enrollmentType != null && !enrollmentType.isBlank()) {
-                    boolean matchesType = student.getEnrollmentTypes().stream()
-                        .anyMatch(type -> type.equalsIgnoreCase(enrollmentType));
-                    if (!matchesType) {
-                        return false;
+
+                    if (request.getEnrollmentType() != null && !request.getEnrollmentType().isBlank()) {
+                        boolean matchesType = student.getEnrollmentTypes().stream()
+                                .anyMatch(type -> type.equalsIgnoreCase(request.getEnrollmentType()));
+                        if (!matchesType) {
+                            return false;
+                        }
                     }
-                }
-                
-                if (search != null && !search.isBlank()) {
-                    String lowerSearch = search.toLowerCase();
-                    boolean matchesSearch =
-                        (student.getName() != null && student.getName().toLowerCase().contains(lowerSearch)) ||
-                        (student.getEmail() != null && student.getEmail().toLowerCase().contains(lowerSearch));
-                    if (!matchesSearch) {
-                        return false;
+
+                    if (request.getSearch() != null && !request.getSearch().isBlank()) {
+                        String lowerSearch = request.getSearch().toLowerCase();
+                        return (student.getFullName() != null && student.getFullName().toLowerCase().contains(lowerSearch)) ||
+                                (student.getEmail() != null && student.getEmail().toLowerCase().contains(lowerSearch));
                     }
-                }
-                
-                return true;
-            })
-            .collect(Collectors.toList());
+
+                    return true;
+                })
+                .collect(Collectors.toList());
 
         int totalElements = filteredStudents.size();
-        int startIndex = page * limit;
-        int endIndex = Math.min(startIndex + limit, totalElements);
+        int startIndex = request.getPage() * request.getSize();
+        int endIndex = Math.min(startIndex + request.getSize(), totalElements);
 
         List<StudentResponse> paginatedStudents = (startIndex < totalElements)
-            ? filteredStudents.subList(startIndex, endIndex)
-            : new ArrayList<>();
+                ? filteredStudents.subList(startIndex, endIndex)
+                : new ArrayList<>();
 
-        Pageable pageable = PageRequest.of(page, limit);
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
         return new PageImpl<>(paginatedStudents, pageable, totalElements);
     }
 
@@ -215,38 +205,41 @@ public class TutorServiceImpl implements TutorService {
         log.info("BFF: Getting detail for student {} of tutor {}", studentId, tutorId);
 
         // Get data from Class Service
-        TutorStudentDetailResponse classData = classServiceClient.getStudentDetail(tutorId, studentId);
+        ApiResponse<TutorStudentDetailResponse> classDataResponse = classServiceClient.getStudentDetail(tutorId, studentId);
+        TutorStudentDetailResponse classData = classDataResponse.getData();
 
         // Get user info
-        UserInfoResponse userInfo = userServiceClient.batchGetUsers(List.of(studentId)).get(studentId);
+//        UserInfoResponse userInfo = userServiceClient.getListUsersByIds(List.of(studentId)).get(studentId);
+        UserInfoResponse userInfo = null;
 
         // Get student profile from Student Service
-        StudentProfileResponse studentProfile = studentServiceClient.getStudentById(studentId);
+        ApiResponse<StudentProfileResponse> studentProfileResponse = studentServiceClient.getStudentDetailById(studentId);
+        StudentProfileResponse studentProfile = studentProfileResponse.getData();
 
         // Parse strengths and weaknesses
         List<String> strengths = parseListField(studentProfile.getStrengths());
         List<String> weaknesses = parseListField(studentProfile.getWeaknesses());
 
         return StudentDetailResponse.builder()
-            .id(studentId)
-            .name(userInfo != null ? userInfo.getName() : null)
-            .avatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
-            .registeredDate(classData.getRegisteredDate())
-            .email(userInfo != null ? userInfo.getEmail() : null)
-            .enrollmentTypes(classData.getEnrollmentTypes())
-            .status(classData.getStatus())
-            .stats(mapStats(classData.getStats()))
-            .contact(StudentDetailResponse.ContactInfo.builder()
-                .phone(studentProfile.getPhone())
-                .joinedDate(classData.getRegisteredDate())
-                .build())
-            .classInfo(mapClassInfo(classData.getClassInfo()))
-            .upcomingSessions(mapUpcomingSessions(classData.getUpcomingSessions()))
-            .sessionHistory(mapSessionHistory(classData.getSessionHistory()))
-            .strengths(strengths)
-            .weaknesses(weaknesses)
-            .tutorNotes(classData.getTutorNotes())
-            .build();
+                .id(studentId)
+                .name(userInfo != null ? userInfo.getName() : null)
+                .avatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
+                .registeredDate(classData.getRegisteredDate())
+                .email(userInfo != null ? userInfo.getEmail() : null)
+                .enrollmentTypes(classData.getEnrollmentTypes())
+                .status(classData.getStatus())
+                .stats(mapStats(classData.getStats()))
+                .contact(StudentDetailResponse.ContactInfo.builder()
+                        .phone(studentProfile.getPhone())
+                        .joinedDate(classData.getRegisteredDate())
+                        .build())
+                .classInfo(mapClassInfo(classData.getClassInfo()))
+                .upcomingSessions(mapUpcomingSessions(classData.getUpcomingSessions()))
+                .sessionHistory(mapSessionHistory(classData.getSessionHistory()))
+                .strengths(strengths)
+                .weaknesses(weaknesses)
+                .tutorNotes(classData.getTutorNotes())
+                .build();
     }
 
     @Override
@@ -258,44 +251,45 @@ public class TutorServiceImpl implements TutorService {
 
         // Extract all unique student IDs
         Set<UUID> allStudentIds = classData.getContent().stream()
-            .flatMap(c -> c.getStudents().stream().map(TutorClassResponse.StudentInfo::getId))
-            .collect(Collectors.toSet());
+                .flatMap(c -> c.getStudents().stream().map(TutorClassResponse.StudentInfo::getId))
+                .collect(Collectors.toSet());
 
         // Batch get user info if there are students
-        Map<UUID, UserInfoResponse> userInfoMap = allStudentIds.isEmpty() 
-            ? new HashMap<>() 
-            : userServiceClient.batchGetUsers(new ArrayList<>(allStudentIds));
+//        Map<UUID, UserInfoResponse> userInfoMap = allStudentIds.isEmpty()
+//                ? new HashMap<>()
+//                : userServiceClient.getListUsersByIds(new ArrayList<>(allStudentIds));
+        Map<UUID, UserInfoResponse> userInfoMap = new HashMap<>();
 
         // Map to ClassResponse
         List<ClassResponse> classResponses = classData.getContent().stream()
-            .map(classItem -> {
-                // Map students with user info
-                List<ClassResponse.StudentInfo> students = classItem.getStudents().stream()
-                    .map(s -> {
-                        UserInfoResponse userInfo = userInfoMap.get(s.getId());
-                        return ClassResponse.StudentInfo.builder()
-                            .id(s.getId())
-                            .name(userInfo != null ? userInfo.getName() : null)
-                            .avatar(userInfo != null ? userInfo.getAvatarUrl() : null)
-                            .build();
-                    })
-                    .collect(Collectors.toList());
+                .map(classItem -> {
+                    // Map students with user info
+                    List<ClassResponse.StudentInfo> students = classItem.getStudents().stream()
+                            .map(s -> {
+                                UserInfoResponse userInfo = userInfoMap.get(s.getId());
+                                return ClassResponse.StudentInfo.builder()
+                                        .id(s.getId())
+                                        .name(userInfo != null ? userInfo.getName() : null)
+                                        .avatar(userInfo != null ? userInfo.getAvatarUrl() : null)
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
 
-                return ClassResponse.builder()
-                    .id(classItem.getId())
-                    .courseTitle(classItem.getCourseTitle())
-                    .students(students)
-                    .type(classItem.getType())
-                    .status(classItem.getStatus())
-                    .schedules(mapSchedules(classItem.getSchedules()))
-                    .startDate(classItem.getStartDate())
-                    .completedSessions(classItem.getCompletedSessions())
-                    .totalSessions(classItem.getTotalSessions())
-                    .quizzes(new ArrayList<>()) // Empty for now
-                    .materials(mapMaterials(classItem.getMaterials()))
-                    .build();
-            })
-            .collect(Collectors.toList());
+                    return ClassResponse.builder()
+                            .id(classItem.getId())
+                            .courseTitle(classItem.getCourseTitle())
+                            .students(students)
+                            .type(classItem.getType())
+                            .status(classItem.getStatus())
+                            .schedules(mapSchedules(classItem.getSchedules()))
+                            .startDate(classItem.getStartDate())
+                            .completedSessions(classItem.getCompletedSessions())
+                            .totalSessions(classItem.getTotalSessions())
+                            .quizzes(new ArrayList<>()) // Empty for now
+                            .materials(mapMaterials(classItem.getMaterials()))
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         Pageable pageable = PageRequest.of(page, limit);
         return new PageImpl<>(classResponses, pageable, classData.getTotalElements());
@@ -311,18 +305,18 @@ public class TutorServiceImpl implements TutorService {
 
         if (classStudent.getSessions() != null && !classStudent.getSessions().isEmpty()) {
             boolean allSessionsCompleted = classStudent.getSessions().stream()
-                .allMatch(session -> {
-                    String sessionStatus = session.getStatus();
-                    return sessionStatus != null &&
-                           (sessionStatus.equalsIgnoreCase("COMPLETED") ||
-                            sessionStatus.equalsIgnoreCase("CANCELLED"));
-                });
-            
+                    .allMatch(session -> {
+                        String sessionStatus = session.getStatus();
+                        return sessionStatus != null &&
+                                (sessionStatus.equalsIgnoreCase("COMPLETED") ||
+                                        sessionStatus.equalsIgnoreCase("CANCELLED"));
+                    });
+
             if (allSessionsCompleted) {
                 return "Completed";
             }
         }
-        
+
         return "Ongoing";
     }
 
@@ -331,262 +325,294 @@ public class TutorServiceImpl implements TutorService {
     }
 
     private StudentDetailResponse.StatsInfo mapStats(TutorStudentDetailResponse.StatsInfo stats) {
-        if (stats == null) return null;
+        if (stats == null)
+            return null;
         return StudentDetailResponse.StatsInfo.builder()
-            .sessionsCompleted(stats.getSessionsCompleted())
-            .totalSessions(stats.getTotalSessions())
-            .sessionsRemaining(stats.getSessionsRemaining())
-            .completionRate(stats.getCompletionRate())
-            .attendanceRate(stats.getAttendanceRate())
-            .lastSessionDate(stats.getLastSessionDate())
-            .build();
+                .sessionsCompleted(stats.getSessionsCompleted())
+                .totalSessions(stats.getTotalSessions())
+                .sessionsRemaining(stats.getSessionsRemaining())
+                .completionRate(stats.getCompletionRate())
+                .attendanceRate(stats.getAttendanceRate())
+                .lastSessionDate(stats.getLastSessionDate())
+                .build();
     }
 
     private StudentDetailResponse.ClassInfo mapClassInfo(TutorStudentDetailResponse.ClassInfo classInfo) {
-        if (classInfo == null) return null;
+        if (classInfo == null)
+            return null;
         return StudentDetailResponse.ClassInfo.builder()
-            .name(classInfo.getName())
-            .instructor(classInfo.getInstructor())
-            .schedule(classInfo.getSchedule())
-            .build();
+                .name(classInfo.getName())
+                .instructor(classInfo.getInstructor())
+                .schedule(classInfo.getSchedule())
+                .build();
     }
 
     private List<StudentDetailResponse.UpcomingSessionInfo> mapUpcomingSessions(
             List<TutorStudentDetailResponse.UpcomingSessionInfo> sessions) {
-        if (sessions == null) return new ArrayList<>();
+        if (sessions == null)
+            return new ArrayList<>();
         return sessions.stream()
-            .map(s -> StudentDetailResponse.UpcomingSessionInfo.builder()
-                .id(s.getId())
-                .date(s.getDate())
-                .time(s.getTime())
-                .duration(s.getDuration())
-                .topic(s.getTopic())
-                .build())
-            .collect(Collectors.toList());
+                .map(s -> StudentDetailResponse.UpcomingSessionInfo.builder()
+                        .id(s.getId())
+                        .date(s.getDate())
+                        .time(s.getTime())
+                        .duration(s.getDuration())
+                        .topic(s.getTopic())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<StudentDetailResponse.SessionHistoryInfo> mapSessionHistory(
             List<TutorStudentDetailResponse.SessionHistoryInfo> sessions) {
-        if (sessions == null) return new ArrayList<>();
+        if (sessions == null)
+            return new ArrayList<>();
         return sessions.stream()
-            .map(s -> StudentDetailResponse.SessionHistoryInfo.builder()
-                .id(s.getId())
-                .date(s.getDate())
-                .duration(s.getDuration())
-                .attendance(s.getAttendance())
-                .topic(s.getTopic())
-                .build())
-            .collect(Collectors.toList());
+                .map(s -> StudentDetailResponse.SessionHistoryInfo.builder()
+                        .id(s.getId())
+                        .date(s.getDate())
+                        .duration(s.getDuration())
+                        .attendance(s.getAttendance())
+                        .topic(s.getTopic())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<ClassResponse.ScheduleInfo> mapSchedules(List<TutorClassResponse.ScheduleInfo> schedules) {
-        if (schedules == null) return new ArrayList<>();
+        if (schedules == null)
+            return new ArrayList<>();
         return schedules.stream()
-            .map(s -> ClassResponse.ScheduleInfo.builder()
-                .day(s.getDay())
-                .time(s.getTime())
-                .build())
-            .collect(Collectors.toList());
+                .map(s -> ClassResponse.ScheduleInfo.builder()
+                        .day(s.getDay())
+                        .time(s.getTime())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private List<ClassResponse.MaterialInfo> mapMaterials(List<TutorClassResponse.MaterialInfo> materials) {
-        if (materials == null) return new ArrayList<>();
+        if (materials == null)
+            return new ArrayList<>();
         return materials.stream()
-            .map(m -> ClassResponse.MaterialInfo.builder()
-                .id(m.getId())
-                .name(m.getName())
-                .type(m.getType())
-                .date(m.getDate())
-                .build())
-            .collect(Collectors.toList());
+                .map(m -> ClassResponse.MaterialInfo.builder()
+                        .id(m.getId())
+                        .name(m.getName())
+                        .type(m.getType())
+                        .date(m.getDate())
+                        .build())
+                .collect(Collectors.toList());
     }
 
-    @Override
     public TutorProfileResponse getTutorProfile(UUID tutorId) {
         log.info("BFF: Getting tutor profile for tutorId: {}", tutorId);
 
         // Get tutor data from tutor service
-        com.elearning.bffservice.client.dto.TutorProfileResponse tutorData = tutorServiceClient.getTutorProfile(tutorId);
-        if (tutorData == null) {
-            log.warn("Tutor data not found for tutorId: {}", tutorId);
-            return null;
-        }
+        return null;
+        // if (tutorData == null) {
+        //     log.warn("Tutor data not found for tutorId: {}", tutorId);
+        //     return null;
+        // }
 
-        // Get user data from user service
-        UserInfoResponse userData = userServiceClient.getUserById(tutorId);
-        if (userData == null) {
-            log.warn("User data not found for tutorId: {}", tutorId);
-            return null;
-        }
+        // // Get user data from user service
+        // UserInfoResponse userData = userServiceClient.getUserById(tutorId);
+        // if (userData == null) {
+        //     log.warn("User data not found for tutorId: {}", tutorId);
+        //     return null;
+        // }
 
-        // Get languages from common service
-        List<LanguageResponse> allLanguages = commonServiceClient.getAllLanguages();
-        Map<String, LanguageResponse> languageMap = allLanguages.stream()
-                .collect(Collectors.toMap(LanguageResponse::getCode, lang -> lang));
+        // // Get subjects from common service
+        // List<SubjectResponse> allSubjects = commonServiceClient.getAllSubjects();
+        // Map<UUID, SubjectResponse> subjectMap = allSubjects.stream()
+        //         .collect(Collectors.toMap(SubjectResponse::getId, subject -> subject));
 
-        // Get countries from common service
-        List<CountryResponse> allCountries = commonServiceClient.getAllCountries();
-        Map<UUID, CountryResponse> countryMap = allCountries.stream()
-                .collect(Collectors.toMap(CountryResponse::getId, country -> country));
-
-        // Get subjects from common service
-        List<SubjectResponse> allSubjects = commonServiceClient.getAllSubjects();
-        Map<UUID, SubjectResponse> subjectMap = allSubjects.stream()
-                .collect(Collectors.toMap(SubjectResponse::getId, subject -> subject));
-
+        //         return null;
         // Build the response
-        return TutorProfileResponse.builder()
-                .fullName(userData.getName())
-                .email(userData.getEmail())
-                .phone(userData.getPhone())
-                .gender(userData.getGender())
-                .country(userData.getCountryId() != null && countryMap.containsKey(userData.getCountryId())
-                        ? countryMap.get(userData.getCountryId()).getName() : null)
-                .city(userData.getCity())
-                .nativeLanguage(tutorData.getNationalityCode() != null && languageMap.containsKey(tutorData.getNationalityCode())
-                        ? TutorProfileResponse.Language.builder()
-                                .id(languageMap.get(tutorData.getNationalityCode()).getId().toString())
-                                .name(languageMap.get(tutorData.getNationalityCode()).getName())
-                                .code(languageMap.get(tutorData.getNationalityCode()).getCode())
-                                .build()
-                        : null)
-                .languages(tutorData.getLanguages() != null ? tutorData.getLanguages().stream()
-                        .filter(lang -> languageMap.containsKey(lang.getLanguageCode()))
-                        .map(lang -> TutorProfileResponse.Language.builder()
-                                .id(languageMap.get(lang.getLanguageCode()).getId().toString())
-                                .name(languageMap.get(lang.getLanguageCode()).getName())
-                                .code(languageMap.get(lang.getLanguageCode()).getCode())
-                                .build())
-                        .collect(Collectors.toList()) : null)
-                .headline(tutorData.getSpecialization())
-                .subjects(tutorData.getSubjects() != null ? tutorData.getSubjects().stream()
-                        .filter(subject -> subject.getSubjectId() != null && subjectMap.containsKey(subject.getSubjectId()))
-                        .map(subject -> TutorProfileResponse.Subject.builder()
-                                .id(subjectMap.get(subject.getSubjectId()).getId().toString())
-                                .name(subjectMap.get(subject.getSubjectId()).getName())
-                                .build())
-                        .collect(Collectors.toList()) : null)
-                .introduction(tutorData.getIntroduction())
-                .avatarUrl(userData.getAvatarUrl())
-                .introductionVideoUrl(tutorData.getVideoUrl())
-                .socialLinks(tutorData.getSocialLinks() != null ? tutorData.getSocialLinks().stream()
-                        .map(social -> TutorProfileResponse.SocialLink.builder()
-                                .id(social.getId().toString())
-                                .platform(social.getPlatform())
-                                .url(social.getUrl())
-                                .build())
-                        .collect(Collectors.toList()) : null)
-                .education(tutorData.getCareerEntries() != null ? tutorData.getCareerEntries().stream()
-                        .filter(entry -> "EDUCATION".equals(entry.getType()))
-                        .map(entry -> TutorProfileResponse.CareerEntry.builder()
-                                .id(entry.getId().toString())
-                                .title(entry.getTitle())
-                                .institution(entry.getInstitution())
-                                .startDate(entry.getStartDate() != null ? entry.getStartDate().toString() : null)
-                                .endDate(entry.getEndDate() != null ? entry.getEndDate().toString() : null)
-                                .location(entry.getLocation())
-                                .description(entry.getDescription())
-                                .build())
-                        .collect(Collectors.toList()) : null)
-                .experience(tutorData.getCareerEntries() != null ? tutorData.getCareerEntries().stream()
-                        .filter(entry -> "EXPERIENCE".equals(entry.getType()))
-                        .map(entry -> TutorProfileResponse.CareerEntry.builder()
-                                .id(entry.getId().toString())
-                                .title(entry.getTitle())
-                                .institution(entry.getInstitution())
-                                .startDate(entry.getStartDate() != null ? entry.getStartDate().toString() : null)
-                                .endDate(entry.getEndDate() != null ? entry.getEndDate().toString() : null)
-                                .location(entry.getLocation())
-                                .description(entry.getDescription())
-                                .build())
-                        .collect(Collectors.toList()) : null)
-                .certifications(tutorData.getCertifications() != null ? tutorData.getCertifications().stream()
-                        .map(cert -> TutorProfileResponse.Certification.builder()
-                                .id(cert.getId().toString())
-                                .name(cert.getName())
-                                .issuingOrganization(cert.getIssuingOrganization())
-                                .issueDate(cert.getIssueDate() != null ? cert.getIssueDate().toString() : null)
-                                .expirationDate(cert.getExpirationDate() != null ? cert.getExpirationDate().toString() : null)
-                                .credentialId(cert.getCredentialId())
-                                .credentialUrl(cert.getCredentialUrl())
-                                .build())
-                        .collect(Collectors.toList()) : null)
-                .build();
-    }
-    
+        // return TutorProfileResponse.builder()
+        //         .fullName(userData.getName())
+        //         .email(userData.getEmail())
+        //         .phone(userData.getPhone())
+        //         .gender(userData.getGender())
+        //         .city(userData.getCity())
+        //         .headline(tutorData.getSpecialization())
+        //         .subjects(tutorData.getSubjects() != null ? tutorData.getSubjects().stream()
+        //                 .filter(subject -> subject.getSubjectId() != null
+        //                         && subjectMap.containsKey(subject.getSubjectId()))
+        //                 .map(subject -> TutorProfileResponse.Subject.builder()
+        //                         .id(subjectMap.get(subject.getSubjectId()).getId().toString())
+        //                         .name(subjectMap.get(subject.getSubjectId()).getName())
+        //                         .build())
+        //                 .collect(Collectors.toList()) : null)
+        //         .introduction(tutorData.getIntroduction())
+        //         .avatarUrl(userData.getAvatarUrl())
+        //         .introductionVideoUrl(tutorData.getVideoUrl())
+        //         .socialLinks(tutorData.getSocialLinks() != null ? tutorData.getSocialLinks().stream()
+        //                 .map(social -> TutorProfileResponse.SocialLink.builder()
+        //                         .id(social.getId().toString())
+        //                         .platform(social.getPlatform())
+        //                         .url(social.getUrl())
+        //                         .build())
+        //                 .collect(Collectors.toList()) : null)
+        //         .education(tutorData.getCareerEntries() != null ? tutorData.getCareerEntries().stream()
+        //                 .filter(entry -> "EDUCATION".equals(entry.getType()))
+        //                 .map(entry -> TutorProfileResponse.CareerEntry.builder()
+        //                         .id(entry.getId().toString())
+        //                         .title(entry.getTitle())
+        //                         .institution(entry.getInstitution())
+        //                         .startDate(entry.getStartDate() != null ? entry.getStartDate().toString() : null)
+        //                         .endDate(entry.getEndDate() != null ? entry.getEndDate().toString() : null)
+        //                         .location(entry.getLocation())
+        //                         .description(entry.getDescription())
+        //                         .build())
+        //                 .collect(Collectors.toList()) : null)
+        //         .experience(tutorData.getCareerEntries() != null ? tutorData.getCareerEntries().stream()
+        //                 .filter(entry -> "EXPERIENCE".equals(entry.getType()))
+        //                 .map(entry -> TutorProfileResponse.CareerEntry.builder()
+        //                         .id(entry.getId().toString())
+        //                         .title(entry.getTitle())
+        //                         .institution(entry.getInstitution())
+        //                         .startDate(entry.getStartDate() != null ? entry.getStartDate().toString() : null)
+        //                         .endDate(entry.getEndDate() != null ? entry.getEndDate().toString() : null)
+        //                         .location(entry.getLocation())
+        //                         .description(entry.getDescription())
+        //                         .build())
+        //                 .collect(Collectors.toList()) : null)
+        //         .certifications(tutorData.getCertifications() != null ? tutorData.getCertifications().stream()
+        //                 .map(cert -> TutorProfileResponse.Certification.builder()
+        //                         .id(cert.getId().toString())
+        //                         .name(cert.getName())
+        //                         .issuingOrganization(cert.getIssuingOrganization())
+        //                         .issueDate(cert.getIssueDate() != null ? cert.getIssueDate().toString() : null)
+        //                         .expirationDate(
+        //                                 cert.getExpirationDate() != null ? cert.getExpirationDate().toString() : null)
+        //                         .credentialId(cert.getCredentialId())
+        //                         .credentialUrl(cert.getCredentialUrl())
+        //                         .build())
+        //                 .collect(Collectors.toList()) : null)
+        //         .build();
     @Override
-    public List<BookedSessionResponse> getBookedSessions(UUID tutorId, LocalDate startDate, LocalDate endDate, List<ScheduleStatus> statuses) {
-        log.info("BFF: Getting booked sessions for tutor {} from {} to {} with statuses {}", 
-                tutorId, startDate, endDate, statuses);
-        
+    public BookedSessionsData getBookedSessionsWithStudents(UUID tutorId, LocalDate startDate, LocalDate endDate) {
+        log.info("BFF: Getting booked sessions with students for tutor {} from {} to {}", tutorId, startDate, endDate);
+
         // Get sessions from class-service
-        List<ClassServiceBookedSessionResponse> classServiceSessions = classServiceClient.getBookedSessions(tutorId, startDate, endDate, statuses);
-        
+        List<ClassServiceBookedSessionResponse> classServiceSessions = classServiceClient.getBookedSessions(tutorId,
+                startDate, endDate, null);
+
         if (classServiceSessions == null || classServiceSessions.isEmpty()) {
             log.info("No booked sessions found for tutor {}", tutorId);
-            return new ArrayList<>();
+            return BookedSessionsData.builder().sessions(new ArrayList<>()).build();
         }
-        
-        // Extract unique student IDs (actually user IDs)
+
+        // Extract unique student IDs
         List<UUID> studentIds = classServiceSessions.stream()
-                .map(ClassServiceBookedSessionResponse::getStudentId)
+                .flatMap(session -> session.getStudentIds().stream())
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
-        
-        // Batch get user info from user-service
-        Map<UUID, UserInfoResponse> userInfoMap = new HashMap<>();
+
+        // Batch get student info from student-service
+        Map<UUID, StudentResponse> studentInfoMap = new HashMap<>();
         if (!studentIds.isEmpty()) {
-            userInfoMap = userServiceClient.batchGetUsers(studentIds);
+            ApiResponse<Map<UUID, StudentResponse>> studentsResponse = studentServiceClient.getStudentsByIds(studentIds);
+            if (studentsResponse != null && studentsResponse.getData() != null) {
+                studentInfoMap = studentsResponse.getData();
+            }
         }
-        
-        // Merge data
-        List<BookedSessionResponse> responses = new ArrayList<>();
-        for (ClassServiceBookedSessionResponse session : classServiceSessions) {
-            UserInfoResponse userInfo = session.getStudentId() != null ? 
-                    userInfoMap.get(session.getStudentId()) : null;
-            
-            BookedSessionResponse response = BookedSessionResponse.builder()
-                    .id(session.getId())
-                    .studentId(session.getStudentId())
-                    .studentName(userInfo != null ? userInfo.getName() : null)
-                    .studentAvatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
-                    .sessionDatetime(session.getSessionDatetime())
-                    .durationMinutes(session.getDurationMinutes())
-                    .className(session.getClassName())
-                    .sessionType(session.getSessionType())
-                    .status(session.getStatus())
-                    .meetingUrl(session.getMeetingUrl())
-                    .notes(session.getNotes())
-                    .bookedAt(session.getBookedAt())
-                    .updatedAt(session.getUpdatedAt())
-                    .build();
-            
-            responses.add(response);
-        }
-        
-        log.info("BFF: Aggregated {} booked sessions with student details", responses.size());
-        return responses;
+
+        // Group sessions and map to response
+        List<SessionWithStudents> sessions = classServiceSessions.stream()
+                .map(session -> {
+                    List<StudentInSession> students = session.getStudentIds().stream()
+                            .map(studentId -> {
+                                StudentResponse studentInfo = studentInfoMap.get(studentId);
+                                return StudentInSession.builder()
+                                        .id(studentId)
+                                        .name(studentInfo != null ? studentInfo.getFullName() : "Unknown")
+                                        .avatar(studentInfo != null ? studentInfo.getAvatarUrl() : null)
+                                        .build();
+                            })
+                            .collect(Collectors.toList());
+
+                    return SessionWithStudents.builder()
+                            .id(session.getId())
+                            .students(students)
+                            .sessionDatetime(session.getSessionDatetime())
+                            .className(session.getClassName())
+                            .sessionType(session.getSessionType())
+                            .createdAt(session.getCreatedAt())
+                            .updatedAt(session.getUpdatedAt())
+                            .meetingUrl(session.getMeetingUrl())
+                            .notes(session.getNotes())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return BookedSessionsData.builder().sessions(sessions).build();
     }
-    
+
     @Override
-    public List<AvailabilityResponse> getAvailabilities(UUID tutorId, LocalDate startDate, LocalDate endDate) {
+    public AvailabilityListResponse getAvailabilities(UUID tutorId, LocalDate startDate, LocalDate endDate) {
         log.info("BFF: Getting availabilities for tutor {} from {} to {}", tutorId, startDate, endDate);
-        
+
         // Simply proxy to tutor-service
-        List<AvailabilityResponse> availabilities = tutorServiceClient.getAvailabilities(tutorId, startDate, endDate);
-        
-        log.info("BFF: Retrieved {} availability patterns", availabilities != null ? availabilities.size() : 0);
-        return availabilities != null ? availabilities : new ArrayList<>();
+        ApiResponse<AvailabilityListResponse> response = tutorServiceClient.getAvailabilities(tutorId, startDate, endDate);
+
+        log.info("BFF: Retrieved {} availability patterns", response.getData() != null && response.getData().getAvailabilities() != null ? response.getData().getAvailabilities().size() : 0);
+        return response.getData();
     }
-    
+
     @Override
     public void bulkUpdateAvailability(UUID tutorId, BulkUpdateAvailabilityRequest request) {
         log.info("BFF: Bulk updating availability for tutor {} with mode: {}", tutorId, request.getMode());
-        
+
         // Simply proxy to tutor-service
         tutorServiceClient.bulkUpdateAvailability(tutorId, request);
-        
+
         log.info("BFF: Successfully bulk updated availability for tutor {}", tutorId);
     }
+
+    @Override
+    public OnboardingResponse getOnboarding(UUID tutorId) {
+        log.info("BFF: Getting onboarding for tutor {}", tutorId);
+
+        ApiResponse<OnboardingResponse> response = tutorServiceClient.getOnboarding(tutorId);
+
+        log.info("BFF: Retrieved onboarding for tutor {}", tutorId);
+        return response.getData();
+    }
+
+    @Override
+    public void updateOnboarding(UUID tutorId, UpdateOnboardingRequest request) {
+        log.info("BFF: Updating onboarding for tutor {}", tutorId);
+
+        tutorServiceClient.updateOnboarding(tutorId, request);
+
+        log.info("BFF: Successfully updated onboarding for tutor {}", tutorId);
+    }
+
+    private List<TutorBffResponse> createOrderedTutorBffResults(List<TutorResponse> tutorDetails, List<UUID> tutorIds,
+            Map<UUID, TutorStatsResponse> statsMap) {
+        // Create map for quick lookup of tutor details
+        Map<UUID, TutorResponse> tutorMap = tutorDetails.stream()
+                .collect(Collectors.toMap(
+                        t -> t.getId() != null ? t.getId() : UUID.randomUUID(),
+                        t -> t));
+        log.info("Created tutor map with {} entries", tutorMap.size());
+
+        // Reorder results according to search ranking (preserve order) and combine with
+        // stats
+        List<TutorBffResponse> orderedResults = tutorIds.stream()
+                .map(tutorId -> {
+                    TutorResponse tutor = tutorMap.get(tutorId);
+                    if (tutor == null) {
+                        return null;
+                    }
+
+                    TutorStatsResponse stats = statsMap.get(tutorId);
+                    return tutorMapper.mapToTutorBffResponse(tutor, stats);
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        log.info("Ordered results: {} tutors after filtering", orderedResults.size());
+
+        return orderedResults;
+    }
 }
+

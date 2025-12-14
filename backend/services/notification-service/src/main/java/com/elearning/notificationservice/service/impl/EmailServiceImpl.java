@@ -54,4 +54,17 @@ public class EmailServiceImpl implements EmailService {
 
         sendHtmlEmail(to, subject, htmlContent);
     }
+
+    @Override
+    public void sendTutorApprovalEmail(String to, String fullName) {
+        String subject = "Congratulations! Your Tutor Application Has Been Approved";
+        String htmlContent = "<html><body>" +
+                "<h2>Congratulations, " + fullName + "!</h2>" +
+                "<p>Your tutor application has been approved. You can now start teaching on our platform.</p>" +
+                "<p>Welcome to our tutor community!</p>" +
+                "<p>Best regards,<br>The E-Learning Team</p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
 }

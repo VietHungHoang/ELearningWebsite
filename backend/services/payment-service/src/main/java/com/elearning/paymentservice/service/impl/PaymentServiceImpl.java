@@ -1,22 +1,30 @@
 package com.elearning.paymentservice.service.impl;
 
+import com.elearning.paymentservice.dto.event.PaymentCompletedEvent;
+import com.elearning.paymentservice.dto.event.PaymentFailedEvent;
 import com.elearning.paymentservice.dto.request.InitiatePaymentRequest;
 import com.elearning.paymentservice.dto.response.InitiatePaymentResponse;
 import com.elearning.paymentservice.dto.response.PaymentData;
 import com.elearning.paymentservice.enums.PaymentMethodType;
+import com.elearning.paymentservice.enums.PaymentStatus;
+import com.elearning.paymentservice.kafka.KafkaProducer;
 import com.elearning.paymentservice.mapper.PaymentMapper;
-import com.elearning.paymentservice.model.PaymentTransaction;
+import com.elearning.paymentservice.entity.PaymentTransaction;
 import com.elearning.paymentservice.repository.PaymentTransactionRepository;
 import com.elearning.paymentservice.service.PaymentService;
 import com.elearning.paymentservice.strategy.PaymentGatewayFactory;
 import com.elearning.paymentservice.strategy.dto.GatewayCreationResponse;
+import com.elearning.paymentservice.strategy.dto.StandardizedPaymentResult;
+import com.elearning.paymentservice.strategy.dto.WebhookPayload;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentTransactionRepository paymentTransactionRepository;
     private final PaymentGatewayFactory paymentGatewayFactory;
+    private final KafkaProducer kafkaProducer;
 
     @Override
     @Transactional
@@ -78,5 +87,80 @@ public class PaymentServiceImpl implements PaymentService {
             .paymentMethodType(PaymentMethodType.REDIRECT)
             .paymentData(paymentData)
             .build();
+    }
+
+    @Override
+    @Transactional
+    public void processWebhook(WebhookPayload payload) {
+        log.info("Processing webhook for provider transaction: {}", payload.getProviderTransactionId());
+
+        // Find the transaction by provider transaction ID
+        Optional<PaymentTransaction> transactionOpt = paymentTransactionRepository
+            .findByProviderTransactionId(payload.getProviderTransactionId());
+
+        if (transactionOpt.isEmpty()) {
+            log.warn("No transaction found for provider transaction ID: {}", payload.getProviderTransactionId());
+            return;
+        }
+
+        PaymentTransaction transaction = transactionOpt.get();
+
+        // Get the appropriate strategy for this payment provider
+        var strategy = paymentGatewayFactory.getStrategy(transaction.getProvider());
+
+        // Process the webhook using the strategy
+        StandardizedPaymentResult result = strategy.handleWebhook(payload);
+
+        // Update transaction status based on webhook result
+        PaymentStatus newStatus;
+        LocalDateTime eventTime = LocalDateTime.now();
+
+        if ("SUCCESS".equalsIgnoreCase(result.getStatus())) {
+            newStatus = PaymentStatus.COMPLETED;
+            transaction.setPaidAt(eventTime);
+
+            // Publish payment completed event
+            PaymentCompletedEvent event = PaymentCompletedEvent.builder()
+                .paymentId(transaction.getId())
+                .orderId(transaction.getOrderId())
+                .amount(transaction.getAmount())
+                .currency(transaction.getCurrency())
+                .paymentProvider(transaction.getProvider().name())
+                .providerTransactionId(transaction.getProviderTransactionId())
+                .completedAt(eventTime)
+                .build();
+
+            kafkaProducer.sendPaymentCompletedEvent(event);
+            log.info("Published payment completed event for order: {}", transaction.getOrderId());
+
+        } else if ("FAILED".equalsIgnoreCase(result.getStatus())) {
+            newStatus = PaymentStatus.FAILED;
+
+            // Publish payment failed event
+            PaymentFailedEvent event = PaymentFailedEvent.builder()
+                .paymentId(transaction.getId())
+                .orderId(transaction.getOrderId())
+                .amount(transaction.getAmount())
+                .currency(transaction.getCurrency())
+                .paymentProvider(transaction.getProvider().name())
+                .providerTransactionId(transaction.getProviderTransactionId())
+                .failureReason("Payment failed via webhook")
+                .failedAt(eventTime)
+                .build();
+
+            kafkaProducer.sendPaymentFailedEvent(event);
+            log.info("Published payment failed event for order: {}", transaction.getOrderId());
+
+        } else {
+            log.info("Webhook status {} not requiring status change for transaction: {}", result.getStatus(), transaction.getId());
+            return;
+        }
+
+        // Update and save transaction
+        transaction.setStatus(newStatus);
+        transaction.setUpdatedAt(eventTime);
+        paymentTransactionRepository.save(transaction);
+
+        log.info("Updated transaction {} status to {}", transaction.getId(), newStatus);
     }
 }

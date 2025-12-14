@@ -1,6 +1,5 @@
 package com.elearning.commonservice.service.impl;
 
-import com.elearning.commonservice.dto.request.LanguageRequest;
 import com.elearning.commonservice.dto.response.LanguageResponse;
 import com.elearning.commonservice.entity.Language;
 import com.elearning.commonservice.mapper.LanguageMapper;
@@ -24,13 +23,6 @@ public class LanguageServiceImpl implements LanguageService {
     private final LanguageMapper languageMapper;
 
     @Override
-    public LanguageResponse create(LanguageRequest request) {
-        Language language = languageMapper.toEntity(request);
-        Language saved = languageRepository.save(language);
-        return languageMapper.toResponse(saved);
-    }
-
-    @Override
     public LanguageResponse getById(UUID id) {
         Language language = getLanguageById(id);
         return languageMapper.toResponse(language);
@@ -42,20 +34,6 @@ public class LanguageServiceImpl implements LanguageService {
         return languages.stream()
                 .map(languageMapper::toResponse)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public LanguageResponse update(UUID id, LanguageRequest request) {
-        Language existing = getLanguageById(id);
-        existing.setName(request.getName());
-        existing.setCode(request.getCode());
-        Language updated = languageRepository.save(existing);
-        return languageMapper.toResponse(updated);
-    }
-
-    @Override
-    public void delete(UUID id) {
-        languageRepository.deleteById(id);
     }
 
     private Language getLanguageById(UUID id) {

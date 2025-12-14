@@ -28,10 +28,7 @@ public class ClassEntity extends BaseEntity {
     @Column(name = "title", nullable = false)
     private String title;
     
-    @Column(name = "description")
     private String description;
-    
-    @Column(name = "subject")
     private String subject;
     
     @Enumerated(EnumType.STRING)
@@ -77,4 +74,8 @@ public class ClassEntity extends BaseEntity {
     @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ClassAssignment> assignments = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<StudentInClass> studentInClasses = new ArrayList<>();
 }

@@ -1,23 +1,25 @@
 package com.elearning.bffservice.client;
 
 import com.elearning.bffservice.dto.request.BulkUpdateAvailabilityRequest;
-import com.elearning.bffservice.dto.response.AvailabilityResponse;
-import com.elearning.bffservice.dto.response.TutorSearchResponse;
-import com.elearning.bffservice.client.dto.TutorProfileResponse;
+import com.elearning.bffservice.dto.request.UpdateOnboardingRequest;
+import com.elearning.bffservice.dto.ApiResponse;
+import com.elearning.bffservice.dto.tutor.response.AvailabilityListResponse;
+import com.elearning.bffservice.dto.response.OnboardingResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorDetailResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -28,66 +30,40 @@ public class TutorServiceClient {
     @Value("${services.tutor-service.url}")
     private String tutorServiceBaseUrl;
 
-    public Page<TutorSearchResponse> searchTutors(List<String> languageCodes, BigDecimal minPrice, BigDecimal maxPrice, List<UUID> categoryIds, List<String> availableDays, int page, int size) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(tutorServiceBaseUrl + "/api/v1/tutors/search")
-                .queryParam("page", page)
-                .queryParam("size", size);
-
-        if (languageCodes != null && !languageCodes.isEmpty()) {
-            for (String code : languageCodes) builder.queryParam("languageCodes", code);
-        }
-        if (minPrice != null) builder.queryParam("minPrice", minPrice);
-        if (maxPrice != null) builder.queryParam("maxPrice", maxPrice);
-        if (categoryIds != null && !categoryIds.isEmpty()) {
-            for (UUID id : categoryIds) builder.queryParam("categoryIds", id);
-        }
-        if (availableDays != null && !availableDays.isEmpty()) {
-            for (String d : availableDays) builder.queryParam("availableDays", d);
-        }
-
-        URI url = builder.build().toUri();
-
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Page<TutorSearchResponse>>() {}
-        ).getBody();
-    }
-
-    public TutorProfileResponse getTutorProfile(UUID tutorId) {
-        String url = tutorServiceBaseUrl + "/tutors/" + tutorId + "/profile";
-        return restTemplate.getForObject(url, TutorProfileResponse.class);
-    }
-    
     /**
      * Get tutors by list of IDs (for search enrichment)
      */
-    public List<TutorSearchResponse> getTutorsByIds(List<UUID> tutorIds) {
+    public ApiResponse<Map<UUID, TutorResponse>> getTutorsByIds(List<UUID> tutorIds) {
         if (tutorIds == null || tutorIds.isEmpty()) {
-            return List.of();
+            return ApiResponse.success(Map.of(), "No tutors found");
         }
-        
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromHttpUrl(tutorServiceBaseUrl + "/api/v1/tutors/batch");
-        
-        for (UUID id : tutorIds) {
-            builder.queryParam("ids", id);
-        }
-        
-        URI url = builder.build().toUri();
-        
+
+        String url = UriComponentsBuilder
+                .fromHttpUrl(tutorServiceBaseUrl + "/tutors/batch")
+                .queryParam("tutorIds", tutorIds)
+                .toUriString();
+
         return restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<TutorSearchResponse>>() {}
+                new ParameterizedTypeReference<ApiResponse<Map<UUID, TutorResponse>>>() {}
         ).getBody();
     }
     
-    public List<AvailabilityResponse> getAvailabilities(UUID tutorId, LocalDate startDate, LocalDate endDate) {
+    public ApiResponse<TutorDetailResponse> getTutorDetail(UUID tutorId) {
+        String url = tutorServiceBaseUrl + "/api/v1/tutors/" + tutorId + "/detail";
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ApiResponse<TutorDetailResponse>>() {}
+        ).getBody();
+    }
+    
+    public ApiResponse<AvailabilityListResponse> getAvailabilities(UUID tutorId, LocalDate startDate, LocalDate endDate) {
         URI url = UriComponentsBuilder
-                .fromHttpUrl(tutorServiceBaseUrl + "/tutors/{tutorId}/availability")
+                .fromHttpUrl(tutorServiceBaseUrl + "/tutors/{tutorId}/availabilities")
                 .queryParam("startDate", startDate)
                 .queryParam("endDate", endDate)
                 .buildAndExpand(tutorId)
@@ -97,7 +73,7 @@ public class TutorServiceClient {
                 url,
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<AvailabilityResponse>>() {}
+                new ParameterizedTypeReference<ApiResponse<AvailabilityListResponse>>() {}
         ).getBody();
     }
     
@@ -112,5 +88,55 @@ public class TutorServiceClient {
                 entity,
                 Void.class
         );
+    }
+    
+    public ApiResponse<OnboardingResponse> getOnboarding(UUID tutorId) {
+        String url = tutorServiceBaseUrl + "/api/v1/tutors/" + tutorId + "/onboarding";
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ApiResponse<OnboardingResponse>>() {}
+        ).getBody();
+    }
+
+    public void updateOnboarding(UUID tutorId, UpdateOnboardingRequest request) {
+        String url = tutorServiceBaseUrl + "/api/v1/tutors/" + tutorId + "/onboarding";
+        
+        HttpEntity<UpdateOnboardingRequest> entity = new HttpEntity<>(request);
+        
+        restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                entity,
+                Void.class
+        );
+    }
+    
+    public void updateOnboarding(UUID tutorId, int step, UpdateOnboardingRequest request) {
+        String url = tutorServiceBaseUrl + "/api/v1/tutors/" + tutorId + "/onboarding/step/" + step;
+        
+        HttpEntity<UpdateOnboardingRequest> entity = new HttpEntity<>(request);
+        
+        restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                entity,
+                Void.class
+        );
+    }
+
+    /**
+     * Get tutor by ID
+     */
+    public TutorResponse getTutorById(UUID tutorId) {
+        String url = tutorServiceBaseUrl + "/api/v1/tutors/" + tutorId;
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ApiResponse<TutorResponse>>() {}
+        ).getBody().getData();
     }
 }

@@ -1,6 +1,5 @@
 package com.elearning.tutorservice.dto.response;
 
-import com.elearning.tutorservice.entity.AvailabilityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +19,4 @@ public class AvailabilityResponse {
     private String endTime; // HH:mm format
     private LocalDate effectiveStartDate;
     private LocalDate effectiveEndDate;
-    private AvailabilityStatus status;
 }

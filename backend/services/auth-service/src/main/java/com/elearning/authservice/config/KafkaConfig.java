@@ -13,8 +13,9 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    private String bootstrapServers = "kafka:9092";
-
+    @Value("${spring.kafka.bootstrap-servers:kafka:9092}")
+    private String bootstrapServers;
+    
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();

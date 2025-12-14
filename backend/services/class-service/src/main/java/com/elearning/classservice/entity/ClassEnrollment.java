@@ -29,11 +29,11 @@ public class ClassEnrollment extends BaseEntity {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private EnrollmentStatus status; // PENDING, APPROVED, REJECTED, CANCELLED
+    private EnrollmentStatus status;
     
     @Column(name = "payment_status")
     @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus; // PENDING, PAID, REFUNDED
+    private PaymentStatus paymentStatus;
     
     @Column(name = "notes")
     private String notes;

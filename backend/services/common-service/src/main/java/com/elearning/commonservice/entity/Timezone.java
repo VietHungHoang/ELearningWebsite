@@ -2,6 +2,7 @@ package com.elearning.commonservice.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "timezones")
+@Table(name = "timezones", indexes = {
+    @Index(name = "idx_timezones_utc_offset", columnList = "utc_offset")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

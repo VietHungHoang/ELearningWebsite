@@ -12,10 +12,7 @@ public class TutorProfileResponse {
     private String email;
     private String phone;
     private String gender;
-    private String country;
     private String city;
-    private Language nativeLanguage;
-    private List<Language> languages;
     private String headline;
     private List<Subject> subjects;
     private String introduction;
@@ -25,14 +22,6 @@ public class TutorProfileResponse {
     private List<CareerEntry> education;
     private List<CareerEntry> experience;
     private List<Certification> certifications;
-
-    @Data
-    @Builder
-    public static class Language {
-        private String id;
-        private String name;
-        private String code;
-    }
 
     @Data
     @Builder

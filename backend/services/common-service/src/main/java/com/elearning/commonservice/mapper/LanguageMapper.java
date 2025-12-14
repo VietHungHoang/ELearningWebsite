@@ -17,11 +17,8 @@ public class LanguageMapper {
 
     public LanguageResponse toResponse(Language language) {
         return LanguageResponse.builder()
-                .id(language.getId())
                 .name(language.getName())
                 .code(language.getCode())
-                .createdAt(language.getCreatedAt())
-                .updatedAt(language.getUpdatedAt())
                 .build();
     }
 }

@@ -1,23 +1,36 @@
 package com.elearning.tutorservice.entity;
 
+import com.elearning.tutorservice.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "tutors")
+@Table(name = "tutors", indexes = {
+    @Index(name = "idx_tutors_email", columnList = "email"),
+    @Index(name = "idx_tutors_country_code", columnList = "country_code"),
+})
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class Tutor extends BaseEntity {
+public class Tutor {
+
+    @Id
+    private UUID id;
+
+    @Column(name = "full_name")
+    private String fullName;
+    
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(name = "is_verified", nullable = false)
     @Builder.Default
@@ -26,40 +39,48 @@ public class Tutor extends BaseEntity {
     @Column(columnDefinition = "TEXT", name = "introduction")
     private String introduction;
 
-    @Column(name = "specialization")
-    private String specialization;
+    @Column(name = "headline")
+    private String headline;
 
-    @Column(name = "nationality_code", length = 2)
-    private String nationalityCode;
+    @Column(name = "country_code")
+    private String countryCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "timezone")
+    private String timezone;
 
     @Column(name = "video_url")
     private String videoUrl;
 
-    @Column(name = "video_thumbnail_url")
-    private String videoThumbnailUrl;
-
     @Column(name = "current_session_fee", precision = 10, scale = 2)
     private BigDecimal currentSessionFee;
 
-    @Column(name = "previous_session_fee", precision = 10, scale = 2)
-    private BigDecimal previousSessionFee;
+    @Column(name = "original_session_fee", precision = 10, scale = 2)
+    private BigDecimal originalSessionFee;
 
-    @Column(name = "session_duration_minutes")
-    private Integer sessionDurationMinutes;
-
-    @Column(length = 3)
-    private String currency;
-
-    @Column(name = "teaches_in_groups", nullable = false)
-    @Builder.Default
-    private Boolean teachesInGroups = false;
-
-    @Column(name = "max_group_members")
-    private Integer maxGroupMembers;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
     
-    @Column(name = "timezone_offset")
-    private String timezoneOffset;
-
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+    
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TutorLanguage> languages;
 

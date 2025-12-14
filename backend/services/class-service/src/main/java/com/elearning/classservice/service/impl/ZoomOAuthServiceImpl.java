@@ -42,6 +42,8 @@ public class ZoomOAuthServiceImpl implements ZoomOAuthService {
         String clientId = zoomProperties.getOauth().getClientId();
         String redirectUri = zoomProperties.getOauth().getRedirectUri();
         
+        log.info("Zoom OAuth properties - authorizeUrl: {}, clientId: {}, redirectUri: {}", authorizeUrl, clientId, redirectUri);
+        
         return String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&state=%s",
                 authorizeUrl, clientId, redirectUri, tutorId.toString());
     }
@@ -137,25 +139,44 @@ public class ZoomOAuthServiceImpl implements ZoomOAuthService {
      * Exchange authorization code for access token
      */
     private ZoomOAuthTokenResponse exchangeCodeForToken(String code) {
-        String tokenUrl = zoomProperties.getOauth().getTokenUrl();
+        log.info("Exchanging authorization code for access token");
+        log.debug("Token URL: {}", zoomProperties.getOauth().getTokenUrl());
         
+        String tokenUrl = zoomProperties.getOauth().getTokenUrl();
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Authorization", "Basic " + getBasicAuthHeader());
-        
+        String authHeader = "Basic " + getBasicAuthHeader();
+        headers.set("Authorization", authHeader);
+        log.debug("Authorization header set (length: {})", authHeader.length());
+
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("code", code);
         body.add("redirect_uri", zoomProperties.getOauth().getRedirectUri());
         
+        log.debug("Request body - grant_type: authorization_code, code: {}..., redirect_uri: {}", 
+                 code, 
+                 zoomProperties.getOauth().getRedirectUri());
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
-        
+
+        log.info("Sending POST request to Zoom OAuth token endpoint");
         ResponseEntity<ZoomOAuthTokenResponse> response = restTemplate.postForEntity(
                 tokenUrl, request, ZoomOAuthTokenResponse.class);
+
+        log.info("Received response from Zoom OAuth - Status: {}", response.getStatusCode());
         
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            return response.getBody();
+            ZoomOAuthTokenResponse tokenResponse = response.getBody();
+            log.info("Successfully exchanged code for token - Access token length: {}, Expires in: {} seconds", 
+                    tokenResponse.getAccessToken() != null ? tokenResponse.getAccessToken().length() : 0,
+                    tokenResponse.getExpiresIn());
+            log.debug("Token type: {}, Scope: {}", tokenResponse.getTokenType(), tokenResponse.getScope());
+            return tokenResponse;
         } else {
+            log.error("Failed to exchange code for token - Status: {}, Body: {}", 
+                     response.getStatusCode(), response.getBody());
             throw new ZoomOAuthException("Failed to exchange code for token: " + response.getStatusCode());
         }
     }

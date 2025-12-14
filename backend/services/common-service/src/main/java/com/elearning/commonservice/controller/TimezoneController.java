@@ -1,6 +1,7 @@
 package com.elearning.commonservice.controller;
 
 import com.elearning.commonservice.dto.request.TimezoneRequest;
+import com.elearning.commonservice.dto.response.ApiResponse;
 import com.elearning.commonservice.dto.response.TimezoneResponse;
 import com.elearning.commonservice.service.TimezoneService;
 import lombok.RequiredArgsConstructor;
@@ -19,29 +20,32 @@ public class TimezoneController {
     private final TimezoneService timezoneService;
 
     @PostMapping
-    public ResponseEntity<TimezoneResponse> create(@RequestBody TimezoneRequest request) {
+    public ResponseEntity<ApiResponse<TimezoneResponse>> create(@RequestBody TimezoneRequest request) {
         TimezoneResponse response = timezoneService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response, "Timezone created successfully"));
     }
 
     @GetMapping
-    public ResponseEntity<List<TimezoneResponse>> getAll() {
-        return ResponseEntity.ok(timezoneService.getAll());
+    public ResponseEntity<ApiResponse<List<TimezoneResponse>>> getAll() {
+        List<TimezoneResponse> timezones = timezoneService.getAll();
+        return ResponseEntity.ok(ApiResponse.success(timezones, "Timezones retrieved successfully"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TimezoneResponse> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(timezoneService.getById(id));
+    public ResponseEntity<ApiResponse<TimezoneResponse>> getById(@PathVariable UUID id) {
+        TimezoneResponse timezone = timezoneService.getById(id);
+        return ResponseEntity.ok(ApiResponse.success(timezone, "Timezone retrieved successfully"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TimezoneResponse> update(@PathVariable UUID id, @RequestBody TimezoneRequest request) {
-        return ResponseEntity.ok(timezoneService.update(id, request));
+    public ResponseEntity<ApiResponse<TimezoneResponse>> update(@PathVariable UUID id, @RequestBody TimezoneRequest request) {
+        TimezoneResponse timezone = timezoneService.update(id, request);
+        return ResponseEntity.ok(ApiResponse.success(timezone, "Timezone updated successfully"));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         timezoneService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success(null, "Timezone deleted successfully"));
     }
 }

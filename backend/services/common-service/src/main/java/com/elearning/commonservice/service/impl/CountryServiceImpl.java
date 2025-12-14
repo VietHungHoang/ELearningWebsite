@@ -6,6 +6,7 @@ import com.elearning.commonservice.mapper.CountryMapper;
 import com.elearning.commonservice.repository.CountryRepository;
 import com.elearning.commonservice.service.CountryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class CountryServiceImpl implements CountryService {
 
@@ -22,9 +24,12 @@ public class CountryServiceImpl implements CountryService {
 
     @Override
     public List<CountryResponse> getAll() {
+        log.info("Fetching all countries");
         List<Country> countries = countryRepository.findAll();
-        return countries.stream()
+        List<CountryResponse> responses = countries.stream()
                 .map(countryMapper::toResponse)
                 .collect(Collectors.toList());
+        log.info("Retrieved {} countries", responses.size());
+        return responses;
     }
 }

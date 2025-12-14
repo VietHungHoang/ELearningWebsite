@@ -1,6 +1,7 @@
 package com.elearning.classservice.dto.response;
 
 import com.elearning.classservice.entity.enums.ClassType;
+import com.elearning.classservice.entity.enums.StudentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,9 +45,5 @@ public class TutorStudentResponse {
     private Integer totalSessionsAttended;
     private Integer totalSessionsScheduled;
     
-    public enum StudentType {
-        ONE_ON_ONE,
-        GROUP,
-        TRIAL
-    }
+
 }

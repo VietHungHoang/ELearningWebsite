@@ -11,8 +11,6 @@ spring:
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:27017}
       database: ${MONGO_DATABASE:chat_db}
-      username: ${MONGO_USERNAME:}
-      password: ${MONGO_PASSWORD:}
   servlet:
     multipart:
       max-file-size: 50MB

@@ -21,14 +21,14 @@ public class Student extends BaseEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
     
-    @Column(name = "fullname", nullable = false)
-    private String fullname;
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
     
-    @Column(name = "phone")
+    @Column(name = "phone_number")
     private String phone;
     
-    @Column(name = "avatar")
-    private String avatar;
+    @Column(name = "avatar_url")
+    private String avatarUrl;
     
     @Column(name = "bio")
     private String bio;
@@ -49,8 +49,8 @@ public class Student extends BaseEntity {
     private String learningGoals;
     
     @Column(name = "strengths", columnDefinition = "TEXT")
-    private String strengths; // JSON array or comma-separated
+    private String strengths;
     
     @Column(name = "weaknesses", columnDefinition = "TEXT")
-    private String weaknesses; // JSON array or comma-separated
+    private String weaknesses;
 }

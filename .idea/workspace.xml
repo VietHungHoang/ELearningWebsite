@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b5b964f5-b566-4428-8538-f2006ae1d11c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/auth-service/src/main/java/com/elearning/authservice/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/auth-service/src/main/java/com/elearning/authservice/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/auth-service/src/main/java/com/elearning/authservice/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/auth-service/src/main/java/com/elearning/authservice/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/auth-service/src/main/java/com/elearning/authservice/service/impl/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/auth-service/src/main/java/com/elearning/authservice/service/impl/AuthServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/bff-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/bff-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/client/CommonServiceClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/client/CommonServiceClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/client/TutorServiceClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/client/TutorServiceClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/controller/TutorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/controller/TutorController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/service/TutorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/service/TutorService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/service/impl/TutorServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/bff-service/src/main/java/com/elearning/bffservice/service/impl/TutorServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/controller/LanguageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/controller/LanguageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/dto/response/CountryResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/dto/response/CountryResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/dto/response/LanguageResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/dto/response/LanguageResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/BaseEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/BaseEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Category.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Category.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Country.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Country.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Language.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Language.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Subject.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Subject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Timezone.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/entity/Timezone.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/mapper/CountryMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/mapper/CountryMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/mapper/LanguageMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/mapper/LanguageMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/service/LanguageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/service/LanguageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/service/impl/CountryServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/service/impl/CountryServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/service/impl/LanguageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/java/com/elearning/commonservice/service/impl/LanguageServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/resources/application-staging.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/resources/application-staging.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/common-service/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/common-service/src/main/resources/data.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/controller/TutorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/controller/TutorController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/entity/BaseEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/entity/BaseEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/entity/Tutor.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/entity/Tutor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/entity/TutorAvailability.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/entity/TutorAvailability.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/service/KafkaConsumerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/service/KafkaConsumerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/service/TutorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/service/TutorService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/service/impl/TutorServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/tutor-service/src/main/java/com/elearning/tutorservice/service/impl/TutorServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/entity/BaseEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/entity/BaseEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/entity/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/entity/enums/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/entity/enums/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/kafka/AccountCreatedListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/kafka/AccountCreatedListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/user-service/src/main/java/com/elearning/userservice/repository/UserRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/services/user-service/src/main/resources/application-staging.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/services/user-service/src/main/resources/application-staging.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 6
+}]]></component>
+  <component name="ProjectId" id="369TXnZy30D5BMetbvVHb0HCkf4" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "last_opened_file_path": "C:/Users/vieth/Desktop/Graduation_Project/backend/ELearningWebsite",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b5b964f5-b566-4428-8538-f2006ae1d11c" name="Changes" comment="" />
+      <created>1764417830216</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1764417830216</updated>
+      <workItem from="1764417831771" duration="13000" />
+    </task>
+    <servers />
+  </component>
+</project>

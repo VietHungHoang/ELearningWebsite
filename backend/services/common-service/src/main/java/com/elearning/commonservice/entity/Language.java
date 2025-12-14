@@ -1,22 +1,25 @@
 package com.elearning.commonservice.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "languages")
+@Table(name = "languages", indexes = {
+    @Index(name = "idx_languages_name", columnList = "name"),
+    @Index(name = "idx_languages_code", columnList = "code")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = true)
-public class Language extends BaseEntity {
-
+public class Language {
+    @Id
+    private String code;
     private String name;
-    private String code; // e.g., "en", "vi"
 }

@@ -1,5 +1,6 @@
 package com.elearning.commonservice.controller;
 
+import com.elearning.commonservice.dto.response.ApiResponse;
 import com.elearning.commonservice.dto.response.CountryResponse;
 import com.elearning.commonservice.service.CountryService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,8 @@ public class CountryController {
     private final CountryService countryService;
 
     @GetMapping
-    public ResponseEntity<List<CountryResponse>> getAll() {
-        return ResponseEntity.ok(countryService.getAll());
+    public ResponseEntity<ApiResponse<List<CountryResponse>>> getAll() {
+        List<CountryResponse> countries = countryService.getAll();
+        return ResponseEntity.ok(ApiResponse.success(countries, "Countries retrieved successfully"));
     }
 }
