@@ -449,13 +449,10 @@ export const classService = {
         );
     },
 
-    getSessionsByTime: async (startTime: string, endTime: string): Promise<ApiResponse<Session[]>> => {
-        const params = new URLSearchParams({
-            startTime,
-            endTime,
-        });
+    getSessionsByTime: async (startDate: string, endDate: string): Promise<ApiResponse<Session[]>> => {
+        const url = `/v1/classes/sessions/me?startDate=${startDate.replace('Z', '')}&endDate=${endDate.replace('Z', '')}`;
 
-        return await apiService.get<Session[]>(`/v1/classes/sessions/?${params.toString()}`);
+        return await apiService.get<Session[]>(url);
     },
 
     // Get class details for detail page with fallback to mock data
@@ -489,7 +486,7 @@ export const classService = {
             };
 
             const response = await apiService.get<GetBookedSessionsResponse>(
-                `/v1/classes/sessions/tutors/${request.tutorId}?startDate=${request.startDate}&endDate=${request.endDate}`
+                `/v1/classes/sessions/me/${request.tutorId}?startDate=${request.startDate}&endDate=${request.endDate}`
             );
             return {
                 status: response.status,

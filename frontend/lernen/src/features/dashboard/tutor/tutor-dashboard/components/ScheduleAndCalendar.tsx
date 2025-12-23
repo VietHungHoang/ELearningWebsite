@@ -64,9 +64,9 @@ const ScheduleAndCalendar: React.FC = () => {
 
                 if (response.success && response.data) {
                     setSessionsData(response.data);
+                    setSessionsLoading(false);
                 } else {
                     console.error("Failed to fetch sessions:", response.message);
-                    setSessionsLoading(false);
                     return [];
                 }
             } catch (error) {

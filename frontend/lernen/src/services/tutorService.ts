@@ -173,7 +173,7 @@ export const tutorService = {
         newReviews: number;
     }>> => {
         try {
-            const params = isAll ? {} : { startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0] };
+            const params = isAll ? {} : { startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().replace('Z', '') };
             return await apiService.get<{
                 totalEarnings: number;
                 totalStudents: number;
