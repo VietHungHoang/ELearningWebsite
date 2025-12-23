@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HiSparkles, HiChevronDown } from "react-icons/hi";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
-import * as commonService from "../../../../services/commonService";
+import commonUtils from "../../../../utils/commonUtils";
 import type { Category, Subject } from "../../../../types/common";
-import type { TutorDetail } from "../../../../types/tutor";
+import type { TutorOnboardingData } from "../../../../types/tutor";
 
 interface ProfessionalProfileStepProps {
-    data: Partial<TutorDetail>;
-    onChange: (data: Partial<TutorDetail>) => void;
+    data: Partial<TutorOnboardingData>;
+    onChange: (data: Partial<TutorOnboardingData>) => void;
 }
 
 const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data, onChange }) => {
@@ -24,7 +24,7 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const subjects = await commonService.getSubjects();
+                const subjects = await commonUtils.getSubjects();
                 setSubjectOptions(subjects);
             } catch (error) {
                 console.error("Failed to fetch subjects:", error);
@@ -36,7 +36,7 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categories = await commonService.getCategories();
+                const categories = await commonUtils.getCategories();
                 setCategoryOptions(categories);
             } catch (error) {
                 console.error("Failed to fetch categories:", error);

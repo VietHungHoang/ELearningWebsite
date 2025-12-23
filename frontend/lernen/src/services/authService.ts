@@ -7,7 +7,7 @@ import type {
     StartSignUpRequest,
     AccountCreatedResponse,
 } from "../types/api";
-import type { TutorDetailResponse, TutorOnboarding } from "../types/tutor";
+import type { TutorOnboarding } from "../types/tutor";
 
 const login = async (request: LoginRequest): Promise<LoginResponse> => {
     const response = await apiService.post<LoginResponse>("v1/auth/login", request);
@@ -72,19 +72,19 @@ const getOnboardingLatestStep = async (): Promise<{ step: number }> => {
 };
 
 const getOnboardingData = async (tutorId: string): Promise<TutorOnboarding> => {
-    const response = await apiService.get(`/v1/public/tutors/${tutorId}/onboarding`);
+    const response = await apiService.get(`/v1/tutors/${tutorId}/onboarding`);
     if (!response.success) {
         throw new Error(response.message);
     }
     return response.data as TutorOnboarding;
 };
 
-const saveOnboardingStep = async (tutorId: string, step: number, data: TutorDetailResponse): Promise<void> => {
+const saveOnboardingStep = async (tutorId: string, step: number, data: string): Promise<void> => {
     const payload = { 
         step: step,
-        data: JSON.stringify(data) 
+        data: data // data đã là string JSON từ frontend
     };
-    const response = await apiService.put(`/v1/public/tutors/${tutorId}/onboarding`, payload);
+    const response = await apiService.put(`/v1/tutors/${tutorId}/onboarding`, payload);
     if (!response.success) {
         throw new Error(response.message);
     }

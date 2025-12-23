@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { HiX, HiPlay, HiCalendar } from 'react-icons/hi';
-import type { BookedSession } from '../../../../types/class';
+import type { Session } from '../../../../types/class';
 
 interface TutorSessionDetailModalProps {
-  session: BookedSession;
+  session: Session;
   position: { top: number; left: number };
   onClose: () => void;
 }

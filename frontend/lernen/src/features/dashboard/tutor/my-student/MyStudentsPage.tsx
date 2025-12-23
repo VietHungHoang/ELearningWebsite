@@ -8,7 +8,7 @@ import {type StudentFilters, studentService} from '../../../../services/studentS
 import type {Student, StudentListItem} from '../../../../types/api';
 import {useAuth} from '../../../../context/AuthContext';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
-import Breadcrumb from '../../components/Breadcrumb';
+import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
 export type StudentEnrollmentType = '1-on-1' | 'Group' | 'Trial';
 export type StudentStatus = 'Ongoing' | 'Completed';
@@ -28,6 +28,14 @@ const MyStudentsPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const itemsPerPage = 10;
+    const { setBreadcrumb } = useBreadcrumb();
+
+    useEffect(() => {
+        setBreadcrumb([
+            { label: 'Dashboard', path: '/dashboard' },
+            { label: 'My Students' }
+        ]);
+    }, [setBreadcrumb]);
 
     // Fetch students data
     useEffect(() => {
@@ -79,8 +87,7 @@ const MyStudentsPage: React.FC = () => {
                 return student.enrollmentTypes.includes(enrollmentFilter as StudentEnrollmentType);
             })
             .filter(student =>
-                student.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                student.email.toLowerCase().includes(searchTerm.toLowerCase())
+                student.fullName.toLowerCase().includes(searchTerm.toLowerCase())
             );
     }, [students, activeTab, searchTerm, enrollmentFilter]);
 
@@ -110,17 +117,16 @@ const MyStudentsPage: React.FC = () => {
     };
 
     return (
-        <div className="mx-auto">
-            <Breadcrumb
-                items={[
-                    { label: 'Dashboard', onClick: () => navigate('/dashboard') },
-                    { label: 'My Students', isActive: true }
-                ]}
-                className="mb-6"
-            />
+        <div className="mx-auto p-4">
+            {/* Page Title */}
+            <div className="mb-3">
+                <h1 className="text-lg font-bold text-gray-800">
+                    My Students
+                </h1>
+            </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap justify-between items-center gap-4 mt-6">
+            <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center flex-wrap gap-1">
                     <TabButton label="All Students" />
                     <TabButton label="Ongoing" />
@@ -144,7 +150,7 @@ const MyStudentsPage: React.FC = () => {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search students..."
+                            placeholder="Search students by name..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0b6459]"
@@ -179,10 +185,8 @@ const MyStudentsPage: React.FC = () => {
                                     <tr>
                                         <th className="p-4 text-center">#</th>
                                         <th className="p-4 text-center">Student Name</th>
-                                        <th className="p-4 text-center">Email</th>
                                         <th className="p-4 text-center">Type</th>
                                         <th className="p-4 text-center">Class</th>
-                                        <th className="p-4 text-center">Sessions</th>
                                         <th className="p-4 text-center">Registered Date</th>
                                         <th className="p-4 text-center">Status</th>
                                         <th className="p-4 text-center">Actions</th>
@@ -201,11 +205,6 @@ const MyStudentsPage: React.FC = () => {
                                                 <p className="font-semibold text-gray-800">{student.fullName}</p>
                                             </td>
 
-                                            {/* Email */}
-                                            <td className="p-4 text-center">
-                                                <p className="text-sm text-gray-600">{student.email}</p>
-                                            </td>
-
                                             {/* Type (enrollment badges only) */}
                                             <td className="p-4 text-center">
                                                 <div className="flex gap-1 justify-center min-w-[140px]">
@@ -218,14 +217,6 @@ const MyStudentsPage: React.FC = () => {
                                             {/* Class - Placeholder for now */}
                                             <td className="p-4 text-center">
                                                 <p className="text-sm text-gray-800 font-medium">Math A1</p>
-                                            </td>
-
-                                            {/* Sessions - Placeholder X/Y format */}
-                                            <td className="p-4 text-center">
-                                                <div className="text-sm">
-                                                    <span className="text-gray-800">8</span>
-                                                    <span className="text-gray-800"> / 10</span>
-                                                </div>
                                             </td>
 
                                             {/* Registered Date */}

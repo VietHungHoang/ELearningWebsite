@@ -205,7 +205,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         );
     };
 
-    const modalTitle = mode === 'Daily' ? t('dashboard.common.selectDay') : mode === 'Weekly' ? t('dashboard.common.selectWeek') : t('dashboard.common.selectMonth');
+    const modalTitle = mode === 'Daily' ? t('booking.selectDate') : mode === 'Weekly' ? t('booking.selectWeek') : t('booking.selectMonth');
 
     return (
         <div className={`relative ${className}`} ref={containerRef}>

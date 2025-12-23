@@ -3,25 +3,30 @@ import { useAuth } from '../../../context/AuthContext';
 import DashboardPage from '../DashboardPage';
 
 // Tutor pages
-import TutorDashboardPage from '../tutor/pages/TutorDashboardPage';
+import TutorDashboardPage from '../tutor/tutor-dashboard/TutorDashboardPage';
 import MyStudentsPage from '../tutor/my-student/MyStudentsPage';
 import StudentDetailPage from '../tutor/pages/StudentDetailPage';
 import MyCoursesPage from '../tutor/pages/MyCoursesContentTutorPage';
-import MyClassPage from '../tutor/pages/MyClassPage';
-import ClassDetailPage from '../tutor/pages/ClassDetailPage';
-import ScheduleManagementPage from '../tutor/pages/ScheduleManagementPage';
-import PayoutsPage from '../tutor/pages/PayoutsPage';
+import MyClassPage from '../tutor/my-class/MyClassPage';
+import ClassDetailPage from '../tutor/components/class-detail/ClassDetailPage';
+import ScheduleManagementPage from '../tutor/schedule/ScheduleManagementPage';
+import PayoutsPage from '../tutor/payout/PayoutsPage';
 import DealsAndCouponsPage from '../tutor/pages/DealsAndCouponsPage';
 import RequestsPage from '../tutor/requests/RequestsPage';
-import InboxPage from '../tutor/pages/InboxPage';
+import InboxPage from '../inbox/InboxPage';
 import CreateCoursePage from '../tutor/pages/CreateCoursePage';
 import ApiDocumentationPage from '../tutor/pages/ApiDocumentationPage';
 import PersonalDetailsPage from '../tutor/personal-detail/PersonalDetailsPage';
-import TutorMyQuizzesPage from '../tutor/pages/TutorMyQuizzesPage';
+import ResumeHighlightsPage from '../tutor/personal-detail/ResumeHighlightsPage';
+import AccountSettingsPage from '../tutor/personal-detail/AccountSettingsPage';
+import SubjectICanTeachPage from '../tutor/personal-detail/SubjectICanTeachPage';
+import TutorMyQuizzesPage from '../../quiz/TutorMyQuizzesPage';
+import { CreateQuizPage } from '../../quiz/create-quiz/create-quiz';
+import QuizStatsPage from '../../quiz/pages/QuizStatsPage';
 
 // Student pages
-import MyBookingsPage from '../student/pages/MyBookingsPage';
-import StudentMyClassPage from '../student/pages/MyClassPage';
+import MyBookingsPage from '../student/my-session/MyBookingsPage';
+import StudentMyClassPage from '../student/my-class/MyClassPage';
 import MyQuizzesPage from '../student/pages/MyQuizzesPage';
 
 // Conditional components
@@ -77,6 +82,14 @@ const dashboardRoutes: RouteObject[] = [
         element: <TutorMyQuizzesPage />,
       },
       {
+        path: 'quizzes/create',
+        element: <CreateQuizPage />,
+      },
+      {
+        path: 'quizzes/:quizId/stats',
+        element: <QuizStatsPage />,
+      },
+      {
         path: 'requests',
         element: <RequestsPage />,
       },
@@ -112,6 +125,18 @@ const dashboardRoutes: RouteObject[] = [
           {
             path: 'personal-details',
             element: <PersonalDetailsPage />,
+          },
+          {
+            path: 'resume-highlights',
+            element: <ResumeHighlightsPage />,
+          },
+          {
+            path: 'account-settings',
+            element: <AccountSettingsPage />,
+          },
+          {
+            path: 'subjects-i-can-teach',
+            element: <SubjectICanTeachPage />,
           },
         ],
       },

@@ -8,9 +8,14 @@ import type {
 
 } from "../types/api";
 import apiService from "./apiService";
-import { mapTutorResponseToTutor, mapTutorDetailResponseToTutorDetail } from "../mappers/tutorMapper";
-import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorDetail, TutorDetailResponse, TutorResponse } from "../types/tutor";
+import { mapTutorResponseToTutor, mapTutorProfileHeaderResponseToTutorProfileHeader } from "../mappers/tutorMapper";
+import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse } from "../types/tutor";
 import type { SubmitReviewRequest } from "../types/student";
+
+export interface ChartsData {
+    incomes: Array<{ month: string; income: number }>; // month format: "YYYY-MM"
+    students: Array<{ month: string; students: number }>; // month format: "YYYY-MM"
+}
 
 export const tutorService = {
     getFilterData: async (): Promise<ApiResponse<FilterData>> => {
@@ -52,15 +57,36 @@ export const tutorService = {
                 params.studentId = studentId;
             }
             const response = await apiService.get<TutorDetailResponse>(`/v1/public/tutors/${tutorId}`, params);
-            const tutor = await mapTutorDetailResponseToTutorDetail(response.data);
+            // const tutor = await mapTutorDetailResponseToTutorDetail(response.data);
             return {
                 status: response.status,
                 success: response.success,
                 message: response.message,
-                data: tutor,
+                data: null as any, // Temporarily set to null to avoid breaking changes
             };
         } catch (error) {
             console.warn("Failed to fetch tutor detail from API:", error);
+            throw error;
+        }
+    },
+
+    getTutor: async (tutorId: string, studentId?: string): Promise<ApiResponse<Tutor>> => {
+        try {
+            const params: Record<string, string> = {};
+            if (studentId) {
+                params.studentId = studentId;
+            }
+            const response = await apiService.get<TutorResponse>(`/v1/public/tutors/${tutorId}`, params);
+            const profileHeaderData = await mapTutorProfileHeaderResponseToTutorProfileHeader(response.data);
+            
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: profileHeaderData,
+            };
+        } catch (error) {
+            console.warn("Failed to fetch tutor profile header from API:", error);
             throw error;
         }
     },
@@ -140,6 +166,26 @@ export const tutorService = {
         }
     },
 
+    getTutorStats: async (isAll: boolean): Promise<ApiResponse<{
+        totalEarnings: number;
+        totalStudents: number;
+        teachingHours: number;
+        newReviews: number;
+    }>> => {
+        try {
+            const params = isAll ? {} : { startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0] };
+            return await apiService.get<{
+                totalEarnings: number;
+                totalStudents: number;
+                teachingHours: number;
+                newReviews: number;
+            }>("/v1/tutors/me/dashboard/stats", params);
+        } catch (error) {
+            console.warn("Failed to fetch tutor stats from API:", error);
+            throw error;
+        }
+    },
+
     submitReview: async (tutorId: string, reviewData: SubmitReviewRequest): Promise<ApiResponse<{ message: string }>> => {
         try {
             return await apiService.post<{ message: string }>(`/api/v1/tutors/${tutorId}/reviews`, reviewData);
@@ -148,17 +194,9 @@ export const tutorService = {
             throw error;
         }
     },
-};
 
-
-export const getTutorSchedule = async (tutorId: string, includeBooked: boolean = false): Promise<any[]> => {
-    try {
-        const response = await apiService.get<any[]>(
-            `/api/v1/tutors/${tutorId}/schedule?includeBooked=${includeBooked}`
-        );
-        return response.data;
-    } catch (error) {
-        console.warn("Failed to fetch tutor schedule from API:", error);
-        return [];
-    }
+    // Get charts data for tutor dashboard
+    getTutorChartsData: async (): Promise<ApiResponse<ChartsData>> => {
+        return await apiService.get<ChartsData>(`/v1/tutors/me/dashboard/charts`);
+    },
 };

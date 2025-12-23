@@ -40,9 +40,6 @@ const Header: React.FC = () => {
     const currencyRef = useRef<HTMLDivElement>(null);
     const languageRef = useRef<HTMLDivElement>(null);
 
-    // Use WebSocket context for notification count
-    // const { notificationCount } = useWebSocket();
-
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
@@ -95,7 +92,7 @@ const Header: React.FC = () => {
 
     return (
         <header className="bg-[var(--page-bg-color)] border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="px-8">
                 <div className="flex justify-between items-center py-4">
                     <div className="flex items-center space-x-8">
                         {/* Logo */}
@@ -214,13 +211,13 @@ const Header: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={handleSignIn}
-                                    className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-medium py-2 px-4 rounded-xl hover:bg-[#084c43] transition-colors"
+                                    className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-medium py-1.75 px-4 rounded-xl hover:bg-[#084c43] transition-colors"
                                 >
                                     {t('header.signIn')}
                                 </button>
                                 <button
                                     onClick={handleGetStarted}
-                                    className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-medium py-2 px-4 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors"
+                                    className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-medium py-1.75 px-4 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors"
                                 >
                                     {t('header.getStarted')}
                                 </button>

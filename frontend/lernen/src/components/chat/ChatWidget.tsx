@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HiX, HiPaperAirplane, HiSearch, HiUserGroup, HiUser } from 'react-icons/hi';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { useAuth } from '../../context/AuthContext';
+import { useChat } from '../../context/ChatContext';
 import chatService, { type ConversationResponse, type MessageResponse } from '../../services/chatService';
 import chatWebSocketService from '../../services/chatWebSocketService';
+import ChatIconButton from './ChatIconButton';
 
 interface Message {
     id: string;
@@ -27,6 +29,7 @@ interface Conversation {
 
 const ChatWidget: React.FC = () => {
     const { state } = useAuth();
+    const { pendingTutorId, pendingTutorName, clearPendingTutor } = useChat();
     const [isOpen, setIsOpen] = useState(false);
     const [showConversationList, setShowConversationList] = useState(true);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -83,12 +86,21 @@ const ChatWidget: React.FC = () => {
                     const newMessage: Message = {
                         id: message.id,
                         senderId: message.senderId,
-                        senderName: 'Unknown', // TODO: Get from participants
+                        senderName: message.senderId === state.user?.id ? 'You' : 'Unknown', // TODO: Get from participants
                         content: message.content,
                         timestamp: new Date(message.createdAt),
                         isOwn: message.senderId === state.user?.id,
                     };
                     setMessages(prev => [...prev, newMessage]);
+
+                    // Update conversation last message
+                    setConversations(prev =>
+                        prev.map(conv =>
+                            conv.id === selectedConversation.id
+                                ? { ...conv, lastMessage: message.content, lastMessageTime: new Date(message.createdAt) }
+                                : conv
+                        )
+                    );
                 }
             );
 
@@ -123,6 +135,16 @@ const ChatWidget: React.FC = () => {
         }
     }, [state.isAuthenticated, state.user, isOpen]);
 
+    // Handle opening chat with specific tutor
+    useEffect(() => {
+        if (pendingTutorId && pendingTutorName && state.isAuthenticated && state.user) {
+            setIsOpen(true);
+            clearPendingTutor();
+            // Find or create conversation with tutor
+            findOrCreateConversationWithTutor(pendingTutorId, pendingTutorName);
+        }
+    }, [pendingTutorId, pendingTutorName, state.isAuthenticated, state.user, clearPendingTutor]);
+
     const fetchConversations = async () => {
         if (!state.user) return;
 
@@ -130,10 +152,10 @@ const ChatWidget: React.FC = () => {
         setConversationsError(null);
 
         try {
-            const data = await chatService.getUserConversations(state.user.id);
+            const data = await chatService.getAllConversationsForUser();
 
             // Map API response to component format
-            const mappedConversations: Conversation[] = data.content.map(apiConv => ({
+            const mappedConversations: Conversation[] = data.map(apiConv => ({
                 id: apiConv.id,
                 name: apiConv.name || getConversationName(apiConv, state.user!.id),
                 type: mapConversationType(apiConv.type),
@@ -153,7 +175,7 @@ const ChatWidget: React.FC = () => {
 
     const getConversationName = (apiConv: ConversationResponse, currentUserId: string): string => {
         // For ONE_TO_ONE conversations without name, generate name from other participant
-        if (apiConv.type === 'ONE_TO_ONE') {
+        if (apiConv.type === 'ONE_ON_ONE') {
             const otherParticipantId = apiConv.participantIds.find((id: string) => id !== currentUserId);
             // TODO: Fetch participant name from API or cache
             return `User ${otherParticipantId}`;
@@ -184,7 +206,7 @@ const ChatWidget: React.FC = () => {
     const loadMessages = async (conversationId: string) => {
         try {
             const data = await chatService.getConversationMessages(conversationId, 0, 50);
-            const mappedMessages: Message[] = data.content.map(msg => ({
+            const mappedMessages: Message[] = data.map(msg => ({
                 id: msg.id,
                 senderId: msg.senderId,
                 senderName: 'Unknown', // TODO: Get from participants cache
@@ -198,6 +220,47 @@ const ChatWidget: React.FC = () => {
         }
     };
 
+    const findOrCreateConversationWithTutor = async (tutorId: string, tutorName: string) => {
+        if (!state.user) return;
+
+        // First, check if conversation already exists
+        const existingConversation = conversations.find(conv =>
+            conv.type === 'individual' && conv.participants?.includes(tutorId) && conv.participants?.includes(state.user!.id)
+        );
+
+        if (existingConversation) {
+            setSelectedConversation(existingConversation);
+            setShowConversationList(false);
+            return;
+        }
+
+        // If not found in current conversations, try to create new conversation
+        try {
+            const createRequest = {
+                type: 'ONE_TO_ONE' as const,
+                participantIds: [tutorId],
+            };
+            const apiResponse = await chatService.createConversation(createRequest);
+
+            // Map API response to component format
+            const newConversation: Conversation = {
+                id: apiResponse.id,
+                name: apiResponse.name || tutorName,
+                type: mapConversationType(apiResponse.type),
+                lastMessageTime: apiResponse.lastMessageAt ? new Date(apiResponse.lastMessageAt) : undefined,
+                unreadCount: 0,
+                participants: apiResponse.participantIds,
+            };
+
+            // Add to conversations list
+            setConversations(prev => [...prev, newConversation]);
+            setSelectedConversation(newConversation);
+            setShowConversationList(false);
+        } catch (error) {
+            console.error('Failed to create conversation with tutor:', error);
+        }
+    };
+
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!inputMessage.trim() || !state.user || !selectedConversation) return;
@@ -206,23 +269,41 @@ const ChatWidget: React.FC = () => {
         setInputMessage(''); // Clear input immediately
 
         try {
-            // Send via REST API (or WebSocket if preferred)
             const messageRequest = {
                 conversationId: selectedConversation.id,
                 type: 'TEXT' as const,
                 content,
             };
 
-            await chatService.sendMessage(messageRequest);
+            // Try to send via WebSocket first
+            try {
+                chatWebSocketService.sendMessage(messageRequest, state.user.id);
+                // Message will be added via WebSocket subscription
+            } catch (wsError) {
+                console.warn('WebSocket send failed, falling back to API:', wsError);
+                // Fallback to REST API
+                const sentMessage = await chatService.sendMessage(messageRequest);
 
-            // Update conversation last message
-            setConversations(prev =>
-                prev.map(conv =>
-                    conv.id === selectedConversation.id
-                        ? { ...conv, lastMessage: content, lastMessageTime: new Date() }
-                        : conv
-                )
-            );
+                // Add the sent message to messages immediately
+                const newMessage: Message = {
+                    id: sentMessage.id,
+                    senderId: sentMessage.senderId,
+                    senderName: 'You', // Since it's own message
+                    content: sentMessage.content,
+                    timestamp: new Date(sentMessage.createdAt),
+                    isOwn: true,
+                };
+                setMessages(prev => [...prev, newMessage]);
+
+                // Update conversation last message
+                setConversations(prev =>
+                    prev.map(conv =>
+                        conv.id === selectedConversation.id
+                            ? { ...conv, lastMessage: content, lastMessageTime: new Date() }
+                            : conv
+                    )
+                );
+            }
         } catch (error) {
             console.error('Failed to send message:', error);
             // Re-add the message to input on error
@@ -234,8 +315,8 @@ const ChatWidget: React.FC = () => {
         setInputMessage(e.target.value);
 
         // Send typing indicator
-        if (selectedConversation && wsConnected) {
-            chatWebSocketService.sendTypingIndicator(selectedConversation.id, true);
+        if (selectedConversation && wsConnected && state.user) {
+            chatWebSocketService.sendTypingIndicator(selectedConversation.id, true, state.user.id);
 
             // Clear existing timeout
             if (typingTimeoutRef.current) {
@@ -244,7 +325,9 @@ const ChatWidget: React.FC = () => {
 
             // Set new timeout to stop typing indicator
             typingTimeoutRef.current = window.setTimeout(() => {
-                chatWebSocketService.sendTypingIndicator(selectedConversation.id, false);
+                if (state.user) {
+                    chatWebSocketService.sendTypingIndicator(selectedConversation.id, false, state.user.id);
+                }
             }, 2000);
         }
     };
@@ -301,24 +384,15 @@ const ChatWidget: React.FC = () => {
         <>
             {/* Chat Icon Button */}
             {!isOpen && (
-                <button
+                <ChatIconButton
+                    totalUnread={totalUnread}
                     onClick={() => {
                         setIsOpen(true);
                         if (state.isAuthenticated && state.user) {
                             fetchConversations();
                         }
                     }}
-                    className="fixed bottom-6 right-6 bg-[#0b6459] text-white rounded-full p-4 shadow-lg hover:bg-[#084c43] transition-all duration-300 hover:scale-110 z-50"
-                    aria-label="Open chat"
-                >
-                    <BsChatDotsFill className="w-6 h-6" />
-                    {/* Notification Badge */}
-                    {totalUnread > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                            {totalUnread}
-                        </span>
-                    )}
-                </button>
+                />
             )}
 
             {/* Chat Window */}
@@ -460,7 +534,7 @@ const ChatWidget: React.FC = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        {messages.map((message) => (
+                                        {[...messages].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()).map((message) => (
                                             <div
                                                 key={message.id}
                                                 className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}

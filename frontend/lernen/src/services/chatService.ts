@@ -1,5 +1,6 @@
 import apiService from "./apiService";
 import axiosInstance from "../lib/axiosInstance";
+import type { PaginatedResponse } from "../types/api";
 
 // ==================== INTERFACES ====================
 
@@ -15,10 +16,10 @@ export interface MessageResponse {
     id: string;
     conversationId: string;
     senderId: string;
-    type: 'TEXT' | 'FILE' | 'IMAGE' | 'VIDEO';
+    type: "TEXT" | "FILE" | "IMAGE" | "VIDEO";
     content: string;
     attachments: MessageAttachment[];
-    status: 'SENT' | 'DELIVERED' | 'READ';
+    status: "SENT" | "DELIVERED" | "READ";
     readBy: string[];
     reactions: Record<string, string>; // userId -> emoji
     createdAt: string;
@@ -40,28 +41,26 @@ export interface ParticipantResponse {
 export interface ConversationResponse {
     id: string;
     name?: string;
-    type: 'ONE_TO_ONE' | 'GROUP' | 'CLASS_GROUP';
+    type: "ONE_ON_ONE" | "GROUP";
     participantIds: string[];
     classId?: string;
     lastMessageId?: string;
     lastMessageAt?: string;
-    createdBy: string;
     createdAt: string;
-    isActive: boolean;
     participants?: ParticipantResponse[];
     lastMessage?: MessageResponse;
 }
 
 export interface SendMessageRequest {
     conversationId: string;
-    type: 'TEXT' | 'FILE' | 'IMAGE' | 'VIDEO';
+    type: "TEXT" | "FILE" | "IMAGE" | "VIDEO";
     content?: string;
     replyToMessageId?: string;
 }
 
 export interface CreateConversationRequest {
     name?: string;
-    type: 'ONE_TO_ONE' | 'GROUP' | 'CLASS_GROUP';
+    type: "ONE_TO_ONE" | "GROUP";
     participantIds: string[];
     classId?: string;
 }
@@ -87,7 +86,7 @@ export interface AddReactionRequest {
  * Note: userId sẽ được tự động thêm vào header X-User-Id qua interceptor
  */
 const createConversation = async (request: CreateConversationRequest): Promise<ConversationResponse> => {
-    const response = await apiService.post<ConversationResponse>('conversations', request);
+    const response = await apiService.post<ConversationResponse>("v1/chat/conversations", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -119,38 +118,30 @@ const getConversation = async (conversationId: string): Promise<ConversationResp
 /**
  * Lấy danh sách conversations của user
  */
-const getUserConversations = async (
-    userId: string,
-    type?: 'ONE_TO_ONE' | 'GROUP' | 'CLASS_GROUP',
+const getAllConversationsForUser = async (
+    type?: "ONE_ON_ONE | GROUP",
     page: number = 0,
     size: number = 20
-): Promise<{
-    content: ConversationResponse[];
-    pageable: { page: number; size: number; sort: string[] };
-    totalElements: number;
-    totalPages: number;
-}> => {
+): Promise<ConversationResponse[]> => {
     const params: Record<string, unknown> = { page, size };
     if (type) params.type = type;
-    
-    const response = await apiService.get<{
-        content: ConversationResponse[];
-        pageable: { page: number; size: number; sort: string[] };
-        totalElements: number;
-        totalPages: number;
-    }>(`conversations/user/${userId}`, params);
-    
+
+    const response = await apiService.get<PaginatedResponse<ConversationResponse>>(`/v1/chat/conversations`, params);
+
     if (!response.success) {
         throw new Error(response.message);
     }
-    return response.data;
+    return response.data.content;
 };
 
 /**
  * Thêm participants vào conversation
  */
 const addParticipants = async (conversationId: string, participantIds: string[]): Promise<ConversationResponse> => {
-    const response = await apiService.put<ConversationResponse>(`conversations/${conversationId}/participants`, participantIds);
+    const response = await apiService.put<ConversationResponse>(
+        `conversations/${conversationId}/participants`,
+        participantIds
+    );
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -171,7 +162,9 @@ const removeParticipant = async (conversationId: string, participantId: string):
  * Cập nhật conversation
  */
 const updateConversation = async (conversationId: string, name: string): Promise<ConversationResponse> => {
-    const response = await apiService.put<ConversationResponse>(`conversations/${conversationId}?name=${encodeURIComponent(name)}`);
+    const response = await apiService.put<ConversationResponse>(
+        `conversations/${conversationId}?name=${encodeURIComponent(name)}`
+    );
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -204,8 +197,8 @@ const searchConversations = async (
         content: ConversationResponse[];
         totalElements: number;
         totalPages: number;
-    }>('conversations/search', { query, page, size });
-    
+    }>("/v1/conversations/search", { query, page, size });
+
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -218,7 +211,7 @@ const searchConversations = async (
  * Gửi tin nhắn text (qua REST API)
  */
 const sendMessage = async (request: SendMessageRequest): Promise<MessageResponse> => {
-    const response = await apiService.post<MessageResponse>('messages', request);
+    const response = await apiService.post<MessageResponse>("/v1/chat/messages", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -235,19 +228,19 @@ const sendMessageWithFiles = async (
     userId: string
 ): Promise<MessageResponse> => {
     const formData = new FormData();
-    formData.append('message', new Blob([JSON.stringify(message)], { type: 'application/json' }));
-    files.forEach(file => formData.append('files', file));
+    formData.append("message", new Blob([JSON.stringify(message)], { type: "application/json" }));
+    files.forEach((file) => formData.append("files", file));
 
     try {
-        const response = await axiosInstance.post<MessageResponse>('messages/with-files', formData, {
+        const response = await axiosInstance.post<MessageResponse>("messages/with-files", formData, {
             headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-User-Id': userId,
+                "Content-Type": "multipart/form-data",
+                "X-User-Id": userId,
             },
         });
         return response.data;
     } catch (error) {
-        throw new Error('Failed to send message with files');
+        throw new Error("Failed to send message with files");
     }
 };
 
@@ -258,28 +251,23 @@ const getConversationMessages = async (
     conversationId: string,
     page: number = 0,
     size: number = 50
-): Promise<{
-    content: MessageResponse[];
-    totalElements: number;
-    totalPages: number;
-}> => {
-    const response = await apiService.get<{
-        content: MessageResponse[];
-        totalElements: number;
-        totalPages: number;
-    }>(`messages/conversation/${conversationId}`, { page, size });
-    
+): Promise<MessageResponse[]> => {
+    const response = await apiService.get<PaginatedResponse<MessageResponse>>(
+        `v1/chat/messages/conversations/${conversationId}`,
+        { page, size }
+    );
+
     if (!response.success) {
         throw new Error(response.message);
     }
-    return response.data;
+    return response.data.content;
 };
 
 /**
  * Sửa tin nhắn
  */
 const updateMessage = async (request: UpdateMessageRequest): Promise<MessageResponse> => {
-    const response = await apiService.put<MessageResponse>('messages', request);
+    const response = await apiService.put<MessageResponse>("messages", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -300,7 +288,7 @@ const deleteMessage = async (messageId: string): Promise<void> => {
  * Mark as read
  */
 const markAsRead = async (request: MarkAsReadRequest): Promise<void> => {
-    const response = await apiService.post<void>('messages/read', request);
+    const response = await apiService.post<void>("messages/read", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -342,11 +330,10 @@ const getUnreadCount = async (conversationId: string): Promise<number> => {
 /**
  * Tìm kiếm tin nhắn
  */
-const searchMessages = async (
-    conversationId: string,
-    query: string
-): Promise<MessageResponse[]> => {
-    const response = await apiService.get<MessageResponse[]>(`messages/conversation/${conversationId}/search`, { query });
+const searchMessages = async (conversationId: string, query: string): Promise<MessageResponse[]> => {
+    const response = await apiService.get<MessageResponse[]>(`messages/conversation/${conversationId}/search`, {
+        query,
+    });
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -360,13 +347,13 @@ export default {
     createConversation,
     getOrCreateOneToOneConversation,
     getConversation,
-    getUserConversations,
+    getAllConversationsForUser,
     addParticipants,
     removeParticipant,
     updateConversation,
     deleteConversation,
     searchConversations,
-    
+
     // Message APIs
     sendMessage,
     sendMessageWithFiles,

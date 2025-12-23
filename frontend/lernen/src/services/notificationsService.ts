@@ -1,11 +1,8 @@
 import apiService from './apiService';
-import { store } from '../lib/store';
 import type { Notification, ViewNotificationBFFResponse } from '../types/notifications';
 
 const getUserId = (): string => {
-  const user = store.getState().auth.user;
-  if (!user) return '1001'; // Fallback for testing
-  return user.id;
+  return "5gg";
 };
 
 class NotificationsService {

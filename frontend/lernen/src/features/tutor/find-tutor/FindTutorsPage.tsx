@@ -12,9 +12,11 @@ import Loading from "../../../components/ui/Loading";
 import BookingModal from "./components/BookingModal";
 import { useAuth } from "../../../context/AuthContext";
 import type { Tutor } from "../../../types/tutor";
+import { useTranslation } from "react-i18next";
 
 const FindTutorsPage: React.FC = () => {
     const { state } = useAuth();
+    const { t } = useTranslation();
     const [tutors, setTutors] = useState<Tutor[]>([]);
     const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -96,17 +98,16 @@ const FindTutorsPage: React.FC = () => {
             <div className="container max-w-7xl mx-auto px-4 py-8">
                 <Breadcrumb
                     paths={[
-                        { name: "Home", path: "/" },
-                        { name: "Find Tutors", path: "/find-tutors" },
+                        { name: t("header.home"), path: "/" },
+                        { name: t("header.findTutors"), path: "/find-tutors" },
                     ]}
                 />
                 <div className="mb-6">
                     <h1 className="text-4xl font-bold text-gray-800 mt-2">
-                        Discover a skilled online tutor for your studies
+                        {t("findTutors.pageTitle")}
                     </h1>
                     <p className="mt-4 text-gray-600 max-w-4xl">
-                        Master your studies with personalized online tutoring from expert educators. Our skilled tutors
-                        are here to help you build strong foundations and achieve your academic goals.
+                        {t("findTutors.pageDescription")}
                     </p>
                 </div>
 
@@ -118,8 +119,8 @@ const FindTutorsPage: React.FC = () => {
                             <Loading />
                         ) : error ? (
                             <SearchNotFound
-                                title="Connection Error"
-                                message="We're having trouble connecting to our servers. Please check your internet connection and try again."
+                                title={t("findTutors.connectionError")}
+                                message={t("findTutors.connectionErrorMessage")}
                             />
                         ) : tutors.length > 0 ? (
                             <>

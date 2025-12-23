@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HiDocumentText, HiUserGroup, HiBookOpen, HiCalendar, HiCreditCard, HiAcademicCap, HiTrendingUp, HiUser, HiGlobe } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
-import Breadcrumb from '../../components/Breadcrumb';
+import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
 interface ApiEndpoint {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -27,6 +27,14 @@ interface ApiEndpoint {
 const ApiDocumentationPage: React.FC = () => {
     const [activeSection, setActiveSection] = useState('common');
     const navigate = useNavigate();
+    const { setBreadcrumb } = useBreadcrumb();
+
+    useEffect(() => {
+        setBreadcrumb([
+            { label: 'Dashboard', path: '/dashboard' },
+            { label: 'API Documentation' }
+        ]);
+    }, [setBreadcrumb]);
 
     const studentEndpoints: ApiEndpoint[] = [
         {
@@ -1638,14 +1646,6 @@ file: [binary data]`
 
     return (
         <div className="max-w-7xl mx-auto p-6">
-            <Breadcrumb
-                items={[
-                    { label: 'Dashboard', onClick: () => navigate('/dashboard') },
-                    { label: 'API Documentation', isActive: true }
-                ]}
-                className="mb-6"
-            />
-
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Sidebar */}
                 <div className="lg:col-span-1">

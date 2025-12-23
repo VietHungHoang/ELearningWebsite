@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ResumeItemData } from './ResumeHighlights';
 import { FiX } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface ResumeItemModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const ResumeItemModal: React.FC<ResumeItemModalProps> = ({ isOpen, onClose, onSa
         location: '',
         description: ''
     });
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (isOpen) {
@@ -41,7 +43,7 @@ const ResumeItemModal: React.FC<ResumeItemModalProps> = ({ isOpen, onClose, onSa
     if (!isOpen) return null;
 
     const inputStyles = "w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition";
-    const modalTitle = `${itemToEdit ? 'Edit' : 'Add'} ${sectionTitle.replace(' & Awards', '')} Entry`;
+    const modalTitle = `${itemToEdit ? t('common.edit') : t('common.add')} ${sectionTitle.replace(' & Awards', '')} ${t('tutorDetail.resumeItemModal.entry')}`;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
@@ -55,30 +57,30 @@ const ResumeItemModal: React.FC<ResumeItemModalProps> = ({ isOpen, onClose, onSa
                 
                 <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('tutorDetail.resumeItemModal.timePeriod')}</label>
                         <input name="period" value={formData.period} onChange={handleChange} placeholder="e.g., 2015 - 2019" className={inputStyles} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('tutorDetail.resumeItemModal.title')}</label>
                         <input name="title" value={formData.title} onChange={handleChange} placeholder="e.g., Bachelor of Computer Science" className={inputStyles} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Institution</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('tutorDetail.resumeItemModal.institution')}</label>
                         <input name="institution" value={formData.institution} onChange={handleChange} placeholder="e.g., ABC University" className={inputStyles} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('tutorDetail.resumeItemModal.location')}</label>
                         <input name="location" value={formData.location} onChange={handleChange} placeholder="e.g., Cacuaco, Angola" className={inputStyles} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('tutorDetail.resumeItemModal.description')}</label>
                         <textarea name="description" value={formData.description} onChange={handleChange} rows={4} className={`${inputStyles} resize-vertical`}></textarea>
                     </div>
                 </div>
 
                 <div className="flex justify-end items-center gap-3 p-4 bg-gray-50 border-t border-gray-100">
-                    <button onClick={onClose} className="px-5 py-2.5 text-sm font-semibold bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100">Cancel</button>
-                    <button onClick={handleSave} className="px-5 py-2.5 text-sm font-semibold bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43]">Save Changes</button>
+                    <button onClick={onClose} className="px-5 py-2.5 text-sm font-semibold bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100">{t('common.cancel')}</button>
+                    <button onClick={handleSave} className="px-5 py-2.5 text-sm font-semibold bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43]">{t('tutorDetail.resumeItemModal.saveChanges')}</button>
                 </div>
             </div>
         </div>

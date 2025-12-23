@@ -1,5 +1,6 @@
 import apiService from './apiService';
 import type {Student, ApiResponse, PaginatedResponse, StudentListItem} from '../types/api';
+import type { Booking } from '../features/dashboard/student/types';
 
 const mockStudents: StudentListItem[] = [
     {
@@ -372,5 +373,17 @@ export const studentService = {
                 data: mockDetail
             };
         }
+    },
+
+    getStudentBookings: async (studentId: string): Promise<ApiResponse<Booking[]>> => {
+        const url = `/api/v1/students/${studentId}/sessions`;
+        const response = await apiService.get<Booking[]>(url);
+
+        return {
+            status: response.status,
+            success: response.success,
+            message: response.message,
+            data: response.data
+        };
     }
 };

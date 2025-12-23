@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Toast from '../../../../components/ui/Toast';
 import RescheduleRequestCard from './components/RescheduleRequestCard';
 import TrialRequestCard from './components/TrialRequestCard';
-import Breadcrumb from '../../components/Breadcrumb';
+import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import { classService } from '../../../../services/classService';
 import { useAuth } from '../../../../context/AuthContext';
 
@@ -15,10 +15,18 @@ const RequestsPage: React.FC = () => {
     const [activeFilter, setActiveFilter] = useState<Filter>('Trial Requests');
     const [updatedRequestId, setUpdatedRequestId] = useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const { setBreadcrumb } = useBreadcrumb();
     
     // TODO: Replace with actual API data fetching
     const [rescheduleRequests, setRescheduleRequests] = useState<any[]>([]);
     const [trialRequests, setTrialRequests] = useState<any[]>([]);
+
+    useEffect(() => {
+        setBreadcrumb([
+            { label: 'Dashboard', path: '/dashboard' },
+            { label: 'Requests' }
+        ]);
+    }, [setBreadcrumb]);
 
     useEffect(() => {
         const fetchTrialRequests = async () => {
@@ -74,14 +82,6 @@ const RequestsPage: React.FC = () => {
     return (
         <div className="mx-auto">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-
-            <Breadcrumb
-                items={[
-                    { label: 'Dashboard', onClick: () => navigate('/dashboard') },
-                    { label: 'Requests', isActive: true }
-                ]}
-                className="mb-6"
-            />
 
             <div className="mt-6">
                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center flex-wrap">

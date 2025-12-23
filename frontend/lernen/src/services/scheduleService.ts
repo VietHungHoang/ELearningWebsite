@@ -63,34 +63,19 @@ export const calculatePrefetchRange = (
 };
 
 export const scheduleService = {
-    /**
-     * Get tutor availability patterns
-     * Backend returns recurring patterns, frontend generates actual time slots for display
-     */
     getAvailability: async (request: GetAvailabilityRequest): Promise<ApiResponse<GetAvailabilityResponse>> => {
         try {
             const params = new URLSearchParams({
                 startDate: request.startDate,
                 endDate: request.endDate,
-                // timezoneOffset removed - all times are UTC
             });
 
             return await apiService.get<GetAvailabilityResponse>(
-                `/api/v1/tutors/${request.tutorId}/availability?${params.toString()}`
+                `/v1/tutors/${request.tutorId}/availabilities?${params.toString()}`
             );
         } catch (error) {
-            console.warn("Failed to fetch availability from API, using mock data:", error);
-
-            return {
-                status: 200,
-                success: true,
-                message: "Availability retrieved successfully",
-                data: {
-                    from: request.startDate,
-                    to: request.endDate,
-                    availabilities: [],
-                },
-            };
+            console.error("Failed to fetch availability from API:", error);
+            throw error;
         }
     },
 

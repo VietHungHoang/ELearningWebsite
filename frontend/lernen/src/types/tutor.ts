@@ -1,20 +1,35 @@
+import type { ClassSchedule } from "./class";
 import type { Country, Language, Subject } from "./common";
 
 export type Gender = 'Male' | 'Female' | 'Not specified';
 
-export interface TutorBasicInfo {
+export interface UserInfo {
     id: string;
     fullName: string;
     avatarUrl: string;
 }
 
-export interface BaseTutor extends TutorBasicInfo {
-    email: string;
+export interface TutorResponse extends UserInfo {
     isVerified: boolean;
-    introduction: string;
     headline: string;
-    gender: Gender;
-    timezone: string;
+    videoUrl: string; 
+    introduction: string;
+    currentSessionFee: number;
+    originalSessionFee?: number;
+    averageRating: number;
+    reviewCount: number;
+    bookedSessionsCount: number;
+    studentCount: number;
+    countryCode: string;
+    languageCodes: TutorLanguageResponse[];
+    subjectIds: string[];
+    socialLinks: TutorSocial[];
+}
+
+export interface Tutor extends UserInfo {
+    isVerified: boolean;
+    headline: string;
+    introduction: string;
     videoUrl: string;
     currentSessionFee: number;
     originalSessionFee?: number;
@@ -22,39 +37,10 @@ export interface BaseTutor extends TutorBasicInfo {
     reviewCount: number;
     bookedSessionsCount: number;
     studentCount: number;
-    hasTrialSession: boolean;
-}
-
-export interface Tutor extends BaseTutor {
     country: Country;
     languages: TutorLanguage[];
     subjects: Subject[];
-}
-
-export interface TutorResponse extends BaseTutor {
-    countryCode: string;
-    languageCodes: TutorLanguageResponse[];
-    subjectIds: string[];
-}
-
-export interface TutorDetail extends Tutor {
-    reviews: TutorReview[];
-    availabilities: TutorAvailability[];
     socialLinks: TutorSocial[];
-    educations: EducationItem[];
-    experiences: ExperienceItem[];
-    certifications: CertificationItem[];
-    groupClasses?: GroupClass[];
-}
-
-export interface TutorDetailResponse extends TutorResponse {
-    reviews?: TutorReview[];
-    availabilities: TutorAvailability[];
-    socialLinks: TutorSocial[];
-    educations: EducationItem[];
-    experiences: ExperienceItem[];
-    certifications: CertificationItem[];
-    groupClasses?: GroupClass[];
 }
 
 export interface TutorReview {
@@ -74,6 +60,7 @@ export interface TutorSocial {
 
 export interface TutorAvailability {
     id?: string;
+    tutorId?: string;
     dayOfWeek: number;
     startTime: string;
     endTime: string;
@@ -117,11 +104,6 @@ export interface SocialLink {
     url: string;
 }
 
-export interface ClassScheduleItem {
-    dayOfWeek: number; // 1=Monday, 2=Tuesday, etc.
-    time: string; // LocalTime format like "14:30" or "5:00 PM"
-}
-
 // New: Group class representation coming from backend
 export interface GroupClassStudent {
     id: string;
@@ -129,18 +111,14 @@ export interface GroupClassStudent {
 }
 
 export interface GroupClass {
-    classId: string; // UUID
-    classTitle: string;
+    id: string;
+    title: string;
     classDescription?: string;
     maxStudents?: number;
-    students?: GroupClassStudent[];
-    schedule: ClassScheduleItem[];
-    duration: number; // Duration in minutes
-    startDate: Date;
-    level: ClassLevel;
-    price: number;
-    sessions: number;
-    language: Language;
+    students?: UserInfo[];
+    schedule: ClassSchedule[];
+    startDate?: Date;
+    pricePerHour: number;
 }
 
 export interface TutorLanguage {
@@ -178,18 +156,49 @@ export interface GetAvailabilityRequest {
 }
 
 export interface GetAvailabilityResponse {
-    from: string;
-    to: string;
     availabilities: TutorAvailability[];
 }
 
 export interface UpdateAvailabilityRequest {
     availabilities: Omit<TutorAvailability, 'id'>[];
+    deleteIds?: string[];
 }
 
 export interface UpdateAvailabilityResponse {
     availabilities: TutorAvailability[];
     message: string;
+}
+
+export interface TutorOnboardingData {
+    id: string;
+    fullName: string;
+    email: string;
+    gender: Gender;
+    countryCode: string;
+    timezone: string;
+    languages: TutorLanguage[];
+    subjects: Subject[];
+    headline: string;
+    introduction: string;
+    currentSessionFee: number;
+    originalSessionFee?: number;
+
+    // Media Portfolio
+    avatarUrl?: string;
+    videoUrl?: string;
+
+    // Education & Experience
+    educations: EducationItem[];
+    experiences: ExperienceItem[];
+
+    // Certifications
+    certifications: CertificationItem[];
+
+    // Availability
+    availabilities: TutorAvailability[];
+
+    // Social Links
+    socialLinks: TutorSocial[];
 }
 
 

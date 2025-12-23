@@ -4,9 +4,9 @@
     "home": "Trang Chủ",
     "findTutors": "Tìm Gia Sư",
     "becomeTutor": "Trở Thành Gia Sư",
-    "signIn": "Đăng Nhập",
-    "getStarted": "Bắt Đầu",
-    "login": "Đăng Nhập",
+    "signIn": "Đăng nhập",
+    "getStarted": "Đăng ký",
+    "login": "Đăng nhập",
     "register": "Đăng Ký",
     "logout": "Đăng Xuất"
   },
@@ -23,7 +23,7 @@
     "forTutors": "Dành Cho Gia Sư",
     "becomeTutor": "Trở Thành Gia Sư",
     "tutorDashboard": "Bảng Điều Khiển Gia Sư",
-    "payouts": "Thanh Toán",
+    "payouts": "Thanh toán",
     "schedule": "Lịch Học",
     "stayUpdated": "Cập Nhật Mới Nhất",
     "newsletterDescription": "Nhận các cập nhật mới nhất, mẹo và ưu đãi độc quyền được gửi đến hộp thư của bạn.",
@@ -50,6 +50,8 @@
     "booking": "Đang Đặt Lịch...",
     "selectDateTime": "Vui lòng chọn ngày và giờ cho buổi học thử của bạn.",
     "selectDate": "Chọn ngày",
+    "selectWeek": "Chọn tuần",
+    "selectMonth": "Chọn tháng",
     "selectDateDescription": "để xem các khung giờ có sẵn.",
     "pleaseSelectDateTime": "Vui lòng chọn ngày và giờ để tiếp tục.",
     "weekdays": ["CN", "T2", "T3", "T4", "T5", "T6", "T7"]
@@ -126,6 +128,64 @@
       "rating": "Đánh giá 4.9/5",
       "studentsCount": "15,000+ Học sinh",
       "certifiedTutors": "Gia sư được chứng nhận"
+    }
+  },
+  "findTutors": {
+    "pageTitle": "Khám phá gia sư trực tuyến chuyên nghiệp cho học tập của bạn",
+    "pageDescription": "Nắm vững kiến thức với sự dạy kèm trực tuyến cá nhân hóa từ các giáo viên chuyên nghiệp. Gia sư giàu kinh nghiệm của chúng tôi luôn sẵn sàng giúp bạn xây dựng nền tảng vững chắc và đạt được mục tiêu học tập.",
+    "connectionError": "Lỗi kết nối",
+    "connectionErrorMessage": "Chúng tôi đang gặp sự cố khi kết nối với máy chủ. Vui lòng kiểm tra kết nối internet của bạn và thử lại.",
+    "filters": {
+      "tabs": {
+        "allSessions": "Tất cả buổi học",
+        "privateSessions": "Buổi học riêng",
+        "groupSessions": "Buổi học nhóm"
+      },
+      "labels": {
+        "category": "Danh mục",
+        "subject": "Chọn môn học",
+        "feePerSession": "Phí mỗi buổi",
+        "tutorLanguages": "Ngôn ngữ gia sư",
+        "availability": "Thời gian có sẵn"
+      },
+      "placeholders": {
+        "chooseCategory": "Chọn danh mục",
+        "chooseSubject": "Chọn môn học",
+        "selectLanguages": "Chọn ngôn ngữ",
+        "sortBy": "Sắp xếp theo",
+        "selectTimezone": "Chọn múi giờ",
+        "search": "Tìm kiếm...",
+        "searchSubjects": "Tìm môn học...",
+        "searchByLanguage": "Tìm theo ngôn ngữ...",
+        "searchByKeyword": "Tìm theo từ khóa",
+        "anytime": "Bất cứ lúc nào"
+      },
+      "availability": {
+        "selectSlots": "Chọn khung giờ có sẵn",
+        "times": {
+          "morning": "Buổi sáng",
+          "afternoon": "Buổi chiều",
+          "evening": "Buổi tối"
+        },
+        "days": {
+          "mon": "Thứ 2",
+          "tue": "Thứ 3",
+          "wed": "Thứ 4",
+          "thu": "Thứ 5",
+          "fri": "Thứ 6",
+          "sat": "Thứ 7",
+          "sun": "Chủ nhật"
+        },
+        "slotsSelected": "khung giờ đã chọn",
+        "clear": "Xóa",
+        "apply": "Áp dụng"
+      },
+      "sortOptions": {
+        "relevance": "Liên quan",
+        "newestFirst": "Mới nhất trước",
+        "oldestFirst": "Cũ nhất trước"
+      },
+      "loading": "Đang tải..."
     }
   },
   "whyChooseUs": {
@@ -259,7 +319,7 @@
     "viewCartDetails": "Xem Chi Tiết Giỏ Hàng",
     "cartEmpty": "Giỏ hàng của bạn đang trống.",
     "continueShopping": "Tiếp Tục Mua Sắm",
-    "checkout": "Thanh Toán",
+    "checkout": "Thanh toán",
     "applyCoupon": "Áp Dụng Mã Giảm Giá",
     "remove": "Xóa",
     "addToWishlist": "Thêm Vào Danh Sách Yêu Thích",
@@ -280,12 +340,12 @@
   "dashboard": {
     "sidebar": {
       "tutor": {
-        "dashboard": "Bảng Điều Khiển",
-        "myStudents": "Học Sinh Của Tôi",
+        "dashboard": "Tổng quan",
+        "myStudents": "Quản lý học sinh",
         "myCourses": "Khóa Học Của Tôi",
-        "myClass": "Lớp Học Của Tôi",
+        "myClass": "Quản lý lớp học",
         "schedule": "Lịch Học",
-        "payouts": "Thanh Toán",
+        "payouts": "Thu nhập",
         "dealsCoupons": "Khuyến Mãi & Mã Giảm Giá",
         "myQuizzes": "Bài Kiểm Tra Của Tôi",
         "requests": "Yêu Cầu",
@@ -295,7 +355,7 @@
       },
       "student": {
         "myBookings": "Lịch Học Của Tôi",
-        "myClass": "Lớp Học Của Tôi",
+        "myClass": "Lớp học",
         "myQuizzes": "Bài Kiểm Tra Của Tôi",
         "myCourses": "Khóa Học Của Tôi",
         "myPurchases": "Mua Hàng Của Tôi",
@@ -307,43 +367,287 @@
     "header": {
       "welcome": "Chào mừng trở lại",
       "balance": "Số dư",
-      "quickActions": "Hành động nhanh"
+      "quickActions": "Hành động nhanh",
+      "breadcrumb": {
+        "dashboard": "Trang quản trị",
+        "analysis": "Tổng quan"
+      }
     },
-    "common": {
-      "loading": "Đang tải...",
-      "noData": "Không có dữ liệu",
-      "viewAll": "Xem Tất Cả",
-      "edit": "Chỉnh sửa",
-      "delete": "Xóa",
-      "save": "Lưu",
-      "cancel": "Hủy",
-      "myWallet": "Ví Của Tôi",
-      "withdraw": "Rút tiền",
-      "signOut": "Đăng xuất",
-      "selectDay": "Chọn một ngày",
-      "selectWeek": "Chọn một tuần",
-      "selectMonth": "Chọn một tháng",
-      "time": "Thời gian",
-      "days": {
-        "sun": "CN",
-        "mon": "T2",
-        "tue": "T3",
-        "wed": "T4",
-        "thu": "T5",
-        "fri": "T6",
-        "sat": "T7"
+    "student": {
+      "myClass": {
+        "title": "Lớp Học Của Tôi",
+        "searchPlaceholder": "Tìm kiếm lớp học...",
+        "filterOptions": {
+          "allStatus": "Tất Cả Trạng Thái",
+          "ongoing": "Đang Học",
+          "completed": "Đã Hoàn Thành"
+        },
+        "selectStatus": "Chọn Trạng Thái",
+        "tableHeaders": {
+          "classTitle": "Tên Lớp Học",
+          "type": "Loại",
+          "startDate": "Ngày Bắt Đầu",
+          "schedule": "Lịch Học",
+          "progress": "Tiến Độ",
+          "status": "Trạng Thái",
+          "actions": "Hành Động"
+        },
+        "classTypes": {
+          "oneOnOne": "1-1",
+          "group": "Nhóm"
+        },
+        "scheduleMore": "Lên Lịch Thêm",
+        "statusLabels": {
+          "ongoing": "Đang Học",
+          "completed": "Đã Hoàn Thành",
+          "enrolled": "Đã Đăng Ký"
+        },
+        "loading": "Đang tải lớp học...",
+        "errorTitle": "Không thể tải lớp học",
+        "tryAgain": "Thử Lại",
+        "noClassesFound": "Không tìm thấy lớp học nào",
+        "noClassesDescription": "Bạn chưa đăng ký lớp học nào. Duyệt qua các khóa học có sẵn để bắt đầu."
+      }
+    },
+    "tutor": {
+      "welcome": "Chào mừng trở lại",
+      "overview": "Tổng quan về hoạt động giảng dạy của bạn",
+      "thisMonth": "Tháng này",
+      "thisWeek": "Tuần này",
+      "all": "Tất cả",
+      "today": "Hôm nay",
+      "week": "Tuần này",
+      "title": "Bảng điều khiển",
+      "analysis": "Phân Tích",
+      "totalEarnings": "Tổng thu nhập",
+      "totalStudents": "Tổng số học sinh",
+      "teachingHours": "Tổng số giờ dạy học",
+      "newReviews": "Đánh giá mới",
+      "upcomingSessions": "Lịch dạy sắp tới",
+      "sessionScheduled": "{{count}} tiết dạy vào {{period}}",
+      "sessionScheduled_plural": "{{count}} tiết dạy vào {{period}}",
+      "todayPeriod": "hôm nay",
+      "weekPeriod": "trong tuần này",
+      "noSessionsTitle": "Không có lịch học",
+      "noSessionsDescription": "Bạn chưa có lịch học nào sắp tới. Hãy kiểm tra lại sau hoặc lên lịch học mới với học sinh của bạn.",
+      "sessionsThisMonth": "{{count}} tiết dạy trong tháng này",
+      "sessionsThisMonth_plural": "{{count}} tiết dạy trong tháng này",
+      "startSession": "Bắt đầu",
+      "startingSession": "Đang bắt đầu buổi học...",
+      "revenueChart": {
+        "title": "Doanh thu",
+        "description": "Theo dõi thu nhập của bạn",
+        "sixMonths": "6 Tháng",
+        "twelveMonths": "12 Tháng",
+        "revenue": "Doanh Thu"
       },
-      "sessionCalendar": "Lịch Học",
-      "quickStats": "Thống Kê Nhanh",
-      "averageRating": "Đánh Giá Trung Bình",
-      "reviews": "đánh giá",
-      "courseCompletion": "Hoàn Thành Khóa Học",
-      "avgResponseTime": "Thời Gian Phản Hồi TB",
-      "thisMonthsHighlight": "Điểm Nổi Bật Tháng Này",
-      "topRatedTutor": "Gia sư được đánh giá cao nhất trong danh mục của bạn!",
-      "recentActivity": "Hoạt Động Gần Đây",
-      "noRecentActivity": "Không có hoạt động gần đây"
-    }
+      "studentsChart": {
+        "title": "Học sinh",
+        "description": "Theo dõi số lượng học sinh của bạn",
+        "sixMonths": "6 Tháng",
+        "twelveMonths": "12 Tháng",
+        "students": "Học Sinh"
+      },
+      "myClass": {
+      "title": "Lớp học",
+      "description": "Quản lý và theo dõi các lớp học của bạn",
+      "createClass": "Mở lớp",
+      "searchPlaceholder": "Tìm kiếm theo lớp hoặc học sinh...",
+      "selectStatus": "Chọn trạng thái",
+      "filterOptions": {
+        "allStatus": "Tất cả",
+        "ongoing": "Đang dạy",
+        "opening": "Đang mở",
+        "completed": "Đã hoàn thành"
+      },
+      "loading": "Đang tải lớp học...",
+      "errorTitle": "Lỗi Khi Tải Lớp Học",
+      "tryAgain": "Thử Lại",
+      "tableHeaders": {
+        "classTitle": "Tên lớp học",
+        "type": "Loại",
+        "status": "Trạng thái",
+        "students": "Học sinh",
+        "schedule": "Lịch học",
+        "progress": "Tiến độ",
+        "actions": "Hành động"
+      },
+      "classTypes": {
+        "oneOnOne": "1 kèm 1",
+        "group": "Nhóm"
+      },
+      "statusLabels": {
+        "ongoing": "Đang dạy",
+        "completed": "Đã hoàn thành",
+        "opening": "Đang chờ"
+      },
+      "studentCount": {
+        "singular": "học sinh",
+        "plural": "học sinh"
+      },
+      "scheduleMore": "+{{count}} nữa",
+      "noClassesFound": "Không Tìm Thấy Lớp Học",
+      "noClassesDescription": "Không có lớp học nào phù hợp với bộ lọc hiện tại của bạn.",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa \"{{classTitle}}\"?",
+      "createModal": {
+        "title": "Mở lớp học mới",
+        "classTitle": "Tên lớp học",
+        "classTitlePlaceholder": "Nhập tên lớp học",
+        "maxStudents": "Số học sinh tối đa",
+        "maxStudentsPlaceholder": "Nhập số học sinh tối đa",
+        "category": "Danh mục",
+        "categoryPlaceholder": "Chọn danh mục",
+        "subject": "Môn học",
+        "subjectPlaceholder": "Chọn môn học",
+        "tuitionFee": "Học phí",
+        "tuitionFeePlaceholder": "Nhập học phí",
+        "description": "Mô tả",
+        "descriptionPlaceholder": "Nhập mô tả lớp học",
+        "schedule": "Lịch học",
+        "addSchedule": "Thêm lịch",
+        "selectDay": "Chọn ngày",
+        "selectTime": "Chọn giờ",
+        "searchTimes": "Tìm kiếm giờ...",
+        "cannotRemoveLastSchedule": "Không thể xóa lịch cuối cùng",
+        "removeSchedule": "Xóa lịch",
+        "createClass": "Mở lớp",
+        "confirmClose": {
+          "title": "Hủy Thay Đổi?",
+          "message": "Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn đóng mà không lưu?",
+          "confirmText": "Hủy Thay Đổi"
+        },
+        "categories": {
+          "academic": "Học Thuật",
+          "language": "Ngôn Ngữ",
+          "arts": "Nghệ Thuật",
+          "science": "Khoa Học",
+          "technology": "Công Nghệ"
+        },
+        "subjects": {
+          "mathematics": "Toán Học",
+          "physics": "Vật Lý",
+          "chemistry": "Hóa Học",
+          "biology": "Sinh Học",
+          "english": "Tiếng Anh",
+          "history": "Lịch Sử",
+          "geography": "Địa Lý",
+          "computerScience": "Tin Học"
+        },
+        "searchCategories": "Tìm kiếm danh mục...",
+        "searchSubjects": "Tìm kiếm môn học..."
+      }
+      },
+      "scheduleTab": {
+        "upcomingSessions": "Lịch dạy sắp tới",
+        "noUpcomingSessions": "Không có lịch nào",
+        "pastSessions": "Lịch sử",
+        "session": "buổi học",
+        "sessions": "buổi học",
+        "attendance": "Điểm danh",
+        "students": "học sinh",
+        "viewDetails": "Xem chi tiết",
+        "hideDetails": "Ẩn chi tiết",
+        "note": "Ghi chú",
+        "attendanceHistory": "Lịch sử điểm danh",
+        "present": "có mặt",
+        "absent": "vắng mặt",
+        "noReason": "Không có lý do",
+        "addNote": "Thêm ghi chú",
+        "enterNotePlaceholder": "Nhập ghi chú của bạn ở đây...",
+        "cancel": "Hủy",
+        "saveNote": "Lưu",
+        "reschedule": "Đổi lịch",
+        "addNoteTitle": "Thêm ghi chú"
+      },
+      "common": {
+        "loading": "Đang tải...",
+        "noData": "Không có dữ liệu",
+        "viewAll": "Xem Tất Cả",
+        "edit": "Chỉnh sửa",
+        "delete": "Xóa",
+        "save": "Lưu",
+        "cancel": "Hủy",
+        "myWallet": "Ví Của Tôi",
+        "withdraw": "Rút tiền",
+        "signOut": "Đăng xuất",
+        "selectDay": "Chọn một ngày",
+        "selectWeek": "Chọn một tuần",
+        "selectMonth": "Chọn một tháng",
+        "time": "Thời gian",
+        "days": {
+          "sun": "CN",
+          "mon": "T2",
+          "tue": "T3",
+          "wed": "T4",
+          "thu": "T5",
+          "fri": "T6",
+          "sat": "T7"
+        },
+        "sessionCalendar": "Lịch",
+        "quickStats": "Thống Kê Nhanh",
+        "averageRating": "Đánh Giá Trung Bình",
+        "reviews": "đánh giá",
+        "courseCompletion": "Hoàn Thành Khóa Học",
+        "avgResponseTime": "Thời Gian Phản Hồi TB",
+        "thisMonthsHighlight": "Điểm Nổi Bật Tháng Này",
+        "topRatedTutor": "Gia sư được đánh giá cao nhất trong danh mục của bạn!",
+        "recentActivity": "Hoạt Động Gần Đây",
+        "noRecentActivity": "Không có hoạt động gần đây",
+        "months": {
+          "01": "Th1",
+          "02": "Th2",
+          "03": "Th3",
+          "04": "Th4",
+          "05": "Th5",
+          "06": "Th6",
+          "07": "Th7",
+          "08": "Th8",
+          "09": "Th9",
+          "10": "Th10",
+          "11": "Th11",
+          "12": "Th12"
+        }
+      },
+      "personalDetails": {
+      "title": "Thông Tin Cơ Bản",
+      "description": "Cung cấp thông tin cá nhân cơ bản của bạn để giúp học sinh hiểu rõ hơn về bạn.",
+      "fullName": "Họ và Tên",
+      "fullNamePlaceholder": "Nhập họ và tên của bạn",
+      "gender": "Giới Tính",
+      "male": "Nam",
+      "female": "Nữ",
+      "notSpecified": "Không chỉ định",
+      "headline": "Tiêu Đề",
+      "headlinePlaceholder": "Nhập tiêu đề nghề nghiệp của bạn",
+      "introduction": "Giới Thiệu",
+      "introductionPlaceholder": "Kể về bản thân bạn...",
+      "country": "Quốc Gia",
+      "countryPlaceholder": "Chọn quốc gia",
+      "nativeLanguage": "Ngôn Ngữ Bản Ngữ",
+      "nativeLanguagePlaceholder": "Chọn ngôn ngữ bản ngữ của bạn",
+      "languagesKnown": "Ngôn Ngữ Tôi Biết",
+      "addLanguage": "+ Thêm Ngôn Ngữ",
+      "photosAndVideos": "Ảnh và Video",
+      "photosAndVideosDescription": "Tải lên ảnh và video để giới thiệu phong cách giảng dạy và tính cách của bạn",
+      "profilePhoto": "Ảnh Đại Diện",
+      "clickToChange": "Nhấp để thay đổi",
+      "dropFileHere": "Thả tệp vào đây hoặc nhấp vào đây để tải lên",
+      "imageFormats": "jpg, jpeg, gif, png (tối đa 5 MB)",
+      "introductionVideo": "Video Giới Thiệu",
+      "videoFormats": "mp4, mov, avi (tối đa 100 MB)",
+      "socialLinks": "Liên Kết Mạng Xã Hội",
+      "socialLinksDescription": "Thêm hồ sơ mạng xã hội của bạn để kết nối với học sinh",
+      "facebookUrl": "URL Facebook",
+      "instagramUrl": "URL Instagram",
+      "linkedinUrl": "URL LinkedIn",
+      "twitterUrl": "URL Twitter/X",
+      "facebookPlaceholder": "https://facebook.com/yourprofile",
+      "instagramPlaceholder": "https://instagram.com/yourprofile",
+      "linkedinPlaceholder": "https://linkedin.com/in/yourprofile",
+      "twitterPlaceholder": "https://twitter.com/yourprofile",
+      "saveDescription": "Lưu & cập nhật những thay đổi mới nhất lên trang web",
+      "saveAndUpdate": "Lưu & Cập Nhật"
+      }
   },
   "profile": {
     "sidebar": {
@@ -351,7 +655,7 @@
       "myBookings": "Lịch Học Của Tôi",
       "myRequests": "Yêu Cầu Của Tôi",
       "myLearning": "Học Tập Của Tôi",
-      "myClass": "Lớp Học Của Tôi",
+      "myClass": "Lớp học",
       "findTutors": "Tìm Gia Sư",
       "myQuizzes": "Bài Kiểm Tra Của Tôi",
       "findCourses": "Tìm Khóa Học",
@@ -473,6 +777,209 @@
       "goHome": "Về Trang Chủ"
     }
   },
+  "app": {
+    "notFound": {
+      "title": "404",
+      "subtitle": "Không Tìm Thấy Trang",
+      "description": "Trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.",
+      "goHome": "Về Trang Chủ"
+    },
+    "systemError": {
+      "title": "500",
+      "subtitle": "Đã Xảy Ra Lỗi",
+      "description": "Chúng tôi xin lỗi, nhưng đã xảy ra lỗi từ phía chúng tôi. Vui lòng thử lại sau.",
+      "goHome": "Về Trang Chủ"
+    }
+  },
+  "tutorDetail": {
+    "profile": {
+      "bookedSessions": "Buổi học đã đặt",
+      "students": "Học sinh",
+      "socialProfiles": "Hồ sơ mạng xã hội",
+      "canTeach": "Tôi có thể dạy",
+      "canSpeak": "Tôi có thể nói",
+      "native": "Bản ngữ",
+      "bookTrialSession": "Đặt lịch học thử",
+      "bookSession": "Đặt lịch học",
+      "sendMessage": "Gửi tin nhắn",
+      "videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
+      "sessionFee": "Phí buổi học",
+      "perMin": "/50 phút"
+    },
+    "booking": {
+      "selectTimeSlot": "Vui lòng chọn khung giờ trước khi yêu cầu buổi học.",
+      "selectNewTimeSlot": "Vui lòng chọn khung giờ mới",
+      "pending": "Đang chờ",
+      "confirmed": "Đã xác nhận",
+      "cancelled": "Đã hủy",
+      "noSessions": "Không có buổi học",
+      "cancelTrialTitle": "Hủy Yêu cầu Học thử",
+      "cancelTrialDescription": "Bạn có chắc chắn muốn hủy yêu cầu học thử này không? Hành động này không thể hoàn tác.",
+      "cancel": "Hủy",
+      "confirmCancel": "Xác nhận hủy"
+    },
+    "aboutMe": {
+      "title": "Về tôi",
+      "showMore": "Xem thêm",
+      "showLess": "Thu gọn"
+    },
+    "reviews": {
+      "title": "Đánh giá từ học sinh",
+      "basedOnRating": "Dựa trên {{count}} đánh giá",
+      "basedOnRatings": "Dựa trên {{count}} đánh giá",
+      "writeReview": "Viết đánh giá",
+      "yourRating": "Đánh giá của bạn",
+      "yourComment": "Bình luận của bạn",
+      "placeholder": "Chia sẻ trải nghiệm của bạn với gia sư này...",
+      "loginRequired": "Vui lòng đăng nhập để gửi đánh giá.",
+      "submitSuccess": "Đánh giá đã được gửi thành công!",
+      "submitError": "Không thể gửi đánh giá. Vui lòng thử lại.",
+      "submitReview": "Gửi đánh giá",
+      "loadMore": "Xem thêm đánh giá",
+      "showLess": "Thu gọn"
+    },
+    "tabs": {
+      "introduction": "Giới thiệu",
+      "availability": "Lịch trống",
+      "groupClass": "Lớp nhóm",
+      "resumeHighlights": "Điểm nổi bật",
+      "reviews": "Đánh giá"
+    },
+    "resume": {
+      "education": "Học vấn",
+      "experience": "Kinh nghiệm",
+      "certifications": "Chứng chỉ & Giải thưởng",
+      "noInfo": "Không có thông tin {{section}}.",
+      "showMore": "Xem thêm",
+      "showLess": "Thu gọn"
+    },
+    "groupClass": {
+      "title": "Lớp nhóm",
+      "price": "Giá",
+      "sessions": "buổi học",
+      "schedule": "Lịch học",
+      "starts": "Bắt đầu",
+      "language": "Ngôn ngữ",
+      "studentsEnrolled": "HỌC SINH ĐÃ THAM GIA",
+      "details": "Chi tiết",
+      "leaveClass": "Rời lớp",
+      "joinClass": "Tham gia lớp",
+      "description": "Mô tả",
+      "startDate": "Ngày bắt đầu",
+      "maxStudents": "Số học sinh tối đa",
+      "enrolled": "Đã tham gia",
+      "noStudentsYet": "Chưa có học sinh nào",
+      "close": "Đóng",
+      "joinThisClass": "Tham gia lớp học này",
+      "joinGroupClass": "Tham gia lớp nhóm",
+      "reviewDetails": "Xem lại chi tiết trước khi xác nhận",
+      "register": "Đăng ký",
+      "payment": "Thanh toán",
+      "start": "Bắt đầu",
+      "importantNotice": "Lưu ý quan trọng",
+      "studentsEnrolledLabel": "Số học sinh đã tham gia",
+      "cancel": "Hủy",
+      "confirmJoin": "Xác nhận & tham gia",
+      "successRegistered": "Đăng ký thành công!",
+      "successMessage": "Bạn đã tham gia lớp nhóm thành công.",
+      "emailNotification": "Bạn sẽ nhận được thông báo qua email khi lớp học bắt đầu.",
+      "gotIt": "Đã hiểu!",
+      "leaveGroupClass": "Rời lớp nhóm",
+      "confirmLeave": "Bạn có chắc chắn muốn rời lớp không?",
+      "warning": "Cảnh báo",
+      "leaveWarning": "Rời lớp sẽ hủy đăng ký của bạn. Bạn có thể cần đăng ký lại nếu thay đổi ý định.",
+      "successLeft": "Đã rời lớp thành công",
+      "leaveSuccessMessage": "Bạn đã rời lớp nhóm thành công. Bạn có thể tham gia lại bất cứ lúc nào nếu thay đổi ý định.",
+      "classWillStartOnDate": "Lớp học này sẽ bắt đầu vào {{startDate}}, ngay cả khi chưa đủ học viên.",
+      "classWillStartWhenFull": "Lớp học này sẽ bắt đầu ngay khi đủ số lượng học viên."
+    },
+    "bookSessionModal": {
+      "title": "Đặt buổi học",
+      "withTutor": "với {{tutorName}}",
+      "choosePackage": "Chọn gói buổi học của bạn",
+      "commitMessage": "Cam kết với việc học tập và tiết kiệm nhiều hơn.",
+      "bestValue": "Giá trị tốt nhất",
+      "sessions": "Buổi học",
+      "perSession": "/buổi",
+      "savePercent": "Tiết kiệm {{percent}}%",
+      "securePayments": "Thanh toán an toàn",
+      "proceedToCheckout": "Tiến hành thanh toán - {{price}}"
+    },
+    "bookTrialModal": {
+      "title": "Yêu cầu buổi học thử miễn phí",
+      "withTutor": "với {{tutorName}}",
+      "benefitsTitle": "Trong buổi học thử miễn phí của bạn, bạn sẽ nhận được:",
+      "benefit1": "Một buổi học giới thiệu 30 phút với gia sư của bạn.",
+      "benefit2": "Đánh giá mức độ kỹ năng hiện tại của bạn.",
+      "benefit3": "Thảo luận về kế hoạch học tập cá nhân hóa của bạn.",
+      "selectedTimes": "Thời gian đã chọn:",
+      "addMessage": "Thêm tin nhắn (Tùy chọn)",
+      "messagePlaceholder": "Hãy cho gia sư biết mục tiêu học tập của bạn...",
+      "footerText": "100% miễn phí, không yêu cầu thông tin thanh toán.",
+      "buttonText": "Yêu cầu buổi học thử miễn phí của bạn",
+      "sendingRequest": "Đang gửi yêu cầu...",
+      "selectTimeSlot": "Vui lòng chọn một khung giờ",
+      "loginRequired": "Bạn phải đăng nhập để yêu cầu buổi học thử",
+      "requestSuccess": "Yêu cầu buổi học thử đã được gửi thành công!",
+      "requestFailed": "Không thể gửi yêu cầu buổi học thử",
+      "requestError": "Đã xảy ra lỗi khi gửi yêu cầu buổi học thử"
+    },
+    "courseCard": {
+      "lessons": "Bài học",
+      "students": "Học sinh",
+      "review": "Đánh giá",
+      "viewCourse": "Xem khóa học"
+    },
+    "requestSessionModal": {
+      "title": "Yêu cầu buổi học",
+      "session": "Buổi học",
+      "privateSession": "Buổi học riêng",
+      "groupSession": "Buổi học nhóm",
+      "firstName": "Tên",
+      "lastName": "Họ",
+      "emailAddress": "Địa chỉ email",
+      "message": "Tin nhắn",
+      "messagePlaceholder": "Nhập tin nhắn ở đây",
+      "sendRequest": "Gửi yêu cầu",
+      "requestSent": "Đã gửi yêu cầu buổi học!"
+    },
+    "resumeItemModal": {
+      "entry": "Mục",
+      "timePeriod": "Thời gian",
+      "title": "Tiêu đề",
+      "institution": "Tổ chức",
+      "location": "Địa điểm",
+      "description": "Mô tả",
+      "saveChanges": "Lưu thay đổi"
+    },
+    "similarTutorCard": {
+      "perSession": "/buổi",
+      "rating": "/5.0",
+      "reviews": "đánh giá",
+      "activeStudents": "Học sinh đang hoạt động",
+      "sessions": "Buổi học",
+      "bookSession": "Đặt buổi học",
+      "sendMessage": "Gửi tin nhắn"
+    },
+    "similarTutors": {
+      "title": "Gia sư tương tự",
+      "viewAll": "Xem tất cả gia sư"
+    },
+    "filterSessionPopover": {
+      "selectSessionType": "Chọn loại buổi học",
+      "selectSubject": "Chọn môn học",
+      "applyFilter": "Áp dụng bộ lọc",
+      "showAllType": "Hiển thị tất cả loại",
+      "privateSession": "Buổi học 1-1",
+      "groupSession": "Buổi học nhóm",
+      "mathematics": "Toán học",
+      "science": "Khoa học",
+      "english": "Tiếng Anh",
+      "history": "Lịch sử",
+      "art": "Nghệ thuật"
+    },
+    "selectTimezone": "Chọn múi giờ"
+  },
   "common": {
     "loading": "Đang tải...",
     "error": "Lỗi",
@@ -480,7 +987,69 @@
     "cancel": "Hủy",
     "save": "Lưu",
     "delete": "Xóa",
+    "confirmDelete": "Xác nhận xóa",
     "edit": "Chỉnh sửa",
-    "view": "Xem"
+    "add": "Thêm",
+    "view": "Xem",
+    "currency": "$",
+    "days": {
+      "sun": "CN",
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7"
+    }
+  }
+  },
+  "payouts": {
+    "title": "Thanh toán",
+    "loading": "Đang tải dữ liệu thanh toán...",
+    "availableBalance": "Số dư khả dụng",
+    "pendingBalance": "Số dư đang xử lý",
+    "totalEarned": "Tổng thu nhập",
+    "currentPaymentMethod": "Phương thức thanh toán hiện tại",
+    "noPaymentMethod": "Chưa chọn phương thức thanh toán",
+    "transactionHistory": "Lịch sử giao dịch",
+    "recentEarnings": "Thu nhập gần đây",
+    "allTypes": "Tất cả loại",
+    "allStatus": "Tất cả trạng thái",
+    "export": "Xuất dữ liệu",
+    "withdraw": "Rút tiền",
+    "addPaymentMethod": "Thêm phương thức thanh toán",
+    "viewDetails": "Xem chi tiết",
+    "amount": "Số tiền",
+    "status": "Trạng thái",
+    "date": "Ngày",
+    "type": "Loại",
+    "description": "Mô tả",
+    "noTransactions": "Không tìm thấy giao dịch nào",
+    "noEarnings": "Không tìm thấy thu nhập nào",
+    "noEarningsDescription": "Bạn chưa kiếm được tiền nào. Bắt đầu dạy học để xem thu nhập của bạn ở đây.",
+    "nextPayout": "Thanh toán tiếp theo",
+    "minimumThreshold": "Ngưỡng rút tiền tối thiểu",
+    "commissionRate": "Tỷ lệ hoa hồng",
+    "withdrawalLimit": "Đã đạt giới hạn rút tiền",
+    "confirmWithdrawal": "Xác nhận rút tiền",
+    "withdrawalAmount": "Số tiền rút",
+    "selectPaymentMethod": "Chọn phương thức thanh toán",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "processing": "Đang xử lý...",
+    "withdrawalSuccessful": "Yêu cầu rút tiền đã được gửi thành công",
+    "withdrawalFailed": "Không thể gửi yêu cầu rút tiền",
+    "paymentMethodAdded": "Đã thêm phương thức thanh toán thành công",
+    "paymentMethodRemoved": "Đã xóa phương thức thanh toán thành công",
+    "invalidAmount": "Số tiền rút không hợp lệ",
+    "insufficientBalance": "Số dư không đủ",
+    "belowMinimum": "Số tiền thấp hơn ngưỡng tối thiểu",
+    "noTransactionsDescription": "Không tìm thấy giao dịch nào. Lịch sử thanh toán của bạn sẽ xuất hiện ở đây khi bạn thực hiện rút tiền.",
+    "dateRange": "{{startDate}} - {{endDate}}"
+  },
+  "onboarding": {
+    "basicInfo": {
+      "location": "Địa Điểm"
+    }
   }
 }

@@ -1,16 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiStar, FiCheckCircle } from 'react-icons/fi';
-import type { TutorDetail, TutorReview } from '../../../../types/api';
+import type { TutorDetail, TutorReview } from '../../../../types/tutor';
 import Toast from '../../../../components/ui/Toast';
 import { tutorService } from '../../../../services/tutorService';
 import { useAuth } from '../../../../context/AuthContext';
+import { useTranslation } from "react-i18next";
 
-const StudentReviews: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
+const StudentReviews: React.FC<{ tutorId: string }> = ({ tutorId }) => {
     const [visibleCount, setVisibleCount] = useState(3);
     const [selectedRating, setSelectedRating] = useState(0);
     const [newComment, setNewComment] = useState('');
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const { state } = useAuth();
+    const { t } = useTranslation();
+    const [tutor, setTutor] = useState<TutorDetail | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchTutor = async () => {
+            try {
+                setLoading(true);
+                const response = await tutorService.getTutorDetail(tutorId);
+                setTutor(response.data);
+            } catch (err) {
+                setError('Failed to load tutor details');
+                console.error('Error fetching tutor:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (tutorId) {
+            fetchTutor();
+        }
+    }, [tutorId]);
+
+    if (loading || !tutor) {
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
+    }
 
     const reviews = tutor.reviews;
 
@@ -33,7 +65,7 @@ const RatingSummary: React.FC = () => (
                 <div className="flex">
                     {[...Array(5)].map((_, i) => <FiStar key={i} className="w-5 h-5 text-yellow-400 fill-current" />)}
                 </div>
-                <p className="text-sm text-gray-600 mt-1">Based on {totalReviews} rating</p>
+                <p className="text-sm text-gray-600 mt-1">{t(totalReviews === 1 ? 'tutorDetail.reviews.basedOnRating' : 'tutorDetail.reviews.basedOnRatings', { count: totalReviews })}</p>
             </div>
         </div>
         <div className="border-t border-gray-300/70 my-4"></div>
@@ -86,7 +118,7 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                             onClick={() => setIsExpanded(!isExpanded)}
                             className="ml-1 text-sm font-semibold text-[#0b6459] underline hover:text-[#084c43]"
                         >
-                            {isExpanded ? 'Show less' : 'Show more'}
+                            {isExpanded ? t('tutorDetail.aboutMe.showLess') : t('tutorDetail.aboutMe.showMore')}
                         </button>
                     )}
                 </p>
@@ -98,7 +130,7 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
 
     return (
         <div className="py-8">
-            <h2 className="text-2xl font-bold text-gray-800">Student Reviews</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{t('tutorDetail.reviews.title')}</h2>
 
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <div className="lg:col-span-1 space-y-6">
@@ -107,10 +139,10 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                     {/* Write a Review Section - only show if tutor doesn't have trial session */}
                     {!tutor.hasTrialSession && (
                         <div className="bg-[#f9f3eb] rounded-2xl p-6">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4">Write a Review</h3>
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('tutorDetail.reviews.writeReview')}</h3>
                             
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t('tutorDetail.reviews.yourRating')}</label>
                                 <div className="flex gap-1">
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <button 
@@ -128,14 +160,14 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                             
                             <div className="mb-4">
                                 <label htmlFor="review-comment" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Your Comment
+                                    {t('tutorDetail.reviews.yourComment')}
                                 </label>
                                 <textarea
                                     id="review-comment"
                                     rows={4}
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
-                                    placeholder="Share your experience with this tutor..."
+                                    placeholder={t('tutorDetail.reviews.placeholder')}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b6459] resize-none text-sm"
                                 />
                             </div>
@@ -145,7 +177,7 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                                 disabled={selectedRating === 0}
                                 onClick={async () => {
                                     if (!state.user) {
-                                        setToast({ message: 'Please login to submit a review.', type: 'error' });
+                                        setToast({ message: t('tutorDetail.reviews.loginRequired'), type: 'error' });
                                         return;
                                     }
                                     
@@ -155,16 +187,16 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                                             rating: selectedRating,
                                             comment: newComment,
                                         });
-                                        setToast({ message: 'Review submitted successfully!', type: 'success' });
+                                        setToast({ message: t('tutorDetail.reviews.submitSuccess'), type: 'success' });
                                         setSelectedRating(0);
                                         setNewComment('');
                                     } catch (error) {
                                         console.error('Failed to submit review:', error);
-                                        setToast({ message: 'Failed to submit review. Please try again.', type: 'error' });
+                                        setToast({ message: t('tutorDetail.reviews.submitError'), type: 'error' });
                                     }
                                 }}
                             >
-                                Submit Review
+                                {t('tutorDetail.reviews.submitReview')}
                             </button>
                         </div>
                     )}
@@ -179,7 +211,7 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                                 onClick={() => setVisibleCount(prev => prev + 3)}
                                 className="px-5 py-2.5 border border-[#0b6459] text-[#0b6459] font-semibold rounded-xl hover:bg-[#0b6459] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
                             >
-                                Load more reviews
+                                {t('tutorDetail.reviews.loadMore')}
                             </button>
                         </div>
                     ) : reviews.length > 3 && (
@@ -188,7 +220,7 @@ const ReviewCard: React.FC<{ review: TutorReview }> = ({ review }) => {
                                 onClick={() => setVisibleCount(3)}
                                 className="px-5 py-2.5 border border-gray-300 text-gray-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-200 shadow-sm hover:shadow-md"
                             >
-                                Show less
+                                {t('tutorDetail.reviews.showLess')}
                             </button>
                         </div>
                     )}

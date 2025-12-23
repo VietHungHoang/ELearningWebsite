@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface DatePickerModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface DatePickerModalProps {
 const DatePickerModal: React.FC<DatePickerModalProps> = ({ isOpen, onClose, onApply, selectedDate, position = 'bottom' }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
   const [hoveredWeek, setHoveredWeek] = useState<{ start: Date; end: Date } | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isOpen) {
@@ -33,7 +35,7 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({ isOpen, onClose, onAp
   };
 
   const selectedWeek = getWeekRangeForDate(selectedDate);
-  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const daysOfWeek = [t('common.days.sun'), t('common.days.mon'), t('common.days.tue'), t('common.days.wed'), t('common.days.thu'), t('common.days.fri'), t('common.days.sat')];
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -68,7 +70,7 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({ isOpen, onClose, onAp
       aria-labelledby="datepicker-title"
     >
       <div className="flex justify-between items-center mb-4">
-        <h2 id="datepicker-title" className="text-lg font-bold text-gray-800">Select Week</h2>
+        <h2 id="datepicker-title" className="text-lg font-bold text-gray-800">{t('tutorDetail.selectWeek')}</h2>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close modal">
           <FiX />
         </button>

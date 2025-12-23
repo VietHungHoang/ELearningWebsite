@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import type { Schedule, StudentInfo } from '../../pages/MyClassPage';
+import type { Schedule, StudentInfo } from '../../my-class/MyClassPage';
 import RequestStatusBadge from '../../components/RequestStatusBadge';
 import type { RequestStatus } from '../../../../../types/api';
 import { classService } from '../../../../../services/classService';

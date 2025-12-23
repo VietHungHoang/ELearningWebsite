@@ -1,6 +1,6 @@
 import React from 'react';
 import { HiX, HiCreditCard, HiOfficeBuilding, HiCheckCircle, HiClock, HiExclamation } from 'react-icons/hi';
-import type { PayoutMethod, PayoutStatus } from '../pages/PayoutsPage';
+import type { PayoutMethod, PayoutStatus } from '../payout/PayoutsPage';
 
 interface TransactionDetailModalProps {
     transaction: {

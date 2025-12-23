@@ -1,17 +1,22 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Booking } from '../types';
+import type { Session } from '../../../types/class';
+import commonUtils from '../../../../utils/commonUtils';
 
 interface DailyViewProps {
     currentDate: Date;
-    bookings: Booking[];
-    onSessionClick: (booking: Booking, event: React.MouseEvent) => void;
+    bookings: Session[];
+    onSessionClick: (session: Session, event: React.MouseEvent) => void;
 }
 
 const DailyView: React.FC<DailyViewProps> = ({ currentDate, bookings, onSessionClick }) => {
     const { t } = useTranslation();
     const times = Array.from({ length: 18 }, (_, i) => i + 6); // 6 AM to 11 PM (23:00)
-    const bookingsForDay = bookings.filter(b => b.date.toDateString() === currentDate.toDateString());
+    const bookingsForDay = bookings.filter(session => {
+        // Convert UTC datetime from backend to local timezone
+        const localSessionDate = commonUtils.convertUTCToLocalDate(session.sessionDatetime);
+        return localSessionDate.toDateString() === currentDate.toDateString();
+    });
     const rowHeight = 52; // increased from 48px
 
     return (
@@ -35,19 +40,21 @@ const DailyView: React.FC<DailyViewProps> = ({ currentDate, bookings, onSessionC
                         ))}
                     </div>
                     <div className="absolute top-0 left-0 right-0 bottom-0">
-                        {bookingsForDay.map(booking => {
-                            const startHour = booking.date.getUTCHours();
+                        {bookingsForDay.map(session => {
+                            // Convert UTC datetime to local timezone
+                            const localSessionDate = commonUtils.convertUTCToLocalDate(session.sessionDatetime);
+                            const startHour = localSessionDate.getHours();
                             const top = (startHour - 6) * rowHeight;
-                            const height = booking.durationHours * rowHeight;
+                            const height = 1 * rowHeight; // Default 1 hour duration
                             return (
                                 <div
-                                    key={booking.id}
-                                    onClick={(e) => onSessionClick(booking, e)}
-                                    className={`absolute px-3 py-1 rounded-lg cursor-pointer ${booking.color}`}
+                                    key={session.id}
+                                    onClick={(e) => onSessionClick(session, e)}
+                                    className="absolute px-3 py-1 rounded-lg cursor-pointer bg-[#0b6459] text-white"
                                     style={{ top: `${top}px`, height: `${height - 4}px`, left: '2px', right: '2px', width: 'calc(100% - 4px)' }}
                                 >
-                                    <p className="font-bold text-sm">{booking.title}</p>
-                                    <p className="text-xs">{booking.tutorName}</p>
+                                    <p className="font-bold text-sm">{session.classInfo?.title || 'Session'}</p>
+                                    <p className="text-xs">{session.tutor?.fullName || 'Tutor'}</p>
                                 </div>
                             )
                         })}

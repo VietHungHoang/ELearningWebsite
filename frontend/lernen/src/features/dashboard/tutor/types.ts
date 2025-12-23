@@ -9,7 +9,7 @@ export interface Session {
     startTime: Date;
     duration: number;
     platform: 'Zoom' | 'Meet' | 'Teams';
-    status: 'Confirmed' | 'Pending' | 'Rescheduled';
+    status: '1-1' | 'group' | 'trial';
     isOnline?: boolean;
 }
 

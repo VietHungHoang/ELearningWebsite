@@ -11,8 +11,7 @@ import {LernenLogo} from '../../../components/LernenLogo';
 import authService from '../../../services/authService';
 import {HiArrowLeft, HiArrowRight} from 'react-icons/hi';
 import {useAuth} from '../../../context/AuthContext';
-import { mapTutorDetailResponseToTutorDetail } from '../../../mappers/tutorMapper';
-import type { TutorDetail, TutorDetailResponse } from '../../../types/tutor';
+import type { TutorOnboardingData } from '../../../types/tutor';
 
 const STEPS = [
     {number: 1, label: 'Basic Info'},
@@ -27,53 +26,69 @@ const TutorOnboardingPage: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [currentStep, setCurrentStep] = useState<number | null>(null);
-    const [stepData, setStepData] = useState<Partial<TutorDetail>>({});
+    const [stepData, setStepData] = useState<Partial<TutorOnboardingData>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const {state} = useAuth();
-    
-    const tutorId = state.user?.id;
+    const tutorId = state.user?.id || (() => {
+        try {
+            const storedData = localStorage.getItem('tutor_onboarding_data');
+            if (storedData) {
+                const parsed = JSON.parse(storedData);
+                return parsed.id;
+            }
+        } catch (error) {
+            console.error('Failed to parse tutor onboarding data from localStorage:', error);
+        }
+        return null;
+    })();
 
     const loadStepData = useCallback(async (step: number) => {
         if (!tutorId) return;
-        
         setLoading(true);
         try {
-            let tutorOnboardingData = localStorage.getItem('tutor_onboarding_data');
-            
-            if (!tutorOnboardingData) {
-                const response = await authService.getOnboardingData(tutorId);
-                if (response.jsonData) {
-                    // Save jsonData (TutorDetailResponse - already has id)
-                    tutorOnboardingData = response.jsonData;
-                    localStorage.setItem('tutor_onboarding_data', response.jsonData);
-                } else {
-                    console.log('No onboarding data found from API');
-                    navigate('/error');
-                    return;
-                }
+            const response = await authService.getOnboardingData(tutorId);
+
+            if (response.jsonData) {
+                const onboardingData = JSON.parse(response.jsonData) as TutorOnboardingData;
+                console.log(onboardingData);
+                setStepData(onboardingData);
+            } else {
+                setStepData({
+                    id: tutorId,
+                    fullName: state.user?.name || '',
+                    email: state.user?.email || '',
+                    gender: 'Not specified',
+                    countryCode: 'US', // Default to US
+                    languages: [],
+                    subjects: [],
+                    educations: [],
+                    experiences: [],
+                    certifications: [],
+                    availabilities: [],
+                    socialLinks: []
+                });
             }
-            
-            // Parse TutorDetailResponse from localStorage/API
-            const tutorDetailResponse = JSON.parse(tutorOnboardingData) as TutorDetailResponse;
-            
-            // Convert to TutorDetail for UI using mapper
-            const tutorDetail = await mapTutorDetailResponseToTutorDetail(tutorDetailResponse);
-            
-            setStepData(tutorDetail);
         } catch (err) {
             console.error(`Failed to load step ${step} data:`, err);
-            navigate('/error');
+            setError('Failed to load onboarding data');
         } finally {
             setLoading(false);
         }
-    }, [navigate, tutorId]);
+    }, [tutorId, state.user]);
 
     useEffect(() => {
-        if (!tutorId) return;
-        
+        if (!tutorId) {
+            console.error('No tutor ID available');
+            setLoading(false);
+            navigate('/error');
+            return;
+        }
+
         const stepParam = searchParams.get('step');
+        console.log('stepParam:', stepParam);
+
         if (stepParam) {
             const step = parseInt(stepParam, 10);
             if (step >= 1 && step <= 6) {
@@ -87,87 +102,35 @@ const TutorOnboardingPage: React.FC = () => {
         }
     }, [searchParams, navigate, tutorId, loadStepData]);
 
-    const handleStepDataChange = useCallback((updates: Partial<TutorDetail>) => {
-        setStepData((prev: Partial<TutorDetail>) => ({...prev, ...updates}));
+    const handleStepDataChange = useCallback((updates: Partial<TutorOnboardingData>) => {
+        setStepData((prev: Partial<TutorOnboardingData>) => ({...prev, ...updates}));
     }, []);
     
-    // Check if user is authenticated - AFTER all hooks
-    if (!state.user) {
-        return (
-            <AuthLayout>
-                <div className="flex justify-center items-center min-h-screen">
-                    <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0b6459] mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Loading...</p>
-                    </div>
-                </div>
-            </AuthLayout>
-        );
-    }
-
-    // Mapper: Convert UI model (Partial<TutorDetail>) to API model (TutorDetailResponse)
-    const mapToTutorDetailResponse = (data: Partial<TutorDetail>): TutorDetailResponse => {
-        return {
-            // Basic info
-            id: data.id || '',
-            fullName: data.fullName || '',
-            avatarUrl: data.avatarUrl || '',
-            email: data.email || '',
-            isVerified: data.isVerified || false,
-            introduction: data.introduction || '',
-            headline: data.headline || '',
-            gender: data.gender || 'Not specified',
-            timezone: data.timezone || '',
-            videoUrl: data.videoUrl || '',
-            currentSessionFee: data.currentSessionFee || 0,
-            originalSessionFee: data.originalSessionFee,
-            averageRating: data.averageRating || 0,
-            reviewCount: data.reviewCount || 0,
-            bookedSessionsCount: data.bookedSessionsCount || 0,
-            studentCount: data.studentCount || 0,
-            hasTrialSession: data.hasTrialSession || false,
-            
-            // Convert Country to string
-            countryCode: data.country?.code || '',
-            
-            // Convert TutorLanguage[] to TutorLanguageResponse[]
-            languageCodes: (data.languages || []).map(lang => ({
-                code: lang.language?.code || '',
-                isNative: lang.isNative || false
-            })),
-            
-            // Convert Subject[] to string[]
-            subjectIds: (data.subjects || []).map(subject => subject?.id || '').filter(id => id !== ''),
-            
-            // Additional fields
-            availabilities: data.availabilities || [],
-            socialLinks: data.socialLinks || [],
-            educations: data.educations || [],
-            experiences: data.experiences || [],
-            certifications: data.certifications || [],
-            reviews: data.reviews,
-            groupClasses: data.groupClasses
-        };
-    };
-
     const saveStepData = async (): Promise<void> => {
-        const tutorOnboardingData = localStorage.getItem('tutor_onboarding_data');
-        if (!tutorOnboardingData) throw new Error('No tutor onboarding data found');
+        if (!tutorId || !currentStep) return;
 
-        const parsed = JSON.parse(tutorOnboardingData) as TutorDetailResponse;
-        
-        // Merge current stepData with existing data from localStorage
-        // stepData is Partial<TutorDetail>, we need to merge carefully
-        const mergedData = { ...parsed, ...stepData } as any;
-        
-        // Convert to TutorDetailResponse for API
-        const tutorDetailResponse = mapToTutorDetailResponse(mergedData);
-        
-        // Call API with tutorId from parsed data (TutorDetailResponse has id field)
-        await authService.saveOnboardingStep(parsed.id, currentStep!, tutorDetailResponse);
+        setSaving(true);
+        try {
+            // Clean data before saving
+            const cleanedData = {
+                ...stepData,
+                subjectIds: stepData.subjects?.map(s => s.id) || [],
+                languages: stepData.languages?.map(l => ({
+                    code: l.language.code,
+                    isNative: l.isNative
+                })) || []
+            };
+            // Remove subjects from cleanedData if backend expects subjectIds instead
+            delete cleanedData.subjects;
 
-        // Update localStorage with TutorDetailResponse as JSON string
-        localStorage.setItem('tutor_onboarding_data', JSON.stringify(tutorDetailResponse));
+            const jsonData = JSON.stringify(cleanedData);
+            await authService.saveOnboardingStep(tutorId, currentStep, jsonData);
+        } catch (error) {
+            console.error('Failed to save onboarding step:', error);
+            throw error;
+        } finally {
+            setSaving(false);
+        }
     };
 
     const validateStep = (step: number): boolean => {
@@ -182,7 +145,7 @@ const TutorOnboardingPage: React.FC = () => {
                     setError('Please select your gender');
                     return false;
                 }
-                if (!stepData.country) {
+                if (!stepData.countryCode) {
                     setError('Country is required');
                     return false;
                 }
@@ -210,7 +173,12 @@ const TutorOnboardingPage: React.FC = () => {
     };
 
     const handleNext = async () => {
-        if (!currentStep || !validateStep(currentStep)) {
+        if (!currentStep) return;
+
+        // Small delay to ensure state updates are processed
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        if (!validateStep(currentStep)) {
             return;
         }
 

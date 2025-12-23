@@ -1,15 +1,22 @@
-import type { Tutor, TutorDetail, TutorResponse, TutorDetailResponse, TutorLanguage, TutorLanguageResponse } from "../types/tutor";
+import type {
+    Tutor,
+    TutorResponse,
+    TutorLanguage,
+    TutorLanguageResponse,
+    TutorProfileHeaderResponse,
+    Tutor,
+} from "../types/tutor";
 import type { Country, Subject } from "../types/common";
 import commonUtils from "../utils/commonUtils";
 
 // Helper: Map country code string to Country object
 const mapCountryCodeToCountry = (countryCode: string): Country => {
-    if(!countryCode) {
-        return { code: '', name: 'Unknown', flag: '' };
+    if (!countryCode) {
+        return { code: "", name: "Unknown", flag: "" };
     }
     const allCountries = commonUtils.getAllCountries();
-    const country = allCountries.find(c => c.code === countryCode);
-    return country || { code: countryCode, name: 'Unknown', flag: '' };
+    const country = allCountries.find((c) => c.code === countryCode);
+    return country || { code: countryCode, name: "Unknown", flag: "" };
 };
 
 // Helper: Map TutorLanguageResponse[] to TutorLanguage[]
@@ -18,10 +25,10 @@ const mapTutorLanguageResponseToTutorLanguage = (languageResponses: TutorLanguag
         return [];
     }
     const allLanguages = commonUtils.getAllLanguages();
-    return languageResponses.map(langResp => {
-        const language = allLanguages.find(l => l.code === langResp.code);
+    return languageResponses.map((langResp) => {
+        const language = allLanguages.find((l) => l.code === langResp.code);
         return {
-            language: language || { code: langResp.code, name: 'Unknown' },
+            language: language || { code: langResp.code, name: "Unknown" },
             isNative: langResp.isNative,
         };
     });
@@ -29,18 +36,18 @@ const mapTutorLanguageResponseToTutorLanguage = (languageResponses: TutorLanguag
 
 // Helper: Map subject IDs to Subject[]
 const mapSubjectIdsToSubjects = async (subjectIds: string[]): Promise<Subject[]> => {
-    if(!subjectIds || subjectIds.length === 0) {
+    if (!subjectIds || subjectIds.length === 0) {
         return [];
     }
     const allSubjects = await commonUtils.getSubjects();
-    return subjectIds.map(id => allSubjects.find(s => s.id === id) || { id, name: 'Unknown', categoryId: '' });
+    return subjectIds.map((id) => allSubjects.find((s) => s.id === id) || { id, name: "Unknown", categoryId: "" });
 };
 
 export const mapTutorResponseToTutor = async (tutorResponse: TutorResponse): Promise<Tutor> => {
     const country = mapCountryCodeToCountry(tutorResponse.countryCode);
     const languages = mapTutorLanguageResponseToTutorLanguage(tutorResponse.languageCodes);
     const subjects = await mapSubjectIdsToSubjects(tutorResponse.subjectIds);
-    
+
     return {
         id: tutorResponse.id,
         fullName: tutorResponse.fullName,
@@ -65,38 +72,29 @@ export const mapTutorResponseToTutor = async (tutorResponse: TutorResponse): Pro
     };
 };
 
-export const mapTutorDetailResponseToTutorDetail = async (tutorDetailResponse: TutorDetailResponse): Promise<TutorDetail> => {
-    const country = mapCountryCodeToCountry(tutorDetailResponse.countryCode);
-    const languages = mapTutorLanguageResponseToTutorLanguage(tutorDetailResponse.languageCodes);
-    const subjects = await mapSubjectIdsToSubjects(tutorDetailResponse.subjectIds);
-    
+export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
+    profileHeaderResponse: TutorProfileHeaderResponse
+): Promise<Tutor> => {
+    const country = mapCountryCodeToCountry(profileHeaderResponse.countryCode);
+    const languages = mapTutorLanguageResponseToTutorLanguage(profileHeaderResponse.languageCodes);
+    const subjects = await mapSubjectIdsToSubjects(profileHeaderResponse.subjectIds);
+
     return {
-        id: tutorDetailResponse.id,
-        fullName: tutorDetailResponse.fullName,
-        email: tutorDetailResponse.email,
-        isVerified: tutorDetailResponse.isVerified,
-        introduction: tutorDetailResponse.introduction,
-        headline: tutorDetailResponse.headline,
+        id: profileHeaderResponse.id,
+        fullName: profileHeaderResponse.fullName,
+        avatarUrl: profileHeaderResponse.avatarUrl,
+        isVerified: profileHeaderResponse.isVerified,
+        headline: profileHeaderResponse.headline,
+        videoUrl: profileHeaderResponse.videoUrl,
+        currentSessionFee: profileHeaderResponse.currentSessionFee,
+        averageRating: profileHeaderResponse.averageRating,
+        reviewCount: profileHeaderResponse.reviewCount,
+        bookedSessionsCount: profileHeaderResponse.bookedSessionsCount,
+        studentCount: profileHeaderResponse.studentCount,
+        introduction: profileHeaderResponse.introduction,
         country: country,
-        gender: tutorDetailResponse.gender,
-        avatarUrl: tutorDetailResponse.avatarUrl,
-        timezone: tutorDetailResponse.timezone,
-        videoUrl: tutorDetailResponse.videoUrl,
-        currentSessionFee: tutorDetailResponse.currentSessionFee,
-        originalSessionFee: tutorDetailResponse.originalSessionFee,
-        averageRating: tutorDetailResponse.averageRating,
-        reviewCount: tutorDetailResponse.reviewCount,
         languages,
         subjects,
-        bookedSessionsCount: tutorDetailResponse.bookedSessionsCount,
-        studentCount: tutorDetailResponse.studentCount,
-        reviews: tutorDetailResponse.reviews || [],
-        availabilities: tutorDetailResponse.availabilities,
-        socialLinks: tutorDetailResponse.socialLinks,
-        educations: tutorDetailResponse.educations,
-        experiences: tutorDetailResponse.experiences,
-        certifications: tutorDetailResponse.certifications,
-        groupClasses: tutorDetailResponse.groupClasses || [],
-        hasTrialSession: tutorDetailResponse.hasTrialSession,
+        socialLinks: profileHeaderResponse.socialLinks,
     };
 };

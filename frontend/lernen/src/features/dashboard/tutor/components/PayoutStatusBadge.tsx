@@ -1,5 +1,5 @@
 import React from 'react';
-import type { PayoutStatus } from '../pages/PayoutsPage';
+import type { PayoutStatus } from '../payout/PayoutsPage';
 
 interface PayoutStatusBadgeProps {
   status: PayoutStatus;

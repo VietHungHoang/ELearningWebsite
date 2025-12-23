@@ -226,45 +226,58 @@ class ChatWebSocketService {
     /**
      * Gửi tin nhắn qua WebSocket
      */
-    sendMessage(conversationId: string, message: any): void {
+    sendMessage(messageRequest: { conversationId: string; type: string; content: string; replyToMessageId?: string }, userId: string): void {
         if (!this.client?.connected) {
-            console.error('WebSocket not connected');
-            return;
+            throw new Error('WebSocket not connected');
         }
 
         this.client.publish({
-            destination: `/app/chat/${conversationId}`,
-            body: JSON.stringify(message),
+            destination: '/app/chat.sendMessage',
+            headers: {
+                'X-User-Id': userId,
+            },
+            body: JSON.stringify(messageRequest),
         });
     }
 
     /**
      * Gửi typing indicator
      */
-    sendTypingIndicator(conversationId: string, isTyping: boolean): void {
+    sendTypingIndicator(conversationId: string, isTyping: boolean, userId: string): void {
         if (!this.client?.connected) {
             console.error('WebSocket not connected');
             return;
         }
 
+        const typingRequest = {
+            conversationId: conversationId,
+            isTyping: isTyping
+        };
+
         this.client.publish({
-            destination: `/app/chat/${conversationId}/typing`,
-            body: JSON.stringify({ isTyping }),
+            destination: '/app/chat.typing',
+            headers: {
+                'X-User-Id': userId,
+            },
+            body: JSON.stringify(typingRequest),
         });
     }
 
     /**
      * Mark message as read
      */
-    markAsRead(conversationId: string, messageId: string): void {
+    markAsRead(conversationId: string, messageId: string, userId: string): void {
         if (!this.client?.connected) {
             console.error('WebSocket not connected');
             return;
         }
 
         this.client.publish({
-            destination: `/app/chat/${conversationId}/read`,
-            body: JSON.stringify({ messageId }),
+            destination: `/app/chat.read/${conversationId}/${messageId}`,
+            headers: {
+                'X-User-Id': userId,
+            },
+            body: '', // No payload needed
         });
     }
 

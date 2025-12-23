@@ -1,21 +1,34 @@
 import React, { useState } from 'react';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import { useTranslation } from 'react-i18next';
 
 interface FilterSessionPopoverProps {
   onClose: () => void;
 }
 
 const FilterSessionPopover: React.FC<FilterSessionPopoverProps> = ({ onClose }) => {
+    const { t } = useTranslation();
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
-    const sessionTypePlaceholder = 'Show All Type';
-    const subjectPlaceholder = 'Select a subject';
+    const sessionTypePlaceholder = t('tutorDetail.filterSessionPopover.showAllType');
+    const subjectPlaceholder = t('tutorDetail.filterSessionPopover.selectSubject');
 
     const [selectedSessionType, setSelectedSessionType] = useState(sessionTypePlaceholder);
     const [selectedSubject, setSelectedSubject] = useState(subjectPlaceholder);
 
-    const sessionTypeOptions = ['Show All Type', 'Private Session', 'Group Session'];
-    const subjectOptions = ['Select a subject', 'Mathematics', 'Science', 'English', 'History', 'Art'];
+    const sessionTypeOptions = [
+        t('tutorDetail.filterSessionPopover.showAllType'),
+        t('tutorDetail.filterSessionPopover.privateSession'),
+        t('tutorDetail.filterSessionPopover.groupSession')
+    ];
+    const subjectOptions = [
+        t('tutorDetail.filterSessionPopover.selectSubject'),
+        t('tutorDetail.filterSessionPopover.mathematics'),
+        t('tutorDetail.filterSessionPopover.science'),
+        t('tutorDetail.filterSessionPopover.english'),
+        t('tutorDetail.filterSessionPopover.history'),
+        t('tutorDetail.filterSessionPopover.art')
+    ];
 
     const handleApply = () => {
         // In a real app, this would trigger a filter function
@@ -30,7 +43,7 @@ const FilterSessionPopover: React.FC<FilterSessionPopoverProps> = ({ onClose }) 
         <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl z-50 p-6 border border-gray-100">
             <div className="space-y-4">
                 <div>
-                    <label className="text-sm font-bold text-gray-800 block mb-2">Select Session Type</label>
+                    <label className="text-sm font-bold text-gray-800 block mb-2">{t('tutorDetail.filterSessionPopover.selectSessionType')}</label>
                     <CustomDropdown
                         options={sessionTypeOptions}
                         selectedValue={selectedSessionType}
@@ -42,7 +55,7 @@ const FilterSessionPopover: React.FC<FilterSessionPopoverProps> = ({ onClose }) 
                     />
                 </div>
                 <div>
-                    <label className="text-sm font-bold text-gray-800 block mb-2">Select a subject</label>
+                    <label className="text-sm font-bold text-gray-800 block mb-2">{t('tutorDetail.filterSessionPopover.selectSubject')}</label>
                      <CustomDropdown
                         options={subjectOptions}
                         selectedValue={selectedSubject}
@@ -58,7 +71,7 @@ const FilterSessionPopover: React.FC<FilterSessionPopoverProps> = ({ onClose }) 
                 onClick={handleApply}
                 className="w-full mt-6 bg-[#0b6459] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#084c43] transition-colors"
             >
-                Apply Filter
+                {t('tutorDetail.filterSessionPopover.applyFilter')}
             </button>
         </div>
     );

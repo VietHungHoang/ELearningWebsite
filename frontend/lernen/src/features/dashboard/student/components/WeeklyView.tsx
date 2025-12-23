@@ -1,10 +1,11 @@
 import React from 'react';
-import type { Booking } from '../types';
+import commonUtils from '../../../../utils/commonUtils';
+import type { Session } from '../../../../types/class';
 
 interface WeeklyViewProps {
     currentDate: Date;
-    bookings: Booking[];
-    onSessionClick: (booking: Booking, event: React.MouseEvent) => void;
+    bookings: Session[];
+    onSessionClick: (session: Session, event: React.MouseEvent) => void;
 }
 
 const WeeklyView: React.FC<WeeklyViewProps> = ({ currentDate, bookings, onSessionClick }) => {
@@ -37,20 +38,28 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({ currentDate, bookings, onSessio
                 ))}
                 {/* Body */}
                 {weekDays.map((day, index) => {
-                    const sessionsForDay = bookings.filter(b => b.date.toDateString() === day.toDateString());
+                    const sessionsForDay = bookings.filter(session => {
+                        // Convert UTC datetime from backend to local timezone
+                        const localSessionDate = commonUtils.convertUTCToLocalDate(session.sessionDatetime);
+                        return localSessionDate.toDateString() === day.toDateString();
+                    });
                     return (
                         <div key={index} className={`h-[400px] p-2 space-y-1 ${index < 6 ? 'border-r' : ''} border-gray-200`}>
                             {sessionsForDay.length > 0 ? (
-                                sessionsForDay.map(session => (
-                                    <div
-                                        key={session.id}
-                                        onClick={(e) => onSessionClick(session, e)}
-                                        className={`text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer ${session.color}`}
-                                    >
-                                        <p className="font-bold">{session.title}</p>
-                                        <p>{session.date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-                                    </div>
-                                ))
+                                sessionsForDay.map(session => {
+                                    // Convert UTC datetime to local timezone for display
+                                    const localSessionDate = commonUtils.convertUTCToLocalDate(session.sessionDatetime);
+                                    return (
+                                        <div
+                                            key={session.id}
+                                            onClick={(e) => onSessionClick(session, e)}
+                                            className="text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer bg-[#0b6459] text-white"
+                                        >
+                                            <p className="font-bold">{session.classInfo?.title || 'Session'}</p>
+                                            <p>{localSessionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                                        </div>
+                                    );
+                                })
                             ) : (
                                 <div className="bg-[#FBF6EE] text-[#B58A3F] text-xs font-semibold py-1.5 px-2 rounded-lg text-center">
                                     No sessions

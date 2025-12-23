@@ -1,7 +1,7 @@
 import type { RouteObject } from 'react-router-dom';
 import QuizTakingPage from '../pages/QuizTakingPage';
 import QuizResultPage from '../pages/QuizResultPage';
-import CreateQuizContent from '../components/CreateQuizContent';
+import { CreateQuizPage } from '../create-quiz/create-quiz';
 
 const quizRoutes: RouteObject[] = [
     {
@@ -14,7 +14,7 @@ const quizRoutes: RouteObject[] = [
     },
     {
         path: '/quiz/create',
-        element: <CreateQuizContent />,
+        element: <CreateQuizPage />,
     },
 ];
 

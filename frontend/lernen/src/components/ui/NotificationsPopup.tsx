@@ -100,6 +100,9 @@ const NotificationsPopup: React.FC = () => {
     setNotifications(
         notifications.map(n => n.id === id ? { ...n, read: true } : n)
     );
+    // useEffect sẽ tự update count
+    
+    // Call API to mark as read in database
     notificationsService.markAsRead(id).catch(error => {
       console.error('Failed to mark notification as read:', error);
     });
@@ -109,13 +112,17 @@ const NotificationsPopup: React.FC = () => {
     setIsLoadingMore(true);
     try {
       const newNotifications = await notificationsService.loadMoreNotifications(currentPage + 1, NOTIFICATIONS_PER_PAGE);
-
+      
+      // Merge, deduplicate by ID, and sort by createdAt (newest first)
       const notificationMap = new Map<string, Notification>();
-
+      
+      // Add existing notifications
       notifications.forEach(notif => notificationMap.set(notif.id, notif));
       
+      // Add new notifications (overwrites if ID exists)
       newNotifications.forEach(notif => notificationMap.set(notif.id, notif));
       
+      // Convert to array and sort by createdAt DESC
       const allNotifications = Array.from(notificationMap.values()).sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );

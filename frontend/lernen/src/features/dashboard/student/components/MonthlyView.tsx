@@ -1,11 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Booking } from '../types';
+import commonUtils from '../../../../utils/commonUtils';
+import type { Session } from '../../../../types/class';
 
 interface MonthlyViewProps {
     currentDate: Date;
-    bookings: Booking[];
-    onSessionClick: (booking: Booking, event: React.MouseEvent) => void;
+    bookings: Session[];
+    onSessionClick: (session: Session, event: React.MouseEvent) => void;
 }
 
 const MonthlyView: React.FC<MonthlyViewProps> = ({ currentDate, bookings, onSessionClick }) => {
@@ -51,23 +52,40 @@ const MonthlyView: React.FC<MonthlyViewProps> = ({ currentDate, bookings, onSess
             </div>
             <div className="grid grid-cols-7 grid-rows-6">
                 {calendarDays.map((d, index) => {
-                    const dayDate = d.isCurrentMonth ? new Date(year, month, d.day) : null;
-                    const sessionsForDay = dayDate
-                        ? bookings.filter(booking => booking.date.toDateString() === dayDate.toDateString())
-                        : [];
+                    // Calculate actual date for this calendar cell
+                    let actualDate: Date;
+                    if (d.isCurrentMonth) {
+                        actualDate = new Date(year, month, d.day);
+                    } else {
+                        // Determine if this is previous or next month based on position in array
+                        const prevMonthDays = startDayOfWeek; // Number of days from previous month
+                        if (index < prevMonthDays) {
+                            // Previous month
+                            actualDate = new Date(year, month - 1, d.day);
+                        } else {
+                            // Next month
+                            actualDate = new Date(year, month + 1, d.day);
+                        }
+                    }
+                    
+                    const sessionsForDay = bookings.filter(session => {
+                        // Convert UTC datetime from backend to local timezone
+                        const localSessionDate = commonUtils.convertUTCToLocalDate(session.sessionDatetime);
+                        return localSessionDate.toDateString() === actualDate.toDateString();
+                    });
 
                     return (
                         <div key={index} className={`calendar-day-cell h-28 p-2 border-r border-b border-gray-200 ${!d.isCurrentMonth ? 'bg-gray-50' : ''}`}>
                             <p className={`text-sm font-semibold ${d.isCurrentMonth ? 'text-gray-800' : 'text-gray-400'}`}>{d.day}</p>
-                            {d.isCurrentMonth && sessionsForDay.length > 0 && (
+                            {sessionsForDay.length > 0 && (
                                 <div className="mt-1 space-y-1 overflow-y-auto max-h-20 custom-scrollbar">
                                     {sessionsForDay.map(session => (
                                         <div
                                             key={session.id}
                                             onClick={(e) => onSessionClick(session, e)}
-                                            className={`text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer ${session.color}`}
+                                            className="text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer bg-[#0b6459] text-white"
                                         >
-                                            {session.title}
+                                            {session.classInfo?.title || 'Session'}
                                         </div>
                                     ))}
                                 </div>

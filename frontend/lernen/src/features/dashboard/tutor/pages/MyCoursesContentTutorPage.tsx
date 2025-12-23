@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch, HiPlus } from 'react-icons/hi';
 import type { TutorCourse } from '../components/TutorCourseCard';
 import TutorCourseCard from '../components/TutorCourseCard';
+import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
 const mockTutorCourses: TutorCourse[] = [
     {
@@ -49,6 +50,14 @@ const MyCoursesPage: React.FC = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<FilterTab>('All');
     const [searchTerm, setSearchTerm] = useState('');
+    const { setBreadcrumb } = useBreadcrumb();
+
+    useEffect(() => {
+        setBreadcrumb([
+            { label: 'Dashboard', path: '/dashboard' },
+            { label: 'My Courses' }
+        ]);
+    }, [setBreadcrumb]);
 
     const handleCreateCourse = () => {
         navigate('/dashboard/create-course');

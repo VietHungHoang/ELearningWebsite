@@ -36,11 +36,9 @@ axiosInstance.interceptors.request.use(
         config.headers.Authorization = `Bearer ${token}`;
         
         // Add X-User-Id header for chat endpoints
-        if (config.url?.includes('/conversations') || config.url?.includes('/messages')) {
-          const userId = getUserIdFromToken(token);
-          if (userId) {
-            config.headers['X-User-Id'] = userId;
-          }
+        const userId = getUserIdFromToken(token);
+        if (userId) {
+          config.headers['X-User-Id'] = userId;
         }
       }
     }

@@ -4,22 +4,15 @@ interface ModalLayoutProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   showCloseButton?: boolean;
 }
 
-const maxWidthClasses = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-};
-
-const ModalLayout: React.FC<ModalLayoutProps> = ({ 
-  isOpen, 
-  onClose, 
+const ModalLayout: React.FC<ModalLayoutProps> = ({
+  isOpen,
+  onClose,
   children,
-  maxWidth = 'md',
+  maxWidth = 'xl',
   showCloseButton = false
 }) => {
   const [shouldRender, setShouldRender] = useState(isOpen);
@@ -60,16 +53,20 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
     >
       {/* Background overlay */}
       <div
-        className={`fixed inset-0 bg-black transition-opacity duration-200 ${
-          isAnimating ? 'opacity-50' : 'opacity-0'
-        }`}
+        className={`fixed inset-0 bg-black transition-opacity duration-200 ${isAnimating ? 'opacity-50' : 'opacity-0'
+          }`}
       />
-      
+
       {/* Modal content */}
       <div
-        className={`bg-white rounded-2xl shadow-2xl ${maxWidth ? maxWidthClasses[maxWidth] : ''} relative z-10 transition-all duration-200 ease-out ${
-          isAnimating ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
-        }`}
+        className={`w-full bg-white rounded-2xl shadow-2xl ${maxWidth === 'sm' ? 'max-w-sm' :
+          maxWidth === 'md' ? 'max-w-md' :
+            maxWidth === 'lg' ? 'max-w-lg' :
+              maxWidth === 'xl' ? 'max-w-xl' :
+                maxWidth === '2xl' ? 'max-w-2xl' :
+                  'max-w-xl'
+          } relative z-10 transition-all duration-200 ease-out ${isAnimating ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         {showCloseButton && (

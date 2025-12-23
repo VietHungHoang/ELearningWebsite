@@ -3,6 +3,7 @@ import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import commonUtils from '../../../../utils/commonUtils';
 import type { TutorSearchFilter } from '../../../../types/api';
 import type { Category, Language, Subject, Timezone } from '../../../../types/common';
+import { useTranslation } from 'react-i18next';
 
 // --- Type Definitions ---
 interface TutorSearchFiltersProps {
@@ -19,6 +20,7 @@ interface MultiSelectDropdownProps {
     openDropdown: string | null;
     setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
     loading?: boolean;
+    loadingText?: string;
 }
 
 interface MultiSelectDropdownWithSearchProps {
@@ -32,10 +34,11 @@ interface MultiSelectDropdownWithSearchProps {
     setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
     searchPlaceholder?: string;
     loading?: boolean;
+    loadingText?: string;
 }
 
 // --- Reusable Multi-Select Dropdown Component ---
-const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false }) => {
+const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false, loadingText = "Loading..." }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const tagsContainerRef = useRef<HTMLDivElement>(null);
     const isOpen = openDropdown === dropdownId;
@@ -125,7 +128,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, option
 };
 
 // --- Reusable Multi-Select Dropdown with Search Component ---
-const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search...", loading = false }) => {
+const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search...", loading = false, loadingText = "Loading..." }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const tagsContainerRef = useRef<HTMLDivElement>(null);
@@ -247,7 +250,8 @@ interface TutorSearchFiltersProps {
 
 // --- Main Filters Component ---
 export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSearchFiltersProps): React.ReactElement {
-    const [activeTab, setActiveTab] = useState<string>('All Sessions');
+    const { t } = useTranslation();
+    const [activeTab, setActiveTab] = useState<string>(t('findTutors.filters.tabs.allSessions'));
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [feeRange, setFeeRange] = useState([0, 150]);
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
@@ -269,11 +273,11 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const [loadingFilterData, setLoadingFilterData] = useState<boolean>(false);
 
     const placeholders = {
-        category: 'Choose category',
-        subject: 'Choose subject',
-        languages: 'Select languages',
-        sortBy: 'Sort by',
-        timezone: 'Select timezone',
+        category: t('findTutors.filters.placeholders.chooseCategory'),
+        subject: t('findTutors.filters.placeholders.chooseSubject'),
+        languages: t('findTutors.filters.placeholders.selectLanguages'),
+        sortBy: t('findTutors.filters.placeholders.sortBy'),
+        timezone: t('findTutors.filters.placeholders.selectTimezone'),
     };
     
     const [selectedValues, setSelectedValues] = useState({
@@ -285,7 +289,11 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-    const tabs: string[] = ['All Sessions', 'Private Sessions', 'Group Sessions'];
+    const tabs: string[] = [
+        t('findTutors.filters.tabs.allSessions'),
+        t('findTutors.filters.tabs.privateSessions'),
+        t('findTutors.filters.tabs.groupSessions')
+    ];
     const activeShadowClass = 'shadow-[0px_1px_3px_0px_rgba(16,24,40,0.1),_0px_1px_2px_0px_rgba(16,24,40,0.06)]';
 
     const handleSearch = () => {
@@ -340,10 +348,26 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         ? subjects.filter(sub => sub.categoryId === selectedCategoryId).map(sub => sub.name)
         : subjects.map(sub => sub.name);
     const timezoneOptions: string[] = timezones.map(tz => tz.name);
-    const sortByOptions: string[] = ['Relevance', 'Newest First', 'Oldest First'];
+    const sortByOptions: string[] = [
+        t('findTutors.filters.sortOptions.relevance'),
+        t('findTutors.filters.sortOptions.newestFirst'),
+        t('findTutors.filters.sortOptions.oldestFirst')
+    ];
     const languageOptions: string[] = languages.map(lang => lang.name);
-    const availabilityDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const availabilityTimes = ['Morning', 'Afternoon', 'Evening'];
+    const availabilityDays = [
+        t('findTutors.filters.availability.days.mon'),
+        t('findTutors.filters.availability.days.tue'),
+        t('findTutors.filters.availability.days.wed'),
+        t('findTutors.filters.availability.days.thu'),
+        t('findTutors.filters.availability.days.fri'),
+        t('findTutors.filters.availability.days.sat'),
+        t('findTutors.filters.availability.days.sun')
+    ];
+    const availabilityTimes = [
+        t('findTutors.filters.availability.times.morning'),
+        t('findTutors.filters.availability.times.afternoon'),
+        t('findTutors.filters.availability.times.evening')
+    ];
 
 
     const handleSelect = (dropdownId: keyof typeof selectedValues, value: string) => {
@@ -427,7 +451,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                     <div className="p-4 bg-[#FBF6EE] rounded-b-xl rounded-tr-xl">
                         <div className="grid w-full grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                             <CustomDropdown 
-                                label="Category"
+                                label={t('findTutors.filters.labels.category')}
                                 options={categoryOptions}
                                 selectedValue={selectedValues.category}
                                 placeholder={placeholders.category}
@@ -435,11 +459,11 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 dropdownId="category" openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
                                 hasSearch={true}
-                                searchPlaceholder="Search..."
+                                searchPlaceholder={t('findTutors.filters.placeholders.search')}
                                 loading={loadingFilterData}
                             />
                             <CustomDropdown
-                                label="Choose subject"
+                                label={t('findTutors.filters.labels.subject')}
                                 options={subjectOptions}
                                 selectedValue={selectedValues.subject}
                                 placeholder={placeholders.subject}
@@ -448,12 +472,12 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
                                 hasSearch={true}
-                                searchPlaceholder="Search subjects..."
+                                searchPlaceholder={t('findTutors.filters.placeholders.searchSubjects')}
                                 loading={loadingFilterData}
                             />
                             <div className="bg-white pt-2.5 px-3 pb-2.5 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] flex flex-col justify-center">
                                 <div className="flex justify-between items-center mb-1.5">
-                                    <label className="text-xs text-[#585858]">Fee per session</label>
+                                    <label className="text-xs text-[#585858]">{t('findTutors.filters.labels.feePerSession')}</label>
                                     <span className="text-sm font-semibold text-gray-800">${feeRange[0]} - ${feeRange[1]}</span>
                                 </div>
                                 <div className="relative h-5 flex items-center">
@@ -493,7 +517,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 </div>
                             </div>
                             <MultiSelectDropdownWithSearch 
-                                label="Tutor languages"
+                                label={t('findTutors.filters.labels.tutorLanguages')}
                                 options={languageOptions}
                                 selectedOptions={selectedLanguages}
                                 onToggleOption={handleLanguageToggle}
@@ -501,24 +525,25 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 dropdownId="languages"
                                 openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
-                                searchPlaceholder="Search by language..."
+                                searchPlaceholder={t('findTutors.filters.placeholders.searchByLanguage')}
                                 loading={loadingFilterData}
+                                loadingText={t('findTutors.filters.loading')}
                             />
 
                             {/* Availability Filter */}
                             <div className="relative" ref={availabilityRef}>
                                 <div onClick={() => setOpenDropdown(openDropdown === 'availability' ? null : 'availability')} className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] cursor-pointer flex flex-col justify-center">
-                                    <label className="text-xs text-[#585858] block mb-1.5">Availability</label>
+                                    <label className="text-xs text-[#585858] block mb-1.5">{t('findTutors.filters.labels.availability')}</label>
                                     <div className="flex items-center justify-between">
                                         <span className={`text-sm font-normal  ${selectedAvailability.length === 0 ? 'text-[rgba(88,88,88,0.4)]' : 'text-gray-800'}`}>
-                                            {selectedAvailability.length === 0 ? 'Anytime' : `${selectedAvailability.length} slots selected`}
+                                            {selectedAvailability.length === 0 ? t('findTutors.filters.placeholders.anytime') : `${selectedAvailability.length} ${t('findTutors.filters.availability.slotsSelected')}`}
                                         </span>
                                         <svg className={`flex-shrink-0 ml-2 w-4 h-4 text-gray-500 transition-transform duration-200 ${openDropdown === 'availability' ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
                                     </div>
                                 </div>
                                 {openDropdown === 'availability' && (
                                     <div className="absolute z-20 mt-1 w-full max-w-sm bg-white rounded-xl shadow-lg border border-gray-200/80 p-4">
-                                        <p className="font-semibold text-sm mb-3">Select available slots</p>
+                                        <p className="font-semibold text-sm mb-3">{t('findTutors.filters.availability.selectSlots')}</p>
                                         <div className="grid grid-cols-4 gap-2 text-center">
                                             <div></div>
                                             {availabilityTimes.map(time => <div key={time} className="text-xs font-bold text-gray-500">{time}</div>)}
@@ -538,8 +563,8 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                             ))}
                                         </div>
                                         <div className="flex justify-between items-center mt-4">
-                                            <button onClick={() => setSelectedAvailability([])} className="text-xs font-semibold text-gray-600 hover:underline">Clear</button>
-                                            <button onClick={() => setOpenDropdown(null)} className="text-xs font-semibold bg-[#0b6459] text-white px-3 py-1.5 rounded-md">Apply</button>
+                                            <button onClick={() => setSelectedAvailability([])} className="text-xs font-semibold text-gray-600 hover:underline">{t('findTutors.filters.availability.clear')}</button>
+                                            <button onClick={() => setOpenDropdown(null)} className="text-xs font-semibold bg-[#0b6459] text-white px-3 py-1.5 rounded-md">{t('findTutors.filters.availability.apply')}</button>
                                         </div>
                                     </div>
                                 )}
@@ -554,7 +579,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                         <div className="relative flex-grow max-w-xs">
                             <input
                                 type="text"
-                                placeholder="Search by keyword"
+                                placeholder={t('findTutors.filters.placeholders.searchByKeyword')}
                                 className="w-full bg-white p-2.5 pl-10 pr-12 text-sm font-medium text-gray-800 rounded-xl border border-gray-200/80 shadow-sm focus:border-[#065a46] focus:outline-none"
                                 value={keyword}
                                 onChange={(e) => setKeyword(e.target.value)}

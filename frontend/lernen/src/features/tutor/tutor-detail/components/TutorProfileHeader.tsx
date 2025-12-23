@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaPinterest, FaYoutube } from "react-icons/fa";
 import { VscVerified } from "react-icons/vsc";
 import { PiStar, PiStudentLight, PiCalendar, PiBookOpenTextLight } from "react-icons/pi";
@@ -6,18 +6,71 @@ import { FiCalendar, FiMessageSquare } from "react-icons/fi";
 import { FaHeart, FaPlay } from "react-icons/fa";
 import { RiSpeakLine } from "react-icons/ri";
 import { AiOutlineGlobal } from "react-icons/ai";
-import Avatar from 'react-avatar';
-import type { TutorDetail } from "../../../../types/tutor";
+import Avatar from "react-avatar";
+import type { Tutor } from "../../../../types/tutor";
 import { FlagIcon } from "../../find-tutor/components/TutorCard";
 import { useCurrency } from "../../../../context/CurrencyContext";
+import { useChat } from "../../../../context/ChatContext";
 import { convertFromVND, formatCurrency } from "../../../../utils/currencyHelper";
-const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
+import { useTranslation } from "react-i18next";
+import { tutorService } from "../../../../services/tutorService";
+import { useAuth } from "../../../../context/AuthContext";
+import { classService } from "../../../../services/classService";
+
+const TutorProfileHeader: React.FC<{
+    tutorId: string;
+    onTutorData?: (tutor: Tutor, trialSessionRequest?: any) => void;
+}> = ({ tutorId, onTutorData }) => {
+    const [tutor, setTutor] = useState<Tutor | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [hasTrialSession, setHasTrialSession] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const { selectedCurrency } = useCurrency();
+    const { openChatWithTutor } = useChat();
+    const { state } = useAuth();
+    const { t } = useTranslation();
 
-    // Convert price from VND to selected currency
-    const convertedPrice = convertFromVND(tutor.currentSessionFee || 0, selectedCurrency);
+    // Fetch tutor data
+    useEffect(() => {
+        const fetchTutorData = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await tutorService.getTutor(tutorId, state.user?.id);
+                setTutor(response.data);
+                onTutorData?.(response.data);
+
+                // Check if user has trial session with this tutor
+                if (state.user?.id) {
+                    try {
+                        const trialResponse = await classService.getTrialSessionRequest(tutorId, state.user.id);
+                        setHasTrialSession(trialResponse.data !== null);
+                        onTutorData?.(response.data);
+                    } catch (trialError) {
+                        console.error("Failed to check trial session:", trialError);
+                        setHasTrialSession(false);
+                        onTutorData?.(response.data);
+                    }
+                } else {
+                    setHasTrialSession(false);
+                    onTutorData?.(response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch tutor data:", err);
+                setError("Failed to load tutor information");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (tutorId) {
+            fetchTutorData();
+        }
+    }, [tutorId, state.user?.id]);
+
+    const convertedPrice = tutor ? convertFromVND(tutor.currentSessionFee || 0, selectedCurrency) : 0;
     const formattedPrice = formatCurrency(convertedPrice, selectedCurrency);
 
     const handlePlayClick = () => {
@@ -28,15 +81,21 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
     };
 
     const handleBookSessionClick = () => {
-        const element = document.getElementById('availability');
+        const element = document.getElementById("availability");
         if (element) {
             const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - 80; // Adjust offset as needed
-      
+            const offsetPosition = elementPosition + window.pageYOffset - 80;
+
             window.scrollTo({
-                 top: offsetPosition,
-                 behavior: "smooth"
+                top: offsetPosition,
+                behavior: "smooth",
             });
+        }
+    };
+
+    const handleSendMessageClick = () => {
+        if (tutor) {
+            openChatWithTutor(tutor.id, tutor.fullName);
         }
     };
 
@@ -47,8 +106,125 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
         instagram: <FaInstagram />,
         pinterest: <FaPinterest />,
         youtube: <FaYoutube />,
-        tiktok: <span className="text-xs font-bold">TT</span>, // TikTok icon not available, using text
+        tiktok: <span className="text-xs font-bold">TT</span>,
     };
+
+    // Skeketon
+    if (loading || error || !tutor) {
+        return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Tutor Details */}
+                <div className="lg:col-span-2">
+                    <div className="animate-pulse">
+                        {/* Header section */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start">
+                            <div className="flex items-center gap-4">
+                                <div className="relative">
+                                    <div className="w-18 h-18 bg-gray-200 rounded-2xl"></div>
+                                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-gray-300 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="h-8 bg-gray-200 rounded w-48"></div>
+                                        <div className="w-5 h-5 bg-gray-200 rounded"></div>
+                                        <div className="w-6 h-4 bg-gray-200 rounded"></div>
+                                    </div>
+                                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                </div>
+                            </div>
+                            <div className="text-left sm:text-right mt-4 sm:mt-0 flex-shrink-0">
+                                <div className="flex flex-col items-end gap-1">
+                                    <div className="h-3 bg-gray-200 rounded w-20 mb-1"></div>
+                                    <div className="h-8 bg-gray-200 rounded w-24"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Stats section */}
+                        <div className="my-1 py-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                {/* Left stats column */}
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 bg-gray-200 rounded mr-3 flex-shrink-0"></div>
+                                        <div className="flex-grow">
+                                            <div className="h-4 bg-gray-200 rounded w-32 mb-1"></div>
+                                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 bg-gray-200 rounded mr-3 flex-shrink-0"></div>
+                                        <div className="flex-grow">
+                                            <div className="h-4 bg-gray-200 rounded w-28"></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 bg-gray-200 rounded mr-3 flex-shrink-0"></div>
+                                        <div className="flex-grow">
+                                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 bg-gray-200 rounded mr-3 flex-shrink-0"></div>
+                                        <div className="flex-grow">
+                                            <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                                            <div className="flex gap-2">
+                                                <div className="w-11 h-11 bg-gray-200 rounded-lg"></div>
+                                                <div className="w-11 h-11 bg-gray-200 rounded-lg"></div>
+                                                <div className="w-11 h-11 bg-gray-200 rounded-lg"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Right stats column */}
+                                <div className="space-y-4">
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 bg-gray-200 rounded mr-3 flex-shrink-0"></div>
+                                        <div className="flex-grow">
+                                            <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-40"></div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="w-5 h-5 bg-gray-200 rounded mr-3 flex-shrink-0"></div>
+                                        <div className="flex-grow">
+                                            <div className="h-4 bg-gray-200 rounded w-16 mb-2"></div>
+                                            <div className="flex gap-2 flex-wrap">
+                                                <div className="h-5 bg-gray-200 rounded w-16"></div>
+                                                <div className="h-5 bg-gray-200 rounded w-12"></div>
+                                                <div className="h-5 bg-gray-200 rounded w-14"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Buttons section */}
+                        <div className="mt-2 flex items-center gap-3">
+                            <div className="h-11 bg-gray-200 rounded-xl w-40"></div>
+                            <div className="h-11 bg-gray-200 rounded-xl w-36"></div>
+                            <div className="w-11 h-11 bg-gray-200 rounded-lg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Video Player */}
+                <div className="w-full lg:col-span-1 pl-2">
+                    <div className="animate-pulse">
+                        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden shadow-lg p-2 bg-gray-100">
+                            <div className="w-full h-full bg-gray-200 rounded-2xl"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <div className="w-6 h-6 bg-gray-400 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -85,11 +261,13 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                     <div className="text-left sm:text-right mt-4 sm:mt-0 flex-shrink-0">
                         <div className="flex flex-col items-end gap-1">
                             <div className="flex items-center justify-end gap-2">
-                                <p className="text-xs text-gray-500">Session fee</p>
+                                <p className="text-xs text-gray-500">{t("tutorDetail.profile.sessionFee")}</p>
                             </div>
                             <p className="text-3xl font-bold text-gray-800">
                                 {formattedPrice}
-                                <span className="text-base font-normal text-gray-500">/50 min</span>
+                                <span className="text-base font-normal text-gray-500">
+                                    {t("tutorDetail.profile.perMin")}
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -117,7 +295,7 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                         <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
                                             {tutor.bookedSessionsCount}
                                         </span>{" "}
-                                        Booked sessions
+                                        {t("tutorDetail.profile.bookedSessions")}
                                     </>
                                 }
                             />
@@ -128,14 +306,14 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                         <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
                                             {tutor.studentCount}
                                         </span>{" "}
-                                        Students
+                                        {t("tutorDetail.profile.students")}
                                     </>
                                 }
                             />
                             {/* <StatItem icon={<ClockIcon />} text={<><span className="font-bold">{tutor.responseTime}</span> Response time</>} /> */}
                             <StatItem
                                 icon={<AiOutlineGlobal style={{ color: "rgb(88, 88, 88)", fontSize: "17px" }} />}
-                                text={<>Social profiles</>}
+                                text={<>{t("tutorDetail.profile.socialProfiles")}</>}
                                 content={
                                     <div className="flex items-center gap-3 flex-wrap">
                                         {tutor.socialLinks &&
@@ -167,18 +345,19 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                         <div className="space-y-4">
                             <StatItem
                                 icon={<PiBookOpenTextLight style={{ color: "rgb(88, 88, 88)", fontSize: "17px" }} />}
-                                text={<>I can teach</>}
+                                text={<>{t("tutorDetail.profile.canTeach")}</>}
                                 content={
                                     <div>
                                         <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
-                                            {tutor.subjects && tutor.subjects.map((subject: any) => subject.name).join(", ")}
+                                            {tutor.subjects &&
+                                                tutor.subjects.map((subject: any) => subject.name).join(", ")}
                                         </span>
                                     </div>
                                 }
                             />
                             <StatItem
                                 icon={<RiSpeakLine />}
-                                text={<>I can speak</>}
+                                text={<>{t("tutorDetail.profile.canSpeak")}</>}
                                 content={
                                     <div>
                                         {tutor.languages &&
@@ -189,7 +368,7 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                                     </span>
                                                     {lang.isNative && (
                                                         <span className="ml-1 px-2 py-0.5 bg-gray-100 text-xs font-medium rounded-md">
-                                                            Native
+                                                            {t("tutorDetail.profile.native")}
                                                         </span>
                                                     )}
                                                     {index < tutor.languages.length - 1 && (
@@ -212,11 +391,20 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                 </div>
 
                 <div className="mt-2 flex items-center gap-3">
-                    <button onClick={handleBookSessionClick} className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] transition-colors">
-                        {tutor.hasTrialSession ? 'Book a trial session' : 'Book a session'} <FiCalendar />
+                    <button
+                        onClick={handleBookSessionClick}
+                        className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] transition-colors"
+                    >
+                        {hasTrialSession
+                            ? t("tutorDetail.profile.bookTrialSession")
+                            : t("tutorDetail.profile.bookSession")}{" "}
+                        <FiCalendar />
                     </button>
-                    <button className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors">
-                        Send message <FiMessageSquare />
+                    <button
+                        onClick={handleSendMessageClick}
+                        className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors"
+                    >
+                        {t("tutorDetail.profile.sendMessage")} <FiMessageSquare />
                     </button>
                     <button className="p-3.5 text-gray-500 rounded-lg hover:border hover:border-gray-300 hover:bg-gray-50 hover:text-red-500 transition-colors">
                         <FaHeart />
@@ -234,7 +422,7 @@ const TutorProfileHeader: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                         className="w-full h-full object-cover border-2 border-gray-200 rounded-2xl"
                     >
                         <source src={tutor.videoUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
+                        {t("tutorDetail.profile.videoNotSupported")}
                     </video>
                     {!isPlaying && (
                         <div

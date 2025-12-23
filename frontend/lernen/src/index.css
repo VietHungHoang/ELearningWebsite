@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+/* Custom scrollbar for main content */
+.custom-scrollbar-main {
+  overflow-y: auto;
+}
+
+.custom-scrollbar-main::-webkit-scrollbar {
+  width: 10px;
+}
+
+.custom-scrollbar-main::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 0 16px 16px 0;
+}
+
+.custom-scrollbar-main::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.4);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar-main::-webkit-scrollbar-thumb:hover {
+  background: rgba(203, 213, 225, 1);
+  background-clip: padding-box;
+}
+
+.custom-scrollbar-main::-webkit-scrollbar-thumb:active {
+  background: rgba(148, 163, 184, 1);
+  background-clip: padding-box;
+}
+
+/* For Firefox */
+.custom-scrollbar-main {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.4) transparent;
+}
+
+.custom-scrollbar-main:hover {
+  scrollbar-color: rgba(203, 213, 225, 1) transparent;
+}

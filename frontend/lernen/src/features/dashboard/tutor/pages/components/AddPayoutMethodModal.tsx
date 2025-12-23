@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HiX, HiCreditCard, HiOfficeBuilding } from 'react-icons/hi';
-import type { PayoutMethodType } from '../PayoutsPage';
+import type { PayoutMethodType } from '../../payout/PayoutsPage';
 
 interface AddPayoutMethodModalProps {
   isOpen: boolean;

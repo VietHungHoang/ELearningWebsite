@@ -1,5 +1,5 @@
 import type { Category, Language, Timezone, Subject } from "./common";
-import type { TutorResponse, EducationItem, ExperienceItem, CertificationItem, SocialLink, ClassScheduleItem } from "./tutor";
+import type { TutorResponse, EducationItem, ExperienceItem, CertificationItem, SocialLink } from "./tutor";
 
 export interface ApiResponse<T> {
     status: number;
@@ -195,71 +195,12 @@ export interface StudentDetail extends Student {
     tutorNotes?: string;
 }
 
-export interface ClassStudent {
-    id: string;
-    name: string;
-    avatar: string;
-}
-
-export interface ClassQuiz {
-    id: string;
-    title: string;
-    status: 'Completed' | 'Pending';
-}
-
-export interface ClassMaterial {
-    id: string;
-    name: string;
-    type: 'PDF' | 'Video' | 'ZIP';
-    date: string;
-}
-
-export interface Class {
-    id: string;
-    courseTitle: string;
-    students: ClassStudent[];
-    type: '1-on-1' | 'Group';
-    status: 'Ongoing' | 'Completed';
-    schedules: ClassScheduleItem[];
-    startDate: string;
-    completedSessions: number;
-    totalSessions: number;
-    quizzes: ClassQuiz[];
-    materials: ClassMaterial[];
-}
-
-export interface ClassStats {
-    totalStudents: number;
-    activeStudents: number;
-    completedSessions: number;
-    totalSessions: number;
-    averageAttendance: number;
-    averageProgress: number;
-}
-
-export interface ClassSession {
-    id: string;
-    date: string;
-    time: string;
-    duration: string;
-    topic: string;
-    attendance: { studentId: string; status: 'Present' | 'Absent' | 'Late' }[];
-    materials: ClassMaterial[];
-}
-
-export interface ClassDetail extends Class {
-    stats: ClassStats;
-    sessions: ClassSession[];
-    announcements: { id: string; title: string; content: string; date: string; author: string }[];
-    assignments: { id: string; title: string; description: string; dueDate: string; submissions: number }[];
-}
-
 export type PayoutStatus = 'Completed' | 'Processing' | 'Failed';
 export type PayoutMethodType = 'PayPal' | 'Bank';
 
 export interface PayoutMethod {
     id: string; // UUID
-    type: PayoutMethodType;
+    type: string;
     identifier: string;
 }
 
@@ -269,6 +210,13 @@ export interface PayoutHistoryItem {
     amount: number;
     method: PayoutMethod;
     status: PayoutStatus;
+}
+
+export interface PayoutStats {
+    availableBalance: number;
+    pendingBalance: number;
+    totalEarned: number;
+    currentPaymentMethod?: PayoutMethod;
 }
 
 export interface PayoutSummary {

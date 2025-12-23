@@ -1,69 +1,48 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { tutorService } from "../../../services/tutorService";
-import { useAuth } from "../../../context/AuthContext";
 import Layout from "../../../components/ui/Layout";
 import Breadcrumb from "../../../components/ui/Breadcrumb";
-import TutorProfileHeader from "./components/TutorProfileHeader";
 import TutorDetailsTabs from "./components/TutorDetailsTabs";
 import AboutMeSection from "./components/AboutMeSection";
 import BookASession from "./components/BookASession";
 import StudentReviews from "./components/StudentReviews";
 import SimilarTutors from "./components/SimilarTutors";
 import ResumeHighlights from "./components/ResumeHighlights";
-import BookSessionModal from "./components/BookSessionModal";
-import BookTrialModal from "./components/BookTrialModal";
 import GroupClassSection from "./components/GroupClassSection";
+import TutorProfileHeader from "./components/TutorProfileHeader";
 
 const TutorDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const { tutorId } = useParams<{ tutorId: string }>();
-    const { state, isInitialized } = useAuth();
-    const [tutor, setTutor] = useState<TutorDetail | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
-    const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
-    const [loading, setLoading] = useState(true)
 
-    const [bookedTrialSlots, setBookedTrialSlots] = useState<string[]>([]);
+    const [introduction, setIntroduction] = useState<string>("");
+    const [tutorData, setTutorData] = useState<any>(null);
 
-    const handleTrialBookingSuccess = () => {
-        // Update tutor state to reflect that trial session is no longer available
-        setTutor(prev => prev ? { ...prev, hasTrialSession: false } : null);
-        // Add booked time to pending slots
-        setBookedTrialSlots(prev => [...prev, selectedTimes[0]]);
+    const handleTutorData = (tutor: any) => {
+        console.log("Tutor introduction:", tutor);
+        setTutorData(tutor);
+        if (tutor.introduction) {
+            setIntroduction(tutor.introduction);
+        }
+    };
+
+    const handleNavigateToApp = (page: string, data?: any) => {
+        if (page === 'checkout' && data) {
+            // Navigate to checkout with booking data and tutor data
+            navigate(`/${page}`, { 
+                state: data // Pass the entire data object which contains bookingData and tutor
+            });
+        } else {
+            navigate(`/${page}`);
+        }
     };
 
     useEffect(() => {
-        // Wait for auth to be initialized before fetching tutor detail
-        if (tutorId && isInitialized) {
-            const fetchTutorDetail = async () => {
-                try {
-                    const response = await tutorService.getTutorDetail(tutorId, state.user?.id);
-                    setTutor(response.data);
-                    console.log("Tutor detail fetched:", response.data);
-                } catch (error) {
-                    console.error("Failed to fetch tutor detail:", error);
-                    navigate("/not-found");
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchTutorDetail();
+        if (!tutorId) {
+            navigate("/not-found");
         }
-    }, [tutorId, navigate, state.user?.id, isInitialized]);
+    }, [tutorId, navigate]);
 
-    if (loading || !tutor) {
-        return (
-            <Layout pageColor="#FAf8F5">
-                <main className="mx-auto py-8">
-                    <div className="max-w-7xl mx-auto text-center">
-                        <p>Loading...</p>
-                    </div>
-                </main>
-            </Layout>
-        );
-    }
     return (
         <Layout pageColor="#FAf8F5">
             <main className="mx-auto py-8">
@@ -72,44 +51,41 @@ const TutorDetailPage: React.FC = () => {
                         paths={[
                             { name: "Home", path: "/" },
                             { name: "Find Tutors", path: "/find-tutors" },
-                            { name: tutor.fullName, path: `/tutors/${tutor.id}` },
+                            { name: "Tutor Profile", path: `/tutors/${tutorId}` },
                         ]}
                     />
                 </div>
                 <div className="mt-6 max-w-7xl mx-auto">
-                    <TutorProfileHeader tutor={tutor} />
+                    <TutorProfileHeader tutorId={tutorId!} onTutorData={handleTutorData} />
                 </div>
 
                 <div className="max-w-7xl mx-auto mt-10">
-                    <TutorDetailsTabs tutor={tutor} />
+                    <TutorDetailsTabs groupClassesCount={5} reviewsCount={10} />
                 </div>
 
                 <div id="introduction" className="max-w-7xl mx-auto pt-1 px-8">
-                    <AboutMeSection tutor={tutor} />
+                    <AboutMeSection introduction={introduction} />
                 </div>
 
                 <div id="availability" className=" mx-auto py-10 min-h-[700px] bg-white">
                     <div className="max-w-7xl mx-auto px-8">
                         <BookASession
-                            onOpenModal={() => setIsModalOpen(true)}
-                            onOpenTrialModal={() => setIsTrialModalOpen(true)}
-                            tutor={tutor}
-                            selectedTimes={selectedTimes}
-                            onTimesSelect={setSelectedTimes}
-                            bookedTrialSlots={bookedTrialSlots}
+                            tutorId={tutorId!}
+                            tutorData={tutorData}
+                            navigateToApp={handleNavigateToApp}
                         />
                     </div>
                 </div>
 
-                <div className="container max-w-7xl mx-auto px-8 py-8">
+                {/* <div className="container max-w-7xl mx-auto px-8 py-8">
                     <div id="group-class" className="pt-16 -mt-16">
-                        <GroupClassSection />
+                        <GroupClassSection tutorId={tutorId!} />
                     </div>
                     <div id="resume-highlights" className="pt-16 -mt-16">
-                        <ResumeHighlights tutor={tutor} />
+                        <ResumeHighlights tutorId={tutorId!} />
                     </div>
                     <div id="reviews" className="pt-16 -mt-16">
-                        <StudentReviews tutor={tutor} />
+                        <StudentReviews tutorId={tutorId!} />
                     </div>
 
                     <hr className="my-12 border-t border-gray-200" />
@@ -117,21 +93,8 @@ const TutorDetailPage: React.FC = () => {
                     <div id="similar-tutors">
                         <SimilarTutors />
                     </div>
-                </div>
+                </div> */}
             </main>
-            <BookSessionModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                tutor={{ name: tutor.fullName, avatar: tutor.avatarUrl, currentSessionFee: tutor.currentSessionFee }}
-                navigateToApp={(page) => navigate(`/${page}`)}
-            />
-            <BookTrialModal
-                isOpen={isTrialModalOpen}
-                onClose={() => setIsTrialModalOpen(false)}
-                tutor={tutor}
-                selectedTimes={selectedTimes}
-                onSuccess={handleTrialBookingSuccess}
-            />
         </Layout>
     );
 };

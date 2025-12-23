@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
-import commonUtils from "../../../../utils/commonUtils.ts";
-import type { Gender, Language, Tutor } from "../../../../types/api.ts";
+import commonUtils from "../../../../utils/commonUtils";
+import type { TutorOnboardingData, Gender } from '../../../../types/tutor';
+import { useTranslation } from "react-i18next";
 
 interface BasicInformationStepProps {
-    data: Partial<Tutor>;
-    onChange: (data: Partial<Tutor>) => void;
+    data: Partial<TutorOnboardingData>;
+    onChange: (data: Partial<TutorOnboardingData>) => void;
 }
 
 const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onChange }) => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     const countries = useMemo(() => commonUtils.getAllCountries(), []);
     const allLanguages = useMemo(() => commonUtils.getAllLanguages(), [])
     const timezones = Intl.supportedValuesOf("timeZone");
 
     useEffect(() => {
+        console.log("sgdá ", data);
         if (!data.gender) {
             onChange({ gender: "Male" });
         }
@@ -31,9 +34,8 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
             const currentLangCode = navigator.language.split("-")[0];
             const lang = allLanguages.find((l) => l.code === currentLangCode);
             if (lang) {
-                const newLang: Language = {
-                    code: lang.code,
-                    name: lang.name,
+                const newLang = {
+                    language: lang,
                     isNative: true,
                 };
                 onChange({ languages: [...(data.languages || []), newLang] });
@@ -42,16 +44,15 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
     }, [data.gender, data.timezone, data.countryCode, data.languages, allLanguages, onChange]);
 
     const availableLanguages = useMemo(
-        () => allLanguages.filter((l) => !data.languages?.some((lang) => lang.code === l.code)),
+        () => allLanguages.filter((l) => !data.languages?.some((lang) => lang.language.code === l.code)),
         [allLanguages, data.languages]
     );
 
     const handleAddLanguage = (langName: string) => {
         const lang = allLanguages.find((l) => l.name === langName);
-        if (lang && !data.languages?.some((l) => l.code === lang.code)) {
-            const newLang: Language = {
-                code: lang.code,
-                name: lang.name,
+        if (lang && !data.languages?.some((l) => l.language.code === lang.code)) {
+            const newLang = {
+                language: lang,
                 isNative: false,
             };
             onChange({ languages: [...(data.languages || []), newLang] });
@@ -63,7 +64,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
 
         const updatedLanguages = data.languages.map((lang) => ({
             ...lang,
-            isNative: lang.code === langCode ? !lang.isNative : false,
+            isNative: lang.language.code === langCode ? !lang.isNative : false,
         }));
 
         onChange({ languages: updatedLanguages });
@@ -72,7 +73,7 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
     const handleRemoveLanguage = (langCode: string) => {
         if (!data.languages) return;
         onChange({
-            languages: data.languages.filter((l) => l.code !== langCode),
+            languages: data.languages.filter((l) => l.language.code !== langCode),
         });
     };
 
@@ -88,7 +89,6 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                 <p className="text-sm text-gray-500 mt-1">Tell us about yourself to get started</p>
             </div>
 
-            {/* Full Name and Gender in 2 columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -134,10 +134,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                 <input type="email" value={data.email} disabled className={disabledInputStyles} />
             </div>
 
-            {/* Address */}
+            {/* Location */}
             <div>
                 <label className="block text-sm font-medium text-gray-700">
-                    Address <span className="text-red-500">*</span>
+                    {t('onboarding.basicInfo.location')} <span className="text-red-500">*</span>
                 </label>
                 <div className="mt-1 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -150,6 +150,8 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                                 const country = countries.find((c) => c.name === value);
                                 if (country) {
                                     onChange({ countryCode: country.code });
+                                    // Force re-render
+                                    setOpenDropdown(null);
                                 }
                             }}
                             dropdownId="country"
@@ -177,19 +179,18 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                         <label className="text-xs text-gray-500 block mb-1.5 ml-1">Native Language</label>
                         <CustomDropdown
                             options={allLanguages.map((l) => l.name)}
-                            selectedValue={data.languages?.find((l) => l.isNative)?.name || "Select language"}
+                            selectedValue={data.languages?.find((l) => l.isNative)?.language.name || "Select language"}
                             placeholder="Select language"
                             onSelect={(value) => {
                                 const lang = allLanguages.find((l) => l.name === value);
                                 if (lang) {
                                     // Remove isNative from all languages and add the new one as native
                                     const updatedLanguages = (data.languages || [])
-                                        .filter((l) => l.code !== lang.code)
+                                        .filter((l) => l.language.code !== lang.code)
                                         .map((l) => ({ ...l, isNative: false }));
 
                                     updatedLanguages.push({
-                                        code: lang.code,
-                                        name: lang.name,
+                                        language: lang,
                                         isNative: true,
                                     });
 
@@ -214,12 +215,12 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                 <div className="p-2 bg-gray-100 border border-transparent rounded-lg flex flex-wrap gap-2 items-center focus-within:border-[#0b6459] transition-colors">
                     {(data.languages || []).map((lang) => (
                         <span
-                            key={lang.code}
+                            key={lang.language.code}
                             className="bg-white px-3 py-1 rounded-md text-sm font-medium flex items-center gap-2 border border-gray-200"
                         >
                             <button
                                 type="button"
-                                onClick={() => handleToggleNative(lang.code)}
+                                onClick={() => handleToggleNative(lang.language.code)}
                                 className={`text-xs px-1.5 py-0.5 rounded ${
                                     lang.isNative
                                         ? "bg-[#0b6459] text-white"
@@ -229,10 +230,10 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                             >
                                 N
                             </button>
-                            {lang.name}
+                            {lang.language.name}
                             <button
                                 type="button"
-                                onClick={() => handleRemoveLanguage(lang.code)}
+                                onClick={() => handleRemoveLanguage(lang.language.code)}
                                 className="text-gray-400 hover:text-gray-600"
                             >
                                 &times;

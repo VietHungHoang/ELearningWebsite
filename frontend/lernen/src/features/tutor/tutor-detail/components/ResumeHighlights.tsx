@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiMapPin } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
-import type { TutorDetail } from '../../../../types/api';
+import type { TutorDetail } from '../../../../types/tutor';
+import { tutorService } from '../../../../services/tutorService';
+import { useTranslation } from "react-i18next";
 
 // --- ICONS (kept inside for simplicity) ---
 
@@ -18,6 +20,7 @@ export interface ResumeItemData {
 // --- RESUME ITEM COMPONENT ---
 const ResumeItem: React.FC<{ item: ResumeItemData }> = ({ item }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const { t } = useTranslation();
     const canTruncate = item.description.length > 100;
     const truncatedDescription = `${item.description.substring(0, 100)}...`;
 
@@ -38,7 +41,7 @@ const ResumeItem: React.FC<{ item: ResumeItemData }> = ({ item }) => {
                         onClick={() => setIsExpanded(!isExpanded)}
                         className="mt-2 text-sm font-semibold text-[#0b6459] underline hover:text-[#084c43]"
                     >
-                        {isExpanded ? 'Show less' : 'Show more'}
+                        {isExpanded ? t('tutorDetail.resume.showLess') : t('tutorDetail.resume.showMore')}
                     </button>
                 )}
             </div>
@@ -53,8 +56,40 @@ const ResumeItem: React.FC<{ item: ResumeItemData }> = ({ item }) => {
 // --- MAIN COMPONENT ---
 type Tab = 'Education' | 'Experience' | 'Certification & Awards';
 
-const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
+const ResumeHighlights: React.FC<{ tutorId: string }> = ({ tutorId }) => {
+    const { t } = useTranslation();
+    const [tutor, setTutor] = useState<TutorDetail | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchTutor = async () => {
+            try {
+                setLoading(true);
+                const response = await tutorService.getTutorDetail(tutorId);
+                setTutor(response.data);
+            } catch (err) {
+                setError('Failed to load tutor details');
+                console.error('Error fetching tutor:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (tutorId) {
+            fetchTutor();
+        }
+    }, [tutorId]);
     const [activeTab, setActiveTab] = useState<Tab>('Education');
+
+    const getTranslatedTab = (tab: Tab) => {
+        switch (tab) {
+            case 'Education': return t('tutorDetail.resume.education');
+            case 'Experience': return t('tutorDetail.resume.experience');
+            case 'Certification & Awards': return t('tutorDetail.resume.certifications');
+            default: return tab;
+        }
+    };
 
     const formatPeriod = (start: string, end?: string) => {
         const startYear = new Date(start).getFullYear();
@@ -98,7 +133,7 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
     const renderContent = () => {
         const items = dataMap[activeTab];
         if (items.length === 0) {
-            return <p className="text-gray-500 mt-4">No {activeTab.toLowerCase()} information available.</p>;
+            return <p className="text-gray-500 mt-4">{t('tutorDetail.resume.noInfo', { section: activeTab.toLowerCase() })}</p>;
         }
         return (
             <div className="mt-6 space-y-8">
@@ -108,6 +143,14 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
             </div>
         );
     };
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (error || !tutor) {
+        return <div>Error: {error || 'Tutor not found'}</div>;
+    }
 
     return (
         <div className="py-8">
@@ -122,13 +165,13 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                                 : 'bg-transparent text-gray-500 hover:bg-white/50'
                         }`}
                     >
-                        {tab}
+                        {getTranslatedTab(tab)}
                     </button>
                 ))}
             </div>
 
             <div className="mt-6">
-                <h2 className="text-2xl font-bold text-gray-800">{activeTab}</h2>
+                <h2 className="text-2xl font-bold text-gray-800">{getTranslatedTab(activeTab)}</h2>
                 {renderContent()}
             </div>
         </div>

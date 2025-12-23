@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiAlertTriangle, FiX } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface ConfirmationModalProps {
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message }) => {
     const [shouldRender, setShouldRender] = useState(isOpen);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (isOpen) setShouldRender(true);
@@ -45,13 +47,13 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
 
                 <div className="flex justify-end items-center gap-4">
                     <button onClick={onClose} className="px-5 py-2.5 text-sm font-semibold bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button 
                         onClick={onConfirm}
                         className="px-5 py-2.5 text-sm font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700"
                     >
-                        Confirm Delete
+                        {t('common.confirmDelete')}
                     </button>
                 </div>
             </div>

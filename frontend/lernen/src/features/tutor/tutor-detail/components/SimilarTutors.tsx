@@ -1,5 +1,6 @@
 import React from 'react';
 import SimilarTutorCard, { type SimilarTutor } from './SimilarTutorCard';
+import { useTranslation } from 'react-i18next';
 
 
 const mockSimilarTutors: SimilarTutor[] = [
@@ -66,9 +67,10 @@ const mockSimilarTutors: SimilarTutor[] = [
 ];
 
 const SimilarTutors: React.FC = () => {
+    const { t } = useTranslation();
     return (
         <div className="py-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-8">Similar Tutors</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-8">{t('tutorDetail.similarTutors.title')}</h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {mockSimilarTutors.map(tutor => (
@@ -78,7 +80,7 @@ const SimilarTutors: React.FC = () => {
 
             <div className="mt-10 text-center">
                 <button className="px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-800 bg-white hover:bg-gray-50 transition-colors">
-                    View All Tutors
+                    {t('tutorDetail.similarTutors.viewAll')}
                 </button>
             </div>
         </div>

@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   FiLock,
-  FiCreditCard,
-  FiDollarSign,
-  FiSmartphone,
   FiLoader,
   FiCheck,
   FiCalendar,
@@ -13,18 +10,22 @@ import {
   FiAward,
 } from "react-icons/fi";
 import HeaderNoNavbar from "../../../components/ui/HeaderNoNavbar";
-import paymentService from "../../../services/paymentService";
+import { useLocation } from "react-router-dom";
+import { useCurrency } from "../../../context/CurrencyContext";
+import { convertFromVND, formatCurrency } from "../../../utils/currencyHelper";
+import Avatar from "react-avatar";
+import bookingService from "../../../services/bookingService";
 
-const mockSchedule = [
-  { sessionNumber: 1, date: "Monday, Oct 20, 2025", time: "10:00 AM" },
-  { sessionNumber: 2, date: "Monday, Oct 27, 2025", time: "10:00 AM" },
-  { sessionNumber: 3, date: "Monday, Nov 03, 2025", time: "10:00 AM" },
-  { sessionNumber: 4, date: "Monday, Nov 10, 2025", time: "10:00 AM" },
-  { sessionNumber: 5, date: "Monday, Nov 17, 2025", time: "10:00 AM" },
-];
+interface Session {
+  sessionNumber: number;
+  date: string;
+  time: string;
+}
 
 const CheckoutPage: React.FC = () => {
-  const [paymentMethod, setPaymentMethod] = useState("bank-transfer");
+  const location = useLocation();
+  const { selectedCurrency } = useCurrency();
+  const [paymentMethod, setPaymentMethod] = useState("momo");
   const [checkoutState, setCheckoutState] = useState<
     "selecting" | "processing" | "success"
   >("selecting");
@@ -33,63 +34,77 @@ const CheckoutPage: React.FC = () => {
   const [couponError, setCouponError] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
 
-  const tutor = {
-    name: "Cynthia Hunter",
-    avatar: "https://picsum.photos/seed/cynthia/96/96",
-    rating: 4.9,
-    subjects: ["Math", "Physics"],
-    experience: 5,
-    lessons: 50,
-    students: 200,
-  };
-  const sessions = 10;
-  const pricePerSession = 40.0;
-  const discountPercent = 10;
+  // Get data from navigation state
+  const bookingData = location.state?.bookingData;
+  const tutorData = location.state?.tutor;
 
-  const originalPrice = sessions * pricePerSession;
-  const discountAmount = originalPrice * (discountPercent / 100);
-  const subtotal = originalPrice - discountAmount;
+  // Use real tutor data
+  const tutor = tutorData ? {
+    name: tutorData.fullName,
+    avatar: tutorData.avatarUrl,
+    subjects: (tutorData.subjects as any)?.map((s: any) => s.name) || [],
+    experience: tutorData.experienceYears || 0,
+    lessons: tutorData.bookedSessionsCount || 5,
+    students: tutorData.studentCount || 0,
+    rating: tutorData.rating || 0,
+  } : null;
+
+  const sessions = bookingData?.sessions || 10;
+  const discountPercent = bookingData?.package?.discount || 10;
+
+  // Use the pricing data directly from bookingData
+  const originalPrice = bookingData?.pricing?.originalPrice || (sessions * 45.0); // Total before discount
+  const discountAmount = bookingData?.pricing?.discountAmount || (originalPrice * discountPercent / 100);
+  const subtotal = bookingData?.pricing?.totalPrice || (originalPrice - discountAmount);
+  
   const couponDiscount = appliedCoupon === 'SAVE10' ? subtotal * 0.1 : 0;
   const total = subtotal - couponDiscount;
 
-  // Mock data for the summary
+  // Use real schedule
+  const schedule: Session[] = bookingData?.schedule || [];
 
-  useEffect(() => {
-    if (checkoutState === "processing") {
-      const timer = setTimeout(() => {
-        setCheckoutState("success");
-      }, 3000); // 3-second processing delay
-      return () => clearTimeout(timer);
-    }
-    if (checkoutState === "success") {
-      const redirectTimer = setTimeout(() => {}, 2000); // 2-second delay to show success message
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [checkoutState]);
+  // Mock data for the summary
 
   const handlePayment = async () => {
     try {
       setCheckoutState("processing");
 
-      const paymentRequest = {
-        paymentMethod: paymentMethod as 'momo' | 'zalopay' | 'credit-card' | 'paypal',
-        amount: total,
-        currency: 'USD'
+      // Prepare payment data
+      const paymentProviderMap: { [key: string]: string } = {
+        momo: 'MOMO',
+        vnpay: 'VNPAY',
+        sepay: 'SEPAY'
       };
 
-      const paymentResponse = await paymentService.initiatePayment(paymentRequest);
+      // Create booking with payment data in one API call
+      const { isBestValue, ...packageData } = bookingData.package;
+      const requestData = {
+        ...packageData, // Flatten package info fields
+        studentId: bookingData.studentId,
+        tutorId: tutorData.id,
+        schedule: schedule.map(s => ({
+          time: new Date(s.date + ' ' + s.time).toISOString().slice(0, 19)
+        })),
+        // Flatten payment information
+        amount: total,
+        paymentProvider: paymentProviderMap[paymentMethod] || paymentMethod,
+        redirectUrl: 'http://localhost:5173/payment-success'
+      };
 
-      if (paymentResponse.status === 'completed') {
+      const bookingResponse = await bookingService.createBooking(requestData) as any;
+
+      // Handle payment response
+      if (bookingResponse.status === 'completed') {
         setCheckoutState("success");
-      } else if (paymentResponse.status === 'pending' && paymentResponse.paymentUrl) {
-        // For QR code payments, redirect to payment URL
-        window.location.href = paymentResponse.paymentUrl;
-      } else if (paymentResponse.status === 'processing') {
+      } else if (bookingResponse.paymentData?.redirectUrl) {
+        // For redirect payments, redirect to payment URL
+        window.location.href = bookingResponse.paymentData.redirectUrl;
+      } else if (bookingResponse.status === 'processing') {
         // For card/paypal, show processing state
         setCheckoutState("processing");
         // In a real app, you might poll for status here
       } else {
-        throw new Error(paymentResponse.message || 'Payment failed');
+        throw new Error(bookingResponse.message || 'Payment failed');
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -173,98 +188,63 @@ const CheckoutPage: React.FC = () => {
                       : "border-gray-200 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="payment-method"
-                        checked={paymentMethod === "momo"}
-                        readOnly
-                        className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
-                      />
-                      <span className="font-semibold text-gray-800">Momo</span>
-                    </div>
-                    <FiSmartphone />
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="payment-method"
+                      checked={paymentMethod === "momo"}
+                      readOnly
+                      className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
+                    />
+                    <img src="/images/momo.webp" alt="Momo" className="w-8 h-8" />
+                    <span className="font-semibold text-gray-800">Momo</span>
                   </div>
                 </div>
-                {/* ZaloPay Option */}
+                {/* VNPay Option */}
                 <div
-                  onClick={() => setPaymentMethod("zalopay")}
+                  onClick={() => setPaymentMethod("vnpay")}
                   className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === "zalopay"
+                    paymentMethod === "vnpay"
                       ? "border-[#0b6459] bg-green-50/30"
                       : "border-gray-200 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="payment-method"
-                        checked={paymentMethod === "zalopay"}
-                        readOnly
-                        className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
-                      />
-                      <span className="font-semibold text-gray-800">
-                        ZaloPay
-                      </span>
-                    </div>
-                    <FiSmartphone />
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="payment-method"
+                      checked={paymentMethod === "vnpay"}
+                      readOnly
+                      className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
+                    />
+                    <img src="/images/vnpay.webp" alt="VNPay" className="w-8 h-8" />
+                    <span className="font-semibold text-gray-800">
+                      VNPay
+                    </span>
                   </div>
                 </div>
 
-                {/* Credit Card Option */}
+                {/* Sepay Option */}
                 <div
-                  onClick={() => setPaymentMethod("credit-card")}
+                  onClick={() => setPaymentMethod("sepay")}
                   className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === "credit-card"
+                    paymentMethod === "sepay"
                       ? "border-[#0b6459] bg-green-50/30"
                       : "border-gray-200 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="payment-method"
-                        checked={paymentMethod === "credit-card"}
-                        readOnly
-                        className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
-                      />
-                      <span className="font-semibold text-gray-800">
-                        Credit Card
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FiCreditCard />
-                      <FiCreditCard />
-                    </div>
-                  </div>
-                </div>
-
-                {/* PayPal Option */}
-                <div
-                  onClick={() => setPaymentMethod("paypal")}
-                  className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                    paymentMethod === "paypal"
-                      ? "border-[#0b6459] bg-green-50/30"
-                      : "border-gray-200 hover:border-gray-400"
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="payment-method"
-                        checked={paymentMethod === "paypal"}
-                        readOnly
-                        className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
-                      />
-                      <span className="font-semibold text-gray-800">
-                        PayPal
-                      </span>
-                    </div>
-                    <FiDollarSign />
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="payment-method"
+                      checked={paymentMethod === "sepay"}
+                      readOnly
+                      className="h-4 w-4 text-[#0b6459] focus:ring-[#0b6459]"
+                    />
+                    <img src="/images/sepay.webp" alt="Sepay" className="w-8 h-8" />
+                    <span className="font-semibold text-gray-800">
+                      Sepay
+                    </span>
                   </div>
                 </div>
               </div>
@@ -286,10 +266,10 @@ const CheckoutPage: React.FC = () => {
                   Your Learning Schedule
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  First {mockSchedule.length} of {sessions} sessions are shown.
+                  First {schedule.length} of {sessions} sessions are shown.
                 </p>
                 <div className="mt-4 border-t border-gray-100 pt-4 space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                  {mockSchedule.map((session) => (
+                  {schedule.map((session) => (
                     <div
                       key={session.sessionNumber}
                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
@@ -322,29 +302,38 @@ const CheckoutPage: React.FC = () => {
 
                 <div className="my-4">
                   <div className="flex items-center gap-4">
-                    <img
-                      src={tutor.avatar}
-                      alt={tutor.name}
-                      className="w-16 h-16 rounded-full"
-                    />
+                    {tutor?.avatar && tutor.avatar.trim() !== "" ? (
+                      <img
+                        src={tutor.avatar}
+                        alt={tutor.name}
+                        className="w-16 h-16 rounded-lg"
+                      />
+                    ) : (
+                      <Avatar
+                        name={tutor?.name || "Tutor"}
+                        size="64"
+                        round={false}
+                        className="w-16 h-16 rounded-lg"
+                      />
+                    )}
                     <div>
                       <p className="font-bold text-2xl text-gray-800">
-                        {tutor.name}
+                        {tutor?.name || "Tutor"}
                       </p>
                       <p className="text-sm text-gray-500 flex items-center gap-1">
-                        <FiStar className="text-orange-400" /> {tutor.rating} ({tutor.lessons} lessons)
+                        <FiStar className="text-orange-400" /> {tutor?.rating || 0} ({tutor?.lessons || 0} lessons)
                       </p>
                     </div>
                   </div>
                   <div className="flex justify-between mt-3">
                     <p className="text-sm text-black bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-md flex items-center gap-1 font-medium">
-                      <FiAward /> {tutor.experience} years
+                      <FiAward /> {tutor?.experience || 0} years
                     </p>
                     <p className="text-sm text-black bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-md flex items-center gap-1 font-medium">
-                      <FiBookOpen /> {tutor.students} students
+                      <FiBookOpen /> {tutor?.students || 0} students
                     </p>
                     <p className="text-sm text-black bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-md flex items-center gap-1 font-medium">
-                      <FiStar /> {tutor.rating}/5
+                      <FiStar /> {tutor?.lessons || 0} lessons
                     </p>
                   </div>
                 </div>
@@ -352,16 +341,16 @@ const CheckoutPage: React.FC = () => {
                 <div className="border-t border-gray-100 pt-4 space-y-2 text-sm">
                   <div className="flex justify-between text-gray-600">
                     <span>{sessions} Sessions Package</span>
-                    <span>${originalPrice.toFixed(2)}</span>
+                    <span>{formatCurrency(originalPrice, selectedCurrency)}</span>
                   </div>
                   <div className="flex justify-between text-green-600">
                     <span>You saved ({discountPercent}%)</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span>-{formatCurrency(discountAmount, selectedCurrency)}</span>
                   </div>
                   {appliedCoupon && (
                     <div className="flex justify-between text-green-600">
                       <span>Coupon ({appliedCoupon}) <button onClick={() => setAppliedCoupon(null)} className="text-red-500 ml-1 hover:text-red-700">×</button></span>
-                      <span>-${couponDiscount.toFixed(2)}</span>
+                      <span>-{formatCurrency(couponDiscount, selectedCurrency)}</span>
                     </div>
                   )}
                   <div className="text-left">
@@ -404,7 +393,7 @@ const CheckoutPage: React.FC = () => {
 
                 <div className="flex justify-between items-center font-bold text-xl">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatCurrency(total, selectedCurrency)}</span>
                 </div>
               </div>
             </div>

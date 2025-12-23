@@ -1,27 +1,66 @@
-import React, { useState } from 'react';
-import SessionDetailModal from '../components/SessionDetailModal';
+import React, { useState, useEffect } from 'react';
+import SessionDetailModal from '../my-session/components/SessionDetailModal';
 import DailyView from '../components/DailyView';
 import WeeklyView from '../components/WeeklyView';
 import MonthlyView from '../components/MonthlyView';
+import CalendarSkeleton from '../my-session/components/CalendarSkeleton';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import type { Booking } from '../types';
+import { useTranslation } from 'react-i18next';
+import type { Session } from '../../../../types/class';
 import DatePicker from '../../components/DatePicker';
-
-const mockBookings: Booking[] = [
-    { id: 1, title: 'Math Session', date: new Date('2025-10-20T10:00:00Z'), durationHours: 1, color: 'bg-blue-100 text-blue-800', tutorName: 'Cynthia Hunter', tutorAvatar: 'https://picsum.photos/seed/cynthia/48/48', status: 'Confirmed' },
-    { id: 2, title: 'Physics Lab', date: new Date('2025-10-22T14:00:00Z'), durationHours: 2, color: 'bg-green-100 text-green-800', tutorName: 'Steven Ford', tutorAvatar: 'https://picsum.photos/seed/steven/48/48', status: 'Confirmed' },
-    { id: 3, title: 'History Review', date: new Date('2025-10-22T16:00:00Z'), durationHours: 1, color: 'bg-yellow-100 text-yellow-800', tutorName: 'Antony Clara', tutorAvatar: 'https://picsum.photos/seed/antonyC/48/48', status: 'Pending' },
-    { id: 4, title: 'Creative Writing', date: new Date('2025-10-24T11:00:00Z'), durationHours: 1, color: 'bg-purple-100 text-purple-800', tutorName: 'Arianne Kearns', tutorAvatar: 'https://picsum.photos/seed/arianne/48/48', status: 'Confirmed' },
-    { id: 5, title: 'Calculus Prep', date: new Date('2025-10-28T09:00:00Z'), durationHours: 1, color: 'bg-blue-100 text-blue-800', tutorName: 'Cynthia Hunter', tutorAvatar: 'https://picsum.photos/seed/cynthia/48/48', status: 'Completed' },
-];
+import { classService } from '../../../../services/classService';
+import { useAuth } from '../../../../context/AuthContext';
+import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
 const MyBookingsPage: React.FC = () => {
+    const { t } = useTranslation();
+    const { state } = useAuth();
     const [view, setView] = useState<'Daily' | 'Weekly' | 'Monthly'>('Monthly');
-    const [currentDate, setCurrentDate] = useState(new Date('2025-10-20T12:00:00Z'));
-    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedBooking, setSelectedBooking] = useState<Session | null>(null);
     const [modalPosition, setModalPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+    const [bookings, setBookings] = useState<Session[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const { setBreadcrumb } = useBreadcrumb();
 
-    const handleSessionClick = (booking: Booking, event: React.MouseEvent) => {
+    useEffect(() => {
+        setBreadcrumb([
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('footer.myBookings') }
+        ]);
+    }, [setBreadcrumb, t]);
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                setIsLoading(true);
+                const studentId = state.user?.id || 'current-student-id';
+                const response = await classService.getStudentSessions(studentId);
+                console.log('API Response:', response);
+                console.log('Response data:', response.data);
+                console.log('Response data type:', typeof response.data);
+                console.log('Is array:', Array.isArray(response.data));
+                
+                if (response.success && response.data) {
+                    // API returns data as Session[] directly
+                    const sessions = response.data;
+                    console.log('Sessions to set:', sessions);
+                    console.log('Sessions length:', sessions.length);
+                    setBookings(sessions);
+                }
+            } catch (error) {
+                console.error('Failed to fetch bookings:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (state.user) {
+            fetchBookings();
+        }
+    }, [state.user]);
+
+    const handleSessionClick = (session: Session, event: React.MouseEvent) => {
         const targetElement = event.currentTarget as HTMLElement;
         const rect = targetElement.getBoundingClientRect();
 
@@ -37,7 +76,7 @@ const MyBookingsPage: React.FC = () => {
             top: rect.top + window.scrollY,
             left: leftPosition
         });
-        setSelectedBooking(booking);
+        setSelectedBooking(session);
     };
 
     // --- Navigation Handlers ---
@@ -76,23 +115,34 @@ const MyBookingsPage: React.FC = () => {
 
     const getTodayButtonText = () => {
         switch (view) {
-            case 'Daily': return 'Today';
-            case 'Weekly': return 'This Week';
-            case 'Monthly': return 'This Month';
-            default: return 'Today';
+            case 'Daily': return t('dashboard.tutor.today');
+            case 'Weekly': return t('dashboard.tutor.thisWeek');
+            case 'Monthly': return t('dashboard.tutor.thisMonth');
+            default: return t('dashboard.tutor.today');
         }
     };
 
-    const ViewButton: React.FC<{ label: 'Daily' | 'Weekly' | 'Monthly' }> = ({ label }) => (
-        <button
-            onClick={() => setView(label)}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                view === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
-            }`}
-        >
-            {label}
-        </button>
-    );
+    const ViewButton: React.FC<{ label: 'Daily' | 'Weekly' | 'Monthly' }> = ({ label }) => {
+        const getLabelKey = () => {
+            switch (label) {
+                case 'Daily': return 'dashboard.tutor.today';
+                case 'Weekly': return 'dashboard.tutor.thisWeek';
+                case 'Monthly': return 'dashboard.tutor.thisMonth';
+                default: return 'bookings.daily';
+            }
+        };
+
+        return (
+            <button
+                onClick={() => setView(label)}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                    view === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
+                }`}
+            >
+                {t(getLabelKey())}
+            </button>
+        );
+    };
 
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm">
@@ -122,26 +172,32 @@ const MyBookingsPage: React.FC = () => {
 
             {/* Calendar Grid */}
             <div className="mt-6">
-                {view === 'Daily' && (
-                    <DailyView
-                        currentDate={currentDate}
-                        bookings={mockBookings}
-                        onSessionClick={handleSessionClick}
-                    />
-                )}
-                {view === 'Weekly' && (
-                    <WeeklyView
-                        currentDate={currentDate}
-                        bookings={mockBookings}
-                        onSessionClick={handleSessionClick}
-                    />
-                )}
-                {view === 'Monthly' && (
-                    <MonthlyView
-                        currentDate={currentDate}
-                        bookings={mockBookings}
-                        onSessionClick={handleSessionClick}
-                    />
+                {isLoading ? (
+                    <CalendarSkeleton view={view} />
+                ) : (
+                    <>
+                        {view === 'Daily' && (
+                            <DailyView
+                                currentDate={currentDate}
+                                bookings={bookings}
+                                onSessionClick={handleSessionClick}
+                            />
+                        )}
+                        {view === 'Weekly' && (
+                            <WeeklyView
+                                currentDate={currentDate}
+                                bookings={bookings}
+                                onSessionClick={handleSessionClick}
+                            />
+                        )}
+                        {view === 'Monthly' && (
+                            <MonthlyView
+                                currentDate={currentDate}
+                                bookings={bookings}
+                                onSessionClick={handleSessionClick}
+                            />
+                        )}
+                    </>
                 )}
             </div>
 
