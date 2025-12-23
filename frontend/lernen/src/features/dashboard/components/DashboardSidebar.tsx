@@ -131,12 +131,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                             className={`font-semibold whitespace-nowrap overflow-hidden transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 w-0"
                                 }`}
                         >
-                            {t('dashboard.common.signOut')}
+                            {t('dashboard.sidebar.signOut')}
                         </span>
                     </button>
                     {!isOpen && (
                         <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                            {t('dashboard.common.signOut')}
+                            {t('dashboard.sidebar.signOut')}
                         </div>
                     )}
                 </div>

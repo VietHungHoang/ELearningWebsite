@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HiSearch, HiCog, HiPaperAirplane, HiUser, HiUsers, HiPlus, HiPhotograph, HiDocument, HiVideoCamera, HiX } from 'react-icons/hi';
 import { useBreadcrumb } from '../context/BreadcrumbContext';
 import Breadcrumb, { type BreadcrumbItem } from '../components/Breadcrumb';
@@ -179,6 +180,7 @@ const ContactListItem: React.FC<{ conv: Conversation; isActive: boolean; onClick
 );
 
 const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversation }) => {
+    const { t } = useTranslation();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const attachmentRef = useRef<HTMLDivElement>(null);
     const [newMessage, setNewMessage] = useState('');
@@ -209,8 +211,8 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
         return (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
                 <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                <h3 className="text-lg font-semibold">Select a conversation</h3>
-                <p className="text-sm">Start by choosing a contact from the list on the left.</p>
+                <h3 className="text-lg font-semibold">{t('dashboard.inbox.empty.title')}</h3>
+                <p className="text-sm">{t('dashboard.inbox.empty.description')}</p>
             </div>
         );
     }
@@ -234,7 +236,7 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
                         <p className="font-bold text-gray-800">{conversation.contactName}</p>
                         <p className="text-xs text-gray-500 flex items-center gap-1">
                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            {conversation.onlineStatus}
+                            {conversation.onlineStatus === 'Online' ? t('dashboard.inbox.status.online') : t('dashboard.inbox.status.offline')}
                         </p>
                     </div>
                 </div>
@@ -284,19 +286,19 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
                         <div className="flex flex-col gap-1">
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiPhotograph className="w-5 h-5 text-blue-500" />
-                                <span className="text-sm text-gray-700">Photo</span>
+                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.photo')}</span>
                             </button>
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiVideoCamera className="w-5 h-5 text-red-500" />
-                                <span className="text-sm text-gray-700">Video</span>
+                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.video')}</span>
                             </button>
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiDocument className="w-5 h-5 text-green-500" />
-                                <span className="text-sm text-gray-700">Document</span>
+                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.document')}</span>
                             </button>
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiUser className="w-5 h-5 text-purple-500" />
-                                <span className="text-sm text-gray-700">Contact</span>
+                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.contact')}</span>
                             </button>
                         </div>
                     </div>
@@ -314,7 +316,7 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
+                        placeholder={t('dashboard.inbox.messagePlaceholder')}
                         className="w-full bg-transparent border-transparent rounded-lg pl-12 pr-12 py-2 text-sm focus:outline-none placeholder:text-gray-400"
                     />
                     <button type="submit" className="absolute inset-y-0 right-0 px-4 text-gray-500 hover:text-[#0b6459]">
@@ -331,6 +333,7 @@ interface InboxContentProps {
 }
 
 const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) => {
+    const { t } = useTranslation();
     const { setBreadcrumb } = useBreadcrumb();
     const [conversations, setConversations] = useState(mockConversations);
     const [selectedConversationId, setSelectedConversationId] = useState<number | null>(initialSelectedStudentId || (mockConversations.length > 0 ? mockConversations[0].id : null));
@@ -340,11 +343,11 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
 
     useEffect(() => {
         const breadcrumbItems: BreadcrumbItem[] = [
-            { label: 'Dashboard', path: '/dashboard' },
-            { label: 'Inbox', isActive: true }
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('dashboard.inbox.title'), isActive: true }
         ];
         setBreadcrumb(breadcrumbItems);
-    }, [setBreadcrumb]);
+    }, [setBreadcrumb, t]);
 
     useEffect(() => {
         if (initialSelectedStudentId && initialSelectedStudentId !== selectedConversationId) {
@@ -374,14 +377,14 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                 {/* Left Pane: Contact List */}
                 <div className="w-full md:w-2/5 xl:w-1/3 max-w-sm border-r border-gray-200 flex flex-col">
                     <div className="p-4 border-b border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-800">Inbox</h2>
+                        <h2 className="text-xl font-bold text-gray-800">{t('dashboard.inbox.title')}</h2>
                         <div className="relative mt-4">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <HiSearch className="w-5 h-5" />
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search..."
+                                placeholder={t('dashboard.inbox.searchPlaceholder')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 focus:outline-none hover:shadow-md transition-all duration-300 ease-in-out placeholder:text-gray-400"
@@ -396,7 +399,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
-                                All
+                                {t('dashboard.inbox.filters.all')}
                             </button>
                             <button
                                 onClick={() => setMessageTypeFilter('private')}
@@ -405,7 +408,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
-                                Private
+                                {t('dashboard.inbox.filters.private')}
                             </button>
                             <button
                                 onClick={() => setMessageTypeFilter('group')}
@@ -414,7 +417,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
-                                Group
+                                {t('dashboard.inbox.filters.group')}
                             </button>
                         </div>
                     </div>
@@ -456,7 +459,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                 {/* Sidebar Header */}
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-bold text-gray-800">Chat Settings</h3>
+                                        <h3 className="text-lg font-bold text-gray-800">{t('dashboard.inbox.settings.title')}</h3>
                                         <button
                                             onClick={() => setIsSettingsSidebarOpen(false)}
                                             className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
@@ -474,7 +477,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                         />
                                         <div>
                                             <p className="font-bold text-gray-800">{selectedConversation.contactName}</p>
-                                            <p className="text-sm text-gray-500">{selectedConversation.onlineStatus}</p>
+                                            <p className="text-sm text-gray-500">{selectedConversation.onlineStatus === 'Online' ? t('dashboard.inbox.status.online') : t('dashboard.inbox.status.offline')}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -484,14 +487,14 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     <div className="space-y-6">
                                         {/* Notifications */}
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Notifications</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.inbox.settings.notifications.title')}</h4>
                                             <div className="space-y-3">
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">Enable notifications</span>
+                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.notifications.enable')}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">Sound alerts</span>
+                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.notifications.sound')}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                             </div>
@@ -499,14 +502,14 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
 
                                         {/* Privacy */}
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Privacy</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.inbox.settings.privacy.title')}</h4>
                                             <div className="space-y-3">
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">Show online status</span>
+                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.privacy.showStatus')}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">Read receipts</span>
+                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.privacy.readReceipts')}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                             </div>
@@ -514,19 +517,19 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
 
                                         {/* Actions */}
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Actions</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.inbox.settings.actions.title')}</h4>
                                             <div className="space-y-2">
                                                 <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                    <span className="text-sm text-gray-700">Mute conversation</span>
+                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.actions.mute')}</span>
                                                 </button>
                                                 <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                    <span className="text-sm text-gray-700">Archive chat</span>
+                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.actions.archive')}</span>
                                                 </button>
                                                 <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                                    <span className="text-sm text-red-600 font-medium">Block user</span>
+                                                    <span className="text-sm text-red-600 font-medium">{t('dashboard.inbox.settings.actions.block')}</span>
                                                 </button>
                                                 <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                                    <span className="text-sm text-red-600 font-medium">Clear chat history</span>
+                                                    <span className="text-sm text-red-600 font-medium">{t('dashboard.inbox.settings.actions.clearHistory')}</span>
                                                 </button>
                                             </div>
                                         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { HiChevronLeft, HiChevronRight, HiCalendar, HiPencil, HiX } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/ui/Toast";
@@ -14,6 +15,7 @@ import type { GetBookedSessionsResponse, Session } from "../../../../types/class
 // --- INTERFACES ---
 // Using BookedSession directly from API types// --- COMPONENT ---
 const ScheduleManagementContent: React.FC = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { state } = useAuth();
     const { user } = state;
@@ -53,10 +55,10 @@ const ScheduleManagementContent: React.FC = () => {
     // Set breadcrumb
     useEffect(() => {
         setBreadcrumb([
-            { label: 'Dashboard', path: '/dashboard' },
-            { label: 'Schedule Management' }
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('dashboard.tutor.schedule.title') }
         ]);
-    }, [setBreadcrumb]);
+    }, [setBreadcrumb, t]);
 
     // Fetch initial availability on mount
     useEffect(() => {
@@ -272,7 +274,7 @@ const ScheduleManagementContent: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to fetch availability:', error);
-            setToast({ message: 'Failed to load availability', type: 'error' });
+            setToast({ message: t('dashboard.tutor.schedule.errors.loadAvailability'), type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -293,7 +295,7 @@ const ScheduleManagementContent: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to fetch booked sessions:', error);
-            setToast({ message: 'Failed to load booked sessions', type: 'error' });
+            setToast({ message: t('dashboard.tutor.schedule.errors.loadSessions'), type: 'error' });
         }
     };
 
@@ -335,17 +337,17 @@ const ScheduleManagementContent: React.FC = () => {
             if (response.success) {
                 setAvailability(tempAvailability);
                 setIsEditMode(false);
-                setToast({ message: 'Availability updated for all future schedules', type: 'success' });
+                setToast({ message: t('dashboard.tutor.schedule.success.save'), type: 'success' });
                 
                 // Refetch to get new availability data with IDs
                 const { start, end } = getMonthlyRange(currentDate);
                 fetchAvailability(start, end);
             } else {
-                setToast({ message: 'Failed to save availability', type: 'error' });
+                setToast({ message: t('dashboard.tutor.schedule.errors.save'), type: 'error' });
             }
         } catch (error) {
             console.error('Failed to save availability:', error);
-            setToast({ message: 'Failed to save availability', type: 'error' });
+            setToast({ message: t('dashboard.tutor.schedule.errors.save'), type: 'error' });
         }
     };
 
@@ -564,7 +566,15 @@ const ScheduleManagementContent: React.FC = () => {
         const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
         const blanks = Array(adjustedFirstDay).fill(null);
         const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-        const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const daysOfWeek = [
+            t('dashboard.tutor.schedule.days.mon'),
+            t('dashboard.tutor.schedule.days.tue'),
+            t('dashboard.tutor.schedule.days.wed'),
+            t('dashboard.tutor.schedule.days.thu'),
+            t('dashboard.tutor.schedule.days.fri'),
+            t('dashboard.tutor.schedule.days.sat'),
+            t('dashboard.tutor.schedule.days.sun')
+        ];
 
         return (
             <>
@@ -817,7 +827,15 @@ const ScheduleManagementContent: React.FC = () => {
             calendarDays.push({ day: i, isCurrentMonth: false, date: new Date(Date.UTC(year, month + 1, i)) });
         }
 
-        const weekDayHeaders = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        const weekDayHeaders = [
+            t('dashboard.tutor.schedule.days.mon'),
+            t('dashboard.tutor.schedule.days.tue'),
+            t('dashboard.tutor.schedule.days.wed'),
+            t('dashboard.tutor.schedule.days.thu'),
+            t('dashboard.tutor.schedule.days.fri'),
+            t('dashboard.tutor.schedule.days.sat'),
+            t('dashboard.tutor.schedule.days.sun')
+        ];
 
         return (
             <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -878,16 +896,23 @@ const ScheduleManagementContent: React.FC = () => {
         );
     };
 
-    const ViewButton: React.FC<{ label: "Daily" | "Weekly" | "Monthly" }> = ({ label }) => (
-        <button
-            onClick={() => setView(label)}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                view === label ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:bg-white/50"
-            }`}
-        >
-            {label}
-        </button>
-    );
+    const ViewButton: React.FC<{ label: "Daily" | "Weekly" | "Monthly" }> = ({ label }) => {
+        const labelKey = label === "Daily" 
+            ? 'dashboard.tutor.schedule.views.daily'
+            : label === "Weekly"
+            ? 'dashboard.tutor.schedule.views.weekly'
+            : 'dashboard.tutor.schedule.views.monthly';
+        return (
+            <button
+                onClick={() => setView(label)}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                    view === label ? "bg-white text-gray-800 shadow-sm" : "text-gray-500 hover:bg-white/50"
+                }`}
+            >
+                {t(labelKey)}
+            </button>
+        );
+    };
 
     // --- MAIN RENDER ---
     return (
@@ -917,7 +942,7 @@ const ScheduleManagementContent: React.FC = () => {
                             disabled={isEditMode}
                             className={`px-4 py-1.5 text-sm font-semibold text-gray-700 border-x border-gray-200 hover:bg-gray-100 ${isEditMode ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            Today
+                            {t('dashboard.tutor.schedule.today')}
                         </button>
                         <button 
                             onClick={() => handleNavigation("next")} 
@@ -939,7 +964,7 @@ const ScheduleManagementContent: React.FC = () => {
                             <HiCalendar className="w-5 h-5" />
                         </button>
                         {isEditMode && (
-                            <Tooltip text="Lịch này sẽ áp dụng cho những ngày còn lại của từ tuần này và các tuần sau" />
+                            <Tooltip text={t('dashboard.tutor.schedule.editTooltip')} />
                         )}
                         {isDatePickerOpen && (
                             <div
@@ -948,7 +973,7 @@ const ScheduleManagementContent: React.FC = () => {
                             >
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-lg font-bold text-gray-800">
-                                        Select a {view === "Daily" ? "Day" : view === "Weekly" ? "Week" : "Month"}
+                                        {view === "Daily" ? t('dashboard.tutor.schedule.datePicker.selectDay') : view === "Weekly" ? t('dashboard.tutor.schedule.datePicker.selectWeek') : t('dashboard.tutor.schedule.datePicker.selectMonth')}
                                     </h2>
                                     <button
                                         onClick={() => setIsDatePickerOpen(false)}
@@ -974,13 +999,13 @@ const ScheduleManagementContent: React.FC = () => {
                                 onClick={handleCancelClick}
                                 className="bg-gray-200 text-gray-800 font-semibold py-2.5 px-5 rounded-lg text-sm hover:bg-gray-300"
                             >
-                                Cancel
+                                {t('dashboard.tutor.schedule.cancel')}
                             </button>
                             <button
                                 onClick={handleSaveForFuture}
                                 className="bg-[#0b6459] text-white font-semibold py-2.5 px-5 rounded-lg text-sm hover:bg-[#084c43]"
                             >
-                                Save
+                                {t('dashboard.tutor.schedule.save')}
                             </button>
                         </div>
                     ) : (
@@ -991,7 +1016,7 @@ const ScheduleManagementContent: React.FC = () => {
                                 view !== "Weekly" ? "opacity-50 cursor-not-allowed" : "hover:bg-[#084c43]"
                             }`}
                         >
-                            <HiPencil className="w-4 h-4" /> Edit
+                            <HiPencil className="w-4 h-4" /> {t('dashboard.tutor.schedule.edit')}
                         </button>
                     )}
                 </div>

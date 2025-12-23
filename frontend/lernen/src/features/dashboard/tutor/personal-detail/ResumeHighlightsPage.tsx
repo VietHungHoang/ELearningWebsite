@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HiPlus, HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineStar, HiOutlineLocationMarker, HiOutlineCalendar, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
+import { useTranslation } from 'react-i18next';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -21,27 +22,36 @@ const ResumeNavItem: React.FC<{
     icon: React.ReactNode;
     activeTab: Tab;
     onClick: () => void
-}> = ({ label, icon, activeTab, onClick }) => (
-    <button
-        onClick={onClick}
-        className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
-            activeTab === label ? "bg-[#045A46] text-white shadow-md" : "hover:bg-gray-100 text-gray-600"
-        }`}
-    >
-        <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center ${
-            activeTab === label ? "text-white" : "text-gray-500"
-        }`}>
-            {icon}
-        </div>
-        <p className={`font-medium text-sm ${activeTab === label ? "text-white" : "text-gray-800"}`}>{label}</p>
-    </button>
-);
+}> = ({ label, icon, activeTab, onClick }) => {
+    const { t } = useTranslation();
+    const tabLabels: Record<Tab, string> = {
+        'Education': t('dashboard.tutor.resumeHighlights.tabs.education'),
+        'Experience': t('dashboard.tutor.resumeHighlights.tabs.experience'),
+        'Certification & Awards': t('dashboard.tutor.resumeHighlights.tabs.certificationAwards')
+    };
+    return (
+        <button
+            onClick={onClick}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
+                activeTab === label ? "bg-[#045A46] text-white shadow-md" : "hover:bg-gray-100 text-gray-600"
+            }`}
+        >
+            <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center ${
+                activeTab === label ? "text-white" : "text-gray-500"
+            }`}>
+                {icon}
+            </div>
+            <p className={`font-medium text-sm ${activeTab === label ? "text-white" : "text-gray-800"}`}>{tabLabels[label]}</p>
+        </button>
+    );
+};
 
 const ResumeNav: React.FC<ResumeNavProps> = ({ activeTab, onTabChange }) => {
+    const { t } = useTranslation();
     return (
         <div className="w-full lg:w-70 flex-shrink-0 pr-4 border-r border-gray-100 bg-gray-50 rounded-xl p-4 h-full">
             <div className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 tracking-wide">Resume Highlights</h3>
+                <h3 className="text-sm font-medium text-gray-700 tracking-wide">{t('dashboard.tutor.resumeHighlights.title')}</h3>
                 <div className="w-full h-px bg-gray-200 mt-3"></div>
             </div>
             <nav className="space-y-2">
@@ -80,6 +90,7 @@ const getItemInstitution = (item: ResumeItemData): string => {
 
 // --- RESUME ITEM COMPONENT ---
 const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete: () => void; activeTab: Tab; }> = ({ item, onEdit, onDelete, activeTab }) => {
+    const { t } = useTranslation();
     const title = getItemTitle(item);
     const institution = getItemInstitution(item);
     const location = ('location' in item ? item.location : undefined) || 'N/A';
@@ -100,7 +111,7 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
                 ? (activeTab === 'Education'
                     ? new Date(item.endDate).getFullYear().toString()
                     : `${new Date(item.endDate).toLocaleString('default', { month: 'long' })} ${new Date(item.endDate).getFullYear()}`)
-                : 'Present';
+                : t('dashboard.tutor.resumeHighlights.present');
 
             return `${startDate} - ${endDate}`;
         }
@@ -138,6 +149,7 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
 };
 
 const ResumeHighlightsPage: React.FC = () => {
+    const { t } = useTranslation();
     const { setBreadcrumb } = useBreadcrumb();
     const [activeTab, setActiveTab] = useState<Tab>('Education');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -232,11 +244,11 @@ const ResumeHighlightsPage: React.FC = () => {
 
     React.useEffect(() => {
         setBreadcrumb([
-            { label: 'Dashboard', path: '/dashboard' },
-            { label: 'Profile Settings', path: '/dashboard/profile-settings/personal-details' },
-            { label: 'Resume Highlights', path: '/dashboard/profile-settings/resume-highlights' },
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('dashboard.tutor.profileSettings.breadcrumb.profileSettings'), path: '/dashboard/profile-settings/personal-details' },
+            { label: t('dashboard.tutor.profileSettings.tabs.resumeHighlights'), path: '/dashboard/profile-settings/resume-highlights' },
         ]);
-    }, [setBreadcrumb]);
+    }, [setBreadcrumb, t]);
 
     const handleOpenModal = (item: ResumeItemData | null) => {
         setEditingItem(item);
@@ -291,8 +303,8 @@ const ResumeHighlightsPage: React.FC = () => {
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsConfirmModalOpen(false)}
                 onConfirm={handleDeleteConfirm}
-                title={`Delete ${activeTab} Entry`}
-                message={`Are you sure you want to delete this entry? This action cannot be undone.`}
+                title={t('dashboard.tutor.resumeHighlights.deleteEntry', { type: activeTab })}
+                message={t('dashboard.tutor.resumeHighlights.deleteConfirm')}
             />
 
             <div className="flex gap-8 h-full pb-12">
@@ -305,16 +317,20 @@ const ResumeHighlightsPage: React.FC = () => {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-6">
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">{activeTab}</h2>
+                            <h2 className="text-xl font-bold text-gray-800">
+                                {activeTab === 'Education' && t('dashboard.tutor.resumeHighlights.tabs.education')}
+                                {activeTab === 'Experience' && t('dashboard.tutor.resumeHighlights.tabs.experience')}
+                                {activeTab === 'Certification & Awards' && t('dashboard.tutor.resumeHighlights.tabs.certificationAwards')}
+                            </h2>
                             <p className="text-sm text-gray-500 mt-1">
-                                {activeTab === 'Education' && 'Showcase your educational background and qualifications'}
-                                {activeTab === 'Experience' && 'Highlight your professional experience and expertise'}
-                                {activeTab === 'Certification & Awards' && 'Display your certifications, awards, and achievements'}
+                                {activeTab === 'Education' && t('dashboard.tutor.resumeHighlights.descriptions.education')}
+                                {activeTab === 'Experience' && t('dashboard.tutor.resumeHighlights.descriptions.experience')}
+                                {activeTab === 'Certification & Awards' && t('dashboard.tutor.resumeHighlights.descriptions.certificationAwards')}
                             </p>
                         </div>
 
                         <button onClick={() => handleOpenModal(null)} className="flex items-center gap-2 text-sm font-semibold text-white bg-[#045A46] px-4 py-2 rounded-lg hover:bg-[#03453a] transition-colors">
-                            <HiPlus className="w-4 h-4" /> Add New
+                            <HiPlus className="w-4 h-4" /> {t('dashboard.tutor.resumeHighlights.addNew')}
                         </button>
                     </div>
 

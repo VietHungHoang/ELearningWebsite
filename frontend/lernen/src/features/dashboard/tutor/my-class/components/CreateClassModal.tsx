@@ -35,8 +35,29 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
     onClose,
     onSubmit
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { currencyDisplay } = useCurrency();
+    
+    // Debug: Check if translations are loaded
+    useEffect(() => {
+        if (isOpen) {
+            console.log('Current language:', i18n.language);
+            console.log('Monday translation:', t('common.days.monday'));
+            console.log('Tuesday translation:', t('common.days.tuesday'));
+            console.log('All common.days keys:', {
+                monday: t('common.days.monday'),
+                tuesday: t('common.days.tuesday'),
+                wednesday: t('common.days.wednesday'),
+                thursday: t('common.days.thursday'),
+                friday: t('common.days.friday'),
+                saturday: t('common.days.saturday'),
+                sunday: t('common.days.sunday')
+            });
+            // Check if key exists
+            const resource = i18n.getResourceBundle(i18n.language, 'translation');
+            console.log('common.days from resource:', resource?.common?.days);
+        }
+    }, [isOpen, i18n.language, t]);
     const [formData, setFormData] = useState<ClassFormData>({
         classTitle: '',
         subject: '',
@@ -360,7 +381,15 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                 <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg">
                                     <div className="flex-1">
                                         <CustomDropdown2
-                                            options={[t('common.days.monday'), t('common.days.tuesday'), t('common.days.wednesday'), t('common.days.thursday'), t('common.days.friday'), t('common.days.saturday'), t('common.days.sunday')]}
+                                            options={[
+                                                t('common.days.monday'),
+                                                t('common.days.tuesday'),
+                                                t('common.days.wednesday'),
+                                                t('common.days.thursday'),
+                                                t('common.days.friday'),
+                                                t('common.days.saturday'),
+                                                t('common.days.sunday')
+                                            ]}
                                             selectedValue={schedule.day}
                                             placeholder={t('dashboard.tutor.myClass.createModal.selectDay')}
                                             onSelect={(value: string) => updateSchedule(index, 'day', value)}

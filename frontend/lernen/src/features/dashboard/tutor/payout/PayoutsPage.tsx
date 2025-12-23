@@ -73,6 +73,16 @@ const PayoutsPage = () => {
     const itemsPerPage = 5;
     const earningsItemsPerPage = 5;
 
+    // Helper function to translate session type
+    const translateSessionType = (type: string): string => {
+        if (type === '1-on-1') {
+            return t('payouts.oneOnOne');
+        } else if (type === 'Group') {
+            return t('payouts.group');
+        }
+        return type;
+    };
+
     // Set breadcrumb
     useEffect(() => {
         setBreadcrumb([
@@ -383,21 +393,47 @@ const PayoutsPage = () => {
                             <div className="w-32">
                                 <CustomDropdown
                                     options={activeTab === 'earnings'
-                                        ? [t('payouts.allTypes'), '1-on-1', 'Group']
-                                        : [t('payouts.allStatus'), 'Completed', 'Processing', 'Failed']
+                                        ? [t('payouts.allTypes'), t('payouts.oneOnOne'), t('payouts.group')]
+                                        : [t('payouts.allStatus'), t('payouts.statusLabels.completed'), t('payouts.statusLabels.processing'), t('payouts.statusLabels.failed')]
                                     }
                                     selectedValue={activeTab === 'earnings'
-                                        ? (earningsFilter === 'All' ? t('payouts.allTypes') : earningsFilter)
-                                        : (statusFilter === 'All' ? t('payouts.allStatus') : statusFilter)
+                                        ? (earningsFilter === 'All' 
+                                            ? t('payouts.allTypes') 
+                                            : earningsFilter === '1-on-1' 
+                                                ? t('payouts.oneOnOne') 
+                                                : t('payouts.group'))
+                                        : (statusFilter === 'All' 
+                                            ? t('payouts.allStatus') 
+                                            : statusFilter === 'Completed'
+                                                ? t('payouts.statusLabels.completed')
+                                                : statusFilter === 'Processing'
+                                                    ? t('payouts.statusLabels.processing')
+                                                    : t('payouts.statusLabels.failed'))
                                     }
                                     placeholder={activeTab === 'earnings' ? t('payouts.allTypes') : t('payouts.allStatus')}
                                     onSelect={(value) => {
                                         if (activeTab === 'earnings') {
-                                            const filterValue = value === 'All Types' ? 'All' : value as '1-on-1' | 'Group';
+                                            let filterValue: 'All' | '1-on-1' | 'Group' = 'All';
+                                            if (value === t('payouts.allTypes')) {
+                                                filterValue = 'All';
+                                            } else if (value === t('payouts.oneOnOne')) {
+                                                filterValue = '1-on-1';
+                                            } else if (value === t('payouts.group')) {
+                                                filterValue = 'Group';
+                                            }
                                             setEarningsFilter(filterValue);
                                             setEarningsCurrentPage(1); // Reset to first page when filter changes
                                         } else {
-                                            const filterValue = value === 'All Status' ? 'All' : value as PayoutStatus;
+                                            let filterValue: PayoutStatus | 'All' = 'All';
+                                            if (value === t('payouts.allStatus')) {
+                                                filterValue = 'All';
+                                            } else if (value === t('payouts.statusLabels.completed')) {
+                                                filterValue = 'Completed';
+                                            } else if (value === t('payouts.statusLabels.processing')) {
+                                                filterValue = 'Processing';
+                                            } else if (value === t('payouts.statusLabels.failed')) {
+                                                filterValue = 'Failed';
+                                            }
                                             setStatusFilter(filterValue);
                                             setCurrentPage(1);
                                         }
@@ -494,7 +530,7 @@ const PayoutsPage = () => {
                                                         <p className="text-sm font-medium text-gray-800">{item.course}</p>
                                                     </td>
                                                     <td className="p-4 text-center">
-                                                        <p className="text-sm text-gray-600">{item.type}</p>
+                                                        <p className="text-sm text-gray-600">{translateSessionType(item.type)}</p>
                                                     </td>
                                                     <td className="p-4 text-center">
                                                         <p className="text-sm text-gray-600">{item.date}</p>

@@ -4,6 +4,7 @@ import { HiPlus, HiSave, HiCheckCircle, HiArrowLeft } from 'react-icons/hi';
 import QuizCard from './QuizCard';
 import CustomDropdown2 from '../../../../components/ui/CustomDropdown2';
 import ConfirmModal from '../../../../components/ui/ConfirmModal';
+import { useTranslation } from 'react-i18next';
 
 interface QuizQuestion {
     id: string;
@@ -15,6 +16,7 @@ interface QuizQuestion {
 
 const CreateQuizPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [quizTitle, setQuizTitle] = useState('');
     const [quizDescription, setQuizDescription] = useState('');
     const [selectedClass, setSelectedClass] = useState('');
@@ -146,7 +148,7 @@ const CreateQuizPage: React.FC = () => {
                     >
                         <HiArrowLeft className="w-5 h-5" />
                     </button>
-                    <h1 className="text-xl font-bold text-gray-800">Create New Quiz</h1>
+                    <h1 className="text-xl font-bold text-gray-800">{t('quiz.create.title')}</h1>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
@@ -154,21 +156,21 @@ const CreateQuizPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
                     >
                         <HiSave className="w-4 h-4" />
-                        Save Draft
+                        {t('quiz.create.saveDraft')}
                     </button>
                     <button
                         onClick={handlePublish}
                         className="flex items-center gap-2 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors font-medium text-sm shadow-sm"
                     >
                         <HiCheckCircle className="w-4 h-4" />
-                        Publish Quiz
+                        {t('quiz.create.publish')}
                     </button>
                 </div>
             </div>
 
             {/* Quiz Metadata */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Quiz Information</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">{t('quiz.create.infoTitle')}</h2>
 
                 <div className="space-y-4">
                     {/* Quiz Title and Class Selection Row */}
@@ -176,13 +178,13 @@ const CreateQuizPage: React.FC = () => {
                         {/* Quiz Title */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Quiz Title <span className="text-red-500">*</span>
+                                {t('quiz.create.quizTitle')} <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 value={quizTitle}
                                 onChange={(e) => setQuizTitle(e.target.value)}
-                                placeholder="e.g., Chapter 1 - Introduction to Physics"
+                                placeholder={t('quiz.create.quizTitlePlaceholder')}
                                 className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out placeholder:text-gray-300"
                             />
                         </div>
@@ -190,16 +192,16 @@ const CreateQuizPage: React.FC = () => {
                         {/* Class Selection */}
                         <div>
                             <CustomDropdown2
-                                label={<>Assign to Class <span className="text-red-500">*</span></>}
+                                label={<>{t('quiz.create.assignClass')} <span className="text-red-500">*</span></>}
                                 options={["Physics 101", "Advanced Mathematics", "Chemistry Basics"]}
                                 selectedValue={selectedClass}
-                                placeholder="Select a class..."
+                                placeholder={t('quiz.create.classPlaceholder')}
                                 onSelect={(value: string) => setSelectedClass(value)}
                                 dropdownId="class-dropdown"
                                 openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
                                 hasSearch={true}
-                                searchPlaceholder="Search classes..."
+                                searchPlaceholder={t('quiz.create.searchClassPlaceholder')}
                             />
                         </div>
                     </div>
@@ -207,12 +209,12 @@ const CreateQuizPage: React.FC = () => {
                     {/* Quiz Description */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Description
+                            {t('quiz.create.description')}
                         </label>
                         <textarea
                             value={quizDescription}
                             onChange={(e) => setQuizDescription(e.target.value)}
-                            placeholder="Brief description of the quiz content and objectives..."
+                            placeholder={t('quiz.create.descriptionPlaceholder')}
                             className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out resize-none placeholder:text-gray-300"
                             rows={3}
                         />
@@ -224,7 +226,7 @@ const CreateQuizPage: React.FC = () => {
             <div className="mb-6">
                 <div className="mb-4">
                     <h2 className="text-xl font-bold text-gray-800">
-                        Questions ({questions.length})
+                        {t('quiz.create.questionsTitle', { count: questions.length })}
                     </h2>
                 </div>
 
@@ -257,16 +259,16 @@ const CreateQuizPage: React.FC = () => {
                         className="flex items-center gap-2 bg-[#0b6459] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#094d44] transition-colors shadow-sm"
                     >
                         <HiPlus className="w-5 h-5" />
-                        Add Question
+                        {t('quiz.create.addQuestion')}
                     </button>
                 </div>
             </div>
 
             <ConfirmModal
                 isOpen={showConfirmBack}
-                title="Discard Changes?"
-                message="You have unsaved changes. Are you sure you want to leave without saving?"
-                confirmText="Leave"
+                title={t('quiz.create.confirmLeave.title')}
+                message={t('quiz.create.confirmLeave.message')}
+                confirmText={t('quiz.create.confirmLeave.confirm')}
                 onConfirm={confirmBack}
                 onCancel={cancelBack}
                 confirmButtonColor="red"

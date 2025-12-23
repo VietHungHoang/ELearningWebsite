@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch, HiPlus, HiPencil, HiEye, HiChartBar } from 'react-icons/hi';
 import { IoHelpCircleOutline, IoTimeOutline, IoPeopleOutline, IoCalendarOutline } from 'react-icons/io5';
+import { useTranslation } from 'react-i18next';
 import { useBreadcrumb } from '../dashboard/context/BreadcrumbContext';
 
 // Types
@@ -92,21 +93,22 @@ const mockQuizzes: Quiz[] = [
     },
 ];
 
-type FilterTab = 'All Quizzes' | 'Active' | 'Draft';
+type FilterTab = 'all' | 'active' | 'draft';
 
 const TutorMyQuizzesPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { setBreadcrumb } = useBreadcrumb();
     const [quizzes] = useState<Quiz[]>(mockQuizzes);
-    const [activeTab, setActiveTab] = useState<FilterTab>('All Quizzes');
+    const [activeTab, setActiveTab] = useState<FilterTab>('all');
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         setBreadcrumb([
-            { label: 'Dashboard', path: '/dashboard' },
-            { label: 'My Quizzes' }
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('dashboard.tutor.myQuizzes.title') }
         ]);
-    }, [setBreadcrumb]);
+    }, [setBreadcrumb, t]);
 
     useEffect(() => {
         document.title = 'My Quizzes - ELearning';
@@ -116,12 +118,8 @@ const TutorMyQuizzesPage: React.FC = () => {
         let filtered = quizzes;
 
         // Filter by status
-        if (activeTab !== 'All Quizzes') {
-            const statusMap = {
-                'Active': 'active',
-                'Draft': 'draft',
-            } as const;
-            filtered = filtered.filter(quiz => quiz.status === statusMap[activeTab]);
+        if (activeTab !== 'all') {
+            filtered = filtered.filter(quiz => quiz.status === activeTab);
         }
 
         // Filter by search term
@@ -149,9 +147,11 @@ const TutorMyQuizzesPage: React.FC = () => {
     const getStatusText = (status: Quiz['status']) => {
         switch (status) {
             case 'active':
-                return 'Active';
+                return t('dashboard.tutor.myQuizzes.status.active');
             case 'draft':
-                return 'Draft';
+                return t('dashboard.tutor.myQuizzes.status.draft');
+            case 'archived':
+                return t('dashboard.tutor.myQuizzes.status.archived');
             default:
                 return status;
         }
@@ -165,17 +165,25 @@ const TutorMyQuizzesPage: React.FC = () => {
         });
     };
 
-    const TabButton: React.FC<{ label: FilterTab }> = ({ label }) => (
-        <button
-            onClick={() => setActiveTab(label)}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${activeTab === label
-                ? 'bg-white text-gray-800 shadow-sm'
-                : 'text-gray-500 hover:bg-white/50'
-                }`}
-        >
-            {label}
-        </button>
-    );
+    const TabButton: React.FC<{ tab: FilterTab }> = ({ tab }) => {
+        const tabLabels = {
+            all: t('dashboard.tutor.myQuizzes.tabs.all'),
+            active: t('dashboard.tutor.myQuizzes.tabs.active'),
+            draft: t('dashboard.tutor.myQuizzes.tabs.draft'),
+        };
+        
+        return (
+            <button
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${activeTab === tab
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-500 hover:bg-white/50'
+                    }`}
+            >
+                {tabLabels[tab]}
+            </button>
+        );
+    };
 
     return (
         <div className="p-4">
@@ -183,15 +191,15 @@ const TutorMyQuizzesPage: React.FC = () => {
             <div className="mb-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-xl font-bold text-gray-800">My Quizzes</h1>
-                        <p className="text-gray-500 mt-1">Create and manage your quiz assessments</p>
+                        <h1 className="text-xl font-bold text-gray-800">{t('dashboard.tutor.myQuizzes.title')}</h1>
+                        <p className="text-gray-500 mt-1">{t('dashboard.tutor.myQuizzes.subtitle')}</p>
                     </div>
                     <button
                         onClick={() => navigate('/dashboard/quizzes/create')}
                         className="bg-[#0b6459] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#084c43] transition-colors flex items-center gap-2"
                     >
                         <HiPlus className="w-4 h-4" />
-                        Create Quiz
+                        {t('dashboard.tutor.myQuizzes.createButton')}
                     </button>
                 </div>
             </div>
@@ -204,7 +212,7 @@ const TutorMyQuizzesPage: React.FC = () => {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search quizzes..."
+                            placeholder={t('dashboard.tutor.myQuizzes.searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 hover:shadow-sm focus:outline-none focus:border-[#0b6459] transition-colors duration-300 w-82"
@@ -213,9 +221,9 @@ const TutorMyQuizzesPage: React.FC = () => {
                 </div>
 
                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center">
-                    <TabButton label="All Quizzes" />
-                    <TabButton label="Active" />
-                    <TabButton label="Draft" />
+                    <TabButton tab="all" />
+                    <TabButton tab="active" />
+                    <TabButton tab="draft" />
                 </div>
             </div>
 
@@ -241,28 +249,28 @@ const TutorMyQuizzesPage: React.FC = () => {
                             <div className="flex justify-between text-xs">
                                 <span className="text-gray-600 flex items-center gap-1">
                                     <IoHelpCircleOutline className="w-4 h-4" />
-                                    Total Questions:
+                                    {t('dashboard.tutor.myQuizzes.card.totalQuestions')}
                                 </span>
                                 <span className="text-gray-600 font-medium">{quiz.totalQuestions}</span>
                             </div>
                             <div className="flex justify-between text-xs">
                                 <span className="text-gray-600 flex items-center gap-1">
                                     <IoTimeOutline className="w-4 h-4" />
-                                    Time Limit:
+                                    {t('dashboard.tutor.myQuizzes.card.timeLimit')}
                                 </span>
                                 <span className="text-gray-600 font-medium">{quiz.timeLimitMinutes} min</span>
                             </div>
                             <div className="flex justify-between text-xs">
                                 <span className="text-gray-600 flex items-center gap-1">
                                     <IoPeopleOutline className="w-4 h-4" />
-                                    Attempts:
+                                    {t('dashboard.tutor.myQuizzes.card.attempts')}
                                 </span>
                                 <span className="text-gray-600 font-medium">{quiz.attempts}</span>
                             </div>
                             <div className="flex justify-between text-xs">
                                 <span className="text-gray-600 flex items-center gap-1">
                                     <IoCalendarOutline className="w-4 h-4" />
-                                    Created At:
+                                    {t('dashboard.tutor.myQuizzes.card.createdAt')}
                                 </span>
                                 <span className="text-gray-600 font-medium">{formatDate(quiz.createdAt)}</span>
                             </div>
@@ -275,21 +283,21 @@ const TutorMyQuizzesPage: React.FC = () => {
                                 className="flex-1 bg-teal-100 text-teal-700 py-2 rounded-lg text-sm font-semibold hover:bg-teal-200 transition-colors flex items-center justify-center gap-1"
                             >
                                 <HiEye className="w-4 h-4" />
-                                Take Quiz
+                                {t('dashboard.tutor.myQuizzes.card.takeQuiz')}
                             </button>
                             <button
                                 onClick={() => navigate(`/dashboard/quizzes/${quiz.id}/stats`)}
                                 className="flex-1 bg-blue-100 text-blue-700 py-2 rounded-lg text-sm font-semibold hover:bg-blue-200 transition-colors flex items-center justify-center gap-1"
                             >
                                 <HiChartBar className="w-4 h-4" />
-                                Stats
+                                {t('dashboard.tutor.myQuizzes.card.stats')}
                             </button>
                             <button
                                 onClick={() => navigate('/dashboard/quizzes/create')}
                                 className="flex-1 bg-[#0b6459] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#084c43] transition-colors flex items-center justify-center gap-1"
                             >
                                 <HiPencil className="w-4 h-4" />
-                                Edit
+                                {t('dashboard.tutor.myQuizzes.card.edit')}
                             </button>
                         </div>
                     </div>
@@ -298,16 +306,16 @@ const TutorMyQuizzesPage: React.FC = () => {
 
             {filteredQuizzes.length === 0 && (
                 <div className="text-center py-20">
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">No quizzes found</h3>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">{t('dashboard.tutor.myQuizzes.empty.title')}</h3>
                     <p className="text-gray-500">
-                        {searchTerm ? 'Try adjusting your search terms.' : 'You haven\'t created any quizzes yet.'}
+                        {searchTerm ? t('dashboard.tutor.myQuizzes.empty.descriptionSearch') : t('dashboard.tutor.myQuizzes.empty.description')}
                     </p>
                     {!searchTerm && (
                         <button
                             onClick={() => navigate('/dashboard/quizzes/create')}
                             className="mt-4 bg-[#0b6459] text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-[#084c43] transition-colors"
                         >
-                            Create Your First Quiz
+                            {t('dashboard.tutor.myQuizzes.empty.createFirst')}
                         </button>
                     )}
                 </div>

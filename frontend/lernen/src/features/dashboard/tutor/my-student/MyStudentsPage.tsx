@@ -9,6 +9,7 @@ import type {Student, StudentListItem} from '../../../../types/api';
 import {useAuth} from '../../../../context/AuthContext';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
+import { useTranslation } from 'react-i18next';
 
 export type StudentEnrollmentType = '1-on-1' | 'Group' | 'Trial';
 export type StudentStatus = 'Ongoing' | 'Completed';
@@ -17,6 +18,7 @@ type EnrollmentFilter = 'All Types' | '1-on-1' | 'Group' | 'Trial';
 
 const MyStudentsPage: React.FC = () => {
     const { state } = useAuth();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [students, setStudents] = useState<StudentListItem[]>([]);
     const [totalElements, setTotalElements] = useState(0);
@@ -32,10 +34,10 @@ const MyStudentsPage: React.FC = () => {
 
     useEffect(() => {
         setBreadcrumb([
-            { label: 'Dashboard', path: '/dashboard' },
-            { label: 'My Students' }
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('dashboard.tutor.myStudents.title') }
         ]);
-    }, [setBreadcrumb]);
+    }, [setBreadcrumb, t]);
 
     // Fetch students data
     useEffect(() => {
@@ -100,45 +102,63 @@ const MyStudentsPage: React.FC = () => {
         };
     }, [students]);
 
-    const TabButton: React.FC<{ label: FilterTab }> = ({ label }) => {
-        const count = tabCounts[label];
-        const isActive = activeTab === label;
+    const tabLabels: Record<FilterTab, string> = {
+        'All Students': t('dashboard.tutor.myStudents.tabs.all'),
+        'Ongoing': t('dashboard.tutor.myStudents.tabs.ongoing'),
+        'Completed': t('dashboard.tutor.myStudents.tabs.completed')
+    };
+
+    const TabButton: React.FC<{ value: FilterTab }> = ({ value }) => {
+        const count = tabCounts[value];
+        const isActive = activeTab === value;
 
         return (
             <button
-                onClick={() => setActiveTab(label)}
+                onClick={() => setActiveTab(value)}
                 className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${isActive ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
                     }`}
             >
-                {label}
+                {tabLabels[value]}
                 {count > 0 && ` (${count})`}
             </button>
         );
     };
+
+    const enrollmentOptions = useMemo(() => ([
+        { value: 'All Types' as EnrollmentFilter, label: t('dashboard.tutor.myStudents.filters.allTypes') },
+        { value: '1-on-1' as EnrollmentFilter, label: t('dashboard.tutor.myStudents.filters.oneOnOne') },
+        { value: 'Group' as EnrollmentFilter, label: t('dashboard.tutor.myStudents.filters.group') },
+        { value: 'Trial' as EnrollmentFilter, label: t('dashboard.tutor.myStudents.filters.trial') },
+    ]), [t]);
+
+    const selectedEnrollmentLabel = enrollmentOptions.find(opt => opt.value === enrollmentFilter)?.label ?? '';
 
     return (
         <div className="mx-auto p-4">
             {/* Page Title */}
             <div className="mb-3">
                 <h1 className="text-lg font-bold text-gray-800">
-                    My Students
+                    {t('dashboard.tutor.myStudents.title')}
                 </h1>
             </div>
 
             {/* Filters */}
             <div className="flex flex-wrap justify-between items-center gap-4">
                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center flex-wrap gap-1">
-                    <TabButton label="All Students" />
-                    <TabButton label="Ongoing" />
-                    <TabButton label="Completed" />
+                    <TabButton value="All Students" />
+                    <TabButton value="Ongoing" />
+                    <TabButton value="Completed" />
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="w-48">
                         <CustomDropdown
-                            options={['All Types', '1-on-1', 'Group', 'Trial']}
-                            selectedValue={enrollmentFilter}
-                            placeholder="All Types"
-                            onSelect={(value: string) => setEnrollmentFilter(value as EnrollmentFilter)}
+                            options={enrollmentOptions.map(opt => opt.label)}
+                            selectedValue={selectedEnrollmentLabel}
+                            placeholder={t('dashboard.tutor.myStudents.filters.allTypes')}
+                            onSelect={(value: string) => {
+                                const matched = enrollmentOptions.find(opt => opt.label === value);
+                                if (matched) setEnrollmentFilter(matched.value);
+                            }}
                             dropdownId="enrollmentFilter"
                             openDropdown={openDropdown}
                             setOpenDropdown={setOpenDropdown}
@@ -150,7 +170,7 @@ const MyStudentsPage: React.FC = () => {
                         </div>
                         <input
                             type="text"
-                            placeholder="Search students by name..."
+                            placeholder={t('dashboard.tutor.myStudents.filters.searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0b6459]"
@@ -164,17 +184,17 @@ const MyStudentsPage: React.FC = () => {
                 {loading ? (
                     <div className="text-center py-16">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto"></div>
-                        <p className="text-gray-500 mt-4">Loading students...</p>
+                        <p className="text-gray-500 mt-4">{t('dashboard.tutor.myStudents.loading')}</p>
                     </div>
                 ) : error ? (
                     <div className="text-center py-16">
-                        <h3 className="text-lg font-bold text-red-600">Error Loading Students</h3>
-                        <p className="text-gray-500 mt-2">{error}</p>
+                        <h3 className="text-lg font-bold text-red-600">{t('dashboard.tutor.myStudents.errorTitle')}</h3>
+                        <p className="text-gray-500 mt-2">{t('dashboard.tutor.myStudents.errorDescription')}</p>
                         <button
                             onClick={() => window.location.reload()}
                             className="mt-4 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition-colors"
                         >
-                            Try Again
+                            {t('dashboard.tutor.myStudents.tryAgain')}
                         </button>
                     </div>
                 ) : (
@@ -183,13 +203,13 @@ const MyStudentsPage: React.FC = () => {
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-gray-50 text-gray-600 font-semibold">
                                     <tr>
-                                        <th className="p-4 text-center">#</th>
-                                        <th className="p-4 text-center">Student Name</th>
-                                        <th className="p-4 text-center">Type</th>
-                                        <th className="p-4 text-center">Class</th>
-                                        <th className="p-4 text-center">Registered Date</th>
-                                        <th className="p-4 text-center">Status</th>
-                                        <th className="p-4 text-center">Actions</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.index')}</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.studentName')}</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.type')}</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.class')}</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.registeredDate')}</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.status')}</th>
+                                        <th className="p-4 text-center">{t('dashboard.tutor.myStudents.tableHeaders.actions')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -216,7 +236,7 @@ const MyStudentsPage: React.FC = () => {
 
                                             {/* Class - Placeholder for now */}
                                             <td className="p-4 text-center">
-                                                <p className="text-sm text-gray-800 font-medium">Math A1</p>
+                                                <p className="text-sm text-gray-800 font-medium">{t('dashboard.tutor.myStudents.classPlaceholder')}</p>
                                             </td>
 
                                             {/* Registered Date */}
@@ -235,14 +255,14 @@ const MyStudentsPage: React.FC = () => {
                                                     <button
                                                         onClick={() => handleMessageStudent(student)}
                                                         className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-                                                        title="Message student"
+                                                        title={t('dashboard.tutor.myStudents.actions.message')}
                                                     >
                                                         <HiChat className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => navigate(`/dashboard/my-students/${student.id}`)}
                                                         className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
-                                                        title="View details"
+                                                        title={t('dashboard.tutor.myStudents.actions.view')}
                                                     >
                                                         <HiEye className="w-4 h-4" />
                                                     </button>
@@ -255,8 +275,8 @@ const MyStudentsPage: React.FC = () => {
                         </div>
                         {filteredStudents.length === 0 && (
                             <div className="text-center py-16">
-                                <h3 className="text-lg font-bold text-gray-800">No Students Found</h3>
-                                <p className="text-gray-500 mt-2">No students match your current filters.</p>
+                                <h3 className="text-lg font-bold text-gray-800">{t('dashboard.tutor.myStudents.noStudentsTitle')}</h3>
+                                <p className="text-gray-500 mt-2">{t('dashboard.tutor.myStudents.noStudentsDescription')}</p>
                             </div>
                         )}
                     </>

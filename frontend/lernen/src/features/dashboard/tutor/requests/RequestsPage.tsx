@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Toast from '../../../../components/ui/Toast';
 import RescheduleRequestCard from './components/RescheduleRequestCard';
 import TrialRequestCard from './components/TrialRequestCard';
@@ -12,6 +13,7 @@ type Filter = 'Reschedule Requests' | 'Trial Requests';
 const RequestsPage: React.FC = () => {
     const navigate = useNavigate();
     const { state } = useAuth();
+    const { t } = useTranslation();
     const [activeFilter, setActiveFilter] = useState<Filter>('Trial Requests');
     const [updatedRequestId, setUpdatedRequestId] = useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -23,10 +25,10 @@ const RequestsPage: React.FC = () => {
 
     useEffect(() => {
         setBreadcrumb([
-            { label: 'Dashboard', path: '/dashboard' },
-            { label: 'Requests' }
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
+            { label: t('dashboard.tutor.requests.title') }
         ]);
-    }, [setBreadcrumb]);
+    }, [setBreadcrumb, t]);
 
     useEffect(() => {
         const fetchTrialRequests = async () => {
@@ -67,17 +69,22 @@ const RequestsPage: React.FC = () => {
         // TODO: Implement chat functionality
     };
 
-    const FilterButton: React.FC<{ label: Filter; count: number; }> = ({ label, count }) => (
-        <button
-            onClick={() => setActiveFilter(label)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                activeFilter === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
-            }`}
-        >
-            {label}
-            {count > 0 && <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{count}</span>}
-        </button>
-    );
+    const FilterButton: React.FC<{ label: Filter; count: number; }> = ({ label, count }) => {
+        const labelKey = label === 'Reschedule Requests' 
+            ? 'dashboard.tutor.requests.filters.reschedule' 
+            : 'dashboard.tutor.requests.filters.trial';
+        return (
+            <button
+                onClick={() => setActiveFilter(label)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                    activeFilter === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
+                }`}
+            >
+                {t(labelKey)}
+                {count > 0 && <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{count}</span>}
+            </button>
+        );
+    };
     
     return (
         <div className="mx-auto">
@@ -122,8 +129,8 @@ const RequestsPage: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">No Pending Requests</h3>
-                        <p className="text-gray-500 text-center max-w-md">You're all caught up! All requests have been processed.</p>
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">{t('dashboard.tutor.requests.empty.title')}</h3>
+                        <p className="text-gray-500 text-center max-w-md">{t('dashboard.tutor.requests.empty.description')}</p>
                     </div>
                 )}
             </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { HiTrash } from 'react-icons/hi';
+import { useTranslation } from 'react-i18next';
 
 interface QuizCardProps {
     cardNumber: number;
@@ -26,6 +27,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     selectedOptions = [],
     onOptionSelect
 }) => {
+    const { t } = useTranslation();
 
     const handleOptionChange = (index: number, value: string) => {
         if (onMultipleChoiceChange) {
@@ -57,13 +59,13 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        {isMultipleSelection ? 'Multiple Selection' : 'Single Selection'}
+                        {isMultipleSelection ? t('quiz.create.card.multipleSelection') : t('quiz.create.card.singleSelection')}
                     </button>
                 </div>
                 <button
                     onClick={onDelete}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete card"
+                    title={t('quiz.create.card.deleteTooltip')}
                 >
                     <HiTrash className="w-5 h-5" />
                 </button>
@@ -74,12 +76,12 @@ const QuizCard: React.FC<QuizCardProps> = ({
                 {/* Question Section */}
                 <div className="flex-1 flex flex-col">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Question
+                        {t('quiz.create.card.questionLabel')}
                     </label>
                     <textarea
                         value={question}
                         onChange={(e) => onQuestionChange(e.target.value)}
-                        placeholder="Enter your question..."
+                        placeholder={t('quiz.create.card.questionPlaceholder')}
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#0b6459] focus:ring-0 resize-none text-gray-800 min-h-0"
                         rows={2}
                     />
@@ -88,7 +90,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
                 {/* Answer Section */}
                 <div className="flex-1 flex flex-col">
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Answer Options
+                        {t('quiz.create.card.answerOptions')}
                     </label>
 
                     <div className="space-y-2 flex-1">
@@ -108,13 +110,13 @@ const QuizCard: React.FC<QuizCardProps> = ({
                                     type="text"
                                     value={option}
                                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                                    placeholder={t('quiz.create.card.optionPlaceholder', { option: String.fromCharCode(65 + index) })}
                                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#0b6459] focus:ring-0 text-sm"
                                 />
                             </div>
                         ))}
                         <p className="text-xs text-gray-500 mt-2">
-                            * Mark the correct answer in the quiz settings
+                            {t('quiz.create.card.answerHint')}
                         </p>
                     </div>
                 </div>
