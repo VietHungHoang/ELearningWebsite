@@ -34,7 +34,7 @@ const ActionRow: React.FC<{ buttonText: string; onSave: () => void }> = ({ butto
 
 const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave }) => {
     const { t } = useTranslation();
-    const inputStyles = "w-full bg-gray-100 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition";
+    const inputStyles = "w-full bg-gray-100 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition";
 
     return (
         <div className="space-y-8">

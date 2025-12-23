@@ -75,7 +75,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
         }
     }, [shouldRender, isOpen, hasSearch]);
 
-    const isPlaceholder = !selectedValue;
+    const isPlaceholder = selectedValue === placeholder;
     
     // Calculate max height based on maxVisibleItems
     // Each item is approximately 40px (p-2 = 8px padding + ~32px content)
@@ -84,24 +84,22 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
     const itemHeight = 40;
     const gapHeight = 4; // space-y-1 = 4px
     const searchBarHeight = hasSearch ? 48 : 0;
-    const itemsHeight = (maxVisibleItems * itemHeight) + ((maxVisibleItems - 1) * gapHeight);
-    const maxHeight = itemsHeight + searchBarHeight + 16; // +16 for container padding
+    const maxHeight = (maxVisibleItems * itemHeight) + searchBarHeight + 16; // +16 for padding
 
     return (
         <div className="relative" ref={dropdownRef}>
             <div className={`
-                bg-white rounded-lg border border-gray-200 shadow-sm
-                focus-within:border-[#0b6459] transition-colors
-                ${label ? 'p-3 min-h-[64px] flex flex-col justify-center' : ''}
+                bg-white rounded-lg border border-gray-200 shadow-sm 
+                ${label ? 'p-3 min-h-[70px] flex flex-col justify-center' : ''}
             `}>
                 {label && <label className="text-xs text-[#585858] block mb-1.5">{label}</label>}
                 <button 
                     type="button"
                     onClick={handleToggle}
                     onMouseDown={(e) => e.preventDefault()}
-                    className={`dropdown-button w-full flex justify-between items-center text-left h-10 px-4 py-2 ${label ? '' : ''}`}
+                    className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[42px]'}`}
                 >
-                    <span className={`dropdown-label text-sm font-medium truncate ${isPlaceholder ? 'text-gray-800' : 'text-gray-800'}`}>{isPlaceholder ? placeholder : selectedValue}</span>
+                    <span className={`dropdown-label text-sm font-normal truncate ${isPlaceholder && label ? 'text-[rgba(88,88,88,0.4)]' : 'text-[#585858]'}`}>{selectedValue}</span>
                     <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
                 </button>
             </div>
@@ -125,7 +123,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
                             />
                         </div>
                     )}
-                    <ul className="space-y-1 overflow-y-auto" style={{ maxHeight: `${itemsHeight}px` }}>
+                    <ul className="space-y-1 overflow-y-auto" style={{ maxHeight: `${maxHeight - searchBarHeight - 16}px` }}>
                         {loading ? (
                             <li className="p-2 text-sm text-gray-500 text-center">
                                 <div className="flex items-center justify-center">

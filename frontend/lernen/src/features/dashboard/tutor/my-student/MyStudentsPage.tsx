@@ -250,21 +250,21 @@ const MyStudentsPage: React.FC = () => {
                                             </td>
 
                                             {/* Actions */}
-                                            <td className="p-4 text-center">
-                                                <div className="flex items-center justify-center gap-2">
+                                            <td className="p-4">
+                                                <div className="flex items-center justify-center gap-0.5">
                                                     <button
                                                         onClick={() => handleMessageStudent(student)}
-                                                        className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+                                                        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                                         title={t('dashboard.tutor.myStudents.actions.message')}
                                                     >
-                                                        <HiChat className="w-4 h-4" />
+                                                        <HiChat className="w-3.5 h-3.5" />
                                                     </button>
                                                     <button
                                                         onClick={() => navigate(`/dashboard/my-students/${student.id}`)}
-                                                        className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+                                                        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                                         title={t('dashboard.tutor.myStudents.actions.view')}
                                                     >
-                                                        <HiEye className="w-4 h-4" />
+                                                        <HiEye className="w-3.5 h-3.5" />
                                                     </button>
                                                 </div>
                                             </td>
