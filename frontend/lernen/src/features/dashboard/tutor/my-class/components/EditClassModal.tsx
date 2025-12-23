@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import ModalLayout from '../../../../../components/ui/ModalLayout';
 import CustomDropdown2 from '../../../../../components/ui/CustomDropdown2';
 
@@ -57,6 +58,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
     onSubmit,
     classData
 }) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState<ClassFormData>({
         classTitle: '',
         subject: '',
@@ -367,7 +369,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                                 className="text-[#0b6459] hover:text-[#0a5a4f] font-medium text-sm flex items-center gap-1"
                             >
                                 <span>+</span>
-                                Add Schedule
+                                {t('dashboard.tutor.myClass.createModal.addSchedule')}
                             </button>
                         </div>
                         <div className="space-y-2">
@@ -375,9 +377,9 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                                 <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg">
                                     <div className="flex-1">
                                         <CustomDropdown2
-                                            options={["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]}
+                                            options={[t('common.days.monday'), t('common.days.tuesday'), t('common.days.wednesday'), t('common.days.thursday'), t('common.days.friday'), t('common.days.saturday'), t('common.days.sunday')]}
                                             selectedValue={schedule.day}
-                                            placeholder="Select day"
+                                            placeholder={t('dashboard.tutor.myClass.createModal.selectDay')}
                                             onSelect={(value: string) => updateSchedule(index, 'day', value)}
                                             dropdownId={`day-dropdown-${index}`}
                                             openDropdown={openDropdown}
@@ -390,7 +392,7 @@ const EditClassModal: React.FC<EditClassModalProps> = ({
                                         <CustomDropdown2
                                             options={["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"]}
                                             selectedValue={schedule.time}
-                                            placeholder="Select time"
+                                            placeholder={t('dashboard.tutor.myClass.createModal.selectTime')}
                                             onSelect={(value: string) => updateSchedule(index, 'time', value)}
                                             dropdownId={`time-dropdown-${index}`}
                                             openDropdown={openDropdown}

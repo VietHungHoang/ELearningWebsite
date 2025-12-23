@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Schedule, StudentInfo } from '../../my-class/MyClassPage';
 import RequestStatusBadge from '../../components/RequestStatusBadge';
 import type { RequestStatus } from '../../../../../types/api';
@@ -28,6 +29,7 @@ interface RescheduleRequestCardProps {
 }
 
 const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, viewMode, onChat, onCancel, onRequestProcessed }) => {
+    const { t } = useTranslation();
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [isAccepting, setIsAccepting] = useState(false);
     const [isDeclining, setIsDeclining] = useState(false);
@@ -37,13 +39,13 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
         try {
             const result = await classService.acceptRescheduleRequest(request.id);
             if (result.success) {
-                setToast({ message: 'Reschedule request accepted successfully!', type: 'success' });
+                setToast({ message: t('dashboard.tutor.requests.reschedule.acceptSuccess'), type: 'success' });
                 onRequestProcessed?.(request.id);
             } else {
-                setToast({ message: result.message || 'Failed to accept request', type: 'error' });
+                setToast({ message: result.message || t('dashboard.tutor.requests.reschedule.acceptFailed'), type: 'error' });
             }
         } catch (error) {
-            setToast({ message: 'An error occurred while accepting the request', type: 'error' });
+            setToast({ message: t('dashboard.tutor.requests.reschedule.acceptError'), type: 'error' });
         } finally {
             setIsAccepting(false);
         }
@@ -53,10 +55,10 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
         setIsDeclining(true);
         try {
             // TODO: Implement decline API call
-            setToast({ message: 'Reschedule request declined and student notified.', type: 'success' });
+            setToast({ message: t('dashboard.tutor.requests.reschedule.declineSuccess'), type: 'success' });
             onRequestProcessed?.(request.id);
         } catch (error) {
-            setToast({ message: 'An error occurred while declining the request', type: 'error' });
+            setToast({ message: t('dashboard.tutor.requests.reschedule.declineError'), type: 'error' });
         } finally {
             setIsDeclining(false);
         }
@@ -64,11 +66,11 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
     const { title, badgeClass, isRecurring } = useMemo(() => {
         const isRecurringReschedule = request.originalSchedule?.toLowerCase().includes('every');
         return {
-            title: isRecurringReschedule ? 'Change Recurring Schedule' : 'One-time Reschedule',
+            title: isRecurringReschedule ? t('dashboard.tutor.requests.reschedule.recurringTitle') : t('dashboard.tutor.requests.reschedule.oneTimeTitle'),
             badgeClass: isRecurringReschedule ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800',
             isRecurring: isRecurringReschedule ?? false
         };
-    }, [request]);
+    }, [request, t]);
 
     const CardHeader = () => {
         if (viewMode === 'tutor') {
@@ -87,7 +89,7 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
              <div className="flex items-center gap-4">
                 {request.tutor?.avatar && <img src={request.tutor.avatar} alt={request.tutor.name} className="w-12 h-12 rounded-full" />}
                 <div>
-                    <p className="text-sm text-gray-500">Sent to:</p>
+                    <p className="text-sm text-gray-500">{t('dashboard.tutor.requests.reschedule.sentTo')}</p>
                     <p className="font-bold text-gray-800">{request.tutor?.name}</p>
                 </div>
             </div>
@@ -113,17 +115,17 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                     <div className="space-y-3 text-sm flex-grow">
                         {request.originalSchedule && (
                             <div>
-                                <p className="font-semibold text-gray-500 text-xs uppercase tracking-wider">Original</p>
+                                <p className="font-semibold text-gray-500 text-xs uppercase tracking-wider">{t('dashboard.tutor.requests.reschedule.original')}</p>
                                 <div className={`mt-1 inline-block text-gray-700 bg-gray-100 px-3 py-1.5 rounded-md font-medium ${isRecurring ? 'w-full text-center' : 'w-auto'}`}>
                                     {request.originalSchedule}
                                 </div>
                             </div>
                         )}
                         <div>
-                            <p className="font-semibold text-gray-500 text-xs uppercase tracking-wider">Proposed</p>
+                            <p className="font-semibold text-gray-500 text-xs uppercase tracking-wider">{t('dashboard.tutor.requests.reschedule.proposed')}</p>
                             {isRecurring ? (
                                 <div className="mt-1 text-gray-800 bg-green-50 px-3 py-2 rounded-md font-medium border border-green-200 w-full text-center">
-                                    {request.proposedSchedules.map(s => `Every ${s.day} at ${s.time}`).join(', ')}
+                                    {request.proposedSchedules.map(s => t('dashboard.tutor.requests.reschedule.everyDayAt', { day: s.day, time: s.time })).join(', ')}
                                 </div>
                             ) : (
                                 <div className="mt-1 inline-block text-green-800 bg-green-50 px-3 py-1.5 rounded-md font-medium border border-green-200">
@@ -140,15 +142,15 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                                 disabled={isAccepting}
                                 className="w-full py-2 text-sm font-semibold bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isAccepting ? 'Accepting...' : 'Accept'}
+                                {isAccepting ? t('dashboard.tutor.requests.reschedule.accepting') : t('dashboard.tutor.requests.reschedule.accept')}
                             </button>
-                            <button onClick={onChat} className="w-full py-2 text-sm font-semibold bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Chat</button>
+                            <button onClick={onChat} className="w-full py-2 text-sm font-semibold bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">{t('dashboard.tutor.requests.reschedule.chat')}</button>
                             <button 
                                 onClick={handleDecline} 
                                 disabled={isDeclining}
                                 className="w-full py-2 text-sm font-semibold bg-red-50 text-red-700 rounded-lg hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {isDeclining ? 'Declining...' : 'Decline'}
+                                {isDeclining ? t('dashboard.tutor.requests.reschedule.declining') : t('dashboard.tutor.requests.reschedule.decline')}
                             </button>
                         </div>
                     )}
@@ -163,7 +165,7 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                         <RequestStatusBadge status={request.status} />
                         {request.status === 'Pending' && (
                             <button onClick={onCancel} className="text-sm font-semibold text-red-600 hover:underline">
-                                Cancel Request
+                                {t('dashboard.tutor.requests.reschedule.cancelRequest')}
                             </button>
                         )}
                     </div>

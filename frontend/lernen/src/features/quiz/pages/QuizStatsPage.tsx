@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     HiArrowLeft,
     HiUsers,
@@ -137,6 +138,7 @@ const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#0b6459'];
 
 const QuizStatsPage: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [selectedTab, setSelectedTab] = useState<'overview' | 'questions' | 'students'>('overview');
 
     const formatDate = (dateString: string) => {
@@ -184,7 +186,7 @@ const QuizStatsPage: React.FC = () => {
                     </button>
                     <div>
                         <h1 className="text-xl font-bold text-gray-800">{mockQuizStats.quizTitle}</h1>
-                        <p className="text-sm text-gray-500">Quiz Statistics & Analytics</p>
+                        <p className="text-sm text-gray-500">{t('quiz.stats.subtitle')}</p>
                     </div>
                 </div>
 
@@ -197,7 +199,7 @@ const QuizStatsPage: React.FC = () => {
                                 : 'bg-transparent text-gray-500 hover:bg-white/50'
                             }`}
                     >
-                        Overview
+                        {t('quiz.stats.tabs.overview')}
                     </button>
                     <button
                         onClick={() => setSelectedTab('questions')}
@@ -206,7 +208,7 @@ const QuizStatsPage: React.FC = () => {
                                 : 'bg-transparent text-gray-500 hover:bg-white/50'
                             }`}
                     >
-                        Questions
+                        {t('quiz.stats.tabs.questions')}
                     </button>
                     <button
                         onClick={() => setSelectedTab('students')}
@@ -215,7 +217,7 @@ const QuizStatsPage: React.FC = () => {
                                 : 'bg-transparent text-gray-500 hover:bg-white/50'
                             }`}
                     >
-                        Students
+                        {t('quiz.stats.tabs.students')}
                     </button>
                 </div>
             </div>
@@ -227,28 +229,28 @@ const QuizStatsPage: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <StatCard
                             icon={<HiUsers className="w-5 h-5 text-blue-600" />}
-                            title="Total Attempts"
+                            title={t('quiz.stats.overview.totalAttempts')}
                             value={mockQuizStats.totalAttempts}
                             borderColor="border-l-blue-600"
                             iconBg="bg-blue-100"
                         />
                         <StatCard
                             icon={<HiChartBar className="w-5 h-5 text-[#0b6459]" />}
-                            title="Average Score"
+                            title={t('quiz.stats.overview.averageScore')}
                             value={`${mockQuizStats.averageScore}%`}
                             borderColor="border-l-[#0b6459]"
                             iconBg="bg-[#0b6459]/10"
                         />
                         <StatCard
                             icon={<HiCheckCircle className="w-5 h-5 text-green-600" />}
-                            title="Completion Rate"
+                            title={t('quiz.stats.overview.completionRate')}
                             value={`${mockQuizStats.completionRate}%`}
                             borderColor="border-l-green-600"
                             iconBg="bg-green-100"
                         />
                         <StatCard
                             icon={<HiClock className="w-5 h-5 text-purple-600" />}
-                            title="Avg. Time"
+                            title={t('quiz.stats.overview.avgTime')}
                             value={`${mockQuizStats.averageTimeMinutes} min`}
                             borderColor="border-l-purple-600"
                             iconBg="bg-purple-100"
@@ -259,7 +261,7 @@ const QuizStatsPage: React.FC = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Score Distribution */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4">Score Distribution</h3>
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('quiz.stats.overview.scoreDistribution')}</h3>
                             <ResponsiveContainer width="100%" height={250}>
                                 <BarChart data={mockScoreDistribution}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -283,14 +285,14 @@ const QuizStatsPage: React.FC = () => {
 
                         {/* Pass/Fail Distribution */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4">Pass/Fail Rate</h3>
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('quiz.stats.overview.passFailRate')}</h3>
                             <div className="flex items-center justify-center">
                                 <ResponsiveContainer width="100%" height={250}>
                                     <PieChart>
                                         <Pie
                                             data={[
-                                                { name: 'Passed', value: 85 },
-                                                { name: 'Failed', value: 15 }
+                                                { name: t('quiz.stats.overview.passed'), value: 85 },
+                                                { name: t('quiz.stats.overview.failed'), value: 15 }
                                             ]}
                                             cx="50%"
                                             cy="50%"
@@ -316,7 +318,7 @@ const QuizStatsPage: React.FC = () => {
             {selectedTab === 'questions' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
                     <div className="p-6">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Question-Level Analytics</h3>
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">{t('quiz.stats.questions.title')}</h3>
                         <div className="space-y-4">
                             {mockQuestionStats.map((question) => (
                                 <div
@@ -333,7 +335,7 @@ const QuizStatsPage: React.FC = () => {
                                     </div>
                                     <div className="grid grid-cols-3 gap-4 ml-12">
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-1">Correct Rate</p>
+                                            <p className="text-xs text-gray-500 mb-1">{t('quiz.stats.questions.correctRate')}</p>
                                             <div className="flex items-center gap-2">
                                                 <div className="flex-1 bg-gray-200 rounded-full h-2">
                                                     <div
@@ -352,11 +354,11 @@ const QuizStatsPage: React.FC = () => {
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-1">Attempts</p>
+                                            <p className="text-xs text-gray-500 mb-1">{t('quiz.stats.questions.attempts')}</p>
                                             <p className="text-sm font-semibold text-gray-800">{question.totalAttempts}</p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500 mb-1">Avg. Time</p>
+                                            <p className="text-xs text-gray-500 mb-1">{t('quiz.stats.questions.avgTime')}</p>
                                             <p className="text-sm font-semibold text-gray-800">{question.averageTime} min</p>
                                         </div>
                                     </div>
@@ -371,16 +373,16 @@ const QuizStatsPage: React.FC = () => {
             {selectedTab === 'students' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
                     <div className="p-6">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Student Performance</h3>
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">{t('quiz.stats.students.title')}</h3>
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-gray-200">
-                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Student</th>
-                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Score</th>
-                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Time</th>
-                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
-                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{t('quiz.stats.students.tableHeaders.student')}</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{t('quiz.stats.students.tableHeaders.score')}</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{t('quiz.stats.students.tableHeaders.time')}</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{t('quiz.stats.students.tableHeaders.date')}</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">{t('quiz.stats.students.tableHeaders.status')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -406,7 +408,7 @@ const QuizStatsPage: React.FC = () => {
                                                     ? 'bg-teal-100 text-teal-700'
                                                     : 'bg-red-100 text-red-700'
                                                     }`}>
-                                                    {student.status === 'passed' ? 'Passed' : 'Failed'}
+                                                    {student.status === 'passed' ? t('quiz.stats.students.status.passed') : t('quiz.stats.students.status.failed')}
                                                 </span>
                                             </td>
                                         </tr>

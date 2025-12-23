@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Toast from "../../../../components/ui/Toast";
 import WriteWithAIModal from "../pages/components/WriteWithAIModal";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
@@ -22,6 +23,7 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
     maxWidth = "48rem"
 }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const { state: authState } = useAuth();
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -65,12 +67,18 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
     const tutorData = tutorError ? emptyTutorDetail : tutor;
 
     useEffect(() => {
+        const tabLabels: Record<ProfileTab, string> = {
+            "Personal Details": t('dashboard.tutor.profileSettings.tabs.personalDetails'),
+            "Resume Highlights": t('dashboard.tutor.profileSettings.tabs.resumeHighlights'),
+            "Account Settings": t('dashboard.tutor.profileSettings.tabs.accountSettings'),
+            "Subjects I Can Teach": t('dashboard.tutor.profileSettings.tabs.subjectsICanTeach')
+        };
         setBreadcrumb([
-            { label: "Dashboard", path: "/dashboard" },
-            { label: "Profile Settings", path: "/dashboard/profile-settings/personal-details" },
-            { label: activeTab, path: `/dashboard/profile-settings/${activeTab.toLowerCase().replace(' ', '-')}` }
+            { label: t('dashboard.header.breadcrumb.dashboard'), path: "/dashboard" },
+            { label: t('dashboard.tutor.profileSettings.breadcrumb.profileSettings'), path: "/dashboard/profile-settings/personal-details" },
+            { label: tabLabels[activeTab], path: `/dashboard/profile-settings/${activeTab.toLowerCase().replace(' ', '-')}` }
         ]);
-    }, [setBreadcrumb, activeTab]);
+    }, [setBreadcrumb, activeTab, t]);
 
     // Handle Zoom OAuth callback
     useEffect(() => {
@@ -131,19 +139,27 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
                 <div className="bg-gray-100 p-1.5 rounded-2xl">
                     <div className="flex justify-center">
                         <div className="flex items-center gap-1 max-w-3xl w-full">
-                            {(["Personal Details", "Resume Highlights", "Account Settings", "Subjects I Can Teach"] as ProfileTab[]).map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => handleTabChange(tab)}
-                                    className={`flex-1 px-6 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
-                                        activeTab === tab
-                                            ? "bg-white text-gray-800 shadow-sm"
-                                            : "text-gray-500 hover:bg-white/50"
-                                    }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
+                            {(["Personal Details", "Resume Highlights", "Account Settings", "Subjects I Can Teach"] as ProfileTab[]).map((tab) => {
+                                const tabLabels: Record<ProfileTab, string> = {
+                                    "Personal Details": t('dashboard.tutor.profileSettings.tabs.personalDetails'),
+                                    "Resume Highlights": t('dashboard.tutor.profileSettings.tabs.resumeHighlights'),
+                                    "Account Settings": t('dashboard.tutor.profileSettings.tabs.accountSettings'),
+                                    "Subjects I Can Teach": t('dashboard.tutor.profileSettings.tabs.subjectsICanTeach')
+                                };
+                                return (
+                                    <button
+                                        key={tab}
+                                        onClick={() => handleTabChange(tab)}
+                                        className={`flex-1 px-6 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
+                                            activeTab === tab
+                                                ? "bg-white text-gray-800 shadow-sm"
+                                                : "text-gray-500 hover:bg-white/50"
+                                        }`}
+                                    >
+                                        {tabLabels[tab]}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

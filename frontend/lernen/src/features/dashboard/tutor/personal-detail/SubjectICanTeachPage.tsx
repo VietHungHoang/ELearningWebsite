@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import type { Category, Subject } from '../../../../types/common';
 
 const SubjectICanTeachPage: React.FC = () => {
+    const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
@@ -86,14 +88,14 @@ const SubjectICanTeachPage: React.FC = () => {
             <ProfileSettingsLayout activeTab="Subjects I Can Teach">
                 {/* Tuition Fee Section */}
                 <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Tuition Fee</h3>
-                    <p className="text-sm text-gray-600 mb-6">Set your hourly teaching rate</p>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">{t('dashboard.tutor.subjectsICanTeach.tuitionFee.title')}</h3>
+                    <p className="text-sm text-gray-600 mb-6">{t('dashboard.tutor.subjectsICanTeach.tuitionFee.description')}</p>
 
                     <form className="space-y-0">
                         <div className="flex items-center py-6 border-b border-gray-200">
                             <div className="w-48 text-left">
                                 <label className="text-sm font-medium text-gray-700">
-                                    Hourly Rate (USD) <span className="text-red-500">*</span>
+                                    {t('dashboard.tutor.subjectsICanTeach.tuitionFee.hourlyRate')} <span className="text-red-500">*</span>
                                 </label>
                             </div>
                             <div className="flex-1 pl-4">
@@ -103,7 +105,7 @@ const SubjectICanTeachPage: React.FC = () => {
                                         type="number"
                                         value={tuitionFee}
                                         onChange={(e) => setTuitionFee(e.target.value)}
-                                        placeholder="0.00"
+                                        placeholder={t('dashboard.tutor.subjectsICanTeach.tuitionFee.hourlyRatePlaceholder')}
                                         className="w-full bg-gray-100 border border-transparent rounded-lg pl-8 pr-4 py-2 text-gray-800 placeholder:text-gray-500 placeholder:font-thin hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out"
                                         min="0"
                                         step="0.01"
@@ -118,15 +120,15 @@ const SubjectICanTeachPage: React.FC = () => {
                 <div>
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-800">Subjects I Can Teach</h3>
-                            <p className="text-sm text-gray-600 mt-1">Manage the subjects you are qualified to teach</p>
+                            <h3 className="text-lg font-semibold text-gray-800">{t('dashboard.tutor.subjectsICanTeach.subjects.title')}</h3>
+                            <p className="text-sm text-gray-600 mt-1">{t('dashboard.tutor.subjectsICanTeach.subjects.description')}</p>
                         </div>
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className="px-4 py-2.25 bg-[#045A46] text-white text-sm rounded-lg hover:bg-[#03453a] transition-colors font-medium flex items-center gap-2"
                         >
                             <span>+</span>
-                            Add New
+                            {t('dashboard.tutor.subjectsICanTeach.subjects.addNew')}
                         </button>
                     </div>
 
@@ -138,10 +140,9 @@ const SubjectICanTeachPage: React.FC = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
                             </div>
-                            <h4 className="text-lg font-semibold text-gray-900 mb-2">No subjects added yet</h4>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-2">{t('dashboard.tutor.subjectsICanTeach.subjects.emptyTitle')}</h4>
                             <p className="text-gray-500 text-sm leading-relaxed">
-                                Start building your teaching profile by adding the subjects you're qualified to teach.
-                                This will help students find you for the right courses.
+                                {t('dashboard.tutor.subjectsICanTeach.subjects.emptyDescription')}
                             </p>
                         </div>
                     </div>
@@ -156,18 +157,18 @@ const SubjectICanTeachPage: React.FC = () => {
                 showCloseButton={true}
             >
                 <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6">Add Subjects</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">{t('dashboard.tutor.subjectsICanTeach.modal.title')}</h3>
 
                     <div className="space-y-6">
                         {/* Category Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Category
+                                {t('dashboard.tutor.subjectsICanTeach.modal.category')}
                             </label>
                             <CustomDropdown
                                 options={categories.map(c => c.name)}
                                 selectedValue={selectedCategory?.name || ''}
-                                placeholder="Select a category"
+                                placeholder={t('dashboard.tutor.subjectsICanTeach.modal.categoryPlaceholder')}
                                 onSelect={(categoryName) => {
                                     const category = categories.find(c => c.name === categoryName);
                                     if (category) handleCategorySelect(category);
@@ -181,14 +182,14 @@ const SubjectICanTeachPage: React.FC = () => {
                         {/* Subject Selection */}
                         <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Subjects <span className="text-red-500">*</span>
+                                    {t('dashboard.tutor.subjectsICanTeach.modal.subjects')} <span className="text-red-500">*</span>
                                 </label>
                                 <CustomDropdown
                                     options={filteredSubjects
                                         .filter(subject => !selectedSubjects.some(s => s.id === subject.id))
                                         .map(subject => subject.name)}
                                     selectedValue=""
-                                    placeholder="+ Add Subject"
+                                    placeholder={t('dashboard.tutor.subjectsICanTeach.modal.addSubject')}
                                     onSelect={(value: string) => {
                                         const selectedSubject = filteredSubjects.find(s => s.name === value);
                                         if (selectedSubject && !selectedSubjects.some(s => s.id === selectedSubject.id)) {
@@ -233,14 +234,14 @@ const SubjectICanTeachPage: React.FC = () => {
                             onClick={handleCloseModal}
                             className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                         >
-                            Cancel
+                            {t('dashboard.tutor.subjectsICanTeach.modal.cancel')}
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={selectedSubjects.length === 0}
                             className="px-4 py-2 text-sm font-semibold bg-[#045A46] text-white rounded-lg hover:bg-[#03453a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            Add Subjects
+                            {t('dashboard.tutor.subjectsICanTeach.modal.addSubjects')}
                         </button>
                     </div>
                 </div>
