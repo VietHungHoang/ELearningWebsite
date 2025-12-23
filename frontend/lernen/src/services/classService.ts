@@ -90,7 +90,7 @@ const mockClassData: ClassTable[] = [
         students: [
             { id: 'student-4', fullName: 'Phạm Thị D', avatarUrl: '' }
         ],
-        type: 'ON_ONE_ONE',
+        type: 'ONE_ON_ONE',
         status: 'ONGOING',
         schedules: [
             { dayOfWeek: 3, time: '20:00' }

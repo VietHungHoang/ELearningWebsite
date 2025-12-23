@@ -71,7 +71,7 @@ export interface ClassDetail extends ClassTable {
     assignments: { id: string; title: string; description: string; dueDate: string; submissions: number }[];
 }
 
-export type ClassType = 'ON_ONE_ONE' | 'GROUP' | 'TRIAL';
+export type ClassType = 'ONE_ON_ONE' | 'GROUP' | 'TRIAL';
 
 
 export interface Session {

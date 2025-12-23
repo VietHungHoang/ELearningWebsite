@@ -118,7 +118,7 @@
   },
   "home": {
     "hero": {
-      "badge": "Nền tảng học trực tuyến số 1",
+      "badge": "nền tảng học trực tuyến số 1",
       "title": "Gia sư đúng người – Thành công đúng hướng",
       "subtitle": "",
       "description": "Kết nối với {{expertTutors}} để trải nghiệm học tập được cá nhân hóa. Đạt được mục tiêu nhanh chóng hơn với sự hướng dẫn một kèm một từ các chuyên gia.",
@@ -438,7 +438,7 @@
           "actions": "Hành động"
         },
         "classTypes": {
-          "oneOnOne": "1-1",
+          "oneOnOne": "1 kèm 1",
           "group": "Nhóm"
         },
         "scheduleMore": "Lên lịch thêm",

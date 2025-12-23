@@ -267,7 +267,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, locale, language, t,
 
     const getStatusColor = (sessionType: string) => {
         switch (sessionType) {
-            case "ON_ONE_ONE":
+            case "1-on-1":
                 return "bg-blue-100 text-blue-700";
             case "GROUP":
                 return "bg-green-100 text-green-700";
@@ -280,7 +280,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, locale, language, t,
 
     const getStatusText = (sessionType: string) => {
         switch (sessionType) {
-            case "ON_ONE_ONE":
+            case "1-on-1":
                 return "1-1";
             case "GROUP":
                 return "Group";
