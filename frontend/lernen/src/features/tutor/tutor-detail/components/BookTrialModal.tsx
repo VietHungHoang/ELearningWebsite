@@ -80,31 +80,13 @@ const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorI
     setIsLoading(true);
     
     try {
-      let utcDateTime = selectedTimes[0];
-      // Convert local time back to UTC
-      if (selectedTimezone) {
-        const localDate = new Date(utcDateTime);
-        const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
-        if (offsetMatch) {
-          const sign = offsetMatch[1] === "+" ? -1 : 1; // Subtract to get UTC
-          const offsetHours = parseInt(offsetMatch[2]);
-          const offsetMinutes = parseInt(offsetMatch[3]);
-          localDate.setHours(localDate.getHours() + sign * offsetHours);
-          localDate.setMinutes(localDate.getMinutes() + sign * offsetMinutes);
-          const year = localDate.getFullYear();
-          const month = String(localDate.getMonth() + 1).padStart(2, '0');
-          const day = String(localDate.getDate()).padStart(2, '0');
-          const hourStr = String(localDate.getHours()).padStart(2, '0');
-          const minuteStr = String(localDate.getMinutes()).padStart(2, '0');
-          const seconds = String(localDate.getSeconds()).padStart(2, '0');
-          utcDateTime = `${year}-${month}-${day}T${hourStr}:${minuteStr}:${seconds}`;
-        }
-      }
+      // selectedTimes already contains UTC+0 ISO strings, no need to convert
+      const utcDateTime = selectedTimes[0];
       
       const request: TrialSessionRequest = {
         tutorId: tutor.id,
         studentId: state.user?.id,
-        sessionDateTime: utcDateTime,
+        sessionDateTime: utcDateTime, // Already UTC+0
         message: message.trim() || ''
       };
       
@@ -163,19 +145,69 @@ const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorI
           <div className="flex items-center gap-2 mb-6">
               <p className="font-semibold text-sm text-gray-800">{t('tutorDetail.bookTrialModal.selectedTimes')}</p>
               <div className="flex flex-wrap gap-2">
-                  {selectedTimes.map((utcDateTime, index) => {
-                      const date = new Date(utcDateTime);
-                      const formattedDate = date.toLocaleDateString('en-US', { 
-                          weekday: 'short', 
-                          month: 'short', 
-                          day: 'numeric',
-                          year: 'numeric'
-                      });
-                      const formattedTime = date.toLocaleTimeString('en-US', { 
-                          hour: 'numeric', 
-                          minute: '2-digit', 
-                          hour12: true 
-                      });
+                  {selectedTimes.map((utcISOString, index) => {
+                      // Convert UTC to display timezone
+                      const utcDate = new Date(utcISOString);
+                      
+                      console.log('🔍 BookTrialModal Debug:');
+                      console.log('  utcISOString:', utcISOString);
+                      console.log('  selectedTimezone:', selectedTimezone);
+                      console.log('  UTC hours:', utcDate.getUTCHours());
+                      
+                      if (!selectedTimezone) {
+                          // No timezone, display UTC
+                          const formattedDate = `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][utcDate.getUTCDay()]}, ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][utcDate.getUTCMonth()]} ${utcDate.getUTCDate()}, ${utcDate.getUTCFullYear()}`;
+                          const hour = utcDate.getUTCHours();
+                          const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                          const ampm = hour >= 12 ? 'PM' : 'AM';
+                          const formattedTime = `${hour12}:${utcDate.getUTCMinutes().toString().padStart(2, '0')} ${ampm}`;
+                          
+                          return (
+                              <span key={index} className="text-sm font-medium text-gray-800">
+                                  {formattedDate} at {formattedTime}
+                              </span>
+                          );
+                      }
+                      
+                      // Get UTC components
+                      const utcYear = utcDate.getUTCFullYear();
+                      const utcMonth = utcDate.getUTCMonth();
+                      const utcDay = utcDate.getUTCDate();
+                      const utcHour = utcDate.getUTCHours();
+                      const utcMinute = utcDate.getUTCMinutes();
+                      
+                      console.log('  UTC components:', { utcYear, utcMonth, utcDay, utcHour, utcMinute });
+                      
+                      // Apply timezone offset
+                      const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+                      if (!offsetMatch) return null;
+                      
+                      const sign = offsetMatch[1] === "+" ? 1 : -1;
+                      const offsetHours = parseInt(offsetMatch[2]);
+                      const offsetMinutes = parseInt(offsetMatch[3]);
+                      
+                      console.log('  Timezone offset parsed:', { sign, offsetHours, offsetMinutes });
+                      console.log('  Will add to UTC hour:', utcHour, '+', sign * offsetHours, '=', utcHour + sign * offsetHours);
+                      
+                      const localDate = new Date(Date.UTC(
+                          utcYear, 
+                          utcMonth, 
+                          utcDay, 
+                          utcHour + sign * offsetHours, 
+                          utcMinute + sign * offsetMinutes
+                      ));
+                      
+                      console.log('  Final display hour:', localDate.getUTCHours());
+                      
+                      const formattedDate = `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][localDate.getUTCDay()]}, ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][localDate.getUTCMonth()]} ${localDate.getUTCDate()}, ${localDate.getUTCFullYear()}`;
+                      const displayHour = localDate.getUTCHours();
+                      const hour12 = displayHour === 0 ? 12 : displayHour > 12 ? displayHour - 12 : displayHour;
+                      const ampm = displayHour >= 12 ? 'PM' : 'AM';
+                      const formattedTime = `${hour12}:${localDate.getUTCMinutes().toString().padStart(2, '0')} ${ampm}`;
+                      
+                      console.log('  Final formatted time:', formattedTime);
+                      console.log('---');
+                      
                       return (
                           <span key={index} className="text-sm font-medium text-gray-800">
                               {formattedDate} at {formattedTime}
