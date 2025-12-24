@@ -4,6 +4,8 @@ server:
 spring:
     application:
         name: content-service
+    profiles:
+        active: dev
 
     datasource:
         url: jdbc:postgresql://localhost:5434/content_service_db

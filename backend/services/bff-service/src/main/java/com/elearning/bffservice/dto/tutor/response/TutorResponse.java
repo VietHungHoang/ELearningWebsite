@@ -31,6 +31,9 @@ public class TutorResponse {
     private BigDecimal originalSessionFee;
     private Double averageRating;
     private Integer reviewCount;
+    private Integer bookedSessionsCount;
+    private Integer studentCount;
+    private Boolean hasTrialSession;
     private List<TutorLanguageResponse> languageCodes;
     private List<UUID> subjectIds;
 }

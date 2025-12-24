@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentFailedEvent {
-    private Long paymentId;
+    private UUID paymentId;
     private UUID orderId;
     private BigDecimal amount;
     private String currency;

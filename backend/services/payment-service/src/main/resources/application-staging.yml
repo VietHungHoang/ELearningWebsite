@@ -1,3 +1,6 @@
+server:
+  port: 8091
+
 spring:
   datasource:
     url: ${DB_URL}
@@ -13,6 +16,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
 services:
   auth-service:
     url: ${AUTH_SERVICE_URL}
@@ -27,7 +33,14 @@ services:
   tutor-service:
     url: ${TUTOR_SERVICE_URL}
 
-logging:
-  level:
-    root: INFO
-    "[com.elearning.bffservice]": DEBUG
+payment:
+  providers:
+    momo:
+      partnerCode: "MOMOI0ZT20251005_TEST"
+      accessKey: "RAlqforIHMzHupmt"
+      secretKey: "UeTsSYek1420zZmXpbinGDnTviPnditj"
+      endpoint: "https://test-payment.momo.vn/v2/gateway/api"
+    vnpay:
+      tmn-code: "97IDADFL"
+      hash-secret: "X4OOQTBSKPM75HI2CIFULM3AILRQFC7M"
+      endpoint: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"

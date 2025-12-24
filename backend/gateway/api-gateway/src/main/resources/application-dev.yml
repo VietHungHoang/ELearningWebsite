@@ -8,12 +8,13 @@ spring:
     gateway:
       routes:
         - id: bff-route
-          uri: http://localhost:8081
+          uri: http://localhost:8083
           predicates:
             - Path=/api/v1/web/**
             - Path=/api/v1/public/**
+            - Path=/api/v1/tutors/**
           filters:
-            - RewritePath=/api/v1/(web|public)/(.*), /api/v1/bff/$2
+            - RewritePath=/api/v1/(web|public|tutors)/(.*), /api/v1/bff/$2
 
         - id: auth-service-route
           uri: http://localhost:8082

@@ -33,7 +33,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponse sendMessage(SendMessageRequest request, String senderId) {
+    public MessageResponse sendMessage(SendMessageRequest request, UUID senderId) {
         log.info("Sending message: conversationId={}, senderId={}", request.getConversationId(), senderId);
 
         // Verify user is participant
@@ -69,7 +69,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponse sendMessageWithFiles(SendMessageRequest request, List<MultipartFile> files, String senderId) {
+    public MessageResponse sendMessageWithFiles(SendMessageRequest request, List<MultipartFile> files, UUID senderId) {
         log.info("Sending message with files: conversationId={}, senderId={}, fileCount={}", 
                 request.getConversationId(), senderId, files.size());
 
@@ -112,6 +112,7 @@ public class MessageServiceImpl implements MessageService {
 
         // Create message
         Message message = Message.builder()
+                .id(UUID.randomUUID())
                 .conversationId(request.getConversationId())
                 .senderId(senderId)
                 .type(request.getType())
@@ -137,7 +138,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public MessageResponse getMessageById(String messageId, String userId) {
+    public MessageResponse getMessageById(UUID messageId, UUID userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
@@ -150,7 +151,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Page<MessageResponse> getConversationMessages(String conversationId, String userId, Pageable pageable) {
+    public Page<MessageResponse> getConversationMessages(UUID conversationId, UUID userId, Pageable pageable) {
         // Verify user is participant
         if (!participantRepository.existsByConversationIdAndUserId(conversationId, userId)) {
             throw new RuntimeException("User is not a participant in this conversation");
@@ -162,7 +163,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponse editMessage(EditMessageRequest request, String userId) {
+    public MessageResponse editMessage(EditMessageRequest request, UUID userId) {
         Message message = messageRepository.findById(request.getMessageId())
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
@@ -189,7 +190,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public void deleteMessage(String messageId, String userId) {
+    public void deleteMessage(UUID messageId, UUID userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
@@ -208,7 +209,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public void markAsRead(String conversationId, String messageId, String userId) {
+    public void markAsRead(UUID conversationId, UUID messageId, UUID userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
@@ -221,7 +222,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public void markAllAsRead(String conversationId, String userId) {
+    public void markAllAsRead(UUID conversationId, UUID userId) {
         List<Message> unreadMessages = messageRepository.findUnreadMessagesInConversation(conversationId, userId);
         
         for (Message message : unreadMessages) {
@@ -236,8 +237,19 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    public UUID getConversationIdByMessageId(UUID messageId) {
+        Message message = messageRepository.findById(messageId).orElse(null);
+        return message != null ? message.getConversationId() : null;
+    }
+
+    @Override
+    public boolean isUserParticipant(UUID conversationId, UUID userId) {
+        return participantRepository.existsByConversationIdAndUserId(conversationId, userId);
+    }
+
+    @Override
     @Transactional
-    public MessageResponse addReaction(String messageId, String emoji, String userId) {
+    public MessageResponse addReaction(UUID messageId, String emoji, UUID userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
@@ -255,7 +267,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponse removeReaction(String messageId, String userId) {
+    public MessageResponse removeReaction(UUID messageId, UUID userId) {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
 
@@ -270,12 +282,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public long getUnreadCount(String conversationId, String userId) {
+    public long getUnreadCount(UUID conversationId, UUID userId) {
         return messageRepository.countUnreadMessages(conversationId, userId);
     }
 
     @Override
-    public Page<MessageResponse> searchMessages(String conversationId, String searchText, String userId, Pageable pageable) {
+    public Page<MessageResponse> searchMessages(UUID conversationId, String searchText, UUID userId, Pageable pageable) {
         // Verify user is participant
         if (!participantRepository.existsByConversationIdAndUserId(conversationId, userId)) {
             throw new RuntimeException("User is not a participant in this conversation");
@@ -286,7 +298,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Page<MessageResponse> getMessagesByType(String conversationId, MessageType type, String userId, Pageable pageable) {
+    public Page<MessageResponse> getMessagesByType(UUID conversationId, MessageType type, UUID userId, Pageable pageable) {
         // Verify user is participant
         if (!participantRepository.existsByConversationIdAndUserId(conversationId, userId)) {
             throw new RuntimeException("User is not a participant in this conversation");
@@ -296,7 +308,8 @@ public class MessageServiceImpl implements MessageService {
                 .map(this::mapToResponse);
     }
 
-    private MessageResponse mapToResponse(Message message) {
+    @Override
+    public MessageResponse mapToResponse(Message message) {
         MessageResponse response = MessageResponse.builder()
                 .id(message.getId())
                 .conversationId(message.getConversationId())

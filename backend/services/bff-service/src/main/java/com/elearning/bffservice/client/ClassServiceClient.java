@@ -1,34 +1,31 @@
 package com.elearning.bffservice.client;
 
 import com.elearning.bffservice.dto.RestResponsePage;
-import com.elearning.bffservice.dto.clas.request.AcceptTrialSessionRequest;
-import com.elearning.bffservice.dto.clas.request.TrialSessionRequest;
-import com.elearning.bffservice.dto.clas.response.GroupClassResponse;
-import com.elearning.bffservice.dto.clas.request.ZoomOAuthCallbackRequest;
-import com.elearning.bffservice.dto.clas.response.ZoomAuthorizationUrlResponse;
+import com.elearning.bffservice.dto.classes.request.AcceptTrialSessionRequest;
+import com.elearning.bffservice.dto.classes.response.*;
+import com.elearning.bffservice.dto.classes.request.ZoomOAuthCallbackRequest;
 import com.elearning.bffservice.dto.ApiResponse;
-import com.elearning.bffservice.dto.response.ClassServiceBookedSessionResponse;
-import com.elearning.bffservice.dto.clas.response.TrialSessionRequestResponse;
-import com.elearning.bffservice.dto.response.TutorStudentResponse;
-import com.elearning.bffservice.dto.clas.response.TutorStatsResponse;
-import com.elearning.bffservice.dto.response.TutorStudentDetailResponse;
-import com.elearning.bffservice.dto.response.TutorClassResponse;
+import com.elearning.bffservice.dto.response.*;
+import com.elearning.bffservice.dto.tutor.response.MonthlyStudentStats;
 import com.elearning.bffservice.dto.enums.ScheduleStatus;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Client for Class Service
@@ -132,6 +129,31 @@ public class ClassServiceClient {
 
         return response;
     }
+
+    /**
+     * Get booked sessions for student from Class Service
+     */
+    public ApiResponse<List<ClassServiceBookedSessionResponse>> getBookedSessionsForStudent(UUID studentId, LocalDate startDate, LocalDate endDate, List<ScheduleStatus> statuses) {
+        UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl(classServiceBaseUrl + "/api/v1/classes/sessions/students/{studentId}")
+            .queryParam("startDate", startDate)
+            .queryParam("endDate", endDate);
+        
+        if (statuses != null && !statuses.isEmpty()) {
+            builder.queryParam("statuses", statuses);
+        }
+        
+        URI url = builder.buildAndExpand(studentId).toUri();
+        
+        ApiResponse<List<ClassServiceBookedSessionResponse>> response = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            null,
+            new ParameterizedTypeReference<ApiResponse<List<ClassServiceBookedSessionResponse>>>() {}
+        ).getBody();
+
+        return response;
+    }
     
     /**
      * Get tutor stats from Class Service
@@ -169,22 +191,6 @@ public class ClassServiceClient {
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<ApiResponse<List<GroupClassResponse>>>() {}
-        ).getBody();
-    }
-
-    /**
-     * Book a trial session from Class Service
-     */
-    public ApiResponse<Void> saveTrialSessionRequest(TrialSessionRequest request) {
-        String url = classServiceBaseUrl + "/api/v1/class/trial-session";
-
-        HttpEntity<TrialSessionRequest> entity = new HttpEntity<>(request);
-
-        return restTemplate.exchange(
-            url,
-            HttpMethod.POST,
-            entity,
-            new ParameterizedTypeReference<ApiResponse<Void>>() {}
         ).getBody();
     }
 
@@ -240,25 +246,6 @@ public class ClassServiceClient {
     }
 
     /**
-     * Get trial session request for a tutor and student
-     */
-    public ApiResponse<TrialSessionRequestResponse> getTrialSessionRequest(UUID tutorId, UUID studentId) {
-        URI url = UriComponentsBuilder
-            .fromHttpUrl(classServiceBaseUrl + "/api/v1/class/trial-session")
-            .queryParam("tutorId", tutorId)
-            .queryParam("studentId", studentId)
-            .build()
-            .toUri();
-
-        return restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            null,
-            new ParameterizedTypeReference<ApiResponse<TrialSessionRequestResponse>>() {}
-        ).getBody();
-    }
-
-    /**
      * Get list of trial session requests by role and user ID
      */
     public ApiResponse<Map<UUID, TrialSessionRequestResponse>> getTrialSessionRequestsByRole(String role, UUID userId) {
@@ -274,6 +261,73 @@ public class ClassServiceClient {
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<ApiResponse<Map<UUID, TrialSessionRequestResponse>>>() {}
+        ).getBody();
+    }
+
+    /**
+     * Get student stats from Class Service
+     */
+    public ClassStatisticsResponse getStudentStats(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate) {
+        URI url = UriComponentsBuilder
+                .fromHttpUrl(classServiceBaseUrl + "/api/v1/classes/{tutorId}/students/stats")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate)
+                .buildAndExpand(tutorId)
+                .toUri();
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                ClassStatisticsResponse.class
+        ).getBody();
+    }
+
+    /**
+     * Get booked sessions for user from Class Service
+     */
+    public ApiResponse<List<BookedSessionResponse>> getBookedSessionsForUser(UUID userId, LocalDateTime startDate, LocalDateTime endDate) {
+        URI url = UriComponentsBuilder
+                .fromHttpUrl(classServiceBaseUrl + "/api/v1/classes/sessions/me")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate)
+                .build()
+                .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Id", userId.toString());
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ApiResponse<List<BookedSessionResponse>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<ApiResponse<List<BookedSessionResponse>>>() {}
+        ).getBody();
+
+        return response;
+    }
+
+    /**
+     * Get monthly student statistics for tutor
+     */
+    public ApiResponse<List<MonthlyStudentStats>> getMonthlyStudentStats(UUID tutorId) {
+        URI url = UriComponentsBuilder
+                .fromHttpUrl(classServiceBaseUrl + "/api/v1/classes/statistics/me/students")
+                .build()
+                .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Id", tutorId.toString());
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<ApiResponse<List<MonthlyStudentStats>>>() {}
         ).getBody();
     }
 }

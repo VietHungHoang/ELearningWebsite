@@ -10,48 +10,49 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface MessageRepository extends MongoRepository<Message, String> {
+public interface MessageRepository extends MongoRepository<Message, UUID> {
 
     /**
      * Find messages in a conversation with pagination
      */
     Page<Message> findByConversationIdAndIsDeletedFalseOrderByCreatedAtDesc(
-            String conversationId, Pageable pageable);
+            UUID conversationId, Pageable pageable);
 
     /**
      * Find messages after a specific time (for real-time sync)
      */
     List<Message> findByConversationIdAndCreatedAtAfterAndIsDeletedFalse(
-            String conversationId, LocalDateTime after);
+            UUID conversationId, LocalDateTime after);
 
     /**
      * Find unread messages for a user in a conversation
      */
     @Query("{ 'conversationId': ?0, 'readBy': { $nin: [?1] }, 'senderId': { $ne: ?1 }, 'isDeleted': false }")
-    List<Message> findUnreadMessagesInConversation(String conversationId, String userId);
+    List<Message> findUnreadMessagesInConversation(UUID conversationId, UUID userId);
 
     /**
      * Count unread messages for a user in a conversation
      */
     @Query(value = "{ 'conversationId': ?0, 'readBy': { $nin: [?1] }, 'senderId': { $ne: ?1 }, 'isDeleted': false }", count = true)
-    long countUnreadMessages(String conversationId, String userId);
+    long countUnreadMessages(UUID conversationId, UUID userId);
 
     /**
      * Find messages by type in a conversation
      */
     Page<Message> findByConversationIdAndTypeAndIsDeletedFalse(
-            String conversationId, MessageType type, Pageable pageable);
+            UUID conversationId, MessageType type, Pageable pageable);
 
     /**
      * Search messages by content
      */
     @Query("{ 'conversationId': ?0, 'content': { $regex: ?1, $options: 'i' }, 'isDeleted': false }")
-    Page<Message> searchInConversation(String conversationId, String searchText, Pageable pageable);
+    Page<Message> searchInConversation(UUID conversationId, String searchText, Pageable pageable);
 
     /**
      * Find messages sent by a specific user
      */
-    Page<Message> findBySenderIdAndIsDeletedFalse(String senderId, Pageable pageable);
+    Page<Message> findBySenderIdAndIsDeletedFalse(UUID senderId, Pageable pageable);
 }

@@ -14,5 +14,6 @@ public interface StudentService {
     StudentResponse createStudent(AccountCreatedEvent request);
     StudentResponse getStudentById(UUID id);
     List<StudentResponse> getStudentsListByIds(List<UUID> ids);
+    List<StudentResponse> getStudentBasicInfosByIds(List<UUID> ids);
     Page<StudentResponse> getAllStudents(Pageable pageable);
 }

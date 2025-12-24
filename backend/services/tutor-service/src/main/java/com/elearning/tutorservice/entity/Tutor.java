@@ -70,6 +70,16 @@ public class Tutor {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    @Column(name = "total_students")
+    private Integer totalStudents;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "payment_method_data")
+    private String paymentMethodData;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -101,4 +111,6 @@ public class Tutor {
 
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Certification> certifications;
+
+
 }

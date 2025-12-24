@@ -5,7 +5,7 @@ package com.elearning.bffservice.dto.request;
  */
 public enum ClassType {
     ALL("all"),
-    ONE_ON_ONE("1-1"),
+    ONE_ON_ONE("1-on-1"),
     GROUP("group");
 
     private final String value;

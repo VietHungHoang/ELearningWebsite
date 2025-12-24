@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,10 +38,31 @@ public interface ClassEnrollmentRepository extends JpaRepository<ClassEnrollment
      * Get all enrollments for a class (no pagination)
      */
     List<ClassEnrollment> findByClassEntityId(UUID classId);
+
+    /**
+     * Find enrollments by student ID and status with pagination
+     */
+    Page<ClassEnrollment> findByStudentIdAndStatus(UUID studentId, EnrollmentStatus status, Pageable pageable);
     
     /**
      * Find enrollment for a specific student in tutor's classes
      */
     @Query("SELECT ce FROM ClassEnrollment ce WHERE ce.classEntity.tutorId = :tutorId AND ce.studentId = :studentId")
     Optional<ClassEnrollment> findByTutorIdAndStudentId(@Param("tutorId") UUID tutorId, @Param("studentId") UUID studentId);
+
+    /**
+     * Đếm số học sinh duy nhất của tutor trong khoảng thời gian
+     */
+    @Query("SELECT COUNT(DISTINCT ce.studentId) FROM ClassEnrollment ce WHERE ce.classEntity.tutorId = :tutorId AND ce.createdAt BETWEEN :startDate AND :endDate AND ce.status = 'APPROVED'")
+    Long countDistinctStudentsByTutorIdAndDateRange(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    /**
+     * Lấy thống kê số học sinh hàng tháng của tutor trong 12 tháng gần nhất
+     */
+    @Query("SELECT YEAR(ce.createdAt) as year, MONTH(ce.createdAt) as month, COUNT(DISTINCT ce.studentId) as students " +
+           "FROM ClassEnrollment ce " +
+           "WHERE ce.classEntity.tutorId = :tutorId AND ce.status = 'APPROVED' AND ce.createdAt >= :startDate " +
+           "GROUP BY YEAR(ce.createdAt), MONTH(ce.createdAt) " +
+           "ORDER BY YEAR(ce.createdAt) DESC, MONTH(ce.createdAt) DESC")
+    List<Object[]> getMonthlyStudentStats(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate);
 }

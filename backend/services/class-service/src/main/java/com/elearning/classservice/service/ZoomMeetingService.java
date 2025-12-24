@@ -1,9 +1,8 @@
 package com.elearning.classservice.service;
 
-import com.elearning.classservice.dto.zoom.ZoomMeetingResponse;
-import com.elearning.classservice.entity.Session;
-
 import java.util.UUID;
+
+import com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse;
 
 /**
  * Service for managing Zoom meetings via Zoom API
@@ -13,10 +12,10 @@ public interface ZoomMeetingService {
     /**
      * Create a scheduled Zoom meeting for a session
      * @param tutorId tutor ID (to get access token)
-     * @param session session entity with start/end time
+     * @param sessionId session entity with start/end time
      * @return Zoom meeting details
      */
-    ZoomMeetingResponse createScheduledMeeting(UUID tutorId, Session session);
+    ZoomMeetingResponse createScheduledMeeting(UUID tutorId, UUID sessionId);
     
     /**
      * Get meeting details from Zoom

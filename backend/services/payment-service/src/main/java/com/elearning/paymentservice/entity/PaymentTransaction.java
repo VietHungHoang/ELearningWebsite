@@ -23,8 +23,11 @@ import java.util.UUID;
 public class PaymentTransaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
@@ -38,6 +41,36 @@ public class PaymentTransaction {
 
     @Column(name = "provider_transaction_id")
     private String providerTransactionId;
+
+    @Column(name = "order_id", nullable = false)
+    private UUID orderId;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    @Column(name = "partner_code")
+    private String partnerCode;
+
+    @Column(name = "order_info")
+    private String orderInfo;
+
+    @Column(name = "order_type")
+    private String orderType;
+
+    @Column(name = "result_code")
+    private String resultCode;
+
+    @Column(name = "result_message")
+    private String resultMessage;
+
+    @Column(name = "pay_type")
+    private String payType;
+
+    @Column(name = "response_time")
+    private LocalDateTime responseTime;
+
+    @Column(name = "signature")
+    private String signature;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

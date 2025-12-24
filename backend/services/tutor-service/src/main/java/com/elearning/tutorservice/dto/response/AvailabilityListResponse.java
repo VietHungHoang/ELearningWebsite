@@ -13,7 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AvailabilityListResponse {
-    private LocalDate from;
-    private LocalDate to;
     private List<AvailabilityResponse> availabilities;
 }

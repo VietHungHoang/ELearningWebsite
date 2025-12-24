@@ -1,42 +1,84 @@
 package com.elearning.classservice.controller;
 
-import com.elearning.classservice.dto.response.StartSessionResponse;
-import com.elearning.classservice.entity.Session;
+import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
+import com.elearning.classservice.dto.request.CreateClassBookingRequest;
+import com.elearning.classservice.dto.response.ApiResponse;
+import com.elearning.classservice.dto.response.CreateClassBookingResponse;
+import com.elearning.classservice.dto.sessions.SessionResponse;
+import com.elearning.classservice.service.ClassService;
 import com.elearning.classservice.service.SessionService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/sessions")
+@RequestMapping("/api/v1/classes/sessions")
 @RequiredArgsConstructor
 @Slf4j
 public class SessionController {
 
     private final SessionService sessionService;
+    private final ClassService classService;
 
-    @PostMapping("/{sessionId}/start")
-    public ResponseEntity<StartSessionResponse> startSession(
-            @PathVariable UUID sessionId,
-            @RequestParam UUID tutorId) {
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<List<SessionResponse>>> getBookedSessionsForUser(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate) {
 
-        log.info("Request to start session {} by tutor {}", sessionId, tutorId);
-
-        StartSessionResponse response = sessionService.startSession(sessionId, tutorId);
-
-        return ResponseEntity.ok(response);
+        log.info("Request to get booked sessions for user {} from {} to {}", userId, startDate, endDate);
+        List<SessionResponse> sessions = sessionService.getBookedSessionsForUser(userId, startDate, endDate);
+        return ResponseEntity.ok(ApiResponse.success(sessions, "Booked sessions retrieved successfully"));
     }
 
-    @GetMapping("/{sessionId}")
-    public ResponseEntity<Session> getSession(@PathVariable UUID sessionId) {
-        log.info("Request to get session {}", sessionId);
+    @PostMapping("/check-slot-conflicts")
+    public ResponseEntity<ApiResponse<List<SessionResponse>>> checkSlotConflicts(
+            @RequestBody CheckSlotConflictsRequest request) {
 
-        Session session = sessionService.getSessionById(sessionId);
-
-        return ResponseEntity.ok(session);
+        log.info("Checking slot conflicts for tutor {}", request.getTutorId());
+        List<SessionResponse> conflictingSessions = sessionService.checkSlotConflicts(request);
+        return ResponseEntity.ok(ApiResponse.success(conflictingSessions, "Slot conflicts checked successfully"));
     }
 
+    @GetMapping("/tutors/{tutorId}")
+    public ResponseEntity<ApiResponse<List<SessionResponse>>> getSessionsForTutor(
+            @PathVariable UUID tutorId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        log.info("Request to get sessions for tutor {} from {} to {}", tutorId, startDate, endDate);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59, 999999999);
+        List<SessionResponse> sessions = sessionService.getBookedSessions(tutorId, startDateTime, endDateTime);
+        return ResponseEntity.ok(ApiResponse.success(sessions, "Sessions retrieved successfully"));
+    }
+
+    @GetMapping("/students/{studentId}")
+    public ResponseEntity<ApiResponse<List<SessionResponse>>> getSessionsForStudent(
+            @PathVariable UUID studentId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
+
+        log.info("Request to get sessions for student {} from {} to {}", studentId, startDate, endDate);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59, 999999999);
+        List<SessionResponse> sessions = sessionService.getBookedSessionsForStudent(studentId, startDateTime, endDateTime);
+        return ResponseEntity.ok(ApiResponse.success(sessions, "Sessions retrieved successfully"));
+    }
+
+    @PostMapping("/bookings")
+    public ResponseEntity<ApiResponse<CreateClassBookingResponse>> createClassBooking(
+            @RequestBody CreateClassBookingRequest request) {
+
+        log.info("Request to create class booking for student {} with tutor {}", request.getStudentId(), request.getTutorId());
+        CreateClassBookingResponse response = classService.createClassBooking(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Class booking created successfully"));
+    }
 }

@@ -1,8 +1,8 @@
 package com.elearning.bffservice.client;
 
 import com.elearning.bffservice.dto.ApiResponse;
-import com.elearning.bffservice.dto.response.StudentProfileResponse;
 import com.elearning.bffservice.dto.student.response.StudentResponse;
+import com.elearning.bffservice.dto.tutor.response.UserInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -35,6 +35,27 @@ public class StudentServiceClient {
             HttpMethod.GET,
             null,
             new ParameterizedTypeReference<ApiResponse<List<StudentResponse>>>() {}
+        ).getBody();
+
+        if (response != null) {
+            return response.getData();
+        }
+
+        return List.of();
+    }
+
+    public List<UserInfoResponse> getStudentBasicInfosByIds(List<UUID> studentIds) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(studentServiceBaseUrl + "/api/v1/students/users/batch");
+        for (UUID id : studentIds) {
+            builder.queryParam("ids", id.toString());
+        }
+        String url = builder.toUriString();
+
+        ApiResponse<List<UserInfoResponse>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ApiResponse<List<UserInfoResponse>>>() {}
         ).getBody();
 
         if (response != null) {

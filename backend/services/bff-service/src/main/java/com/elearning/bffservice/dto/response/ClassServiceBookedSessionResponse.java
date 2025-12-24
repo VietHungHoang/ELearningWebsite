@@ -18,6 +18,7 @@ import java.util.UUID;
 public class ClassServiceBookedSessionResponse {
     private String id;
     private List<UUID> studentIds;
+    private UUID tutorId;
     private String sessionDatetime;
     private String className;
     private String sessionType;

@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Request DTO for creating a new conversation
@@ -25,7 +26,7 @@ public class CreateConversationRequest {
     private ConversationType type;
 
     @NotEmpty(message = "At least one participant is required")
-    private List<String> participantIds;
+    private List<UUID> participantIds;
 
-    private String classId;  // Optional: for class-based group chats
+    private UUID classId;  // Optional: for class-based group chats
 }

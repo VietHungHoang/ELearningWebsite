@@ -20,9 +20,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Enumeration;
 
-/**
- * Controller for user login and token management operations
- */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor

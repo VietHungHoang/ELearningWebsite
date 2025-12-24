@@ -158,12 +158,12 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
     }
 
-    private void sendAccountCreatedEvent(String userId, String email, String fullname, Role role) {
+    private void sendAccountCreatedEvent(String userId, String email, String fullName, Role role) {
         try {
             AccountCreatedEvent event = AccountCreatedEvent.builder()
                     .id(userId)
                     .email(email)
-                    .fullName(fullname)
+                    .fullName(fullName)
                     .role(role != null ? role.toValue() : null)
                     .build();
             kafkaProducer.sendAccountCreatedEvent(event);

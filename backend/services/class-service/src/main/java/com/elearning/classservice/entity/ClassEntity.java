@@ -24,12 +24,17 @@ public class ClassEntity extends BaseEntity {
     
     @Column(name = "tutor_id", nullable = false)
     private UUID tutorId;
+
+    @Column(name = "tutor_name")
+    private String tutorName;
     
     @Column(name = "title", nullable = false)
     private String title;
     
     private String description;
-    private String subject;
+
+    @Column(name = "subject_id")
+    private UUID subjectId;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "class_type", nullable = false)
@@ -40,13 +45,7 @@ public class ClassEntity extends BaseEntity {
     
     @Column(name = "price_per_hour")
     private Double pricePerHour;
-    
-    // @Column(name = "start_date")
-    // private LocalDateTime startDate;
-    
-    // @Column(name = "end_date")
-    // private LocalDateTime endDate;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ClassStatus status; // DRAFT, PUBLISHED, IN_PROGRESS, COMPLETED, CANCELLED

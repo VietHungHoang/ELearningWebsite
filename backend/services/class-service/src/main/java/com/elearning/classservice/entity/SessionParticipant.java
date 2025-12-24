@@ -29,6 +29,9 @@ public class SessionParticipant extends BaseEntity {
     
     @Column(name = "student_name")
     private String studentName;
+
+    @Column(name = "student_avatar_url")
+    private String studentAvatarUrl;
     
     // Attendance status
     @Enumerated(EnumType.STRING)

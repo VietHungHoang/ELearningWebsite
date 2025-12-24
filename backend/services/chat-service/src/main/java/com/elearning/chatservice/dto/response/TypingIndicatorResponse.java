@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Response DTO for typing indicator notification
@@ -16,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TypingIndicatorResponse {
 
-    private String conversationId;
+    private UUID conversationId;
 
-    private List<String> typingUserIds;
+    private List<UUID> typingUserIds;
 }

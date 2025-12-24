@@ -5,5 +5,6 @@ public enum PaymentGateway {
     VNPAY,
     PAYPAL,
     STRIPE,
-    ZALOPAY
+    ZALOPAY,
+    SEPAY
 }

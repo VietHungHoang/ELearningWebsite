@@ -25,7 +25,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     private final FileUploadConfig fileUploadConfig;
 
     @Override
-    public String storeFile(MultipartFile file, String conversationId) throws IOException {
+    public String storeFile(MultipartFile file, UUID conversationId) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Cannot store empty file");
         }
@@ -35,7 +35,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         String newFilename = UUID.randomUUID().toString() + "." + extension;
 
         // Create conversation-specific directory
-        Path conversationDir = Paths.get(fileUploadConfig.getUploadDirectory(), conversationId);
+        Path conversationDir = Paths.get(fileUploadConfig.getUploadDirectory(), conversationId.toString());
         if (!Files.exists(conversationDir)) {
             Files.createDirectories(conversationDir);
         }
@@ -43,14 +43,14 @@ public class FileStorageServiceImpl implements FileStorageService {
         Path targetPath = conversationDir.resolve(newFilename);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-        String fileUrl = "/files/" + conversationId + "/" + newFilename;
+        String fileUrl = "/files/" + conversationId.toString() + "/" + newFilename;
         log.info("File stored: {}", fileUrl);
 
         return fileUrl;
     }
 
     @Override
-    public List<String> storeFiles(List<MultipartFile> files, String conversationId) throws IOException {
+    public List<String> storeFiles(List<MultipartFile> files, UUID conversationId) throws IOException {
         List<String> fileUrls = new ArrayList<>();
         
         for (MultipartFile file : files) {

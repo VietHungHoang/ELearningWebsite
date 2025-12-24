@@ -3,16 +3,12 @@ package com.elearning.bffservice.controller;
 import com.elearning.bffservice.dto.request.BulkUpdateAvailabilityRequest;
 import com.elearning.bffservice.dto.tutor.request.GetTutorStudentsRequest;
 import com.elearning.bffservice.dto.ApiResponse;
-import com.elearning.bffservice.dto.response.BookedSessionResponse;
 import com.elearning.bffservice.dto.student.response.StudentResponse;
 import com.elearning.bffservice.dto.response.StudentDetailResponse;
 import com.elearning.bffservice.dto.response.ClassResponse;
-import com.elearning.bffservice.dto.enums.ScheduleStatus;
 import com.elearning.bffservice.dto.tutor.response.AvailabilityListResponse;
-import com.elearning.bffservice.bff.tutor.response.TutorBffResponse;
-import com.elearning.bffservice.bff.tutor.response.TutorDetailBffResponse;
+import com.elearning.bffservice.bff.tutors.response.TutorDetailBffResponse;
 import com.elearning.bffservice.dto.request.UpdateTutorProfileRequest;
-import com.elearning.bffservice.bff.tutor.request.TutorSearchBffRequest;
 import com.elearning.bffservice.dto.event.TutorProfileUpdatedEvent;
 import com.elearning.bffservice.service.KafkaProducerService;
 import com.elearning.bffservice.service.TutorService;
@@ -31,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,12 +40,17 @@ public class TutorController {
     private final TutorService tutorService;
     private final KafkaProducerService kafkaProducerService;
 
-    @GetMapping("/search/tutors")
-    public ResponseEntity<ApiResponse<Page<TutorBffResponse>>> searchTutors(
-            @ModelAttribute TutorSearchBffRequest request) {
-
-        Page<TutorBffResponse> result = tutorService.searchTutors(request);
-        ApiResponse<Page<TutorBffResponse>> response = ApiResponse.success(result, "Tutors searched successfully");
+    @GetMapping("/tutors/{tutorId}")
+    public ResponseEntity<ApiResponse<TutorDetailBffResponse>> getTutorDetail(
+            @PathVariable UUID tutorId,
+            @RequestParam(required = false) UUID studentId,
+            @RequestHeader(value = "X-User-Id", required = false) UUID userId) {
+        // If studentId is null, use the user ID from header
+        if (studentId == null) {
+            studentId = userId;
+        }
+        TutorDetailBffResponse result = tutorService.getTutorDetail(tutorId, studentId);
+        ApiResponse<TutorDetailBffResponse> response = ApiResponse.success(result, "Tutor detail retrieved successfully");
         return ResponseEntity.ok(response);
     }
 
@@ -91,102 +93,6 @@ public class TutorController {
     }
 
     /**
-     * Update tutor profile with aggregated data from multiple services
-     */
-    @PutMapping("/profile")
-    public ResponseEntity<ApiResponse<Void>> updateTutorProfile(@RequestBody UpdateTutorProfileRequest request) {
-        // Combine education and experience into careerEntries with type
-        List<TutorProfileUpdatedEvent.CareerEntryInfo> careerEntries = new java.util.ArrayList<>();
-
-        if (request.getEducation() != null) {
-            request.getEducation().forEach(entry -> careerEntries.add(TutorProfileUpdatedEvent.CareerEntryInfo.builder()
-                    .type("EDUCATION")
-                    .title(entry.getTitle())
-                    .institution(entry.getInstitution())
-                    .startDate(entry.getStartDate())
-                    .endDate(entry.getEndDate())
-                    .location(entry.getLocation())
-                    .description(entry.getDescription())
-                    .build()));
-        }
-
-        if (request.getExperience() != null) {
-            request.getExperience()
-                    .forEach(entry -> careerEntries.add(TutorProfileUpdatedEvent.CareerEntryInfo.builder()
-                            .type("EXPERIENCE")
-                            .title(entry.getTitle())
-                            .institution(entry.getInstitution())
-                            .startDate(entry.getStartDate())
-                            .endDate(entry.getEndDate())
-                            .location(entry.getLocation())
-                            .description(entry.getDescription())
-                            .build()));
-        }
-
-        // Create event from request
-        TutorProfileUpdatedEvent event = TutorProfileUpdatedEvent.builder()
-                .tutorId(request.getTutorId())
-                .fullName(request.getFullName())
-                .phone(request.getPhone())
-                .gender(request.getGender())
-                .countryId(request.getCountry())
-                .city(request.getCity())
-                .nativeLanguageCode(request.getNativeLanguage() != null ? request.getNativeLanguage().getCode() : null)
-                .languageCodes(request.getLanguages() != null ? request.getLanguages().stream()
-                        .map(lang -> lang.getCode())
-                        .toList() : null)
-                .headline(request.getHeadline())
-                .subjects(request.getSubjects() != null ? request.getSubjects().stream()
-                        .map(sub -> TutorProfileUpdatedEvent.SubjectInfo.builder()
-                                .subjectId(sub.getId())
-                                .subjectName(sub.getName())
-                                .build())
-                        .toList() : null)
-                .introduction(request.getIntroduction())
-                .socialLinks(request.getSocialLinks() != null ? request.getSocialLinks().stream()
-                        .map(link -> TutorProfileUpdatedEvent.SocialLinkInfo.builder()
-                                .platform(link.getPlatform())
-                                .url(link.getUrl())
-                                .build())
-                        .toList() : null)
-                .careerEntries(careerEntries)
-                .certifications(request.getCertifications() != null ? request.getCertifications().stream()
-                        .map(cert -> TutorProfileUpdatedEvent.CertificationInfo.builder()
-                                .name(cert.getName())
-                                .issuingOrganization(cert.getIssuingOrganization())
-                                .issueDate(cert.getIssueDate())
-                                .expirationDate(cert.getExpirationDate())
-                                .credentialId(cert.getCredentialId())
-                                .credentialUrl(cert.getCredentialUrl())
-                                .build())
-                        .toList() : null)
-                .build();
-
-        // Send event to Kafka
-        kafkaProducerService.sendTutorProfileUpdatedEvent(event);
-
-        ApiResponse<Void> response = ApiResponse.success(null, "Tutor profile update initiated successfully");
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * GET /api/v1/tutors/{tutorId}/sessions/booked
-     * Get booked sessions for a tutor with date range and status filters
-     */
-    @GetMapping("/{tutorId}/sessions/booked")
-    public ResponseEntity<ApiResponse<List<BookedSessionResponse>>> getBookedSessions(
-            @PathVariable UUID tutorId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) List<ScheduleStatus> statuses) {
-
-        List<BookedSessionResponse> sessions = tutorService.getBookedSessions(tutorId, startDate, endDate, statuses);
-        ApiResponse<List<BookedSessionResponse>> response = ApiResponse.success(sessions,
-                "Booked sessions retrieved successfully");
-        return ResponseEntity.ok(response);
-    }
-
-    /**
      * GET /api/v1/tutors/{tutorId}/availability
      * Get availability patterns for a tutor
      */
@@ -219,12 +125,5 @@ public class TutorController {
     }
 
 
-    @GetMapping("/tutors/{tutorId}")
-    public ResponseEntity<ApiResponse<TutorDetailBffResponse>> getTutorDetail(
-            @PathVariable UUID tutorId,
-            @RequestParam(required = false) UUID studentId) {
-        TutorDetailBffResponse result = tutorService.getTutorDetail(tutorId, studentId);
-        ApiResponse<TutorDetailBffResponse> response = ApiResponse.success(result, "Tutor detail retrieved successfully");
-        return ResponseEntity.ok(response);
-    }
+
 }

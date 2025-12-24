@@ -27,7 +27,7 @@ public class TutorQueryBuilder {
         }
         
         String language = request.getLanguage();
-        Boolean fuzzy = request.getFuzzy() != null ? request.getFuzzy() : true;
+        boolean fuzzy = request.getFuzzy() != null ? request.getFuzzy() : true;
         
         // Build multi-match query based on language preference
         if (language != null && !language.trim().isEmpty()) {

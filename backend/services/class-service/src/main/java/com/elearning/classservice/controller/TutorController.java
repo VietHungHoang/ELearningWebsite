@@ -92,13 +92,6 @@ public class TutorController {
         return ResponseEntity.ok(ApiResponse.success(response, "Class detail retrieved successfully"));
     }
     
-    /**
-     * GET /api/v1/tutors/stats?tutorIds=uuid1&tutorIds=uuid2&tutorIds=uuid3
-     * <p>
-     * Get statistics for multiple tutors including booked sessions count and student count
-     * @param request Request containing list of tutor IDs
-     * @return ApiResponse with list of tutor statistics
-     */
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<List<TutorStatsResponse>>> getTutorStats(@ModelAttribute TutorStatsRequest request) {
         List<TutorStatsResponse> response = tutorService.getTutorStats(request.getTutorIds(), request.getStudentId());

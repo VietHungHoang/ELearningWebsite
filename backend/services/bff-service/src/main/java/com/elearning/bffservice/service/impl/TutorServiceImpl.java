@@ -1,39 +1,26 @@
 package com.elearning.bffservice.service.impl;
 
-import com.elearning.bffservice.bff.tutor.request.TutorSearchBffRequest;
 import com.elearning.bffservice.client.ClassServiceClient;
-import com.elearning.bffservice.client.SearchServiceClient;
 import com.elearning.bffservice.client.StudentServiceClient;
 import com.elearning.bffservice.client.TutorServiceClient;
-import com.elearning.bffservice.dto.clas.response.TutorStatsResponse;
-import com.elearning.bffservice.dto.clas.response.GroupClassResponse;
+import com.elearning.bffservice.dto.classes.response.GroupClassResponse;
 import com.elearning.bffservice.dto.request.BulkUpdateAvailabilityRequest;
-import com.elearning.bffservice.dto.request.SearchTutorRequest;
 import com.elearning.bffservice.dto.request.UpdateOnboardingRequest;
 import com.elearning.bffservice.dto.tutor.request.GetTutorStudentsRequest;
 import com.elearning.bffservice.dto.tutor.response.AvailabilityListResponse;
-import com.elearning.bffservice.bff.tutor.response.TutorDetailBffResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorDashboardChartsResponse;
+import com.elearning.bffservice.bff.tutors.response.TutorDetailBffResponse;
 import com.elearning.bffservice.dto.ApiResponse;
-import com.elearning.bffservice.dto.response.BookedSessionResponse;
-import com.elearning.bffservice.dto.response.BookedSessionsData;
 import com.elearning.bffservice.dto.response.ClassResponse;
-import com.elearning.bffservice.dto.response.ClassServiceBookedSessionResponse;
-import com.elearning.bffservice.dto.response.SessionWithStudents;
-import com.elearning.bffservice.dto.response.StudentInSession;
 import com.elearning.bffservice.dto.response.StudentDetailResponse;
 import com.elearning.bffservice.dto.student.response.StudentResponse;
 import com.elearning.bffservice.dto.tutor.response.TutorDetailResponse;
-import com.elearning.bffservice.dto.tutor.response.TutorResponse;
-import com.elearning.bffservice.dto.tutor.response.TutorSearchResult;
 import com.elearning.bffservice.dto.response.OnboardingResponse;
 import com.elearning.bffservice.dto.response.TutorProfileResponse;
 import com.elearning.bffservice.dto.response.TutorStudentResponse;
 import com.elearning.bffservice.dto.response.TutorStudentDetailResponse;
 import com.elearning.bffservice.dto.response.TutorClassResponse;
 import com.elearning.bffservice.dto.response.UserInfoResponse;
-import com.elearning.bffservice.dto.response.StudentProfileResponse;
-import com.elearning.bffservice.dto.enums.ScheduleStatus;
-import com.elearning.bffservice.bff.tutor.response.TutorBffResponse;
 import com.elearning.bffservice.mapper.TutorMapper;
 import com.elearning.bffservice.service.TutorService;
 
@@ -55,53 +42,9 @@ import java.util.stream.Collectors;
 public class TutorServiceImpl implements TutorService {
 
     private final TutorServiceClient tutorServiceClient;
-    private final SearchServiceClient searchServiceClient;
     private final ClassServiceClient classServiceClient;
     private final StudentServiceClient studentServiceClient;
     private final TutorMapper tutorMapper;
-
-    @Override
-    public Page<TutorBffResponse> searchTutors(TutorSearchBffRequest request) {
-        SearchTutorRequest searchRequest = tutorMapper.mapToSearchTutorRequest(request);
-        Page<TutorSearchResult> searchResults = searchServiceClient.searchTutors(searchRequest);
-        log.info("Search Service returned {} results", searchResults.getTotalElements());
-
-        if (searchResults.isEmpty()) {
-            return new PageImpl<>(List.of(), PageRequest.of(request.getPage(), request.getSize()), 0);
-        }
-
-        // Extract tutor IDs in order
-        List<UUID> tutorIds = searchResults.getContent().stream()
-                .map(TutorSearchResult::getTutorId)
-                .toList();
-        log.info("Extracted tutor IDs: {}", tutorIds);
-
-//        List<TutorResponse> tutorDetails = tutorServiceClient.getTutorsByIds(tutorIds).getData();
-        List<TutorResponse> tutorDetails = new ArrayList<>();
-        log.info("Fetched {} tutor details from Tutor Service", tutorDetails.size());
-
-        List<TutorStatsResponse> tutorStats = classServiceClient.getTutorStats(tutorIds, request.getStudentId()).getData();
-        log.info("Fetched {} tutor stats from Class Service", tutorStats.size());
-
-        // Create map for quick lookup of stats
-        Map<UUID, TutorStatsResponse> statsMap = tutorStats.stream()
-                .collect(Collectors.toMap(
-                        TutorStatsResponse::getTutorId,
-                        stats -> stats));
-
-        // Reorder results according to search ranking (preserve order) and combine with
-        // stats
-        List<TutorBffResponse> orderedResults = createOrderedTutorBffResults(tutorDetails, tutorIds, statsMap);
-
-        Page<TutorBffResponse> result = new PageImpl<>(
-                orderedResults,
-
-                PageRequest.of(request.getPage(), request.getSize()),
-                searchResults.getTotalElements());
-        log.info("Returning page {} of {} with {} tutors", request.getPage(), result.getTotalPages(),
-                orderedResults.size());
-        return result;
-    }
 
     @Override
     public TutorDetailBffResponse getTutorDetail(UUID tutorId, UUID studentId) {
@@ -110,9 +53,8 @@ public class TutorServiceImpl implements TutorService {
         ApiResponse<TutorDetailResponse> tutorDetailResponse = tutorServiceClient.getTutorDetail(tutorId);
         TutorDetailResponse tutorDetail = tutorDetailResponse.getData();
 
-        List<TutorStatsResponse> tutorStats = classServiceClient.getTutorStats(List.of(tutorId), studentId).getData();
         List<GroupClassResponse> groupClasses = classServiceClient.getGroupClasses(tutorId).getData();
-        TutorDetailBffResponse result = tutorMapper.mapToTutorDetailBffResponse(tutorDetail, groupClasses, tutorStats.isEmpty() ? null : tutorStats.get(0));
+        TutorDetailBffResponse result = tutorMapper.mapToTutorDetailBffResponse(tutorDetail, groupClasses);
 
         log.info("Successfully mapped tutor detail with {} group classes",
                 groupClasses != null ? groupClasses.size() : 0);
@@ -204,42 +146,44 @@ public class TutorServiceImpl implements TutorService {
     public StudentDetailResponse getStudentDetail(UUID tutorId, UUID studentId) {
         log.info("BFF: Getting detail for student {} of tutor {}", studentId, tutorId);
 
+        return null;
+
         // Get data from Class Service
-        ApiResponse<TutorStudentDetailResponse> classDataResponse = classServiceClient.getStudentDetail(tutorId, studentId);
-        TutorStudentDetailResponse classData = classDataResponse.getData();
+//        ApiResponse<TutorStudentDetailResponse> classDataResponse = classServiceClient.getStudentDetail(tutorId, studentId);
+//        TutorStudentDetailResponse classData = classDataResponse.getData();
 
         // Get user info
 //        UserInfoResponse userInfo = userServiceClient.getListUsersByIds(List.of(studentId)).get(studentId);
-        UserInfoResponse userInfo = null;
+//        UserInfoResponse userInfo = null;
 
         // Get student profile from Student Service
-        ApiResponse<StudentProfileResponse> studentProfileResponse = studentServiceClient.getStudentDetailById(studentId);
-        StudentProfileResponse studentProfile = studentProfileResponse.getData();
-
-        // Parse strengths and weaknesses
-        List<String> strengths = parseListField(studentProfile.getStrengths());
-        List<String> weaknesses = parseListField(studentProfile.getWeaknesses());
-
-        return StudentDetailResponse.builder()
-                .id(studentId)
-                .name(userInfo != null ? userInfo.getName() : null)
-                .avatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
-                .registeredDate(classData.getRegisteredDate())
-                .email(userInfo != null ? userInfo.getEmail() : null)
-                .enrollmentTypes(classData.getEnrollmentTypes())
-                .status(classData.getStatus())
-                .stats(mapStats(classData.getStats()))
-                .contact(StudentDetailResponse.ContactInfo.builder()
-                        .phone(studentProfile.getPhone())
-                        .joinedDate(classData.getRegisteredDate())
-                        .build())
-                .classInfo(mapClassInfo(classData.getClassInfo()))
-                .upcomingSessions(mapUpcomingSessions(classData.getUpcomingSessions()))
-                .sessionHistory(mapSessionHistory(classData.getSessionHistory()))
-                .strengths(strengths)
-                .weaknesses(weaknesses)
-                .tutorNotes(classData.getTutorNotes())
-                .build();
+//        ApiResponse<StudentProfileResponse> studentProfileResponse = studentServiceClient.getStudentDetailById(studentId);
+//        StudentProfileResponse studentProfile = studentProfileResponse.getData();
+//
+//        // Parse strengths and weaknesses
+//        List<String> strengths = parseListField(studentProfile.getStrengths());
+//        List<String> weaknesses = parseListField(studentProfile.getWeaknesses());
+//
+//        return StudentDetailResponse.builder()
+//                .id(studentId)
+//                .name(userInfo != null ? userInfo.getName() : null)
+//                .avatarUrl(userInfo != null ? userInfo.getAvatarUrl() : null)
+//                .registeredDate(classData.getRegisteredDate())
+//                .email(userInfo != null ? userInfo.getEmail() : null)
+//                .enrollmentTypes(classData.getEnrollmentTypes())
+//                .status(classData.getStatus())
+//                .stats(mapStats(classData.getStats()))
+//                .contact(StudentDetailResponse.ContactInfo.builder()
+//                        .phone(studentProfile.getPhone())
+//                        .joinedDate(classData.getRegisteredDate())
+//                        .build())
+//                .classInfo(mapClassInfo(classData.getClassInfo()))
+//                .upcomingSessions(mapUpcomingSessions(classData.getUpcomingSessions()))
+//                .sessionHistory(mapSessionHistory(classData.getSessionHistory()))
+//                .strengths(strengths)
+//                .weaknesses(weaknesses)
+//                .tutorNotes(classData.getTutorNotes())
+//                .build();
     }
 
     @Override
@@ -487,64 +431,6 @@ public class TutorServiceImpl implements TutorService {
         //                         .build())
         //                 .collect(Collectors.toList()) : null)
         //         .build();
-    @Override
-    public BookedSessionsData getBookedSessionsWithStudents(UUID tutorId, LocalDate startDate, LocalDate endDate) {
-        log.info("BFF: Getting booked sessions with students for tutor {} from {} to {}", tutorId, startDate, endDate);
-
-        // Get sessions from class-service
-        List<ClassServiceBookedSessionResponse> classServiceSessions = classServiceClient.getBookedSessions(tutorId,
-                startDate, endDate, null);
-
-        if (classServiceSessions == null || classServiceSessions.isEmpty()) {
-            log.info("No booked sessions found for tutor {}", tutorId);
-            return BookedSessionsData.builder().sessions(new ArrayList<>()).build();
-        }
-
-        // Extract unique student IDs
-        List<UUID> studentIds = classServiceSessions.stream()
-                .flatMap(session -> session.getStudentIds().stream())
-                .filter(Objects::nonNull)
-                .distinct()
-                .collect(Collectors.toList());
-
-        // Batch get student info from student-service
-        Map<UUID, StudentResponse> studentInfoMap = new HashMap<>();
-        if (!studentIds.isEmpty()) {
-            ApiResponse<Map<UUID, StudentResponse>> studentsResponse = studentServiceClient.getStudentsByIds(studentIds);
-            if (studentsResponse != null && studentsResponse.getData() != null) {
-                studentInfoMap = studentsResponse.getData();
-            }
-        }
-
-        // Group sessions and map to response
-        List<SessionWithStudents> sessions = classServiceSessions.stream()
-                .map(session -> {
-                    List<StudentInSession> students = session.getStudentIds().stream()
-                            .map(studentId -> {
-                                StudentResponse studentInfo = studentInfoMap.get(studentId);
-                                return StudentInSession.builder()
-                                        .id(studentId)
-                                        .name(studentInfo != null ? studentInfo.getFullName() : "Unknown")
-                                        .avatar(studentInfo != null ? studentInfo.getAvatarUrl() : null)
-                                        .build();
-                            })
-                            .collect(Collectors.toList());
-
-                    return SessionWithStudents.builder()
-                            .id(session.getId())
-                            .students(students)
-                            .sessionDatetime(session.getSessionDatetime())
-                            .className(session.getClassName())
-                            .sessionType(session.getSessionType())
-                            .createdAt(session.getCreatedAt())
-                            .updatedAt(session.getUpdatedAt())
-                            .meetingUrl(session.getMeetingUrl())
-                            .notes(session.getNotes())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        return BookedSessionsData.builder().sessions(sessions).build();
     }
 
     @Override
@@ -587,32 +473,20 @@ public class TutorServiceImpl implements TutorService {
         log.info("BFF: Successfully updated onboarding for tutor {}", tutorId);
     }
 
-    private List<TutorBffResponse> createOrderedTutorBffResults(List<TutorResponse> tutorDetails, List<UUID> tutorIds,
-            Map<UUID, TutorStatsResponse> statsMap) {
-        // Create map for quick lookup of tutor details
-        Map<UUID, TutorResponse> tutorMap = tutorDetails.stream()
-                .collect(Collectors.toMap(
-                        t -> t.getId() != null ? t.getId() : UUID.randomUUID(),
-                        t -> t));
-        log.info("Created tutor map with {} entries", tutorMap.size());
+    @Override
+    public TutorDashboardChartsResponse getDashboardCharts(UUID tutorId) {
+        log.info("BFF: Getting dashboard charts for tutor {}", tutorId);
 
-        // Reorder results according to search ranking (preserve order) and combine with
-        // stats
-        List<TutorBffResponse> orderedResults = tutorIds.stream()
-                .map(tutorId -> {
-                    TutorResponse tutor = tutorMap.get(tutorId);
-                    if (tutor == null) {
-                        return null;
-                    }
+        var studentsResponse = classServiceClient.getMonthlyStudentStats(tutorId);
+        var incomesResponse = tutorServiceClient.getMonthlyIncomeStats(tutorId);
 
-                    TutorStatsResponse stats = statsMap.get(tutorId);
-                    return tutorMapper.mapToTutorBffResponse(tutor, stats);
-                })
-                .filter(Objects::nonNull)
-                .toList();
-        log.info("Ordered results: {} tutors after filtering", orderedResults.size());
+        TutorDashboardChartsResponse response = TutorDashboardChartsResponse.builder()
+                .students(studentsResponse != null ? studentsResponse.getData() : null)
+                .incomes(incomesResponse != null ? incomesResponse.getData() : null)
+                .build();
 
-        return orderedResults;
+        log.info("BFF: Successfully retrieved dashboard charts for tutor {}", tutorId);
+        return response;
     }
 }
 

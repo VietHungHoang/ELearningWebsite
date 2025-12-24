@@ -10,7 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ApiResponse<T> {
-    private int status;
+    private int status;      // HTTP status code (200, 400, 500, etc.)
+    private Integer error;   // Business error code (e.g., 1001 for profanity violation)
     private boolean success;
     private String message;
     private T data;
@@ -18,6 +19,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()
                 .status(200)
+                .error(null)
                 .success(true)
                 .message(message)
                 .data(data)
@@ -27,6 +29,17 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> error(int status, String message) {
         return ApiResponse.<T>builder()
                 .status(status)
+                .error(null)
+                .success(false)
+                .message(message)
+                .data(null)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> businessError(int errorCode, String message) {
+        return ApiResponse.<T>builder()
+                .status(200)  // HTTP call succeeded
+                .error(errorCode)  // Business logic error code
                 .success(false)
                 .message(message)
                 .data(null)
