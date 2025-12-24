@@ -97,7 +97,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
                     type="button"
                     onClick={handleToggle}
                     onMouseDown={(e) => e.preventDefault()}
-                    className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[42px]'}`}
+                    className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[38px]'}`}
                 >
                     <span className={`dropdown-label text-sm font-normal truncate ${isPlaceholder && label ? 'text-[rgba(88,88,88,0.4)]' : 'text-[#585858]'}`}>{selectedValue}</span>
                     <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
