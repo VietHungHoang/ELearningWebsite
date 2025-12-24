@@ -367,7 +367,7 @@ export const classService = {
     ): Promise<ApiResponse<TrialSessionRequestResponse[]>> => {
         try {
             const response = await apiService.get<TrialSessionRequestResponse[]>(
-                `/v1/public/class/trial-session/list`,
+                `/v1/classes/trial-session/by-user`,
                 {
                     role,
                     userId,
@@ -381,6 +381,37 @@ export const classService = {
             };
         } catch (error: any) {
             console.error("Error fetching trial requests:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to fetch trial requests",
+                data: [],
+            };
+        }
+    },
+
+    // Get list of trial session requests by tutor ID or student ID
+    getTrialRequestsByUser: async (
+        userId: string,
+        userType: "tutor" | "student"
+    ): Promise<ApiResponse<TrialSessionRequestResponse[]>> => {
+        try {
+            const response = await apiService.get<TrialSessionRequestResponse[]>(
+                `/v1/classes/trial-session/by-user`,
+                {
+                    userId,
+                    userType,
+                }
+            );
+
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data || [],
+            };
+        } catch (error: any) {
+            console.error("Error fetching trial requests by user:", error);
             return {
                 status: error.response?.status || 500,
                 success: false,

@@ -1,5 +1,5 @@
 import type { Category, Language, Timezone, Subject } from "./common";
-import type { TutorResponse, EducationItem, ExperienceItem, CertificationItem, SocialLink } from "./tutor";
+import type { TutorResponse, EducationItem, ExperienceItem, CertificationItem, SocialLink, UserInfo } from "./tutor";
 
 export interface ApiResponse<T> {
     status: number;
@@ -293,8 +293,8 @@ export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED';
 
 export interface TrialSessionRequestResponse {
     id: string;
-    tutor?: TutorResponse;
-    student?: Student;
+    tutor?: UserInfo;
+    student?: UserInfo;
     sessionDateTime: string;
     message?: string;
     status: RequestStatus;
