@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Participant entity - represents user participation in a conversation
@@ -21,11 +22,11 @@ import java.time.LocalDateTime;
 public class Participant {
 
     @Id
-    private String id;
+    private UUID id;
 
-    private String conversationId;
+    private UUID conversationId;
 
-    private String userId;
+    private UUID userId;
 
     private boolean isTyping;
 
@@ -39,7 +40,8 @@ public class Participant {
 
     private boolean isAdmin;  // For group chats
 
-    public Participant(String conversationId, String userId) {
+    public Participant(UUID conversationId, UUID userId) {
+        this.id = UUID.randomUUID();
         this.conversationId = conversationId;
         this.userId = userId;
         this.isTyping = false;

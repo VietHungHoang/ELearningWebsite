@@ -199,4 +199,24 @@ export const tutorService = {
     getTutorChartsData: async (): Promise<ApiResponse<ChartsData>> => {
         return await apiService.get<ChartsData>(`/v1/tutors/me/dashboard/charts`);
     },
+
+    /**
+     * Submit resume text to backend
+     * After tutor uploads file or enters text manually
+     * 
+     * @param tutorId - Tutor ID from localStorage
+     * @param resumeText - Extracted or manually entered resume text
+     * @returns API response
+     */
+    submitResumeText: async (tutorId: string, resumeText: string): Promise<ApiResponse<{ message: string }>> => {
+        try {
+            return await apiService.post<{ message: string }>(
+                `/v1/tutors/${tutorId}/onboarding/submit-file`,
+                { resumeText }
+            );
+        } catch (error) {
+            console.warn('Failed to submit resume text to API:', error);
+            throw error;
+        }
+    },
 };

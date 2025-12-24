@@ -38,10 +38,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public Page<TutorSearchResult> searchTutors(SearchTutorRequest request) {
         log.info("Searching tutors with request: {}", request);
-        log.info("Request details - page: {}, size: {}, keyword: {}, languages: {}, price: {}-{}, categories: {}", 
-                request.getPage(), request.getSize(), request.getKeyword(), request.getLanguageCodes(), 
-                request.getMinPrice(), request.getMaxPrice(), request.getCategoryIds());
-        
+
         // 1. Build search query
         Query searchQuery = queryBuilder.buildSearchQuery(request);
         log.info("Built search query");

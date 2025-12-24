@@ -7,38 +7,39 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface ParticipantRepository extends MongoRepository<Participant, String> {
+public interface ParticipantRepository extends MongoRepository<Participant, UUID> {
 
     /**
      * Find participant by conversation and user
      */
-    Optional<Participant> findByConversationIdAndUserId(String conversationId, String userId);
+    Optional<Participant> findByConversationIdAndUserId(UUID conversationId, UUID userId);
 
     /**
      * Find all participants in a conversation
      */
-    List<Participant> findByConversationId(String conversationId);
+    List<Participant> findByConversationId(UUID conversationId);
 
     /**
      * Find all conversations for a user
      */
-    List<Participant> findByUserId(String userId);
+    List<Participant> findByUserId(UUID userId);
 
     /**
      * Find users currently typing in a conversation
      */
     @Query("{ 'conversationId': ?0, 'isTyping': true }")
-    List<Participant> findTypingParticipants(String conversationId);
+    List<Participant> findTypingParticipants(UUID conversationId);
 
     /**
      * Delete all participants in a conversation
      */
-    void deleteByConversationId(String conversationId);
+    void deleteByConversationId(UUID conversationId);
 
     /**
      * Check if user is participant in conversation
      */
-    boolean existsByConversationIdAndUserId(String conversationId, String userId);
+    boolean existsByConversationIdAndUserId(UUID conversationId, UUID userId);
 }

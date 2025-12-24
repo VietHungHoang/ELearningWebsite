@@ -10,9 +10,11 @@ spring:
         - id: bff-route
           uri: ${BFF_SERVICE_URL}
           predicates:
+            - Path=/api/v1/web/**
             - Path=/api/v1/public/**
+            - Path=/api/v1/tutors/**
           filters:
-            - RewritePath=/api/v1/public/(.*), /api/v1/bff/$1
+            - RewritePath=/api/v1/(web|public|tutors)/(.*), /api/v1/bff/$2
 
         - id: auth-service-route
           uri: ${AUTH_SERVICE_URL}
@@ -20,6 +22,8 @@ spring:
             - Path=/api/v1/auth/**
 
 services:
+  bff-service:
+    url: ${BFF_SERVICE_URL}
   auth-service:
     url: ${AUTH_SERVICE_URL}
   cart-service:

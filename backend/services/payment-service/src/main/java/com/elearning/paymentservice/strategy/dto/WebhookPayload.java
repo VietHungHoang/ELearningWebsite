@@ -7,5 +7,6 @@ import java.util.Map;
 @Data
 public class WebhookPayload {
     private String provider;
+    private String providerTransactionId;
     private Map<String, Object> rawPayload;
 }

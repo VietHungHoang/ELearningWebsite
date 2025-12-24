@@ -33,11 +33,11 @@ public class VnpayGatewayStrategy implements PaymentGatewayStrategy {
 
     @Override
     public GatewayCreationResponse createPaymentIntent(InitiatePaymentRequest request) {
-        if(CommonUtils.isNullOrEmpty(vnpayConfig.getSecretKey())) {
-            throw new IllegalStateException("Missing secret key for VNPay configuration");
+        if(CommonUtils.isNullOrEmpty(vnpayConfig.getHashSecret())) {
+            throw new IllegalStateException("Missing hash secret for VNPay configuration");
         }
 
-        String tmnCode = vnpayConfig.getPartnerCode();
+        String tmnCode = vnpayConfig.getTmnCode();
         String txnRef = request.getOrderId().toString();
         String amount = String.valueOf(request.getAmount().longValue() * 100); // VNPay amount in smallest unit
         String orderInfo = "Payment for order " + request.getOrderId();
@@ -98,7 +98,7 @@ public class VnpayGatewayStrategy implements PaymentGatewayStrategy {
     }
 
     private String createVnpaySignature(VnpayInitiateRequest req) {
-        String secretKey = vnpayConfig.getSecretKey();
+        String secretKey = vnpayConfig.getHashSecret();
 
         String rawSyntax = "vnp_Amount=" + req.getVnp_Amount()
                 + "&vnp_Command=" + req.getVnp_Command()

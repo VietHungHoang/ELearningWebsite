@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/class/trial-session")
+@RequestMapping("/api/v1/classes/trial-session")
 @RequiredArgsConstructor
 public class TrialSessionController {
 

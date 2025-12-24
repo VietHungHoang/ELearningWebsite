@@ -13,32 +13,6 @@ import java.util.stream.Collectors;
 @Component
 public class TutorMapper {
 
-    public TutorResponse toTutorResponse(Tutor tutor) {
-        if (tutor == null) {
-            return null;
-        }
-
-        return TutorResponse.builder()
-                .id(tutor.getId())
-                .fullName(tutor.getFullName())
-                .email(tutor.getEmail())
-                .isVerified(tutor.getIsVerified())
-                .introduction(tutor.getIntroduction())
-                .headline(tutor.getHeadline())
-                .countryCode(tutor.getCountryCode())
-                .gender(tutor.getGender())
-                .avatarUrl(tutor.getAvatarUrl())
-                .timezone(tutor.getTimezone())
-                .videoUrl(tutor.getVideoUrl())
-                .currentSessionFee(tutor.getCurrentSessionFee())
-                .originalSessionFee(tutor.getOriginalSessionFee())
-                .averageRating(calculateAverageRating(tutor))
-                .reviewCount(calculateReviewCount(tutor))
-                .languageCodes(mapLanguages(tutor))
-                .subjectIds(mapSubjectIds(tutor))
-                .build();
-    }
-
     private Double calculateAverageRating(Tutor tutor) {
         if (tutor.getReviews() == null || tutor.getReviews().isEmpty()) {
             return null;
@@ -74,35 +48,33 @@ public class TutorMapper {
                 .collect(Collectors.toList());
     }
 
-    public TutorDetailResponse toTutorDetailResponse(Tutor tutor) {
+    public TutorResponse toTutorResponse(Tutor tutor) {
         if (tutor == null) {
             return null;
         }
 
-        return TutorDetailResponse.builder()
+        return TutorResponse.builder()
                 .id(tutor.getId())
                 .fullName(tutor.getFullName())
                 .email(tutor.getEmail())
                 .isVerified(tutor.getIsVerified())
-                .introduction(tutor.getIntroduction())
                 .headline(tutor.getHeadline())
+                .introduction(tutor.getIntroduction())
                 .countryCode(tutor.getCountryCode())
-                .gender(tutor.getGender())
                 .avatarUrl(tutor.getAvatarUrl())
-                .timezone(tutor.getTimezone())
                 .videoUrl(tutor.getVideoUrl())
                 .currentSessionFee(tutor.getCurrentSessionFee())
                 .originalSessionFee(tutor.getOriginalSessionFee())
                 .averageRating(calculateAverageRating(tutor))
                 .reviewCount(calculateReviewCount(tutor))
+                .bookedSessionCount(tutor.getTotalStudents()) // Assuming totalStudents represents booked sessions
+                .studentCount(tutor.getTotalStudents())
                 .languageCodes(mapLanguages(tutor))
                 .subjectIds(mapSubjectIds(tutor))
-                .reviews(mapReviews(tutor))
-                .availabilities(mapAvailabilities(tutor))
                 .socialLinks(mapSocialLinks(tutor))
                 .educations(mapEducations(tutor))
                 .experiences(mapExperiences(tutor))
-                .certifications(mapCertifications(tutor))
+                .certificates(mapCertifications(tutor))
                 .build();
     }
 
@@ -332,6 +304,15 @@ public class TutorMapper {
                 .description(onboarding.getDescription())
                 .createdAt(onboarding.getCreatedAt())
                 .updatedAt(onboarding.getUpdatedAt())
+                .build();
+    }
+
+    public UserInfoResponse toUserInfoResponse(Tutor tutor) {
+        return UserInfoResponse.builder()
+                .id(tutor.getId())
+                .email(tutor.getEmail())
+                .fullName(tutor.getFullName())
+                .avatarUrl(tutor.getAvatarUrl())
                 .build();
     }
 }

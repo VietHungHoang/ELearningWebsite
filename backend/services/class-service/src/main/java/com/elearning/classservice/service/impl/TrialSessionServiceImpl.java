@@ -1,7 +1,6 @@
 package com.elearning.classservice.service.impl;
 
 import com.elearning.classservice.dto.request.TrialSessionRequest;
-import com.elearning.classservice.dto.zoom.ZoomMeetingResponse;
 import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.entity.SessionParticipant;
 import com.elearning.classservice.entity.TrialSessionRequestEntity;
@@ -11,7 +10,6 @@ import com.elearning.classservice.repository.SessionParticipantRepository;
 import com.elearning.classservice.repository.SessionRepository;
 import com.elearning.classservice.repository.TrialSessionRepository;
 import com.elearning.classservice.service.TrialSessionRequestService;
-import com.elearning.classservice.service.ZoomMeetingService;
 import com.elearning.classservice.dto.TrialSessionRequestResponse;
 import com.elearning.classservice.mapper.TrialSessionRequestMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +29,6 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
     private final TrialSessionRepository trialSessionRepository;
     private final SessionRepository sessionRepository;
     private final SessionParticipantRepository sessionParticipantRepository;
-    private final ZoomMeetingService zoomMeetingService;
     private final TrialSessionRequestMapper trialSessionRequestMapper;
 
     @Override
@@ -83,14 +80,14 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
 
         // Create Zoom meeting
         try {
-            ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(
-                entity.getTutorId(), session
-            );
-            session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
-            session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
-            session.setZoomPassword(zoomMeeting.getPassword());
-            sessionRepository.save(session);
-            log.info("Zoom meeting created successfully with ID: {}", zoomMeeting.getId());
+//            ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(
+//                entity.getTutorId(), session
+//            );
+//            session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
+//            session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
+//            session.setZoomPassword(zoomMeeting.getPassword());
+//            sessionRepository.save(session);
+//            log.info("Zoom meeting created successfully with ID: {}", zoomMeeting.getId());
         } catch (Exception e) {
             log.error("Failed to create Zoom meeting for session {}", session.getId(), e);
             // Meeting creation failed, but session is still valid

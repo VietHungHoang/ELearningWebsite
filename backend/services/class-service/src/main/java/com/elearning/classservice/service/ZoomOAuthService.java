@@ -13,32 +13,12 @@ public interface ZoomOAuthService {
      * @return authorization URL to redirect user to
      */
     String getAuthorizationUrl(UUID tutorId);
-    
-    /**
-     * Handle OAuth callback and exchange code for access token
-     * @param code authorization code from Zoom
-     * @param tutorId tutor ID from state parameter
-     */
-    void handleCallback(String code, UUID tutorId);
-    
+
     /**
      * Refresh access token for a tutor
      * @param tutorId tutor ID
      */
     void refreshAccessToken(UUID tutorId);
-    
-    /**
-     * Check if tutor has connected Zoom account
-     * @param tutorId tutor ID
-     * @return true if connected
-     */
-    boolean isConnected(UUID tutorId);
-    
-    /**
-     * Disconnect Zoom account (delete credentials)
-     * @param tutorId tutor ID
-     */
-    void disconnectZoom(UUID tutorId);
     
     /**
      * Get valid access token for tutor (auto-refresh if expired)

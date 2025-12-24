@@ -4,18 +4,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 public interface FileStorageService {
 
     /**
      * Store a file and return its URL
      */
-    String storeFile(MultipartFile file, String conversationId) throws IOException;
+    String storeFile(MultipartFile file, UUID conversationId) throws IOException;
 
     /**
      * Store multiple files and return their URLs
      */
-    List<String> storeFiles(List<MultipartFile> files, String conversationId) throws IOException;
+    List<String> storeFiles(List<MultipartFile> files, UUID conversationId) throws IOException;
 
     /**
      * Delete a file

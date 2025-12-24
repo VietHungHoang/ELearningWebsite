@@ -48,8 +48,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 .collect(Collectors.toList());
 
         return AvailabilityListResponse.builder()
-                .from(startDate)
-                .to(endDate)
                 .availabilities(responses)
                 .build();
     }

@@ -1,5 +1,11 @@
 package com.elearning.classservice.service.impl;
 
+import com.elearning.classservice.config.ZoomProperties;
+import com.elearning.classservice.dto.zoom.response.ZoomOAuthTokenResponse;
+import com.elearning.classservice.entity.TutorZoomCredential;
+import com.elearning.classservice.exception.ZoomOAuthException;
+import com.elearning.classservice.repository.TutorZoomCredentialRepository;
+import com.elearning.classservice.service.ZoomOAuthService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -10,13 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import com.elearning.classservice.config.ZoomProperties;
-import com.elearning.classservice.dto.zoom.ZoomOAuthTokenResponse;
-import com.elearning.classservice.entity.TutorZoomCredential;
-import com.elearning.classservice.exception.ZoomOAuthException;
-import com.elearning.classservice.repository.TutorZoomCredentialRepository;
-import com.elearning.classservice.service.ZoomOAuthService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,49 +35,11 @@ public class ZoomOAuthServiceImpl implements ZoomOAuthService {
 
     @Override
     public String getAuthorizationUrl(UUID tutorId) {
-        log.info("Generating Zoom OAuth URL for tutor: {}", tutorId);
-        
         String authorizeUrl = zoomProperties.getOauth().getAuthorizeUrl();
         String clientId = zoomProperties.getOauth().getClientId();
         String redirectUri = zoomProperties.getOauth().getRedirectUri();
-        
-        log.info("Zoom OAuth properties - authorizeUrl: {}, clientId: {}, redirectUri: {}", authorizeUrl, clientId, redirectUri);
-        
         return String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&state=%s",
                 authorizeUrl, clientId, redirectUri, tutorId.toString());
-    }
-
-    @Override
-    @Transactional
-    public void handleCallback(String code, UUID tutorId) {
-        log.info("Handling Zoom OAuth callback for tutor: {}", tutorId);
-        
-        try {
-            // Exchange authorization code for access token
-            ZoomOAuthTokenResponse tokenResponse = exchangeCodeForToken(code);
-            
-            // Calculate expiry time
-            LocalDateTime expiresAt = LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn());
-            
-            // Check if credential exists
-            TutorZoomCredential credential = credentialRepository.findByTutorId(tutorId)
-                    .orElse(TutorZoomCredential.builder()
-                            .tutorId(tutorId)
-                            .build());
-            
-            // Update credentials
-            credential.setAccessToken(tokenResponse.getAccessToken());
-            credential.setRefreshToken(tokenResponse.getRefreshToken());
-            credential.setExpiresAt(expiresAt);
-            
-            credentialRepository.save(credential);
-            
-            log.info("Successfully saved Zoom credentials for tutor: {}", tutorId);
-            
-        } catch (Exception e) {
-            log.error("Failed to handle OAuth callback for tutor {}: {}", tutorId, e.getMessage(), e);
-            throw new ZoomOAuthException("Failed to exchange authorization code", e);
-        }
     }
 
     @Override
@@ -105,18 +66,6 @@ public class ZoomOAuthServiceImpl implements ZoomOAuthService {
             log.error("Failed to refresh token for tutor {}: {}", tutorId, e.getMessage(), e);
             throw new ZoomOAuthException("Failed to refresh access token", e);
         }
-    }
-
-    @Override
-    public boolean isConnected(UUID tutorId) {
-        return credentialRepository.existsByTutorId(tutorId);
-    }
-
-    @Override
-    @Transactional
-    public void disconnectZoom(UUID tutorId) {
-        log.info("Disconnecting Zoom for tutor: {}", tutorId);
-        credentialRepository.deleteByTutorId(tutorId);
     }
 
     @Override

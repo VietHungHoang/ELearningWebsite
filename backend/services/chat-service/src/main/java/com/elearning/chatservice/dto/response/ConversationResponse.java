@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Response DTO for conversation details
@@ -18,15 +19,15 @@ import java.util.List;
 @AllArgsConstructor
 public class ConversationResponse {
 
-    private String id;
+    private UUID id;
 
     private String name;
 
     private ConversationType type;
 
-    private List<String> participantIds;
+    private List<UUID> participantIds;
 
-    private String classId;
+    private UUID classId;
 
     private MessageResponse lastMessage;
 
@@ -36,7 +37,7 @@ public class ConversationResponse {
 
     private List<ParticipantResponse> typingUsers;
 
-    private String createdBy;
+    private UUID createdBy;
 
     private LocalDateTime createdAt;
 

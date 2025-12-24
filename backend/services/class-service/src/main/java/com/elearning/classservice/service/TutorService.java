@@ -6,6 +6,7 @@ import com.elearning.classservice.dto.response.ClassDetailResponse;
 import com.elearning.classservice.dto.response.TutorClassResponse;
 import com.elearning.classservice.dto.response.TutorStatsResponse;
 import com.elearning.classservice.dto.response.GroupClassResponse;
+import com.elearning.classservice.dto.response.ClassTableItem;
 import org.springframework.data.domain.Page;
 
 import java.util.List;

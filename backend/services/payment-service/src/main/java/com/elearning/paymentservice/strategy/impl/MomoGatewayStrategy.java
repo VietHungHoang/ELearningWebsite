@@ -51,7 +51,7 @@ public class MomoGatewayStrategy implements PaymentGatewayStrategy {
             .orderId(request.getOrderId().toString())  
             .orderInfo("Payment for order " + request.getOrderId())
             .redirectUrl(request.getRedirectUrl())
-            .ipnUrl("http://localhost:8086/payment/callback")
+            .ipnUrl("http://localhost:8081/payment/webhook/momo")
             .build();
 
         String signature = createMomoSignature(momoRequest);

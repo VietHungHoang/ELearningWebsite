@@ -261,7 +261,7 @@ public class TutorServiceImpl implements TutorService {
     @Override
     @Transactional(readOnly = true)
     public List<TutorStatsResponse> getTutorStats(List<UUID> tutorIds, UUID studentId) {
-        log.info("Getting stats for tutors: {}", tutorIds);
+        log.info("Getting stats for tutors: {} with studentId filter: {}", tutorIds, studentId);
 
         List<TutorStatsResponse> results = new ArrayList<>();
 
@@ -277,9 +277,7 @@ public class TutorServiceImpl implements TutorService {
             int studentCount = uniqueStudents.size();
 
             // Check if tutor has trial session with the specified student
-            boolean hasTrialSession = studentId != null ?
-             !trialSessionRepository.existsByTutorIdAndStudentId(tutorId, studentId)
-             : true;
+            boolean hasTrialSession = studentId == null || !trialSessionRepository.existsByTutorIdAndStudentId(tutorId, studentId);
 
 
             TutorStatsResponse stats = TutorStatsResponse.builder()

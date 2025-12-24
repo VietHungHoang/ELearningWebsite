@@ -38,14 +38,21 @@ public class JwtTokenFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.info("=== JwtTokenFilter CALLED for path: {} ===", exchange.getRequest().getPath());
+        
+        // Check if Authorization header exists
+        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        log.info("Authorization header present: {}", authHeader != null);
+        
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .flatMap(authentication -> {
+                    log.info("JwtTokenFilter: Processing authentication for request: {}", exchange.getRequest().getPath());
                     if (authentication instanceof JwtAuthenticationToken) {
                         JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
                         Jwt jwt = jwtAuth.getToken();
                         
-                        log.debug("Processing JWT token for request: {}", exchange.getRequest().getPath());
+                        log.info("Processing JWT token for request: {}", exchange.getRequest().getPath());
                         
                         // Extract user info from JWT token
                         String userId = extractClaim(jwt, "sub");
@@ -63,17 +70,20 @@ public class JwtTokenFilter implements GlobalFilter, Ordered {
                                 .header("X-Auth-Token", jwt.getTokenValue())
                                 .build();
                         
-                        log.debug("Added user headers - UserId: {}, Email: {}, Roles: {}", userId, email, roles);
+                        log.info("Added user headers - UserId: {}, Email: {}, Roles: {}", userId, email, roles);
                         
                         // Continue with modified request
                         return chain.filter(exchange.mutate().request(modifiedRequest).build());
                     }
                     
                     // No JWT token found, continue without adding headers
-                    log.debug("No JWT token found in request: {}", exchange.getRequest().getPath());
+                    log.info("No JWT authentication found in SecurityContext");
                     return chain.filter(exchange);
                 })
-                .switchIfEmpty(chain.filter(exchange)); // Handle case when no security context exists
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.info("SecurityContext is empty, continuing without user headers");
+                    return chain.filter(exchange);
+                }));
     }
 
     /**

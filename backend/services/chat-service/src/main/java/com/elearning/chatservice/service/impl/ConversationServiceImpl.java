@@ -2,7 +2,6 @@ package com.elearning.chatservice.service.impl;
 
 import com.elearning.chatservice.dto.request.CreateConversationRequest;
 import com.elearning.chatservice.dto.response.ConversationResponse;
-import com.elearning.chatservice.dto.response.MessageResponse;
 import com.elearning.chatservice.dto.response.ParticipantResponse;
 import com.elearning.chatservice.entity.Conversation;
 import com.elearning.chatservice.entity.ConversationType;
@@ -12,7 +11,6 @@ import com.elearning.chatservice.repository.ConversationRepository;
 import com.elearning.chatservice.repository.MessageRepository;
 import com.elearning.chatservice.repository.ParticipantRepository;
 import com.elearning.chatservice.service.ConversationService;
-import com.elearning.chatservice.service.MessageService;
 import com.elearning.chatservice.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -39,11 +37,11 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     @Transactional
-    public ConversationResponse createConversation(CreateConversationRequest request, String createdBy) {
+    public ConversationResponse createConversation(CreateConversationRequest request, UUID createdBy) {
         log.info("Creating conversation: type={}, createdBy={}", request.getType(), createdBy);
 
         // Validate participants
-        List<String> participantIds = new ArrayList<>(request.getParticipantIds());
+        List<UUID> participantIds = new ArrayList<>(request.getParticipantIds());
         if (!participantIds.contains(createdBy)) {
             participantIds.add(createdBy);
         }
@@ -56,7 +54,7 @@ public class ConversationServiceImpl implements ConversationService {
             
             var existing = conversationRepository.findOneToOneConversation(participantIds);
             if (existing.isPresent()) {
-                return mapToResponse(existing.get());
+                return mapToResponse(existing.get(), null);
             }
         }
 
@@ -75,23 +73,23 @@ public class ConversationServiceImpl implements ConversationService {
         conversation = conversationRepository.save(conversation);
 
         // Create participant records
-        for (String participantId : participantIds) {
+        for (UUID participantId : participantIds) {
             Participant participant = new Participant(conversation.getId(), participantId);
             participant.setAdmin(participantId.equals(createdBy));
             participantRepository.save(participant);
         }
 
         log.info("Conversation created: id={}", conversation.getId());
-        return mapToResponse(conversation);
+        return mapToResponse(conversation, null);
     }
 
     @Override
-    public ConversationResponse getOrCreateOneToOneConversation(String userId1, String userId2) {
-        List<String> participantIds = Arrays.asList(userId1, userId2);
+    public ConversationResponse getOrCreateOneToOneConversation(UUID userId1, UUID userId2) {
+        List<UUID> participantIds = Arrays.asList(userId1, userId2);
         
         var existing = conversationRepository.findOneToOneConversation(participantIds);
         if (existing.isPresent()) {
-            return mapToResponse(existing.get());
+            return mapToResponse(existing.get(), null);
         }
 
         // Create new conversation
@@ -104,7 +102,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ConversationResponse getConversationById(String conversationId, String userId) {
+    public ConversationResponse getConversationById(UUID conversationId, UUID userId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -112,24 +110,24 @@ public class ConversationServiceImpl implements ConversationService {
             throw new RuntimeException("User is not a participant in this conversation");
         }
 
-        return mapToResponse(conversation);
+        return mapToResponse(conversation, userId);
     }
 
     @Override
-    public Page<ConversationResponse> getUserConversations(String userId, Pageable pageable) {
+    public Page<ConversationResponse> getUserConversations(UUID userId, Pageable pageable) {
         return conversationRepository.findByParticipantId(userId, pageable)
-                .map(this::mapToResponse);
+                .map(conversation -> mapToResponse(conversation, userId));
     }
 
     @Override
-    public Page<ConversationResponse> getUserConversationsByType(String userId, ConversationType type, Pageable pageable) {
+    public Page<ConversationResponse> getUserConversationsByType(UUID userId, ConversationType type, Pageable pageable) {
         return conversationRepository.findByParticipantIdAndType(userId, type, pageable)
-                .map(this::mapToResponse);
+                .map(conversation -> mapToResponse(conversation, userId));
     }
 
     @Override
     @Transactional
-    public ConversationResponse addParticipants(String conversationId, List<String> participantIds, String requestUserId) {
+    public ConversationResponse addParticipants(UUID conversationId, List<UUID> participantIds, UUID requestUserId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -146,7 +144,7 @@ public class ConversationServiceImpl implements ConversationService {
         }
 
         // Add new participants
-        for (String participantId : participantIds) {
+        for (UUID participantId : participantIds) {
             if (!conversation.getParticipantIds().contains(participantId)) {
                 conversation.getParticipantIds().add(participantId);
                 Participant participant = new Participant(conversationId, participantId);
@@ -157,12 +155,12 @@ public class ConversationServiceImpl implements ConversationService {
         conversation.setUpdatedAt(LocalDateTime.now());
         conversation = conversationRepository.save(conversation);
 
-        return mapToResponse(conversation);
+        return mapToResponse(conversation, null);
     }
 
     @Override
     @Transactional
-    public ConversationResponse removeParticipant(String conversationId, String participantId, String requestUserId) {
+    public ConversationResponse removeParticipant(UUID conversationId, UUID participantId, UUID requestUserId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -185,12 +183,12 @@ public class ConversationServiceImpl implements ConversationService {
         conversation.setUpdatedAt(LocalDateTime.now());
         conversation = conversationRepository.save(conversation);
 
-        return mapToResponse(conversation);
+        return mapToResponse(conversation, null);
     }
 
     @Override
     @Transactional
-    public ConversationResponse updateConversation(String conversationId, String name, String userId) {
+    public ConversationResponse updateConversation(UUID conversationId, String name, UUID userId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -202,12 +200,12 @@ public class ConversationServiceImpl implements ConversationService {
         conversation.setUpdatedAt(LocalDateTime.now());
         conversation = conversationRepository.save(conversation);
 
-        return mapToResponse(conversation);
+        return mapToResponse(conversation, null);
     }
 
     @Override
     @Transactional
-    public void deleteConversation(String conversationId, String userId) {
+    public void deleteConversation(UUID conversationId, UUID userId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
@@ -221,14 +219,14 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public Page<ConversationResponse> searchConversations(String userId, String searchText, Pageable pageable) {
+    public Page<ConversationResponse> searchConversations(UUID userId, String searchText, Pageable pageable) {
         return conversationRepository.searchByNameForUser(userId, searchText, pageable)
-                .map(this::mapToResponse);
+                .map(conversation -> mapToResponse(conversation, userId));
     }
 
     @Override
     @Transactional
-    public void updateLastMessage(String conversationId, String messageId) {
+    public void updateLastMessage(UUID conversationId, UUID messageId) {
         conversationRepository.findById(conversationId).ifPresent(conversation -> {
             conversation.setLastMessageId(messageId);
             conversation.setLastMessageAt(LocalDateTime.now());
@@ -236,8 +234,8 @@ public class ConversationServiceImpl implements ConversationService {
         });
     }
 
-    private ConversationResponse mapToResponse(Conversation conversation) {
-        ConversationResponse response = ConversationResponse.builder()
+    private ConversationResponse mapToResponse(Conversation conversation, UUID userId) {
+        ConversationResponse.ConversationResponseBuilder builder = ConversationResponse.builder()
                 .id(conversation.getId())
                 .name(conversation.getName())
                 .type(conversation.getType())
@@ -246,8 +244,32 @@ public class ConversationServiceImpl implements ConversationService {
                 .createdBy(conversation.getCreatedBy())
                 .createdAt(conversation.getCreatedAt())
                 .updatedAt(conversation.getUpdatedAt())
-                .lastMessageAt(conversation.getLastMessageAt())
-                .build();
+                .lastMessageAt(conversation.getLastMessageAt());
+
+        // Populate lastMessage if exists
+        if (conversation.getLastMessageId() != null) {
+            try {
+                Message lastMessage = messageRepository.findById(conversation.getLastMessageId()).orElse(null);
+                if (lastMessage != null) {
+                    // TODO: Implement messageService.mapToResponse
+                    // builder.lastMessage(messageService.mapToResponse(lastMessage));
+                }
+            } catch (Exception e) {
+                log.warn("Failed to load last message for conversation {}", conversation.getId(), e);
+            }
+        }
+
+        ConversationResponse response = builder.build();
+
+        // Populate unreadCount if userId is provided
+        if (userId != null) {
+            try {
+                long unreadCount = messageRepository.countUnreadMessages(conversation.getId(), userId);
+                response.setUnreadCount(unreadCount);
+            } catch (Exception e) {
+                log.warn("Failed to count unread messages for conversation {} and user {}", conversation.getId(), userId, e);
+            }
+        }
 
         // Get typing users
         List<ParticipantResponse> typingUsers = participantService.getTypingParticipants(conversation.getId());

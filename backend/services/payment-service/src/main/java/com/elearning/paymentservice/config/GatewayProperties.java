@@ -11,4 +11,7 @@ public class GatewayProperties {
     private String accessKey;
     private String secretKey;
     private String endpoint;
+    // VNPay specific fields
+    private String tmnCode;
+    private String hashSecret;
 }

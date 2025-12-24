@@ -1,13 +1,14 @@
 package com.elearning.paymentservice.dto.response;
 
 import com.elearning.paymentservice.enums.PaymentMethodType;
+
+import java.util.UUID;
+
 import com.elearning.paymentservice.enums.PaymentGateway;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-// paymentId is a Long (DB auto-generated id)
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class InitiatePaymentResponse {
 
     // Unique ID of the transaction stored in payment-service DB
-    private Long paymentId;
+    private UUID paymentId;
 
     // Which provider will handle this payment (MOMO, VNPAY, ...)
     private PaymentGateway provider;

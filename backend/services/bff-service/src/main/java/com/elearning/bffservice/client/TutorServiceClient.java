@@ -4,13 +4,17 @@ import com.elearning.bffservice.dto.request.BulkUpdateAvailabilityRequest;
 import com.elearning.bffservice.dto.request.UpdateOnboardingRequest;
 import com.elearning.bffservice.dto.ApiResponse;
 import com.elearning.bffservice.dto.tutor.response.AvailabilityListResponse;
+import com.elearning.bffservice.dto.tutor.response.MonthlyIncomeStats;
 import com.elearning.bffservice.dto.response.OnboardingResponse;
 import com.elearning.bffservice.dto.tutor.response.TutorDetailResponse;
 import com.elearning.bffservice.dto.tutor.response.TutorResponse;
+import com.elearning.bffservice.dto.tutor.response.TutorDashboardStatisticsResponse;
+import com.elearning.bffservice.exception.ServiceCallException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -33,22 +38,27 @@ public class TutorServiceClient {
     /**
      * Get tutors by list of IDs (for search enrichment)
      */
-    public ApiResponse<Map<UUID, TutorResponse>> getTutorsByIds(List<UUID> tutorIds) {
+    public List<TutorResponse> getTutorsByIds(List<UUID> tutorIds) throws ServiceCallException {
         if (tutorIds == null || tutorIds.isEmpty()) {
-            return ApiResponse.success(Map.of(), "No tutors found");
+            return List.of();
         }
 
         String url = UriComponentsBuilder
-                .fromHttpUrl(tutorServiceBaseUrl + "/tutors/batch")
-                .queryParam("tutorIds", tutorIds)
+                .fromHttpUrl(tutorServiceBaseUrl + "/api/v1/tutors/batch")
+                .queryParam("ids", tutorIds)
                 .toUriString();
 
-        return restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<ApiResponse<Map<UUID, TutorResponse>>>() {}
-        ).getBody();
+        try {
+            ApiResponse<List<TutorResponse>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<ApiResponse<List<TutorResponse>>>() {}
+            ).getBody();
+            return response != null ? response.getData() : List.of();
+        } catch (Exception e) {
+            throw new ServiceCallException("Failed to fetch tutors from tutor service: " + e.getMessage(), e);
+        }
     }
     
     public ApiResponse<TutorDetailResponse> getTutorDetail(UUID tutorId) {
@@ -138,5 +148,43 @@ public class TutorServiceClient {
                 null,
                 new ParameterizedTypeReference<ApiResponse<TutorResponse>>() {}
         ).getBody().getData();
+    }
+
+    public ApiResponse<TutorDashboardStatisticsResponse> getTutorStats(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate) {
+        URI url = UriComponentsBuilder
+                .fromHttpUrl(tutorServiceBaseUrl + "/api/v1/tutors/{tutorId}/stats")
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate)
+                .buildAndExpand(tutorId)
+                .toUri();
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ApiResponse<TutorDashboardStatisticsResponse>>() {}
+        ).getBody();
+    }
+
+    /**
+     * Get monthly income statistics for tutor
+     */
+    public ApiResponse<List<MonthlyIncomeStats>> getMonthlyIncomeStats(UUID tutorId) {
+        URI url = UriComponentsBuilder
+                .fromHttpUrl(tutorServiceBaseUrl + "/api/v1/tutors/me/income")
+                .build()
+                .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Id", tutorId.toString());
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<ApiResponse<List<MonthlyIncomeStats>>>() {}
+        ).getBody();
     }
 }

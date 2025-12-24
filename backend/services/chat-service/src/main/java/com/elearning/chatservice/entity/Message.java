@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Message entity - represents a chat message
@@ -23,11 +24,12 @@ import java.util.Map;
 public class Message {
 
     @Id
-    private String id;
+    @Builder.Default
+    private UUID id = UUID.randomUUID();
 
-    private String conversationId;
+    private UUID conversationId;
 
-    private String senderId;  // User ID of sender
+    private UUID senderId;  // User ID of sender
 
     private MessageType type;
 
@@ -37,9 +39,9 @@ public class Message {
 
     private MessageStatus status;
 
-    private List<String> readBy;  // List of user IDs who have read the message
+    private List<UUID> readBy;  // List of user IDs who have read the message
 
-    private Map<String, String> reactions;  // userId -> emoji
+    private Map<UUID, String> reactions;  // userId -> emoji
 
     private LocalDateTime createdAt;
 
@@ -51,9 +53,9 @@ public class Message {
 
     private boolean isDeleted;
 
-    private String replyToMessageId;  // For reply functionality
+    private UUID replyToMessageId;  // For reply functionality
 
-    public Message(String conversationId, String senderId, MessageType type, String content) {
+    public Message(UUID conversationId, UUID senderId, MessageType type, String content) {
         this.conversationId = conversationId;
         this.senderId = senderId;
         this.type = type;

@@ -4,6 +4,7 @@ import com.elearning.chatservice.dto.request.SendMessageRequest;
 import com.elearning.chatservice.dto.request.TypingIndicatorRequest;
 import com.elearning.chatservice.dto.response.MessageResponse;
 import com.elearning.chatservice.dto.response.TypingIndicatorResponse;
+import com.elearning.chatservice.service.ConversationService;
 import com.elearning.chatservice.service.MessageService;
 import com.elearning.chatservice.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * WebSocket Controller for real-time chat features
@@ -38,6 +38,7 @@ public class WebSocketChatController {
 
     private final MessageService messageService;
     private final ParticipantService participantService;
+    private final ConversationService conversationService;
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
@@ -46,18 +47,30 @@ public class WebSocketChatController {
      * Broadcast to: /topic/conversation/{conversationId}
      */
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload SendMessageRequest request, Principal principal) {
+    public void sendMessage(@Payload SendMessageRequest request, StompHeaderAccessor headerAccessor) {
+        String userIdHeader = null;
         try {
-            String userId = principal.getName(); // Get user ID from authentication
+            userIdHeader = headerAccessor.getFirstNativeHeader("X-User-Id");
+            if (userIdHeader == null) {
+                throw new IllegalArgumentException("X-User-Id header is required");
+            }
+            UUID userId = UUID.fromString(userIdHeader);
             log.info("WebSocket - Send message: userId={}, conversationId={}", userId, request.getConversationId());
 
             // Save message
             MessageResponse messageResponse = messageService.sendMessage(request, userId);
 
-            // Broadcast to all participants in the conversation
+            // Broadcast message to all participants in the conversation
             messagingTemplate.convertAndSend(
                     "/topic/conversation/" + request.getConversationId(),
                     messageResponse
+            );
+
+            // Send conversation updated event to all participants
+            var updatedConversation = conversationService.getConversationById(request.getConversationId(), userId);
+            messagingTemplate.convertAndSend(
+                    "/topic/conversation/" + request.getConversationId() + "/updated",
+                    updatedConversation
             );
 
             log.info("Message broadcasted: messageId={}", messageResponse.getId());
@@ -65,7 +78,7 @@ public class WebSocketChatController {
             log.error("Error sending message via WebSocket", e);
             // Send error to user
             messagingTemplate.convertAndSendToUser(
-                    principal.getName(),
+                    userIdHeader,
                     "/queue/errors",
                     "Failed to send message: " + e.getMessage()
             );
@@ -78,9 +91,13 @@ public class WebSocketChatController {
      * Broadcast to: /topic/conversation/{conversationId}/typing
      */
     @MessageMapping("/chat.typing")
-    public void updateTypingStatus(@Payload TypingIndicatorRequest request, Principal principal) {
+    public void updateTypingStatus(@Payload TypingIndicatorRequest request, StompHeaderAccessor headerAccessor) {
         try {
-            String userId = principal.getName();
+            String userIdHeader = headerAccessor.getFirstNativeHeader("X-User-Id");
+            if (userIdHeader == null) {
+                throw new IllegalArgumentException("X-User-Id header is required");
+            }
+            UUID userId = UUID.fromString(userIdHeader);
             log.debug("WebSocket - Typing indicator: userId={}, conversationId={}, isTyping={}", 
                     userId, request.getConversationId(), request.isTyping());
 
@@ -89,7 +106,7 @@ public class WebSocketChatController {
 
             // Get all typing users
             var typingUsers = participantService.getTypingParticipants(request.getConversationId());
-            List<String> typingUserIds = typingUsers.stream()
+            List<UUID> typingUserIds = typingUsers.stream()
                     .map(p -> p.getUserId())
                     .filter(id -> !id.equals(userId))  // Exclude current user
                     .toList();
@@ -118,22 +135,33 @@ public class WebSocketChatController {
     public void markAsRead(
             @DestinationVariable String conversationId,
             @DestinationVariable String messageId,
-            Principal principal) {
+            StompHeaderAccessor headerAccessor) {
         try {
-            String userId = principal.getName();
+            String userIdHeader = headerAccessor.getFirstNativeHeader("X-User-Id");
+            if (userIdHeader == null) {
+                throw new IllegalArgumentException("X-User-Id header is required");
+            }
+            UUID userId = UUID.fromString(userIdHeader);
             log.debug("WebSocket - Mark as read: userId={}, conversationId={}, messageId={}", 
                     userId, conversationId, messageId);
 
             // Mark message as read
-            messageService.markAsRead(conversationId, messageId, userId);
+            messageService.markAsRead(UUID.fromString(conversationId), UUID.fromString(messageId), userId);
 
             // Update last seen
-            participantService.updateLastSeen(conversationId, userId);
+            participantService.updateLastSeen(UUID.fromString(conversationId), userId);
 
             // Broadcast read receipt to conversation
             messagingTemplate.convertAndSend(
                     "/topic/conversation/" + conversationId + "/read",
                     new ReadReceipt(messageId, userId)
+            );
+
+            // Send conversation updated event to all participants
+            var updatedConversation = conversationService.getConversationById(UUID.fromString(conversationId), userId);
+            messagingTemplate.convertAndSend(
+                    "/topic/conversation/" + conversationId + "/updated",
+                    updatedConversation
             );
         } catch (Exception e) {
             log.error("Error marking message as read", e);
@@ -145,13 +173,17 @@ public class WebSocketChatController {
      * Client sends to: /app/chat.join/{conversationId}
      */
     @MessageMapping("/chat.join/{conversationId}")
-    public void userJoined(@DestinationVariable String conversationId, Principal principal) {
+    public void userJoined(@DestinationVariable String conversationId, StompHeaderAccessor headerAccessor) {
         try {
-            String userId = principal.getName();
+            String userIdHeader = headerAccessor.getFirstNativeHeader("X-User-Id");
+            if (userIdHeader == null) {
+                throw new IllegalArgumentException("X-User-Id header is required");
+            }
+            UUID userId = UUID.fromString(userIdHeader);
             log.info("WebSocket - User joined: userId={}, conversationId={}", userId, conversationId);
 
             // Update last seen
-            participantService.updateLastSeen(conversationId, userId);
+            participantService.updateLastSeen(UUID.fromString(conversationId), userId);
 
             // Broadcast user joined event
             messagingTemplate.convertAndSend(
@@ -168,16 +200,20 @@ public class WebSocketChatController {
      * Client sends to: /app/chat.leave/{conversationId}
      */
     @MessageMapping("/chat.leave/{conversationId}")
-    public void userLeft(@DestinationVariable String conversationId, Principal principal) {
+    public void userLeft(@DestinationVariable String conversationId, StompHeaderAccessor headerAccessor) {
         try {
-            String userId = principal.getName();
+            String userIdHeader = headerAccessor.getFirstNativeHeader("X-User-Id");
+            if (userIdHeader == null) {
+                throw new IllegalArgumentException("X-User-Id header is required");
+            }
+            UUID userId = UUID.fromString(userIdHeader);
             log.info("WebSocket - User left: userId={}, conversationId={}", userId, conversationId);
 
             // Update last seen
-            participantService.updateLastSeen(conversationId, userId);
+            participantService.updateLastSeen(UUID.fromString(conversationId), userId);
 
             // Clear typing status
-            participantService.updateTypingStatus(conversationId, userId, false);
+            participantService.updateTypingStatus(UUID.fromString(conversationId), userId, false);
 
             // Broadcast user left event
             messagingTemplate.convertAndSend(
@@ -190,6 +226,6 @@ public class WebSocketChatController {
     }
 
     // Helper classes for WebSocket messages
-    public record ReadReceipt(String messageId, String userId) {}
-    public record PresenceEvent(String userId, String status) {}
+    public record ReadReceipt(String messageId, UUID userId) {}
+    public record PresenceEvent(UUID userId, String status) {}
 }

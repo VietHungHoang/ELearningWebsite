@@ -1,5 +1,7 @@
 package com.elearning.paymentservice.kafka;
 
+import com.elearning.paymentservice.dto.event.BookingPaymentFailedEvent;
+import com.elearning.paymentservice.dto.event.BookingPaymentSuccessEvent;
 import com.elearning.paymentservice.dto.event.PaymentCompletedEvent;
 import com.elearning.paymentservice.dto.event.PaymentFailedEvent;
 import com.elearning.paymentservice.dto.event.PaymentRefundedEvent;
@@ -50,5 +52,13 @@ public class KafkaProducer {
 
     public void sendPaymentRefundedEvent(PaymentRefundedEvent event) {
         sendMessage(KafkaTopics.PAYMENT_REFUNDED, event.getOrderId().toString(), event);
+    }
+
+    public void sendBookingPaymentSuccessEvent(BookingPaymentSuccessEvent event) {
+        sendMessage(KafkaTopics.PAYMENT_BOOKING_SUCCESS, event.getBookingId().toString(), event);
+    }
+
+    public void sendBookingPaymentFailedEvent(BookingPaymentFailedEvent event) {
+        sendMessage(KafkaTopics.PAYMENT_BOOKING_FAILED, event.getBookingId().toString(), event);
     }
 }
