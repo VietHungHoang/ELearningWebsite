@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { HiChevronLeft, HiChevronRight, HiCalendar, HiPencil, HiX } from "react-icons/hi";
+import { HiChevronLeft, HiChevronRight, HiPencil, HiX } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/ui/Toast";
 import Tooltip from "../../../../components/ui/Tooltip";
@@ -18,7 +18,7 @@ import commonUtils from "../../../../utils/commonUtils";
 // --- INTERFACES ---
 // Using BookedSession directly from API types// --- COMPONENT ---
 const ScheduleManagementContent: React.FC = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { state } = useAuth();
     const { user } = state;
@@ -419,17 +419,18 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     const getDisplayDate = () => {
+        const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
         const options: Intl.DateTimeFormatOptions = { timeZone: "UTC" };
         if (view === "Daily") {
             options.year = "numeric";
             options.month = "long";
             options.day = "numeric";
-            return currentDate.toLocaleDateString("en-US", options);
+            return currentDate.toLocaleDateString(locale, options);
         }
         if (view === "Monthly") {
             options.month = "long";
             options.year = "numeric";
-            return currentDate.toLocaleDateString("en-US", options);
+            return currentDate.toLocaleDateString(locale, options);
         }
         // Weekly view
         const week = getWeekDays(currentDate);
@@ -448,7 +449,7 @@ const ScheduleManagementContent: React.FC = () => {
             startOptions.year = "numeric";
         }
 
-        return `${start.toLocaleDateString("en-US", startOptions)} - ${end.toLocaleDateString("en-US", endOptions)}`;
+        return `${start.toLocaleDateString(locale, startOptions)} - ${end.toLocaleDateString(locale, endOptions)}`;
     };
 
     // --- DATE PICKER HELPERS ---
@@ -617,7 +618,7 @@ const ScheduleManagementContent: React.FC = () => {
                         <HiChevronLeft className="w-5 h-5" />
                     </button>
                     <span className="font-semibold text-gray-700">
-                        {displayDate.toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}
+                        {displayDate.toLocaleString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { month: "long", year: "numeric", timeZone: "UTC" })}
                     </span>
                     <button 
                         onClick={handleNextMonth} 
@@ -696,9 +697,10 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     const renderMonthPicker = () => {
+        const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
         const year = displayDate.getUTCFullYear();
         const months = Array.from({ length: 12 }, (_, i) =>
-            new Date(Date.UTC(year, i, 1)).toLocaleString("en-US", { month: "short", timeZone: "UTC" })
+            new Date(Date.UTC(year, i, 1)).toLocaleString(locale, { month: "short", timeZone: "UTC" })
         );
 
         return (
@@ -733,104 +735,182 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     // --- RENDER FUNCTIONS FOR VIEWS ---
-    const timeSlots = Array.from({ length: 16 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`);
+    const timeSlots = Array.from({ length: 18 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`); // 7:00-24:00 - all time slots
 
     const renderHourlyGrid = (days: Date[]) => (
-        <div className="overflow-x-auto relative" ref={gridRef}>
-            <div className={`grid min-w-[400px]`} style={{ gridTemplateColumns: `auto repeat(${days.length}, 1fr)` }}>
-                {/* Time Column Header */}
-                <div className="sticky left-0 bg-white z-10"></div>
-                {/* Day Headers */}
-                {days.map((day) => (
-                    <div key={day.toISOString()} className="text-center p-3 border-b border-gray-200">
-                        <p className="text-xs text-gray-500">
-                            {day.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}
-                        </p>
-                        <p className="text-lg font-bold text-gray-800">{day.getUTCDate()}</p>
-                    </div>
-                ))}
-
-                {/* Time Slots and Availability Grid */}
-                {timeSlots.map((time) => (
-                    <React.Fragment key={time}>
-                        <div className="text-right pr-4 py-2 border-r border-gray-200 text-xs text-gray-500 sticky left-0 bg-white z-10 h-12 flex items-center justify-end">
-                            {time}
+        <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full w-full min-h-0 overflow-hidden">
+            <div className="overflow-x-auto flex-1 relative min-h-0" ref={gridRef}>
+                <div className={`grid`} style={{ gridTemplateColumns: `80px repeat(${days.length}, 1fr)`, width: '100%' }}>
+                    {/* Time Column Header */}
+                    <div className="sticky left-0 bg-white z-10"></div>
+                    {/* Day Headers */}
+                    {days.map((day) => (
+                        <div key={day.toISOString()} className="text-center p-0.5 border-b border-gray-200 bg-white sticky top-0 z-10">
+                            <p className="text-[10px] text-gray-500">
+                                {day.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}
+                            </p>
+                            <p className="text-xs font-bold text-gray-800">{day.getUTCDate()}</p>
                         </div>
-                        {days.map((day) => {
-                            const hour = parseInt(time.split(":")[0]);
-                            const slotDate = new Date(day);
-                            slotDate.setUTCHours(hour, 0, 0, 0);
-                            const slotISO = slotDate.toISOString();
+                    ))}
 
-                            const isAvailable = isEditMode
-                                ? tempAvailability.includes(slotISO)
-                                : availability.includes(slotISO);
-                            const bookedSession = bookedSessions.find(session => {
-                                if (!session.sessionDatetime) return false;
-                                const sessionDate = new Date(session.sessionDatetime);
-                                // Check if slot matches the session datetime (assuming 1-hour sessions)
-                                return sessionDate.getTime() === slotDate.getTime();
-                            });
+                    {/* Time Slots and Availability Grid */}
+                    {timeSlots.map((time) => (
+                        <React.Fragment key={time}>
+                            <div className="text-right pr-3 py-0.5 border-r border-gray-200 text-[10px] text-gray-500 sticky left-0 bg-white z-10 h-7 flex items-center justify-end">
+                                {time}
+                            </div>
+                            {days.map((day) => {
+                                const hour = parseInt(time.split(":")[0]);
+                                const slotDate = new Date(day);
+                                slotDate.setUTCHours(hour, 0, 0, 0);
+                                const slotISO = slotDate.toISOString();
 
-                            if (bookedSession) {
-                                return (
-                                    <div key={day.toISOString()} className="border-b border-r border-gray-200 p-1">
-                                        <div
-                                            onClick={(e) => handleSessionClick(bookedSession, e)}
-                                            className={`h-full rounded text-xs p-1 bg-blue-100 text-blue-800 border-blue-200 ${
-                                                !isEditMode ? "cursor-pointer" : "cursor-default opacity-70"
-                                            }`}
-                                        >
-                                            <p className="font-bold">{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
-                                            <p>
-                                                {bookedSession.students && bookedSession.students.length > 0
-                                                    ? (bookedSession.students.length === 1 
-                                                        ? (bookedSession.students[0]?.fullName || 'Unknown Student')
-                                                        : `${bookedSession.students[0]?.fullName || 'Unknown Student'} (+${bookedSession.students.length - 1} more)`)
-                                                    : 'No students'
-                                                }
-                                            </p>
+                                const isAvailable = isEditMode
+                                    ? tempAvailability.includes(slotISO)
+                                    : availability.includes(slotISO);
+                                const bookedSession = bookedSessions.find(session => {
+                                    if (!session.sessionDatetime) return false;
+                                    const sessionDate = new Date(session.sessionDatetime);
+                                    // Check if slot matches the session datetime (assuming 1-hour sessions)
+                                    return sessionDate.getTime() === slotDate.getTime();
+                                });
+
+                                if (bookedSession) {
+                                    return (
+                                        <div key={day.toISOString()} className="border-b border-r border-gray-200 h-7.5 p-0 overflow-hidden">
+                                            <div
+                                                onClick={(e) => handleSessionClick(bookedSession, e)}
+                                                className={`h-full w-full rounded text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 border border-blue-200 overflow-hidden flex flex-col justify-center min-w-0 ${
+                                                    !isEditMode ? "cursor-pointer" : "cursor-default opacity-70"
+                                                }`}
+                                            >
+                                                <p className="font-bold leading-tight text-[10px] overflow-hidden text-ellipsis whitespace-nowrap min-w-0">{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
+                                                <p className="leading-tight text-[10px] overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                                                    {bookedSession.students && bookedSession.students.length > 0
+                                                        ? (bookedSession.students.length === 1 
+                                                            ? (bookedSession.students[0]?.fullName || 'Unknown Student')
+                                                            : `${bookedSession.students[0]?.fullName || 'Unknown'} (+${bookedSession.students.length - 1})`)
+                                                        : 'No students'
+                                                    }
+                                                </p>
+                                            </div>
                                         </div>
+                                    );
+                                }
+
+                                return (
+                                    <div
+                                        key={day.toISOString()}
+                                        data-iso={slotISO}
+                                        className={`calendar-cell border-b border-r border-gray-200 h-7.5 text-center select-none overflow-hidden ${
+                                            isEditMode ? "cursor-pointer" : ""
+                                        }`}
+                                        onMouseDown={(e) => handleMouseDown(e, day, hour)}
+                                        onClick={() => handleCellClick(day, hour)}
+                                    >
+                                        {isAvailable && (
+                                            <div
+                                                className={`h-full w-full ${
+                                                    isEditMode ? "bg-green-200" : "bg-green-100"
+                                                } opacity-70`}
+                                            ></div>
+                                        )}
                                     </div>
                                 );
-                            }
+                            })}
+                        </React.Fragment>
+                    ))}
+                </div>
+                {isDragging && selectionRect && (
+                    <div
+                        className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
+                        style={{
+                            left: selectionRect.left,
+                            top: selectionRect.top,
+                            width: selectionRect.width,
+                            height: selectionRect.height,
+                        }}
+                    />
+                )}
+            </div>
+        </div>
+    );
 
+    // Helper function to get day name from dayOfWeek (1=Monday, 7=Sunday)
+    const getDayName = (dayOfWeek: number): string => {
+        const days = [
+            t('common.days.monday'),
+            t('common.days.tuesday'),
+            t('common.days.wednesday'),
+            t('common.days.thursday'),
+            t('common.days.friday'),
+            t('common.days.saturday'),
+            t('common.days.sunday')
+        ];
+        return days[dayOfWeek === 7 ? 6 : dayOfWeek - 1] || '';
+    };
+
+    // Render availability details panel
+    const renderAvailabilityDetails = () => {
+        if (!originalAvailabilities || originalAvailabilities.length === 0) {
+            return (
+                <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full">
+                    <div className="p-4 border-b border-gray-200 flex-shrink-0">
+                        <h3 className="text-lg font-semibold text-gray-800">{t('dashboard.tutor.schedule.availabilityDetails.title')}</h3>
+                    </div>
+                    <div className="p-4 flex-1 flex items-center justify-center">
+                        <p className="text-sm text-gray-500">{t('dashboard.tutor.schedule.availabilityDetails.noAvailability')}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Group availabilities by dayOfWeek (1=Monday, 7=Sunday)
+        const groupedByDay: { [key: number]: typeof originalAvailabilities } = {};
+        originalAvailabilities.forEach((avail) => {
+            if (!groupedByDay[avail.dayOfWeek]) {
+                groupedByDay[avail.dayOfWeek] = [];
+            }
+            groupedByDay[avail.dayOfWeek].push(avail);
+        });
+
+        // Sort by dayOfWeek (Monday to Sunday)
+        const sortedDays = [1, 2, 3, 4, 5, 6, 7].filter(day => groupedByDay[day]);
+
+        return (
+            <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full min-h-0">
+                <div className="p-3 border-b border-gray-200 flex-shrink-0 sticky top-0 bg-white z-10 rounded-t-lg">
+                    <h3 className="text-base font-semibold text-gray-800">{t('dashboard.tutor.schedule.availabilityDetails.title')}</h3>
+                    <p className="text-[10px] text-gray-500 mt-0.5">
+                        {originalAvailabilities.length} {originalAvailabilities.length > 1 ? t('dashboard.tutor.schedule.availabilityDetails.slots') : t('dashboard.tutor.schedule.availabilityDetails.slot')}
+                    </p>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2 min-h-0">
+                    <div className="space-y-2">
+                        {sortedDays.map((dayOfWeek) => {
+                            const dayAvailabilities = groupedByDay[dayOfWeek];
                             return (
-                                <div
-                                    key={day.toISOString()}
-                                    data-iso={slotISO}
-                                    className={`calendar-cell border-b border-r border-gray-200 h-12 text-center select-none ${
-                                        isEditMode ? "cursor-pointer" : ""
-                                    }`}
-                                    onMouseDown={(e) => handleMouseDown(e, day, hour)}
-                                    onClick={() => handleCellClick(day, hour)}
-                                >
-                                    {isAvailable && (
-                                        <div
-                                            className={`h-full w-full ${
-                                                isEditMode ? "bg-green-200" : "bg-green-100"
-                                            } opacity-70`}
-                                        ></div>
-                                    )}
+                                <div key={dayOfWeek} className="border border-gray-200 rounded-md p-2 hover:border-[#0b6459] transition-colors bg-gray-50 hover:bg-white">
+                                    <div className="mb-1.5">
+                                        <span className="text-xs font-semibold text-gray-800">
+                                            {getDayName(dayOfWeek)}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {dayAvailabilities.map((avail) => (
+                                            <span key={avail.id} className="text-[10px] text-gray-600 font-medium px-1.5 py-0.5 bg-white rounded border border-gray-200">
+                                                {avail.startTime} - {avail.endTime}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             );
                         })}
-                    </React.Fragment>
-                ))}
+                    </div>
+                </div>
             </div>
-            {isDragging && selectionRect && (
-                <div
-                    className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
-                    style={{
-                        left: selectionRect.left,
-                        top: selectionRect.top,
-                        width: selectionRect.width,
-                        height: selectionRect.height,
-                    }}
-                />
-            )}
-        </div>
-    );
+        );
+    };
 
     const renderDailyView = () => renderHourlyGrid([currentDate]);
     const renderWeeklyView = () => renderHourlyGrid(getWeekDays(currentDate));
@@ -949,8 +1029,8 @@ const ScheduleManagementContent: React.FC = () => {
 
     // --- MAIN RENDER ---
     return (
-        <div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm">
+        <div className="flex flex-col h-full overflow-hidden">
+            <div className="bg-white px-6 pt-6 pb-0 rounded-2xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
                 {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {selectedSession && (
                 <TutorSessionDetailModal
@@ -960,7 +1040,7 @@ const ScheduleManagementContent: React.FC = () => {
                 />
             )}
 
-            <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-6 flex-shrink-0">
                 <div className="flex items-center gap-2">
                     <div className="flex items-center border border-gray-200 rounded-lg">
                         <button 
@@ -986,16 +1066,18 @@ const ScheduleManagementContent: React.FC = () => {
                         </button>
                     </div>
                     <div className="relative flex items-center gap-2">
-                        <button
-                            onClick={isEditMode ? undefined : () => setIsDatePickerOpen(true)}
-                            disabled={isEditMode}
-                            className={`bg-gray-100 border border-transparent rounded-lg pl-4 pr-4 py-2 text-sm font-medium text-gray-800 min-w-64 text-left flex items-center justify-between ${
-                                isEditMode ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer focus:outline-none'
-                            }`}
-                        >
+                           <button
+                               onClick={isEditMode ? undefined : () => setIsDatePickerOpen(true)}
+                               disabled={isEditMode}
+                               className={`bg-gray-100 border border-transparent rounded-lg pl-4 pr-4 py-2 text-sm font-medium text-gray-800 min-w-64 text-left flex items-center justify-between ${
+                                   isEditMode ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer focus:outline-none'
+                               }`}
+                           >
                             <span>{getDisplayDate()}</span>
-                            <HiCalendar className="w-5 h-5" />
-                        </button>
+                            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                           </button>
                         {isEditMode && (
                             <Tooltip text={t('dashboard.tutor.schedule.editTooltip')} />
                         )}
@@ -1021,7 +1103,7 @@ const ScheduleManagementContent: React.FC = () => {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="w-48">
+                    <div className="w-48 h-[38px] flex items-center">
                         <CustomDropdown
                             options={timezoneOptions}
                             selectedValue={selectedTimezone}
@@ -1044,13 +1126,13 @@ const ScheduleManagementContent: React.FC = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={handleCancelClick}
-                                className="bg-gray-200 text-gray-800 font-semibold py-2.5 px-5 rounded-lg text-sm hover:bg-gray-300"
+                                className="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg text-sm hover:bg-gray-300 transition-colors"
                             >
                                 {t('dashboard.tutor.schedule.cancel')}
                             </button>
                             <button
                                 onClick={handleSaveForFuture}
-                                className="bg-[#0b6459] text-white font-semibold py-2.5 px-5 rounded-lg text-sm hover:bg-[#084c43]"
+                                className="px-4 py-2 bg-[#0b6459] text-white font-medium rounded-lg text-sm hover:bg-[#084c43] transition-colors"
                             >
                                 {t('dashboard.tutor.schedule.save')}
                             </button>
@@ -1059,7 +1141,7 @@ const ScheduleManagementContent: React.FC = () => {
                         <button
                             onClick={handleEditClick}
                             disabled={view !== "Weekly"}
-                            className={`flex items-center gap-2 bg-[#0b6459] text-white font-semibold py-2 px-5 rounded-lg ${
+                            className={`flex items-center gap-2 bg-[#0b6459] text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors ${
                                 view !== "Weekly" ? "opacity-50 cursor-not-allowed" : "hover:bg-[#084c43]"
                             }`}
                         >
@@ -1069,14 +1151,26 @@ const ScheduleManagementContent: React.FC = () => {
                 </div>
             </div>
 
-            <div className="mt-6 relative">
+            <div className="relative flex-1 min-h-0 flex flex-col -mx-6 -mb-6">
                 {loading ? (
                     view === "Monthly" ? <MonthlyCalendarSkeleton /> : <CalendarSkeleton />
                 ) : (
                     <>
-                        {view === "Daily" && renderDailyView()}
-                        {view === "Weekly" && renderWeeklyView()}
-                        {view === "Monthly" && renderMonthlyView()}
+                        {view === "Weekly" ? (
+                            <div className="grid grid-cols-10 gap-4 h-full min-h-0 px-6 pb-6">
+                                <div className="col-span-7 flex flex-col h-full min-h-0">
+                                    {renderWeeklyView()}
+                                </div>
+                                <div className="col-span-3 flex flex-col h-full min-h-0">
+                                    {renderAvailabilityDetails()}
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {view === "Daily" && renderDailyView()}
+                                {view === "Monthly" && renderMonthlyView()}
+                            </>
+                        )}
                     </>
                 )}
             </div>

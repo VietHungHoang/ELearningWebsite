@@ -477,6 +477,11 @@
       "week": "Week",
       "title": "Dashboard",
       "analysis": "Analysis",
+      "sessionTypes": {
+        "oneOnOne": "1-on-1",
+        "group": "Group",
+        "trial": "Trial"
+      },
       "totalEarnings": "Total earnings",
       "totalStudents": "Total students",
       "teachingHours": "Teaching hours",
@@ -810,6 +815,12 @@
           "loadAvailability": "Failed to load availability",
           "loadSessions": "Failed to load booked sessions",
           "save": "Failed to save availability"
+        },
+        "availabilityDetails": {
+          "title": "Availability Details",
+          "noAvailability": "No availability set",
+          "slot": "availability slot",
+          "slots": "availability slots"
         }
       },
         "scheduleTab": {

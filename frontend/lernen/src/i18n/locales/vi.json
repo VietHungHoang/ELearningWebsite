@@ -478,6 +478,11 @@
       "week": "Tuần này",
       "title": "Bảng điều khiển",
       "analysis": "Phân tích",
+      "sessionTypes": {
+        "oneOnOne": "1 kèm 1",
+        "group": "Nhóm",
+        "trial": "Thử nghiệm"
+      },
       "totalEarnings": "Tổng thu nhập",
       "totalStudents": "Tổng số học sinh",
       "teachingHours": "Tổng số giờ dạy học",
@@ -810,6 +815,12 @@
           "loadAvailability": "Không thể tải lịch dạy",
           "loadSessions": "Không thể tải các buổi học đã đặt",
           "save": "Không thể lưu lịch dạy"
+        },
+        "availabilityDetails": {
+          "title": "Chi tiết lịch dạy",
+          "noAvailability": "Chưa có lịch dạy",
+          "slot": "khung giờ",
+          "slots": "khung giờ"
         }
       },
       "scheduleTab": {
