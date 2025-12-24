@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { HiChevronLeft, HiChevronRight, HiCalendar, HiPencil, HiX } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/ui/Toast";
 import Tooltip from "../../../../components/ui/Tooltip";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
+import { CalendarSkeleton, MonthlyCalendarSkeleton } from "./components/SchedulePageSkeleton";
 import TutorSessionDetailModal from "../components/TutorSessionDetailModal";
 import { scheduleService } from "../../../../services/scheduleService";
 import { classService } from "../../../../services/classService";
@@ -12,6 +13,7 @@ import { useAuth } from "../../../../context/AuthContext";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import type { TutorAvailability } from "../../../../types/tutor";
 import type { GetBookedSessionsResponse, Session } from "../../../../types/class";
+import commonUtils from "../../../../utils/commonUtils";
 
 // --- INTERFACES ---
 // Using BookedSession directly from API types// --- COMPONENT ---
@@ -54,7 +56,7 @@ const ScheduleManagementContent: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
     // Timezone State
-    const [selectedTimezone, setSelectedTimezone] = useState("UTC");
+    const [selectedTimezone, setSelectedTimezone] = useState<string>("");
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
     // Set breadcrumb
@@ -65,23 +67,22 @@ const ScheduleManagementContent: React.FC = () => {
         ]);
     }, [setBreadcrumb, t]);
 
-    // Timezone options
-    const timezoneOptions = [
-        "UTC",
-        "America/New_York (EST/EDT)",
-        "America/Chicago (CST/CDT)",
-        "America/Denver (MST/MDT)",
-        "America/Los_Angeles (PST/PDT)",
-        "Europe/London (GMT/BST)",
-        "Europe/Paris (CET/CEST)",
-        "Europe/Berlin (CET/CEST)",
-        "Asia/Tokyo (JST)",
-        "Asia/Shanghai (CST)",
-        "Asia/Hong_Kong (HKT)",
-        "Asia/Singapore (SGT)",
-        "Australia/Sydney (AEDT/AEST)",
-        "Pacific/Auckland (NZDT/NZST)"
-    ];
+    // Timezone options from commonUtils (memoized to prevent recalculation)
+    const timezoneOptions = useMemo(() => 
+        commonUtils.getAllTimezones().map(tz => `${tz.name} (${tz.offset})`), 
+        []
+    );
+
+    // Set default timezone to user's current timezone (only on mount)
+    useEffect(() => {
+        const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const currentTimezoneOption = timezoneOptions.find(option => option.startsWith(currentTimezone));
+        if (currentTimezoneOption && !selectedTimezone) { // Only set if not already set
+            setSelectedTimezone(currentTimezoneOption);
+        } else if (!selectedTimezone) {
+            setSelectedTimezone(timezoneOptions[0] || "UTC (+00:00)"); // fallback
+        }
+    }, []); // Remove timezoneOptions dependency
 
     // Fetch initial availability on mount
     useEffect(() => {
@@ -1029,6 +1030,8 @@ const ScheduleManagementContent: React.FC = () => {
                             dropdownId="timezone-dropdown"
                             openDropdown={openDropdown}
                             setOpenDropdown={setOpenDropdown}
+                            hasSearch={true}
+                            searchPlaceholder="Search timezone..."
                             maxVisibleItems={4}
                         />
                     </div>
@@ -1067,14 +1070,15 @@ const ScheduleManagementContent: React.FC = () => {
             </div>
 
             <div className="mt-6 relative">
-                {loading && (
-                    <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459]"></div>
-                    </div>
+                {loading ? (
+                    view === "Monthly" ? <MonthlyCalendarSkeleton /> : <CalendarSkeleton />
+                ) : (
+                    <>
+                        {view === "Daily" && renderDailyView()}
+                        {view === "Weekly" && renderWeeklyView()}
+                        {view === "Monthly" && renderMonthlyView()}
+                    </>
                 )}
-                {view === "Daily" && renderDailyView()}
-                {view === "Weekly" && renderWeeklyView()}
-                {view === "Monthly" && renderMonthlyView()}
             </div>
         </div>
         </div>
