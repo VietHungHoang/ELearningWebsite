@@ -348,8 +348,10 @@
           "myQuizzes": "My quizzes",
           "requests": "Requests",
           "inbox": "Inbox",
+          "reviews": "Reviews",
           "profileSettings": "Profile settings",
-          "api": "API"
+          "api": "API",
+          "whiteboard": "Whiteboard"
         },
         "student": {
           "myBookings": "My bookings",
@@ -359,7 +361,8 @@
           "myPurchases": "My purchases",
           "certificates": "Certificates",
           "messages": "Messages",
-          "profileSettings": "Profile settings"
+          "profileSettings": "Profile settings",
+          "whiteboard": "Whiteboard"
         },
         "signOut": "Sign out"
       },
@@ -372,6 +375,17 @@
         "dashboard": "Dashboard",
         "analysis": "Analysis"
       }
+    },
+    "reviews": {
+      "title": "Student Reviews",
+      "subtitle": "See what your students are saying about you",
+      "overallRating": "Overall Rating",
+      "reviews": "reviews",
+      "ratingDistribution": "Rating Distribution",
+      "searchPlaceholder": "Search by student name, comment, or course...",
+      "all": "All",
+      "noReviews": "No reviews found matching your filters",
+      "sessionDate": "Session date"
     },
     "inbox": {
       "title": "Inbox",
@@ -1436,6 +1450,15 @@
       "searchClassPlaceholder": "Search classes...",
       "description": "Description",
       "descriptionPlaceholder": "Brief description of the quiz content and objectives...",
+      "dueDate": "Due date",
+      "settings": "Quiz settings",
+      "timeLimit": "Time limit",
+      "minutes": "minutes",
+      "passingScore": "Passing score",
+      "maxAttempts": "Max attempts",
+      "unlimited": "Unlimited",
+      "shuffleQuestions": "Shuffle questions for each attempt",
+      "showCorrectAnswers": "Show correct answers after submission",
       "questionsTitle": "Questions ({{count}})",
       "addQuestion": "Add question",
       "confirmLeave": {
@@ -1500,6 +1523,28 @@
         }
       }
     }
+  },
+  "whiteboard": {
+    "title": "Whiteboard",
+    "subtitle": "Digital drawing and collaboration space",
+    "tools": {
+      "pen": "Pen",
+      "eraser": "Eraser",
+      "line": "Line",
+      "rectangle": "Rectangle",
+      "circle": "Circle",
+      "text": "Text"
+    },
+    "lineWidth": "Line width",
+    "undo": "Undo",
+    "clear": "Clear all",
+    "download": "Download",
+    "resetView": "Reset view",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterText": "Enter text:",
+    "confirmClear": "Are you sure you want to clear the whiteboard?",
+    "panHint": "Right-click or Space + Drag to pan • Scroll to zoom"
   },
   "onboarding": {
     "basicInfo": {

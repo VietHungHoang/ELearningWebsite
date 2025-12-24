@@ -24,6 +24,15 @@ const CreateQuizPage: React.FC = () => {
     const [showConfirmBack, setShowConfirmBack] = useState(false);
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
     const lastQuestionRef = useRef<HTMLDivElement>(null);
+    
+    // Quiz settings
+    const [dueDate, setDueDate] = useState<string>('');
+    const [timeLimit, setTimeLimit] = useState<number>(60); // in minutes
+    const [passingScore, setPassingScore] = useState<number>(70); // percentage
+    const [shuffleQuestions, setShuffleQuestions] = useState(false);
+    const [showCorrectAnswers, setShowCorrectAnswers] = useState(true);
+    const [maxAttempts, setMaxAttempts] = useState<number>(3);
+    const [isUnlimitedAttempts, setIsUnlimitedAttempts] = useState(false);
 
     const [questions, setQuestions] = useState<QuizQuestion[]>([
         {
@@ -98,12 +107,40 @@ const CreateQuizPage: React.FC = () => {
 
     const handleSaveDraft = () => {
         // TODO: Implement save draft logic
-        console.log('Saving draft...', { quizTitle, quizDescription, selectedClass, questions });
+        console.log('Saving draft...', { 
+            quizTitle, 
+            quizDescription, 
+            selectedClass,
+            dueDate,
+            questions,
+            settings: {
+                timeLimit,
+                passingScore,
+                shuffleQuestions,
+                showCorrectAnswers,
+                maxAttempts: isUnlimitedAttempts ? -1 : maxAttempts,
+                isUnlimitedAttempts
+            }
+        });
     };
 
     const handlePublish = () => {
         // TODO: Implement publish logic
-        console.log('Publishing quiz...', { quizTitle, quizDescription, selectedClass, questions });
+        console.log('Publishing quiz...', { 
+            quizTitle, 
+            quizDescription, 
+            selectedClass,
+            dueDate,
+            questions,
+            settings: {
+                timeLimit,
+                passingScore,
+                shuffleQuestions,
+                showCorrectAnswers,
+                maxAttempts: isUnlimitedAttempts ? -1 : maxAttempts,
+                isUnlimitedAttempts
+            }
+        });
     };
 
     // Check if any form data has been entered
@@ -218,6 +255,112 @@ const CreateQuizPage: React.FC = () => {
                             className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out resize-none placeholder:text-gray-300"
                             rows={3}
                         />
+                    </div>
+
+                    {/* Due Date */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {t('quiz.create.dueDate')}
+                            </label>
+                            <input
+                                type="datetime-local"
+                                value={dueDate}
+                                onChange={(e) => setDueDate(e.target.value)}
+                                className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Quiz Settings */}
+                    <div className="pt-4 border-t border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('quiz.create.settings')}</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Time Limit */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    {t('quiz.create.timeLimit')} ({t('quiz.create.minutes')})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={timeLimit}
+                                    onChange={(e) => setTimeLimit(Math.max(1, parseInt(e.target.value) || 1))}
+                                    className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out"
+                                />
+                            </div>
+
+                            {/* Passing Score */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    {t('quiz.create.passingScore')} (%)
+                                </label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={passingScore}
+                                    onChange={(e) => setPassingScore(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                                    className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out"
+                                />
+                            </div>
+
+                            {/* Max Attempts */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    {t('quiz.create.maxAttempts')}
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={maxAttempts}
+                                        onChange={(e) => setMaxAttempts(Math.max(1, parseInt(e.target.value) || 1))}
+                                        disabled={isUnlimitedAttempts}
+                                        className={`flex-1 px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out ${isUnlimitedAttempts ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    />
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={isUnlimitedAttempts}
+                                            onChange={(e) => setIsUnlimitedAttempts(e.target.checked)}
+                                            className="w-4 h-4 text-[#0b6459] border-gray-300 rounded focus:ring-[#0b6459] cursor-pointer"
+                                        />
+                                        <span className="text-sm text-gray-700">{t('quiz.create.unlimited')}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Checkboxes */}
+                        <div className="mt-4 space-y-3">
+                            {/* Shuffle Questions */}
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={shuffleQuestions}
+                                    onChange={(e) => setShuffleQuestions(e.target.checked)}
+                                    className="w-4 h-4 text-[#0b6459] border-gray-300 rounded focus:ring-[#0b6459] cursor-pointer"
+                                />
+                                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                                    {t('quiz.create.shuffleQuestions')}
+                                </span>
+                            </label>
+
+                            {/* Show Correct Answers */}
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={showCorrectAnswers}
+                                    onChange={(e) => setShowCorrectAnswers(e.target.checked)}
+                                    className="w-4 h-4 text-[#0b6459] border-gray-300 rounded focus:ring-[#0b6459] cursor-pointer"
+                                />
+                                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                                    {t('quiz.create.showCorrectAnswers')}
+                                </span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>

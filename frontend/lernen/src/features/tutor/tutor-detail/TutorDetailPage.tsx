@@ -8,29 +8,64 @@ import BookASession from "./components/BookASession";
 import StudentReviews from "./components/StudentReviews";
 import SimilarTutors from "./components/SimilarTutors";
 import ResumeHighlights from "./components/ResumeHighlights";
-import GroupClassSection from "./components/GroupClassSection";
 import TutorProfileHeader from "./components/TutorProfileHeader";
+import { tutorService } from "../../../services/tutorService";
+import { useAuth } from "../../../context/AuthContext";
+import { classService } from "../../../services/classService";
 
 const TutorDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const { tutorId } = useParams<{ tutorId: string }>();
+    const { state } = useAuth();
 
     const [introduction, setIntroduction] = useState<string>("");
     const [tutorData, setTutorData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [hasTrialSession, setHasTrialSession] = useState(false);
 
-    const handleTutorData = (tutor: any) => {
-        console.log("Tutor introduction:", tutor);
-        setTutorData(tutor);
-        if (tutor.introduction) {
-            setIntroduction(tutor.introduction);
-        }
-    };
+    // Fetch tutor data
+    useEffect(() => {
+        const fetchTutorData = async () => {
+            if (!tutorId) return;
+
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await tutorService.getTutor(tutorId, state.user?.id);
+                setTutorData(response.data);
+
+                // Check if user has trial session with this tutor
+                if (state.user?.id) {
+                    try {
+                        const trialResponse = await classService.getTrialSessionRequest(tutorId, state.user.id);
+                        setHasTrialSession(trialResponse.data !== null);
+                    } catch (trialError) {
+                        console.error("Failed to check trial session:", trialError);
+                        setHasTrialSession(false);
+                    }
+                } else {
+                    setHasTrialSession(false);
+                }
+
+                if (response.data.introduction) {
+                    setIntroduction(response.data.introduction);
+                }
+            } catch (err) {
+                console.error("Failed to fetch tutor data:", err);
+                setError("Failed to load tutor information");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTutorData();
+    }, [tutorId, state.user?.id]);
 
     const handleNavigateToApp = (page: string, data?: any) => {
         if (page === 'checkout' && data) {
-            // Navigate to checkout with booking data and tutor data
             navigate(`/${page}`, { 
-                state: data // Pass the entire data object which contains bookingData and tutor
+                state: data
             });
         } else {
             navigate(`/${page}`);
@@ -56,7 +91,7 @@ const TutorDetailPage: React.FC = () => {
                     />
                 </div>
                 <div className="mt-6 max-w-7xl mx-auto">
-                    <TutorProfileHeader tutorId={tutorId!} onTutorData={handleTutorData} />
+                    <TutorProfileHeader tutor={tutorData} hasTrialSession={hasTrialSession} />
                 </div>
 
                 <div className="max-w-7xl mx-auto mt-10">
@@ -77,10 +112,10 @@ const TutorDetailPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* <div className="container max-w-7xl mx-auto px-8 py-8">
-                    <div id="group-class" className="pt-16 -mt-16">
+                <div className="container max-w-7xl mx-auto px-8 py-8">
+                    {/* <div id="group-class" className="pt-16 -mt-16">
                         <GroupClassSection tutorId={tutorId!} />
-                    </div>
+                    </div> */}
                     <div id="resume-highlights" className="pt-16 -mt-16">
                         <ResumeHighlights tutorId={tutorId!} />
                     </div>
@@ -93,7 +128,7 @@ const TutorDetailPage: React.FC = () => {
                     <div id="similar-tutors">
                         <SimilarTutors />
                     </div>
-                </div> */}
+                </div>
             </main>
         </Layout>
     );

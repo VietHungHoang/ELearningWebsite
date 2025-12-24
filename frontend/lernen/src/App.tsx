@@ -2,6 +2,8 @@ import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./components/providers/AuthProvider";
 import { CurrencyProvider } from "./context/CurrencyContext";
 import { ChatProvider } from "./context/ChatContext";
+import { FullscreenProvider } from "./context/FullscreenContext";
+import { SidebarProvider } from "./context/SidebarContext";
 import ChatWidget from "./components/chat/ChatWidget";
 import router from "./routes";
 
@@ -36,8 +38,12 @@ const App: React.FC = () => {
         <CurrencyProvider>
             <AuthProvider>
                 <ChatProvider>
-                    <RouterProvider router={router} />
-                    <ConditionalChatWidget />
+                    <SidebarProvider>
+                        <FullscreenProvider>
+                            <RouterProvider router={router} />
+                            <ConditionalChatWidget />
+                        </FullscreenProvider>
+                    </SidebarProvider>
                 </ChatProvider>
             </AuthProvider>
         </CurrencyProvider>

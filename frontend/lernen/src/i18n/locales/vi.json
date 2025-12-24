@@ -350,8 +350,10 @@
         "myQuizzes": "Quản lý bài kiểm tra",
         "requests": "Yêu cầu",
         "inbox": "Hộp thư",
+        "reviews": "Đánh giá",
         "profileSettings": "Cài đặt hồ sơ",
-        "api": "API"
+        "api": "API",
+        "whiteboard": "Bảng vẽ"
       },
       "student": {
         "myBookings": "Lịch học của tôi",
@@ -361,7 +363,8 @@
         "myPurchases": "Mua hàng của tôi",
         "certificates": "Chứng chỉ",
         "messages": "Tin nhắn",
-        "profileSettings": "Cài đặt hồ sơ"
+        "profileSettings": "Cài đặt hồ sơ",
+        "whiteboard": "Bảng vẽ"
       },
       "signOut": "Đăng xuất"
     },
@@ -373,6 +376,17 @@
         "dashboard": "Trang quản trị",
         "analysis": "Tổng quan"
       }
+    },
+    "reviews": {
+      "title": "Đánh giá từ học viên",
+      "subtitle": "Xem học viên của bạn nói gì về bạn",
+      "overallRating": "Đánh giá tổng thể",
+      "reviews": "đánh giá",
+      "ratingDistribution": "Phân bố đánh giá",
+      "searchPlaceholder": "Tìm kiếm theo tên học viên, bình luận hoặc khóa học...",
+      "all": "Tất cả",
+      "noReviews": "Không tìm thấy đánh giá phù hợp",
+      "sessionDate": "Ngày học"
     },
     "inbox": {
       "title": "Hộp thư",
@@ -1379,6 +1393,15 @@
       "searchClassPlaceholder": "Tìm kiếm lớp học...",
       "description": "Mô tả",
       "descriptionPlaceholder": "Mô tả ngắn về nội dung và mục tiêu bài kiểm tra...",
+      "dueDate": "Thời hạn nộp bài",
+      "settings": "Cài đặt bài kiểm tra",
+      "timeLimit": "Thời gian giới hạn",
+      "minutes": "phút",
+      "passingScore": "Điểm đạt",
+      "maxAttempts": "Số lần làm tối đa",
+      "unlimited": "Không giới hạn",
+      "shuffleQuestions": "Đảo câu hỏi mỗi lần làm",
+      "showCorrectAnswers": "Hiển thị đáp án đúng sau khi nộp bài",
       "questionsTitle": "Câu hỏi ({{count}})",
       "addQuestion": "Thêm câu hỏi",
       "confirmLeave": {
@@ -1494,6 +1517,28 @@
     "belowMinimum": "Số tiền thấp hơn ngưỡng tối thiểu",
     "noTransactionsDescription": "Không tìm thấy giao dịch nào. Lịch sử thanh toán của bạn sẽ xuất hiện ở đây khi bạn thực hiện rút tiền.",
     "dateRange": "{{startDate}} - {{endDate}}"
+  },
+  "whiteboard": {
+    "title": "Bảng vẽ",
+    "subtitle": "Không gian vẽ và cộng tác kỹ thuật số",
+    "tools": {
+      "pen": "Bút vẽ",
+      "eraser": "Tẩy",
+      "line": "Đường thẳng",
+      "rectangle": "Hình chữ nhật",
+      "circle": "Hình tròn",
+      "text": "Văn bản"
+    },
+    "lineWidth": "Độ dày nét",
+    "undo": "Hoàn tác",
+    "clear": "Xóa tất cả",
+    "download": "Tải xuống",
+    "resetView": "Đặt lại",
+    "fullscreen": "Toàn màn hình",
+    "exitFullscreen": "Thoát toàn màn hình",
+    "enterText": "Nhập văn bản:",
+    "confirmClear": "Bạn có chắc chắn muốn xóa toàn bộ bảng vẽ?",
+    "panHint": "Nhấn chuột phải hoặc Space + Kéo để di chuyển • Cuộn để phóng to/thu nhỏ"
   },
   "onboarding": {
     "basicInfo": {

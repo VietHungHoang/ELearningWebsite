@@ -4,6 +4,7 @@ import { HiChevronLeft, HiChevronRight, HiCalendar, HiPencil, HiX } from "react-
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/ui/Toast";
 import Tooltip from "../../../../components/ui/Tooltip";
+import CustomDropdown from "../../../../components/ui/CustomDropdown";
 import TutorSessionDetailModal from "../components/TutorSessionDetailModal";
 import { scheduleService } from "../../../../services/scheduleService";
 import { classService } from "../../../../services/classService";
@@ -28,7 +29,7 @@ const ScheduleManagementContent: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [availabilityData, setAvailabilityData] = useState<{startDate: Date, endDate: Date, slots: string[]} | null>(null);
     const [originalAvailabilities, setOriginalAvailabilities] = useState<TutorAvailability[]>([]);
-    const [bookedSessions, setBookedSessions] = useState<GetBookedSessionsResponse['sessions']>([]);
+    const [bookedSessions, setBookedSessions] = useState<Session[]>([]);
     const [selectedSession, setSelectedSession] = useState<Session | null>(null);
     const [modalPosition, setModalPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
@@ -52,6 +53,10 @@ const ScheduleManagementContent: React.FC = () => {
     // Save Popover State
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+    // Timezone State
+    const [selectedTimezone, setSelectedTimezone] = useState("UTC");
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
     // Set breadcrumb
     useEffect(() => {
         setBreadcrumb([
@@ -59,6 +64,24 @@ const ScheduleManagementContent: React.FC = () => {
             { label: t('dashboard.tutor.schedule.title') }
         ]);
     }, [setBreadcrumb, t]);
+
+    // Timezone options
+    const timezoneOptions = [
+        "UTC",
+        "America/New_York (EST/EDT)",
+        "America/Chicago (CST/CDT)",
+        "America/Denver (MST/MDT)",
+        "America/Los_Angeles (PST/PDT)",
+        "Europe/London (GMT/BST)",
+        "Europe/Paris (CET/CEST)",
+        "Europe/Berlin (CET/CEST)",
+        "Asia/Tokyo (JST)",
+        "Asia/Shanghai (CST)",
+        "Asia/Hong_Kong (HKT)",
+        "Asia/Singapore (SGT)",
+        "Australia/Sydney (AEDT/AEST)",
+        "Pacific/Auckland (NZDT/NZST)"
+    ];
 
     // Fetch initial availability on mount
     useEffect(() => {
@@ -81,6 +104,11 @@ const ScheduleManagementContent: React.FC = () => {
     }, [currentDate, isDatePickerOpen]);
 
     // --- HANDLERS ---
+    const handleTimezoneSelect = (timezone: string) => {
+        setSelectedTimezone(timezone);
+        // TODO: Implement timezone conversion logic for schedule display
+    };
+
     const handleSessionClick = (booking: Session, event: React.MouseEvent) => {
         if (isEditMode) return;
         const rect = event.currentTarget.getBoundingClientRect();
@@ -291,7 +319,7 @@ const ScheduleManagementContent: React.FC = () => {
             });
 
             if (response.success) {
-                setBookedSessions(response.data.sessions);
+                setBookedSessions(response.data);
             }
         } catch (error) {
             console.error('Failed to fetch booked sessions:', error);
@@ -311,6 +339,7 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     const handleSaveForFuture = async () => {
+        if (!user?.id) return;
         if (!user?.id) return;
         
         try {
@@ -736,6 +765,7 @@ const ScheduleManagementContent: React.FC = () => {
                                 ? tempAvailability.includes(slotISO)
                                 : availability.includes(slotISO);
                             const bookedSession = bookedSessions.find(session => {
+                                if (!session.sessionDatetime) return false;
                                 const sessionDate = new Date(session.sessionDatetime);
                                 // Check if slot matches the session datetime (assuming 1-hour sessions)
                                 return sessionDate.getTime() === slotDate.getTime();
@@ -750,11 +780,13 @@ const ScheduleManagementContent: React.FC = () => {
                                                 !isEditMode ? "cursor-pointer" : "cursor-default opacity-70"
                                             }`}
                                         >
-                                            <p className="font-bold">{bookedSession.className}</p>
+                                            <p className="font-bold">{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
                                             <p>
-                                                {bookedSession.students.length === 1 
-                                                    ? bookedSession.students[0].fullName 
-                                                    : `${bookedSession.students[0].fullName} (+${bookedSession.students.length - 1} more)`
+                                                {bookedSession.students && bookedSession.students.length > 0
+                                                    ? (bookedSession.students.length === 1 
+                                                        ? (bookedSession.students[0]?.fullName || 'Unknown Student')
+                                                        : `${bookedSession.students[0]?.fullName || 'Unknown Student'} (+${bookedSession.students.length - 1} more)`)
+                                                    : 'No students'
                                                 }
                                             </p>
                                         </div>
@@ -884,7 +916,7 @@ const ScheduleManagementContent: React.FC = () => {
                                             key={session.id}
                                             className="text-xs font-semibold py-0.5 px-1 rounded text-left truncate bg-blue-100 text-blue-800"
                                         >
-                                            {session.className}
+                                            {session.tutor?.fullName || 'Unknown Tutor'}
                                         </div>
                                     ))}
                                 </div>
@@ -988,6 +1020,18 @@ const ScheduleManagementContent: React.FC = () => {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
+                    <div className="w-48">
+                        <CustomDropdown
+                            options={timezoneOptions}
+                            selectedValue={selectedTimezone}
+                            placeholder="Select timezone"
+                            onSelect={handleTimezoneSelect}
+                            dropdownId="timezone-dropdown"
+                            openDropdown={openDropdown}
+                            setOpenDropdown={setOpenDropdown}
+                            maxVisibleItems={4}
+                        />
+                    </div>
                     <div className="bg-gray-100 p-1 rounded-lg flex items-center">
                         <ViewButton label="Daily" />
                         <ViewButton label="Weekly" />

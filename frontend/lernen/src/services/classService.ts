@@ -486,7 +486,7 @@ export const classService = {
             };
 
             const response = await apiService.get<GetBookedSessionsResponse>(
-                `/v1/classes/sessions/me/${request.tutorId}?startDate=${request.startDate}&endDate=${request.endDate}`
+                `/v1/classes/sessions/tutors/${request.tutorId}?startDate=${request.startDate}&endDate=${request.endDate}`
             );
             return {
                 status: response.status,

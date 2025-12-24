@@ -1,19 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import DashboardSidebar from './DashboardSidebar';
 import DashboardHeader from './DashboardHeader';
 import type { DashboardLayoutProps } from '../config/dashboardConfigs';
 import type { BreadcrumbItem } from './Breadcrumb';
+import { useFullscreen } from '../../../context/FullscreenContext';
+import { useSidebar } from '../../../context/SidebarContext';
 
 interface ExtendedDashboardLayoutProps extends DashboardLayoutProps {
     breadcrumb?: BreadcrumbItem[];
 }
 
 const DashboardLayout: React.FC<ExtendedDashboardLayoutProps> = ({ children, sidebarOptions, headerProps, breadcrumb }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { isFullscreen } = useFullscreen();
+  const { isSidebarOpen, setIsSidebarOpen } = useSidebar();
 
   const handleToggleSidebar = () => {
-    setIsSidebarOpen(prev => !prev);
+    setIsSidebarOpen(!isSidebarOpen);
   };
+
+  // If fullscreen mode, hide sidebar and header
+  if (isFullscreen) {
+    return (
+      <div className="h-screen w-full bg-white">
+        <main className="h-full w-full overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-full bg-white">

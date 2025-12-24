@@ -23,6 +23,8 @@ import SubjectICanTeachPage from '../tutor/personal-detail/SubjectICanTeachPage'
 import TutorMyQuizzesPage from '../../quiz/TutorMyQuizzesPage';
 import { CreateQuizPage } from '../../quiz/create-quiz/create-quiz';
 import QuizStatsPage from '../../quiz/pages/QuizStatsPage';
+import WhiteboardPage from '../whiteboard/WhiteboardPage';
+import ReviewsPage from '../tutor/reviews/ReviewsPage';
 
 // Student pages
 import MyBookingsPage from '../student/my-session/MyBookingsPage';
@@ -108,6 +110,14 @@ const dashboardRoutes: RouteObject[] = [
       {
         path: 'api',
         element: <ApiDocumentationPage />,
+      },
+      {
+        path: 'whiteboard',
+        element: <WhiteboardPage />,
+      },
+      {
+        path: 'reviews',
+        element: <ReviewsPage />,
       },
       // Student routes
       {

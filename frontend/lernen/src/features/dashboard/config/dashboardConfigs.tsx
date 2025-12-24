@@ -13,7 +13,9 @@ import {
     FiShoppingBag,
     FiFileText,
     FiCode,
+    FiStar,
 } from "react-icons/fi";
+import { PiChalkboardTeacher } from "react-icons/pi";
 
 export interface SidebarOption {
     icon: ReactNode;
@@ -97,6 +99,12 @@ export const TUTOR_SIDEBAR_OPTIONS: SidebarOption[] = [
         path: "/dashboard/inbox",
     },
     {
+        icon: <FiStar className="w-4 h-4" />,
+        activeIcon: <FiStar className="w-4 h-4" />,
+        labelKey: "dashboard.sidebar.tutor.reviews",
+        path: "/dashboard/reviews",
+    },
+    {
         icon: <FiSettings className="w-4 h-4" />,
         activeIcon: <FiSettings className="w-4 h-4" />,
         labelKey: "dashboard.sidebar.tutor.profileSettings",
@@ -107,6 +115,12 @@ export const TUTOR_SIDEBAR_OPTIONS: SidebarOption[] = [
         activeIcon: <FiCode className="w-4 h-4" />,
         labelKey: "dashboard.sidebar.tutor.api",
         path: "/dashboard/api",
+    },
+    {
+        icon: <PiChalkboardTeacher className="w-4 h-4" />,
+        activeIcon: <PiChalkboardTeacher className="w-4 h-4" />,
+        labelKey: "dashboard.sidebar.tutor.whiteboard",
+        path: "/dashboard/whiteboard",
     },
 ];
 
@@ -153,5 +167,11 @@ export const STUDENT_SIDEBAR_OPTIONS: SidebarOption[] = [
         activeIcon: <FiSettings className="w-4 h-4" />,
         labelKey: "dashboard.sidebar.student.profileSettings",
         path: "/dashboard/profile-settings/personal-details",
+    },
+    {
+        icon: <PiChalkboardTeacher className="w-4 h-4" />,
+        activeIcon: <PiChalkboardTeacher className="w-4 h-4" />,
+        labelKey: "dashboard.sidebar.student.whiteboard",
+        path: "/dashboard/whiteboard",
     },
 ];

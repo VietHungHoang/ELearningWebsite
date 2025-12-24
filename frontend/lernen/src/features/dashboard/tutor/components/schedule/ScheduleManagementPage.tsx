@@ -26,7 +26,7 @@ const ScheduleManagementContent: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [availabilityData, setAvailabilityData] = useState<{startDate: Date, endDate: Date, slots: string[]} | null>(null);
     const [originalAvailabilities, setOriginalAvailabilities] = useState<TutorAvailability[]>([]);
-    const [bookedSessions, setBookedSessions] = useState<GetBookedSessionsResponse['sessions']>([]);
+    const [bookedSessions, setBookedSessions] = useState<Session[]>([]);
     const [selectedSession, setSelectedSession] = useState<Session | null>(null);
     const [modalPosition, setModalPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
@@ -289,7 +289,7 @@ const ScheduleManagementContent: React.FC = () => {
             });
 
             if (response.success) {
-                setBookedSessions(response.data.sessions);
+                setBookedSessions(response.data);
             }
         } catch (error) {
             console.error('Failed to fetch booked sessions:', error);
@@ -740,7 +740,7 @@ const ScheduleManagementContent: React.FC = () => {
                                                 !isEditMode ? "cursor-pointer" : "cursor-default opacity-70"
                                             }`}
                                         >
-                                            <p className="font-bold">{bookedSession.className}</p>
+                                            <p className="font-bold">{bookedSession.tutor.fullName}</p>
                                             <p>
                                                 {bookedSession.students.length === 1 
                                                     ? bookedSession.students[0].fullName 
@@ -866,7 +866,7 @@ const ScheduleManagementContent: React.FC = () => {
                                             key={session.id}
                                             className="text-xs font-semibold py-0.5 px-1 rounded text-left truncate bg-blue-100 text-blue-800"
                                         >
-                                            {session.className}
+                                            {session.tutor.fullName}
                                         </div>
                                     ))}
                                 </div>

@@ -18,57 +18,14 @@ import { useAuth } from "../../../../context/AuthContext";
 import { classService } from "../../../../services/classService";
 
 const TutorProfileHeader: React.FC<{
-    tutorId: string;
-    onTutorData?: (tutor: Tutor, trialSessionRequest?: any) => void;
-}> = ({ tutorId, onTutorData }) => {
-    const [tutor, setTutor] = useState<Tutor | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [hasTrialSession, setHasTrialSession] = useState(false);
+    tutor: any;
+    hasTrialSession: boolean;
+}> = ({ tutor, hasTrialSession }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const { selectedCurrency } = useCurrency();
     const { openChatWithTutor } = useChat();
-    const { state } = useAuth();
     const { t } = useTranslation();
-
-    // Fetch tutor data
-    useEffect(() => {
-        const fetchTutorData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await tutorService.getTutor(tutorId, state.user?.id);
-                setTutor(response.data);
-                onTutorData?.(response.data);
-
-                // Check if user has trial session with this tutor
-                if (state.user?.id) {
-                    try {
-                        const trialResponse = await classService.getTrialSessionRequest(tutorId, state.user.id);
-                        setHasTrialSession(trialResponse.data !== null);
-                        onTutorData?.(response.data);
-                    } catch (trialError) {
-                        console.error("Failed to check trial session:", trialError);
-                        setHasTrialSession(false);
-                        onTutorData?.(response.data);
-                    }
-                } else {
-                    setHasTrialSession(false);
-                    onTutorData?.(response.data);
-                }
-            } catch (err) {
-                console.error("Failed to fetch tutor data:", err);
-                setError("Failed to load tutor information");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (tutorId) {
-            fetchTutorData();
-        }
-    }, [tutorId, state.user?.id]);
 
     const convertedPrice = tutor ? convertFromVND(tutor.currentSessionFee || 0, selectedCurrency) : 0;
     const formattedPrice = formatCurrency(convertedPrice, selectedCurrency);
@@ -109,8 +66,8 @@ const TutorProfileHeader: React.FC<{
         tiktok: <span className="text-xs font-bold">TT</span>,
     };
 
-    // Skeketon
-    if (loading || error || !tutor) {
+    // Skeleton when tutor data is not available
+    if (!tutor) {
         return (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column: Tutor Details */}

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FiMapPin } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import type { TutorDetail } from '../../../../types/tutor';
-import { tutorService } from '../../../../services/tutorService';
 import { useTranslation } from "react-i18next";
 
 // --- ICONS (kept inside for simplicity) ---
@@ -49,37 +48,10 @@ const ResumeItem: React.FC<{ item: ResumeItemData }> = ({ item }) => {
     );
 };
 
-
-// --- INITIAL MOCK DATA ---
-// Removed, using tutor data instead
-
-// --- MAIN COMPONENT ---
 type Tab = 'Education' | 'Experience' | 'Certification & Awards';
 
-const ResumeHighlights: React.FC<{ tutorId: string }> = ({ tutorId }) => {
+const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
     const { t } = useTranslation();
-    const [tutor, setTutor] = useState<TutorDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchTutor = async () => {
-            try {
-                setLoading(true);
-                const response = await tutorService.getTutorDetail(tutorId);
-                setTutor(response.data);
-            } catch (err) {
-                setError('Failed to load tutor details');
-                console.error('Error fetching tutor:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (tutorId) {
-            fetchTutor();
-        }
-    }, [tutorId]);
     const [activeTab, setActiveTab] = useState<Tab>('Education');
 
     const getTranslatedTab = (tab: Tab) => {
@@ -97,32 +69,32 @@ const ResumeHighlights: React.FC<{ tutorId: string }> = ({ tutorId }) => {
         return `${startYear} - ${endYear}`;
     };
 
-    const educationItems: ResumeItemData[] = tutor.educations.map(edu => ({
+    const educationItems: ResumeItemData[] = tutor?.educations?.map(edu => ({
         id: parseInt(edu.id),
         period: formatPeriod(edu.startDate, edu.endDate),
         title: edu.title,
         institution: edu.institution,
         location: edu.location || '',
         description: edu.description || '',
-    }));
+    })) || [];
 
-    const experienceItems: ResumeItemData[] = tutor.experiences.map(exp => ({
+    const experienceItems: ResumeItemData[] = tutor?.experiences?.map(exp => ({
         id: parseInt(exp.id),
         period: formatPeriod(exp.startDate, exp.endDate),
         title: exp.title,
         institution: exp.institution,
         location: exp.location || '',
         description: exp.description || '',
-    }));
+    })) || [];
 
-    const certificationItems: ResumeItemData[] = tutor.certifications.map(cert => ({
+    const certificationItems: ResumeItemData[] = tutor?.certifications?.map(cert => ({
         id: parseInt(cert.id),
         period: new Date(cert.issueDate).getFullYear().toString(),
         title: cert.name,
         institution: cert.issuingOrganization,
         location: '',
         description: cert.credentialId ? `Credential ID: ${cert.credentialId}` : '',
-    }));
+    })) || [];
 
     const dataMap = {
         'Education': educationItems,
@@ -143,14 +115,6 @@ const ResumeHighlights: React.FC<{ tutorId: string }> = ({ tutorId }) => {
             </div>
         );
     };
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (error || !tutor) {
-        return <div>Error: {error || 'Tutor not found'}</div>;
-    }
 
     return (
         <div className="py-8">
