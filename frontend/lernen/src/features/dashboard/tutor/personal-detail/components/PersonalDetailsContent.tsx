@@ -238,7 +238,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
     };
 
     const inputStyles =
-        "w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-500 placeholder:font-thin hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out";
+        "w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-400 placeholder:font-thin hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out";
     const disabledInputStyles =
         "w-full bg-gray-100/60 border-transparent rounded-lg px-4 py-2 text-gray-500 placeholder:text-gray-400 placeholder:font-thin cursor-not-allowed hover:bg-gray-100/60 hover:border-gray-200 transition-all duration-800 ease-in-out";
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { HiX } from 'react-icons/hi';
 import type { Coupon, CouponDiscountType } from '../pages/DealsAndCouponsPage';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import ModalLayout from '../../../../components/ui/ModalLayout';
 import { useTranslation } from 'react-i18next';
 
 const mockCourseList = [
@@ -99,14 +99,18 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
 
     if (!shouldRender) return null;
 
-    const inputStyles = "w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition";
+    const inputStyles = "w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out placeholder:text-gray-300 text-sm text-gray-800";
 
     return (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${isOpen ? 'bg-black/50 opacity-100' : 'opacity-0'}`}>
-            <div className={`bg-white rounded-2xl shadow-xl w-full max-w-2xl transform transition-all duration-300 ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
+        <ModalLayout
+            isOpen={isOpen}
+            onClose={onClose}
+            maxWidth="2xl"
+            showCloseButton={true}
+        >
+            <div className="flex flex-col h-full">
                 <div className="flex justify-between items-center p-5 border-b border-gray-100">
                     <h2 className="font-bold text-lg text-gray-800">{existingCoupon ? t('dashboard.tutor.dealsCoupons.modal.editTitle') : t('dashboard.tutor.dealsCoupons.modal.createTitle')}</h2>
-                    <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600"><HiX className="w-5 h-5" /></button>
                 </div>
                 
                 <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
@@ -163,7 +167,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                     {/* Usage Limit */}
                      <div>
                         <label htmlFor="usage-limit" className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.tutor.dealsCoupons.modal.usageLimit.label')}</label>
-                        <input id="usage-limit" type="number" value={usageLimit} onChange={e => setUsageLimit(Number(e.target.value))} disabled={unlimitedUsage} className={`${inputStyles} ${unlimitedUsage ? 'bg-gray-200 cursor-not-allowed' : ''}`} />
+                        <input id="usage-limit" type="number" value={usageLimit} onChange={e => setUsageLimit(Number(e.target.value))} disabled={unlimitedUsage} className={`${inputStyles} ${unlimitedUsage ? 'bg-[#f7f7f8] opacity-50 cursor-not-allowed' : ''}`} />
                         <label className="flex items-center gap-2 mt-2 text-sm">
                             <input type="checkbox" checked={unlimitedUsage} onChange={e => setUnlimitedUsage(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-[#0b6459] focus:ring-[#0b6459]"/>
                             {t('dashboard.tutor.dealsCoupons.modal.usageLimit.unlimited')}
@@ -182,7 +186,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                     <button onClick={handleSave} className="px-5 py-2.5 text-sm font-semibold bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43]">{t('dashboard.tutor.dealsCoupons.modal.saveButton')}</button>
                 </div>
             </div>
-        </div>
+        </ModalLayout>
     );
 };
 

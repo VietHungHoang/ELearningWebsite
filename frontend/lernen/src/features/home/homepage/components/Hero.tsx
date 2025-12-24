@@ -18,16 +18,16 @@ const Hero: React.FC = () => {
         {/* Left Column */}
         <div className="text-center lg:text-left">
           {/* Badge */}
-          <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1.5 text-sm font-semibold text-gray-700 animate-fade-in-up">
+          <div className="inline-flex items-center bg-gray-100 rounded-full px-4 py-1.5 text-sm font-normal text-gray-700 animate-fade-in-up">
             <span className="text-lg mr-1.5">✨</span>
-            <span className="bg-gradient-to-r from-[#0b6459] to-teal-600 bg-clip-text text-transparent">
+            <span className="text-black lowercase">
               {t('home.hero.badge')}
             </span>
           </div>
 
           {/* Main Heading */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 mt-5 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <span className="bg-gradient-to-r from-[#0b6459] via-teal-600 to-[#0b6459] bg-clip-text text-transparent">
+            <span className="text-[#065A46]">
               {t('home.hero.title')}
             </span>{' '}
             <br />
@@ -47,7 +47,7 @@ const Hero: React.FC = () => {
                 placeholder={t('home.hero.searchPlaceholder')}
                 className="w-full pl-5 pr-16 py-3.5 text-base bg-white border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent transition-all hover:shadow-md placeholder-gray-400"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-gradient-to-r from-[#0b6459] to-teal-600 hover:from-teal-600 hover:to-[#0b6459] rounded-lg flex items-center justify-center transition-all hover:scale-105 shadow-md">
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-[#3A3535] rounded-lg flex items-center justify-center transition-all shadow-md">
                 <FiSearch size={20} color='white' />
               </button>
             </div>

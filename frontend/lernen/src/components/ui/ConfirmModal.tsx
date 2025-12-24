@@ -80,7 +80,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     </button>
                     <button
                         onClick={onConfirm}
-                        className={`px-4 py-2 ${getConfirmButtonClasses()} transition-colors`}
+                        className={`px-4 py-2 font-semibold ${getConfirmButtonClasses()} transition-colors`}
                     >
                         {confirmText}
                     </button>

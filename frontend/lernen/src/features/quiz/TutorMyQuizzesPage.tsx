@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch, HiPlus, HiPencil, HiEye, HiChartBar } from 'react-icons/hi';
-import { IoHelpCircleOutline, IoTimeOutline, IoPeopleOutline, IoCalendarOutline } from 'react-icons/io5';
+import { IoHelpCircleOutline, IoTimeOutline, IoPeopleOutline, IoCalendarOutline, IoEllipsisVertical } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import { useBreadcrumb } from '../dashboard/context/BreadcrumbContext';
 
@@ -102,6 +102,7 @@ const TutorMyQuizzesPage: React.FC = () => {
     const [quizzes] = useState<Quiz[]>(mockQuizzes);
     const [activeTab, setActiveTab] = useState<FilterTab>('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
     useEffect(() => {
         setBreadcrumb([
@@ -136,11 +137,11 @@ const TutorMyQuizzesPage: React.FC = () => {
     const getStatusColor = (status: Quiz['status']) => {
         switch (status) {
             case 'active':
-                return 'bg-green-500';
+                return 'bg-[#065A46]';
             case 'draft':
-                return 'bg-yellow-500';
+                return 'bg-amber-600';
             default:
-                return 'bg-gray-500';
+                return 'bg-gray-600';
         }
     };
 
@@ -185,6 +186,141 @@ const TutorMyQuizzesPage: React.FC = () => {
         );
     };
 
+    const QuizCard: React.FC<{ quiz: Quiz }> = ({ quiz }) => {
+        const isMenuOpen = openMenuId === quiz.id;
+        const menuRef = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            const handleClickOutside = (event: MouseEvent) => {
+                if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                    if (isMenuOpen) {
+                        setOpenMenuId(null);
+                    }
+                }
+            };
+            if (isMenuOpen) {
+                document.addEventListener('mousedown', handleClickOutside);
+            }
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }, [isMenuOpen, setOpenMenuId]);
+
+        return (
+            <div className="bg-white rounded-xl border border-[#eaeaea] px-3 pt-3 pb-2 hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] transition-shadow relative overflow-hidden">
+                {/* Status badge - Top left corner */}
+                <div className="absolute top-0 left-0 z-10">
+                    <div className={`${getStatusColor(quiz.status)} text-white text-[10px] font-semibold px-2.5 py-1 rounded-br-lg flex items-center gap-1 shadow-sm`}>
+                        <div className="w-1 h-1 rounded-full bg-white/80"></div>
+                        <span className="uppercase tracking-wide">{getStatusText(quiz.status)}</span>
+                    </div>
+                </div>
+
+                {/* Header */}
+                <div className="mb-2 pt-5">
+                    {/* Title row with three dots menu */}
+                    <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <h3 className="font-bold text-base text-gray-800 truncate flex-1 pr-2">
+                            {quiz.title}
+                        </h3>
+                        {/* Three dots menu button */}
+                        <div className="relative flex-shrink-0 -mr-2.5" ref={menuRef}>
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenMenuId(isMenuOpen ? null : quiz.id);
+                                }}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-600 hover:text-gray-800 outline-none focus:outline-none focus-visible:outline-none"
+                                aria-label="Menu options"
+                                onMouseDown={(e) => e.preventDefault()}
+                            >
+                                <IoEllipsisVertical className="w-4 h-4 flex-shrink-0" />
+                            </button>
+                            
+                            {/* Dropdown menu */}
+                            {isMenuOpen && (
+                                <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[140px] z-40">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate('/quiz/take');
+                                            setOpenMenuId(null);
+                                        }}
+                                        className="w-full px-3 py-2 text-sm text-left hover:bg-teal-50 active:bg-teal-100 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                                    >
+                                        <HiEye className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                                        <span>{t('dashboard.tutor.myQuizzes.card.takeQuiz')}</span>
+                                    </button>
+                                    <div className="h-px bg-gray-100 my-0.5"></div>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/dashboard/quizzes/${quiz.id}/stats`);
+                                            setOpenMenuId(null);
+                                        }}
+                                        className="w-full px-3 py-2 text-sm text-left hover:bg-blue-50 active:bg-blue-100 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                                    >
+                                        <HiChartBar className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                                        <span>{t('dashboard.tutor.myQuizzes.card.stats')}</span>
+                                    </button>
+                                    <div className="h-px bg-gray-100 my-0.5"></div>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate('/dashboard/quizzes/create');
+                                            setOpenMenuId(null);
+                                        }}
+                                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#0b6459]/5 active:bg-[#0b6459]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                                    >
+                                        <HiPencil className="w-4 h-4 text-[#0b6459] flex-shrink-0" />
+                                        <span>{t('dashboard.tutor.myQuizzes.card.edit')}</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{quiz.courseTitle}</p>
+                </div>
+
+                {/* Quiz Details */}
+                <div className="space-y-2 mb-2">
+                    <div className="flex justify-between text-xs">
+                        <span className="text-gray-600 flex items-center gap-1">
+                            <IoHelpCircleOutline className="w-4 h-4" />
+                            {t('dashboard.tutor.myQuizzes.card.totalQuestions')}
+                        </span>
+                        <span className="text-gray-600 font-medium">{quiz.totalQuestions}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                        <span className="text-gray-600 flex items-center gap-1">
+                            <IoTimeOutline className="w-4 h-4" />
+                            {t('dashboard.tutor.myQuizzes.card.timeLimit')}
+                        </span>
+                        <span className="text-gray-600 font-medium">{quiz.timeLimitMinutes} min</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                        <span className="text-gray-600 flex items-center gap-1">
+                            <IoPeopleOutline className="w-4 h-4" />
+                            {t('dashboard.tutor.myQuizzes.card.attempts')}
+                        </span>
+                        <span className="text-gray-600 font-medium">{quiz.attempts}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                        <span className="text-gray-600 flex items-center gap-1">
+                            <IoCalendarOutline className="w-4 h-4" />
+                            {t('dashboard.tutor.myQuizzes.card.createdAt')}
+                        </span>
+                        <span className="text-gray-600 font-medium">{formatDate(quiz.createdAt)}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="p-4">
             {/* Page Header */}
@@ -215,7 +351,7 @@ const TutorMyQuizzesPage: React.FC = () => {
                             placeholder={t('dashboard.tutor.myQuizzes.searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 hover:shadow-sm focus:outline-none focus:border-[#0b6459] transition-colors duration-300 w-82"
+                            className="bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 hover:shadow-sm focus:outline-none focus:border-[#0b6459] transition-colors duration-300 w-82 placeholder:text-gray-400"
                         />
                     </div>
                 </div>
@@ -227,80 +363,9 @@ const TutorMyQuizzesPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,360px))] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredQuizzes.map((quiz) => (
-                    <div key={quiz.id} className="bg-white rounded-xl border border-[#eaeaea] p-4 hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] transition-shadow">
-                        {/* Header */}
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1 mr-4 overflow-hidden">
-                                <h3 className="font-bold text-base text-gray-800 truncate mb-1">
-                                    {quiz.title}
-                                </h3>
-                                <p className="text-sm text-gray-600">{quiz.courseTitle}</p>
-                            </div>
-                            <span className="text-xs font-medium px-2.25 py-0.5 rounded-full bg-white border border-gray-300 flex items-center gap-1.5">
-                                <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor(quiz.status)}`}></div>
-                                {getStatusText(quiz.status)}
-                            </span>
-                        </div>
-
-                        {/* Quiz Details */}
-                        <div className="space-y-2 mb-4">
-                            <div className="flex justify-between text-xs">
-                                <span className="text-gray-600 flex items-center gap-1">
-                                    <IoHelpCircleOutline className="w-4 h-4" />
-                                    {t('dashboard.tutor.myQuizzes.card.totalQuestions')}
-                                </span>
-                                <span className="text-gray-600 font-medium">{quiz.totalQuestions}</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                                <span className="text-gray-600 flex items-center gap-1">
-                                    <IoTimeOutline className="w-4 h-4" />
-                                    {t('dashboard.tutor.myQuizzes.card.timeLimit')}
-                                </span>
-                                <span className="text-gray-600 font-medium">{quiz.timeLimitMinutes} min</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                                <span className="text-gray-600 flex items-center gap-1">
-                                    <IoPeopleOutline className="w-4 h-4" />
-                                    {t('dashboard.tutor.myQuizzes.card.attempts')}
-                                </span>
-                                <span className="text-gray-600 font-medium">{quiz.attempts}</span>
-                            </div>
-                            <div className="flex justify-between text-xs">
-                                <span className="text-gray-600 flex items-center gap-1">
-                                    <IoCalendarOutline className="w-4 h-4" />
-                                    {t('dashboard.tutor.myQuizzes.card.createdAt')}
-                                </span>
-                                <span className="text-gray-600 font-medium">{formatDate(quiz.createdAt)}</span>
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => navigate('/quiz/take')}
-                                className="flex-1 bg-teal-100 text-teal-700 py-2 rounded-lg text-sm font-semibold hover:bg-teal-200 transition-colors flex items-center justify-center gap-1"
-                            >
-                                <HiEye className="w-4 h-4" />
-                                {t('dashboard.tutor.myQuizzes.card.takeQuiz')}
-                            </button>
-                            <button
-                                onClick={() => navigate(`/dashboard/quizzes/${quiz.id}/stats`)}
-                                className="flex-1 bg-blue-100 text-blue-700 py-2 rounded-lg text-sm font-semibold hover:bg-blue-200 transition-colors flex items-center justify-center gap-1"
-                            >
-                                <HiChartBar className="w-4 h-4" />
-                                {t('dashboard.tutor.myQuizzes.card.stats')}
-                            </button>
-                            <button
-                                onClick={() => navigate('/dashboard/quizzes/create')}
-                                className="flex-1 bg-[#0b6459] text-white py-2 rounded-lg text-sm font-semibold hover:bg-[#084c43] transition-colors flex items-center justify-center gap-1"
-                            >
-                                <HiPencil className="w-4 h-4" />
-                                {t('dashboard.tutor.myQuizzes.card.edit')}
-                            </button>
-                        </div>
-                    </div>
+                    <QuizCard key={quiz.id} quiz={quiz} />
                 ))}
             </div>
 

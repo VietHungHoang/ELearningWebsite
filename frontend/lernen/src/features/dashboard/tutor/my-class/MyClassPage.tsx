@@ -355,15 +355,15 @@ const MyClassPage: React.FC = () => {
                                                 }
                                             </span>
                                         </td>
-                                        <td className="p-4 text-center">
-                                            <div className="flex items-center gap-0.5">
+                                        <td className="p-4">
+                                            <div className="flex items-center justify-center gap-0.5">
                                                 {classData.status === 'OPENING' ? (
                                                     <button
                                                         onClick={() => handleEditClass(classData)}
                                                         className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                                         title="Edit class"
                                                     >
-                                                        <FiEdit className="w-4 h-4" />
+                                                        <FiEdit className="w-3.5 h-3.5" />
                                                     </button>
                                                 ) : (
                                                     <button
@@ -371,7 +371,7 @@ const MyClassPage: React.FC = () => {
                                                         className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                                         title="View details"
                                                     >
-                                                        <FiEye className="w-4 h-4" />
+                                                        <FiEye className="w-3.5 h-3.5" />
                                                     </button>
                                                 )}
                                                 <button
@@ -382,7 +382,7 @@ const MyClassPage: React.FC = () => {
                                                     className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                                     title="Chat"
                                                 >
-                                                    <FiMessageSquare className="w-4 h-4" />
+                                                    <FiMessageSquare className="w-3.5 h-3.5" />
                                                 </button>
                                                 {classData.status === 'OPENING' && (
                                                     <button
@@ -397,7 +397,7 @@ const MyClassPage: React.FC = () => {
                                                         className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
                                                         title="Delete class"
                                                     >
-                                                        <FiTrash className="w-4 h-4" />
+                                                        <FiTrash className="w-3.5 h-3.5" />
                                                     </button>
                                                 )}
                                             </div>

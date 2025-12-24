@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { HiPlus, HiPencil, HiTrash } from 'react-icons/hi';
+import { HiPlus } from 'react-icons/hi';
+import { FiEdit, FiTrash } from 'react-icons/fi';
 import CreateCouponModal from '../components/CreateCouponModal';
-import ConfirmationModal from '../components/ConfirmationModal';
+import ConfirmModal from '../../../../components/ui/ConfirmModal';
 import CouponStatusBadge from '../components/CouponStatusBadge';
 import ToggleSwitch from '../components/ToggleSwitch';
 import { useTranslation } from 'react-i18next';
@@ -77,30 +78,32 @@ const DealsAndCouponsContent: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="p-4">
              <CreateCouponModal
                 isOpen={isModalOpen}
                 onClose={() => { setIsModalOpen(false); setEditingCoupon(null); }}
                 onSave={handleSaveCoupon}
                 existingCoupon={editingCoupon}
             />
-            <ConfirmationModal
+            <ConfirmModal
                 isOpen={!!itemToDelete}
-                onClose={() => setItemToDelete(null)}
+                onCancel={() => setItemToDelete(null)}
                 onConfirm={() => itemToDelete && handleDelete(itemToDelete)}
                 title={t('dashboard.tutor.dealsCoupons.deleteTitle')}
                 message={t('dashboard.tutor.dealsCoupons.deleteMessage', { code: itemToDelete?.code ?? '' })}
-                confirmButtonText={t('dashboard.tutor.dealsCoupons.deleteConfirm')}
+                confirmText={t('dashboard.tutor.dealsCoupons.deleteConfirm')}
+                cancelText={t('common.cancel')}
+                confirmButtonColor="red"
             />
 
-            <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">{t('dashboard.tutor.dealsCoupons.title')}</h1>
+                    <h1 className="text-xl font-bold text-gray-800">{t('dashboard.tutor.dealsCoupons.title')}</h1>
                     <p className="text-gray-600 mt-1">{t('dashboard.tutor.dealsCoupons.subtitle')}</p>
                 </div>
                 <button 
                     onClick={() => handleOpenModal(null)}
-                    className="flex items-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 px-5 rounded-lg hover:bg-[#084c43] transition-colors"
+                    className="px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition-colors font-medium text-sm flex items-center gap-2"
                 >
                     <HiPlus className="w-4 h-4" />
                     <span>{t('dashboard.tutor.dealsCoupons.createButton')}</span>
@@ -137,9 +140,9 @@ const DealsAndCouponsContent: React.FC = () => {
                                         <ToggleSwitch enabled={coupon.isActive} onChange={(checked) => handleToggleActive(coupon.id, checked)} />
                                     </td>
                                     <td className="p-4">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button onClick={() => handleOpenModal(coupon)} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-md" title={t('dashboard.tutor.dealsCoupons.actions.edit')}><HiPencil className="w-4 h-4" /></button>
-                                            <button onClick={() => setItemToDelete(coupon)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-md" title={t('dashboard.tutor.dealsCoupons.actions.delete')}><HiTrash className="w-4 h-4" /></button>
+                                        <div className="flex items-center justify-center gap-0.5">
+                                            <button onClick={() => handleOpenModal(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.edit')}><FiEdit className="w-3.5 h-3.5" /></button>
+                                            <button onClick={() => setItemToDelete(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.delete')}><FiTrash className="w-3.5 h-3.5" /></button>
                                         </div>
                                     </td>
                                 </tr>
