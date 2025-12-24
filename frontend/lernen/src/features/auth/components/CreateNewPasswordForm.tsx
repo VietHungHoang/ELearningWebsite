@@ -92,7 +92,7 @@ const CreateNewPasswordForm: React.FC<CreateNewPasswordFormProps> = ({ mode = "s
                 );
 
                 localStorage.removeItem("signupVerification");
-                navigate("/onboarding/tutor?step=1");
+                navigate("/tutor-resume-input");
             } else {
                 localStorage.setItem(
                     "studentLoginData",
