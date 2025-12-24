@@ -192,7 +192,7 @@ public class TutorServiceImpl implements TutorService {
         // Get students from enrollments
         List<TutorClassResponse.StudentInfo> students = classEntity.getEnrollments().stream()
             .map(e -> TutorClassResponse.StudentInfo.builder()
-                .id(e.getStudentId())
+                .id(e.getStudent().getId())
                 .build())
             .collect(Collectors.toList());
         
@@ -272,7 +272,7 @@ public class TutorServiceImpl implements TutorService {
             // Count unique students for this tutor (all students enrolled in tutor's classes)
             List<ClassEnrollment> enrollments = classEnrollmentRepository.findByTutorId(tutorId);
             Set<UUID> uniqueStudents = enrollments.stream()
-                .map(ClassEnrollment::getStudentId)
+                .map(enrollment -> enrollment.getStudent().getId())
                 .collect(Collectors.toSet());
             int studentCount = uniqueStudents.size();
 

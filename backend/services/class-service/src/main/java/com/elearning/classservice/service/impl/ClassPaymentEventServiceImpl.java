@@ -70,7 +70,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 return;
             }
 
-            UUID tutorId = classEntity.getTutorId();
+            UUID tutorId = classEntity.getTutor().getId();
             int successCount = 0;
             int failCount = 0;
 

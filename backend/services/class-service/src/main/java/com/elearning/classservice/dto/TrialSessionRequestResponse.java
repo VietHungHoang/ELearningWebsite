@@ -1,5 +1,6 @@
 package com.elearning.classservice.dto;
 
+import com.elearning.classservice.dto.response.UserInfoResponse;
 import com.elearning.classservice.entity.enums.ScheduleStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +18,8 @@ public class TrialSessionRequestResponse {
     private UUID id;
     private LocalDateTime sessionDateTime;
     private String message;
-    private UUID studentId;
-    private UUID tutorId;
+    private UserInfoResponse student;
+    private UserInfoResponse tutor;
     private ScheduleStatus status;
     private UUID sessionId;
     private LocalDateTime createdAt;

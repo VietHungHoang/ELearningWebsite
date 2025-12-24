@@ -7,9 +7,7 @@ import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.entity.SessionParticipant;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class SessionMapper {
@@ -36,9 +34,9 @@ public class SessionMapper {
 
         // Get tutor info
         UserInfoResponse tutorInfo = UserInfoResponse.builder()
-                    .id(session.getTutorId().toString())
-                    .fullName(session.getTutorName())
-                    .avatarUrl(session.getTutorAvatarUrl())
+                    .id(session.getTutor().getId().toString())
+                    .fullName(session.getTutor().getFullName())
+                    .avatarUrl(session.getTutor().getAvatarUrl())
                     .build();
 
         // Get student info
@@ -62,9 +60,9 @@ public class SessionMapper {
 
     public UserInfoResponse toUserInfoResponse(SessionParticipant sessionParticipant) {
         return UserInfoResponse.builder()
-                .id(sessionParticipant.getStudentId().toString())
-                .fullName(sessionParticipant.getStudentName())
-                .avatarUrl(sessionParticipant.getStudentAvatarUrl())
+                .id(sessionParticipant.getStudent().getId().toString())
+                .fullName(sessionParticipant.getStudent().getFullName())
+                .avatarUrl(sessionParticipant.getStudent().getAvatarUrl())
                 .build();
     }
 }

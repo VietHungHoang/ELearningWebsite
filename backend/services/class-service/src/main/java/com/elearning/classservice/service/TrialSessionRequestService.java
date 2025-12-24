@@ -35,5 +35,5 @@ public interface TrialSessionRequestService {
      * @param userId user ID
      * @return list of trial session request DTOs
      */
-    Map<UUID, TrialSessionRequestResponse> getTrialSessionRequestsByRole(String role, UUID userId);
+    java.util.List<TrialSessionRequestResponse> getTrialSessionRequestsByRole(String role, UUID userId);
 }

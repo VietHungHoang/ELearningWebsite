@@ -19,4 +19,8 @@ public interface TrialSessionRepository extends JpaRepository<TrialSessionReques
     List<TrialSessionRequestEntity> findByTutorIdAndStatus(UUID tutorId, ScheduleStatus status);
     
     List<TrialSessionRequestEntity> findByStudentIdAndStatus(UUID studentId, ScheduleStatus status);
+
+    List<TrialSessionRequestEntity> findByTutorId(UUID tutorId);
+
+    List<TrialSessionRequestEntity> findByStudentId(UUID studentId);
 }

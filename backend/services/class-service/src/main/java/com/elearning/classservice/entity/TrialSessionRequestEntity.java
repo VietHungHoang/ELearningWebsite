@@ -21,11 +21,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TrialSessionRequestEntity extends BaseEntity {
 
-    @Column(name = "tutor_id", nullable = false)
-    private UUID tutorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tutor_id", nullable = false)
+    private User tutor;
 
-    @Column(name = "student_id", nullable = false)
-    private UUID studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
     @Column(name = "session_date_time", nullable = false)
     private LocalDateTime sessionDateTime;

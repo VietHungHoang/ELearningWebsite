@@ -4,6 +4,7 @@ import com.elearning.classservice.dto.request.TrialSessionRequest;
 import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.entity.SessionParticipant;
 import com.elearning.classservice.entity.TrialSessionRequestEntity;
+import com.elearning.classservice.entity.User;
 import com.elearning.classservice.entity.enums.AttendanceStatus;
 import com.elearning.classservice.entity.enums.ScheduleStatus;
 import com.elearning.classservice.repository.SessionParticipantRepository;
@@ -15,7 +16,6 @@ import com.elearning.classservice.mapper.TrialSessionRequestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -38,8 +38,8 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
                 request.getTutorId(), request.getStudentId(), request.getSessionDateTime());
 
         TrialSessionRequestEntity trialSessionRequestEntity = TrialSessionRequestEntity.builder()
-                .tutorId(request.getTutorId())
-                .studentId(request.getStudentId())
+                .tutor(User.builder().id(request.getTutorId()).build())
+                .student(User.builder().id(request.getStudentId()).build())
                 .sessionDateTime(request.getSessionDateTime())
                 .message(request.getMessage())
                 .build();
@@ -68,7 +68,7 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
 
     private void createTrialSessionFromRequest(TrialSessionRequestEntity entity) {
         Session session = Session.builder()
-                .tutorId(entity.getTutorId())
+                .tutor(entity.getTutor())
                 .isTrial(true)
                 .title("Trial Session")
                 .startTime(entity.getSessionDateTime())
@@ -96,16 +96,14 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
         // Add participants: tutor and student
         SessionParticipant tutorParticipant = SessionParticipant.builder()
                 .session(session)
-                .studentId(entity.getTutorId()) // Tutor as participant
-                .studentName("Tutor") // Placeholder, should get real name
+                .student(entity.getTutor())
                 .attendanceStatus(AttendanceStatus.REGISTERED)
                 .isHost(true)
                 .build();
 
         SessionParticipant studentParticipant = SessionParticipant.builder()
                 .session(session)
-                .studentId(entity.getStudentId())
-                .studentName("Student") // Placeholder
+                .student(entity.getStudent())
                 .attendanceStatus(AttendanceStatus.REGISTERED)
                 .isHost(false)
                 .build();
@@ -128,31 +126,23 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public Map<UUID, TrialSessionRequestResponse> getTrialSessionRequestsByRole(String role, UUID userId) {
+    public java.util.List<TrialSessionRequestResponse> getTrialSessionRequestsByRole(String role, UUID userId) {
         log.info("Fetching trial session requests for role={} userId={}", role, userId);
 
         String normalizedRole = role.toLowerCase();
         List<TrialSessionRequestEntity> entities;
 
         if ("tutor".equals(normalizedRole)) {
-            entities = trialSessionRepository.findByTutorIdAndStatus(userId, ScheduleStatus.PENDING);
-            return entities.stream()
-                    .collect(Collectors.toMap(
-                            TrialSessionRequestEntity::getStudentId,
-                            trialSessionRequestMapper::toResponse,
-                            (existing, replacement) -> existing
-                    ));
+            entities = trialSessionRepository.findByTutorId(userId);
         } else if ("student".equals(normalizedRole)) {
-            entities = trialSessionRepository.findByStudentIdAndStatus(userId, ScheduleStatus.PENDING);
-            return entities.stream()
-                    .collect(Collectors.toMap(
-                            TrialSessionRequestEntity::getTutorId,
-                            trialSessionRequestMapper::toResponse,
-                            (existing, replacement) -> existing
-                    ));
+            entities = trialSessionRepository.findByStudentId(userId);
         } else {
             log.warn("Invalid role: {}", role);
-            return Map.of();
+            return java.util.Collections.emptyList();
         }
+
+        return entities.stream()
+                .map(trialSessionRequestMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

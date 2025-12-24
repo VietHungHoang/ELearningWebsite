@@ -17,8 +17,8 @@ public class GroupClassMapper {
         if (studentInClasses != null) {
             for (StudentInClass studentInClass : studentInClasses) {
                 students.add(GroupClassResponse.GroupClassStudent.builder()
-                        .id(studentInClass.getStudentId())
-                        .name(studentInClass.getStudentName())
+                        .id(studentInClass.getStudent().getId())
+                        .name(studentInClass.getStudent().getFullName())
                         .build());
             }
         }

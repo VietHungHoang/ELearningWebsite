@@ -24,11 +24,9 @@ public class ClassEnrollment extends BaseEntity {
     @JoinColumn(name = "class_id", nullable = false)
     private ClassEntity classEntity;
     
-    @Column(name = "student_id", nullable = false)
-    private UUID studentId;
-
-    @Column(name = "student_name", nullable = false)
-    private String studentName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

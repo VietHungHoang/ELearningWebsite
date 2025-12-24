@@ -44,7 +44,7 @@ public class SessionServiceImpl implements SessionService {
 //                .orElseThrow(() -> new SessionNotFoundException(sessionId));
 //
 //        // 2. Check authorization
-//        if (!session.getTutorId().equals(tutorId)) {
+//        if (!session.getTutor().getId().equals(tutorId)) {
 //            throw new UnauthorizedSessionAccessException(tutorId, sessionId);
 //        }
 //
@@ -112,7 +112,7 @@ public class SessionServiceImpl implements SessionService {
         // If trial session, get from participants
         if (session.getIsTrial()) {
             return session.getParticipants().stream()
-                    .map(SessionParticipant::getStudentId)
+                    .map(participant -> participant.getStudent().getId())
                     .collect(Collectors.toList());
         }
         
@@ -121,7 +121,7 @@ public class SessionServiceImpl implements SessionService {
             List<ClassEnrollment> enrollments = enrollmentRepository
                     .findByClassEntityId(session.getClassEntity().getId());
             return enrollments.stream()
-                    .map(ClassEnrollment::getStudentId)
+                    .map(enrollment -> enrollment.getStudent().getId())
                     .collect(Collectors.toList());
         }
         
@@ -134,7 +134,7 @@ public class SessionServiceImpl implements SessionService {
     private void sendSessionStartedEvent(Session session, List<UUID> studentIds) {
         SessionStartedEvent event = SessionStartedEvent.builder()
                 .sessionId(session.getId())
-                .tutorId(session.getTutorId())
+                .tutorId(session.getTutor().getId())
                 .studentIds(studentIds)
                 .zoomJoinUrl(session.getZoomJoinUrl())
                 .startTime(session.getStartTime())

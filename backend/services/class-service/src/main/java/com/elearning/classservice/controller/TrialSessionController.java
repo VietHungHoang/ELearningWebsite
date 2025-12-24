@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,12 +40,14 @@ public class TrialSessionController {
         return ResponseEntity.ok(ApiResponse.success(response, "Trial session request retrieved successfully"));
     }
 
-    @GetMapping("/list")
-    public ResponseEntity<ApiResponse<Map<UUID, TrialSessionRequestResponse>>> getTrialSessionRequestsByRole(
-            @RequestParam String role,
-            @RequestParam UUID userId) {
+    @GetMapping("/by-user")
+    public ResponseEntity<ApiResponse<List<TrialSessionRequestResponse>>> getTrialSessionRequestsByUser(
+            @RequestParam UUID userId,
+            @RequestParam String userType) {
 
-        Map<UUID, TrialSessionRequestResponse> response = trialSessionRequestService.getTrialSessionRequestsByRole(role, userId);
+        List<TrialSessionRequestResponse> response = trialSessionRequestService.getTrialSessionRequestsByRole(userType, userId);
+
         return ResponseEntity.ok(ApiResponse.success(response, "Trial session requests retrieved successfully"));
     }
+
 }

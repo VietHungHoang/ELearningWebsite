@@ -26,14 +26,9 @@ public class Session extends BaseEntity {
     @JoinColumn(name = "class_id")
     private ClassEntity classEntity;
     
-    @Column(name = "tutor_id", nullable = false)
-    private UUID tutorId;
-
-    @Column(name = "tutor_name", nullable = false)
-    private String tutorName;
-
-    @Column (name = "tutor_avatar_url")
-    private String tutorAvatarUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tutor_id", nullable = false)
+    private User tutor;
     
     @Column(name = "is_trial", nullable = false)
     @Builder.Default

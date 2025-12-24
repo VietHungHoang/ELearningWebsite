@@ -10,6 +10,7 @@ import com.elearning.classservice.entity.ClassEnrollment;
 import com.elearning.classservice.entity.ClassEntity;
 import com.elearning.classservice.entity.ClassSchedule;
 import com.elearning.classservice.entity.Session;
+import com.elearning.classservice.entity.User;
 import com.elearning.classservice.entity.enums.ClassStatus;
 import com.elearning.classservice.entity.enums.ClassType;
 import com.elearning.classservice.entity.enums.EnrollmentStatus;
@@ -64,9 +65,9 @@ public class ClassServiceImpl implements ClassService {
                         classEnrollmentRepository.findByClassEntityIdAndStatus(classEntity.getId(), EnrollmentStatus.ON_GOING);
                     List<UserInfoResponse> students = enrollments.stream()
                             .map(enrollment -> UserInfoResponse.builder()
-                                    .id(enrollment.getStudentId().toString())
-                                    .fullName(enrollment.getStudentName())
-                                    .avatarUrl("")
+                                    .id(enrollment.getStudent().getId().toString())
+                                    .fullName(enrollment.getStudent().getFullName())
+                                    .avatarUrl(enrollment.getStudent().getAvatarUrl())
                                     .build())
                             .collect(Collectors.toList());
 
@@ -120,9 +121,9 @@ public class ClassServiceImpl implements ClassService {
 
                     // Get tutor info
                     List<UserInfoResponse> tutors = List.of(UserInfoResponse.builder()
-                            .id(classEntity.getTutorId().toString())
-                            .fullName(classEntity.getTutorName() != null ? classEntity.getTutorName() : "Tutor " + classEntity.getTutorId().toString().substring(0, 8))
-                            .avatarUrl("")
+                            .id(classEntity.getTutor().getId().toString())
+                            .fullName(classEntity.getTutor().getFullName())
+                            .avatarUrl(classEntity.getTutor().getAvatarUrl())
                             .build());
 
                     // Get schedules
@@ -169,7 +170,7 @@ public class ClassServiceImpl implements ClassService {
 
         // Create class entity
         ClassEntity classEntity = ClassEntity.builder()
-                .tutorId(tutorId)
+                .tutor(User.builder().id(tutorId).build())
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .subjectId(UUID.fromString(request.getSubjectId()))
@@ -194,7 +195,7 @@ public class ClassServiceImpl implements ClassService {
 
         // Create ClassEntity
         ClassEntity classEntity = ClassEntity.builder()
-                .tutorId(request.getTutorId())
+                .tutor(User.builder().id(request.getTutorId()).build())
                 .title("Booked Class")
                 .classType(ClassType.ONE_ON_ONE)
                 .maxStudents(1)
@@ -208,7 +209,7 @@ public class ClassServiceImpl implements ClassService {
         // Create ClassEnrollment
         ClassEnrollment enrollment = ClassEnrollment.builder()
                 .classEntity(classEntity)
-                .studentId(request.getStudentId())
+                .student(User.builder().id(request.getStudentId()).build())
                 .status(EnrollmentStatus.PENDING)
                 .build();
 
@@ -225,7 +226,7 @@ public class ClassServiceImpl implements ClassService {
 
             Session session = Session.builder()
                     .classEntity(classEntity)
-                    .tutorId(request.getTutorId())
+                    .tutor(User.builder().id(request.getTutorId()).build())
                     .sessionNumber(i + 1)
                     .title("Session " + (i + 1))
                     .startTime(startTime)

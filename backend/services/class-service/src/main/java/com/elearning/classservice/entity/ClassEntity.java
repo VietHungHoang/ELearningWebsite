@@ -22,11 +22,9 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ClassEntity extends BaseEntity {
     
-    @Column(name = "tutor_id", nullable = false)
-    private UUID tutorId;
-
-    @Column(name = "tutor_name")
-    private String tutorName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tutor_id", nullable = false)
+    private User tutor;
     
     @Column(name = "title", nullable = false)
     private String title;

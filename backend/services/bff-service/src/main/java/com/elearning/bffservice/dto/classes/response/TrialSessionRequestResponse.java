@@ -20,6 +20,10 @@ public class TrialSessionRequestResponse {
     private ScheduleStatus status;
     private UUID studentId;
     private UUID tutorId;
+    private String studentName;
+    private String tutorName;
+    private String studentAvatarUrl;
+    private String tutorAvatarUrl;
     private UUID sessionId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
