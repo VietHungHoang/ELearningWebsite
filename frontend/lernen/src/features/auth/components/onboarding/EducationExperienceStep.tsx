@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HiPlus, HiPencil, HiTrash, HiAcademicCap, HiBriefcase } from 'react-icons/hi';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
-import commonUtils from '../../../../lib/commonUtils';
+import commonUtils from '../../../../utils/commonUtils';
 import type { EducationItem, ExperienceItem, Tutor } from '../../../../types/api';
 
 interface EducationExperienceStepProps {

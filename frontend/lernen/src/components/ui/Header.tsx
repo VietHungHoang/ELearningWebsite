@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import NotificationsPopup from "./NotificationsPopup";
 import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from "react-icons/fi";
 import { currencyOptions, languageOptions } from "../../constants/headerConstants";
@@ -7,14 +8,18 @@ import CartPopup from "../../features/cart/components/CartPopup";
 import { LernenLogo } from "../LernenLogo";
 import ProfileDropdown from "./ProfileDropdown";
 import { useAuth } from "../../context/AuthContext";
+import { useCurrency } from "../../context/CurrencyContext";
+import { getCurrencyCodeFromDisplay } from "../../utils/currencyHelper";
 // import { useWebSocket } from '../../hooks/useWebSocket';
 
 interface LanguageOption {
     name: string;
+    code: string;
     icon: React.ReactElement;
 }
 
 const Header: React.FC = () => {
+    const { t, i18n } = useTranslation();
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -22,21 +27,18 @@ const Header: React.FC = () => {
     const [cartCount, setCartCount] = useState(0);
 
     const { state } = useAuth();
+    const { currencyDisplay, setSelectedCurrency } = useCurrency();
     const isLoggedIn = state.isAuthenticated;
 
     const navigate = useNavigate();
 
-    const [selectedCurrency, setSelectedCurrency] = useState("USD $");
-    const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(languageOptions[0]);
+    const currentLanguageOption = languageOptions.find(option => option.code === i18n.language) || languageOptions[0];
 
     const cartRef = useRef<HTMLDivElement>(null);
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
     const currencyRef = useRef<HTMLDivElement>(null);
     const languageRef = useRef<HTMLDivElement>(null);
-
-    // Use WebSocket context for notification count
-    // const { notificationCount } = useWebSocket();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -69,13 +71,14 @@ const Header: React.FC = () => {
         setOpenDropdown(openDropdown === type ? null : type);
     };
 
-    const handleCurrencySelect = (currency: string) => {
-        setSelectedCurrency(currency);
+    const handleCurrencySelect = (currencyDisplay: string) => {
+        const currencyCode = getCurrencyCodeFromDisplay(currencyDisplay);
+        setSelectedCurrency(currencyCode);
         setOpenDropdown(null);
     };
 
     const handleLanguageSelect = (language: LanguageOption) => {
-        setSelectedLanguage(language);
+        i18n.changeLanguage(language.code);
         setOpenDropdown(null);
     };
 
@@ -89,7 +92,7 @@ const Header: React.FC = () => {
 
     return (
         <header className="bg-[var(--page-bg-color)] border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-4">
+            <div className="px-8">
                 <div className="flex justify-between items-center py-4">
                     <div className="flex items-center space-x-8">
                         {/* Logo */}
@@ -99,17 +102,10 @@ const Header: React.FC = () => {
 
                         {/* Navigation */}
                         <nav className="hidden md:flex items-center space-x-6">
-                            <LnNavLink to="/">Home</LnNavLink>
-                            <LnNavLink to="/find-tutors">Find Tutors</LnNavLink>
+                            <LnNavLink to="/">{t('header.home')}</LnNavLink>
+                            <LnNavLink to="/find-tutors">{t('header.findTutors')}</LnNavLink>
                             {/* <LnNavLink to="/courses">Courses</LnNavLink> */}
-                            <LnNavLink to="/become-a-tutor">Become a Tutor</LnNavLink>
-                            {/* Test Link - Remove in production */}
-                            <NavLink
-                                to="/onboarding/tutor?email=test@example.com"
-                                className="font-bold text-purple-600 flex items-center space-x-1 border-b-2 border-purple-400 hover:border-purple-600 transition-all duration-300"
-                            >
-                                🧪 Test Onboarding
-                            </NavLink>
+                            <LnNavLink to="/become-a-tutor">{t('header.becomeTutor')}</LnNavLink>
                             {/* <LnNavLink to="/subscriptions">Subscriptions</LnNavLink> */}
                             {/* <LnNavLink to="/more">More</LnNavLink> */}
                         </nav>
@@ -121,11 +117,11 @@ const Header: React.FC = () => {
                                 onClick={() => handleDropdownToggle("currency")}
                                 className="hidden sm:flex items-center space-x-1 text-gray-600 cursor-pointer"
                             >
-                                <span className="font-medium">{selectedCurrency}</span>
+                                <span className="font-medium">{currencyDisplay}</span>
                                 <FiChevronDown size={20} />
                             </button>
                             {openDropdown === "currency" && (
-                                <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-xl z-50 p-2 border border-gray-100 transform transition-all duration-150 ease-out opacity-100 scale-100">
+                                <div className="absolute top-full right-0 mt-2 w-28 bg-white rounded-lg shadow-xl z-50 p-2 border border-gray-100 transform transition-all duration-150 ease-out opacity-100 scale-100">
                                     <ul className="space-y-1">
                                         {currencyOptions.map((option) => (
                                             <li
@@ -148,9 +144,9 @@ const Header: React.FC = () => {
                                 className="hidden sm:flex items-center space-x-2 text-gray-600 cursor-pointer"
                             >
                                 <div style={{ width: "20px", height: "15px" }}>
-                                    {selectedLanguage.icon}
+                                    {currentLanguageOption.icon}
                                 </div>
-                                <span>{selectedLanguage.name}</span>
+                                <span>{currentLanguageOption.name}</span>
                                 <FiChevronDown size={20} />
                             </button>
                             {openDropdown === "language" && (
@@ -215,15 +211,15 @@ const Header: React.FC = () => {
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={handleSignIn}
-                                    className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-medium py-2 px-4 rounded-xl hover:bg-[#084c43] transition-colors"
+                                    className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-medium py-1.75 px-4 rounded-xl hover:bg-[#084c43] transition-colors"
                                 >
-                                    Sign In
+                                    {t('header.signIn')}
                                 </button>
                                 <button
                                     onClick={handleGetStarted}
-                                    className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-medium py-2 px-4 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors"
+                                    className="flex items-center justify-center gap-2 border border-[#e9bb71] bg-transparent text-[#585858] font-medium py-1.75 px-4 rounded-xl hover:bg-[#084c43] hover:text-white hover:border-[#084c43] transition-colors"
                                 >
-                                    Get Started
+                                    {t('header.getStarted')}
                                 </button>
                             </div>
                         ) : (

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { FcGoogle } from "react-icons/fc";
 import type { StartSignUpRequest, UserRole } from "../../../types/api";
 
@@ -11,6 +12,7 @@ interface SignUpFormProps {
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role = "student", error = null }) => {
+    const { t } = useTranslation();
     const [termsAgreed, setTermsAgreed] = useState(false);
     const [formData, setFormData] = useState({
         fullname: "",
@@ -31,17 +33,17 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
         const newErrors: { [key: string]: string } = {};
 
         if (!formData.fullname.trim()) {
-            newErrors.fullname = "Full name is required";
+            newErrors.fullname = t('auth.signup.fullNameRequired');
         }
 
         if (!formData.email.trim()) {
-            newErrors.email = "Email is required";
+            newErrors.email = t('auth.signup.emailRequired');
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = "Email is invalid";
+            newErrors.email = t('auth.signup.emailInvalid');
         }
 
         if (!termsAgreed) {
-            newErrors.terms = "You must agree to the terms and conditions";
+            newErrors.terms = t('auth.signup.agreeToTerms');
         }
 
         setErrors(newErrors);
@@ -64,18 +66,16 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
         <div className="bg-[#F8F7F4] p-10 flex flex-col justify-center">
             <div className="max-w-md mx-auto w-full">
                 <h2 className="text-2xl font-bold text-[#0b6459]">
-                    Sign up as a {role === "tutor" ? "Tutor" : "Student"}
+                    {role === "tutor" ? t('auth.signup.signUpAsTutor') : t('auth.signup.signUpAsStudent')}
                 </h2>
                 <p className="text-gray-600 mt-2">
-                    {role === "tutor"
-                        ? "Start your teaching journey today."
-                        : "Start your learning journey today."}
+                    {role === "tutor" ? t('auth.signup.tutorJourney') : t('auth.signup.studentJourney')}
                 </p>
 
                 <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
                     <div>
                         <label htmlFor="full-name" className="text-sm font-medium text-gray-700">
-                            Full Name <span className="text-red-500">*</span>
+                            {t('auth.signup.fullName')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="full-name"
@@ -88,7 +88,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
                             className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm ${
                                 errors.fullname ? "border-red-500" : "border-gray-300"
                             }`}
-                            placeholder="Your full name"
+                            placeholder={t('auth.signup.fullNamePlaceholder')}
                         />
                         {errors.fullname && (
                             <p className="mt-1 text-sm text-red-600">{errors.fullname}</p>
@@ -100,7 +100,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
                             htmlFor="email-address"
                             className="text-sm font-medium text-gray-700"
                         >
-                            Email address <span className="text-red-500">*</span>
+                            {t('auth.signup.emailAddress')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="email-address"
@@ -113,7 +113,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
                             className={`mt-1 block w-full px-4 py-3 bg-white border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm ${
                                 errors.email ? "border-red-500" : "border-gray-300"
                             }`}
-                            placeholder="Email address"
+                            placeholder={t('auth.signup.emailPlaceholder')}
                         />
                         {errors.email && (
                             <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -156,9 +156,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
                             </div>
                         </div>
                         <span className="ml-2 block text-sm text-gray-900">
-                            I agree to the{" "}
+                            {t('auth.signup.agreeTermsText')}{" "}
                             <a href="#" className="font-medium text-[#0b6459] hover:text-[#084c43]">
-                                Terms and Conditions
+                                {t('auth.signup.termsAndConditions')}
                             </a>
                         </span>
                     </label>
@@ -170,21 +170,21 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
                             disabled={!termsAgreed || loading}
                             className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? "Creating Account..." : "Create Account"}
+                            {loading ? t('auth.signup.creatingAccount') : t('auth.signup.createAccount')}
                         </button>
                     </div>
                 </form>
 
                 <p className="mt-5 text-center text-sm text-gray-600">
-                    Already have an account?{" "}
+                    {t('auth.signup.alreadyHaveAccount')}{" "}
                     <Link to="/login" className="font-medium text-[#0b6459] hover:text-[#084c43]">
-                        Sign in
+                        {t('auth.signup.signIn')}
                     </Link>
                 </p>
 
                 <div className="mt-5 flex items-center">
                     <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
+                    <span className="flex-shrink mx-4 text-gray-500 text-sm">{t('auth.signup.orSeparator')}</span>
                     <div className="flex-grow border-t border-gray-300"></div>
                 </div>
 
@@ -194,7 +194,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSubmit, loading = false, role
                         className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors"
                     >
                         <FcGoogle />
-                        <span className="ml-3">Sign up with Google</span>
+                        <span className="ml-3">{t('auth.signup.signUpWithGoogle')}</span>
                     </button>
                 </div>
             </div>

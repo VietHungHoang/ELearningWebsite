@@ -16,10 +16,9 @@ export class ZoomableLineChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Series data
                 let ts2 = 1484418600000;
                 let dates = [];
                 for (let i = 0; i < 120; i++) {
@@ -27,7 +26,6 @@ export class ZoomableLineChartService {
                     dates.push([ts2, dataSeries[1][i].value]);
                 }
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -78,7 +76,7 @@ export class ZoomableLineChartService {
                             shadeIntensity: 1,
                             opacityFrom: 0.5,
                             opacityTo: 0,
-                            // stops: [0, 90, 100]
+
                         }
                     },
                     xaxis: {
@@ -138,7 +136,6 @@ export class ZoomableLineChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#zoomable_line_chart'), options);
                 chart.render();
             } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SessionDetailModal from './SessionDetailModal';
 import { FiChevronLeft, FiChevronRight, FiCalendar, FiSearch, FiGrid } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface Booking {
   id: number;
@@ -22,6 +23,7 @@ const mockBookings: Booking[] = [
 
 
 const MyBookingsContent: React.FC = () => {
+    const { t } = useTranslation();
     const [view, setView] = useState<'Daily' | 'Weekly' | 'Monthly'>('Monthly');
     const [currentDate, setCurrentDate] = useState(new Date('2025-10-20T12:00:00Z'));
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -88,16 +90,27 @@ const MyBookingsContent: React.FC = () => {
         });
     };
 
-    const ViewButton: React.FC<{ label: 'Daily' | 'Weekly' | 'Monthly' }> = ({ label }) => (
-        <button
-            onClick={() => setView(label)}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                view === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
-            }`}
-        >
-            {label}
-        </button>
-    );
+    const ViewButton: React.FC<{ label: 'Daily' | 'Weekly' | 'Monthly' }> = ({ label }) => {
+        const getTranslatedLabel = () => {
+            switch (label) {
+                case 'Daily': return t('profile.bookings.daily');
+                case 'Weekly': return t('profile.bookings.weekly');
+                case 'Monthly': return t('profile.bookings.monthly');
+                default: return label;
+            }
+        };
+
+        return (
+            <button
+                onClick={() => setView(label)}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                    view === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
+                }`}
+            >
+                {getTranslatedLabel()}
+            </button>
+        );
+    };
 
     const renderDailyView = () => {
         const times = Array.from({ length: 18 }, (_, i) => i + 6); // 6 AM to 11 PM (23:00)
@@ -178,7 +191,7 @@ const MyBookingsContent: React.FC = () => {
                                     ))
                                 ) : (
                                     <div className="bg-[#FBF6EE] text-[#B58A3F] text-xs font-semibold py-1.5 px-2 rounded-lg text-center">
-                                        No sessions
+                                        {t('profile.bookings.noSessions')}
                                     </div>
                                 )}
                             </div>
@@ -290,7 +303,7 @@ const MyBookingsContent: React.FC = () => {
 
                 <div className="flex items-center gap-2">
                     <div className="relative">
-                        <input type="text" placeholder="Search here" className="bg-gray-100 rounded-lg pl-10 pr-4 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-[#0b6459]" />
+                        <input type="text" placeholder={t('profile.bookings.searchHere')} className="bg-gray-100 rounded-lg pl-10 pr-4 py-2 text-sm w-48 focus:outline-none focus:ring-2 focus:ring-[#0b6459]" />
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <FiSearch />
                         </div>

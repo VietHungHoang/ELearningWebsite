@@ -1,5 +1,4 @@
 import React from 'react';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 interface LoadingProps {
   size?: number;
@@ -9,7 +8,10 @@ interface LoadingProps {
 const Loading: React.FC<LoadingProps> = ({ size = 32, className = '' }) => {
   return (
     <div className={`flex items-center justify-center mt-12 ${className}`}>
-      <AiOutlineLoading3Quarters size={size} className="animate-spin text-[#0b6459]" />
+      <div
+        className="animate-spin rounded-full border-b-2 border-[#0b6459] mx-auto"
+        style={{ width: size, height: size }}
+      ></div>
     </div>
   );
 };

@@ -15,10 +15,9 @@ export class LineColumnAreaChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -65,7 +64,7 @@ export class LineColumnAreaChartService {
                             type: "vertical",
                             opacityFrom: 0.85,
                             opacityTo: 0.55,
-                            // stops: [0, 100, 100, 100]
+
                         }
                     },
                     labels: [
@@ -165,7 +164,6 @@ export class LineColumnAreaChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#line_column_area_chart'), options);
                 chart.render();
             } catch (error) {

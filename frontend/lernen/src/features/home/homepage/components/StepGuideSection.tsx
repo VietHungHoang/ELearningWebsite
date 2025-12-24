@@ -1,6 +1,8 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 const StepGuideSection: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section className="py-16 sm:py-20 bg-[#faf8f5]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -9,15 +11,15 @@ const StepGuideSection: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <div className="h-px w-12 bg-gray-300"></div>
             <span className="mx-4 text-sm font-semibold text-[#065A46] tracking-wide uppercase">
-              A Step-by-Step Guide
+              {t('stepGuide.sectionLabel')}
             </span>
             <div className="h-px w-12 bg-gray-300"></div>
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Unlock Your Potential with Easy Steps
+            {t('stepGuide.title')}
           </h2>
           <p className="text-gray-600 text-lg leading-relaxed">
-            Learn how our platform simplifies finding and booking top tutors to enhance your skills and achieve your learning goals
+            {t('stepGuide.description')}
           </p>
         </div>
 
@@ -36,14 +38,14 @@ const StepGuideSection: React.FC = () => {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h3 className="mt-5 text-xl font-semibold text-[#065A46]">Sign Up</h3>
+              <h3 className="mt-5 text-xl font-semibold text-[#065A46]">{t('stepGuide.steps.step1.title')}</h3>
               <p className="mt-2 text-gray-600">
-                Create your account quickly to get started with our platform
+                {t('stepGuide.steps.step1.description')}
               </p>
             </div>
             <div className="px-6 pb-6">
               <button className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors">
-                Get Started
+                {t('stepGuide.steps.step1.button')}
               </button>
             </div>
           </div>
@@ -61,14 +63,14 @@ const StepGuideSection: React.FC = () => {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h3 className="mt-5 text-xl font-semibold text-[#065A46]">Find a Tutor</h3>
+              <h3 className="mt-5 text-xl font-semibold text-[#065A46]">{t('stepGuide.steps.step2.title')}</h3>
               <p className="mt-2 text-gray-600">
-                Browse & select from qualified tutors based on your need
+                {t('stepGuide.steps.step2.description')}
               </p>
             </div>
             <div className="px-6 pb-6">
               <button className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors">
-                Search Now
+                {t('stepGuide.steps.step2.button')}
               </button>
             </div>
           </div>
@@ -86,14 +88,14 @@ const StepGuideSection: React.FC = () => {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <h3 className="mt-5 text-xl font-semibold text-[#065A46]">Schedule a Lesson</h3>
+              <h3 className="mt-5 text-xl font-semibold text-[#065A46]">{t('stepGuide.steps.step3.title')}</h3>
               <p className="mt-2 text-gray-600">
-                Book a convenient time for your lesson with ease
+                {t('stepGuide.steps.step3.description')}
               </p>
             </div>
             <div className="px-6 pb-6">
               <button className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors">
-                Let's Begin
+                {t('stepGuide.steps.step3.button')}
               </button>
             </div>
           </div>
@@ -108,14 +110,14 @@ const StepGuideSection: React.FC = () => {
                   className="w-full h-full object-contain filter brightness-0 invert"
                 />
               </div>
-              <h3 className="mt-5 text-xl font-semibold">Start Your Journey</h3>
+              <h3 className="mt-5 text-xl font-semibold">{t('stepGuide.steps.step4.title')}</h3>
               <p className="mt-2 text-white/80">
-                Begin your educational journey with us. Find a tutor and book your first session today!
+                {t('stepGuide.steps.step4.description')}
               </p>
             </div>
             <div className="px-6 pb-6">
               <button className="w-full rounded-lg bg-orange-500 text-white text-sm font-semibold py-2.5 hover:bg-orange-600 transition-colors flex items-center justify-center">
-                Get Started Now
+                {t('stepGuide.steps.step4.button')}
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { HiStar } from 'react-icons/hi';
 
 interface QuickStatsProps {
@@ -14,15 +15,16 @@ const QuickStats: React.FC<QuickStatsProps> = ({
     completionRate,
     responseTime
 }) => {
+    const { t } = useTranslation();
     return (
         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl shadow-lg p-6 border border-emerald-100 hover:shadow-xl transition-shadow duration-300">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Quick Stats</h3>
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('dashboard.common.quickStats')}</h3>
 
             <div className="space-y-4">
                 {/* Average Rating */}
                 <div>
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">Average Rating</span>
+                        <span className="text-sm font-medium text-gray-600">{t('dashboard.common.averageRating')}</span>
                         <span className="text-2xl font-bold text-gray-800">{averageRating.toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -37,14 +39,14 @@ const QuickStats: React.FC<QuickStatsProps> = ({
                                     }`}
                             />
                         ))}
-                        <span className="text-xs text-gray-500 ml-2">({totalReviews} reviews)</span>
+                        <span className="text-xs text-gray-500 ml-2">({totalReviews} {t('dashboard.common.reviews')})</span>
                     </div>
                 </div>
 
                 {/* Completion Rate */}
                 <div>
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">Course Completion</span>
+                        <span className="text-sm font-medium text-gray-600">{t('dashboard.common.courseCompletion')}</span>
                         <span className="text-lg font-bold text-gray-800">{completionRate}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -58,7 +60,7 @@ const QuickStats: React.FC<QuickStatsProps> = ({
                 {/* Response Time */}
                 <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-600">Avg. Response Time</span>
+                        <span className="text-sm font-medium text-gray-600">{t('dashboard.common.avgResponseTime')}</span>
                         <span className="text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                             {responseTime}
                         </span>
@@ -70,8 +72,8 @@ const QuickStats: React.FC<QuickStatsProps> = ({
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">🏆</span>
                         <div>
-                            <p className="text-sm font-semibold">This Month's Highlight</p>
-                            <p className="text-xs opacity-90">Top rated tutor in your category!</p>
+                            <p className="text-sm font-semibold">{t('dashboard.common.thisMonthsHighlight')}</p>
+                            <p className="text-xs opacity-90">{t('dashboard.common.topRatedTutor')}</p>
                         </div>
                     </div>
                 </div>

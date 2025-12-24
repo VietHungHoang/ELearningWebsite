@@ -92,10 +92,8 @@ const ApiDocsPage: React.FC = () => {
       "teachesInGroups": true,
       "maxGroupMembers": 8,
       "videoUrl": "https://example.com/video.mp4",
-      "videoThumbnailUrl": "https://example.com/thumbnail.jpg",
       "bio": "Experienced mathematics tutor with 10+ years of teaching experience. I specialize in making complex mathematical concepts accessible and enjoyable for students of all levels.",
       "studentCount": 127,
-      "sessionDurationMinutes": 60,
       "bookedSessionsCount": 234
     }
   ],
@@ -170,10 +168,8 @@ const ApiDocsPage: React.FC = () => {
             <li><strong>teachesInGroups</strong> (boolean): Whether tutor offers group sessions</li>
             <li><strong>maxGroupMembers</strong> (number): Maximum number of students in group sessions</li>
             <li><strong>videoUrl</strong> (string): URL to tutor's introduction video</li>
-            <li><strong>videoThumbnailUrl</strong> (string): URL to video thumbnail image</li>
             <li><strong>bio</strong> (string): Tutor's biography/description</li>
             <li><strong>studentCount</strong> (number): Number of students the tutor has taught</li>
-            <li><strong>sessionDurationMinutes</strong> (number): Duration of each tutoring session in minutes</li>
             <li><strong>bookedSessionsCount</strong> (number): Total number of booked sessions by this tutor</li>
           </ul>
         </div>

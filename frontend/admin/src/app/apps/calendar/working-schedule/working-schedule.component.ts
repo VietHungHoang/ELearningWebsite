@@ -10,7 +10,6 @@ import { NgClass } from '@angular/common';
 })
 export class WorkingScheduleComponent {
 
-	// Owl Carousel
     upcomingEventsSlides: OwlOptions = {
         items: 1,
 		nav: false,
@@ -26,27 +25,25 @@ export class WorkingScheduleComponent {
 		]
     }
 
-    // Popup Trigger
     classApplied = false;
     toggleClass() {
         this.classApplied = !this.classApplied;
     }
 
-    // Calendar
     currentMonth!: number;
     currentYear!: number;
-    currentDay!: number; // Current day
-    today!: { year: number; month: number; day: number }; // Today's date
+    currentDay!: number; 
+    today!: { year: number; month: number; day: number }; 
     weekdays: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     monthNames: string[] = [
         'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    daysInMonth: (number | null)[] = []; // Allow null values
+    daysInMonth: (number | null)[] = []; 
     ngOnInit() {
         const today = new Date();
-        this.currentMonth = today.getMonth(); // 0-based index
+        this.currentMonth = today.getMonth(); 
         this.currentYear = today.getFullYear();
-        this.currentDay = today.getDate(); // Get current day of the month
+        this.currentDay = today.getDate(); 
         this.today = {
             year: this.currentYear,
             month: this.currentMonth,
@@ -59,7 +56,7 @@ export class WorkingScheduleComponent {
         const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
         const numberOfDays = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
         for (let i = 0; i < firstDay; i++) {
-            this.daysInMonth.push(null); // Placeholder for days before the first of the month
+            this.daysInMonth.push(null); 
         }
         for (let i = 1; i <= numberOfDays; i++) {
             this.daysInMonth.push(i);

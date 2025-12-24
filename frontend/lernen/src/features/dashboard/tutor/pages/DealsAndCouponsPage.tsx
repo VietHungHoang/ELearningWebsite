@@ -1,10 +1,12 @@
 
-import React, { useState, useMemo } from 'react';
-import { HiPlus, HiPencil, HiTrash } from 'react-icons/hi';
+import React, { useState } from 'react';
+import { HiPlus } from 'react-icons/hi';
+import { FiEdit, FiTrash } from 'react-icons/fi';
 import CreateCouponModal from '../components/CreateCouponModal';
-import ConfirmationModal from '../components/ConfirmationModal';
+import ConfirmModal from '../../../../components/ui/ConfirmModal';
 import CouponStatusBadge from '../components/CouponStatusBadge';
 import ToggleSwitch from '../components/ToggleSwitch';
+import { useTranslation } from 'react-i18next';
 
 export type CouponStatus = 'Active' | 'Expired' | 'Inactive';
 export type CouponDiscountType = 'Percentage' | 'Fixed';
@@ -31,6 +33,7 @@ const mockCoupons: Coupon[] = [
 
 
 const DealsAndCouponsContent: React.FC = () => {
+    const { t } = useTranslation();
     const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
@@ -75,32 +78,35 @@ const DealsAndCouponsContent: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
+        <div className="p-4">
              <CreateCouponModal
                 isOpen={isModalOpen}
                 onClose={() => { setIsModalOpen(false); setEditingCoupon(null); }}
                 onSave={handleSaveCoupon}
                 existingCoupon={editingCoupon}
             />
-            <ConfirmationModal
+            <ConfirmModal
                 isOpen={!!itemToDelete}
-                onClose={() => setItemToDelete(null)}
+                onCancel={() => setItemToDelete(null)}
                 onConfirm={() => itemToDelete && handleDelete(itemToDelete)}
-                title="Delete Coupon"
-                message={`Are you sure you want to delete the coupon "${itemToDelete?.code}"? This action is irreversible.`}
+                title={t('dashboard.tutor.dealsCoupons.deleteTitle')}
+                message={t('dashboard.tutor.dealsCoupons.deleteMessage', { code: itemToDelete?.code ?? '' })}
+                confirmText={t('dashboard.tutor.dealsCoupons.deleteConfirm')}
+                cancelText={t('common.cancel')}
+                confirmButtonColor="red"
             />
 
-            <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Deals & Coupons</h1>
-                    <p className="text-gray-600 mt-1">Create and manage discount codes for your courses.</p>
+                    <h1 className="text-xl font-bold text-gray-800">{t('dashboard.tutor.dealsCoupons.title')}</h1>
+                    <p className="text-gray-600 mt-1">{t('dashboard.tutor.dealsCoupons.subtitle')}</p>
                 </div>
                 <button 
                     onClick={() => handleOpenModal(null)}
-                    className="flex items-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 px-5 rounded-lg hover:bg-[#084c43] transition-colors"
+                    className="px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition-colors font-medium text-sm flex items-center gap-2"
                 >
                     <HiPlus className="w-4 h-4" />
-                    <span>Create New Coupon</span>
+                    <span>{t('dashboard.tutor.dealsCoupons.createButton')}</span>
                 </button>
             </div>
 
@@ -109,14 +115,14 @@ const DealsAndCouponsContent: React.FC = () => {
                     <table className="w-full text-sm text-left">
                         <thead className="bg-gray-50 text-gray-600 font-semibold">
                             <tr>
-                                <th className="p-4">Coupon Code</th>
-                                <th className="p-4">Discount</th>
-                                <th className="p-4">Applies To</th>
-                                <th className="p-4">Usage</th>
-                                <th className="p-4">Expiry Date</th>
-                                <th className="p-4">Status</th>
-                                <th className="p-4 text-center">Active</th>
-                                <th className="p-4 text-center">Actions</th>
+                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.code')}</th>
+                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.discount')}</th>
+                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.appliesTo')}</th>
+                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.usage')}</th>
+                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.expiryDate')}</th>
+                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.status')}</th>
+                                <th className="p-4 text-center">{t('dashboard.tutor.dealsCoupons.tableHeaders.active')}</th>
+                                <th className="p-4 text-center">{t('dashboard.tutor.dealsCoupons.tableHeaders.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -124,9 +130,9 @@ const DealsAndCouponsContent: React.FC = () => {
                                 <tr key={coupon.id} className="hover:bg-gray-50">
                                     <td className="p-4 font-bold text-gray-800">{coupon.code}</td>
                                     <td className="p-4 text-gray-700 font-semibold">
-                                        {coupon.discountValue}{coupon.discountType === 'Percentage' ? '%' : '$'}
+                                        {coupon.discountValue}{coupon.discountType === 'Percentage' ? '%' : t('dashboard.tutor.dealsCoupons.currencySymbol')}
                                     </td>
-                                    <td className="p-4 text-gray-600">{coupon.applicableCourses.includes('All') ? 'All Courses' : coupon.applicableCourses.join(', ')}</td>
+                                    <td className="p-4 text-gray-600">{coupon.applicableCourses.includes('All') ? t('dashboard.tutor.dealsCoupons.allCourses') : coupon.applicableCourses.join(', ')}</td>
                                     <td className="p-4 text-gray-600">{coupon.timesUsed} / {coupon.usageLimit ?? '∞'}</td>
                                     <td className="p-4 text-gray-600">{coupon.expiryDate}</td>
                                     <td className="p-4"><CouponStatusBadge status={getCouponStatus(coupon)} /></td>
@@ -134,9 +140,9 @@ const DealsAndCouponsContent: React.FC = () => {
                                         <ToggleSwitch enabled={coupon.isActive} onChange={(checked) => handleToggleActive(coupon.id, checked)} />
                                     </td>
                                     <td className="p-4">
-                                        <div className="flex items-center justify-center gap-2">
-                                            <button onClick={() => handleOpenModal(coupon)} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-100 rounded-md"><HiPencil className="w-4 h-4" /></button>
-                                            <button onClick={() => setItemToDelete(coupon)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-md"><HiTrash className="w-4 h-4" /></button>
+                                        <div className="flex items-center justify-center gap-0.5">
+                                            <button onClick={() => handleOpenModal(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.edit')}><FiEdit className="w-3.5 h-3.5" /></button>
+                                            <button onClick={() => setItemToDelete(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.delete')}><FiTrash className="w-3.5 h-3.5" /></button>
                                         </div>
                                     </td>
                                 </tr>

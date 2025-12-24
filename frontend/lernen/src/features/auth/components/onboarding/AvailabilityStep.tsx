@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { Tutor } from '../../../../types/api.ts'
+import type { Tutor, TutorAvailability } from '../../../../types/api.ts'
 
 interface AvailabilityStepProps {
     data?: Partial<Tutor>;
@@ -24,13 +24,83 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
     };
 
     const [weekDays] = useState(getCurrentWeek());
-    const [availability, setAvailability] = useState<string[]>(((data as any)?.availability) || []);
+    const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
 
-    // Update parent when availability changes - write into `availability` field of parent data
+    // Convert TutorAvailability[] to selected time slots on mount
     useEffect(() => {
-        // cast because `availability` is not declared on Tutor type; parent uses Partial<Tutor>
-        onChange({ availability } as unknown as Partial<Tutor>);
-    }, [availability, onChange]);
+        if (data?.availabilities) {
+            const slots: string[] = [];
+            data.availabilities.forEach(avail => {
+                // For each availability, generate hourly slots between start and end time
+                const startHour = parseInt(avail.startTime.split(':')[0]);
+                const endHour = parseInt(avail.endTime.split(':')[0]);
+                
+                weekDays.forEach(day => {
+                    if (day.getDay() === avail.dayOfWeek || (avail.dayOfWeek === 0 && day.getDay() === 0)) {
+                        for (let hour = startHour; hour < endHour; hour++) {
+                            const slotDate = new Date(day);
+                            slotDate.setHours(hour, 0, 0, 0);
+                            slots.push(slotDate.toISOString());
+                        }
+                    }
+                });
+            });
+            setSelectedSlots(slots);
+        }
+    }, []);
+
+    // Convert selected slots to TutorAvailability[] format when slots change
+    useEffect(() => {
+        const availabilities: TutorAvailability[] = [];
+        
+        // Group slots by day of week
+        const slotsByDay: { [key: number]: Date[] } = {};
+        selectedSlots.forEach(slotISO => {
+            const date = new Date(slotISO);
+            const dayOfWeek = date.getDay();
+            if (!slotsByDay[dayOfWeek]) {
+                slotsByDay[dayOfWeek] = [];
+            }
+            slotsByDay[dayOfWeek].push(date);
+        });
+
+        // Convert to TutorAvailability format with time ranges
+        Object.keys(slotsByDay).forEach(dayKey => {
+            const dayOfWeek = parseInt(dayKey);
+            const slots = slotsByDay[dayOfWeek].sort((a, b) => a.getTime() - b.getTime());
+            
+            if (slots.length === 0) return;
+
+            let rangeStart = slots[0];
+            let rangeEnd = slots[0];
+
+            for (let i = 1; i <= slots.length; i++) {
+                const currentSlot = slots[i];
+                const prevSlot = slots[i - 1];
+                
+                if (currentSlot && currentSlot.getTime() - prevSlot.getTime() === 3600000) {
+                    // Consecutive slot
+                    rangeEnd = currentSlot;
+                } else {
+                    // End of range, save it
+                    availabilities.push({
+                        dayOfWeek,
+                        startTime: `${String(rangeStart.getHours()).padStart(2, '0')}:00`,
+                        endTime: `${String(rangeEnd.getHours() + 1).padStart(2, '0')}:00`,
+                        effectiveStartDate: new Date().toISOString().split('T')[0],
+                        status: 'AVAILABLE'
+                    });
+                    
+                    if (currentSlot) {
+                        rangeStart = currentSlot;
+                        rangeEnd = currentSlot;
+                    }
+                }
+            }
+        });
+
+        onChange({ availabilities });
+    }, [selectedSlots, onChange]);
 
     // Marquee Selection State
     const [isDragging, setIsDragging] = useState(false);
@@ -40,19 +110,19 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
     const [initialAvailability, setInitialAvailability] = useState<string[]>([]);
     const gridRef = useRef<HTMLDivElement>(null);
 
-    // Reduced time slots: 8:00 AM - 8:00 PM (12 hours instead of 16)
+    // Reduced time slots: 8:00 AM - 8:00 PM (12 hours)
     const timeSlots = Array.from({ length: 12 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
 
     const handleCellClick = (date: Date, hour: number) => {
         const slotDate = new Date(date);
         slotDate.setHours(hour, 0, 0, 0);
         const slotISO = slotDate.toISOString();
-        const isCurrentlyAvailable = availability.includes(slotISO);
+        const isCurrentlyAvailable = selectedSlots.includes(slotISO);
 
         if (isCurrentlyAvailable) {
-            setAvailability(prev => prev.filter(s => s !== slotISO));
+            setSelectedSlots(prev => prev.filter(s => s !== slotISO));
         } else {
-            setAvailability(prev => [...prev, slotISO]);
+            setSelectedSlots(prev => [...prev, slotISO]);
         }
     };
 
@@ -70,10 +140,10 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
         const slotDate = new Date(date);
         slotDate.setHours(hour, 0, 0, 0);
         const slotISO = slotDate.toISOString();
-        const mode = availability.includes(slotISO) ? 'removing' : 'adding';
+        const mode = selectedSlots.includes(slotISO) ? 'removing' : 'adding';
         setSelectionMode(mode);
 
-        setInitialAvailability([...availability]);
+        setInitialAvailability([...selectedSlots]);
         setIsDragging(true);
     };
 
@@ -140,12 +210,12 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                 }
             }
         });
-        setAvailability(Array.from(newAvailability));
+        setSelectedSlots(Array.from(newAvailability));
     }, [selectionRect, selectionMode, initialAvailability, isDragging]);
 
-    // Group slots by day and convert to time ranges
+    // Group slots by day and convert to time ranges for display
     const groupedSlots: { [key: string]: Date[] } = {};
-    availability.forEach(slot => {
+    selectedSlots.forEach(slot => {
         const date = new Date(slot);
         const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
         if (!groupedSlots[dayName]) {
@@ -264,7 +334,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                                             const slotDate = new Date(day);
                                             slotDate.setHours(hour, 0, 0, 0);
                                             const slotISO = slotDate.toISOString();
-                                            const isAvailable = availability.includes(slotISO);
+                                            const isAvailable = selectedSlots.includes(slotISO);
 
                                             return (
                                                 <div
@@ -302,10 +372,10 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
 
                 {/* Right: Selected Slots List - Sticky */}
                 <div className="lg:sticky lg:top-4 h-fit">
-                    {availability.length > 0 ? (
+                    {selectedSlots.length > 0 ? (
                         <div className="bg-white border border-gray-200 rounded-lg p-2.5 max-h-[380px] overflow-y-auto">
                             <h4 className="font-semibold text-xs text-gray-800 mb-2">
-                                Selected Slots ({availability.length})
+                                Selected Slots ({selectedSlots.length})
                             </h4>
                             <div className="space-y-1.5">
                                 {sortedDays.map(day => (

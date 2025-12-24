@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { FiUserPlus, FiCalendar, FiTrendingUp } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 import useIntersectionObserver from "./useIntersectionObserver";
 
 interface StepCardProps {
@@ -21,6 +22,7 @@ const StepCard: React.FC<StepCardProps> = ({ icon, title, description, delay, is
 );
 
 const HowToStart: React.FC = () => {
+    const { t } = useTranslation();
     const sectionRef = useRef<HTMLElement>(null);
     const isVisible = useIntersectionObserver(sectionRef as React.RefObject<Element>, { threshold: 0.1 });
 
@@ -28,27 +30,27 @@ const HowToStart: React.FC = () => {
         <section ref={sectionRef} className="bg-white py-16 sm:py-24">
             <div className="max-w-7xl mx-auto px-4 text-center">
                 <h2 className={`text-4xl font-bold text-gray-800 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
-                    Start in Just a Few Minutes
+                    {t('becomeTutor.howToStart.title')}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-12">
                     <StepCard
                         icon={<FiUserPlus size={40} />}
-                        title="1. Create Your Profile"
-                        description="Complete our simple application to showcase your skills and qualifications."
+                        title={t('becomeTutor.howToStart.steps.profile.title')}
+                        description={t('becomeTutor.howToStart.steps.profile.description')}
                         delay="0.1s"
                         isVisible={isVisible}
                     />
                     <StepCard
                         icon={<FiCalendar size={40} />}
-                        title="2. Set Your Availability"
-                        description="You decide when and how often you want to teach. Total flexibility."
+                        title={t('becomeTutor.howToStart.steps.availability.title')}
+                        description={t('becomeTutor.howToStart.steps.availability.description')}
                         delay="0.2s"
                         isVisible={isVisible}
                     />
                     <StepCard
                         icon={<FiTrendingUp size={40} />}
-                        title="3. Start Earning"
-                        description="Once approved, students can book sessions and you can start earning."
+                        title={t('becomeTutor.howToStart.steps.earning.title')}
+                        description={t('becomeTutor.howToStart.steps.earning.description')}
                         delay="0.3s"
                         isVisible={isVisible}
                     />

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaShieldAlt, FaAward, FaCheckCircle } from 'react-icons/fa';
 import { FiMail, FiArrowRight } from 'react-icons/fi';
 import useIntersectionObserver from '../../hooks/useIntersectionObserver';
@@ -34,6 +35,7 @@ const SocialIcon: React.FC<{ href: string; ariaLabel: string; children: React.Re
 );
 
 const Footer: React.FC = () => {
+    const { t } = useTranslation();
     const footerRef = useRef<HTMLElement>(null);
     const isVisible = useIntersectionObserver(footerRef as React.RefObject<Element>, { threshold: 0.1 });
     
@@ -80,22 +82,22 @@ const Footer: React.FC = () => {
                                     <LernenLogo />
                                 </Link>
                                 <p className="text-sm text-white leading-relaxed mb-6 max-w-md">
-                                    Empowering minds through accessible, personalized, and engaging online education for a brighter future.
+                                    {t('footer.description')}
                                 </p>
                                 
                                 {/* Trust Badges */}
                                 <div className="flex flex-wrap gap-3 mb-6">
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
                                         <FaShieldAlt className="text-teal-300" size={14} />
-                                        <span className="text-xs text-white font-medium">Secure</span>
+                                        <span className="text-xs text-white font-medium">{t('footer.secure')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
                                         <FaAward className="text-teal-300" size={14} />
-                                        <span className="text-xs text-white font-medium">Verified</span>
+                                        <span className="text-xs text-white font-medium">{t('footer.verified')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
                                         <FaCheckCircle className="text-teal-300" size={14} />
-                                        <span className="text-xs text-white font-medium">Trusted</span>
+                                        <span className="text-xs text-white font-medium">{t('footer.trusted')}</span>
                                     </div>
                                 </div>
 
@@ -118,31 +120,31 @@ const Footer: React.FC = () => {
 
                             {/* Column 2: For Student */}
                             <div>
-                                <h4 className="font-bold text-base mb-5 text-white">For Students</h4>
+                                <h4 className="font-bold text-base mb-5 text-white">{t('footer.forStudents')}</h4>
                                 <ul className="space-y-2.5">
-                                    <FooterLink to="/find-tutors">Find a Tutor</FooterLink>
-                                    <FooterLink to="/profile/my-bookings">My Bookings</FooterLink>
-                                    <FooterLink to="/profile/my-learning">My Learning</FooterLink>
-                                    <FooterLink to="/profile/favourites">Favourites</FooterLink>
+                                    <FooterLink to="/find-tutors">{t('footer.findTutor')}</FooterLink>
+                                    <FooterLink to="/profile/my-bookings">{t('footer.myBookings')}</FooterLink>
+                                    <FooterLink to="/profile/my-learning">{t('footer.myLearning')}</FooterLink>
+                                    <FooterLink to="/profile/favourites">{t('footer.favourites')}</FooterLink>
                                 </ul>
                             </div>
 
                             {/* Column 3: For Tutors */}
                             <div>
-                                <h4 className="font-bold text-base mb-5 text-white">For Tutors</h4>
+                                <h4 className="font-bold text-base mb-5 text-white">{t('footer.forTutors')}</h4>
                                 <ul className="space-y-2.5">
-                                    <FooterLink to="/become-a-tutor">Become a Tutor</FooterLink>
-                                    <FooterLink to="/dashboard">Tutor Dashboard</FooterLink>
-                                    <FooterLink to="/dashboard/payouts">Payouts</FooterLink>
-                                    <FooterLink to="/dashboard/schedule">Schedule</FooterLink>
+                                    <FooterLink to="/become-a-tutor">{t('footer.becomeTutor')}</FooterLink>
+                                    <FooterLink to="/dashboard">{t('footer.tutorDashboard')}</FooterLink>
+                                    <FooterLink to="/dashboard/payouts">{t('footer.payouts')}</FooterLink>
+                                    <FooterLink to="/dashboard/schedule">{t('footer.schedule')}</FooterLink>
                                 </ul>
                             </div>
                             
                             {/* Column 4: Newsletter */}
                             <div>
-                                <h4 className="font-bold text-base mb-5 text-white">Stay Updated</h4>
+                                <h4 className="font-bold text-base mb-5 text-white">{t('footer.stayUpdated')}</h4>
                                 <p className="text-xs text-white mb-4">
-                                    Get the latest updates, tips, and exclusive offers delivered to your inbox.
+                                    {t('footer.newsletterDescription')}
                                 </p>
                                 <form onSubmit={handleNewsletterSubmit} className="space-y-3">
                                     <div className="relative">
@@ -151,7 +153,7 @@ const Footer: React.FC = () => {
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="Enter your email"
+                                            placeholder={t('footer.enterEmail')}
                                             required
                                             className="w-full pl-10 pr-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/30 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-white/50 text-sm transition-all"
                                         />
@@ -164,11 +166,11 @@ const Footer: React.FC = () => {
                                         {isSubmitted ? (
                                             <>
                                                 <FaCheckCircle size={16} />
-                                                <span>Subscribed!</span>
+                                                <span>{t('footer.subscribed')}</span>
                                             </>
                                         ) : (
                                             <>
-                                                <span>Subscribe</span>
+                                                <span>{t('footer.subscribe')}</span>
                                                 <FiArrowRight size={16} />
                                             </>
                                         )}
@@ -184,11 +186,11 @@ const Footer: React.FC = () => {
                     <div className="max-w-7xl mx-auto px-4 py-5">
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                             <p className="text-xs text-white text-center md:text-left">
-                                &copy; {new Date().getFullYear()} Lernen. All Rights Reserved.
+                                {t('footer.copyright', { year: new Date().getFullYear() })}
                             </p>
                             <div className="flex gap-6 text-xs text-white">
-                                <Link to="/privacy" className="hover:text-teal-200 transition-colors">Privacy Policy</Link>
-                                <Link to="/terms" className="hover:text-teal-200 transition-colors">Terms of Service</Link>
+                                <Link to="/privacy" className="hover:text-teal-200 transition-colors">{t('footer.privacyPolicy')}</Link>
+                                <Link to="/terms" className="hover:text-teal-200 transition-colors">{t('footer.termsOfService')}</Link>
                             </div>
                         </div>
                     </div>

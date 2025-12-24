@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { HiSparkles, HiChevronDown } from "react-icons/hi";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
-import * as commonService from "../../../../services/commonService";
-import type { Subject, Tutor, Category } from "../../../../types/api.ts";
+import commonUtils from "../../../../utils/commonUtils";
+import type { Category, Subject } from "../../../../types/common";
+import type { TutorOnboardingData } from "../../../../types/tutor";
 
 interface ProfessionalProfileStepProps {
-    data: Partial<Tutor>;
-    onChange: (data: Partial<Tutor>) => void;
+    data: Partial<TutorOnboardingData>;
+    onChange: (data: Partial<TutorOnboardingData>) => void;
 }
 
 const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data, onChange }) => {
@@ -23,7 +24,7 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
-                const subjects = await commonService.getSubjects();
+                const subjects = await commonUtils.getSubjects();
                 setSubjectOptions(subjects);
             } catch (error) {
                 console.error("Failed to fetch subjects:", error);
@@ -35,7 +36,7 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const categories = await commonService.getCategories();
+                const categories = await commonUtils.getCategories();
                 setCategoryOptions(categories);
             } catch (error) {
                 console.error("Failed to fetch categories:", error);
@@ -84,6 +85,28 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
                 />
                 <p className="text-xs text-gray-500 mt-1">
                     This will be displayed under your name on your profile card.
+                </p>
+            </div>
+
+            {/* Session Fee */}
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Session Fee (per hour) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={data.currentSessionFee || ''}
+                        onChange={(e) => onChange({ currentSessionFee: parseFloat(e.target.value) || 0 })}
+                        placeholder="0.00"
+                        className={`${inputStyles} pl-8`}
+                    />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                    Set your hourly rate for tutoring sessions.
                 </p>
             </div>
 

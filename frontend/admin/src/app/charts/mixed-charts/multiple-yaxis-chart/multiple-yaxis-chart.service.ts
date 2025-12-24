@@ -15,10 +15,9 @@ export class MultipleYaxisChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -160,7 +159,7 @@ export class MultipleYaxisChartService {
                     tooltip: {
                         fixed: {
                             enabled: true,
-                            position: "topLeft", // topRight, topLeft, bottomRight, bottomLeft
+                            position: "topLeft", 
                             offsetY: 30,
                             offsetX: 60
                         }
@@ -191,7 +190,6 @@ export class MultipleYaxisChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#multiple_yaxis_chart'), options);
                 chart.render();
             } catch (error) {

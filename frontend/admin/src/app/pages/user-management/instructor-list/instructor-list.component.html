@@ -1,0 +1,179 @@
+<div class="mb-[25px] md:flex items-center justify-between">
+    <h5 class="!mb-0">
+        Instructors List
+    </h5>
+    <ol class="breadcrumb mt-[12px] md:mt-0">
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+                    home
+                </i>
+                Dashboard
+            </a>
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            User Management
+        </li>
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            Instructors List
+        </li>
+    </ol>
+</div>
+
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
+        <div class="trezo-card-title">
+            <app-search-input
+                [placeholder]="'Search instructors by name.....'"
+                [width]="'sm:w-[265px]'"
+                (search)="onSearchInstructors($event)">
+            </app-search-input>
+        </div>
+    </div>
+    <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
+        <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
+            <table id="instructors-list-table" class="w-full bg-white dark:bg-[#0c1427]">
+                <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                    <tr>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
+                            ID
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
+                            Name
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
+                            Email
+                        </th>
+
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
+                            Join Date
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Rating
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Country
+                        </th>
+                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="text-black dark:text-white">
+                    @for (instructor of paginatedInstructors; track instructor.id) {
+                        <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium" [title]="instructor.id">
+                                    #{{ instructor.id | truncate }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-600 dark:text-gray-300 font-medium">
+                                    {{ instructor.name }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ instructor.email }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ instructor.joinDate | date:'dd/MM/yyyy HH:mm:ss' }}
+                                </span>
+                            </td>
+
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ getRating(instructor) }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ getCountryCode(instructor) }}
+                                </span>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                                <div class="flex items-center gap-[9px]">
+                                    <button
+                                        type="button"
+                                        (click)="viewDetail(instructor)"
+                                        class="text-primary-500 leading-none hover:text-primary-600 transition-colors">
+                                        <i class="material-symbols-outlined !text-md">
+                                            visibility
+                                        </i>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        (click)="openDeleteDialog(instructor)"
+                                        class="text-danger-500 leading-none hover:text-danger-600 transition-colors">
+                                        <i class="material-symbols-outlined !text-md">
+                                            delete
+                                        </i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (paginatedInstructors.length === 0) {
+                        <tr>
+                            <td [attr.colspan]="6" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                                No instructors found
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="px-[25px] pt-[12px] md:pt-[14px] sm:flex sm:items-center justify-between">
+            <p class="!mb-0 text-sm">
+                {{ showingText }}
+            </p>
+            @if (totalPages > 1) {
+            <ol class="mt-[10px] sm:mt-0">
+                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                    <button
+                        type="button"
+                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        [disabled]="currentPage === 1"
+                        (click)="previousPage()">
+                        <span class="opacity-0">0</span>
+                        <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_left</i>
+                    </button>
+                </li>
+                @for (page of visiblePages; track page) {
+                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                    <button
+                        type="button"
+                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500"
+                        [class]="page === currentPage ? 'border-primary-500 bg-primary-500 text-white' : 'border-gray-100 dark:border-[#172036]'"
+                        (click)="goToPage(page)">
+                        {{ page }}
+                    </button>
+                </li>
+                }
+                <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                    <button
+                        type="button"
+                        class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        [disabled]="currentPage === totalPages"
+                        (click)="nextPage()">
+                        <span class="opacity-0">0</span>
+                        <i class="material-symbols-outlined left-0 right-0 absolute top-1/2 -translate-y-1/2">chevron_right</i>
+                    </button>
+                </li>
+            </ol>
+            }
+        </div>
+    </div>
+</div>
+
+<app-confirm-dialog
+    [isOpen]="showDeleteDialog"
+    title="Xóa Giảng Viên"
+    [message]="'Bạn có chắc chắn muốn xóa giảng viên ' + (instructorToDelete?.name || '') + '?'"
+    cancelText="Hủy"
+    confirmText="Xóa"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()">
+</app-confirm-dialog>

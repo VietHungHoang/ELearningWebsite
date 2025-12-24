@@ -15,10 +15,9 @@ export class RotatedLabelsColumnChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -135,12 +134,11 @@ export class RotatedLabelsColumnChartService {
                             inverseColors: true,
                             opacityFrom: 0.85,
                             opacityTo: 0.85,
-                            // stops: [50, 0, 100]
+
                         }
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#rotated_labels_column_chart'), options);
                 chart.render();
             } catch (error) {

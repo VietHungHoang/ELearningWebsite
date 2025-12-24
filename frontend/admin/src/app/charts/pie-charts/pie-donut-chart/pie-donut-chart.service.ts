@@ -15,10 +15,9 @@ export class PieDonutChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [60, 30, 10],
                     chart: {
@@ -55,7 +54,6 @@ export class PieDonutChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#pie_donut_chart'), options);
                 chart.render();
             } catch (error) {

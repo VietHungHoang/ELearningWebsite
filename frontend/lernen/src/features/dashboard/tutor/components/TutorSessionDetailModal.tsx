@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { HiX, HiPlay, HiCalendar } from 'react-icons/hi';
-
-interface Session {
-  id: number;
-  title: string;
-  date: Date;
-  studentName: string;
-  studentAvatar: string;
-}
+import type { Session } from '../../../../types/class';
 
 interface TutorSessionDetailModalProps {
   session: Session;
@@ -38,8 +31,9 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
         }
     }, [position]);
 
-    const formattedDate = session.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    const formattedTime = session.date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const sessionDate = new Date(session.sessionDatetime);
+    const formattedDate = sessionDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const formattedTime = sessionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
     return (
         <div 
@@ -51,8 +45,11 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
 
             <div className="flex justify-between items-start">
                 <div>
-                    <h3 className="font-bold text-lg text-gray-800">{session.title}</h3>
+                    <h3 className="font-bold text-lg text-gray-800">{session.className}</h3>
                     <p className="text-sm text-gray-500 mt-1">{formattedDate}</p>
+                    {session.sessionType && (
+                        <p className="text-xs text-blue-600 mt-1">{session.sessionType} Session</p>
+                    )}
                 </div>
                 <button onClick={onClose} className="p-1 -mr-2 -mt-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
                     <HiX className="w-4 h-4" />
@@ -60,16 +57,29 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
             </div>
             
             <div className="flex items-center gap-3 my-4">
-                <img src={session.studentAvatar} alt={session.studentName} className="w-10 h-10 rounded-full" />
+                <img src={session.students[0].avatarUrl} alt={session.students[0].fullName} className="w-10 h-10 rounded-full" />
                 <div>
-                    <p className="text-sm font-semibold text-gray-800">{session.studentName}</p>
-                    <p className="text-xs text-gray-500">Student</p>
+                    <p className="text-sm font-semibold text-gray-800">
+                        {session.students.length === 1 
+                            ? session.students[0].fullName 
+                            : `${session.students[0].fullName} (+${session.students.length - 1} more)`
+                        }
+                    </p>
+                    <p className="text-xs text-gray-500">
+                        {session.students.length === 1 ? 'Student' : `${session.students.length} Students`}
+                    </p>
                 </div>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-3 text-center">
                 <p className="text-sm font-semibold text-gray-700">{formattedTime}</p>
             </div>
+            
+            {session.notes && (
+                <div className="bg-blue-50 rounded-lg p-3 mt-3">
+                    <p className="text-sm text-blue-800">{session.notes}</p>
+                </div>
+            )}
             
             <div className="mt-4 flex flex-col gap-2">
                 <button className="w-full flex items-center justify-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-[#084c43] transition-colors">

@@ -80,7 +80,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
     // Calculate max height based on maxVisibleItems
     // Each item is approximately 40px (p-2 = 8px padding + ~32px content)
     // Search bar adds ~48px if present
+    // space-y-1 adds 4px gaps between items
     const itemHeight = 40;
+    const gapHeight = 4; // space-y-1 = 4px
     const searchBarHeight = hasSearch ? 48 : 0;
     const maxHeight = (maxVisibleItems * itemHeight) + searchBarHeight + 16; // +16 for padding
 

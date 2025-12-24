@@ -12,22 +12,22 @@ import { RouterLink } from '@angular/router';
 })
 export class ClipboardComponent {
 
-    copyText: string = '#annual90conference2025'; // Bind this to your input
-    copied: boolean = false; // Tracks if the text is copied
-    buttonText: string = 'Copy'; // Button text
+    copyText: string = '#annual90conference2025'; 
+    copied: boolean = false; 
+    buttonText: string = 'Copy'; 
     copyToClipboard(input: HTMLInputElement): void {
         if (!input) return;
-        // Select and copy the input field value
+
         input.select();
-        input.setSelectionRange(0, 99999); // For mobile devices
+        input.setSelectionRange(0, 99999); 
         navigator.clipboard
         .writeText(input.value)
         .then(() => {
-            this.copied = true; // Change icon
-            this.buttonText = ''; // Remove text temporarily
+            this.copied = true; 
+            this.buttonText = ''; 
             setTimeout(() => {
-                this.copied = false; // Revert icon
-                this.buttonText = 'Copy'; // Restore text
+                this.copied = false; 
+                this.buttonText = 'Copy'; 
             }, 2000);
         })
         .catch((err) => {

@@ -1,18 +1,16 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-to-do-list',
-    imports: [RouterLink],
-    templateUrl: './to-do-list.component.html',
-    styleUrl: './to-do-list.component.scss'
+  selector: 'app-to-do-list',
+  standalone: true,
+  template: `
+    <div class="p-4">
+      <h1>To Do List</h1>
+      <p>This component is under development.</p>
+    </div>
+  `,
+  styles: []
 })
 export class ToDoListComponent {
-
-    // Popup Trigger
-    classApplied = false;
-    toggleClass() {
-        this.classApplied = !this.classApplied;
-    }
 
 }

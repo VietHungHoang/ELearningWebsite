@@ -1,5 +1,17 @@
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
+// Helper function to decode JWT and extract userId
+const getUserIdFromToken = (token: string): string | null => {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.userId || decoded.sub || decoded.id || null;
+  } catch (error) {
+    console.error('Failed to decode token:', error);
+    return null;
+  }
+};
+
 // Create axios instance with base configuration
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://1mf17bgk-8081.asse.devtunnels.ms/api',
@@ -22,6 +34,12 @@ axiosInstance.interceptors.request.use(
       const token = localStorage.getItem('accessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        
+        // Add X-User-Id header for chat endpoints
+        const userId = getUserIdFromToken(token);
+        if (userId) {
+          config.headers['X-User-Id'] = userId;
+        }
       }
     }
     return config;

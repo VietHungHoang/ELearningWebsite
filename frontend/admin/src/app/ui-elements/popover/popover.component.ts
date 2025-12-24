@@ -10,23 +10,21 @@ import { BottomPopoverComponent } from './bottom-popover/bottom-popover.componen
 })
 export class PopoverComponent {
 
-    popoverVisible = false;  // Controls visibility of the popover
-    popoverText: string = ''; // Text content for the popover
+    popoverVisible = false;  
+    popoverText: string = ''; 
 
-    // Toggles the visibility of the popover
     togglePopover(event: MouseEvent, text: string): void {
-        // Prevent the event from propagating to the document click listener
+
         event.stopPropagation();
-        this.popoverText = text;  // Set the popover text from the data attribute
-        this.popoverVisible = !this.popoverVisible;  // Toggle the visibility
+        this.popoverText = text;  
+        this.popoverVisible = !this.popoverVisible;  
     }
 
-    // Close the popover when clicking outside
     @HostListener('document:click', ['$event'])
     closePopover(event: MouseEvent): void {
         const button = document.querySelector('.custom-popover') as HTMLElement;
         if (!button.contains(event.target as Node)) {
-            this.popoverVisible = false; // Hide the popover if clicked outside
+            this.popoverVisible = false; 
         }
     }
 

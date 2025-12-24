@@ -15,10 +15,9 @@ export class PieMonochromeChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [25, 15, 44, 55, 41, 17],
                     chart: {
@@ -60,7 +59,6 @@ export class PieMonochromeChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#pie_monochrome_chart'), options);
                 chart.render();
             } catch (error) {

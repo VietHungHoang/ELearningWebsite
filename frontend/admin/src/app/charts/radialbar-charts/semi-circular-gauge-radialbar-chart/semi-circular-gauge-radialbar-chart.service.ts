@@ -15,10 +15,9 @@ export class SemiCircularGaugeRadialbarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [76],
                     chart: {
@@ -32,7 +31,7 @@ export class SemiCircularGaugeRadialbarChartService {
                             track: {
                                 background: "#e7e7e7",
                                 strokeWidth: "97%",
-                                margin: 5, // margin is in pixels
+                                margin: 5, 
                                 dropShadow: {
                                     enabled: true,
                                     top: 2,
@@ -60,14 +59,13 @@ export class SemiCircularGaugeRadialbarChartService {
                             inverseColors: false,
                             opacityFrom: 1,
                             opacityTo: 1,
-                            // stops: [0, 50, 53, 91]
+
                         }
                     },
                     labels: ["Average Results"],
                     colors: ["#605DFF"]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#semi_circular_gauge_radialbar_chart'), options);
                 chart.render();
             } catch (error) {

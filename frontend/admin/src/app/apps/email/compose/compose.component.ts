@@ -16,8 +16,7 @@ export class ComposeComponent {
         @Inject(PLATFORM_ID) private platformId: Object
     ) {}
 
-    // Text Editor
-    editor!: Editor | null;  // Make it nullable
+    editor!: Editor | null;  
     toolbar: Toolbar = [
         ['bold', 'italic'],
         ['underline', 'strike'],
@@ -31,7 +30,7 @@ export class ComposeComponent {
 
     ngOnInit(): void {
         if (isPlatformBrowser(this.platformId)) {
-            // Initialize the editor only in the browser
+
             this.editor = new Editor();
         }
     }

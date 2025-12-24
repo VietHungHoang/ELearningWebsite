@@ -10,14 +10,12 @@ import { NgClass } from '@angular/common';
 })
 export class ChatComponent {
 
-    // Tabs
     currentTab = 'tab1';
     switchTab(event: MouseEvent, tab: string) {
         event.preventDefault();
         this.currentTab = tab;
     }
 
-    // Card Header Menu
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;

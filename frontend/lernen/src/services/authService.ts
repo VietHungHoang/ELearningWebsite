@@ -7,6 +7,7 @@ import type {
     StartSignUpRequest,
     AccountCreatedResponse,
 } from "../types/api";
+import type { TutorOnboarding } from "../types/tutor";
 
 const login = async (request: LoginRequest): Promise<LoginResponse> => {
     const response = await apiService.post<LoginResponse>("v1/auth/login", request);
@@ -62,27 +63,31 @@ const googleLogin = async (request: { code: string; redirectUri: string }): Prom
     return response.data as { accessToken: string; refreshToken: string; tokenType: string; expiresIn: number; scope: string };
 };
 
-const getOnboardingStatus = async (): Promise<{ status: number }> => {
-    const response = await apiService.get('/v1/tutors/onboarding/status');
+const getOnboardingLatestStep = async (): Promise<{ step: number }> => {
+    const response = await apiService.get('/v1/public/tutors/${tutorId}/onboarding/step');
     if (!response.success) {
         throw new Error(response.message);
     }
-    return response.data as { status: number };
+    return response.data as { step: number };
 };
 
-const getOnboardingStep = async (tutorId: number, stepId: number): Promise<any> => {
-    const response = await apiService.get(`/v1/public/tutors/${tutorId}/onboarding/step/${stepId}`);
+const getOnboardingData = async (tutorId: string): Promise<TutorOnboarding> => {
+    const response = await apiService.get(`/v1/tutors/${tutorId}/onboarding`);
     if (!response.success) {
         throw new Error(response.message);
     }
-    return response.data;
+    return response.data as TutorOnboarding;
 };
 
-const saveOnboardingStep = async (tutorId: number, stepId: number, data: any): Promise<void> => {
-    const response = await apiService.put(`/v1/public/tutors/${tutorId}/onboarding/step/${stepId}`, data);
+const saveOnboardingStep = async (tutorId: string, step: number, data: string): Promise<void> => {
+    const payload = { 
+        step: step,
+        data: data // data đã là string JSON từ frontend
+    };
+    const response = await apiService.put(`/v1/tutors/${tutorId}/onboarding`, payload);
     if (!response.success) {
         throw new Error(response.message);
     }
 };
 
-export default { login, signup, signUpInitiate: startSignUp, verifyOtp, createAccount, getGoogleAuthUrl, googleLogin, getOnboardingStatus, getOnboardingStep, saveOnboardingStep };
+export default { login, signup, signUpInitiate: startSignUp, verifyOtp, createAccount, getGoogleAuthUrl, googleLogin, getOnboardingLatestStep, getOnboardingData, saveOnboardingStep };

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiAlertTriangle } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface ConfirmationModalProps {
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message, confirmButtonText = "Confirm", confirmButtonVariant = 'danger' }) => {
+    const { t } = useTranslation();
     const [shouldRender, setShouldRender] = useState(isOpen);
 
     useEffect(() => {
@@ -59,14 +61,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
                         className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:ml-3 sm:w-auto sm:text-sm transition-colors ${buttonStyles[confirmButtonVariant]}`}
                         onClick={onConfirm}
                     >
-                        {confirmButtonText}
+                        {confirmButtonText || t('common.confirm')}
                     </button>
                     <button
                         type="button"
                         className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm"
                         onClick={onClose}
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                 </div>
             </div>

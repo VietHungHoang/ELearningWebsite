@@ -15,10 +15,9 @@ export class StrockedCircularGaugeRadialbarChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [67],
                     chart: {
@@ -55,7 +54,7 @@ export class StrockedCircularGaugeRadialbarChartService {
                             inverseColors: false,
                             opacityFrom: 1,
                             opacityTo: 1,
-                            // stops: [0, 50, 65, 91]
+
                         }
                     },
                     stroke: {
@@ -65,7 +64,6 @@ export class StrockedCircularGaugeRadialbarChartService {
                     colors: ["#605DFF"]
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#strocked_circular_gauge_radialbar_chart'), options);
                 chart.render();
             } catch (error) {

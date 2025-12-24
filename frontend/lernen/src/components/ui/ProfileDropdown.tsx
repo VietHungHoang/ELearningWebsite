@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiBookOpen, FiLogOut, FiSettings, FiCalendar, FiCreditCard, FiHeart, FiSearch, FiMessageSquare, FiStar } from 'react-icons/fi';
+import { FiBookOpen, FiLogOut, FiSettings, FiCalendar, FiCreditCard, FiHeart, FiMessageSquare, FiHome, FiTag, FiBell, FiCode, FiShoppingBag, FiFileText, FiUsers } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -27,24 +27,35 @@ const ProfileDropdown: React.FC = () => {
         navigate('/');
     };
 
-    const getSwitchRoleText = () => {
-        if (user?.role === 'student') {
-            return {
-                title: 'Switch to tutor account',
-                description: 'You can switch back to student account anytime with one click',
-                buttonText: 'Switch to tutor'
-            };
-        } else if (user?.role === 'tutor') {
-            return {
-                title: 'Switch to student account',
-                description: 'You can switch back to tutor account anytime with one click',
-                buttonText: 'Switch to student'
-            };
-        }
-        return null;
-    };
+    // Tutor menu items
+    const tutorMenuItems = [
+        { icon: <FiHome />, label: "Dashboard", path: "/dashboard" },
+        { icon: <FiUsers />, label: "My Students", path: "/dashboard/my-students" },
+        { icon: <FiBookOpen />, label: "My Courses", path: "/dashboard/my-courses" },
+        { icon: <FiBookOpen />, label: "My Class", path: "/dashboard/my-class" },
+        { icon: <FiCalendar />, label: "Schedule", path: "/dashboard/schedule" },
+        { icon: <FiCreditCard />, label: "Payouts", path: "/dashboard/payouts" },
+        { icon: <FiTag />, label: "Deals & Coupons", path: "/dashboard/deals-coupons" },
+        { icon: <FiBell />, label: "Requests", path: "/dashboard/requests" },
+        { icon: <FiMessageSquare />, label: "Inbox", path: "/dashboard/inbox" },
+        { icon: <FiSettings />, label: "Profile Settings", path: "/dashboard/profile-settings/personal-details" },
+        { icon: <FiCode />, label: "API", path: "/dashboard/api" },
+    ];
 
-    const switchRoleData = getSwitchRoleText();
+    // Student menu items
+    const studentMenuItems = [
+        { icon: <FiCalendar />, label: "My Bookings", path: "/dashboard/my-bookings" },
+        { icon: <FiBookOpen />, label: "My Courses", path: "/dashboard/my-courses" },
+        { icon: <FiShoppingBag />, label: "My Purchases", path: "/dashboard/purchases" },
+        { icon: <FiFileText />, label: "Certificates", path: "/dashboard/certificates" },
+        { icon: <FiMessageSquare />, label: "Messages", path: "/dashboard/messages" },
+        { icon: <FiHeart />, label: "Favourites", path: "/profile/favourites" },
+        { icon: <FiSettings />, label: "Profile Settings", path: "/dashboard/profile-settings/personal-details" },
+    ];
+
+    // Select menu items based on user role
+    const menuItems = user?.role === 'tutor' ? tutorMenuItems : studentMenuItems;
+
     return (
         <div className="absolute top-full right-0 mt-3 w-72 bg-white rounded-xl shadow-lg z-50 border border-gray-100 p-4 animate-dropdown-in">
             {/* User Info */}
@@ -60,32 +71,16 @@ const ProfileDropdown: React.FC = () => {
                 </div>
             </div>
 
-            {/* Switch Role */}
-            {/* {switchRoleData && (
-                <div className="my-4 p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-bold text-gray-800">{switchRoleData.title}</h4>
-                    <p className="text-xs text-gray-500 mt-1">{switchRoleData.description}</p>
-                    <button className="mt-3 w-full flex items-center justify-center gap-2 bg-[#345B55] text-white font-semibold py-2 px-3 rounded-lg text-sm hover:bg-opacity-90 transition-colors">
-                        <span>Icon</span>
-                        <span>{switchRoleData.buttonText}</span>
-                    </button>
-                </div>
-            )} */}
-            
             {/* Navigation Links */}
-            <nav className="space-y-1">
-                <NavItem icon={<FiSettings />} label="Profile Settings" onClick={() => navigate('/profile/profile-settings')} />
-                <NavItem icon={<FiCalendar />} label="My Bookings" onClick={() => navigate('/profile/my-bookings')} />
-                <NavItem icon={<FiBookOpen />} label="My Learning" onClick={() => navigate('/profile/my-learning')} />
-                <NavItem icon={<FiCreditCard />} label="Billing Details" onClick={() => navigate('/profile/billing-details')} />
-                <NavItem icon={<FiHeart />} label="Favourites" onClick={() => navigate('/profile/favourites')} />
-                <NavItem icon={<FiSearch />} label="Find Tutors" onClick={() => navigate('/profile/find-tutors')} />
-                <NavItem icon={<FiBookOpen />} label="Find Courses" onClick={() => navigate('/profile/find-courses')} />
-                <NavItem icon={<FiMessageSquare />} label="Inbox" onClick={() => navigate('/profile/inbox')} />
-                <NavItem icon={<FiStar />} label="Subscriptions" onClick={() => navigate('/profile/subscriptions')} />
-                {user?.role === 'tutor' && (
-                    <NavItem icon={<FiSettings />} label="Tutor Dashboard" onClick={() => navigate('/dashboard')} />
-                )}
+            <nav className="space-y-1 mt-4">
+                {menuItems.map((item, index) => (
+                    <NavItem
+                        key={index}
+                        icon={item.icon}
+                        label={item.label}
+                        onClick={() => navigate(item.path)}
+                    />
+                ))}
                 <div className="pt-2 mt-2 border-t border-gray-100">
                     <NavItem icon={<FiLogOut />} label="Sign out" isSignOut onClick={handleLogout} />
                 </div>

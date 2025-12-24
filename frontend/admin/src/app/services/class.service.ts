@@ -1,0 +1,410 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+
+export type ClassStatus = 'upcoming' | 'ongoing' | 'completed';
+export type ClassType = '1-on-1' | '1-on-n';
+
+export interface GroupClass {
+  id: string;
+  class_name: string;
+  class_description: string;
+  class_type: ClassType;
+  instructor_id: string;
+  instructor_name: string;
+  course_id: string;
+  course_name: string;
+  start_datetime: Date;
+  end_datetime: Date;
+  duration_in_minutes: number;
+  price_per_student: number;
+  max_capacity: number;
+  enrollment_count: number;
+  platform_fee_percentage: number;
+  status: ClassStatus;
+  created_at: Date;
+}
+
+export interface StudentEnrollment {
+  class_id: string;
+  student_id: string;
+  student_name: string;
+  student_email: string;
+  registered_at: Date;
+}
+
+export interface ClassFinancialReport {
+  class_id: string;
+  price_per_student: number;
+  enrollment_count: number;
+  total_revenue: number;
+  platform_fee: number;
+  instructor_payout: number;
+  revenue_per_hour: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ClassService {
+  private classesSubject = new BehaviorSubject<GroupClass[]>([]);
+  public classes$ = this.classesSubject.asObservable();
+
+  private enrollmentsSubject = new BehaviorSubject<{ [classId: string]: StudentEnrollment[] }>({});
+  public enrollments$ = this.enrollmentsSubject.asObservable();
+
+  constructor() {
+    this.initializeMockData();
+  }
+
+  private initializeMockData(): void {
+    const mockClasses: GroupClass[] = [
+      {
+        id: 'class_001',
+        class_name: 'Angular Advanced Fundamentals - Lớp 1',
+        class_description: 'Khóa học nâng cao Angular với các best practices và patterns hiện đại. Bao gồm: Reactive Forms, RxJS Advanced, Change Detection, Dependency Injection.',
+        class_type: '1-on-n',
+        instructor_id: 'instr_001',
+        instructor_name: 'Nguyễn Văn A',
+        course_id: 'course_001',
+        course_name: 'Angular Advanced',
+        start_datetime: new Date('2025-11-15T09:00:00'),
+        end_datetime: new Date('2025-11-15T10:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 150000,
+        max_capacity: 20,
+        enrollment_count: 18,
+        platform_fee_percentage: 20,
+        status: 'upcoming',
+        created_at: new Date('2025-10-01')
+      },
+      {
+        id: 'class_002',
+        class_name: 'React Hooks & State Management - Lớp 1',
+        class_description: 'Khóa học React Hooks từ cơ bản đến nâng cao. Tìm hiểu State, Context API, Custom Hooks, Redux Toolkit và Performance Optimization.',
+        class_type: '1-on-1',
+        instructor_id: 'instr_002',
+        instructor_name: 'Trần Thị B',
+        course_id: 'course_002',
+        course_name: 'React Pro',
+        start_datetime: new Date('2025-11-10T14:00:00'),
+        end_datetime: new Date('2025-11-10T15:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 140000,
+        max_capacity: 25,
+        enrollment_count: 22,
+        platform_fee_percentage: 20,
+        status: 'ongoing',
+        created_at: new Date('2025-10-02')
+      },
+      {
+        id: 'class_003',
+        class_name: 'TypeScript Mastery - Lớp 1',
+        class_description: 'Nắm vững TypeScript từ cơ bản đến các tính năng advanced. Bao gồm: Types, Interfaces, Generics, Decorators, Modules.',
+        class_type: '1-on-n',
+        instructor_id: 'instr_001',
+        instructor_name: 'Nguyễn Văn A',
+        course_id: 'course_003',
+        course_name: 'TypeScript Pro',
+        start_datetime: new Date('2025-11-05T10:00:00'),
+        end_datetime: new Date('2025-11-05T11:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 130000,
+        max_capacity: 30,
+        enrollment_count: 28,
+        platform_fee_percentage: 20,
+        status: 'completed',
+        created_at: new Date('2025-09-15')
+      },
+      {
+        id: 'class_004',
+        class_name: 'Node.js & Express - Lớp 2',
+        class_description: 'Xây dựng RESTful API bằng Node.js và Express. Tìm hiểu Middleware, Routing, Authentication, Database Integration.',
+        class_type: '1-on-1',
+        instructor_id: 'instr_003',
+        instructor_name: 'Lê Văn C',
+        course_id: 'course_004',
+        course_name: 'Backend Master',
+        start_datetime: new Date('2025-11-20T16:00:00'),
+        end_datetime: new Date('2025-11-20T17:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 160000,
+        max_capacity: 20,
+        enrollment_count: 15,
+        platform_fee_percentage: 20,
+        status: 'upcoming',
+        created_at: new Date('2025-10-05')
+      },
+      {
+        id: 'class_005',
+        class_name: 'Database Design - Lớp 1',
+        class_description: 'Thiết kế cơ sở dữ liệu hiệu quả. Bao gồm: Normalization, Index, Query Optimization, SQL Advanced.',
+        class_type: '1-on-n',
+        instructor_id: 'instr_002',
+        instructor_name: 'Trần Thị B',
+        course_id: 'course_005',
+        course_name: 'Database Pro',
+        start_datetime: new Date('2025-11-12T13:00:00'),
+        end_datetime: new Date('2025-11-12T14:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 120000,
+        max_capacity: 25,
+        enrollment_count: 20,
+        platform_fee_percentage: 20,
+        status: 'upcoming',
+        created_at: new Date('2025-10-03')
+      },
+      {
+        id: 'class_006',
+        class_name: 'Cybersecurity Fundamentals - Lớp 1',
+        class_description: 'Nền tảng bảo mật mạng và ứng dụng. Bao gồm: Cryptography, Network Security, Penetration Testing, Security Best Practices.',
+        class_type: '1-on-n',
+        instructor_id: '1',
+        instructor_name: 'Oliver Khan',
+        course_id: 'course_006',
+        course_name: 'Cybersecurity Pro',
+        start_datetime: new Date('2025-11-18T10:00:00'),
+        end_datetime: new Date('2025-11-18T11:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 180000,
+        max_capacity: 25,
+        enrollment_count: 20,
+        platform_fee_percentage: 20,
+        status: 'upcoming',
+        created_at: new Date('2025-10-06')
+      },
+      {
+        id: 'class_007',
+        class_name: 'Advanced Python Programming - Lớp 1',
+        class_description: 'Lập trình Python nâng cao với focus vào performance. Bao gồm: Decorators, Generators, Async/Await, Optimization, Design Patterns.',
+        class_type: '1-on-1',
+        instructor_id: '1',
+        instructor_name: 'Oliver Khan',
+        course_id: 'course_007',
+        course_name: 'Python Master',
+        start_datetime: new Date('2025-11-22T14:00:00'),
+        end_datetime: new Date('2025-11-22T15:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 170000,
+        max_capacity: 1,
+        enrollment_count: 1,
+        platform_fee_percentage: 20,
+        status: 'ongoing',
+        created_at: new Date('2025-10-08')
+      },
+      {
+        id: 'class_008',
+        class_name: 'Machine Learning Essentials - Lớp 2',
+        class_description: 'Giới thiệu Machine Learning từ lý thuyết đến thực hành. Bao gồm: Supervised/Unsupervised Learning, Feature Engineering, Model Evaluation, TensorFlow.',
+        class_type: '1-on-n',
+        instructor_id: '1',
+        instructor_name: 'Oliver Khan',
+        course_id: 'course_008',
+        course_name: 'ML Fundamentals',
+        start_datetime: new Date('2025-11-25T09:00:00'),
+        end_datetime: new Date('2025-11-25T10:30:00'),
+        duration_in_minutes: 90,
+        price_per_student: 200000,
+        max_capacity: 20,
+        enrollment_count: 16,
+        platform_fee_percentage: 20,
+        status: 'upcoming',
+        created_at: new Date('2025-10-10')
+      }
+    ];
+
+    this.classesSubject.next(mockClasses);
+
+    const mockEnrollments: { [classId: string]: StudentEnrollment[] } = {
+      class_001: [
+        { class_id: 'class_001', student_id: 'std_001', student_name: 'Phạm Minh Đức', student_email: 'duc@example.com', registered_at: new Date('2025-10-20') },
+        { class_id: 'class_001', student_id: 'std_002', student_name: 'Hoàng Thu Hương', student_email: 'huong@example.com', registered_at: new Date('2025-10-21') },
+        { class_id: 'class_001', student_id: 'std_003', student_name: 'Võ Thành Long', student_email: 'long@example.com', registered_at: new Date('2025-10-22') }
+      ],
+      class_002: [
+        { class_id: 'class_002', student_id: 'std_004', student_name: 'Ngô Hải Nam', student_email: 'nam@example.com', registered_at: new Date('2025-10-18') },
+        { class_id: 'class_002', student_id: 'std_005', student_name: 'Dương Minh Châu', student_email: 'chau@example.com', registered_at: new Date('2025-10-19') }
+      ],
+      class_003: [
+        { class_id: 'class_003', student_id: 'std_006', student_name: 'Bùi Quốc Hùng', student_email: 'hung@example.com', registered_at: new Date('2025-09-20') }
+      ],
+      class_004: [
+        { class_id: 'class_004', student_id: 'std_007', student_name: 'Trần Khánh Linh', student_email: 'linh@example.com', registered_at: new Date('2025-10-25') }
+      ],
+      class_005: [
+        { class_id: 'class_005', student_id: 'std_008', student_name: 'Lý Thị Phương Thảo', student_email: 'thao@example.com', registered_at: new Date('2025-10-24') }
+      ],
+      class_006: [
+        { class_id: 'class_006', student_id: 'std_009', student_name: 'Mạc Gia Bảo', student_email: 'bao@example.com', registered_at: new Date('2025-10-26') },
+        { class_id: 'class_006', student_id: 'std_010', student_name: 'Phan Thị Thanh Tuyền', student_email: 'tuyen@example.com', registered_at: new Date('2025-10-27') },
+        { class_id: 'class_006', student_id: 'std_011', student_name: 'Vũ Minh Khánh', student_email: 'khanh@example.com', registered_at: new Date('2025-10-28') },
+        { class_id: 'class_006', student_id: 'std_012', student_name: 'Đinh Văn Hải', student_email: 'hai@example.com', registered_at: new Date('2025-10-29') }
+      ],
+      class_007: [
+        { class_id: 'class_007', student_id: 'std_013', student_name: 'Nguyễn Hữu Tuấn', student_email: 'tuan@example.com', registered_at: new Date('2025-11-01') }
+      ],
+      class_008: [
+        { class_id: 'class_008', student_id: 'std_014', student_name: 'Cao Thị Lan Anh', student_email: 'lananh@example.com', registered_at: new Date('2025-10-30') },
+        { class_id: 'class_008', student_id: 'std_015', student_name: 'Đỗ Quang Vinh', student_email: 'vinh@example.com', registered_at: new Date('2025-11-02') },
+        { class_id: 'class_008', student_id: 'std_016', student_name: 'Tạ Thị Mỹ Tiên', student_email: 'tien@example.com', registered_at: new Date('2025-11-03') }
+      ]
+    };
+
+    this.enrollmentsSubject.next(mockEnrollments);
+  }
+
+  getAllClasses(): Observable<GroupClass[]> {
+    return this.classes$;
+  }
+
+  getClassById(classId: string): Observable<GroupClass | undefined> {
+    const classes = this.classesSubject.value;
+    return of(classes.find(c => c.id === classId));
+  }
+
+  getClassesByStatus(status: ClassStatus): Observable<GroupClass[]> {
+    const classes = this.classesSubject.value;
+    return of(classes.filter(c => c.status === status));
+  }
+
+  getClassesByInstructor(instructorId: string): Observable<GroupClass[]> {
+    const classes = this.classesSubject.value;
+    return of(classes.filter(c => c.instructor_id === instructorId));
+  }
+
+  getClassesByDateRange(startDate: Date, endDate: Date): Observable<GroupClass[]> {
+    const classes = this.classesSubject.value;
+    return of(
+      classes.filter(c => {
+        const classDate = new Date(c.start_datetime);
+        return classDate >= startDate && classDate <= endDate;
+      })
+    );
+  }
+
+  searchClassesByName(query: string): Observable<GroupClass[]> {
+    const classes = this.classesSubject.value;
+    if (!query.trim()) {
+      return of(classes);
+    }
+    const lowerQuery = query.toLowerCase();
+    return of(classes.filter(c => c.class_name.toLowerCase().includes(lowerQuery)));
+  }
+
+  getClassEnrollments(classId: string): Observable<StudentEnrollment[]> {
+    const enrollments = this.enrollmentsSubject.value[classId] || [];
+    return of(enrollments);
+  }
+
+  calculateFinancialReport(classId: string): Observable<ClassFinancialReport> {
+    const groupClass = this.classesSubject.value.find(c => c.id === classId);
+
+    if (!groupClass) {
+      return of({
+        class_id: classId,
+        price_per_student: 0,
+        enrollment_count: 0,
+        total_revenue: 0,
+        platform_fee: 0,
+        instructor_payout: 0,
+        revenue_per_hour: 0
+      });
+    }
+
+    const totalRevenue = groupClass.price_per_student * groupClass.enrollment_count;
+    const platformFee = totalRevenue * (groupClass.platform_fee_percentage / 100);
+    const instructorPayout = totalRevenue - platformFee;
+    const durationInHours = groupClass.duration_in_minutes / 60;
+    const revenuePerHour = durationInHours > 0 ? totalRevenue / durationInHours : 0;
+
+    return of({
+      class_id: classId,
+      price_per_student: groupClass.price_per_student,
+      enrollment_count: groupClass.enrollment_count,
+      total_revenue: totalRevenue,
+      platform_fee: platformFee,
+      instructor_payout: instructorPayout,
+      revenue_per_hour: revenuePerHour
+    });
+  }
+
+  getInstructorsList(): Observable<{ id: string; name: string }[]> {
+    const classes = this.classesSubject.value;
+    const instructorsMap = new Map<string, string>();
+
+    classes.forEach(c => {
+      if (!instructorsMap.has(c.instructor_id)) {
+        instructorsMap.set(c.instructor_id, c.instructor_name);
+      }
+    });
+
+    const instructorsList = Array.from(instructorsMap, ([id, name]) => ({ id, name }));
+    return of(instructorsList);
+  }
+
+  determineClassStatus(startDate: Date, endDate: Date): ClassStatus {
+    const now = new Date();
+    if (now < startDate) {
+      return 'upcoming';
+    } else if (now >= startDate && now <= endDate) {
+      return 'ongoing';
+    } else {
+      return 'completed';
+    }
+  }
+
+  searchClasses(query: string): Observable<GroupClass[]> {
+    const classes = this.classesSubject.value;
+    const filtered = classes.filter(c =>
+      c.class_name.toLowerCase().includes(query.toLowerCase()) ||
+      c.course_name.toLowerCase().includes(query.toLowerCase()) ||
+      c.instructor_name.toLowerCase().includes(query.toLowerCase())
+    );
+    return of(filtered);
+  }
+
+  formatDuration(minutes: number): string {
+    if (minutes < 60) {
+      return `${minutes} phút`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (mins === 0) {
+      return `${hours} giờ`;
+    }
+    return `${hours}h ${mins}m`;
+  }
+
+  getStudentEnrollments(studentId: string): Observable<StudentEnrollment[]> {
+    const enrollments = Object.entries(this.enrollmentsSubject.value)
+      .filter(([classId, students]) => students.some(s => s.student_id === studentId))
+      .map(([classId, students]) => students.find(s => s.student_id === studentId)!)
+      .filter(enrollment => enrollment !== undefined);
+    return of(enrollments);
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  }
+
+  updateClassStatus(classId: string, newStatus: ClassStatus): void {
+    const classes = this.classesSubject.value;
+    const classIndex = classes.findIndex(c => c.id === classId);
+    if (classIndex !== -1) {
+      classes[classIndex].status = newStatus;
+      this.classesSubject.next([...classes]);
+    }
+  }
+
+  formatDateTime(date: Date): string {
+    return new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(date));
+  }
+}

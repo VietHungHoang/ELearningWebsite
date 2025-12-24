@@ -10,7 +10,6 @@ import { RouterLink } from '@angular/router';
 })
 export class ChangePasswordComponent {
 
-    // Password Show/Hide
     password1: string = '';
     password2: string = '';
     password3: string = '';

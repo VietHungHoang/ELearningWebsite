@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PaginationProps {
   currentPage: number;
@@ -15,6 +16,7 @@ const Pagination: React.FC<PaginationProps> = ({
   itemsPerPage,
   onPageChange
 }) => {
+  const { t } = useTranslation();
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -45,7 +47,7 @@ const Pagination: React.FC<PaginationProps> = ({
     return pages.map((page, index) => {
       if (page === '...') {
         return (
-          <span key={`ellipsis-${index}`} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+          <span key={`ellipsis-${index}`} className="relative inline-flex items-center px-3 py-1.5 border border-gray-300 bg-white text-sm font-medium text-gray-700">
             ...
           </span>
         );
@@ -56,7 +58,7 @@ const Pagination: React.FC<PaginationProps> = ({
           key={page}
           onClick={() => handlePageChange(page as number)}
           aria-current={currentPage === page ? 'page' : undefined}
-          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md ml-2 ${
+          className={`relative inline-flex items-center px-3 py-1.5 border text-sm font-medium rounded-md ml-2 ${
             currentPage === page
               ? 'border-[#0b6459] text-white bg-[#0b6459]'
               : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
@@ -68,22 +70,22 @@ const Pagination: React.FC<PaginationProps> = ({
     });
   };
 
-  if (totalPages <= 1) return null;
+  if (totalPages < 1) return null;
 
   return (
     <nav className="flex items-center justify-between pt-8" aria-label="Pagination">
       <div className="hidden sm:block">
         <p className="text-sm text-gray-700">
-          Showing <span className="font-medium">{startItem}</span> to <span className="font-medium">{endItem}</span> of <span className="font-medium">{totalItems}</span> results
+          {t('pagination.showing', { start: startItem, end: endItem, total: totalItems })}
         </p>
       </div>
       <div className="flex-1 flex justify-between sm:justify-end">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Previous
+          {t('pagination.previous')}
         </button>
         
         <div className="hidden sm:flex ml-3">
@@ -93,9 +95,9 @@ const Pagination: React.FC<PaginationProps> = ({
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="ml-3 relative inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Next
+          {t('pagination.next')}
         </button>
       </div>
     </nav>

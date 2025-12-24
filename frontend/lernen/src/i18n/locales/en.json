@@ -1,0 +1,1554 @@
+{
+  "header": {
+    "title": "E-Learning Platform",
+    "home": "Home",
+    "findTutors": "Find tutors",
+    "becomeTutor": "Become a tutor",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "footer": {
+    "description": "Empowering minds through accessible, personalized, and engaging online education for a brighter future.",
+    "secure": "Secure",
+    "verified": "Verified",
+    "trusted": "Trusted",
+    "forStudents": "For students",
+    "findTutor": "Find a tutor",
+    "myBookings": "My bookings",
+    "myLearning": "My learning",
+    "favourites": "Favourites",
+    "forTutors": "For tutors",
+    "becomeTutor": "Become a tutor",
+    "tutorDashboard": "Tutor dashboard",
+    "payouts": "Payouts",
+    "schedule": "Schedule",
+    "stayUpdated": "Stay updated",
+    "newsletterDescription": "Get the latest updates, tips, and exclusive offers delivered to your inbox.",
+    "enterEmail": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribed": "Subscribed!",
+    "copyright": "© {{year}} Lernen. All Rights Reserved.",
+    "privacyPolicy": "Privacy policy",
+    "termsOfService": "Terms of service"
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} results",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "booking": {
+    "bookTrialLesson": "Book a trial lesson",
+    "withTutor": "with {{tutorName}}",
+    "trialLessonBooked": "Trial lesson booked!",
+    "bookingConfirmation": "Your trial lesson with {{tutorName}} is confirmed for {{date}} at {{time}}.",
+    "done": "Done",
+    "availableTimesFor": "Available times for {{date}}",
+    "confirmBooking": "Confirm booking",
+    "booking": "Booking...",
+    "selectDateTime": "Please select a date and time for your trial lesson.",
+    "selectDate": "Select a date",
+    "selectDateDescription": "to see available time slots.",
+    "pleaseSelectDateTime": "Please select a date and time to proceed.",
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
+  "headerNoNavbar": {
+    "exit": "Exit"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "noNotifications": "You have no new notifications.",
+    "loading": "Loading...",
+    "loadMore": "Load more"
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Welcome back!",
+      "gladToHaveYouBack": "We're glad to have you back.",
+      "emailAddress": "Email address",
+      "password": "Password",
+      "emailPlaceholder": "Email address",
+      "passwordPlaceholder": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "loggingIn": "Logging in...",
+      "login": "Login",
+      "dontHaveAccount": "Don't have an account?",
+      "signUpAsStudent": "Sign up as student",
+      "or": "or",
+      "signUpAsTutor": "Sign up as tutor",
+      "orSeparator": "OR",
+      "signInWithGoogle": "Sign in with Google"
+    },
+    "signup": {
+      "signUpAsTutor": "Sign up as a tutor",
+      "signUpAsStudent": "Sign up as a student",
+      "tutorJourney": "Start your teaching journey today.",
+      "studentJourney": "Start your learning journey today.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "emailAddress": "Email address",
+      "emailPlaceholder": "Email address",
+      "fullNameRequired": "Full name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Email is invalid",
+      "agreeToTerms": "You must agree to the terms and conditions",
+      "agreeTermsText": "I agree to the",
+      "termsAndConditions": "Terms and conditions",
+      "creatingAccount": "Creating account...",
+      "createAccount": "Create account",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "orSeparator": "OR",
+      "signUpWithGoogle": "Sign up with Google"
+    },
+    "forgotPassword": {
+      "title": "Forgot password?",
+      "description": "No worries, we'll send you reset instructions.",
+      "emailAddress": "Email address",
+      "emailPlaceholder": "Enter your email",
+      "sendResetLink": "Send reset link",
+      "backToLogin": "Back to login"
+    }
+  },
+  "home": {
+    "hero": {
+      "badge": "#1 online learning platform",
+      "title": "Empower your future",
+      "subtitle": "Start learning today",
+      "description": "Connect with {{expertTutors}} for personalized learning experiences. Achieve your goals faster with one-on-one guidance.",
+      "expertTutors": "expert tutors",
+      "searchPlaceholder": "Search for tutors, courses, or subjects...",
+      "tutorsOnline": "{{count}}+ tutors online now",
+      "rating": "4.9/5 Rating",
+      "studentsCount": "15,000+ students",
+      "certifiedTutors": "Certified tutors"
+    }
+  },
+  "findTutors": {
+    "pageTitle": "Discover a skilled online tutor for your studies",
+    "pageDescription": "Master your studies with personalized online tutoring from expert educators. Our skilled tutors are here to help you build strong foundations and achieve your academic goals.",
+    "connectionError": "Connection error",
+    "connectionErrorMessage": "We're having trouble connecting to our servers. Please check your internet connection and try again.",
+    "filters": {
+      "tabs": {
+        "allSessions": "All sessions",
+        "privateSessions": "Private sessions",
+        "groupSessions": "Group sessions"
+      },
+      "labels": {
+        "category": "Category",
+        "subject": "Choose subject",
+        "feePerSession": "Fee per session",
+        "tutorLanguages": "Tutor languages",
+        "availability": "Availability"
+      },
+      "placeholders": {
+        "chooseCategory": "Choose category",
+        "chooseSubject": "Choose subject",
+        "selectLanguages": "Select languages",
+        "sortBy": "Sort by",
+        "selectTimezone": "Select timezone",
+        "search": "Search...",
+        "searchSubjects": "Search subjects...",
+        "searchByLanguage": "Search by language...",
+        "searchByKeyword": "Search by keyword",
+        "anytime": "Anytime"
+      },
+      "availability": {
+        "selectSlots": "Select available slots",
+        "times": {
+          "morning": "Morning",
+          "afternoon": "Afternoon",
+          "evening": "Evening"
+        },
+        "days": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        },
+        "slotsSelected": "slots selected",
+        "clear": "Clear",
+        "apply": "Apply"
+      },
+      "sortOptions": {
+        "relevance": "Relevance",
+        "newestFirst": "Newest first",
+        "oldestFirst": "Oldest first"
+      },
+      "loading": "Loading..."
+    }
+  },
+  "whyChooseUs": {
+    "sectionLabel": "Why choose us",
+    "title": "Why our marketplace stands out",
+    "description": "Explore a wealth of articles, guides, tutorials, and more, curated by our experts to enhance your learning experience.",
+    "features": {
+      "flexibleScheduling": {
+        "title": "Flexible scheduling",
+        "description": "Learn at your own pace with tutors available 24/7"
+      },
+      "expertTutors": {
+        "title": "Expert tutors",
+        "description": "Verified professionals with proven teaching experience"
+      },
+      "affordableRates": {
+        "title": "Affordable rates",
+        "description": "Competitive pricing with no hidden fees"
+      },
+      "personalizedLearning": {
+        "title": "Personalized learning plans",
+        "description": "Customized curriculum tailored to your goals"
+      },
+      "wideRangeSubjects": {
+        "title": "Wide range of subjects",
+        "description": "From academics to hobbies, find tutors for everything"
+      },
+      "learnersCommunity": {
+        "title": "Learner's community and access to infinite educational resources",
+        "description": "Join a global community of learners and educators"
+      }
+    },
+    "getStarted": "Get started now"
+  },
+  "stepGuide": {
+    "sectionLabel": "A step-by-step guide",
+    "title": "Unlock your potential with easy steps",
+    "description": "Learn how our platform simplifies finding and booking top tutors to enhance your skills and achieve your learning goals",
+    "steps": {
+      "step1": {
+        "title": "Sign up",
+        "description": "Create your account quickly to get started with our platform",
+        "button": "Get started"
+      },
+      "step2": {
+        "title": "Find a tutor",
+        "description": "Browse & select from qualified tutors based on your need",
+        "button": "Search now"
+      },
+      "step3": {
+        "title": "Schedule a lesson",
+        "description": "Book a convenient time for your lesson with ease",
+        "button": "Let's begin"
+      },
+      "step4": {
+        "title": "Start your journey",
+        "description": "Begin your educational journey with us. Find a tutor and book your first session today!",
+        "button": "Get started now"
+      }
+    }
+  },
+  "testimonials": {
+    "sectionLabel": "Real feedback from our clients",
+    "title": "What our users are saying",
+    "description": "Discover how Lernen is making a difference in the lives of students and educational institutions. Hear from our satisfied users.",
+    "items": [
+      {
+        "text": "We have tried several tutoring platforms, but none compare to Lernen. The tutors are top-notch, and the booking process is incredibly.",
+        "name": "Arlene M",
+        "title": "Agile District",
+        "companyName": "Agile District"
+      },
+      {
+        "text": "Lernen has been a game-changer for our students. The variety of tutors and the ease of booking sessions make it a breeze for parents and students alike. Our students' grades have improved significantly since we started using this platform.",
+        "name": "Marvin M",
+        "title": "Tutoring specialist",
+        "companyName": "Learning Hub"
+      },
+      {
+        "text": "Lernen is a fantastic resource for our students. The diverse range of tutors ensures that we can find the perfect match for each student's.",
+        "name": "Devon L",
+        "title": "Classroom teacher",
+        "companyName": "Wisdom Academy"
+      },
+      {
+        "text": "Lernen is a dependable and effective tool for our agency, offering knowledgeable and dedicated tutors.",
+        "name": "Ronald R",
+        "title": "Educational consultant",
+        "companyName": "Xero Education"
+      },
+      {
+        "text": "We're delighted with Lernen its top-notch tutors and user-friendly platform have greatly boosted our students.",
+        "name": "Courtney H",
+        "title": "School counselor",
+        "companyName": "Growth Learning"
+      },
+      {
+        "text": "Our experience with Lernen has been outstanding. The platform is user-friendly, & the tutors are highly qualified.",
+        "name": "Darlene R",
+        "title": "Academic advisor",
+        "companyName": "EduTech Solutions"
+      }
+    ]
+  },
+  "expertGuide": {
+    "sectionLabel": "User guide",
+    "title": "Our experts will guide you to mastery",
+    "description1": "Learn from our carefully selected expert tutors who bring years of knowledge, experience, and personalized instruction to help you succeed in your learning journey.",
+    "description2": "Whether you're looking to improve your grades, prepare for exams, learn new skills, or follow a customized learning plan, our experts will guide you to achieve your full potential."
+  },
+  "support": {
+    "sectionLabel": "24/7 Support",
+    "title": "Comprehensive support at every step",
+    "description1": "Our dedicated onboarding assistance and technical support team are here to help you get started and troubleshoot any issues you might encounter along the way.",
+    "description2": "Access our comprehensive library of tutorials, guides, FAQs, articles, and more to enhance your learning experience and make the most of our platform."
+  },
+  "featureTutors": {
+    "sectionLabel": "Feature tutors",
+    "title": "Explore our handpicked tutors",
+    "description": "Explore a wealth of articles, guides, tutorials, and more, curated by our experts to enhance your learning experience.",
+    "viewAllTutors": "View all tutors",
+    "perHour": "/hr",
+    "reviews": "reviews",
+    "activeStudents": "Active students",
+    "viewProfile": "View profile"
+  },
+  "cart": {
+    "shoppingCart": "Shopping cart",
+    "byTutor": "by {{tutor}}",
+    "subtotal": "Subtotal",
+    "viewCartDetails": "View cart details",
+    "cartEmpty": "Your cart is empty.",
+    "continueShopping": "Continue shopping",
+    "checkout": "Checkout",
+    "applyCoupon": "Apply coupon",
+    "remove": "Remove",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "total": "Total",
+    "discount": "Discount",
+    "grandTotal": "Grand total",
+    "haveCouponCode": "Have a coupon code?",
+    "enterCouponCode": "Enter coupon code",
+    "apply": "Apply",
+    "seeAvailableCoupon": "See available coupon",
+    "availableCoupons": "Available coupons",
+    "proceedToCheckout": "Proceed to checkout",
+    "loadingCart": "Loading cart items...",
+    "reviews": "reviews",
+    "lessons": "lessons"
+  },
+  "dashboard": {
+      "sidebar": {
+        "tutor": {
+          "dashboard": "Dashboard",
+          "myStudents": "My students",
+          "myCourses": "My courses",
+          "myClass": "My class",
+          "schedule": "Schedule",
+          "payouts": "Payouts",
+          "dealsCoupons": "Deals & Coupons",
+          "myQuizzes": "My quizzes",
+          "requests": "Requests",
+          "inbox": "Inbox",
+          "reviews": "Reviews",
+          "profileSettings": "Profile settings",
+          "api": "API",
+          "whiteboard": "Whiteboard"
+        },
+        "student": {
+          "myBookings": "My bookings",
+          "myClass": "My class",
+          "myQuizzes": "My quizzes",
+          "myCourses": "My courses",
+          "myPurchases": "My purchases",
+          "certificates": "Certificates",
+          "messages": "Messages",
+          "profileSettings": "Profile settings",
+          "whiteboard": "Whiteboard"
+        },
+        "signOut": "Sign out"
+      },
+    "header": {
+      "welcome": "Welcome back",
+      "balance": "Balance",
+      "quickActions": "Quick actions",
+      "breadcrumb": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "analysis": "Analysis"
+      }
+    },
+    "reviews": {
+      "title": "Student Reviews",
+      "subtitle": "See what your students are saying about you",
+      "overallRating": "Overall Rating",
+      "reviews": "reviews",
+      "ratingDistribution": "Rating Distribution",
+      "searchPlaceholder": "Search by student name, comment, or course...",
+      "all": "All",
+      "noReviews": "No reviews found matching your filters",
+      "sessionDate": "Session date"
+    },
+    "inbox": {
+      "title": "Inbox",
+      "searchPlaceholder": "Search...",
+      "filters": {
+        "all": "All",
+        "private": "Private",
+        "group": "Group"
+      },
+      "status": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "empty": {
+        "title": "Select a conversation",
+        "description": "Start by choosing a contact from the list on the left."
+      },
+      "messagePlaceholder": "Type a message...",
+      "attachments": {
+        "photo": "Photo",
+        "video": "Video",
+        "document": "Document",
+        "contact": "Contact"
+      },
+      "settings": {
+        "title": "Chat Settings",
+        "notifications": {
+          "title": "Notifications",
+          "enable": "Enable notifications",
+          "sound": "Sound alerts"
+        },
+        "privacy": {
+          "title": "Privacy",
+          "showStatus": "Show online status",
+          "readReceipts": "Read receipts"
+        },
+        "actions": {
+          "title": "Actions",
+          "mute": "Mute conversation",
+          "archive": "Archive chat",
+          "block": "Block user",
+          "clearHistory": "Clear chat history"
+        }
+      }
+    },
+    "student": {
+      "myClass": {
+        "title": "My classes",
+        "searchPlaceholder": "Search classes...",
+        "filterOptions": {
+          "allStatus": "All status",
+          "ongoing": "Ongoing",
+          "completed": "Completed"
+        },
+        "selectStatus": "Select status",
+        "tableHeaders": {
+          "classTitle": "Class title",
+          "type": "Type",
+          "startDate": "Start date",
+          "schedule": "Schedule",
+          "progress": "Progress",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "classTypes": {
+          "oneOnOne": "1-on-1",
+          "group": "Group"
+        },
+        "scheduleMore": "Schedule more",
+        "statusLabels": {
+          "ongoing": "Ongoing",
+          "completed": "Completed",
+          "enrolled": "Enrolled"
+        },
+        "loading": "Loading classes...",
+        "errorTitle": "Failed to load classes",
+        "tryAgain": "Try again",
+        "noClassesFound": "No classes found",
+        "noClassesDescription": "You haven't enrolled in any classes yet. Browse available courses to get started."
+      }
+    },
+    "tutor": {
+      "welcome": "Welcome back",
+      "overview": "Here's an overview of your teaching activities",
+      "thisMonth": "This month",
+      "thisWeek": "This week",
+      "all": "All",
+      "today": "Today",
+      "week": "Week",
+      "title": "Dashboard",
+      "analysis": "Analysis",
+      "totalEarnings": "Total earnings",
+      "totalStudents": "Total students",
+      "teachingHours": "Teaching hours",
+      "newReviews": "New reviews",
+      "upcomingSessions": "Upcoming sessions",
+      "sessionScheduled": "{{count}} session scheduled at {{period}}",
+      "sessionScheduled_plural": "{{count}} sessions scheduled at {{period}}",
+      "todayPeriod": "today",
+      "weekPeriod": "this week",
+      "noSessionsTitle": "No sessions scheduled",
+      "noSessionsDescription": "You don't have any upcoming sessions at the moment. Check back later or schedule new sessions with your students.",
+      "sessionsThisMonth": "{{count}} session this month",
+      "sessionsThisMonth_plural": "{{count}} sessions this month",
+      "startSession": "Start",
+      "startingSession": "Starting session...",
+      "revenueChart": {
+        "title": "Revenue overview",
+        "description": "Track your earnings over time",
+        "sixMonths": "6 months",
+        "twelveMonths": "12 months",
+        "revenue": "Revenue"
+      },
+      "studentsChart": {
+        "title": "Students growth",
+        "description": "Track your student enrollment over time",
+        "sixMonths": "6 months",
+        "twelveMonths": "12 months",
+        "students": "Students"
+      },
+      "myStudents": {
+        "title": "My students",
+        "tabs": {
+          "all": "All students",
+          "ongoing": "Ongoing",
+          "completed": "Completed"
+        },
+        "filters": {
+          "allTypes": "All types",
+          "oneOnOne": "1-on-1",
+          "group": "Group",
+          "trial": "Trial",
+          "searchPlaceholder": "Search students by name..."
+        },
+        "tableHeaders": {
+          "index": "#",
+          "studentName": "Student name",
+          "type": "Type",
+          "class": "Class",
+          "registeredDate": "Registered date",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "loading": "Loading students...",
+        "errorTitle": "Error loading students",
+        "errorDescription": "Failed to fetch students",
+        "tryAgain": "Try again",
+        "noStudentsTitle": "No students found",
+        "noStudentsDescription": "No students match your current filters.",
+        "actions": {
+          "message": "Message student",
+          "view": "View details"
+        },
+        "classPlaceholder": "Math A1"
+      },
+      "myClass": {
+        "title": "My classes",
+        "description": "Manage and monitor your teaching classes",
+        "createClass": "Create class",
+        "searchPlaceholder": "Search by class or student...",
+        "selectStatus": "Select status",
+        "filterOptions": {
+          "allStatus": "All status",
+          "ongoing": "Ongoing",
+          "opening": "Opening",
+          "completed": "Completed"
+        },
+        "loading": "Loading classes...",
+        "errorTitle": "Error loading classes",
+        "tryAgain": "Try again",
+        "tableHeaders": {
+          "classTitle": "Class title",
+          "courseTitle": "Course title",
+          "type": "Type",
+          "status": "Status",
+          "students": "Students",
+          "schedule": "Schedule",
+          "progress": "Progress",
+          "actions": "Actions"
+        },
+        "classTypes": {
+          "oneOnOne": "1-on-1",
+          "group": "Group"
+        },
+        "statusLabels": {
+          "ongoing": "Ongoing",
+          "completed": "Completed",
+          "opening": "Opening"
+        },
+        "studentCount": {
+          "singular": "student",
+          "plural": "students"
+        },
+        "scheduleMore": "+{{count}} more",
+        "noClassesFound": "No classes found",
+        "noClassesDescription": "There are no classes that match your current filters.",
+        "confirmDelete": "Are you sure you want to delete \"{{classTitle}}\"?",
+        "createModal": {
+          "title": "Create new class",
+          "classTitle": "Class title",
+          "classTitlePlaceholder": "Enter class title",
+          "maxStudents": "Max students",
+          "maxStudentsPlaceholder": "Enter max students",
+          "category": "Category",
+          "categoryPlaceholder": "Select category",
+          "subject": "Subject",
+          "subjectPlaceholder": "Select subject",
+          "tuitionFee": "Tuition fee ($)",
+          "tuitionFeePlaceholder": "Enter tuition fee",
+          "description": "Class description",
+          "descriptionPlaceholder": "Enter class description",
+          "schedule": "Class schedule",
+          "addSchedule": "Add schedule",
+          "selectDay": "Select day",
+          "selectTime": "Select time",
+          "searchTimes": "Search times...",
+          "cannotRemoveLastSchedule": "Cannot remove last schedule",
+          "removeSchedule": "Remove schedule",
+          "createClass": "Create class",
+          "confirmClose": {
+            "title": "Discard changes?",
+            "message": "You have unsaved changes. Are you sure you want to close without saving?",
+            "confirmText": "Discard changes"
+          },
+          "categories": {
+            "academic": "Academic",
+            "language": "Language",
+            "arts": "Arts",
+            "science": "Science",
+            "technology": "Technology"
+          },
+          "subjects": {
+            "mathematics": "Mathematics",
+            "physics": "Physics",
+            "chemistry": "Chemistry",
+            "biology": "Biology",
+            "english": "English",
+            "history": "History",
+            "geography": "Geography",
+            "computerScience": "Computer Science"
+          },
+          "searchCategories": "Search categories...",
+          "searchSubjects": "Search subjects..."
+        }
+      },
+      "dealsCoupons": {
+        "title": "Deals & Coupons",
+        "subtitle": "Create and manage discount codes for your courses.",
+        "createButton": "Create new coupon",
+        "currencySymbol": "$",
+        "allCourses": "All courses",
+        "deleteTitle": "Delete coupon",
+        "deleteMessage": "Are you sure you want to delete the coupon \"{{code}}\"? This action is irreversible.",
+        "deleteConfirm": "Delete",
+        "tableHeaders": {
+          "code": "Coupon code",
+          "discount": "Discount",
+          "appliesTo": "Applies to",
+          "usage": "Usage",
+          "expiryDate": "Expiry date",
+          "status": "Status",
+          "active": "Active",
+          "actions": "Actions"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "status": {
+          "active": "Active",
+          "expired": "Expired",
+          "inactive": "Inactive"
+        },
+        "modal": {
+          "createTitle": "Create new coupon",
+          "editTitle": "Edit coupon",
+          "saveButton": "Save coupon",
+          "code": {
+            "label": "Coupon code",
+            "placeholder": "e.g. SUMMER25"
+          },
+          "discountType": {
+            "label": "Discount type",
+            "placeholder": "Select type",
+            "percentage": "Percentage",
+            "fixed": "Fixed amount"
+          },
+          "value": {
+            "label": "Value"
+          },
+          "courses": {
+            "label": "Applicable courses",
+            "placeholder": "Select courses",
+            "all": "All",
+            "allCoursesLabel": "All courses",
+            "selectedCount": "{{count}} course(s) selected",
+            "helper": "Select 'All' or choose specific courses."
+          },
+          "usageLimit": {
+            "label": "Usage limit",
+            "unlimited": "Unlimited usage"
+          },
+          "expiryDate": {
+            "label": "Expiry date"
+          }
+        }
+      },
+      "myQuizzes": {
+        "title": "My quizzes",
+        "subtitle": "Create and manage your quiz assessments",
+        "createButton": "Create quiz",
+        "searchPlaceholder": "Search quizzes...",
+        "tabs": {
+          "all": "All quizzes",
+          "active": "Active",
+          "draft": "Draft"
+        },
+        "status": {
+          "active": "Active",
+          "draft": "Draft",
+          "archived": "Archived"
+        },
+        "card": {
+          "totalQuestions": "Total questions:",
+          "timeLimit": "Time limit:",
+          "attempts": "Attempts:",
+          "createdAt": "Created at:",
+          "takeQuiz": "Take quiz",
+          "stats": "Stats",
+          "edit": "Edit"
+        },
+        "empty": {
+          "title": "No quizzes found",
+          "description": "You haven't created any quizzes yet.",
+          "descriptionSearch": "Try adjusting your search terms.",
+          "createFirst": "Create your first quiz"
+        }
+      },
+      "requests": {
+        "title": "Requests",
+        "filters": {
+          "reschedule": "Reschedule requests",
+          "trial": "Trial requests"
+        },
+        "empty": {
+          "title": "No pending requests",
+          "description": "You're all caught up! All requests have been processed."
+        },
+        "status": {
+          "pending": "Pending",
+          "approved": "Approved",
+          "declined": "Declined"
+        },
+        "trial": {
+          "badge": "Trial session request",
+          "sessionTime": "Session time",
+          "accept": "Accept",
+          "accepting": "Accepting...",
+          "decline": "Decline",
+          "declining": "Declining...",
+          "chat": "Chat",
+          "cancelRequest": "Cancel request",
+          "acceptSuccess": "Trial session request accepted successfully!",
+          "acceptFailed": "Failed to accept request",
+          "acceptError": "An error occurred while accepting the request",
+          "declineSuccess": "Trial session request declined and student notified.",
+          "declineError": "An error occurred while declining the request",
+          "unknownStudent": "Unknown student",
+          "unknownTutor": "Unknown tutor",
+          "sentTo": "Sent to:"
+        },
+        "reschedule": {
+          "recurringTitle": "Change recurring schedule",
+          "oneTimeTitle": "One-time reschedule",
+          "original": "Original",
+          "proposed": "Proposed",
+          "accept": "Accept",
+          "accepting": "Accepting...",
+          "decline": "Decline",
+          "declining": "Declining...",
+          "chat": "Chat",
+          "cancelRequest": "Cancel request",
+          "acceptSuccess": "Reschedule request accepted successfully!",
+          "acceptFailed": "Failed to accept request",
+          "acceptError": "An error occurred while accepting the request",
+          "declineSuccess": "Reschedule request declined and student notified.",
+          "declineError": "An error occurred while declining the request",
+          "sentTo": "Sent to:",
+          "everyDayAt": "Every {{day}} at {{time}}"
+        }
+      },
+      "schedule": {
+        "title": "Schedule management",
+        "today": "Today",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "editTooltip": "This schedule will apply to the remaining days of this week and future weeks",
+        "views": {
+          "daily": "Daily",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        },
+        "days": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        },
+        "datePicker": {
+          "selectDay": "Select a day",
+          "selectWeek": "Select a week",
+          "selectMonth": "Select a month"
+        },
+        "success": {
+          "save": "Availability updated for all future schedules"
+        },
+        "errors": {
+          "loadAvailability": "Failed to load availability",
+          "loadSessions": "Failed to load booked sessions",
+          "save": "Failed to save availability"
+        }
+      },
+        "scheduleTab": {
+        "upcomingSessions": "Upcoming sessions",
+        "noUpcomingSessions": "No upcoming sessions",
+        "pastSessions": "Past sessions",
+        "session": "session",
+        "sessions": "sessions",
+        "attendance": "Attendance",
+        "students": "students",
+        "viewDetails": "View details",
+        "hideDetails": "Hide details",
+        "note": "Note",
+        "attendanceHistory": "Attendance history",
+        "present": "present",
+        "absent": "absent",
+        "noReason": "No reason",
+        "addNote": "Add note",
+        "enterNotePlaceholder": "Enter your note here...",
+        "cancel": "Cancel",
+        "saveNote": "Save note",
+        "reschedule": "Reschedule",
+        "addNoteTitle": "Add note"
+      },
+      "common": {
+        "loading": "Loading...",
+        "noData": "No data available",
+        "viewAll": "View All",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "myWallet": "My wallet",
+        "withdraw": "Withdraw",
+        "signOut": "Sign out",
+        "selectDay": "Select a day",
+        "selectWeek": "Select a week",
+        "selectMonth": "Select a month",
+        "time": "Time",
+        "days": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sunday": "Sunday",
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday"
+        },
+        "sessionCalendar": "Session calendar",
+        "quickStats": "Quick stats",
+        "averageRating": "Average rating",
+        "reviews": "reviews",
+        "courseCompletion": "Course completion",
+        "avgResponseTime": "Avg. response time",
+        "thisMonthsHighlight": "This month's highlight",
+        "topRatedTutor": "Top rated tutor in your category!",
+        "recentActivity": "Recent activity",
+        "noRecentActivity": "No recent activity",
+        "months": {
+          "01": "Jan",
+          "02": "Feb",
+          "03": "Mar",
+          "04": "Apr",
+          "05": "May",
+          "06": "Jun",
+          "07": "Jul",
+          "08": "Aug",
+          "09": "Sep",
+          "10": "Oct",
+          "11": "Nov",
+          "12": "Dec"
+        }
+      },
+      "personalDetails": {
+        "title": "Basic Information",
+        "description": "Provide your basic personal details to help students get to know you better.",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Enter your full name",
+        "gender": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "notSpecified": "Not specified",
+        "headline": "Headline",
+        "headlinePlaceholder": "Enter your professional headline",
+        "introduction": "Introduction",
+        "introductionPlaceholder": "Tell us about yourself...",
+        "country": "Country",
+        "countryPlaceholder": "Select country",
+        "nativeLanguage": "Native Language",
+        "nativeLanguagePlaceholder": "Select your native language",
+        "languagesKnown": "Languages I Know",
+        "addLanguage": "+ Add Language",
+        "photosAndVideos": "Photos and Videos",
+        "photosAndVideosDescription": "Upload photos and videos to showcase your teaching style and personality",
+        "profilePhoto": "Profile Photo",
+        "clickToChange": "Click to change",
+        "dropFileHere": "Drop a file here or click here to upload",
+        "imageFormats": "jpg, jpeg, gif, png (max. 5 MB)",
+        "introductionVideo": "Introduction Video",
+        "videoFormats": "mp4, mov, avi (max. 100 MB)",
+        "socialLinks": "Social Links",
+        "socialLinksDescription": "Add your social media profiles to connect with students",
+        "facebookUrl": "Facebook URL",
+        "instagramUrl": "Instagram URL",
+        "linkedinUrl": "LinkedIn URL",
+        "twitterUrl": "Twitter/X URL",
+        "facebookPlaceholder": "https://facebook.com/yourprofile",
+        "instagramPlaceholder": "https://instagram.com/yourprofile",
+        "linkedinPlaceholder": "https://linkedin.com/in/yourprofile",
+        "twitterPlaceholder": "https://twitter.com/yourprofile",
+        "saveDescription": "Save & update the latest changes to the live",
+        "saveAndUpdate": "Save & update"
+      },
+      "profileSettings": {
+        "tabs": {
+          "personalDetails": "Personal details",
+          "resumeHighlights": "Resume",
+          "accountSettings": "Account settings",
+          "subjectsICanTeach": "Teaching subjects"
+        },
+        "breadcrumb": {
+          "profileSettings": "Profile settings"
+        }
+      },
+      "resumeHighlights": {
+        "title": "Resume",
+        "tabs": {
+          "education": "Education",
+          "experience": "Experience",
+          "certificationAwards": "Certification & Awards"
+        },
+        "descriptions": {
+          "education": "Showcase your educational background and qualifications",
+          "experience": "Highlight your professional experience and expertise",
+          "certificationAwards": "Display your certifications, awards, and achievements"
+        },
+        "addNew": "Add new",
+        "deleteEntry": "Delete {{type}} entry",
+        "deleteConfirm": "Are you sure you want to delete this entry? This action cannot be undone.",
+        "present": "Present",
+        "noCalendarLinked": "No calendar linked at the moment"
+      },
+      "accountSettings": {
+        "title": "Account settings",
+        "description": "Manage your account security and integrations.",
+        "changePassword": {
+          "title": "Change your password",
+          "subtitle": "You can reset your password from here. Choose the best password.",
+          "currentPassword": "Current password",
+          "currentPasswordPlaceholder": "Enter current password",
+          "newPassword": "New password",
+          "newPasswordPlaceholder": "Enter new password",
+          "retypePassword": "Re-type new password",
+          "retypePasswordPlaceholder": "Re-type new password",
+          "updatePassword": "Update password"
+        },
+        "timeZone": {
+          "title": "Update your time zone",
+          "subtitle": "Stay on schedule by updating your time zone settings easily.",
+          "timeZone": "Time zone",
+          "saveAndUpdate": "Save & update"
+        },
+        "googleCalendar": {
+          "title": "Link your Google calendar",
+          "subtitle": "Link your Google Calendar to sync all your lessons with your personal schedule.",
+          "noCalendarLinked": "No calendar linked at the moment",
+          "connect": "Connect Google calendar"
+        },
+        "zoom": {
+          "title": "Link Zoom account",
+          "subtitle": "Link your Zoom account to sync all your lessons and meetings. Follow these",
+          "steps": "steps",
+          "toCreate": "to create your Zoom credentials.",
+          "zoomAccountId": "Zoom account ID",
+          "zoomAccountIdPlaceholder": "Enter Zoom account ID",
+          "zoomClientId": "Zoom client ID",
+          "zoomClientIdPlaceholder": "Enter Zoom client ID",
+          "zoomClientSecret": "Zoom client secret",
+          "zoomClientSecretPlaceholder": "Enter Zoom client secret",
+          "saveAndUpdate": "Save & update"
+        },
+        "saveDescription": "Save & update the latest changes to the live"
+      },
+      "subjectsICanTeach": {
+        "tuitionFee": {
+          "title": "Tuition fee",
+          "description": "Set your hourly teaching rate",
+          "hourlyRate": "Hourly rate (USD)",
+          "hourlyRatePlaceholder": "0.00"
+        },
+        "subjects": {
+          "title": "Subjects I can teach",
+          "description": "Manage the subjects you are qualified to teach",
+          "addNew": "Add new",
+          "emptyTitle": "No subjects added yet",
+          "emptyDescription": "Start building your teaching profile by adding the subjects you're qualified to teach. This will help students find you for the right courses."
+        },
+        "modal": {
+          "title": "Add subjects",
+          "category": "Category",
+          "categoryPlaceholder": "Select a category",
+          "subjects": "Subjects",
+          "addSubject": "+ Add subject",
+          "cancel": "Cancel",
+          "addSubjects": "Add subjects"
+        }
+      }
+    }
+  },
+  "profile": {
+    "sidebar": {
+      "profileSettings": "Profile Settings",
+      "myBookings": "My Bookings",
+      "myRequests": "My Requests",
+      "myLearning": "My Learning",
+      "myClass": "My Class",
+      "findTutors": "Find Tutors",
+      "myQuizzes": "My Quizzes",
+      "findCourses": "Find Courses",
+      "findCourseBundles": "Find Course Bundles",
+      "assignments": "Assignments",
+      "inbox": "Inbox",
+      "community": "Community",
+      "myCertificates": "My Certificates",
+      "favourites": "Favourites",
+      "billingDetails": "Billing Details",
+      "invoices": "Invoices",
+      "disputes": "Disputes",
+      "signOut": "Sign out"
+    },
+    "bookings": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "searchHere": "Search here",
+      "noSessions": "No sessions"
+    },
+    "session": {
+      "tutor": "Tutor",
+      "joinClass": "Join Class",
+      "reschedule": "Reschedule"
+    },
+    "header": {
+      "quickSearch": "Quick search here"
+    }
+  },
+  "course": {
+    "sections": {
+      "courses": "Courses",
+      "overview": "Overview",
+      "whatYoullLearn": "What You'll Learn",
+      "courseCurriculum": "Course Curriculum",
+      "prerequisites": "Prerequisites",
+      "reviews": "Reviews"
+    },
+    "card": {
+      "reviews": "reviews",
+      "addToCart": "Add to Cart"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "productivity": "Productivity",
+      "timeManagement": "Time Management"
+    },
+    "common": {
+      "lessons": "lessons",
+      "duration": "duration",
+      "price": "Price",
+      "originalPrice": "Original Price",
+      "enrollNow": "Enroll Now",
+      "viewDetails": "View Details"
+    }
+  },
+  "becomeTutor": {
+    "hero": {
+      "title": "Share Your Knowledge, Inspire the Future",
+      "description": "Join our community of passionate educators and start earning on your own schedule. Empower students worldwide and make a real impact.",
+      "ctaButton": "Start teaching today"
+    },
+    "whyTeach": {
+      "title": "Why Teach with Lernen?",
+      "subtitle": "Join a platform that values your expertise and supports your growth.",
+      "benefits": {
+        "earnings": {
+          "title": "Competitive Earnings",
+          "description": "Set your own hourly rate and get paid securely for every session you teach."
+        },
+        "schedule": {
+          "title": "Flexible Schedule",
+          "description": "Teach whenever you want, from wherever you are. You are in control of your calendar."
+        },
+        "global": {
+          "title": "Global Student Base",
+          "description": "Connect with and inspire eager learners from all around the world."
+        },
+        "community": {
+          "title": "Supportive Community",
+          "description": "Get access to resources, tools, and a community of fellow tutors to help you succeed."
+        }
+      }
+    },
+    "howToStart": {
+      "title": "Start in Just a Few Minutes",
+      "steps": {
+        "profile": {
+          "title": "1. Create Your Profile",
+          "description": "Complete our simple application to showcase your skills and qualifications."
+        },
+        "availability": {
+          "title": "2. Set Your Availability",
+          "description": "You decide when and how often you want to teach. Total flexibility."
+        },
+        "earning": {
+          "title": "3. Start Earning",
+          "description": "Once approved, students can book sessions and you can start earning."
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Hear From Our Tutors",
+      "subtitle": "See what other educators are saying about their experience on Lernen."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "404",
+      "subtitle": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go Home"
+    },
+    "systemError": {
+      "title": "500",
+      "subtitle": "Something Went Wrong",
+      "description": "We're sorry, but something went wrong on our end. Please try again later.",
+      "goHome": "Go Home"
+    }
+  },
+  "app": {
+    "notFound": {
+      "title": "404",
+      "subtitle": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved.",
+      "goHome": "Go Home"
+    },
+    "systemError": {
+      "title": "500",
+      "subtitle": "Something Went Wrong",
+      "description": "We're sorry, but something went wrong on our end. Please try again later.",
+      "goHome": "Go Home"
+    }
+  },
+  "tutorDetail": {
+    "profile": {
+      "bookedSessions": "Booked sessions",
+      "students": "Students",
+      "socialProfiles": "Social profiles",
+      "canTeach": "I can teach",
+      "canSpeak": "I can speak",
+      "native": "Native",
+      "bookTrialSession": "Book a trial session",
+      "bookSession": "Book a session",
+      "sendMessage": "Send message",
+      "videoNotSupported": "Your browser does not support the video tag.",
+      "sessionFee": "Session fee",
+      "perMin": "/50 min"
+    },
+    "booking": {
+      "selectTimeSlot": "Please select a time slot before requesting a session.",
+      "selectNewTimeSlot": "Please select a new time slot",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "noSessions": "No sessions",
+      "cancelTrialTitle": "Cancel Trial Request",
+      "cancelTrialDescription": "Are you sure you want to cancel this trial request? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirmCancel": "Confirm Cancel"
+    },
+    "aboutMe": {
+      "title": "About me",
+      "showMore": "Show more",
+      "showLess": "Show less"
+    },
+    "reviews": {
+      "title": "Student Reviews",
+      "basedOnRating": "Based on {{count}} rating",
+      "basedOnRatings": "Based on {{count}} ratings",
+      "writeReview": "Write a Review",
+      "yourRating": "Your Rating",
+      "yourComment": "Your Comment",
+      "placeholder": "Share your experience with this tutor...",
+      "loginRequired": "Please login to submit a review.",
+      "submitSuccess": "Review submitted successfully!",
+      "submitError": "Failed to submit review. Please try again.",
+      "submitReview": "Submit Review",
+      "loadMore": "Load more reviews",
+      "showLess": "Show less"
+    },
+    "tabs": {
+      "introduction": "Introduction",
+      "availability": "Availability",
+      "groupClass": "Group Class",
+      "resumeHighlights": "Resume Highlights",
+      "reviews": "Reviews"
+    },
+    "resume": {
+      "education": "Education",
+      "experience": "Experience",
+      "certifications": "Certification & Awards",
+      "noInfo": "No {{section}} information available.",
+      "showMore": "Show more",
+      "showLess": "Show less"
+    },
+    "groupClass": {
+      "title": "Group Class",
+      "price": "Price",
+      "sessions": "sessions",
+      "schedule": "Schedule",
+      "starts": "Starts",
+      "language": "Language",
+      "studentsEnrolled": "STUDENTS ENROLLED",
+      "details": "Details",
+      "leaveClass": "Leave Class",
+      "joinClass": "Join Class",
+      "description": "Description",
+      "startDate": "Start Date",
+      "maxStudents": "Max Students",
+      "enrolled": "Enrolled",
+      "noStudentsYet": "No students yet",
+      "close": "Close",
+      "joinThisClass": "Join This Class",
+      "joinGroupClass": "Join Group Class",
+      "reviewDetails": "Review details before confirming",
+      "register": "Register",
+      "payment": "Payment",
+      "start": "Start",
+      "importantNotice": "Important Notice",
+      "studentsEnrolledLabel": "Students Enrolled",
+      "cancel": "Cancel",
+      "confirmJoin": "Confirm & Join",
+      "successRegistered": "Successfully Registered!",
+      "successMessage": "You have successfully joined the group class.",
+      "emailNotification": "You will receive an email notification when the class starts.",
+      "gotIt": "Got it!",
+      "leaveGroupClass": "Leave Group Class",
+      "confirmLeave": "Are you sure you want to leave?",
+      "warning": "Warning",
+      "leaveWarning": "Leaving this class will remove your registration. You may need to re-register if you change your mind.",
+      "successLeft": "Successfully Left the Class",
+      "leaveSuccessMessage": "You have successfully left the group class. You can rejoin anytime if you change your mind.",
+      "classWillStartOnDate": "This class will start on {{startDate}}, even if not all spots are filled.",
+      "classWillStartWhenFull": "This class will start immediately once all spots are filled."
+    },
+    "bookSessionModal": {
+      "title": "Book a Session",
+      "withTutor": "with {{tutorName}}",
+      "choosePackage": "Choose Your Session Package",
+      "commitMessage": "Commit to your learning and save more.",
+      "bestValue": "Best Value",
+      "sessions": "Sessions",
+      "perSession": "/session",
+      "savePercent": "Save {{percent}}%",
+      "securePayments": "Secure payments",
+      "proceedToCheckout": "Proceed to Checkout - {{price}}"
+    },
+    "bookTrialModal": {
+      "title": "Request a Free Trial Lesson",
+      "withTutor": "with {{tutorName}}",
+      "benefitsTitle": "In your free trial, you'll get:",
+      "benefit1": "A 30-minute introductory lesson with your tutor.",
+      "benefit2": "An assessment of your current skill level.",
+      "benefit3": "A discussion about your personalized learning plan.",
+      "selectedTimes": "Selected Times:",
+      "addMessage": "Add a message (Optional)",
+      "messagePlaceholder": "Let the tutor know your learning goals...",
+      "footerText": "100% free, no payment information required.",
+      "buttonText": "Request Your Free Trial",
+      "sendingRequest": "Sending Request...",
+      "selectTimeSlot": "Please select a time slot",
+      "loginRequired": "You must be logged in to request a trial session",
+      "requestSuccess": "Trial session request sent successfully!",
+      "requestFailed": "Failed to send trial session request",
+      "requestError": "An error occurred while sending the trial session request"
+    },
+    "courseCard": {
+      "lessons": "Lessons",
+      "students": "Students",
+      "review": "Review",
+      "viewCourse": "View Course"
+    },
+    "requestSessionModal": {
+      "title": "Request a Session",
+      "session": "Session",
+      "privateSession": "Private Session",
+      "groupSession": "Group Session",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "emailAddress": "Email address",
+      "message": "Message",
+      "messagePlaceholder": "Type here message",
+      "sendRequest": "Send Request",
+      "requestSent": "Session request sent!"
+    },
+    "resumeItemModal": {
+      "entry": "Entry",
+      "timePeriod": "Time Period",
+      "title": "Title",
+      "institution": "Institution",
+      "location": "Location",
+      "description": "Description",
+      "saveChanges": "Save Changes"
+    },
+    "similarTutorCard": {
+      "perSession": "/session",
+      "rating": "/5.0",
+      "reviews": "reviews",
+      "activeStudents": "Active students",
+      "sessions": "Sessions",
+      "bookSession": "Book a session",
+      "sendMessage": "Send message"
+    },
+    "similarTutors": {
+      "title": "Similar Tutors",
+      "viewAll": "View All Tutors"
+    },
+    "filterSessionPopover": {
+      "selectSessionType": "Select Session Type",
+      "selectSubject": "Select a subject",
+      "applyFilter": "Apply Filter",
+      "showAllType": "Show All Type",
+      "privateSession": "Private Session",
+      "groupSession": "Group Session",
+      "mathematics": "Mathematics",
+      "science": "Science",
+      "english": "English",
+      "history": "History",
+      "art": "Art"
+    },
+    "selectTimezone": "Select timezone"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirmDelete": "Confirm Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "view": "View",
+    "currency": "$",
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
+  },
+  "payouts": {
+    "title": "Payouts",
+    "loading": "Loading payout data...",
+    "availableBalance": "Available balance",
+    "pendingBalance": "Pending balance",
+    "totalEarned": "Total earned",
+    "currentPaymentMethod": "Current payment method",
+    "noPaymentMethod": "No payment method selected",
+    "transactionHistory": "Transaction history",
+    "recentEarnings": "Recent earnings",
+    "allTypes": "All types",
+    "allStatus": "All status",
+    "oneOnOne": "1-on-1",
+    "group": "Group",
+    "statusLabels": {
+      "completed": "Completed",
+      "processing": "Processing",
+      "failed": "Failed"
+    },
+    "export": "Export",
+    "withdraw": "Withdraw",
+    "addPaymentMethod": "Add payment method",
+    "viewDetails": "View details",
+    "amount": "Amount",
+    "status": "Status",
+    "date": "Date",
+    "type": "Type",
+    "description": "Description",
+    "noTransactions": "No transactions found",
+    "noEarnings": "No earnings found",
+    "noEarningsDescription": "You haven't earned any money yet. Start teaching to see your earnings here.",
+    "nextPayout": "Next payout",
+    "minimumThreshold": "Minimum withdrawal threshold",
+    "commissionRate": "Commission rate",
+    "withdrawalLimit": "Withdrawal limit reached",
+    "confirmWithdrawal": "Confirm withdrawal",
+    "withdrawalAmount": "Withdrawal amount",
+    "selectPaymentMethod": "Select payment method",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "processing": "Processing...",
+    "withdrawalSuccessful": "Withdrawal request submitted successfully",
+    "withdrawalFailed": "Failed to submit withdrawal request",
+    "paymentMethodAdded": "Payment method added successfully",
+    "paymentMethodRemoved": "Payment method removed successfully",
+    "invalidAmount": "Invalid withdrawal amount",
+    "insufficientBalance": "Insufficient balance",
+    "noTransactionsDescription": "No transactions found. Your payout history will appear here once you make withdrawals.",
+    "dateRange": "{{startDate}} - {{endDate}}"
+  },
+  "quiz": {
+    "create": {
+      "title": "Create new quiz",
+      "saveDraft": "Save draft",
+      "publish": "Publish quiz",
+      "infoTitle": "Quiz information",
+      "quizTitle": "Quiz title",
+      "quizTitlePlaceholder": "e.g., Chapter 1 - Introduction to Physics",
+      "assignClass": "Assign to class",
+      "classPlaceholder": "Select a class...",
+      "searchClassPlaceholder": "Search classes...",
+      "description": "Description",
+      "descriptionPlaceholder": "Brief description of the quiz content and objectives...",
+      "dueDate": "Due date",
+      "settings": "Quiz settings",
+      "timeLimit": "Time limit",
+      "minutes": "minutes",
+      "passingScore": "Passing score",
+      "maxAttempts": "Max attempts",
+      "unlimited": "Unlimited",
+      "shuffleQuestions": "Shuffle questions for each attempt",
+      "showCorrectAnswers": "Show correct answers after submission",
+      "questionsTitle": "Questions ({{count}})",
+      "addQuestion": "Add question",
+      "confirmLeave": {
+        "title": "Discard changes?",
+        "message": "You have unsaved changes. Are you sure you want to leave without saving?",
+        "confirm": "Leave"
+      },
+      "card": {
+        "multipleSelection": "Multiple selection",
+        "singleSelection": "Single selection",
+        "deleteTooltip": "Delete card",
+        "questionLabel": "Question",
+        "questionPlaceholder": "Enter your question...",
+        "answerOptions": "Answer options",
+        "optionPlaceholder": "Option {{option}}",
+        "answerHint": "* Mark the correct answer in the quiz settings"
+      }
+    },
+    "assign": {
+      "title": "Assign quiz",
+      "selectLabel": "Select quiz",
+      "selectPlaceholder": "Choose a quiz...",
+      "dueDate": "Due date",
+      "assign": "Assign",
+      "validation": "Please select a quiz and a due date."
+    },
+    "stats": {
+      "subtitle": "Quiz statistics & analytics",
+      "tabs": {
+        "overview": "Overview",
+        "questions": "Questions",
+        "students": "Students"
+      },
+      "overview": {
+        "totalAttempts": "Total attempts",
+        "averageScore": "Average score",
+        "completionRate": "Completion rate",
+        "avgTime": "Avg. time",
+        "scoreDistribution": "Score distribution",
+        "passFailRate": "Pass/fail rate",
+        "passed": "Passed",
+        "failed": "Failed"
+      },
+      "questions": {
+        "title": "Question-level analytics",
+        "correctRate": "Correct rate",
+        "attempts": "Attempts",
+        "avgTime": "Avg. time"
+      },
+      "students": {
+        "title": "Student performance",
+        "tableHeaders": {
+          "student": "Student",
+          "score": "Score",
+          "time": "Time",
+          "date": "Date",
+          "status": "Status"
+        },
+        "status": {
+          "passed": "Passed",
+          "failed": "Failed"
+        }
+      }
+    }
+  },
+  "whiteboard": {
+    "title": "Whiteboard",
+    "subtitle": "Digital drawing and collaboration space",
+    "tools": {
+      "pen": "Pen",
+      "eraser": "Eraser",
+      "line": "Line",
+      "rectangle": "Rectangle",
+      "circle": "Circle",
+      "text": "Text"
+    },
+    "lineWidth": "Line width",
+    "undo": "Undo",
+    "clear": "Clear all",
+    "download": "Download",
+    "resetView": "Reset view",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "enterText": "Enter text:",
+    "confirmClear": "Are you sure you want to clear the whiteboard?",
+    "panHint": "Right-click or Space + Drag to pan • Scroll to zoom"
+  },
+  "onboarding": {
+    "basicInfo": {
+      "location": "Location"
+    }
+  }
+}

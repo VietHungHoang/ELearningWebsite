@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiX, FiCheckCircle, FiChevronLeft, FiChevronRight, FiLoader } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 import type { Tutor } from '../../types/api';
 
 interface BookingModalProps {
@@ -12,6 +13,7 @@ interface BookingModalProps {
 const mockAvailableSlots = [ '09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM', '05:00 PM', '07:00 PM' ];
 
 const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) => {
+    const { t } = useTranslation();
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [step, setStep] = useState<'selecting' | 'success'>('selecting');
     const [isBooking, setIsBooking] = useState(false);
@@ -72,7 +74,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
 
     if (!shouldRender) return null;
     
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdays = t('booking.weekdays', { returnObjects: true }) as string[];
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -87,8 +89,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
                     <div className="flex items-center gap-3">
                         <img src={tutor.avatarUrl} alt={tutor.name} className="w-10 h-10 rounded-full" />
                         <div>
-                            <h2 className="font-bold text-gray-800">Book a Trial Lesson</h2>
-                            <p className="text-sm text-gray-500">with {tutor.name}</p>
+                            <h2 className="font-bold text-gray-800">{t('booking.bookTrialLesson')}</h2>
+                            <p className="text-sm text-gray-500">{t('booking.withTutor', { tutorName: tutor.name })}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full"><FiX /></button>
@@ -97,11 +99,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
                 {step === 'success' ? (
                     <div className="text-center p-8 sm:p-12">
                         <div className="w-16 h-16 mx-auto"><FiCheckCircle /></div>
-                        <h3 className="text-xl font-bold text-gray-800 mt-4">Trial Lesson Booked!</h3>
+                        <h3 className="text-xl font-bold text-gray-800 mt-4">{t('booking.trialLessonBooked')}</h3>
                         <p className="text-gray-600 mt-2">
-                            Your trial lesson with <span className="font-semibold">{tutor.name}</span> is confirmed for <span className="font-semibold">{selectedDate!.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span> at <span className="font-semibold">{selectedTime}</span>.
+                            {t('booking.bookingConfirmation', {
+                                tutorName: tutor.name,
+                                date: selectedDate!.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+                                time: selectedTime
+                            })}
                         </p>
-                        <button onClick={onClose} className="mt-6 w-full max-w-xs mx-auto bg-[#0b6459] text-white font-bold py-3 rounded-lg hover:bg-[#084c43] btn-scale">Done</button>
+                        <button onClick={onClose} className="mt-6 w-full max-w-xs mx-auto bg-[#0b6459] text-white font-bold py-3 rounded-lg hover:bg-[#084c43] btn-scale">{t('booking.done')}</button>
                     </div>
                 ) : (
                     <>
@@ -138,7 +144,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
                             <div className="w-full md:w-1/2 p-5">
                                 {selectedDate ? (
                                     <>
-                                        <h3 className="font-semibold text-gray-800 mb-3">Available Times for {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</h3>
+                                        <h3 className="font-semibold text-gray-800 mb-3">{t('booking.availableTimesFor', { date: selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) })}</h3>
                                         <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar pr-2 -mr-2">
                                             {mockAvailableSlots.map(time => {
                                                 const isSelected = selectedTime === time;
@@ -159,8 +165,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
                                 ) : (
                                     <div className="h-full flex flex-col items-center justify-center text-center text-gray-500">
                                         <svg className="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        <p className="font-semibold">Select a date</p>
-                                        <p className="text-xs">to see available time slots.</p>
+                                        <p className="font-semibold">{t('booking.selectDate')}</p>
+                                        <p className="text-xs">{t('booking.selectDateDescription')}</p>
                                     </div>
                                 )}
                             </div>
@@ -175,7 +181,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
                                         <p className="text-gray-500">{selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} at <span className="font-medium text-gray-600">{selectedTime}</span></p>
                                     </>
                                 ) : (
-                                    <p className="font-medium text-gray-500">Please select a date and time to proceed.</p>
+                                    <p className="font-medium text-gray-500">{t('booking.pleaseSelectDateTime')}</p>
                                 )}
                             </div>
                             <button
@@ -183,7 +189,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, tutor }) =
                                 disabled={!selectedTime || isBooking}
                                 className="bg-[#0b6459] text-white font-bold py-3 px-6 rounded-lg min-w-[180px] h-[48px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed btn-scale"
                             >
-                                {isBooking ? <FiLoader className="h-5 w-5 text-white animate-spin" /> : 'Confirm Booking'}
+                                {isBooking ? <FiLoader className="h-5 w-5 text-white animate-spin" /> : t('booking.confirmBooking')}
                             </button>
                         </div>
                     </>

@@ -1,7 +1,6 @@
 export interface CartResponse {
   id: number;
   learnerId: number;
-  status: 'OPEN' | 'CHECKED_OUT';
   totalAmount: number;
   items: CartItem[];
 }
@@ -13,8 +12,7 @@ export interface CartItem {
   courseId: number;       
   name: string;          
   category: string;       
-  tutor: string;        
-  tutorId: number;       
+  instructor: InstructorInfo;  
   price: number;         
   image: string;          
   rating: number;        
@@ -28,13 +26,17 @@ export interface CartItem {
   appliedCoupon?: string;
 }
 
+export interface InstructorInfo {
+  id: number;
+  name: string;
+}
+
 
 export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 
 
 export interface CouponInfo {
   code: string;           
-  type: 'percentage' | 'fixed'; 
   value: number;         
 }
 
@@ -59,7 +61,7 @@ export interface CourseDetailBE {
   image: string;
   rating: number;
   reviews: number;
-  instructorId: number;
+  instructorId: string;
   description: string;
   level: CourseLevel;
   listPrice: number;
@@ -76,6 +78,55 @@ export interface CourseDetailBE {
 
 export interface CartItemResponse extends CartItemBE, CourseDetailBE {
   instructor: InstructorBE;
+}
+
+export interface AddToCartBFFResponse {
+  cartId: number;
+  courseId: number;
+  itemCount: number;
+  totalAmount: number;
+}
+
+export interface CartItemBFF {
+  id: number;
+  courseId: number;
+  courseTitle: string;
+  category: string;
+  instructorId: string;
+  instructorName: string;
+  price: number;
+  image: string;
+  rating: number;
+  reviews: number;
+  level: CourseLevel;
+  language: string;
+  lessons: number;
+  duration: string;
+}
+
+export interface ViewCartBFFResponse {
+  cartId: number;
+  learnerId: string;
+  items: CartItemBFF[];
+  subtotal: number;
+  discountAmount: number;
+  totalAmount: number;
+  discountPercentage?: number;
+  availableCoupons?: string[];
+}
+
+export interface ApplyCouponBFFResponse {
+  cartId: number;
+  courseId: number;
+  couponCode: string;
+  discountAmount: number;
+  totalAmount: number;
+  itemCount: number;
+}
+
+export interface CheckoutBFFResponse {
+  orderId: string;
+  totalAmount: number;
 }
 
 export interface CheckoutResponse {

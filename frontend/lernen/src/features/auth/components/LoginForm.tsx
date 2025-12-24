@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import authService from '../../../services/authService';
@@ -11,6 +12,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false }) => {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,13 +43,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
   return (
     <div className="bg-[#F8F7F4] p-10 flex flex-col justify-center">
       <div className="max-w-md mx-auto w-full">
-        <h2 className="text-2xl font-bold text-[#0b6459]">Welcome back!</h2>
-        <p className="text-gray-600 mt-2">We're glad to have you back.</p>
+        <h2 className="text-2xl font-bold text-[#0b6459]">{t('auth.login.welcomeBack')}</h2>
+        <p className="text-gray-600 mt-2">{t('auth.login.gladToHaveYouBack')}</p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="email-address" className="text-sm font-medium text-gray-700">
-              Email address <span className="text-red-500">*</span>
+              {t('auth.login.emailAddress')} <span className="text-red-500">*</span>
             </label>
             <input
               id="email-address"
@@ -59,13 +61,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm disabled:opacity-50"
-              placeholder="Email address"
+              placeholder={t('auth.login.emailPlaceholder')}
             />
           </div>
 
           <div className="relative">
             <label htmlFor="password" className="text-sm font-medium text-gray-700">
-              Password <span className="text-red-500">*</span>
+              {t('auth.login.password')} <span className="text-red-500">*</span>
             </label>
             <input
               id="password"
@@ -77,7 +79,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-[#0b6459] focus:border-[#0b6459] sm:text-sm disabled:opacity-50"
-              placeholder="Password"
+              placeholder={t('auth.login.passwordPlaceholder')}
             />
             <button
               type="button"
@@ -105,13 +107,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
                     </div>
                 </div>
                 <span className="ml-2 block text-sm text-gray-900">
-                    Remember Me
+                    {t('auth.login.rememberMe')}
                 </span>
             </label>
 
             <div className="text-sm">
               <Link to="/forgot-password" className="font-medium text-[#0b6459] hover:text-[#084c43]">
-                Forgot Password?
+                {t('auth.login.forgotPassword')}
               </Link>
             </div>
           </div>
@@ -122,27 +124,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
               disabled={isLoading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-[#0b6459] hover:bg-[#084c43] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? t('auth.login.loggingIn') : t('auth.login.login')}
             </button>
           </div>
         </form>
 
         <p className="mt-3 text-center text-sm text-gray-600">
-          Don't have an Account?
+          {t('auth.login.dontHaveAccount')}
         </p>
         <p className="mt-1 text-center text-sm">
           <Link to="/signup?role=student" className="font-medium text-[#0b6459] hover:text-[#084c43] underline">
-            Sign up as Student
+            {t('auth.login.signUpAsStudent')}
           </Link>
-          {' '}or{' '}
+          {' '}{t('auth.login.or')}{' '}
           <Link to="/signup?role=tutor" className="font-medium text-[#0b6459] hover:text-[#084c43] underline">
-            Sign up as Tutor
+            {t('auth.login.signUpAsTutor')}
           </Link>
         </p>
 
         <div className="mt-5 flex items-center">
           <div className="flex-grow border-t border-gray-300"></div>
-          <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
+          <span className="flex-shrink mx-4 text-gray-500 text-sm">{t('auth.login.orSeparator')}</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
         
@@ -160,7 +162,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
               className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer"
             >
               <FcGoogle />
-              <span className="ml-3">Sign in with Google</span>
+              <span className="ml-3">{t('auth.login.signInWithGoogle')}</span>
             </button>
         </div>
 

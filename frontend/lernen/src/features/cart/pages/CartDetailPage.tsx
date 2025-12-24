@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import type { CartItem } from '../../../types/cart';
 import cartService from '../../../services/cartService';
 import wishlistService from '../../../services/wishlistService';
+import { useTranslation } from 'react-i18next';
 
 const StatItem: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, text }) => (
     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -18,6 +19,7 @@ const StatItem: React.FC<{ icon: React.ReactNode; text: string }> = ({ icon, tex
 
 
 const CartDetailPage: React.FC = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -95,15 +97,8 @@ const CartDetailPage: React.FC = () => {
     
     const itemDiscountsTotal = useMemo(() => itemDiscounts.reduce((sum, d) => sum + d.discount, 0), [itemDiscounts]);
     const totalDiscount = itemDiscountsTotal;
-    const total = subtotal - totalDiscount;    const handleRemoveTutorCoupon = async (itemId: number) => {
-        try {
-            setCartItems(items => items.map(item => 
-                item.id === itemId ? { ...item, appliedCoupon: undefined } : item
-            ));
-        } catch (error) {
-            console.error('Failed to remove coupon:', error);
-        }
-    };
+    const tax = (subtotal - itemDiscountsTotal) * 0.1; // Tax calculated after item discounts
+    const total = subtotal + tax - totalDiscount;
 
     const handleToggleCouponDisplay = (itemId: number) => {
         setShowCouponCode(prev => ({
@@ -190,14 +185,14 @@ const CartDetailPage: React.FC = () => {
                     { name: 'Home', path: '/' },
                     { name: 'Cart', path: '/cart' }
                 ]} />
-                <h1 className="text-3xl font-bold text-gray-800">Shopping Cart</h1>
+                <h1 className="text-3xl font-bold text-gray-800">{t('cart.shoppingCart')}</h1>
 
                 <div className="grid lg:grid-cols-3 gap-8 mt-8">
                     {/* Cart Items */}
                     <div className="lg:col-span-2 space-y-6">
                         {loading ? (
                             <div className="bg-white p-12 text-center rounded-xl shadow-sm">
-                                <p className="text-gray-500">Loading cart items...</p>
+                                <p className="text-gray-500">{t('cart.loadingCart')}</p>
                             </div>
                         ) : cartItems.length > 0 ? cartItems.map(item => (
                             <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm flex flex-col sm:flex-row items-start gap-6">
@@ -206,7 +201,7 @@ const CartDetailPage: React.FC = () => {
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <a href="#" onClick={(e) => {e.preventDefault(); navigate(`/course-detail/${item.courseId}`);}} className="font-bold text-lg text-gray-800 hover:text-[#0b6459]">{item.name}</a>
-                                            <p className="text-sm text-gray-500 mt-1">by <a href="#" onClick={(e) => {e.preventDefault(); navigate(`/instructor-detail/${item.tutorId}`);}} className="font-medium text-gray-600 hover:underline">{item.tutor}</a></p>
+                                            <p className="text-sm text-gray-500 mt-1">{t('cart.byTutor', { tutor: item.tutor })}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xl font-bold text-gray-800">${item.price.toFixed(2)}</p>
@@ -246,7 +241,7 @@ const CartDetailPage: React.FC = () => {
                                             }`}
                                         >
                                             <AiOutlineTag className="w-4 h-4" />
-                                            See Available Coupon
+                                            {t('cart.seeAvailableCoupon')}
                                         </button>
 
                                         {/* Coupon Code Display */}
@@ -258,10 +253,7 @@ const CartDetailPage: React.FC = () => {
                                                             Coupon Code: <span className="font-mono bg-blue-100 px-2 py-1 rounded text-blue-900">{item.availableCoupon.code}</span>
                                                         </p>
                                                         <p className="text-xs text-blue-600 mt-1">
-                                                            {item.availableCoupon.type === 'percentage'
-                                                                ? `${item.availableCoupon.value}% off`
-                                                                : `$${item.availableCoupon.value} off`
-                                                            }
+                                                            ${item.availableCoupon.value}% off
                                                         </p>
                                                     </div>
                                                     {!item.appliedCoupon ? (
@@ -269,7 +261,7 @@ const CartDetailPage: React.FC = () => {
                                                             onClick={() => handleApplyCouponDirectly(item.availableCoupon!.code)}
                                                             className="text-sm bg-[#0b6459] text-white px-4 py-1 rounded hover:bg-[#084c43] transition-colors"
                                                         >
-                                                            Apply
+                                                            {t('cart.apply')}
                                                         </button>
                                                     ) : (
                                                         <button
@@ -279,7 +271,7 @@ const CartDetailPage: React.FC = () => {
                                                             }}
                                                             className="text-sm text-green-600 font-medium hover:text-green-700 cursor-pointer"
                                                         >
-                                                            ✓ Applied
+                                                            ✓ {t('cart.apply')}
                                                         </button>
                                                     )}
                                                 </div>
@@ -310,7 +302,7 @@ const CartDetailPage: React.FC = () => {
                             </div>
                         )) : (
                             <div className="bg-white p-12 text-center rounded-xl shadow-sm">
-                                <h2 className="text-xl font-semibold">Your cart is empty.</h2>
+                                <h2 className="text-xl font-semibold">{t('cart.cartEmpty')}</h2>
                                 <p className="text-gray-500 mt-2">Looks like you haven't added anything to your cart yet.</p>
                                 <button onClick={() => navigate('/findCourses')} className="mt-6 bg-[#0b6459] text-white font-semibold py-2 px-5 rounded-lg">Browse Courses</button>
                             </div>
@@ -349,7 +341,7 @@ const CartDetailPage: React.FC = () => {
                                 {/* Coupon Input Section */}
                                 <div className="mt-4 pt-4 border-t border-gray-200">
                                     <label htmlFor="coupon-input" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Have a coupon code?
+                                        {t('cart.haveCouponCode')}
                                     </label>
 
                                     {/* Applied Coupons Display */}
@@ -380,7 +372,7 @@ const CartDetailPage: React.FC = () => {
                                             type="text"
                                             value={couponInput}
                                             onChange={(e) => setCouponInput(e.target.value)}
-                                            placeholder="Enter coupon code"
+                                            placeholder={t('cart.enterCouponCode')}
                                             className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent"
                                             onKeyPress={(e) => e.key === 'Enter' && handleApplyCouponFromInput()}
                                         />
@@ -388,7 +380,7 @@ const CartDetailPage: React.FC = () => {
                                             onClick={handleApplyCouponFromInput}
                                             className="px-4 py-2 bg-[#0b6459] text-white rounded-md hover:bg-[#084c43] transition-colors font-medium"
                                         >
-                                            Apply
+                                            {t('cart.apply')}
                                         </button>
                                     </div>
                                     {couponError && (
@@ -399,7 +391,7 @@ const CartDetailPage: React.FC = () => {
                                 {/* Available Coupons Section */}
                                 {cartItems.some(item => item.availableCoupon) && (
                                     <div className="mt-4 pt-4 border-t border-gray-200">
-                                        <h3 className="text-sm font-medium text-gray-700 mb-3">Available Coupons</h3>
+                                        <h3 className="text-sm font-medium text-gray-700 mb-3">{t('cart.availableCoupons')}</h3>
                                         <div className="flex flex-wrap gap-2">
                                             {cartItems
                                                 .filter(item => item.availableCoupon)
@@ -440,7 +432,7 @@ const CartDetailPage: React.FC = () => {
                                     onClick={() => navigate('/checkout')}
                                     className="w-full mt-6 bg-[#0b6459] text-white font-bold py-3 rounded-lg hover:bg-[#084c43] transition-colors cursor-pointer"
                                 >
-                                    Proceed to Checkout
+                                    {t('cart.proceedToCheckout')}
                                 </button>
                             </div>
                         </div>

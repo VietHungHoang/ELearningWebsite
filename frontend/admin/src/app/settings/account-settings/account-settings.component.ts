@@ -9,7 +9,6 @@ import { FileUploadModule } from '@iplab/ngx-file-upload';
 })
 export class AccountSettingsComponent {
 
-    // File Uploader
     public multiple: boolean = false;
 
 }

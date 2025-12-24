@@ -1,4 +1,5 @@
-import type { TutorAvailability, BookedSession } from '../types/api';
+import type { Session } from '../types/class';
+import type { TutorAvailability } from '../types/tutor';
 
 /**
  * Generate actual time slots from recurring availability patterns
@@ -17,7 +18,7 @@ export interface DisplaySlot {
   datetime: Date;
   availabilityId: string;
   isBooked: boolean;
-  bookedSession?: BookedSession;
+  bookedSession?: Session;
 }
 
 export const generateSlotsFromPatterns = (
@@ -28,8 +29,8 @@ export const generateSlotsFromPatterns = (
 ): DisplaySlot[] => {
   const slots: DisplaySlot[] = [];
   
-  // Filter only active patterns
-  const activePatterns = availabilities.filter(a => a.status === 'ACTIVE');
+  // Use all availability patterns (no status filtering needed)
+  const activePatterns = availabilities;
   
   // Iterate through each day in the range
   const currentDate = new Date(startDate);
@@ -95,7 +96,7 @@ export const generateSlotsFromPatterns = (
  */
 export const overlayBookedSessions = (
   slots: DisplaySlot[],
-  bookedSessions: BookedSession[]
+  bookedSessions: Session[]
 ): DisplaySlot[] => {
   return slots.map(slot => {
     // Find if this slot has a booked session
@@ -122,7 +123,7 @@ export const overlayBookedSessions = (
 /**
  * Get color class for a booked session based on status
  */
-export const getSessionColorClass = (status: BookedSession['status']): string => {
+export const getSessionColorClass = (status: Session['status']): string => {
   switch (status) {
     case 'CONFIRMED':
       return 'bg-blue-100 text-blue-800 border-blue-200';

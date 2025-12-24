@@ -1,0 +1,67 @@
+
+.breadcrumb {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    .breadcrumb-item {
+        a {
+            text-decoration: none;
+            color: #64748b;
+            transition: all 0.3s ease;
+
+            &:hover {
+                color: #605dff;
+            }
+
+            i {
+                display: inline-block;
+            }
+        }
+
+        &:last-child {
+            color: #64748b;
+            pointer-events: none;
+        }
+    }
+}
+
+.trezo-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+img {
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.bg-gradient-to-br {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+        pointer-events: none;
+    }
+}
+

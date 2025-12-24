@@ -15,10 +15,9 @@ export class GradientLineChartService {
     async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
-                // Dynamically import ApexCharts
+
                 const ApexCharts = (await import('apexcharts')).default;
 
-                // Define chart options
                 const options = {
                     series: [
                         {
@@ -98,7 +97,7 @@ export class GradientLineChartService {
                             type: "horizontal",
                             opacityFrom: 1,
                             opacityTo: 1,
-                            // stops: [0, 100, 100, 100]
+
                         }
                     },
                     markers: {
@@ -129,7 +128,6 @@ export class GradientLineChartService {
                     }
                 };
 
-                // Initialize and render the chart
                 const chart = new ApexCharts(document.querySelector('#gradient_line_chart'), options);
                 chart.render();
             } catch (error) {

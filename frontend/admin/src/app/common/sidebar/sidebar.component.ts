@@ -16,7 +16,6 @@ interface MenuItem {
 })
 export class SidebarComponent {
 
-    // Accordion
     openSectionIndex: number = -1;
     openSectionIndex2: number = -1;
     openSectionIndex3: number = -1;

@@ -42,19 +42,21 @@ const LoginPage: React.FC = () => {
     const handleLogin = async (email: string, password: string) => {
         try {
             const user = await login({ email, password });
-            if (user?.role === "tutor") {
-                // Check onboarding status for tutors
-                const { status } = await authService.getOnboardingStatus();
-                if (status < 7) {
-                    navigate(`/onboarding/tutor?step=${status}`);
+            if (!user?.role) {
+                const tutorOnboarding = await authService.getOnboardingData(user!.id);
+                if (tutorOnboarding.currentStep < 7) {
+                    navigate(`/onboarding/tutor?step=${tutorOnboarding.currentStep}`);
                 } else {
-                    navigate("/dashboard");
+                    navigate("/onboarding-completion");
                 }
+            } else if (user.role === "tutor") {
+                navigate("/dashboard");
             } else {
                 navigate("/");
             }
         } catch (error) {
             console.error("Login failed:", error);
+            throw error;
         }
     };
 

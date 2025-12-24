@@ -21,7 +21,7 @@ export class App {
         this.router.events.subscribe((event: Event) => {
             if (event instanceof NavigationEnd) {
                 const currentUrl = event.urlAfterRedirects;
-                // Scroll to top ONLY if navigating to a different route (not on refresh)
+
                 if (this.previousUrl && this.previousUrl !== currentUrl) {
                     this.viewportScroller.scrollToPosition([0, 0]);
                 }

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { HiCloudUpload, HiTrash } from 'react-icons/hi';
-import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaYoutube } from 'react-icons/fa';
-import type { TutorSocial, Tutor } from '../../../../types/api';
-import { uploadService } from '../../../../services/uploadService';
+import React, { useState } from "react";
+import { HiCloudUpload, HiTrash } from "react-icons/hi";
+import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaYoutube } from "react-icons/fa";
+import type { TutorSocial, Tutor } from "../../../../types/api";
+import { uploadService } from "../../../../services/uploadService";
 
 interface MediaPortfolioStepProps {
     data: Partial<Tutor>;
@@ -10,9 +10,7 @@ interface MediaPortfolioStepProps {
 }
 
 const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange }) => {
-    const [photoPreview, setPhotoPreview] = useState<string | null>(
-        data.avatarUrl || null
-    );
+    const [photoPreview, setPhotoPreview] = useState<string | null>(data.avatarUrl || null);
     const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
     const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +33,7 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
                 };
                 reader.readAsDataURL(file);
             } catch (error) {
-                console.error('Failed to upload photo:', error);
+                console.error("Failed to upload photo:", error);
                 // Handle error, maybe show toast
             }
         }
@@ -58,7 +56,7 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
                 const url = URL.createObjectURL(file);
                 setVideoPreview(url);
             } catch (error) {
-                console.error('Failed to upload video:', error);
+                console.error("Failed to upload video:", error);
                 // Handle error
             }
         }
@@ -78,23 +76,21 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
     };
 
     const socialPlatforms = [
-        { id: 'facebook', name: 'Facebook', icon: FaFacebook, placeholder: 'https://facebook.com/yourprofile' },
-        { id: 'twitter', name: 'Twitter', icon: FaTwitter, placeholder: 'https://twitter.com/yourprofile' },
-        { id: 'linkedin', name: 'LinkedIn', icon: FaLinkedin, placeholder: 'https://linkedin.com/in/yourprofile' },
-        { id: 'instagram', name: 'Instagram', icon: FaInstagram, placeholder: 'https://instagram.com/yourprofile' },
-        { id: 'youtube', name: 'YouTube', icon: FaYoutube, placeholder: 'https://youtube.com/@yourchannel' },
+        { id: "facebook", name: "Facebook", icon: FaFacebook, placeholder: "https://facebook.com/yourprofile" },
+        { id: "twitter", name: "Twitter", icon: FaTwitter, placeholder: "https://twitter.com/yourprofile" },
+        { id: "linkedin", name: "LinkedIn", icon: FaLinkedin, placeholder: "https://linkedin.com/in/yourprofile" },
+        { id: "instagram", name: "Instagram", icon: FaInstagram, placeholder: "https://instagram.com/yourprofile" },
+        { id: "youtube", name: "YouTube", icon: FaYoutube, placeholder: "https://youtube.com/@yourchannel" },
     ];
 
     const handleSocialLinkChange = (platform: string, url: string) => {
         const existingLinks = data.socialLinks || [];
-        const linkIndex = existingLinks.findIndex(link => link.platform === platform);
+        const linkIndex = existingLinks.findIndex((link) => link.platform === platform);
 
         let updatedLinks: TutorSocial[];
         if (linkIndex >= 0) {
             // Update existing link
-            updatedLinks = existingLinks.map((link, idx) =>
-                idx === linkIndex ? { ...link, url } : link
-            );
+            updatedLinks = existingLinks.map((link, idx) => (idx === linkIndex ? { ...link, url } : link));
         } else {
             // Add new link
             updatedLinks = [...existingLinks, { platform, url }];
@@ -104,19 +100,17 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
     };
 
     const getSocialLinkValue = (platform: string): string => {
-        return data.socialLinks?.find(link => link.platform === platform)?.url || '';
+        return data.socialLinks?.find((link) => link.platform === platform)?.url || "";
     };
 
     const inputStyles =
-        'w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition';
+        "w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition";
 
     return (
         <div className="space-y-6">
             <div>
                 <h3 className="text-xl font-bold text-gray-800">Media & Portfolio</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                    Add visual content to make your profile stand out
-                </p>
+                <p className="text-sm text-gray-500 mt-1">Add visual content to make your profile stand out</p>
             </div>
 
             {/* Profile Photo */}
@@ -155,18 +149,14 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
                             onChange={handlePhotoUpload}
                             className="hidden"
                         />
-                        <p className="text-xs text-gray-500 mt-2">
-                            Recommended: Square image, at least 400x400px
-                        </p>
+                        <p className="text-xs text-gray-500 mt-2">Recommended: Square image, at least 400x400px</p>
                     </div>
                 )}
             </div>
 
             {/* Intro Video */}
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Introduction Video (Optional)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Introduction Video (Optional)</label>
                 {videoPreview ? (
                     <div className="space-y-2">
                         <video
@@ -208,9 +198,7 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
 
             {/* Social Links */}
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Social Links (Optional)
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Social Links</label>
                 <div className="space-y-3">
                     {socialPlatforms.map((platform) => {
                         const Icon = platform.icon;

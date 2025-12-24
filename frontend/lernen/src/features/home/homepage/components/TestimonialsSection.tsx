@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Testimonial {
   id: number
@@ -11,60 +12,62 @@ interface Testimonial {
 }
 
 const TestimonialsSection: React.FC = () => {
+  const { t } = useTranslation();
+
   const testimonials: Testimonial[] = [
     {
       id: 1,
-      text: "We have tried several tutoring platforms, but none compare to Lernen. The tutors are top-notch, and the booking process is incredibly.",
-      name: "Arlene M",
-      title: "Agile District",
+      text: t('testimonials.items.0.text'),
+      name: t('testimonials.items.0.name'),
+      title: t('testimonials.items.0.title'),
       profileImage: "/media/homepage/Anthony Shao.png",
       companyIcon: "A",
-      companyName: "Agile District"
+      companyName: t('testimonials.items.0.companyName')
     },
     {
       id: 2,
-      text: "Lernen has been a game-changer for our students. The variety of tutors and the ease of booking sessions make it a breeze for parents and students alike. Our students' grades have improved significantly since we started using this platform.",
-      name: "Marvin M",
-      title: "Tutoring Specialist",
+      text: t('testimonials.items.1.text'),
+      name: t('testimonials.items.1.name'),
+      title: t('testimonials.items.1.title'),
       profileImage: "/media/homepage/Steven Ford.png",
       companyIcon: "L",
-      companyName: "Learning Hub"
+      companyName: t('testimonials.items.1.companyName')
     },
     {
       id: 3,
-      text: "Lernen is a fantastic resource for our students. The diverse range of tutors ensures that we can find the perfect match for each student's.",
-      name: "Devon L",
-      title: "Classroom Teacher",
+      text: t('testimonials.items.2.text'),
+      name: t('testimonials.items.2.name'),
+      title: t('testimonials.items.2.title'),
       profileImage: "/media/homepage/Anthony Shao.png",
       companyIcon: "W",
-      companyName: "Wisdom Academy"
+      companyName: t('testimonials.items.2.companyName')
     },
     {
       id: 4,
-      text: "Lernen is a dependable and effective tool for our agency, offering knowledgeable and dedicated tutors.",
-      name: "Ronald R",
-      title: "Educational Consultant",
+      text: t('testimonials.items.3.text'),
+      name: t('testimonials.items.3.name'),
+      title: t('testimonials.items.3.title'),
       profileImage: "/media/homepage/Steven Ford.png",
       companyIcon: "X",
-      companyName: "Xero Education"
+      companyName: t('testimonials.items.3.companyName')
     },
     {
       id: 5,
-      text: "We're delighted with Lernen its top-notch tutors and user-friendly platform have greatly boosted our students.",
-      name: "Courtney H",
-      title: "School Counselor",
+      text: t('testimonials.items.4.text'),
+      name: t('testimonials.items.4.name'),
+      title: t('testimonials.items.4.title'),
       profileImage: "/media/homepage/Anthony Shao.png",
       companyIcon: "G",
-      companyName: "Growth Learning"
+      companyName: t('testimonials.items.4.companyName')
     },
     {
       id: 6,
-      text: "Our experience with Lernen has been outstanding. The platform is user-friendly, & the tutors are highly qualified.",
-      name: "Darlene R",
-      title: "Academic Advisor",
+      text: t('testimonials.items.5.text'),
+      name: t('testimonials.items.5.name'),
+      title: t('testimonials.items.5.title'),
       profileImage: "/media/homepage/Steven Ford.png",
       companyIcon: "E",
-      companyName: "EduTech Solutions"
+      companyName: t('testimonials.items.5.companyName')
     }
   ]
 
@@ -101,18 +104,18 @@ const TestimonialsSection: React.FC = () => {
           {/* Subtitle */}
           <div className="flex items-center justify-center mb-4">
             <div className="h-px bg-[#065A46] flex-1 max-w-20"></div>
-            <span className="px-4 text-[#065A46] text-sm font-medium">Real Feedback from Our Clients</span>
+            <span className="px-4 text-[#065A46] text-sm font-medium">{t('testimonials.sectionLabel')}</span>
             <div className="h-px bg-[#065A46] flex-1 max-w-20"></div>
           </div>
           
           {/* Main Title */}
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-            What Our Users Are Saying
+            {t('testimonials.title')}
           </h2>
           
           {/* Description */}
           <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
-            Discover how Lernen is making a difference in the lives of students and educational institutions. Hear from our satisfied users.
+            {t('testimonials.description')}
           </p>
         </div>
 

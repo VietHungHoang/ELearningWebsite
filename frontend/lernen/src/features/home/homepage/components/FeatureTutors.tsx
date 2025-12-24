@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 
 interface Tutor {
   id: number
@@ -16,6 +17,7 @@ interface Tutor {
 }
 
 const FeatureTutors: React.FC = () => {
+  const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [playingVideos, setPlayingVideos] = useState<{ [key: number]: boolean }>({})
@@ -158,25 +160,25 @@ const FeatureTutors: React.FC = () => {
             {/* Subtitle */}
             <div className="flex items-center mb-4">
               <div className="h-px bg-white/30 flex-1"></div>
-              <span className="px-4 text-white/80 text-sm font-medium">Feature Tutors</span>
+              <span className="px-4 text-white/80 text-sm font-medium">{t('featureTutors.sectionLabel')}</span>
               <div className="h-px bg-white/30 flex-1"></div>
             </div>
             
             {/* Main Title */}
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Explore Our Handpicked Tutors
+              {t('featureTutors.title')}
             </h2>
             
             {/* Description */}
             <p className="text-white/80 text-lg leading-relaxed max-w-2xl">
-              Explore a wealth of articles, guides, tutorials, and more, curated by our experts to enhance your learning experience.
+              {t('featureTutors.description')}
             </p>
           </div>
           
           {/* View All Button */}
           <div className="mt-8 lg:mt-0 lg:ml-8">
             <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-              View All Tutors
+              {t('featureTutors.viewAllTutors')}
             </button>
           </div>
         </div>
@@ -295,7 +297,7 @@ const FeatureTutors: React.FC = () => {
                   {/* Pricing and Reviews */}
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-gray-900">${tutor.hourlyRate.toFixed(2)}/hr</span>
+                      <span className="text-2xl font-bold text-gray-900">${tutor.hourlyRate.toFixed(2)}{t('featureTutors.perHour')}</span>
                     </div>
                     
                     <div className="flex items-center space-x-2">
@@ -303,18 +305,18 @@ const FeatureTutors: React.FC = () => {
                         {renderStars(tutor.rating)}
                       </div>
                       <span className="text-gray-600 text-sm">
-                        {tutor.rating.toFixed(1)}/5.0 ({tutor.reviewCount} reviews)
+                        {tutor.rating.toFixed(1)}/5.0 ({tutor.reviewCount} {t('featureTutors.reviews')})
                       </span>
                     </div>
                     
                     <div className="text-gray-600 text-sm">
-                      {tutor.activeStudents} Active Students
+                      {tutor.activeStudents} {t('featureTutors.activeStudents')}
                     </div>
                   </div>
 
                   {/* View Profile Button */}
                   <button className="w-full bg-[#065A46] hover:bg-[#054A3A] text-white py-3 rounded-lg font-semibold transition-colors">
-                    View Profile
+                    {t('featureTutors.viewProfile')}
                   </button>
                 </div>
               </motion.div>
