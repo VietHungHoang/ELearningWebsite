@@ -1,0 +1,20 @@
+package com.elearning.studentservice.dto.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreatePaymentRequest {
+
+    private UUID bookingId;
+    private Long amount;
+    private String paymentProvider;
+    private String redirectUrl;
+}

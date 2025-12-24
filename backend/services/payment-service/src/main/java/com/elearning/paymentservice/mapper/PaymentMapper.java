@@ -8,8 +8,9 @@ public class PaymentMapper {
 
     public static PaymentTransaction toEntity(InitiatePaymentRequest request) {
         return PaymentTransaction.builder()
+                .orderId(request.getOrderId())
                 .amount(request.getAmount())
-                .currency(request.getCurrency())
+                .currency("VND")
                 .provider(request.getPaymentProvider())
                 .status(PaymentStatus.PENDING)
                 .build();

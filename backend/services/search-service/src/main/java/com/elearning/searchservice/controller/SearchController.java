@@ -22,19 +22,15 @@ public class SearchController {
 
     private final SearchService searchService;
 
-    /**
-     * Enhanced search endpoint with multi-language support
-     * POST /v1/search/tutors
-     */
     @PostMapping("/tutors")
     public ResponseEntity<ApiResponse<Page<TutorSearchResult>>> searchTutors(
             @RequestBody SearchTutorRequest request) {
-        
-        log.info("Search request: keyword={}, language={}, filters={}", 
+
+        log.info("Search request: keyword={}, language={}, filters={}",
                 request.getKeyword(), request.getLanguage(), request);
-        
+
         Page<TutorSearchResult> results = searchService.searchTutors(request);
-        
+
         return ResponseEntity.ok(ApiResponse.success(results));
     }
 
@@ -45,9 +41,9 @@ public class SearchController {
     @PostMapping("/tutors/facets")
     public ResponseEntity<ApiResponse<SearchFacets>> getSearchFacets(
             @RequestBody SearchTutorRequest request) {
-        
+
         SearchFacets facets = searchService.getSearchFacets(request);
-        
+
         return ResponseEntity.ok(ApiResponse.success(facets));
     }
 
@@ -61,16 +57,16 @@ public class SearchController {
             @RequestParam(required = false) String language,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        
+
         SearchTutorRequest request = SearchTutorRequest.builder()
                 .keyword(keyword)
                 .language(language)
                 .page(page)
                 .size(size)
                 .build();
-        
+
         Page<TutorSearchResult> results = searchService.searchTutors(request);
-        
+
         return ResponseEntity.ok(ApiResponse.success(results));
     }
 }

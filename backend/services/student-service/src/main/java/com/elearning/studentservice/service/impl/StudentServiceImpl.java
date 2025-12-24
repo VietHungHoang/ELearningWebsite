@@ -79,4 +79,16 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentMapper::toStudentResponse)
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudentResponse> getStudentBasicInfosByIds(List<UUID> ids) {
+        log.info("Fetching students basic info by ids: {}", ids);
+
+        List<Student> students = studentRepository.findAllById(ids);
+
+        return students.stream()
+                .map(studentMapper::toStudentResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

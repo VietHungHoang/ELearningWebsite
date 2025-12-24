@@ -3,36 +3,37 @@ package com.elearning.chatservice.service;
 import com.elearning.chatservice.dto.response.ParticipantResponse;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ParticipantService {
 
     /**
      * Update typing status
      */
-    void updateTypingStatus(String conversationId, String userId, boolean isTyping);
+    void updateTypingStatus(UUID conversationId, UUID userId, boolean isTyping);
 
     /**
      * Get typing participants in a conversation
      */
-    List<ParticipantResponse> getTypingParticipants(String conversationId);
+    List<ParticipantResponse> getTypingParticipants(UUID conversationId);
 
     /**
      * Update last seen time
      */
-    void updateLastSeen(String conversationId, String userId);
+    void updateLastSeen(UUID conversationId, UUID userId);
 
     /**
      * Get participant info
      */
-    ParticipantResponse getParticipant(String conversationId, String userId);
+    ParticipantResponse getParticipant(UUID conversationId, UUID userId);
 
     /**
      * Get all participants in a conversation
      */
-    List<ParticipantResponse> getConversationParticipants(String conversationId);
+    List<ParticipantResponse> getConversationParticipants(UUID conversationId);
 
     /**
      * Check if user is participant
      */
-    boolean isParticipant(String conversationId, String userId);
+    boolean isParticipant(UUID conversationId, UUID userId);
 }

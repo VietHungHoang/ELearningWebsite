@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 /**
  * Request DTO for sending a message
  */
@@ -17,13 +19,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SendMessageRequest {
 
-    @NotBlank(message = "Conversation ID is required")
-    private String conversationId;
+    @NotNull(message = "Conversation ID is required")
+    private UUID conversationId;
 
     @NotNull(message = "Message type is required")
     private MessageType type;
 
     private String content;  // Can be null for file-only messages
 
-    private String replyToMessageId;  // Optional: for reply functionality
+    private UUID replyToMessageId;  // Optional: for reply functionality
 }

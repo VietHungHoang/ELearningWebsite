@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Response DTO for participant details
@@ -16,11 +17,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ParticipantResponse {
 
-    private String id;
+    private UUID id;
 
-    private String conversationId;
+    private UUID conversationId;
 
-    private String userId;
+    private UUID userId;
 
     private boolean isTyping;
 

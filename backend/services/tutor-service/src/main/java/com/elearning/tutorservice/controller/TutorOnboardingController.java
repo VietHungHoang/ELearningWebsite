@@ -30,11 +30,11 @@ public class TutorOnboardingController {
     }
 
     @PutMapping("/{id}/onboarding")
-    public ResponseEntity<Void> updateOnboarding(
+    public ResponseEntity<ApiResponse<Void>> updateOnboarding(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateOnboardingRequest request) {
 
         tutorOnboardingService.updateOnboarding(id, request);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success(null, "Onboarding data updated successfully"));
     }
 }

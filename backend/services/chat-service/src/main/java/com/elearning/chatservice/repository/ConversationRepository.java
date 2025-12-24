@@ -10,36 +10,37 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface ConversationRepository extends MongoRepository<Conversation, String> {
+public interface ConversationRepository extends MongoRepository<Conversation, UUID> {
 
     /**
      * Find all conversations for a user
      */
     @Query("{ 'participantIds': ?0, 'isActive': true }")
-    Page<Conversation> findByParticipantId(String userId, Pageable pageable);
+    Page<Conversation> findByParticipantId(UUID userId, Pageable pageable);
 
     /**
      * Find one-to-one conversation between two users
      */
     @Query("{ 'type': 'ONE_TO_ONE', 'participantIds': { $all: ?0 }, 'isActive': true }")
-    Optional<Conversation> findOneToOneConversation(List<String> participantIds);
+    Optional<Conversation> findOneToOneConversation(List<UUID> participantIds);
 
     /**
      * Find conversations by class ID
      */
-    Page<Conversation> findByClassIdAndIsActiveTrue(String classId, Pageable pageable);
+    Page<Conversation> findByClassIdAndIsActiveTrue(UUID classId, Pageable pageable);
 
     /**
      * Find conversations by type for a user
      */
     @Query("{ 'participantIds': ?0, 'type': ?1, 'isActive': true }")
-    Page<Conversation> findByParticipantIdAndType(String userId, ConversationType type, Pageable pageable);
+    Page<Conversation> findByParticipantIdAndType(UUID userId, ConversationType type, Pageable pageable);
 
     /**
      * Search conversations by name
      */
     @Query("{ 'participantIds': ?0, 'name': { $regex: ?1, $options: 'i' }, 'isActive': true }")
-    Page<Conversation> searchByNameForUser(String userId, String namePattern, Pageable pageable);
+    Page<Conversation> searchByNameForUser(UUID userId, String namePattern, Pageable pageable);
 }

@@ -31,16 +31,9 @@ public class SearchServiceClient {
     @Value("${services.search-service.url}")
     private String searchServiceBaseUrl;
 
-    /**
-     * Search tutors using Search Service
-     * Returns page of search results with scores
-     */
     public Page<TutorSearchResult> searchTutors(SearchTutorRequest request) {
         try {
             String url = searchServiceBaseUrl + "/api/v1/search/tutors";
-            
-            log.debug("Searching tutors via Search Service: keyword={}, language={}", 
-                    request.getKeyword(), request.getLanguage());
             
             HttpEntity<SearchTutorRequest> entity = new HttpEntity<>(request);
             
@@ -48,7 +41,8 @@ public class SearchServiceClient {
                     url,
                     HttpMethod.POST,
                     entity,
-                    new ParameterizedTypeReference<ApiResponse<RestResponsePage<TutorSearchResult>>>() {}
+                    new ParameterizedTypeReference<>() {
+                    }
             );
             
             if (response.getBody() != null && response.getBody().getData() != null) {
@@ -62,15 +56,5 @@ public class SearchServiceClient {
             log.error("Failed to search tutors via Search Service", e);
             throw new RuntimeException("Search service unavailable", e);
         }
-    }
-
-    /**
-     * Simple search that returns only tutor IDs (for backward compatibility)
-     */
-    public List<UUID> searchTutorIds(SearchTutorRequest request) {
-        Page<TutorSearchResult> results = searchTutors(request);
-        return results.getContent().stream()
-                .map(TutorSearchResult::getTutorId)
-                .toList();
     }
 }

@@ -11,7 +11,7 @@ import commonUtils from "../../../../utils/commonUtils";
 import { classService } from "../../../../services/classService";
 import { scheduleService } from "../../../../services/scheduleService";
 import { useTranslation } from "react-i18next";
-import type { GetBookedSessionsResponse, Session } from "../../../../types/class";
+import type { Session } from "../../../../types/class";
 import type { TrialSessionRequestResponse } from "../../../../types/api";
 
 interface BookASessionProps {
@@ -28,6 +28,7 @@ const BookASession: React.FC<BookASessionProps> = ({
     const { state, isInitialized } = useAuth();
     const { t } = useTranslation();
     const [selectedDate, setSelectedDate] = useState(new Date()); // Today
+    const [selectedDay, setSelectedDay] = useState<Date>(selectedDate); // UI-only selected day within the week (view-only)
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [timezones, setTimezones] = useState<Timezone[]>([]);
@@ -49,6 +50,7 @@ const BookASession: React.FC<BookASessionProps> = ({
     const [tutorAvailabilities, setTutorAvailabilities] = useState<any[]>([]);
     const [tutorSessions, setTutorSessions] = useState<Session[]>([]);
     const [hasTrialSession, setHasTrialSession] = useState(true); // Default to true (can book trial)
+    const [conflictedSlots, setConflictedSlots] = useState<string[]>([]); // Slots that conflict with student's existing classes
 
     // Initialize timezones and set default to machine timezone
     useEffect(() => {
@@ -90,42 +92,39 @@ const BookASession: React.FC<BookASessionProps> = ({
         checkTrialSessionAvailability();
     }, [tutorId, state.user?.id, isInitialized]);
 
-    // Fetch availabilities and sessions
+    // Fetch availabilities once (they represent recurring weekly availability)
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAvailabilities = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                // Calculate date range for current week
-                const weekStart = new Date(selectedDate);
+                // Use current week as a sample week to fetch recurring availabilities
+                const today = new Date();
+                const weekStart = new Date(today);
                 weekStart.setDate(weekStart.getDate() - weekStart.getDay());
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 6);
 
-                // Call APIs in parallel
-                const [availabilitiesResponse, sessionsResponse] = await Promise.all([
-                    scheduleService.getAvailability({
-                        tutorId,
-                        startDate: weekStart.toISOString().split('T')[0],
-                        endDate: weekEnd.toISOString().split('T')[0]
-                    }),
-                    classService.getTutorSessions(tutorId, weekStart.toISOString().split('T')[0], weekEnd.toISOString().split('T')[0])
-                ]);
+                const availabilitiesResponse = await scheduleService.getAvailability({
+                    tutorId,
+                    startDate: weekStart.toISOString().split('T')[0],
+                    endDate: weekEnd.toISOString().split('T')[0]
+                });
 
                 setTutorAvailabilities(availabilitiesResponse.data?.availabilities || []);
-                setTutorSessions(sessionsResponse.data.sessions || []);
                 setLoading(false);
             } catch (err) {
-                setError('Failed to load data');
-                console.error('Error fetching data:', err);
+                setError('Failed to load availability');
+                console.error('Error fetching availabilities:', err);
+                setLoading(false);
             }
         };
 
         if (tutorId) {
-            fetchData();
+            fetchAvailabilities();
         }
-    }, [tutorId, selectedDate]);
+    }, [tutorId]);
 
     const timezonePlaceholder = selectedTimezone
         ? `${selectedTimezone.name} (${selectedTimezone.offset})`
@@ -134,100 +133,6 @@ const BookASession: React.FC<BookASessionProps> = ({
     const timezoneOptions = timezones.map((tz) => `${tz.name} (${tz.offset})`);
 
     const buttonText = hasTrialSession ? "Đăng ký học thử" : "Đăng ký học";
-
-    const sessions = useMemo(() => {
-        if (!tutorAvailabilities || !tutorSessions) return [];
-
-        // Create all possible slots from availability
-        const allPossibleSlots: string[] = [];
-        tutorAvailabilities.forEach((avail: any) => {
-            const parseTime = (timeStr: string) => {
-                const [hours, minutes] = timeStr.split(":").map(Number);
-                return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-            };
-
-            const start24 = parseTime(avail.startTime);
-            const end24 = parseTime(avail.endTime);
-
-            const timeSlots = [];
-            let current = new Date(`1970-01-01T${start24}`);
-            const endTime = new Date(`1970-01-01T${end24}`);
-            while (current < endTime) {
-                const slot = current.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-                timeSlots.push(slot);
-                current.setHours(current.getHours() + 1);
-            }
-
-            // Calculate date range for current week
-            const today = new Date();
-            const weekStart = new Date(today);
-            weekStart.setDate(today.getDate() - today.getDay());
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6);
-
-            // Generate slots for each occurrence of this day of week in current week
-            let currentDate = new Date(weekStart);
-            while (currentDate <= weekEnd) {
-                if (currentDate.getDay() === avail.dayOfWeek) {
-                    // Create UTC datetime strings for each slot
-                    timeSlots.forEach(time => {
-                        const utcDateTime = commonUtils.convertToLocalDateTime(currentDate, time, selectedTimezone);
-                        allPossibleSlots.push(utcDateTime);
-                    });
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        });
-
-        // Filter out booked slots
-        const bookedSlots = new Set(
-            tutorSessions.map((session: any) => {
-                const utcDate = new Date(session.sessionDateTime);
-                // Convert UTC to local time in selectedTimezone
-                if (selectedTimezone) {
-                    const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
-                    if (offsetMatch) {
-                        const sign = offsetMatch[1] === "+" ? 1 : -1;
-                        const offsetHours = parseInt(offsetMatch[2]);
-                        const offsetMinutes = parseInt(offsetMatch[3]);
-                        utcDate.setHours(utcDate.getHours() + sign * offsetHours);
-                        utcDate.setMinutes(utcDate.getMinutes() + sign * offsetMinutes);
-                    }
-                }
-                const year = utcDate.getFullYear();
-                const month = String(utcDate.getMonth() + 1).padStart(2, '0');
-                const day = String(utcDate.getDate()).padStart(2, '0');
-                const hourStr = String(utcDate.getHours()).padStart(2, '0');
-                const minuteStr = String(utcDate.getMinutes()).padStart(2, '0');
-                const seconds = String(utcDate.getSeconds()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hourStr}:${minuteStr}:${seconds}`;
-            })
-        );
-        const availableSlots = allPossibleSlots.filter(slot => !bookedSlots.has(slot));
-
-        // Group by date for display
-        const sessionsMap = new Map<string, string[]>();
-        availableSlots.forEach(slot => {
-            // Parse the UTC datetime string to get date
-            const date = new Date(slot);
-            const dateKey = date.toDateString();
-            const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
-
-            if (!sessionsMap.has(dateKey)) {
-                sessionsMap.set(dateKey, []);
-            }
-            sessionsMap.get(dateKey)!.push(timeStr);
-        });
-
-        // Convert map to array
-        const result: { date: Date; timeSlots: string[] }[] = [];
-        sessionsMap.forEach((timeSlots, dateKey) => {
-            result.push({ date: new Date(dateKey), timeSlots });
-        });
-
-        console.log("Available sessions:", result);
-        return result;
-    }, [tutorAvailabilities, tutorSessions, selectedTimezone]);
 
     const getWeekRange = (date: Date) => {
         const startDate = new Date(date);
@@ -246,6 +151,209 @@ const BookASession: React.FC<BookASessionProps> = ({
     };
 
     const [weekRange, setWeekRange] = useState(getWeekRange(selectedDate));
+
+    // Fetch tutor sessions (booked/conflicting slots) for current weekRange whenever weekRange or tutorId changes
+    useEffect(() => {
+        const fetchSessions = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+
+                const start = weekRange.start.toISOString().split('T')[0];
+                const end = weekRange.end.toISOString().split('T')[0];
+
+                const sessionsResponse = await classService.getTutorSessions(tutorId, start, end);
+                setTutorSessions(sessionsResponse.data || []);
+                setLoading(false);
+            } catch (err) {
+                setError('Failed to load sessions');
+                console.error('Error fetching sessions:', err);
+                setLoading(false);
+            }
+        };
+
+        if (tutorId) {
+            fetchSessions();
+        }
+    }, [tutorId, weekRange]);
+
+    // Check slot conflicts ONCE when component loads (for regular sessions only)
+    useEffect(() => {
+        const checkConflicts = async () => {
+            // Only check conflicts for regular sessions (not trial)
+            if (hasTrialSession || !tutorId) return;
+
+            try {
+                // Get all available slots for the current week (empty array = check all tutor's slots)
+                const response = await classService.checkSlotConflicts(tutorId, []);
+                if (response.success && response.data) {
+                    // Store conflicted slot times (ISO strings in UTC+0)
+                    setConflictedSlots(response.data);
+                }
+            } catch (error) {
+                console.error('Error checking slot conflicts:', error);
+            }
+        };
+
+        checkConflicts();
+    }, [tutorId, hasTrialSession]); // Only re-run if tutorId or hasTrialSession changes
+
+    // Generate available slots in UTC+0 for current week
+    const availableSlotsUTC = useMemo(() => {
+        if (!tutorAvailabilities || !tutorSessions) return [];
+
+        // Use the current weekRange to generate slots (weekRange is updated when navigating weeks)
+        const weekStart = new Date(weekRange.start);
+        weekStart.setUTCDate(weekStart.getUTCDate());
+        weekStart.setUTCHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekRange.end);
+        weekEnd.setUTCHours(23, 59, 59, 999);
+
+        // Step 1: Generate all possible slots from availabilities in UTC+0
+        const allPossibleSlots: string[] = [];
+        
+        tutorAvailabilities.forEach((avail: any) => {
+            // Parse start and end time (format: "HH:MM")
+            const startHour = Number(avail.startTime.split(':')[0]);
+            const endHour = Number(avail.endTime.split(':')[0]);
+
+            // Normalize dayOfWeek: API uses 1=Monday,7=Sunday, JS uses 0=Sunday,1=Monday
+            const normalizedDayOfWeek = avail.dayOfWeek === 7 ? 0 : avail.dayOfWeek;
+
+            // Find all dates in current week that match this dayOfWeek
+            let currentDate = new Date(weekStart);
+            while (currentDate <= weekEnd) {
+                if (currentDate.getUTCDay() === normalizedDayOfWeek) {
+                    // Generate hourly slots for this date
+                    for (let hour = startHour; hour < endHour; hour++) {
+                        const slotDate = new Date(Date.UTC(
+                            currentDate.getUTCFullYear(),
+                            currentDate.getUTCMonth(),
+                            currentDate.getUTCDate(),
+                            hour,
+                            0,
+                            0,
+                            0
+                        ));
+                        allPossibleSlots.push(slotDate.toISOString());
+                    }
+                }
+                currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+            }
+        });
+
+        // Step 2: Get booked slots (already in UTC+0) - EXCLUDE trial sessions
+        const bookedSlotsSet = new Set(
+            tutorSessions
+                .filter((session: any) => session.sessionDateTime)
+                .map((session: any) => {
+                    // Ensure UTC parsing by adding 'Z' if not present
+                    let dateTimeString = session.sessionDateTime;
+                    if (typeof dateTimeString === 'string' && !dateTimeString.endsWith('Z') && !dateTimeString.includes('+')) {
+                        dateTimeString += 'Z';
+                    }
+                    return new Date(dateTimeString).toISOString();
+                })
+        );
+
+        // Step 3: Filter out booked slots AND conflicted slots (but keep trial sessions for display)
+        const conflictedSlotsSet = new Set(conflictedSlots);
+        const availableSlots = allPossibleSlots.filter(slot => 
+            !bookedSlotsSet.has(slot) && !conflictedSlotsSet.has(slot)
+        );
+        
+        // Step 4: Add trial session slot if it exists and is in current week
+        if (trialSessionRequest?.sessionDateTime) {
+            try {
+                // IMPORTANT: Ensure we parse as UTC by adding 'Z' if not present
+                let dateTimeString = trialSessionRequest.sessionDateTime;
+                if (!dateTimeString.endsWith('Z') && !dateTimeString.includes('+') && !dateTimeString.includes('T00:00:00')) {
+                    dateTimeString += 'Z'; // Treat as UTC
+                }
+                const trialDate = new Date(dateTimeString);
+                
+                if (!isNaN(trialDate.getTime())) {
+                    const trialSlotISO = trialDate.toISOString();
+                    // Check if trial session is within current week range
+                    if (trialDate >= weekStart && trialDate <= weekEnd) {
+                        // Add trial session to available slots (even if it's "booked")
+                        if (!availableSlots.includes(trialSlotISO)) {
+                            availableSlots.push(trialSlotISO);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('Error adding trial session to slots:', error);
+            }
+        }
+
+        return availableSlots.sort();
+    }, [tutorAvailabilities, tutorSessions, weekRange, trialSessionRequest, conflictedSlots]);
+
+    // Group available slots by date for display
+    const sessions = useMemo(() => {
+        if (!availableSlotsUTC.length || !selectedTimezone) return [];
+
+        // Group UTC slots by date
+        const sessionsMap = new Map<string, string[]>();
+        
+        availableSlotsUTC.forEach(utcSlot => {
+            // Parse UTC time from ISO string
+            const utcDate = new Date(utcSlot);
+            
+            // Get UTC components (not affected by local timezone)
+            const utcYear = utcDate.getUTCFullYear();   
+            const utcMonth = utcDate.getUTCMonth();
+            const utcDay = utcDate.getUTCDate();
+            const utcHour = utcDate.getUTCHours();
+            const utcMinute = utcDate.getUTCMinutes();
+            
+            // Apply timezone offset to UTC time
+            const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+            if (!offsetMatch) return;
+            
+            const sign = offsetMatch[1] === "+" ? 1 : -1;
+            const offsetHours = parseInt(offsetMatch[2]);
+            const offsetMinutes = parseInt(offsetMatch[3]);
+            
+            // Create a new date with offset applied
+            const localDate = new Date(Date.UTC(
+                utcYear, 
+                utcMonth, 
+                utcDay, 
+                utcHour + sign * offsetHours, 
+                utcMinute + sign * offsetMinutes
+            ));
+            
+            // Use UTC components for grouping (to get correct date after offset)
+            const localYear = localDate.getUTCFullYear();
+            const localMonth = localDate.getUTCMonth();
+            const localDay = localDate.getUTCDate();
+            const displayHour = localDate.getUTCHours();
+            const displayMinute = localDate.getUTCMinutes();
+            
+            // Create date key using local components
+            const dateKey = new Date(localYear, localMonth, localDay).toDateString();
+            
+            // Format time in 12-hour format
+            const hour12 = displayHour === 0 ? 12 : displayHour > 12 ? displayHour - 12 : displayHour;
+            const ampm = displayHour >= 12 ? 'PM' : 'AM';
+            const timeStr = `${hour12}:${displayMinute.toString().padStart(2, '0')} ${ampm}`;
+
+            if (!sessionsMap.has(dateKey)) {
+                sessionsMap.set(dateKey, []);
+            }
+            sessionsMap.get(dateKey)!.push(timeStr);
+        });
+
+        // Convert map to array
+        const result: { date: Date; timeSlots: string[] }[] = [];
+        sessionsMap.forEach((timeSlots, dateKey) => {
+            result.push({ date: new Date(dateKey), timeSlots });
+        });
+
+        return result.sort((a, b) => a.date.getTime() - b.date.getTime());
+    }, [availableSlotsUTC, selectedTimezone]);
 
     const displayedDateRange = `${formatDate(weekRange.start, { month: "long", day: "numeric" })} - ${formatDate(
         weekRange.end,
@@ -266,6 +374,7 @@ const BookASession: React.FC<BookASessionProps> = ({
         setSelectedDate(date);
         setWeekRange(getWeekRange(date));
         setIsDatePickerOpen(false);
+        setSelectedDay(date);
     };
 
     const handleToggleDatePicker = () => {
@@ -280,7 +389,8 @@ const BookASession: React.FC<BookASessionProps> = ({
     };
 
     const handleSelectDay = (date: Date) => {
-        setSelectedDate(date);
+        // Only update UI selection within the week — do not trigger API calls
+        setSelectedDay(date);
     };
 
     const handlePrevWeek = () => {
@@ -288,6 +398,7 @@ const BookASession: React.FC<BookASessionProps> = ({
         newStartDate.setDate(newStartDate.getDate() - 7);
         const newWeekRange = getWeekRange(newStartDate);
         setWeekRange(newWeekRange);
+        // Don't update selectedDay - keep it for manual day selection only
         if (selectedDate < newWeekRange.start || selectedDate > newWeekRange.end) {
             setSelectedDate(newStartDate);
         }
@@ -298,6 +409,7 @@ const BookASession: React.FC<BookASessionProps> = ({
         newStartDate.setDate(newStartDate.getDate() + 7);
         const newWeekRange = getWeekRange(newStartDate);
         setWeekRange(newWeekRange);
+        // Don't update selectedDay - keep it for manual day selection only
         if (selectedDate < newWeekRange.start || selectedDate > newWeekRange.end) {
             setSelectedDate(newStartDate);
         }
@@ -307,12 +419,23 @@ const BookASession: React.FC<BookASessionProps> = ({
         const today = new Date();
         setSelectedDate(today);
         setWeekRange(getWeekRange(today));
+        setSelectedDay(today);
     };
 
     useEffect(() => {
         const combinedSlots = [...bookedTrialSlots];
         if (trialSessionRequest?.sessionDateTime) {
-            combinedSlots.push(trialSessionRequest.sessionDateTime);
+            try {
+                // Ensure UTC parsing by adding 'Z' if not present
+                let dateTimeString = trialSessionRequest.sessionDateTime;
+                if (!dateTimeString.endsWith('Z') && !dateTimeString.includes('+')) {
+                    dateTimeString += 'Z';
+                }
+                const normalizedSlot = new Date(dateTimeString).toISOString();
+                combinedSlots.push(normalizedSlot);
+            } catch (error) {
+                console.warn('Error normalizing trial session datetime:', error);
+            }
         }
         // Update the state only if there are changes
         if (combinedSlots.length !== bookedTrialSlots.length || 
@@ -463,46 +586,22 @@ const BookASession: React.FC<BookASessionProps> = ({
         </ModalLayout>
     );
 
-    // Handle slot click with API check for regular sessions
-    const handleSlotClick = async (utcDateTime: string) => {
+    // Handle slot click - simple toggle, no API call (conflicts already checked on load)
+    const handleSlotClick = (utcDateTime: string) => {
         if (hasTrialSession) {
             // Trial session: chỉ chọn 1
             setSelectedTimes([utcDateTime]);
             return;
         }
 
-        // Regular session: check conflicts via API
+        // Regular session: toggle selection (conflicts already filtered out)
         const isSelected = selectedTimes.includes(utcDateTime);
-        let newSelectedTimes: string[];
-
         if (isSelected) {
             // Remove slot
-            newSelectedTimes = selectedTimes.filter((t) => t !== utcDateTime);
+            setSelectedTimes(selectedTimes.filter((t) => t !== utcDateTime));
         } else {
             // Add slot
-            newSelectedTimes = [...selectedTimes, utcDateTime];
-        }
-
-        try {
-            // Call API to check conflicts for new selection
-            const response = await classService.checkSlotConflicts(tutorId, newSelectedTimes);
-            if (response.success) {
-                const conflicts = response.data?.sessions || [];
-                
-                // Only update selection if no conflicts
-                if (conflicts.length === 0) {
-                    setSelectedTimes(newSelectedTimes);
-                } else {
-                    // Show error or handle conflicts - for now just log
-                    console.warn("Slot conflicts detected:", conflicts);
-                }
-            } else {
-                console.error("Failed to check slot conflicts:", response.message);
-                // Keep current selection if API fails
-            }
-        } catch (error) {
-            console.error("Error checking slot conflicts:", error);
-            // Keep current selection if API fails
+            setSelectedTimes([...selectedTimes, utcDateTime]);
         }
     };
 
@@ -645,7 +744,8 @@ const BookASession: React.FC<BookASessionProps> = ({
                 </button>
                 <div className="grid grid-cols-7 gap-x-2 flex-grow mx-1">
                     {weekDays.map((d, index) => {
-                        const isSelected = selectedDate.toDateString() === d.fullDate.toDateString();
+                        const today = new Date();
+                        const isToday = today.toDateString() === d.fullDate.toDateString();
                         const daySessions = sessions.find(
                             (session: any) => session.date.toDateString() === d.fullDate.toDateString()
                         );
@@ -654,7 +754,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                                 <button
                                     onClick={() => handleSelectDay(d.fullDate)}
                                     className={`w-full p-3 rounded-lg transition-colors ${
-                                        isSelected ? "bg-[#F9F3EB]" : "hover:bg-gray-50"
+                                        isToday ? "bg-[#F9F3EB]" : "hover:bg-gray-50"
                                     }`}
                                 >
                                     <p className="text-sm font-semibold">{d.date}</p>
@@ -662,22 +762,75 @@ const BookASession: React.FC<BookASessionProps> = ({
                                 </button>
                                 <div className="mt-3 space-y-2">
                                     {daySessions && daySessions.timeSlots.length > 0 ? (
-                                        daySessions.timeSlots.map((time: string) => {
-                                            const utcDateTime = commonUtils.convertToLocalDateTime(d.fullDate, time, selectedTimezone);
-                                            const isSelected = selectedTimes.includes(utcDateTime);
-                                            const isBookedTrial = bookedTrialSlots.includes(utcDateTime);
-                                            const isTrialRequest = Boolean(
-                                                trialSessionRequest &&
-                                                trialSessionRequest.sessionDateTime === utcDateTime
-                                            );
+                                        daySessions.timeSlots.map((time: string, timeIndex: number) => {
+                                            // Find the corresponding UTC slot for this display time
+                                            const timeMatch = time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+                                            if (!timeMatch) return null;
+
+                                            let displayHours = parseInt(timeMatch[1]);
+                                            const displayMinutes = parseInt(timeMatch[2]);
+                                            const ampm = timeMatch[3].toUpperCase();
+
+                                            if (ampm === "PM" && displayHours !== 12) displayHours += 12;
+                                            if (ampm === "AM" && displayHours === 12) displayHours = 0;
+
+                                            // Create date using UTC to avoid local timezone interference
+                                            const displayDate = d.fullDate;
+                                            const year = displayDate.getFullYear();
+                                            const month = displayDate.getMonth();
+                                            const day = displayDate.getDate();
+                                            
+                                            // Convert back to UTC by reversing timezone offset
+                                            if (!selectedTimezone) return null;
+                                            const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+                                            if (!offsetMatch) return null;
+
+                                            const sign = offsetMatch[1] === "+" ? 1 : -1;
+                                            const offsetHours = parseInt(offsetMatch[2]);
+                                            const offsetMinutes = parseInt(offsetMatch[3]);
+
+                                            // Subtract the offset to get UTC (reverse of display conversion)
+                                            const utcHours = displayHours - sign * offsetHours;
+                                            const utcMinutes = displayMinutes - sign * offsetMinutes;
+                                            
+                                            // Create UTC datetime
+                                            const utcDateTime = new Date(Date.UTC(year, month, day, utcHours, utcMinutes, 0, 0));
+                                            const utcSlot = utcDateTime.toISOString();
+
+                                            // Check if slot is in the past
+                                            const now = new Date();
+                                            const isPastSlot = utcDateTime < now;
+
+                                            const isSelected = selectedTimes.includes(utcSlot);
+                                            const isBookedTrial = bookedTrialSlots.includes(utcSlot);
+                                            
+                                            // Check if this slot is the trial session request
+                                            let isTrialRequest = false;
+                                            if (trialSessionRequest?.sessionDateTime) {
+                                                try {
+                                                    // Ensure UTC parsing by adding 'Z' if not present
+                                                    let dateTimeString = trialSessionRequest.sessionDateTime;
+                                                    if (!dateTimeString.endsWith('Z') && !dateTimeString.includes('+')) {
+                                                        dateTimeString += 'Z';
+                                                    }
+                                                    const trialDateTime = new Date(dateTimeString);
+                                                    const trialSlotISO = trialDateTime.toISOString();
+                                                    isTrialRequest = trialSlotISO === utcSlot;
+                                                } catch (error) {
+                                                    console.warn('Error comparing trial session:', error);
+                                                }
+                                            }
+                                            
                                             const trialStatus = isTrialRequest
                                                 ? (trialSessionRequest?.status as any)
                                                 : null;
                                             return (
-                                                <div key={time} className="space-y-1">
+                                                <div key={`${time}-${timeIndex}`} className="space-y-1">
                                                     <button
                                                         className={`pending-trial-slot w-full text-xs py-2.5 rounded-md font-semibold transition-colors ${
-                                                            isTrialRequest && trialStatus
+                                                            isPastSlot
+                                                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                                                : isTrialRequest && trialStatus
                                                                 ? trialStatus === "PENDING"
                                                                     ? "bg-yellow-100 text-yellow-700 border-2 border-yellow-300 cursor-pointer hover:bg-yellow-200"
                                                                     : trialStatus === "CONFIRMED"
@@ -694,25 +847,26 @@ const BookASession: React.FC<BookASessionProps> = ({
                                                         onClick={() => {
                                                             if (isRescheduling) {
                                                                 // In rescheduling mode: only allow selecting one slot, no toggle
-                                                                setSelectedTimes([utcDateTime]);
+                                                                setSelectedTimes([utcSlot]);
                                                             } else if (isTrialRequest && trialStatus === "PENDING") {
                                                                 // Toggle show/hide action buttons for pending trial request
                                                                 setSelectedTrialSlot((prev) =>
-                                                                    prev === utcDateTime ? null : utcDateTime
+                                                                    prev === utcSlot ? null : utcSlot
                                                                 );
                                                             } else if (
                                                                 hasTrialSession &&
-                                                                !bookedTrialSlots.includes(utcDateTime)
+                                                                !bookedTrialSlots.includes(utcSlot)
                                                             ) {
                                                                 // Trial session: chỉ chọn 1
-                                                                setSelectedTimes([utcDateTime]);
+                                                                setSelectedTimes([utcSlot]);
                                                             } else if (!hasTrialSession) {
                                                                 // Regular session: call API to check conflicts
-                                                                handleSlotClick(utcDateTime);
+                                                                handleSlotClick(utcSlot);
                                                             }
                                                         }}
                                                         disabled={
-                                                            (bookedTrialSlots.includes(utcDateTime) &&
+                                                            isPastSlot ||
+                                                            (bookedTrialSlots.includes(utcSlot) &&
                                                                 !isTrialRequest) ||
                                                             (isTrialRequest && isRescheduling)
                                                         }
@@ -739,7 +893,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                                                     </button>
 
                                                     {/* Action buttons for pending trial request */}
-                                                    {selectedTrialSlot === utcDateTime &&
+                                                    {selectedTrialSlot === utcSlot &&
                                                         isTrialRequest &&
                                                         trialStatus === "PENDING" && (
                                                             <div className="flex gap-2 trial-slot-actions">

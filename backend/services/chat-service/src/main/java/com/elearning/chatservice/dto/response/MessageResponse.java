@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Response DTO for message details
@@ -21,11 +22,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class MessageResponse {
 
-    private String id;
+    private UUID id;
 
-    private String conversationId;
+    private UUID conversationId;
 
-    private String senderId;
+    private UUID senderId;
 
     private MessageType type;
 
@@ -35,9 +36,9 @@ public class MessageResponse {
 
     private MessageStatus status;
 
-    private List<String> readBy;
+    private List<UUID> readBy;
 
-    private Map<String, String> reactions;
+    private Map<UUID, String> reactions;
 
     private LocalDateTime createdAt;
 
@@ -47,7 +48,7 @@ public class MessageResponse {
 
     private boolean isEdited;
 
-    private String replyToMessageId;
+    private UUID replyToMessageId;
 
     private MessageResponse replyToMessage;  // Nested message for context
 }

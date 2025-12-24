@@ -26,6 +26,9 @@ public class ClassEnrollment extends BaseEntity {
     
     @Column(name = "student_id", nullable = false)
     private UUID studentId;
+
+    @Column(name = "student_name", nullable = false)
+    private String studentName;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

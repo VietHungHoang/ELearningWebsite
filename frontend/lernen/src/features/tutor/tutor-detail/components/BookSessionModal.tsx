@@ -75,39 +75,53 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
             const pricePerSession = calculatePricePerSession(selectedPackage.discount);
             const totalPrice = calculateTotalPrice(selectedPackage.sessions, selectedPackage.discount);
             
-            // Helper function to convert UTC time to selected timezone for display
-            const convertUTCToTimezoneTime = (utcDate: Date, timezone: Timezone | null): string => {
+            // Helper function to convert UTC ISO string to selected timezone for display
+            const convertUTCToTimezoneTime = (utcISOString: string, timezone: Timezone | null): string => {
+                const utcDate = new Date(utcISOString);
+                
                 if (!timezone) {
-                    return utcDate.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit', 
-                        hour12: true 
-                    });
+                    // No timezone, just format UTC time
+                    const hour = utcDate.getUTCHours();
+                    const minute = utcDate.getUTCMinutes();
+                    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
                 }
                 
-                // Add timezone offset to UTC to get local time
+                // Get UTC components
+                const utcYear = utcDate.getUTCFullYear();
+                const utcMonth = utcDate.getUTCMonth();
+                const utcDay = utcDate.getUTCDate();
+                const utcHour = utcDate.getUTCHours();
+                const utcMinute = utcDate.getUTCMinutes();
+                
+                // Apply timezone offset
                 const offsetMatch = timezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
-                if (offsetMatch) {
-                    const sign = offsetMatch[1] === "+" ? 1 : -1;
-                    const offsetHours = parseInt(offsetMatch[2]);
-                    const offsetMinutes = parseInt(offsetMatch[3]);
-                    
-                    const localDate = new Date(utcDate);
-                    localDate.setHours(localDate.getHours() + sign * offsetHours);
-                    localDate.setMinutes(localDate.getMinutes() + sign * offsetMinutes);
-                    
-                    return localDate.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit', 
-                        hour12: true 
-                    });
+                if (!offsetMatch) {
+                    const hour12 = utcHour === 0 ? 12 : utcHour > 12 ? utcHour - 12 : utcHour;
+                    const ampm = utcHour >= 12 ? 'PM' : 'AM';
+                    return `${hour12}:${utcMinute.toString().padStart(2, '0')} ${ampm}`;
                 }
                 
-                return utcDate.toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit', 
-                    hour12: true 
-                });
+                const sign = offsetMatch[1] === "+" ? 1 : -1;
+                const offsetHours = parseInt(offsetMatch[2]);
+                const offsetMinutes = parseInt(offsetMatch[3]);
+                
+                // Create local date with offset
+                const localDate = new Date(Date.UTC(
+                    utcYear, 
+                    utcMonth, 
+                    utcDay, 
+                    utcHour + sign * offsetHours, 
+                    utcMinute + sign * offsetMinutes
+                ));
+                
+                const displayHour = localDate.getUTCHours();
+                const displayMinute = localDate.getUTCMinutes();
+                const hour12 = displayHour === 0 ? 12 : displayHour > 12 ? displayHour - 12 : displayHour;
+                const ampm = displayHour >= 12 ? 'PM' : 'AM';
+                
+                return `${hour12}:${displayMinute.toString().padStart(2, '0')} ${ampm}`;
             };
             
             // Generate learning schedule based on selected times or fallback to weekly
@@ -133,20 +147,25 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                             if (cycle === fullCycles && timeIndex >= remainingSessions) break;
                             
                             const selectedTime = selectedTimes[timeIndex];
+                            // selectedTime is already UTC ISO string
                             const baseDate = new Date(selectedTime);
                             
-                            // Add weeks for subsequent cycles
+                            // Add weeks for subsequent cycles (keeping in UTC)
                             const sessionDate = new Date(baseDate);
-                            sessionDate.setDate(baseDate.getDate() + (cycle * 7));
+                            sessionDate.setUTCDate(baseDate.getUTCDate() + (cycle * 7));
                             
+                            // Convert to ISO string for the helper function
+                            const sessionISOString = sessionDate.toISOString();
+                            
+                            // For date display, use UTC components
                             const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                             
-                            const dayName = dayNames[sessionDate.getDay()];
-                            const monthName = monthNames[sessionDate.getMonth()];
-                            const day = sessionDate.getDate();
-                            const year = sessionDate.getFullYear();
-                            const timeString = convertUTCToTimezoneTime(sessionDate, timezone);
+                            const dayName = dayNames[sessionDate.getUTCDay()];
+                            const monthName = monthNames[sessionDate.getUTCMonth()];
+                            const day = sessionDate.getUTCDate();
+                            const year = sessionDate.getUTCFullYear();
+                            const timeString = convertUTCToTimezoneTime(sessionISOString, timezone);
                             
                             schedule.push({
                                 sessionNumber: sessionCount + 1,

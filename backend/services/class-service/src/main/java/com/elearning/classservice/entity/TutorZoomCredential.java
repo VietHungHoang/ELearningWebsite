@@ -10,12 +10,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Entity to store Zoom OAuth credentials for each tutor
- * Each tutor can connect their personal Zoom account via OAuth
- */
-@Entity
 @Table(name = "tutor_zoom_credentials")
+@Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder
@@ -40,10 +36,7 @@ public class TutorZoomCredential extends BaseEntity {
     
     @Column(name = "zoom_email")
     private String zoomEmail;
-    
-    /**
-     * Check if the access token is expired
-     */
+
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(expiresAt);
     }

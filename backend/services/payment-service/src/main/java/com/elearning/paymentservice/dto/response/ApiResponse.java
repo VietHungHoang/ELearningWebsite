@@ -14,11 +14,13 @@ public class ApiResponse<T> {
     private int status;
     private String message;
     private T data;
+    private boolean success;
 
     public static <T> ApiResponse<T> success(T data, String message) {
         return ApiResponse.<T>builder()
                 .status(200)
                 .message(message)
+                .success(true)
                 .data(data)
                 .build();
     }
@@ -28,6 +30,7 @@ public class ApiResponse<T> {
                 .status(status)
                 .message(message)
                 .data(null)
+                .success(false)
                 .build();
     }
 }

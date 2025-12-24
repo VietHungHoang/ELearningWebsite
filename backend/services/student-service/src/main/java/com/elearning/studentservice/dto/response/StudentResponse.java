@@ -1,23 +1,17 @@
 package com.elearning.studentservice.dto.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentResponse {
-    private UUID id;
-    private String email;
-    private String fullName;
-    private String phone;
-    private String avatar;
+public class StudentResponse extends UserInfoResponse {
     private String bio;
     private LocalDateTime dateOfBirth;
     private String address;

@@ -310,6 +310,39 @@ services:
     depends_on:
       - mongodb
 
+  payment-service:
+    build:
+      context: ./backend/services/payment-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: payment-service
+    ports:
+      - "8091:8091"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/payment-service/src:/app/src
+      - ./backend/services/payment-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+      - kafka
+
+  booking-service:
+    build:
+      context: ./backend/services/booking-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: booking-service
+    ports:
+      - "8092:8092"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/booking-service/src:/app/src
+      - ./backend/services/booking-service/pom.xml:/app/pom.xml
+
 volumes:
   postgres_data:
   esdata:

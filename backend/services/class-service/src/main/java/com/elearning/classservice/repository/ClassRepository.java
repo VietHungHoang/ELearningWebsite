@@ -18,5 +18,6 @@ public interface ClassRepository extends JpaRepository<ClassEntity, UUID> {
     Page<ClassEntity> findByStatus(ClassStatus status, Pageable pageable);
     Page<ClassEntity> findByClassType(ClassType classType, Pageable pageable);
     List<ClassEntity> findByTutorIdAndStatus(UUID tutorId, ClassStatus status);
+    Page<ClassEntity> findByTutorIdAndStatus(UUID tutorId, ClassStatus status, Pageable pageable);
     List<ClassEntity> findByTutorIdAndMaxStudentsGreaterThan(UUID tutorId, Integer maxStudents);
 }

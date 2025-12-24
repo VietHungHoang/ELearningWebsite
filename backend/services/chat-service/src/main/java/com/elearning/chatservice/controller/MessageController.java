@@ -18,13 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
-/**
- * REST Controller for message operations
- */
 @Slf4j
 @RestController
-@RequestMapping("/api/messages")
+@RequestMapping("/api/v1/chat/messages")
 @RequiredArgsConstructor
 public class MessageController {
 
@@ -33,7 +31,7 @@ public class MessageController {
     @PostMapping
     public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(
             @Valid @RequestBody SendMessageRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Send message: userId={}, conversationId={}", userId, request.getConversationId());
         MessageResponse response = messageService.sendMessage(request, userId);
@@ -44,7 +42,7 @@ public class MessageController {
     public ResponseEntity<ApiResponse<MessageResponse>> sendMessageWithFiles(
             @RequestPart("message") @Valid SendMessageRequest request,
             @RequestPart("files") List<MultipartFile> files,
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Send message with files: userId={}, conversationId={}, fileCount={}", 
                 userId, request.getConversationId(), files.size());
@@ -54,21 +52,30 @@ public class MessageController {
 
     @GetMapping("/{messageId}")
     public ResponseEntity<ApiResponse<MessageResponse>> getMessage(
-            @PathVariable String messageId,
-            @RequestHeader("X-User-Id") String userId) {
+            @PathVariable UUID messageId,
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Get message: messageId={}, userId={}", messageId, userId);
         MessageResponse response = messageService.getMessageById(messageId, userId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/conversation/{conversationId}")
+    @GetMapping("/conversations/{conversationId}")
     public ResponseEntity<ApiResponse<Page<MessageResponse>>> getConversationMessages(
-            @PathVariable String conversationId,
-            @RequestHeader("X-User-Id") String userId,
+            @PathVariable UUID conversationId,
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "50") int limit,
             Pageable pageable) {
         
-        log.info("Get conversation messages: conversationId={}, userId={}", conversationId, userId);
+        log.info("Get conversation messages: conversationId={}, userId={}, offset={}, limit={}", 
+                conversationId, userId, offset, limit);
+        
+        // Validate user is participant
+        if (!messageService.isUserParticipant(conversationId, userId)) {
+            return ResponseEntity.status(403).body(ApiResponse.error("Access denied: User is not a participant"));
+        }
+        
         Page<MessageResponse> response = messageService.getConversationMessages(conversationId, userId, pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -76,7 +83,7 @@ public class MessageController {
     @PutMapping
     public ResponseEntity<ApiResponse<MessageResponse>> editMessage(
             @Valid @RequestBody EditMessageRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Edit message: messageId={}, userId={}", request.getMessageId(), userId);
         MessageResponse response = messageService.editMessage(request, userId);
@@ -85,36 +92,40 @@ public class MessageController {
 
     @DeleteMapping("/{messageId}")
     public ResponseEntity<ApiResponse<Void>> deleteMessage(
-            @PathVariable String messageId,
-            @RequestHeader("X-User-Id") String userId) {
+            @PathVariable UUID messageId,
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Delete message: messageId={}, userId={}", messageId, userId);
         messageService.deleteMessage(messageId, userId);
         return ResponseEntity.ok(ApiResponse.success("Message deleted successfully", null));
     }
 
-    @PostMapping("/read")
-    public ResponseEntity<ApiResponse<Void>> markAsRead(
-            @Valid @RequestBody MarkAsReadRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+    @PutMapping("/{messageId}/read")
+    public ResponseEntity<ApiResponse<Void>> markMessageAsRead(
+            @PathVariable UUID messageId,
+            @RequestHeader("X-User-Id") UUID userId) {
         
-        log.info("Mark as read: conversationId={}, messageId={}, userId={}", 
-                request.getConversationId(), request.getMessageId(), userId);
+        log.info("Mark message as read: messageId={}, userId={}", messageId, userId);
         
-        if (request.getMessageId() != null) {
-            messageService.markAsRead(request.getConversationId(), request.getMessageId(), userId);
-        } else {
-            messageService.markAllAsRead(request.getConversationId(), userId);
+        // Get conversationId from message and validate user is participant
+        UUID conversationId = messageService.getConversationIdByMessageId(messageId);
+        if (conversationId == null) {
+            return ResponseEntity.status(404).body(ApiResponse.error("Message not found"));
         }
         
-        return ResponseEntity.ok(ApiResponse.success("Marked as read", null));
+        if (!messageService.isUserParticipant(conversationId, userId)) {
+            return ResponseEntity.status(403).body(ApiResponse.error("Access denied: User is not a participant"));
+        }
+        
+        messageService.markAsRead(conversationId, messageId, userId);
+        return ResponseEntity.ok(ApiResponse.success("Message marked as read", null));
     }
 
     @PostMapping("/{messageId}/reactions")
     public ResponseEntity<ApiResponse<MessageResponse>> addReaction(
-            @PathVariable String messageId,
+            @PathVariable UUID messageId,
             @Valid @RequestBody AddReactionRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Add reaction: messageId={}, emoji={}, userId={}", messageId, request.getEmoji(), userId);
         MessageResponse response = messageService.addReaction(messageId, request.getEmoji(), userId);
@@ -123,8 +134,8 @@ public class MessageController {
 
     @DeleteMapping("/{messageId}/reactions")
     public ResponseEntity<ApiResponse<MessageResponse>> removeReaction(
-            @PathVariable String messageId,
-            @RequestHeader("X-User-Id") String userId) {
+            @PathVariable UUID messageId,
+            @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Remove reaction: messageId={}, userId={}", messageId, userId);
         MessageResponse response = messageService.removeReaction(messageId, userId);
@@ -133,8 +144,8 @@ public class MessageController {
 
     @GetMapping("/conversation/{conversationId}/unread-count")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount(
-            @PathVariable String conversationId,
-            @RequestHeader("X-User-Id") String userId) {
+            @PathVariable UUID conversationId,
+            @RequestHeader("X-User-Id") UUID userId) {
         
         long count = messageService.getUnreadCount(conversationId, userId);
         return ResponseEntity.ok(ApiResponse.success(count));
@@ -142,9 +153,9 @@ public class MessageController {
 
     @GetMapping("/conversation/{conversationId}/search")
     public ResponseEntity<ApiResponse<Page<MessageResponse>>> searchMessages(
-            @PathVariable String conversationId,
+            @PathVariable UUID conversationId,
             @RequestParam String query,
-            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Id") UUID userId,
             Pageable pageable) {
         
         log.info("Search messages: conversationId={}, query={}", conversationId, query);
@@ -154,9 +165,9 @@ public class MessageController {
 
     @GetMapping("/conversation/{conversationId}/type/{type}")
     public ResponseEntity<ApiResponse<Page<MessageResponse>>> getMessagesByType(
-            @PathVariable String conversationId,
+            @PathVariable UUID conversationId,
             @PathVariable MessageType type,
-            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Id") UUID userId,
             Pageable pageable) {
         
         log.info("Get messages by type: conversationId={}, type={}", conversationId, type);

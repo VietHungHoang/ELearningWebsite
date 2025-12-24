@@ -39,12 +39,12 @@ public class SearchTutorRequest {
     /**
      * Filter by category IDs
      */
-    private List<UUID> categoryIds;
+    private UUID categoryId;
     
     /**
      * Filter by subject IDs
      */
-    private List<UUID> subjectIds;
+    private UUID subjectId;
     
     /**
      * Filter by price range

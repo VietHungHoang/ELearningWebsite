@@ -21,12 +21,9 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);
-      // Delay để browser có thời gian render DOM trước khi trigger animation
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setIsAnimating(true);
-        });
-      });
+      setTimeout(() => {
+        setIsAnimating(true);
+      }, 10);
     } else {
       setIsAnimating(false);
       const timer = setTimeout(() => {
@@ -55,19 +52,19 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
     >
       {/* Background overlay */}
       <div
-        className={`fixed inset-0 bg-black transition-opacity duration-300 ease-out ${isAnimating ? 'opacity-50' : 'opacity-0'
+        className={`fixed inset-0 bg-black transition-opacity duration-200 ${isAnimating ? 'opacity-50' : 'opacity-0'
           }`}
       />
 
       {/* Modal content */}
       <div
-        className={`w-full bg-white rounded-2xl shadow-2xl overflow-hidden ${maxWidth === 'sm' ? 'max-w-sm' :
+        className={`w-full bg-white rounded-2xl shadow-2xl ${maxWidth === 'sm' ? 'max-w-sm' :
           maxWidth === 'md' ? 'max-w-md' :
             maxWidth === 'lg' ? 'max-w-lg' :
               maxWidth === 'xl' ? 'max-w-xl' :
                 maxWidth === '2xl' ? 'max-w-2xl' :
                   'max-w-xl'
-          } relative z-10 transition-all duration-300 ease-out ${isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          } relative z-10 transition-all duration-200 ease-out ${isAnimating ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
           }`}
         onClick={(e) => e.stopPropagation()}
       >

@@ -529,7 +529,7 @@ export const classService = {
     },
 
     // Check conflicts for selected time slots
-    checkSlotConflicts: async (tutorId: string, slotDateTimes: string[]): Promise<ApiResponse<GetBookedSessionsResponse>> => {
+    checkSlotConflicts: async (tutorId: string, slotDateTimes: string[]): Promise<ApiResponse<Session[]>> => {
         try {
             return await apiService.post<GetBookedSessionsResponse>(
                 `/v1/classes/sessions/check-slot-conflicts`,

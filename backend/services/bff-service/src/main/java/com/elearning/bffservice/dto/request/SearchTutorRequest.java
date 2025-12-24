@@ -24,8 +24,8 @@ public class SearchTutorRequest {
     
     // Filters
     private List<String> languageCodes;
-    private List<UUID> categoryIds;
-    private List<UUID> subjectIds;
+    private UUID categoryId;
+    private UUID subjectId;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
     private Double minRating;

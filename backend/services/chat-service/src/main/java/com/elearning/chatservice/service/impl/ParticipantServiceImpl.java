@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,7 +23,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     @Override
     @Transactional
-    public void updateTypingStatus(String conversationId, String userId, boolean isTyping) {
+    public void updateTypingStatus(UUID conversationId, UUID userId, boolean isTyping) {
         Participant participant = participantRepository.findByConversationIdAndUserId(conversationId, userId)
                 .orElseThrow(() -> new RuntimeException("Participant not found"));
 
@@ -35,7 +36,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     }
 
     @Override
-    public List<ParticipantResponse> getTypingParticipants(String conversationId) {
+    public List<ParticipantResponse> getTypingParticipants(UUID conversationId) {
         return participantRepository.findTypingParticipants(conversationId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -43,7 +44,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     @Override
     @Transactional
-    public void updateLastSeen(String conversationId, String userId) {
+    public void updateLastSeen(UUID conversationId, UUID userId) {
         participantRepository.findByConversationIdAndUserId(conversationId, userId)
                 .ifPresent(participant -> {
                     participant.setLastSeenAt(LocalDateTime.now());
@@ -52,21 +53,21 @@ public class ParticipantServiceImpl implements ParticipantService {
     }
 
     @Override
-    public ParticipantResponse getParticipant(String conversationId, String userId) {
+    public ParticipantResponse getParticipant(UUID conversationId, UUID userId) {
         Participant participant = participantRepository.findByConversationIdAndUserId(conversationId, userId)
                 .orElseThrow(() -> new RuntimeException("Participant not found"));
         return mapToResponse(participant);
     }
 
     @Override
-    public List<ParticipantResponse> getConversationParticipants(String conversationId) {
+    public List<ParticipantResponse> getConversationParticipants(UUID conversationId) {
         return participantRepository.findByConversationId(conversationId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public boolean isParticipant(String conversationId, String userId) {
+    public boolean isParticipant(UUID conversationId, UUID userId) {
         return participantRepository.existsByConversationIdAndUserId(conversationId, userId);
     }
 

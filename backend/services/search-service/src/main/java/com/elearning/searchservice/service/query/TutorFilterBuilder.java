@@ -38,14 +38,14 @@ public class TutorFilterBuilder {
             filters.add(buildLanguageCodesFilter(request.getLanguageCodes()));
         }
         
-        // Category IDs filter
-        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
-            filters.add(buildCategoryIdsFilter(request.getCategoryIds()));
+        // Category ID filter
+        if (request.getCategoryId() != null) {
+            filters.add(buildCategoryIdFilter(request.getCategoryId()));
         }
         
-        // Subject IDs filter
-        if (request.getSubjectIds() != null && !request.getSubjectIds().isEmpty()) {
-            filters.add(buildSubjectIdsFilter(request.getSubjectIds()));
+        // Subject ID filter
+        if (request.getSubjectId() != null) {
+            filters.add(buildSubjectIdFilter(request.getSubjectId()));
         }
         
         // Rating filter
@@ -119,33 +119,25 @@ public class TutorFilterBuilder {
                 )
         );
     }
-    
-    private Query buildCategoryIdsFilter(List<UUID> categoryIds) {
-        List<FieldValue> values = categoryIds.stream()
-                .map(id -> FieldValue.of(id.toString()))
-                .collect(Collectors.toList());
-        
+
+    private Query buildCategoryIdFilter(UUID categoryId) {
         return Query.of(q -> q
-                .terms(t -> t
+                .term(t -> t
                         .field("categoryIds")
-                        .terms(tv -> tv.value(values))
+                        .value(categoryId.toString())
                 )
         );
     }
-    
-    private Query buildSubjectIdsFilter(List<UUID> subjectIds) {
-        List<FieldValue> values = subjectIds.stream()
-                .map(id -> FieldValue.of(id.toString()))
-                .collect(Collectors.toList());
-        
+
+    private Query buildSubjectIdFilter(UUID subjectId) {
         return Query.of(q -> q
-                .terms(t -> t
+                .term(t -> t
                         .field("subjectIds")
-                        .terms(tv -> tv.value(values))
+                        .value(subjectId.toString())
                 )
         );
     }
-    
+
     private Query buildMinRatingFilter(Double minRating) {
         return Query.of(q -> q
                 .range(r -> r
@@ -157,12 +149,12 @@ public class TutorFilterBuilder {
                 )
         );
     }
-    
+
     private Query buildAvailableDaysFilter(List<String> availableDays) {
         List<FieldValue> values = availableDays.stream()
                 .map(FieldValue::of)
                 .collect(Collectors.toList());
-        
+
         return Query.of(q -> q
                 .terms(t -> t
                         .field("availableDays")
@@ -170,7 +162,7 @@ public class TutorFilterBuilder {
                 )
         );
     }
-    
+
     private Query buildTermFilter(String field, String value) {
         return Query.of(q -> q
                 .term(t -> t

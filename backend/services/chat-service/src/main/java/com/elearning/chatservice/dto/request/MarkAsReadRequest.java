@@ -1,10 +1,12 @@
 package com.elearning.chatservice.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 /**
  * Request DTO for marking messages as read
@@ -15,8 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MarkAsReadRequest {
 
-    @NotBlank(message = "Conversation ID is required")
-    private String conversationId;
+    @NotNull(message = "Conversation ID is required")
+    private UUID conversationId;
 
-    private String messageId;  // Optional: if null, mark all messages as read
+    private UUID messageId;  // Optional: if null, mark all messages as read
 }

@@ -1,10 +1,9 @@
 package com.elearning.bffservice.mapper;
 
-import com.elearning.bffservice.bff.tutor.request.TutorSearchBffRequest;
-import com.elearning.bffservice.bff.tutor.response.TutorBffResponse;
-import com.elearning.bffservice.bff.tutor.response.TutorDetailBffResponse;
-import com.elearning.bffservice.dto.clas.response.TutorStatsResponse;
-import com.elearning.bffservice.dto.clas.response.GroupClassResponse;
+import com.elearning.bffservice.bff.tutors.request.TutorSearchBffRequest;
+import com.elearning.bffservice.bff.tutors.response.TutorBffResponse;
+import com.elearning.bffservice.bff.tutors.response.TutorDetailBffResponse;
+import com.elearning.bffservice.dto.classes.response.GroupClassResponse;
 import com.elearning.bffservice.dto.request.SearchTutorRequest;
 import com.elearning.bffservice.dto.tutor.response.TutorDetailResponse;
 import com.elearning.bffservice.dto.tutor.response.TutorResponse;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Mapper for tutor search operations
@@ -25,15 +23,13 @@ public class TutorMapper {
      * Maps TutorSearchBffRequest to SearchTutorRequest for search service
      */
     public SearchTutorRequest mapToSearchTutorRequest(TutorSearchBffRequest request) {
-        // Resolve category ID to category IDs
-        List<UUID> categoryIdsToSearch = request.getCategoryId() != null ? List.of(request.getCategoryId()) : null;
 
         return SearchTutorRequest.builder()
                 .languageCodes(request.getLanguageCodes())
                 .minPrice(request.getMinPrice())
                 .maxPrice(request.getMaxPrice())
-                .categoryIds(categoryIdsToSearch)
-                .subjectIds(request.getSubjectIds())
+                .categoryId(request.getCategoryId())
+                .subjectId(request.getSubjectId())
                 .classType(request.getClassType())
                 .availableDays(request.getAvailableDays())
                 .page(request.getPage())
@@ -44,7 +40,7 @@ public class TutorMapper {
     /**
      * Maps TutorResponse to TutorBffResponse with additional stats
      */
-    public TutorBffResponse mapToTutorBffResponse(TutorResponse tutor, TutorStatsResponse stats) {
+    public TutorBffResponse mapToTutorBffResponse(TutorResponse tutor) {
         return TutorBffResponse.builder()
                 .id(tutor.getId())
                 .fullName(tutor.getFullName())
@@ -63,16 +59,16 @@ public class TutorMapper {
                 .reviewCount(tutor.getReviewCount())
                 .languageCodes(tutor.getLanguageCodes())
                 .subjectIds(tutor.getSubjectIds())
-                .bookedSessionsCount(stats != null ? stats.getBookedSessionsCount() : 0)
-                .studentCount(stats != null ? stats.getStudentCount() : 0)
-                .hasTrialSession(stats.isHasTrialSession())
+                .bookedSessionsCount(tutor.getBookedSessionsCount())
+                .studentCount(tutor.getStudentCount())
+                .hasTrialSession(tutor.getHasTrialSession() == null || tutor.getHasTrialSession())
                 .build();
     }
 
     /**
      * Maps TutorDetailResponse and GroupClassResponse list to TutorDetailBffResponse
      */
-    public TutorDetailBffResponse mapToTutorDetailBffResponse(TutorDetailResponse tutorDetail, List<GroupClassResponse> groupClasses, TutorStatsResponse stats) {
+    public TutorDetailBffResponse mapToTutorDetailBffResponse(TutorDetailResponse tutorDetail, List<GroupClassResponse> groupClasses) {
         return TutorDetailBffResponse.builder()
                 .id(tutorDetail.getId())
                 .fullName(tutorDetail.getFullName())
@@ -91,9 +87,9 @@ public class TutorMapper {
                 .reviewCount(tutorDetail.getReviewCount())
                 .languageCodes(tutorDetail.getLanguageCodes())
                 .subjectIds(tutorDetail.getSubjectIds())
-                .bookedSessionsCount(stats != null ? stats.getBookedSessionsCount() : 0)
-                .studentCount(stats != null ? stats.getStudentCount() : 0)
-                .hasTrialSession(stats.isHasTrialSession())
+                .bookedSessionsCount(tutorDetail.getBookedSessionsCount())
+                .studentCount(tutorDetail.getStudentCount())
+                .hasTrialSession(tutorDetail.getHasTrialSession())
                 .reviews(tutorDetail.getReviews())
                 .availabilities(tutorDetail.getAvailabilities())
                 .socialLinks(tutorDetail.getSocialLinks())

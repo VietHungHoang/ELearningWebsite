@@ -28,6 +28,12 @@ public class Session extends BaseEntity {
     
     @Column(name = "tutor_id", nullable = false)
     private UUID tutorId;
+
+    @Column(name = "tutor_name", nullable = false)
+    private String tutorName;
+
+    @Column (name = "tutor_avatar_url")
+    private String tutorAvatarUrl;
     
     @Column(name = "is_trial", nullable = false)
     @Builder.Default

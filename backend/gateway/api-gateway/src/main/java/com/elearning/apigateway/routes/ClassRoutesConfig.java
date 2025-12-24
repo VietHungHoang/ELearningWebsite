@@ -15,17 +15,30 @@ public class ClassRoutesConfig {
     @Value("${services.bff-service.url}")
     private String bffServiceUrl;
 
-    private final String baseClassServiceUrl = classServiceUrl + "api/v1/classes/";
-    private final String baseBffServiceUrl = "/api/v1/bff/classes/";
-
     @Bean
-    public RouteLocator bffServiceRoutes(RouteLocatorBuilder builder) {
+    public RouteLocator classServiceRoutes(RouteLocatorBuilder builder) {
         return builder.routes()
                 // Direct routes
+
+                .route("save-trial-session", r -> r
+                        .path("/api/v1/classes/trial-session/**",
+                                "/api/v1/classes/tutors/me",
+                                "/api/v1/classes/sessions/tutors/{tutorId}",
+                                "/api/v1/classes/sessions/check-slot-conflicts",
+                                "/api/v1/classes/sessions/students/{studentId}",
+                                "/api/v1/classes/sessions/me/**")
+                        .uri(classServiceUrl))
+
                 .route("class-sessions", r -> r
-                        .path(baseBffServiceUrl + "sessions/**")
+                        .path("/api/v1/classes/sesttttttsions/**")
+                        .filters(f -> f
+                                .rewritePath(
+                                        "/api/v1/(?<rest>.*)",
+                                        "/api/v1/bff/${rest}"
+                                )
+                        )
                         .uri(bffServiceUrl))
-                
+
                 .build();
     }
 }
