@@ -18,11 +18,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
     displayFormat,
     className = ''
 }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [displayDate, setDisplayDate] = useState(new Date(value.getFullYear(), value.getMonth(), 1));
     const [hoveredWeek, setHoveredWeek] = useState<{ start: Date; end: Date } | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    
+    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
 
     useEffect(() => {
         if (isOpen) {
@@ -63,16 +65,16 @@ const DatePicker: React.FC<DatePickerProps> = ({
         const endDate = weekDays[6];
         const startFormat: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
         const endFormat: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
-        return `${startDate.toLocaleDateString('en-US', startFormat)} - ${endDate.toLocaleDateString('en-US', endFormat)}`;
+        return `${startDate.toLocaleDateString(locale, startFormat)} - ${endDate.toLocaleDateString(locale, endFormat)}`;
     };
 
     const defaultDisplayFormat = (date: Date, mode: 'Daily' | 'Weekly' | 'Monthly') => {
         if (mode === 'Daily') {
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            return date.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
         } else if (mode === 'Weekly') {
             return getWeekRangeDisplay(date);
         } else {
-            return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
         }
     };
 
@@ -94,7 +96,15 @@ const DatePicker: React.FC<DatePickerProps> = ({
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const blanks = Array(firstDayOfMonth).fill(null);
         const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const daysOfWeek = [
+            t('dashboard.common.days.sun'),
+            t('dashboard.common.days.mon'),
+            t('dashboard.common.days.tue'),
+            t('dashboard.common.days.wed'),
+            t('dashboard.common.days.thu'),
+            t('dashboard.common.days.fri'),
+            t('dashboard.common.days.sat')
+        ];
 
         const handleDayClick = (day: number) => {
             const clickedDate = new Date(year, month, day);
@@ -115,7 +125,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             <>
                 <div className="flex items-center justify-between mb-4">
                     <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-gray-100"><HiChevronLeft className="w-5 h-5" /></button>
-                    <span className="font-semibold text-gray-700">{displayDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
+                    <span className="font-semibold text-gray-700">{displayDate.toLocaleString(locale, { month: 'long', year: 'numeric' })}</span>
                     <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-gray-100"><HiChevronRight className="w-5 h-5" /></button>
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center text-sm text-gray-500 mb-2">
@@ -169,7 +179,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     const renderMonthPicker = () => {
         const year = displayDate.getFullYear();
         const months = Array.from({ length: 12 }, (_, i) => 
-            new Date(year, i, 1).toLocaleString('en-US', { month: 'short' })
+            new Date(year, i, 1).toLocaleString(locale, { month: 'short' })
         );
 
         const handlePrevYear = () => setDisplayDate(prev => new Date(prev.getFullYear() - 1, 0, 1));

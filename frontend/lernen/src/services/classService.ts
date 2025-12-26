@@ -264,6 +264,36 @@ export const classService = {
         return await apiService.post<null>(`/v1/class/reschedule-requests/accept`, { requestId });
     },
 
+    // Get list of reschedule requests for tutor or student
+    getRescheduleRequests: async (
+        role: "tutor" | "student",
+        userId: string
+    ): Promise<ApiResponse<any[]>> => {
+        try {
+            const response = await apiService.get<any[]>(
+                `/v1/class/reschedule-requests/by-user`,
+                {
+                    role,
+                    userId,
+                }
+            );
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data || [],
+            };
+        } catch (error: any) {
+            console.error("Error fetching reschedule requests:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to fetch reschedule requests",
+                data: [],
+            };
+        }
+    },
+
     acceptTrialRequest: async (requestId: string): Promise<ApiResponse<null>> => {
         try {
             const response = await apiService.post<null>(`/v1/public/class/trial-session/${requestId}/accept`);

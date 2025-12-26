@@ -919,10 +919,20 @@ const ScheduleManagementContent: React.FC = () => {
     // --- RENDER FUNCTIONS FOR VIEWS ---
     const timeSlots = Array.from({ length: 18 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`); // 7:00-24:00 - all time slots
 
-    const renderHourlyGrid = (days: Date[]) => (
+    const renderHourlyGrid = (days: Date[], isDaily: boolean = false) => {
+        // Daily view: larger cells (h-12) for scrolling
+        // Weekly view: smaller cells (h-7) to fit without scrolling
+        const timeColumnWidth = isDaily ? '100px' : '80px';
+        const cellHeight = isDaily ? 'h-12' : 'h-7.5';
+        const timeTextSize = isDaily ? 'text-sm font-medium text-gray-700' : 'text-[10px] text-gray-500';
+        const timePadding = isDaily ? 'pr-4 py-1' : 'pr-3 py-0.5';
+        const sessionTextSize = isDaily ? 'text-xs' : 'text-[10px]';
+        const sessionPadding = isDaily ? 'px-2 py-1' : 'px-2 py-0.5';
+
+        return (
         <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full w-full min-h-0 overflow-hidden">
-            <div className="overflow-x-auto flex-1 relative min-h-0" ref={gridRef}>
-                <div className={`grid`} style={{ gridTemplateColumns: `80px repeat(${days.length}, 1fr)`, width: '100%' }}>
+            <div className="overflow-x-auto overflow-y-auto flex-1 relative min-h-0" ref={gridRef}>
+                <div className={`grid`} style={{ gridTemplateColumns: `${timeColumnWidth} repeat(${days.length}, 1fr)`, width: '100%' }}>
                     {/* Time Column Header */}
                     <div className="sticky left-0 bg-white z-10"></div>
                     {/* Day Headers */}
@@ -938,7 +948,7 @@ const ScheduleManagementContent: React.FC = () => {
                     {/* Time Slots and Availability Grid */}
                     {timeSlots.map((time) => (
                         <React.Fragment key={time}>
-                            <div className="text-right pr-3 py-0.5 border-r border-gray-200 text-[10px] text-gray-500 sticky left-0 bg-white z-10 h-7 flex items-center justify-end">
+                            <div className={`text-right border-r border-gray-200 sticky left-0 bg-white z-10 ${cellHeight} flex items-center justify-end ${timeTextSize} ${timePadding}`}>
                                 {time}
                             </div>
                             {days.map((day) => {
@@ -986,15 +996,15 @@ const ScheduleManagementContent: React.FC = () => {
 
                                 if (bookedSession) {
                                     return (
-                                        <div key={day.toISOString()} className="border-b border-r border-gray-200 h-7.5 p-0 overflow-hidden">
+                                        <div key={day.toISOString()} className={`border-b border-r border-gray-200 ${cellHeight} p-0 overflow-hidden`}>
                                             <div
                                                 onClick={(e) => handleSessionClick(bookedSession, e)}
-                                                className={`h-full w-full rounded text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 border border-blue-200 overflow-hidden flex flex-col justify-center min-w-0 ${
+                                                className={`h-full w-full rounded ${sessionTextSize} ${sessionPadding} bg-blue-100 text-blue-800 border border-blue-200 overflow-hidden flex flex-col justify-center min-w-0 ${
                                                     !isEditMode ? "cursor-pointer" : "cursor-default opacity-70"
                                                 }`}
                                             >
-                                                <p className="font-bold leading-tight text-[10px] overflow-hidden text-ellipsis whitespace-nowrap min-w-0">{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
-                                                <p className="leading-tight text-[10px] overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                                                <p className={`font-bold leading-tight ${sessionTextSize} overflow-hidden text-ellipsis whitespace-nowrap min-w-0`}>{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
+                                                <p className={`leading-tight ${sessionTextSize} overflow-hidden text-ellipsis whitespace-nowrap min-w-0`}>
                                                     {bookedSession.students && bookedSession.students.length > 0
                                                         ? (bookedSession.students.length === 1 
                                                             ? (bookedSession.students[0]?.fullName || 'Unknown Student')
@@ -1011,7 +1021,7 @@ const ScheduleManagementContent: React.FC = () => {
                                     <div
                                         key={day.toISOString()}
                                         data-iso={slotISO}
-                                        className={`calendar-cell border-b border-r border-gray-200 h-7.5 text-center select-none overflow-hidden ${
+                                        className={`calendar-cell border-b border-r border-gray-200 ${cellHeight} text-center select-none overflow-hidden ${
                                             isEditMode ? "cursor-pointer" : ""
                                         }`}
                                         onMouseDown={(e) => handleMouseDown(e, day, hour)}
@@ -1043,7 +1053,8 @@ const ScheduleManagementContent: React.FC = () => {
                 )}
             </div>
         </div>
-    );
+        );
+    };
 
     // Helper function to get day name from dayOfWeek (1=Monday, 7=Sunday)
     const getDayName = (dayOfWeek: number): string => {
@@ -1121,8 +1132,8 @@ const ScheduleManagementContent: React.FC = () => {
         );
     };
 
-    const renderDailyView = () => renderHourlyGrid([currentDate]);
-    const renderWeeklyView = () => renderHourlyGrid(getWeekDays(currentDate));
+    const renderDailyView = () => renderHourlyGrid([currentDate], true);
+    const renderWeeklyView = () => renderHourlyGrid(getWeekDays(currentDate), false);
 
     const renderMonthlyView = () => {
         const year = currentDate.getUTCFullYear();
@@ -1144,7 +1155,7 @@ const ScheduleManagementContent: React.FC = () => {
         for (let i = 1; i <= daysInMonth; i++) {
             calendarDays.push({ day: i, isCurrentMonth: true, date: new Date(Date.UTC(year, month, i)) });
         }
-        const remainingCells = 35 - calendarDays.length;
+        const remainingCells = 42 - calendarDays.length; // 6 rows * 7 days = 42
         for (let i = 1; i <= remainingCells; i++) {
             calendarDays.push({ day: i, isCurrentMonth: false, date: new Date(Date.UTC(year, month + 1, i)) });
         }
@@ -1160,15 +1171,15 @@ const ScheduleManagementContent: React.FC = () => {
         ];
 
         return (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                     {weekDayHeaders.map((day) => (
                         <div key={day} className="p-3 text-center text-sm font-semibold text-gray-600">
                             {day}
                         </div>
                     ))}
                 </div>
-                <div className="grid grid-cols-7 grid-rows-5">
+                <div className="grid grid-cols-7 auto-rows-[112px]">
                     {calendarDays.map((d, index) => {
                         const dayBookings: Session[] = []; // TODO: Implement booked sessions from API
                         return (
@@ -1189,26 +1200,28 @@ const ScheduleManagementContent: React.FC = () => {
                                     );
                                     setView("Daily");
                                 }}
-                                className={`h-28 p-2 border-r border-b border-gray-200 cursor-pointer transition-colors ${
+                                className={`h-28 p-2 border-r border-b border-gray-200 cursor-pointer transition-colors flex flex-col ${
                                     d.isCurrentMonth ? "hover:bg-gray-50" : "bg-gray-50"
                                 }`}
                             >
                                 <p
-                                    className={`text-sm font-semibold ${
+                                    className={`text-sm font-semibold flex-shrink-0 ${
                                         d.isCurrentMonth ? "text-gray-800" : "text-gray-400"
                                     }`}
                                 >
                                     {d.day}
                                 </p>
-                                <div className="mt-1 space-y-1 overflow-hidden">
-                                    {dayBookings.map((session) => (
-                                        <div
-                                            key={session.id}
-                                            className="text-xs font-semibold py-0.5 px-1 rounded text-left truncate bg-blue-100 text-blue-800"
-                                        >
-                                            {session.tutor?.fullName || 'Unknown Tutor'}
-                                        </div>
-                                    ))}
+                                <div className="mt-1 space-y-1 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
+                                    {dayBookings.length > 0 ? (
+                                        dayBookings.map((session) => (
+                                            <div
+                                                key={session.id}
+                                                className="text-xs font-semibold py-0.5 px-1 rounded text-left truncate bg-blue-100 text-blue-800"
+                                            >
+                                                {session.tutor?.fullName || 'Unknown Tutor'}
+                                            </div>
+                                        ))
+                                    ) : null}
                                 </div>
                             </div>
                         );
@@ -1376,8 +1389,16 @@ const ScheduleManagementContent: React.FC = () => {
                             </div>
                         ) : (
                             <>
-                                {view === "Daily" && renderDailyView()}
-                                {view === "Monthly" && renderMonthlyView()}
+                                {view === "Daily" && (
+                                    <div className="h-full min-h-0 overflow-auto px-6 pb-6">
+                                        {renderDailyView()}
+                                    </div>
+                                )}
+                                {view === "Monthly" && (
+                                    <div className="h-full min-h-0 overflow-auto px-6 pb-6">
+                                        {renderMonthlyView()}
+                                    </div>
+                                )}
                             </>
                         )}
                     </>

@@ -388,6 +388,19 @@
       "noReviews": "Không tìm thấy đánh giá phù hợp",
       "sessionDate": "Ngày học"
     },
+    "common": {
+      "time": "Thời gian",
+      "noSessions": "Không có buổi học",
+      "days": {
+        "sun": "CN",
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7"
+      }
+    },
     "inbox": {
       "title": "Hộp thư",
       "searchPlaceholder": "Tìm kiếm...",
@@ -433,6 +446,42 @@
       }
     },
     "student": {
+      "myQuizzes": {
+        "title": "Bài kiểm tra của tôi",
+        "subtitle": "Xem và quản lý các bài kiểm tra được giao",
+        "searchPlaceholder": "Tìm kiếm bài kiểm tra...",
+        "tabs": {
+          "all": "Tất cả",
+          "completed": "Đã hoàn thành",
+          "inProgress": "Đang làm",
+          "notStarted": "Chưa bắt đầu"
+        },
+        "status": {
+          "completed": "Đã hoàn thành",
+          "inProgress": "Đang làm",
+          "notStarted": "Chưa bắt đầu"
+        },
+        "card": {
+          "questions": "Số câu hỏi",
+          "timeLimit": "Thời gian",
+          "progress": "Tiến độ",
+          "score": "Điểm số",
+          "completed": "Hoàn thành",
+          "assigned": "Được giao",
+          "answered": "đã trả lời"
+        },
+        "actions": {
+          "startQuiz": "Bắt đầu làm",
+          "continueQuiz": "Tiếp tục làm",
+          "viewResults": "Xem kết quả",
+          "retake": "Làm lại"
+        },
+        "empty": {
+          "title": "Không tìm thấy bài kiểm tra",
+          "descriptionSearch": "Thử điều chỉnh từ khóa tìm kiếm.",
+          "description": "Bạn chưa có bài kiểm tra nào được giao."
+        }
+      },
       "myClass": {
         "title": "Lớp học của tôi",
         "searchPlaceholder": "Tìm kiếm lớp học...",
@@ -1555,5 +1604,56 @@
     "basicInfo": {
       "location": "Địa điểm"
     }
+  },
+  "quizTaking": {
+    "exitQuiz": "Thoát bài kiểm tra",
+    "of": "trên",
+    "singleChoice": "Chọn một",
+    "multipleChoice": "Chọn nhiều",
+    "answered": "đã trả lời",
+    "flagForReview": "Đánh dấu xem lại",
+    "removeFlag": "Bỏ đánh dấu",
+    "prev": "Trước",
+    "next": "Tiếp",
+    "submit": "Nộp bài",
+    "questions": "Câu hỏi",
+    "remaining": "Còn lại",
+    "flagged": "Đã đánh dấu",
+    "submitModal": {
+      "title": "Nộp bài kiểm tra?",
+      "review": "Xem lại",
+      "submit": "Nộp bài",
+      "submitting": "Đang nộp...",
+      "unanswered": "Chưa trả lời"
+    },
+    "exitModal": {
+      "title": "Thoát bài kiểm tra?",
+      "continue": "Tiếp tục",
+      "exit": "Thoát",
+      "warning": "Tiến trình của bạn sẽ không được lưu. Bạn có chắc chắn muốn thoát?"
+    }
+  },
+  "quizResult": {
+    "title": "Kết quả bài kiểm tra",
+    "reviewAnswers": "Xem lại câu trả lời",
+    "score": "Điểm",
+    "passed": "Đạt!",
+    "notPassed": "Chưa đạt",
+    "correct": "Đúng",
+    "incorrect": "Sai",
+    "yourAnswer": "Câu trả lời của bạn",
+    "correctAnswer": "Đáp án đúng",
+    "explanation": "Giải thích",
+    "hideExplanation": "Ẩn giải thích",
+    "time": "Thời gian",
+    "passScore": "Điểm đạt",
+    "retakeQuiz": "Làm lại",
+    "backToQuizzes": "Quay lại",
+    "filter": {
+      "all": "Tất cả",
+      "correct": "Đúng",
+      "incorrect": "Sai"
+    },
+    "noQuestionsMatch": "Không có câu hỏi nào phù hợp với bộ lọc"
   }
 }

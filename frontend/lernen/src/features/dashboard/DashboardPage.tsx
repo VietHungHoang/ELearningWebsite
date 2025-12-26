@@ -2,6 +2,7 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import DashboardLayout from "./components/DashboardLayout";
 import { BreadcrumbProvider, useBreadcrumb } from "./context/BreadcrumbContext";
+import { RequestsProvider, useRequests } from "./context/RequestsContext";
 import Loading from "../../components/ui/Loading";
 import {
     TUTOR_SIDEBAR_OPTIONS,
@@ -15,6 +16,7 @@ const DashboardContent: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { breadcrumb } = useBreadcrumb();
+    const { totalRequestsCount } = useRequests();
 
     // Show loading while initializing
     if (!isInitialized) {
@@ -48,7 +50,12 @@ const DashboardContent: React.FC = () => {
 
     switch (role) {
         case "tutor":
-            sidebarOptions = TUTOR_SIDEBAR_OPTIONS;
+            sidebarOptions = TUTOR_SIDEBAR_OPTIONS.map(option => {
+                if (option.path === "/dashboard/requests") {
+                    return { ...option, count: totalRequestsCount };
+                }
+                return option;
+            });
             userRole = "tutor";
             break;
         case "student":
@@ -87,7 +94,9 @@ const DashboardContent: React.FC = () => {
 const DashboardPage = () => {
     return (
         <BreadcrumbProvider>
-            <DashboardContent />
+            <RequestsProvider>
+                <DashboardContent />
+            </RequestsProvider>
         </BreadcrumbProvider>
     );
 };
