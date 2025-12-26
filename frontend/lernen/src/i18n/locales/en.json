@@ -432,6 +432,42 @@
       }
     },
     "student": {
+      "myQuizzes": {
+        "title": "My Quizzes",
+        "subtitle": "View and manage your assigned quizzes",
+        "searchPlaceholder": "Search quizzes...",
+        "tabs": {
+          "all": "All Quizzes",
+          "completed": "Completed",
+          "inProgress": "In Progress",
+          "notStarted": "Not Started"
+        },
+        "status": {
+          "completed": "Completed",
+          "inProgress": "In Progress",
+          "notStarted": "Not Started"
+        },
+        "card": {
+          "questions": "Questions",
+          "timeLimit": "Time Limit",
+          "progress": "Progress",
+          "score": "Score",
+          "completed": "Completed",
+          "assigned": "Assigned",
+          "answered": "answered"
+        },
+        "actions": {
+          "startQuiz": "Start Quiz",
+          "continueQuiz": "Continue Quiz",
+          "viewResults": "View Results",
+          "retake": "Retake"
+        },
+        "empty": {
+          "title": "No quizzes found",
+          "descriptionSearch": "Try adjusting your search terms.",
+          "description": "You don't have any quizzes assigned yet."
+        }
+      },
       "myClass": {
         "title": "My classes",
         "searchPlaceholder": "Search classes...",
@@ -1561,5 +1597,56 @@
     "basicInfo": {
       "location": "Location"
     }
+  },
+  "quizTaking": {
+    "exitQuiz": "Exit quiz",
+    "of": "of",
+    "singleChoice": "Single choice",
+    "multipleChoice": "Multiple choice",
+    "answered": "answered",
+    "flagForReview": "Flag for review",
+    "removeFlag": "Remove flag",
+    "prev": "Prev",
+    "next": "Next",
+    "submit": "Submit",
+    "questions": "Questions",
+    "remaining": "Remaining",
+    "flagged": "Flagged",
+    "submitModal": {
+      "title": "Submit Quiz?",
+      "review": "Review",
+      "submit": "Submit",
+      "submitting": "Submitting...",
+      "unanswered": "Unanswered"
+    },
+    "exitModal": {
+      "title": "Exit Quiz?",
+      "continue": "Continue",
+      "exit": "Exit",
+      "warning": "Your progress will not be saved. Are you sure you want to exit?"
+    }
+  },
+  "quizResult": {
+    "title": "Quiz Result",
+    "reviewAnswers": "Review Answers",
+    "score": "Score",
+    "passed": "Passed!",
+    "notPassed": "Not Passed",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "yourAnswer": "Your answer",
+    "correctAnswer": "Correct",
+    "explanation": "Explanation",
+    "hideExplanation": "Hide explanation",
+    "time": "Time",
+    "passScore": "Pass score",
+    "retakeQuiz": "Retake Quiz",
+    "backToQuizzes": "Back to Quizzes",
+    "filter": {
+      "all": "All",
+      "correct": "Correct",
+      "incorrect": "Incorrect"
+    },
+    "noQuestionsMatch": "No questions match this filter"
   }
 }

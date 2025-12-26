@@ -9,7 +9,6 @@ export interface AuthContextType {
     state: AuthState;
     login: (request: LoginRequest) => Promise<AuthUser | null>;
     logout: () => void;
-    isInitialized: boolean;
 }
 
 export interface AuthUser {
@@ -91,7 +90,6 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [state, dispatch] = useReducer(authReducer, initialState);
-    const [isInitialized, setIsInitialized] = React.useState(false);
 
     const login = async (request: LoginRequest): Promise<AuthUser | null> => {
         dispatch({ type: "LOGIN_START" });
@@ -139,8 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 });
             }
         }
-        setIsInitialized(true);
     }, []);
 
-    return <AuthContext.Provider value={{ state, login, logout, isInitialized }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ state, login, logout }}>{children}</AuthContext.Provider>;
 };
