@@ -116,7 +116,7 @@ const TutorOnboardingPage: React.FC = () => {
                 ...stepData,
                 subjectIds: stepData.subjects?.map(s => s.id) || [],
                 languages: stepData.languages?.map(l => ({
-                    code: l.language.code,
+                    code: 'language' in l ? l.language.code : "",
                     isNative: l.isNative
                 })) || []
             };

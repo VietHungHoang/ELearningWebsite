@@ -423,17 +423,17 @@ export const classService = {
 
     // Get payout stats for a tutor (4 main stats)
     getPayoutStats: async (): Promise<ApiResponse<PayoutStats>> => {
-        return await apiService.get<PayoutStats>(`/api/v1/tutors/me/earnings/stats`);
+        return await apiService.get<PayoutStats>(`/v1/tutors/me/earnings/stats`);
     },
 
     // Get payout summary for a tutor (full details)
     getPayoutSummary: async (): Promise<ApiResponse<PayoutSummary>> => {
-        return await apiService.get<PayoutSummary>(`/api/v1/tutors/me/earnings/summary`);
+        return await apiService.get<PayoutSummary>(`/v1/tutors/me/earnings/summary`);
     },
 
     // Get payout methods for a tutor
     getPayoutMethods: async (): Promise<ApiResponse<PaymentMethod[]>> => {
-        return await apiService.get<PaymentMethod[]>(`/api/v1/tutors/me/payment-methods`);
+        return await apiService.get<PaymentMethod[]>(`/v1/tutors/me/payment-methods`);
     },
 
     // Get payout history for a tutor with pagination
@@ -462,7 +462,7 @@ export const classService = {
         if (filters?.page) queryParams.append("page", filters.page.toString());
         if (filters?.size) queryParams.append("size", filters.size.toString());
 
-        const url = `/api/v1/class/tutors/me/earnings${
+        const url = `/v1/tutors/me/earnings${
             queryParams.toString() ? `?${queryParams.toString()}` : ""
         }`;
         return await apiService.get<PaginatedResponse<RecentEarning>>(url);
