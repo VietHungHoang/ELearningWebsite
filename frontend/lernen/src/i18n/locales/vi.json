@@ -388,6 +388,19 @@
       "noReviews": "Không tìm thấy đánh giá phù hợp",
       "sessionDate": "Ngày học"
     },
+    "common": {
+      "time": "Thời gian",
+      "noSessions": "Không có buổi học",
+      "days": {
+        "sun": "CN",
+        "mon": "T2",
+        "tue": "T3",
+        "wed": "T4",
+        "thu": "T5",
+        "fri": "T6",
+        "sat": "T7"
+      }
+    },
     "inbox": {
       "title": "Hộp thư",
       "searchPlaceholder": "Tìm kiếm...",

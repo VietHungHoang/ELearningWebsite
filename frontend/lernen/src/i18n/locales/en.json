@@ -387,6 +387,19 @@
       "noReviews": "No reviews found matching your filters",
       "sessionDate": "Session date"
     },
+    "common": {
+      "time": "Time",
+      "noSessions": "No sessions",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
     "inbox": {
       "title": "Inbox",
       "searchPlaceholder": "Search...",
