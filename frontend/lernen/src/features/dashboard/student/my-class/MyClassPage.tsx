@@ -277,7 +277,7 @@ const MyClassPage: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <div className="flex items-center gap-0.5">
+                                            <div className="flex items-center justify-center gap-0.5">
                                                 <button
                                                     onClick={() => handleViewDetails(classData)}
                                                     className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
