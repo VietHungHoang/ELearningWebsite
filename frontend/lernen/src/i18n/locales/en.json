@@ -357,6 +357,7 @@
           "myBookings": "My bookings",
           "myClass": "My class",
           "myQuizzes": "My quizzes",
+          "requests": "Requests",
           "myCourses": "My courses",
           "myPurchases": "My purchases",
           "certificates": "Certificates",
@@ -402,6 +403,50 @@
     },
     "inbox": {
       "title": "Inbox",
+      "searchPlaceholder": "Search...",
+      "filters": {
+        "all": "All",
+        "private": "Private",
+        "group": "Group"
+      },
+      "status": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "empty": {
+        "title": "Select a conversation",
+        "description": "Start by choosing a contact from the list on the left."
+      },
+      "messagePlaceholder": "Type a message...",
+      "attachments": {
+        "photo": "Photo",
+        "video": "Video",
+        "document": "Document",
+        "contact": "Contact"
+      },
+      "settings": {
+        "title": "Chat Settings",
+        "notifications": {
+          "title": "Notifications",
+          "enable": "Enable notifications",
+          "sound": "Sound alerts"
+        },
+        "privacy": {
+          "title": "Privacy",
+          "showStatus": "Show online status",
+          "readReceipts": "Read receipts"
+        },
+        "actions": {
+          "title": "Actions",
+          "mute": "Mute conversation",
+          "archive": "Archive chat",
+          "block": "Block user",
+          "clearHistory": "Clear chat history"
+        }
+      }
+    },
+    "messages": {
+      "title": "Messages",
       "searchPlaceholder": "Search...",
       "filters": {
         "all": "All",
@@ -514,6 +559,58 @@
         "tryAgain": "Try again",
         "noClassesFound": "No classes found",
         "noClassesDescription": "You haven't enrolled in any classes yet. Browse available courses to get started."
+      },
+      "requests": {
+        "title": "My Requests",
+        "filters": {
+          "reschedule": "Reschedule Requests",
+          "trial": "Trial Requests"
+        },
+        "empty": {
+          "title": "No requests pending",
+          "description": "You're all caught up! All your requests have been processed."
+        }
+      },
+      "purchases": {
+        "title": "My Purchases",
+        "searchPlaceholder": "Search by course or invoice number...",
+        "selectStatus": "Select status",
+        "filterOptions": {
+          "allStatus": "All status",
+          "pending": "Pending",
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "refunded": "Refunded"
+        },
+        "loading": "Loading purchases...",
+        "errorTitle": "Error loading purchases",
+        "tryAgain": "Try again",
+        "tableHeaders": {
+          "courseTitle": "Course title",
+          "type": "Type",
+          "amount": "Amount",
+          "status": "Status",
+          "purchaseDate": "Purchase date",
+          "actions": "Actions"
+        },
+        "classTypes": {
+          "oneOnOne": "1-on-1",
+          "group": "Group",
+          "course": "Course"
+        },
+        "statusLabels": {
+          "pending": "Pending",
+          "completed": "Completed",
+          "cancelled": "Cancelled",
+          "refunded": "Refunded"
+        },
+        "noPurchasesFound": "No purchases found",
+        "noPurchasesDescription": "You haven't made any purchases yet. Browse available courses to get started.",
+        "actions": {
+          "view": "View details",
+          "downloadInvoice": "Download invoice",
+          "contactSupport": "Contact support"
+        }
       }
     },
     "tutor": {
@@ -802,6 +899,7 @@
           "declining": "Declining...",
           "chat": "Chat",
           "cancelRequest": "Cancel request",
+          "cancelConfirmMessage": "Are you sure you want to cancel this trial request? This action cannot be undone.",
           "acceptSuccess": "Trial session request accepted successfully!",
           "acceptFailed": "Failed to accept request",
           "acceptError": "An error occurred while accepting the request",
@@ -822,6 +920,7 @@
           "declining": "Declining...",
           "chat": "Chat",
           "cancelRequest": "Cancel request",
+          "cancelConfirmMessage": "Are you sure you want to cancel this reschedule request? This action cannot be undone.",
           "acceptSuccess": "Reschedule request accepted successfully!",
           "acceptFailed": "Failed to accept request",
           "acceptError": "An error occurred while accepting the request",

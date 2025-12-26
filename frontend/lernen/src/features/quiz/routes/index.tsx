@@ -1,20 +1,20 @@
 import type { RouteObject } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
 import { CreateQuizPage } from '../create-quiz/create-quiz';
+import QuizTakingPage from '../pages/QuizTakingPage';
+import QuizResultPage from '../pages/QuizResultPage';
 
 const quizRoutes: RouteObject[] = [
     {
         path: '/quiz/create',
         element: <CreateQuizPage />,
     },
-    // Redirect old routes to new dashboard routes
     {
         path: '/quiz/take',
-        element: <Navigate to="/dashboard/my-quizzes/take" replace />,
+        element: <QuizTakingPage />,
     },
     {
         path: '/quiz/result',
-        element: <Navigate to="/dashboard/my-quizzes/result" replace />,
+        element: <QuizResultPage />,
     },
 ];
 

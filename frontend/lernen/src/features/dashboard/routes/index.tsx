@@ -23,14 +23,13 @@ import SubjectICanTeachPage from '../tutor/personal-detail/SubjectICanTeachPage'
 import MyQuizzesPage from '../../quiz/TutorMyQuizzesPage';
 import { CreateQuizPage } from '../../quiz/create-quiz/create-quiz';
 import QuizStatsPage from '../../quiz/pages/QuizStatsPage';
-import QuizResultPage from '../../quiz/pages/QuizResultPage';
-import QuizTakingPage from '../../quiz/pages/QuizTakingPage';
 import WhiteboardPage from '../whiteboard/WhiteboardPage';
 import ReviewsPage from '../tutor/reviews/ReviewsPage';
 
 // Student pages
 import MyBookingsPage from '../student/my-session/MyBookingsPage';
 import StudentMyClassPage from '../student/my-class/MyClassPage';
+import PurchasesPage from '../student/purchases/PurchasesPage';
 
 // Conditional components
 const ConditionalMyClassPage = () => {
@@ -93,22 +92,6 @@ const dashboardRoutes: RouteObject[] = [
         element: <QuizStatsPage />,
       },
       {
-        path: 'quizzes/result',
-        element: <QuizResultPage />,
-      },
-      {
-        path: 'my-quizzes/result',
-        element: <QuizResultPage />,
-      },
-      {
-        path: 'quizzes/take',
-        element: <QuizTakingPage />,
-      },
-      {
-        path: 'my-quizzes/take',
-        element: <QuizTakingPage />,
-      },
-      {
         path: 'requests',
         element: <RequestsPage />,
       },
@@ -144,6 +127,14 @@ const dashboardRoutes: RouteObject[] = [
       {
         path: 'my-quizzes',
         element: <MyQuizzesPage />,
+      },
+      {
+        path: 'purchases',
+        element: <PurchasesPage />,
+      },
+      {
+        path: 'messages',
+        element: <InboxPage />,
       },
       // Shared routes
       {
