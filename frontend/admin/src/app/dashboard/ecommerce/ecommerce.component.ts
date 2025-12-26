@@ -1,5 +1,9 @@
 import { Component } from '@angular/core';
+import { WelcomeComponent } from './welcome/welcome.component';
+import { TotalOrdersComponent } from './total-orders/total-orders.component';
 import { EcommerceTotalSalesComponent } from './total-sales/total-sales.component';
+import { TotalCustomersComponent } from './total-customers/total-customers.component';
+import { TotalRevenueComponent } from './total-revenue/total-revenue.component';
 import { SalesByLocationsComponent } from './sales-by-locations/sales-by-locations.component';
 import { TopSellingProductsComponent } from './top-selling-products/top-selling-products.component';
 import { RecentOrdersComponent } from './recent-orders/recent-orders.component';
@@ -9,7 +13,7 @@ import { ReturningCustomerRateComponent } from './returning-customer-rate/return
 
 @Component({
     selector: 'app-ecommerce',
-    imports: [EcommerceTotalSalesComponent, SalesByLocationsComponent, TopSellingProductsComponent, RecentOrdersComponent, OrderSummaryComponent, RecentTransactionsComponent, ReturningCustomerRateComponent],
+    imports: [WelcomeComponent, TotalOrdersComponent, EcommerceTotalSalesComponent, TotalCustomersComponent, TotalRevenueComponent, SalesByLocationsComponent, TopSellingProductsComponent, RecentOrdersComponent, OrderSummaryComponent, RecentTransactionsComponent, ReturningCustomerRateComponent],
     templateUrl: './ecommerce.component.html',
     styleUrl: './ecommerce.component.scss'
 })
