@@ -1,14 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ReviewService, Review } from '../../../services/review.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { I18nService } from '../../../i18n/i18n.service';
 
 @Component({
     selector: 'app-review-management',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent],
+    imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent, TranslatePipe],
     templateUrl: './review-management.component.html',
     styleUrl: './review-management.component.scss'
 })
@@ -28,38 +30,63 @@ export class ReviewManagementComponent implements OnInit {
     searchQuery: string = '';
 
     flagReasons = [
-        { value: 'all', label: 'All Reasons' },
-        { value: 'low_rating', label: '1-2 Stars' },
-        { value: 'bad_words', label: 'Inappropriate Language' },
-        { value: 'spam', label: 'Spam/Advertising' }
+        { value: 'all', label: '' },
+        { value: 'low_rating', label: '' },
+        { value: 'bad_words', label: '' },
+        { value: 'spam', label: '' }
     ];
 
     visibilityOptions = [
-        { value: 'all', label: 'All Status' },
-        { value: 'visible', label: 'Visible' },
-        { value: 'hidden', label: 'Hidden' }
+        { value: 'all', label: '' },
+        { value: 'visible', label: '' },
+        { value: 'hidden', label: '' }
     ];
 
     ratings = ['all', 1, 2, 3, 4, 5];
-
-    summary: any = {};
 
     isFlagReasonDropdownOpen = false;
     isVisibilityDropdownOpen = false;
     isRatingDropdownOpen = false;
 
     selectedReviewForAction: Review | null = null;
-    actionConfirmType: 'hide' | 'unflag' | 'toggleVisibility' | null = null;
+    actionConfirmType: 'hide' | 'restore' | 'toggleVisibility' | null = null;
     selectedReviewForDetail: Review | null = null;
     selectedReviews: Set<string> = new Set();
+    bulkConfirmType: 'hide' | 'restore' | null = null;
 
     Math = Math;
 
-    constructor(private reviewService: ReviewService) {}
+    constructor(
+        private reviewService: ReviewService,
+        private i18nService: I18nService
+    ) {
+        // React to language changes
+        effect(() => {
+            this.i18nService.currentLanguage$();
+            this.initializeLabels();
+        });
+    }
 
     ngOnInit(): void {
+        this.initializeLabels();
         this.loadReviews();
-        this.loadSummary();
+    }
+
+    initializeLabels(): void {
+        // Initialize flag reasons labels
+        this.flagReasons = [
+            { value: 'all', label: this.i18nService.translate('reviewManagement.filters.allReasons') },
+            { value: 'low_rating', label: this.i18nService.translate('reviewManagement.filters.lowRating') },
+            { value: 'bad_words', label: this.i18nService.translate('reviewManagement.filters.inappropriateLanguage') },
+            { value: 'spam', label: this.i18nService.translate('reviewManagement.filters.spam') }
+        ];
+
+        // Initialize visibility options labels
+        this.visibilityOptions = [
+            { value: 'all', label: this.i18nService.translate('reviewManagement.filters.allStatus') },
+            { value: 'visible', label: this.i18nService.translate('reviewManagement.status.visible') },
+            { value: 'hidden', label: this.i18nService.translate('reviewManagement.status.hidden') }
+        ];
     }
 
     loadReviews(): void {
@@ -67,10 +94,6 @@ export class ReviewManagementComponent implements OnInit {
             this.reviews = reviews;
             this.applyFilters();
         });
-    }
-
-    loadSummary(): void {
-        this.summary = this.reviewService.getSummary();
     }
 
     applyFilters(): void {
@@ -135,20 +158,24 @@ export class ReviewManagementComponent implements OnInit {
 
     getFlagReasonLabel(): string {
         const reason = this.flagReasons.find(r => r.value === this.selectedFlagReason);
-        return reason ? reason.label : 'All Reasons';
+        return reason ? reason.label : this.i18nService.translate('reviewManagement.filters.allReasons');
     }
 
     getVisibilityLabel(): string {
         const visibility = this.visibilityOptions.find(v => v.value === this.selectedVisibility);
-        return visibility ? visibility.label : 'All Status';
+        return visibility ? visibility.label : this.i18nService.translate('reviewManagement.filters.allStatus');
     }
 
     getRatingLabel(): string {
-        return this.selectedRating === 'all' ? 'All Ratings' : `${this.selectedRating} Stars`;
+        return this.selectedRating === 'all' 
+            ? this.i18nService.translate('reviewManagement.filters.allRatings')
+            : `${this.selectedRating} ${this.i18nService.translate('reviewManagement.stars')}`;
     }
 
     getDisplayedRating(rating: any): string {
-        return rating === 'all' ? 'All Ratings' : `${rating} Stars`;
+        return rating === 'all' 
+            ? this.i18nService.translate('reviewManagement.filters.allRatings')
+            : `${rating} ${this.i18nService.translate('reviewManagement.stars')}`;
     }
 
     getRatingStars(rating: number): string {
@@ -161,21 +188,16 @@ export class ReviewManagementComponent implements OnInit {
         this.actionConfirmType = 'hide';
     }
 
-    unflagReview(review: Review): void {
-        this.selectedReviewForAction = review;
-        this.actionConfirmType = 'unflag';
-    }
-
     // Actions for Tab 2: All Reviews - toggle visibility
     toggleReviewVisibility(review: Review): void {
         this.selectedReviewForAction = review;
         this.actionConfirmType = 'toggleVisibility';
     }
 
-    // Restore hidden review (make visible)
+    // Restore review (make visible again)
     restoreReview(review: Review): void {
         this.selectedReviewForAction = review;
-        this.actionConfirmType = 'toggleVisibility';
+        this.actionConfirmType = 'restore';
     }
 
     confirmAction(): void {
@@ -189,12 +211,12 @@ export class ReviewManagementComponent implements OnInit {
                     ? { ...r, status: 'hidden', isFlagged: false }
                     : r
             );
-        } else if (this.actionConfirmType === 'unflag') {
-            // Unflag the review (remove flag but keep it visible)
-            this.reviewService.unflagReview(this.selectedReviewForAction.id);
+        } else if (this.actionConfirmType === 'restore') {
+            // Restore the review (make it visible again)
+            this.reviewService.makeReviewVisible(this.selectedReviewForAction.id);
             this.reviews = this.reviews.map(r =>
                 r.id === this.selectedReviewForAction!.id
-                    ? { ...r, isFlagged: false }
+                    ? { ...r, status: 'visible' as const, isFlagged: false }
                     : r
             );
         } else if (this.actionConfirmType === 'toggleVisibility') {
@@ -213,7 +235,6 @@ export class ReviewManagementComponent implements OnInit {
         }
 
         this.loadReviews();
-        this.loadSummary();
         this.cancelAction();
     }
 
@@ -236,7 +257,9 @@ export class ReviewManagementComponent implements OnInit {
     }
 
     getStatusText(status: string): string {
-        return status === 'hidden' ? 'Hidden' : 'Visible';
+        return status === 'hidden' 
+            ? this.i18nService.translate('reviewManagement.status.hidden')
+            : this.i18nService.translate('reviewManagement.status.visible');
     }
 
     getStatusClass(status: string): string {
@@ -245,14 +268,14 @@ export class ReviewManagementComponent implements OnInit {
 
     getActionConfirmMessage(): string {
         if (this.actionConfirmType === 'hide') {
-            return 'Hide this review? It will no longer be visible to users.';
-        } else if (this.actionConfirmType === 'unflag') {
-            return 'Mark as processed? The flag will be removed.';
+            return this.i18nService.translate('reviewManagement.confirm.hideSingle');
+        } else if (this.actionConfirmType === 'restore') {
+            return this.i18nService.translate('reviewManagement.confirm.restoreSingle');
         } else if (this.actionConfirmType === 'toggleVisibility') {
             const willHide = this.selectedReviewForAction?.status !== 'hidden';
             return willHide
-                ? 'Hide this review?'
-                : 'Make this review visible again?';
+                ? this.i18nService.translate('reviewManagement.confirm.hideToggle')
+                : this.i18nService.translate('reviewManagement.confirm.showToggle');
         }
         return '';
     }
@@ -282,33 +305,83 @@ export class ReviewManagementComponent implements OnInit {
         return this.selectedReviews.size > 0 && this.selectedReviews.size < this.filteredReviews.length;
     }
 
-    bulkHideReviews(): void {
+    showBulkConfirmDialog(action: 'hide' | 'restore'): void {
         if (this.selectedReviews.size === 0) return;
+        this.bulkConfirmType = action;
+    }
 
-        if (confirm(`Hide ${this.selectedReviews.size} review(s)?`)) {
+    cancelBulkAction(): void {
+        this.bulkConfirmType = null;
+    }
+
+    confirmBulkAction(): void {
+        if (!this.bulkConfirmType || this.selectedReviews.size === 0) return;
+
+        switch (this.bulkConfirmType) {
+            case 'hide':
             this.selectedReviews.forEach(id => {
                 this.reviewService.hideReview(id);
                 this.reviews = this.reviews.map(r =>
                     r.id === id ? { ...r, status: 'hidden', isFlagged: false } : r
                 );
             });
+                break;
+            case 'restore':
+                this.selectedReviews.forEach(id => {
+                    this.reviewService.makeReviewVisible(id);
+                    this.reviews = this.reviews.map(r =>
+                        r.id === id ? { ...r, status: 'visible' as const } : r
+                    );
+                });
+                break;
+        }
+
             this.selectedReviews.clear();
+        this.bulkConfirmType = null;
             this.loadReviews();
-            this.loadSummary();
+        this.applyFilters();
+        }
+
+    getBulkConfirmMessage(): string {
+        if (!this.bulkConfirmType) return '';
+        const count = this.selectedReviews.size;
+        
+        switch (this.bulkConfirmType) {
+            case 'hide':
+                return this.i18nService.translate('reviewManagement.confirm.bulkHide', { count });
+            case 'restore':
+                return this.i18nService.translate('reviewManagement.confirm.bulkRestore', { count });
+            default:
+                return '';
         }
     }
 
-    bulkUnflagReviews(): void {
-        if (this.selectedReviews.size === 0) return;
-
-        if (confirm(`Mark ${this.selectedReviews.size} review(s) as processed?`)) {
-            this.selectedReviews.forEach(id => {
-                this.reviews = this.reviews.map(r =>
-                    r.id === id ? { ...r, isFlagged: false } : r
-                );
-            });
-            this.selectedReviews.clear();
-            this.applyFilters();
+    getBulkConfirmButtonText(): string {
+        if (!this.bulkConfirmType) return '';
+        
+        switch (this.bulkConfirmType) {
+            case 'hide':
+                return this.i18nService.translate('reviewManagement.bulkActions.hide');
+            case 'restore':
+                return this.i18nService.translate('reviewManagement.bulkActions.restore');
+            default:
+                return this.i18nService.translate('common.confirm');
         }
+    }
+
+    formatFlagReason(reason?: string): string {
+        if (!reason || reason === 'none') return '';
+        const reasonMap: { [key: string]: string } = {
+            'low_rating': this.i18nService.translate('reviewManagement.filters.lowRating'),
+            'bad_words': this.i18nService.translate('reviewManagement.filters.inappropriateLanguage'),
+            'spam': this.i18nService.translate('reviewManagement.filters.spam')
+        };
+        return reasonMap[reason] || reason;
+        }
+
+    getSttNumber(index: number): number {
+        // Calculate STT based on current page and items per page
+        // For now, just return index + 1 (assuming no pagination)
+        return index + 1;
     }
 }

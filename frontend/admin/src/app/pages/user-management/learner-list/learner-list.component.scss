@@ -11,26 +11,26 @@ a.active-tab {
 
 .table-responsive {
     overflow-x: auto;
-    border-radius: 8px;
+    padding: 0;
 
     table {
         width: 100%;
-        background-color: white;
+        table-layout: fixed;
+        border-collapse: collapse;
+
+        th, td {
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
 
         thead {
-            background-color: #f3f4f6;
-
             th {
-                text-align: left;
                 font-weight: 600;
-                padding: 11px 20px;
+                padding: 11px 12px;
+                background-color: #f3f4f6;
                 border-bottom: 1px solid #e5e7eb;
                 white-space: nowrap;
-                color: #1f2937;
-
-                &:first-child {
-                    padding-left: 25px;
-                }
             }
         }
 
@@ -44,12 +44,81 @@ a.active-tab {
                 }
 
                 td {
-                    padding: 15px 20px;
+                    padding: 15px 12px;
                     vertical-align: middle;
-                    color: #1f2937;
+                }
+            }
+        }
 
-                    &:first-child {
-                        padding-left: 25px;
+        // ID column
+        th:first-child,
+        td:first-child {
+            width: 8%;
+            text-align: center;
+        }
+
+        // Name column
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 20%;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Email column
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 28%;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Phone column
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 15%;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Join Date column
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 15%;
+            text-align: center;
+        }
+
+        // Actions column (always last)
+        th:last-child,
+        td:last-child {
+            width: 14%;
+            text-align: center;
+            padding-right: 0 !important;
+        }
+
+        // Action buttons styling
+        tbody {
+            tr {
+                td:last-child {
+                    button {
+                        padding: 6px;
+                        border-radius: 6px;
+                        transition: all 0.2s ease;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        &:hover {
+                            background-color: rgba(0, 0, 0, 0.05);
+                            
+                            .dark & {
+                                background-color: rgba(255, 255, 255, 0.1);
+                            }
+                        }
+
+                        i {
+                            font-size: 20px;
+                        }
                     }
                 }
             }
@@ -78,43 +147,6 @@ a.active-tab {
 
 .text-muted {
     color: #6b7280;
-}
-
-.action-buttons {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-
-    button {
-        padding: 4px 8px;
-        border: none;
-        background: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        i {
-            font-size: 18px;
-        }
-
-        &.btn-view {
-            color: #3b82f6;
-
-            &:hover {
-                color: #2563eb;
-            }
-        }
-
-        &.btn-delete {
-            color: #ef4444;
-
-            &:hover {
-                color: #dc2626;
-            }
-        }
-    }
 }
 
 .pagination {

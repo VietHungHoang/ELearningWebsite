@@ -1,38 +1,87 @@
 // Table Styles
 .table-responsive {
-  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 
   table {
-    border-collapse: collapse;
     width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin: 0;
 
     thead {
       background-color: #f9fafb;
 
       th {
-        padding: 14px 20px;
+        padding: 11px 12px;
         text-align: left;
         font-weight: 600;
         font-size: 13px;
         border-bottom: 1px solid #e5e7eb;
+        box-sizing: border-box;
+        word-wrap: break-word;
+
+        &:first-child {
+          width: 50px;
+          padding-left: 20px;
+        }
+
+        &:last-child {
+          padding-right: 20px;
+        }
+
+        &:nth-child(2) {
+          width: 80px;
+        }
+
+        &:nth-child(3) {
+          width: 150px;
+        }
+
+        &:nth-child(4) {
+          width: 150px;
+        }
+
+        &:nth-child(5) {
+          width: 100px;
+        }
+
+        &:nth-child(6) {
+          width: auto;
+        }
+
+        &:nth-child(7) {
+          width: 120px;
+        }
+
+        &:nth-child(8) {
+          width: 100px;
+        }
       }
     }
 
     tbody {
       td {
-        padding: 15px 20px;
+        padding: 15px 12px;
         border-bottom: 1px solid #f3f4f6;
         font-size: 13px;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        vertical-align: top;
 
         &:first-child {
-          color: #6b7280;
+          padding-left: 20px;
         }
 
-        &:nth-child(5) {
-          max-width: 200px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+        &:last-child {
+          padding-right: 20px;
+        }
+
+        &:nth-child(6) {
+          max-width: 300px;
+          white-space: normal;
         }
       }
 
@@ -45,6 +94,13 @@
       }
     }
   }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 // Dropdown Styles
@@ -203,5 +259,92 @@
 
 .trezo-card-dropdown-menu {
   animation: slideDown 0.2s ease-out;
+}
+
+// Confirm Dialog Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.confirm-dialog-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.confirm-dialog-content {
+  animation: slideUpFadeIn 0.3s ease-out;
+}
+
+// Sticky Select All Bar Styles
+.sticky-select-bar {
+  box-sizing: border-box;
+  
+  .select-all-checkbox {
+    outline: none !important;
+    border: 1px solid #d1d5db !important;
+    
+    &:focus,
+    &:active,
+    &:focus-visible {
+      outline: none !important;
+      border: 1px solid #d1d5db !important;
+      box-shadow: none !important;
+      ring: none !important;
+    }
+    
+    &:checked {
+      border-color: #3b82f6 !important;
+      background-color: #3b82f6 !important;
+    }
+  }
+  
+  .bulk-action-btn {
+    box-sizing: border-box;
+    max-width: 100%;
+    flex-shrink: 1;
+    min-width: 0;
+    
+    // Prevent button from expanding container
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+
+// Compact sticky bar for All Reviews tab
+.sticky-select-bar-compact {
+  box-sizing: border-box;
+  padding: 6px 12px;
+  min-height: 32px;
+  height: 32px;
+  
+  &.has-selection {
+    padding: 12px 16px;
+    min-height: auto;
+    height: auto;
+  }
+  
+  .bulk-action-btn {
+    box-sizing: border-box;
+    max-width: 100%;
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 }
 

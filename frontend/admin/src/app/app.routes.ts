@@ -210,11 +210,8 @@ export const routes: Routes = [
                 path: 'settings',
                 component: SettingsComponent,
                 children: [
-                    {path: '', component: AccountSettingsComponent},
+                    {path: '', redirectTo: 'change-password', pathMatch: 'full'},
                     {path: 'change-password', component: ChangePasswordComponent},
-                    {path: 'connections', component: ConnectionsComponent},
-                    {path: 'privacy-policy', component: PrivacyPolicyComponent},
-                    {path: 'terms-conditions', component: TermsConditionsComponent},
                     {path: 'payment-method', component: PaymentMethodComponent}
                 ]
             }

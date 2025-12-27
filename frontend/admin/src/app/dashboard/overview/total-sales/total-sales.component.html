@@ -2,7 +2,7 @@
     <div class="trezo-card-header mb-[10px] md:mb-[10px] flex items-center justify-between">
         <div class="trezo-card-title">
             <h5 class="!mb-0">
-                Total Sales
+                {{ 'dashboard.overview.totalSales.title' | translate }}
             </h5>
         </div>
         <div class="trezo-card-subtitle">
@@ -17,17 +17,17 @@
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[195px] z-[5] dark:bg-dark dark:shadow-none">
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Weekly')">
-                                Weekly
+                                {{ 'dashboard.overview.totalSales.weekly' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Monthly')">
-                                Monthly
+                                {{ 'dashboard.overview.totalSales.monthly' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Yearly')">
-                                Yearly
+                                {{ 'dashboard.overview.totalSales.yearly' | translate }}
                             </button>
                         </li>
                     </ul>

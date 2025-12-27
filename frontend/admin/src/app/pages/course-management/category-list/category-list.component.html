@@ -1,6 +1,6 @@
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
-        Category & Subject Management
+        {{ 'categorySubjectManagement.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
@@ -8,14 +8,14 @@
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
-                Dashboard
+                {{ 'categorySubjectManagement.breadcrumb.dashboard' | translate }}
             </a>
         </li>
-                <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Course Management
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            {{ 'categorySubjectManagement.breadcrumb.courseManagement' | translate }}
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Category & Subject Management
+            {{ 'categorySubjectManagement.breadcrumb.categorySubjectManagement' | translate }}
         </li>
     </ol>
 </div>
@@ -29,7 +29,7 @@
             [class.active]="activeTab === 'subjects'"
             class="pb-[15px] px-[15px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-all relative"
             [class.text-primary-500]="activeTab === 'subjects'">
-            Subject List
+            {{ 'categorySubjectManagement.tabs.subjectList' | translate }}
             @if (activeTab === 'subjects') {
                 <span class="absolute bottom-0 ltr:left-0 rtl:right-0 w-full h-[3px] bg-primary-500 rounded-t"></span>
             }
@@ -41,7 +41,7 @@
             [class.active]="activeTab === 'categories'"
             class="pb-[15px] px-[15px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-all relative"
             [class.text-primary-500]="activeTab === 'categories'">
-            Category List
+            {{ 'categorySubjectManagement.tabs.categoryList' | translate }}
             @if (activeTab === 'categories') {
                 <span class="absolute bottom-0 ltr:left-0 rtl:right-0 w-full h-[3px] bg-primary-500 rounded-t"></span>
             }
@@ -57,7 +57,7 @@
             <input
                 type="text"
                 class="w-full px-[15px] py-[8px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-0 sm:w-[265px]"
-                placeholder="Search by Name"
+                [placeholder]="'categorySubjectManagement.subjectList.searchPlaceholder' | translate"
                 [(ngModel)]="searchTerm"
                 (input)="onSearchCategories(searchTerm)">
         </div>
@@ -66,7 +66,7 @@
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleStatusDropdown()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ selectedStatus }} Status
+                        {{ 'categorySubjectManagement.subjectList.statusLabel' | translate }}: {{ selectedStatus === 'All' ? ('categorySubjectManagement.subjectList.status.all' | translate) : (selectedStatus === 'Active' ? ('categorySubjectManagement.subjectList.status.active' | translate) : ('categorySubjectManagement.subjectList.status.inactive' | translate)) }}
                         <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                     </span>
                 </button>
@@ -74,17 +74,17 @@
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('All')">
-                                All
+                                {{ 'categorySubjectManagement.categoryList.status.all' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('Active')">
-                                Active
+                                {{ 'categorySubjectManagement.categoryList.status.active' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('Inactive')">
-                                Inactive
+                                {{ 'categorySubjectManagement.categoryList.status.inactive' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -94,7 +94,7 @@
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleCategoryFilterDropdown()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ selectedCategoryFilter }} Category
+                        {{ 'categorySubjectManagement.subjectList.category' | translate }}: {{ selectedCategoryFilter === 'All' ? ('categorySubjectManagement.subjectList.status.all' | translate) : selectedCategoryFilter }}
                         <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                     </span>
                 </button>
@@ -118,101 +118,122 @@
 
             <button type="button" class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md bg-primary-500 text-white font-medium text-sm transition-all hover:bg-primary-600" (click)="openAddSubjectModal()">
                 <i class="ri-add-line mr-[4px]"></i>
-                Add Subject
+                {{ 'categorySubjectManagement.subjectList.addSubject' | translate }}
             </button>
         </div>
     </div>
 
     <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
-        <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
+        <div class="table-responsive overflow-x-auto shadow-sm rounded-lg mx-[20px] md:mx-[25px] mb-[20px]">
             <table id="subjects-table" class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
-                <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b-2 border-primary-200 dark:border-[#172036]">
                     <tr>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                            ID
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] whitespace-nowrap text-center w-[80px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.stt' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                            Subject Name
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[200px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.subjectName' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[300px]">
-                            Description
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[300px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.description' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
-                            Category
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[150px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.category' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Tutors
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[100px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.tutors' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Status
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[120px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.status' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Actions
+                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[120px] text-gray-700 dark:text-gray-300">
+                            {{ 'categorySubjectManagement.subjectList.table.actions' | translate }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    @for (item of paginatedSubjectItems; track item.displayId) {
-                        @if (item.subject) {
+                    @if (paginatedSubjectItems.length === 0) {
                         <tr>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036] text-center">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">
-                                    #{{ item.displayId }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-gray-900 dark:text-white font-medium">
-                                    {{ item.subject.name }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ item.subject.description || '—' }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
-                                    {{ item.category.name }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">
-                                    {{ getTutorCountForSubject(item.subject.id) }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span [class]="'inline-block px-[12px] py-[6px] rounded-full text-xs font-medium ' + getStatusColor(item.subject.isActive)">
-                                    {{ item.subject.isActive ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <div class="flex items-center gap-[9px]">
-                                    <button class="text-green-500 leading-none hover:text-green-600 transition-colors" (click)="toggleSubjectActive(item)" [title]="item.subject.isActive ? 'Deactivate' : 'Activate'">
-                                        <i class="material-symbols-outlined !text-md">
-                                            {{ item.subject.isActive ? 'toggle_on' : 'toggle_off' }}
-                                        </i>
-                                    </button>
-                                    <button class="text-primary-500 leading-none hover:text-primary-600 transition-colors" (click)="editSubject(item)" title="Edit">
-                                        <i class="material-symbols-outlined !text-md">
-                                            edit
-                                        </i>
-                                    </button>
-                                    <button class="text-orange-500 leading-none hover:text-orange-600 transition-colors" (click)="deleteSubject(item)" title="Delete">
-                                        <i class="material-symbols-outlined !text-md">
-                                            delete
-                                        </i>
-                                    </button>
+                            <td colspan="7" class="px-[25px] py-[60px] text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="material-symbols-outlined !text-[48px] text-gray-300 dark:text-gray-600 mb-[15px]">school</i>
+                                    <p class="text-gray-500 dark:text-gray-400 font-medium text-sm">{{ 'categorySubjectManagement.subjectList.emptyState.title' | translate }}</p>
+                                    <p class="text-gray-400 dark:text-gray-500 text-xs mt-[5px]">{{ 'categorySubjectManagement.subjectList.emptyState.description' | translate }}</p>
                                 </div>
                             </td>
                         </tr>
+                    } @else {
+                        @for (item of paginatedSubjectItems; track item.displayId) {
+                            @if (item.subject) {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors duration-150">
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] border-b border-gray-100 dark:border-[#172036] text-center">
+                                    <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">
+                                        {{ (currentPage - 1) * itemsPerPage + $index + 1 }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
+                                    <span class="text-gray-900 dark:text-white font-semibold text-sm">
+                                        {{ item.subject.name }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036] max-w-[300px]">
+                                    <span class="text-gray-500 dark:text-gray-400 text-sm line-clamp-2" [title]="item.subject.description || ''">
+                                        {{ item.subject.description || '—' }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
+                                    <span class="inline-flex items-center px-[10px] py-[4px] text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800">
+                                        {{ item.category.name }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
+                                    <div class="flex items-center gap-1">
+                                        <i class="material-symbols-outlined text-gray-400 dark:text-gray-500 !text-sm">person</i>
+                                        <span class="text-gray-700 dark:text-gray-300 font-medium text-sm">
+                                            {{ getTutorCountForSubject(item.subject.id) }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
+                                    <span [class]="'inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium ' + getStatusColor(item.subject.isActive)">
+                                        <span [class]="'w-1.5 h-1.5 rounded-full mr-1.5 ' + (item.subject.isActive ? 'bg-success-600' : 'bg-danger-600')"></span>
+                                        {{ item.subject.isActive ? ('categorySubjectManagement.subjectList.status.active' | translate) : ('categorySubjectManagement.subjectList.status.inactive' | translate) }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
+                                    <div class="flex items-center gap-[8px]">
+                                        <button 
+                                            class="p-[6px] rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-all duration-150" 
+                                            (click)="toggleSubjectActive(item)" 
+                                            [title]="item.subject.isActive ? 'Deactivate' : 'Activate'">
+                                            <i class="material-symbols-outlined !text-lg">
+                                                {{ item.subject.isActive ? 'toggle_on' : 'toggle_off' }}
+                                            </i>
+                                        </button>
+                                        <button 
+                                            class="p-[6px] rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-all duration-150" 
+                                            (click)="editSubject(item)" 
+                                            title="Edit">
+                                            <i class="material-symbols-outlined !text-lg">edit</i>
+                                        </button>
+                                        <button 
+                                            class="p-[6px] rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all duration-150" 
+                                            (click)="deleteSubject(item)" 
+                                            title="Delete">
+                                            <i class="material-symbols-outlined !text-lg">delete</i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            }
                         }
                     }
                 </tbody>
             </table>
         </div>
-        <div class="px-[25px] pt-[12px] md:pt-[14px] sm:flex sm:items-center justify-between">
+        <div class="px-[20px] md:px-[25px] pt-[12px] md:pt-[14px] sm:flex sm:items-center justify-between">
             <p class="!mb-0 text-sm">
-                {{ showingText }}
+                {{ 'categorySubjectManagement.subjectList.pagination.showing' | translate }} {{ (currentPage - 1) * itemsPerPage + 1 }} {{ 'categorySubjectManagement.subjectList.pagination.to' | translate }} {{ Math.min(currentPage * itemsPerPage, filteredSubjectItems.length) }} {{ 'categorySubjectManagement.subjectList.pagination.of' | translate }} {{ filteredSubjectItems.length }} {{ 'categorySubjectManagement.subjectList.pagination.entries' | translate }}
             </p>
             @if (totalPages > 1) {
                 <ol class="mt-[10px] sm:mt-0">
@@ -258,7 +279,7 @@
         <div class="trezo-card w-full bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
             <div class="trezo-card-header bg-gray-50 dark:bg-[#15203c] mb-[20px] md:mb-[25px] flex items-center justify-between -mx-[20px] md:-mx-[25px] -mt-[20px] md:-mt-[25px] p-[20px] md:p-[25px] rounded-t-md">
                 <div class="trezo-card-title">
-                    <h5 class="!mb-0">{{ isEditMode ? 'Edit Subject' : 'Add New Subject' }}</h5>
+                    <h5 class="!mb-0">{{ isEditMode ? ('categorySubjectManagement.subjectList.modal.editTitle' | translate) : ('categorySubjectManagement.subjectList.modal.addTitle' | translate) }}</h5>
                 </div>
                 <div class="trezo-card-subtitle">
                     <button type="button" class="text-[23px] transition-all leading-none text-black dark:text-white hover:text-primary-500" (click)="closeAddModal()">
@@ -271,7 +292,7 @@
 
                     <div class="form-group">
                         <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Subject Name <span class="text-red-500">*</span>
+                            {{ 'categorySubjectManagement.subjectList.modal.subjectName' | translate }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -284,7 +305,7 @@
 
                     <div class="form-group">
                         <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Description
+                            {{ 'categorySubjectManagement.subjectList.modal.description' | translate }}
                         </label>
                         <textarea
                             class="form-control w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-vertical"
@@ -296,7 +317,7 @@
 
                     <div class="form-group">
                         <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Category <span class="text-red-500">*</span>
+                            {{ 'categorySubjectManagement.subjectList.modal.category' | translate }} <span class="text-red-500">*</span>
                         </label>
                         <select
                             class="form-control w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -304,18 +325,18 @@
                             (change)="onCategoryChange()"
                             name="category"
                             required>
-                            <option value="">-- Select a category --</option>
+                            <option value="">{{ 'categorySubjectManagement.subjectList.modal.selectCategory' | translate }}</option>
                             @for (cat of categories; track cat.id) {
                                 <option [value]="cat.id">{{ cat.name }}</option>
                             }
-                            <option value="other">+ Add New Category</option>
+                            <option value="other">{{ 'categorySubjectManagement.subjectList.modal.addNewCategory' | translate }}</option>
                         </select>
                     </div>
 
                     @if (selectedCategoryForSubject === 'other') {
                         <div class="form-group">
                             <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                New Category Name <span class="text-red-500">*</span>
+                                {{ 'categorySubjectManagement.subjectList.modal.newCategoryName' | translate }} <span class="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -330,10 +351,10 @@
             </div>
             <div class="trezo-card-footer flex items-center justify-end gap-3 -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px] pt-[20px] md:pt-[25px] border-t border-gray-100 dark:border-[#172036]">
                 <button class="inline-block px-4 py-2 bg-gray-500 text-white transition-all hover:bg-gray-600 rounded-md border border-gray-500 hover:border-gray-600 text-sm font-medium" type="button" (click)="closeAddModal()">
-                    Cancel
+                    {{ 'categorySubjectManagement.subjectList.modal.cancel' | translate }}
                 </button>
                 <button class="inline-block px-4 py-2 bg-primary-500 text-white transition-all hover:bg-primary-600 rounded-md border border-primary-500 hover:border-primary-600 text-sm font-medium" type="button" (click)="submitForm()">
-                    {{ isEditMode ? 'Update Subject' : 'Add Subject' }}
+                    {{ isEditMode ? ('categorySubjectManagement.subjectList.modal.update' | translate) : ('categorySubjectManagement.subjectList.modal.add' | translate) }}
                 </button>
             </div>
         </div>
@@ -346,7 +367,7 @@
 <div class="modal-overlay" (click)="closeAddCategoryModal()">
     <div class="modal-content max-w-md" (click)="$event.stopPropagation()">
         <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
-            <h5 class="mb-0">Add New Category</h5>
+            <h5 class="mb-0">{{ 'categorySubjectManagement.categoryList.modal.addTitle' | translate }}</h5>
             <button type="button" class="text-gray-400 hover:text-gray-600" (click)="closeAddCategoryModal()">
                 <i class="ri-close-fill"></i>
             </button>
@@ -355,7 +376,7 @@
             <form (ngSubmit)="submitCategoryForm()" class="space-y-4">
                 <div class="form-group">
                     <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Category Name <span class="text-red-500">*</span>
+                        {{ 'categorySubjectManagement.categoryList.modal.categoryName' | translate }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -368,7 +389,7 @@
 
                 <div class="form-group">
                     <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Description
+                        {{ 'categorySubjectManagement.categoryList.modal.description' | translate }}
                     </label>
                     <textarea
                         class="form-control w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white resize-vertical"
@@ -380,7 +401,7 @@
 
                 <div class="form-group">
                     <label class="form-label block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Default Subject Name <span class="text-red-500">*</span>
+                        {{ 'categorySubjectManagement.categoryList.modal.defaultSubjectName' | translate }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -397,7 +418,7 @@
                 Cancel
             </button>
             <button class="inline-block px-4 py-2 bg-primary-500 text-white transition-all hover:bg-primary-600 rounded-md border border-primary-500 hover:border-primary-600 text-sm font-medium" type="button" (click)="submitCategoryForm()">
-                Add Category
+                {{ 'categorySubjectManagement.categoryList.modal.add' | translate }}
             </button>
         </div>
     </div>
@@ -411,7 +432,7 @@
             <input
                 type="text"
                 class="w-full px-[15px] py-[8px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-0 sm:w-[265px]"
-                placeholder="Search by Category Name"
+                [placeholder]="'categorySubjectManagement.categoryList.searchPlaceholder' | translate"
                 [(ngModel)]="searchTermCategory"
                 (input)="onSearchCategories(searchTermCategory)">
         </div>
@@ -419,7 +440,7 @@
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleStatusDropdown()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ selectedStatus }} Status
+                        {{ 'categorySubjectManagement.categoryList.statusLabel' | translate }}: {{ selectedStatus === 'All' ? ('categorySubjectManagement.categoryList.status.all' | translate) : (selectedStatus === 'Active' ? ('categorySubjectManagement.categoryList.status.active' | translate) : ('categorySubjectManagement.categoryList.status.inactive' | translate)) }}
                         <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                     </span>
                 </button>
@@ -427,17 +448,17 @@
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('All')">
-                                All
+                                {{ 'categorySubjectManagement.categoryList.status.all' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('Active')">
-                                Active
+                                {{ 'categorySubjectManagement.categoryList.status.active' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('Inactive')">
-                                Inactive
+                                {{ 'categorySubjectManagement.categoryList.status.inactive' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -450,74 +471,83 @@
         @if (categories.length === 0) {
             <div class="text-center py-[60px]">
                 <i class="material-symbols-outlined !text-[48px] text-gray-300 dark:text-gray-600 block mb-[15px]">category</i>
-                <p class="text-gray-500 dark:text-gray-400 font-medium">No categories found</p>
+                <p class="text-gray-500 dark:text-gray-400 font-medium">{{ 'categorySubjectManagement.categoryList.emptyState.title' | translate }}</p>
             </div>
         } @else {
-            <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
+            <div class="table-responsive overflow-x-auto shadow-sm rounded-lg mx-[20px] md:mx-[25px] mb-[20px]">
                 <table id="categories-list-table" class="w-full min-w-[700px] bg-white dark:bg-[#0c1427]">
-                    <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                    <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b-2 border-primary-200 dark:border-[#172036]">
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                                ID
+                            <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] whitespace-nowrap w-[100px] text-gray-700 dark:text-gray-300">
+                                {{ 'categorySubjectManagement.categoryList.table.stt' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                                Category Name
+                            <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[200px] text-gray-700 dark:text-gray-300">
+                                {{ 'categorySubjectManagement.categoryList.table.categoryName' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[300px]">
-                                Description
+                            <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[300px] text-gray-700 dark:text-gray-300">
+                                {{ 'categorySubjectManagement.categoryList.table.description' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                                Subjects
+                            <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[80px] text-gray-700 dark:text-gray-300">
+                                {{ 'categorySubjectManagement.categoryList.table.subjects' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                                Status
+                            <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[80px] text-gray-700 dark:text-gray-300">
+                                {{ 'categorySubjectManagement.categoryList.table.status' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                                Action
+                            <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[100px] text-gray-700 dark:text-gray-300">
+                                {{ 'categorySubjectManagement.categoryList.table.action' | translate }}
                             </th>
                         </tr>
                     </thead>
                     <tbody class="text-black dark:text-white">
                         @for (category of categories; track category.id) {
-                            <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
-                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ category.id }}</span>
+                            <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors duration-150">
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px]">
+                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ $index + 1 }}</span>
                                 </td>
-                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ category.name }}</span>
+                                <td class="ltr:text-left rtl:text-right px-[16px] py-[12px]">
+                                    <span class="font-semibold text-gray-900 dark:text-white text-sm">{{ category.name }}</span>
                                 </td>
-                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                    <span class="text-gray-600 dark:text-gray-400 text-sm">{{ category.description || '—' }}</span>
-                                </td>
-                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                    <span class="inline-block px-[10px] py-[2px] rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                                        {{ category.subjects.length || 0 }}
+                                <td class="ltr:text-left rtl:text-right px-[16px] py-[12px] max-w-[300px]">
+                                    <span class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2" [title]="category.description || ''">
+                                        {{ category.description || '—' }}
                                     </span>
                                 </td>
-                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                    <span [class]="'inline-block px-[12px] py-[6px] rounded-full text-xs font-medium text-center min-w-[75px] ' + (category.isActive ? 'bg-success-100 text-success-600' : 'bg-danger-100 text-danger-600')">
-                                        {{ category.isActive ? 'Active' : 'Inactive' }}
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px]">
+                                    <div class="flex items-center gap-1.5">
+                                        <i class="material-symbols-outlined text-blue-500 dark:text-blue-400 !text-sm">book</i>
+                                        <span class="inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                            {{ category.subjects.length || 0 }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px]">
+                                    <span [class]="'inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium ' + (category.isActive ? 'bg-success-50 text-success-700 dark:bg-success-900/30 dark:text-success-300 border border-success-200 dark:border-success-800' : 'bg-danger-50 text-danger-700 dark:bg-danger-900/30 dark:text-danger-300 border border-danger-200 dark:border-danger-800')">
+                                        <span [class]="'w-1.5 h-1.5 rounded-full mr-1.5 ' + (category.isActive ? 'bg-success-600' : 'bg-danger-600')"></span>
+                                        {{ category.isActive ? ('categorySubjectManagement.categoryList.status.active' | translate) : ('categorySubjectManagement.categoryList.status.inactive' | translate) }}
                                     </span>
                                 </td>
-                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                    <div class="flex items-center gap-[9px]">
-                                        <button class="text-primary-500 leading-none hover:text-primary-600 transition-colors" title="View Details" (click)="openCategoryDetailsModal(category)">
-                                            <i class="material-symbols-outlined !text-md">
-                                                visibility
-                                            </i>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px]">
+                                    <div class="flex items-center gap-[8px]">
+                                        <button 
+                                            class="p-[6px] rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-all duration-150" 
+                                            title="View Details" 
+                                            (click)="openCategoryDetailsModal(category)">
+                                            <i class="material-symbols-outlined !text-lg">visibility</i>
                                         </button>
                                         <button
-                                            class="text-green-500 leading-none hover:text-green-600 transition-colors"
+                                            class="p-[6px] rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-all duration-150"
                                             [title]="category.isActive ? 'Deactivate' : 'Activate'"
                                             (click)="toggleActive(category)">
-                                            <i class="material-symbols-outlined !text-md">
+                                            <i class="material-symbols-outlined !text-lg">
                                                 {{ category.isActive ? 'toggle_on' : 'toggle_off' }}
                                             </i>
                                         </button>
-                                        <button type="button" class="text-danger-500 leading-none hover:text-danger-600 transition-colors" title="Delete" (click)="deleteCategory(category.id)">
-                                            <i class="material-symbols-outlined !text-md">
-                                                delete
-                                            </i>
+                                        <button 
+                                            type="button" 
+                                            class="p-[6px] rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all duration-150" 
+                                            title="Delete" 
+                                            (click)="deleteCategory(category.id)">
+                                            <i class="material-symbols-outlined !text-lg">delete</i>
                                         </button>
                                     </div>
                                 </td>
@@ -537,7 +567,7 @@
         <div class="trezo-card w-full bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
             <div class="trezo-card-header bg-gray-50 dark:bg-[#15203c] mb-[20px] md:mb-[25px] flex items-center justify-between -mx-[20px] md:-mx-[25px] -mt-[20px] md:-mt-[25px] p-[20px] md:p-[25px] rounded-t-md">
                 <div class="trezo-card-title">
-                    <h5 class="!mb-0">{{ selectedCategoryForDetail?.name || 'Category Details' }}</h5>
+                    <h5 class="!mb-0">{{ selectedCategoryForDetail?.name || ('categorySubjectManagement.categoryList.detailsModal.title' | translate) }}</h5>
                 </div>
                 <div class="trezo-card-subtitle">
                     <button type="button" class="text-[23px] transition-all leading-none text-black dark:text-white hover:text-primary-500" (click)="closeCategoryDetailsModal()">
@@ -550,21 +580,21 @@
                 @if (selectedCategoryForDetail) {
                     <!-- Category Information -->
                     <div class="mb-[25px]">
-                        <h6 class="font-semibold text-gray-900 dark:text-white mb-[15px]">Category Information</h6>
+                        <h6 class="font-semibold text-gray-900 dark:text-white mb-[15px]">{{ 'categorySubjectManagement.categoryList.detailsModal.categoryInformation' | translate }}</h6>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
                             <div>
-                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-[5px] block">Category ID</label>
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-[5px] block">{{ 'categorySubjectManagement.categoryList.detailsModal.categoryId' | translate }}</label>
                                 <p class="text-sm text-gray-900 dark:text-white">{{ selectedCategoryForDetail.id }}</p>
                             </div>
                             <div>
-                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-[5px] block">Status</label>
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-[5px] block">{{ 'categorySubjectManagement.categoryList.detailsModal.status' | translate }}</label>
                                 <span class="inline-block px-[8px] py-[4px] rounded text-xs font-medium"
                                     [class]="selectedCategoryForDetail.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'">
-                                    {{ selectedCategoryForDetail.isActive ? 'Active' : 'Inactive' }}
+                                    {{ selectedCategoryForDetail.isActive ? ('categorySubjectManagement.categoryList.status.active' | translate) : ('categorySubjectManagement.categoryList.status.inactive' | translate) }}
                                 </span>
                             </div>
                             <div class="md:col-span-2">
-                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-[5px] block">Description</label>
+                                <label class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase mb-[5px] block">{{ 'categorySubjectManagement.categoryList.detailsModal.description' | translate }}</label>
                                 <p class="text-sm text-gray-600 dark:text-gray-300">{{ selectedCategoryForDetail.description || '—' }}</p>
                             </div>
                         </div>
@@ -573,7 +603,7 @@
                     <!-- Subjects List -->
                     <div>
                         <div class="flex items-center justify-between mb-[15px]">
-                            <h6 class="font-semibold text-gray-900 dark:text-white">Subjects in this Category</h6>
+                            <h6 class="font-semibold text-gray-900 dark:text-white">{{ 'categorySubjectManagement.categoryList.detailsModal.subjectsInCategory' | translate }}</h6>
                             <span class="inline-block px-[10px] py-[2px] rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
                                 {{ selectedCategoryForDetail.subjects.length || 0 }}
                             </span>
@@ -590,7 +620,7 @@
                                         <div class="flex items-center gap-[8px] ml-[15px] flex-shrink-0">
                                             <span class="inline-block px-[8px] py-[2px] rounded text-xs font-medium"
                                                 [class]="subject.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'">
-                                                {{ subject.isActive ? 'Active' : 'Inactive' }}
+                                                {{ subject.isActive ? ('categorySubjectManagement.categoryList.status.active' | translate) : ('categorySubjectManagement.categoryList.status.inactive' | translate) }}
                                             </span>
                                             <span class="inline-block px-[8px] py-[2px] rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300">
                                                 {{ getTutorCountForSubject(subject.id) }} tutors
@@ -601,7 +631,7 @@
                             </div>
                         } @else {
                             <div class="text-center py-[40px] bg-gray-50 dark:bg-[#15203c] rounded-lg">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">No subjects in this category</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'categorySubjectManagement.categoryList.detailsModal.noSubjects' | translate }}</p>
                             </div>
                         }
                     </div>
@@ -610,7 +640,7 @@
 
             <div class="trezo-card-footer flex items-center justify-end gap-3 -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px] pt-[20px] md:pt-[25px] border-t border-gray-100 dark:border-[#172036]">
                 <button class="inline-block px-4 py-2 bg-gray-500 text-white transition-all hover:bg-gray-600 rounded-md border border-gray-500 hover:border-gray-600 text-sm font-medium" type="button" (click)="closeCategoryDetailsModal()">
-                    Close
+                    {{ 'categorySubjectManagement.categoryList.detailsModal.close' | translate }}
                 </button>
             </div>
         </div>

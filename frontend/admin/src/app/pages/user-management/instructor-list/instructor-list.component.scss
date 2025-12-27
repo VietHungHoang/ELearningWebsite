@@ -11,15 +11,23 @@ a.active-tab {
 
 .table-responsive {
     overflow-x: auto;
+    padding: 0;
 
     table {
         width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+
+        th, td {
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
 
         thead {
             th {
-                text-align: left;
                 font-weight: 600;
-                padding: 11px 20px;
+                padding: 11px 12px;
                 background-color: #f3f4f6;
                 border-bottom: 1px solid #e5e7eb;
                 white-space: nowrap;
@@ -36,10 +44,62 @@ a.active-tab {
                 }
 
                 td {
-                    padding: 15px 20px;
+                    padding: 15px 12px;
                     vertical-align: middle;
                 }
             }
+        }
+
+        // STT column - center aligned
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 6%;
+            text-align: center;
+        }
+
+        // Name column - left aligned
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 18%;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Email column - left aligned
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 20%;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Join Date column - center aligned
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 15%;
+            text-align: center;
+        }
+
+        // Rating column - center aligned
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 10%;
+            text-align: center;
+        }
+
+        // Country column - center aligned
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 15%;
+            text-align: center;
+        }
+
+        // Action column - center aligned
+        th:nth-child(7),
+        td:nth-child(7) {
+            width: 16%;
+            text-align: center;
+            padding-right: 0 !important;
         }
     }
 }

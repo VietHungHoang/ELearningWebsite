@@ -3,10 +3,11 @@ import { Subscription } from 'rxjs';
 import { PopularSubject, TimePeriod } from '../../../types/dashboard';
 import { DashboardService } from '../../../services/dashboard.service';
 import { StudentsInterestedTopicsService } from './students-interested-topics.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-students-interested-topics',
-    imports: [],
+    imports: [TranslatePipe],
     templateUrl: './students-interested-topics.component.html',
     styleUrl: './students-interested-topics.component.scss'
 })

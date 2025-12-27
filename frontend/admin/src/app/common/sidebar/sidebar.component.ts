@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 interface MenuItem {
     title: string;
@@ -10,7 +11,7 @@ interface MenuItem {
 
 @Component({
     selector: 'app-sidebar',
-    imports: [NgScrollbarModule, RouterLinkActive, RouterLink, NgClass],
+    imports: [NgScrollbarModule, RouterLinkActive, RouterLink, NgClass, TranslatePipe],
     templateUrl: './sidebar.component.html',
     styleUrl: './sidebar.component.scss'
 })

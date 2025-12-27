@@ -1,3 +1,101 @@
+// Override for action buttons to ensure text color is visible
+.action-btn-edit,
+.action-btn-save,
+.action-btn-cancel {
+    color: #1e40af !important;
+    
+    i, span, .material-symbols-outlined {
+        color: #1e40af !important;
+    }
+    
+    &:hover {
+        color: #1e3a8a !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #1e3a8a !important;
+        }
+    }
+    
+    &.dark {
+        color: #93c5fd !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #93c5fd !important;
+        }
+        
+        &:hover {
+            color: #bfdbfe !important;
+            
+            i, span, .material-symbols-outlined {
+                color: #bfdbfe !important;
+            }
+        }
+    }
+}
+
+.action-btn-save {
+    color: #166534 !important;
+    
+    i, span, .material-symbols-outlined {
+        color: #166534 !important;
+    }
+    
+    &:hover {
+        color: #14532d !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #14532d !important;
+        }
+    }
+    
+    &.dark {
+        color: #86efac !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #86efac !important;
+        }
+        
+        &:hover {
+            color: #bbf7d0 !important;
+            
+            i, span, .material-symbols-outlined {
+                color: #bbf7d0 !important;
+            }
+        }
+    }
+}
+
+.action-btn-cancel {
+    color: #374151 !important;
+    
+    i, span, .material-symbols-outlined {
+        color: #374151 !important;
+    }
+    
+    &:hover {
+        color: #1f2937 !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #1f2937 !important;
+        }
+    }
+    
+    &.dark {
+        color: #d1d5db !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #d1d5db !important;
+        }
+        
+        &:hover {
+            color: #f3f4f6 !important;
+            
+            i, span, .material-symbols-outlined {
+                color: #f3f4f6 !important;
+            }
+        }
+    }
+}
 
 .breadcrumb {
     list-style: none;
@@ -38,7 +136,62 @@
 .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    gap: 16px;
+}
+
+// Override grid gap for information cards with high specificity
+:host ::ng-deep .trezo-card .grid {
+    gap: 16px !important;
+}
+
+// Override spacing for info cards - remove borders and adjust padding
+:host ::ng-deep .trezo-card div.bg-white.rounded-lg {
+    border: none !important;
+    padding: 16px !important;
+    
+    > p:first-child {
+        margin-bottom: 2px !important;
+        font-size: 0.875rem !important; // text-sm
+    }
+    
+    > p:not(:first-child),
+    > div > p {
+        font-size: 0.875rem !important; // text-sm (giống instructor-approval-detail)
+    }
+}
+
+// Dark mode variant
+:host ::ng-deep .trezo-card div[class*="dark:bg-\[#0c1427\]"].rounded-lg {
+    border: none !important;
+    padding: 16px !important;
+    
+    > p:first-child {
+        margin-bottom: 2px !important;
+        font-size: 0.875rem !important; // text-sm
+    }
+    
+    > p:not(:first-child),
+    > div > p {
+        font-size: 0.875rem !important; // text-sm (giống instructor-approval-detail)
+    }
+}
+
+// Ensure grid gap is applied with high specificity
+:host ::ng-deep div.grid.gap-\[16px\] {
+    gap: 16px !important;
+}
+
+// Override space-y values with high specificity
+:host ::ng-deep div.space-y-\[16px\] > * + * {
+    margin-top: 16px !important;
+}
+
+:host ::ng-deep div.space-y-\[12px\] > * + * {
+    margin-top: 12px !important;
+}
+
+:host ::ng-deep div.space-y-\[8px\] > * + * {
+    margin-top: 8px !important;
 }
 
 img {

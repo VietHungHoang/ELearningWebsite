@@ -1,6 +1,6 @@
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
-        Learners List
+        {{ 'learnerList.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
@@ -8,14 +8,14 @@
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
-                Dashboard
+                {{ 'learnerList.breadcrumb.dashboard' | translate }}
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            User Management
+            {{ 'learnerList.breadcrumb.userManagement' | translate }}
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Learners List
+            {{ 'learnerList.breadcrumb.learnerList' | translate }}
         </li>
     </ol>
 </div>
@@ -24,80 +24,82 @@
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
             <app-search-input
-                [placeholder]="'Search learners by name.....'"
+                [placeholder]="'learnerList.searchPlaceholder' | translate"
                 [width]="'sm:w-[265px]'"
                 (search)="onSearchLearners($event)">
             </app-search-input>
         </div>
     </div>
-    <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
+    <div class="trezo-card-content -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
-            <table id="learners-table" class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
+            <table id="learners-table" class="w-full bg-white dark:bg-[#0c1427]">
                 <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                     <tr>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                            ID
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.stt' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                            Name
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.name' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                            Email
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.email' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
-                            Phone
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.phone' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Join Date
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.joinDate' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Action
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.action' | translate }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    @for (learner of learners; track learner.id) {
+                    @for (learner of learners; track learner.id; let i = $index) {
                         <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium">
-                                    #{{ learner.id | truncate:8 }}
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                    {{ (currentPage - 1) * itemsPerPage + i + 1 }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-600 dark:text-gray-300 font-medium">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">
                                     {{ learner.fullname }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-sm text-gray-600 dark:text-gray-400 break-all">
                                     {{ learner.email }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ learner.phone }}
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ learner.phone || 'N/A' }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ learner.joinDate }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <div class="flex items-center gap-[9px]">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                                <div class="flex items-center justify-center gap-[9px]">
                                     <button
                                         type="button"
                                         (click)="viewDetail(learner)"
-                                        class="text-primary-500 leading-none hover:text-primary-600 transition-colors">
-                                        <i class="material-symbols-outlined !text-md">
+                                        class="text-primary-500 leading-none hover:text-primary-600 transition-colors"
+                                        [title]="'learnerList.actions.viewDetails' | translate">
+                                        <i class="material-symbols-outlined !text-lg">
                                             visibility
                                         </i>
                                     </button>
                                     <button
                                         type="button"
                                         (click)="openDeleteDialog(learner)"
-                                        class="text-danger-500 leading-none hover:text-danger-600 transition-colors">
-                                        <i class="material-symbols-outlined !text-md">
+                                        class="text-danger-500 leading-none hover:text-danger-600 transition-colors"
+                                        [title]="'learnerList.actions.delete' | translate">
+                                        <i class="material-symbols-outlined !text-lg">
                                             delete
                                         </i>
                                     </button>
@@ -107,8 +109,11 @@
                     }
                     @if (learners.length === 0) {
                         <tr>
-                            <td [attr.colspan]="6" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
-                                No learners found
+                            <td [attr.colspan]="6" class="text-center py-[40px] text-gray-500 dark:text-gray-400">
+                                <div class="flex flex-col items-center gap-[12px]">
+                                    <i class="material-symbols-outlined text-4xl text-gray-400">person_off</i>
+                                    <p class="text-sm font-medium">{{ 'learnerList.emptyState.noLearnersFound' | translate }}</p>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -160,10 +165,10 @@
 
 <app-confirm-dialog
     [isOpen]="showDeleteDialog"
-    title="Xóa Học Viên"
-    [message]="'Bạn có chắc chắn muốn xóa học viên ' + (learnerToDelete?.fullname || '') + '?'"
-    cancelText="Hủy"
-    confirmText="Xóa"
+    [title]="'learnerList.confirm.deleteTitle' | translate"
+    [message]="i18nService.translate('learnerList.confirm.deleteMessage', { name: learnerToDelete?.fullname || '' })"
+    [cancelText]="'learnerList.confirm.cancel' | translate"
+    [confirmText]="'learnerList.confirm.delete' | translate"
     (confirm)="confirmDelete()"
     (cancel)="cancelDelete()">
 </app-confirm-dialog>

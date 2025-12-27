@@ -2,7 +2,7 @@
     <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
         <div class="trezo-card-title">
             <h5 class="!mb-0">
-                Popular Subjects
+                {{ 'dashboard.overview.popularSubjects.title' | translate }}
             </h5>
         </div>
         <div class="trezo-card-subtitle">
@@ -16,33 +16,33 @@
                 @if (isCardHeaderOpen) {
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[195px] z-[5] dark:bg-dark dark:shadow-none">
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Last 2 Months')">
-                                Last 2 Months
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('month')">
+                                {{ 'dashboard.overview.popularSubjects.last2Months' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Last 4 Months')">
-                                Last 4 Months
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('month')">
+                                {{ 'dashboard.overview.popularSubjects.last4Months' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Last 6 Months')">
-                                Last 6 Months
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('month')">
+                                {{ 'dashboard.overview.popularSubjects.last6Months' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Last 8 Months')">
-                                Last 8 Months
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('month')">
+                                {{ 'dashboard.overview.popularSubjects.last8Months' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Last 10 Months')">
-                                Last 10 Months
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('month')">
+                                {{ 'dashboard.overview.popularSubjects.last10Months' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('Last 12 Months')">
-                                Last 12 Months
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('month')">
+                                {{ 'dashboard.overview.popularSubjects.last12Months' | translate }}
                             </button>
                         </li>
                     </ul>

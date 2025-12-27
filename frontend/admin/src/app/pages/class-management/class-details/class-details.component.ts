@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { ClassService, GroupClass, StudentEnrollment, ClassFinancialReport } from '../../../services/class.service';
 
 @Component({
   selector: 'app-class-details',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './class-details.component.html',
   styleUrl: './class-details.component.scss'
 })
@@ -17,6 +18,7 @@ export class ClassDetailsComponent implements OnInit {
   loading = true;
   error: string | null = null;
   weekDays: any[] = [];
+  currentWeekStart: Date = new Date();
 
   constructor(
     private classService: ClassService,
@@ -43,12 +45,12 @@ export class ClassDetailsComponent implements OnInit {
           this.loadEnrollments(classId);
           this.loadFinancialReport(classId);
         } else {
-          this.error = 'Class not found';
+          this.error = 'classManagement.classDetails.error.notFound';
           this.loading = false;
         }
       },
       error: () => {
-        this.error = 'Error loading class details';
+        this.error = 'classManagement.classDetails.error.loadingError';
         this.loading = false;
       }
     });
@@ -63,6 +65,10 @@ export class ClassDetailsComponent implements OnInit {
   loadFinancialReport(classId: string): void {
     this.classService.calculateFinancialReport(classId).subscribe(report => {
       this.financialReport = report;
+      if (this.groupClass) {
+        const classDate = new Date(this.groupClass.start_datetime);
+        this.currentWeekStart = this.getMonday(classDate);
+      }
       this.generateWeeklySchedule();
       this.loading = false;
     });
@@ -72,8 +78,9 @@ export class ClassDetailsComponent implements OnInit {
     if (!this.groupClass) return;
 
     const classDate = new Date(this.groupClass.start_datetime);
-    const weekStart = this.getMonday(classDate);
+    const weekStart = this.currentWeekStart;
     const classDay = classDate.getDay();
+    const classTime = new Date(this.groupClass.start_datetime);
 
     this.weekDays = [];
 
@@ -87,12 +94,16 @@ export class ClassDetailsComponent implements OnInit {
         day: 'numeric'
       }).format(day);
 
-      const hasClass = day.getDay() === classDay;
+      // Check if this day matches the class day and is in the same week
+      const isSameDayOfWeek = day.getDay() === classDay;
+      const isSameWeek = this.isSameWeek(day, classDate);
+      const hasClass = isSameDayOfWeek && isSameWeek;
+      
       const time = hasClass ? new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
-      }).format(new Date(this.groupClass.start_datetime)) : '';
+      }).format(classTime) : '';
 
       this.weekDays.push({
         dayIndex: i,
@@ -102,6 +113,44 @@ export class ClassDetailsComponent implements OnInit {
         time: time
       });
     }
+  }
+
+  private isSameWeek(date1: Date, date2: Date): boolean {
+    const monday1 = this.getMonday(date1);
+    const monday2 = this.getMonday(date2);
+    return monday1.getTime() === monday2.getTime();
+  }
+
+  previousWeek(): void {
+    const newWeek = new Date(this.currentWeekStart);
+    newWeek.setDate(newWeek.getDate() - 7);
+    this.currentWeekStart = newWeek;
+    this.generateWeeklySchedule();
+  }
+
+  nextWeek(): void {
+    const newWeek = new Date(this.currentWeekStart);
+    newWeek.setDate(newWeek.getDate() + 7);
+    this.currentWeekStart = newWeek;
+    this.generateWeeklySchedule();
+  }
+
+  getCurrentWeekRange(): string {
+    const weekEnd = new Date(this.currentWeekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    
+    const startStr = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric'
+    }).format(this.currentWeekStart);
+    
+    const endStr = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    }).format(weekEnd);
+    
+    return `${startStr} - ${endStr}`;
   }
 
   private getMonday(date: Date): Date {
@@ -120,9 +169,9 @@ export class ClassDetailsComponent implements OnInit {
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'upcoming': 'Upcoming',
-      'ongoing': 'Ongoing',
-      'completed': 'Completed'
+      'upcoming': 'classManagement.status.upcoming',
+      'ongoing': 'classManagement.status.ongoing',
+      'completed': 'classManagement.status.completed'
     };
     return statusMap[status] || status;
   }

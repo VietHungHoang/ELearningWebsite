@@ -1,6 +1,8 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CategoryService, Category, Subject } from '../../../services/category.service';
 
 interface SubjectItem {
@@ -13,7 +15,7 @@ interface SubjectItem {
 @Component({
     selector: 'app-category-list',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
     templateUrl: './category-list.component.html',
     styleUrl: './category-list.component.scss'
 })
@@ -72,6 +74,9 @@ export class CategoryListComponent implements OnInit {
     // Category Details Modal
     showCategoryDetailsModal = false;
     selectedCategoryForDetail: Category | null = null;
+
+    // Expose Math for template
+    Math = Math;
 
     constructor(private categoryService: CategoryService) {}
 

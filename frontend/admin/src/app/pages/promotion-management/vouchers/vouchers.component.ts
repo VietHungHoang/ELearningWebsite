@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { VoucherService, Voucher } from '../../../services/voucher.service';
 
 @Component({
   selector: 'app-vouchers',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './vouchers.component.html',
   styleUrl: './vouchers.component.scss'
 })
@@ -64,22 +65,22 @@ export class VouchersComponent implements OnInit, OnDestroy {
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'active': 'Active',
-      'expired': 'Expired',
-      'paused': 'Paused',
-      'upcoming': 'Upcoming'
+      'active': 'voucherManagement.status.active',
+      'expired': 'voucherManagement.status.expired',
+      'paused': 'voucherManagement.status.paused',
+      'upcoming': 'voucherManagement.status.upcoming'
     };
     return statusMap[status] || status;
   }
 
   getActorLabel(actor?: string): string {
     const actorMap: { [key: string]: string } = {
-      'all': 'All Students',
-      'top-spenders': 'Top Spenders',
-      'new-students': 'New Students',
-      'no-spending-1month': 'No Spending (1 month)'
+      'all': 'voucherManagement.actor.allStudents',
+      'top-spenders': 'voucherManagement.actor.topSpenders',
+      'new-students': 'voucherManagement.actor.newStudents',
+      'no-spending-1month': 'voucherManagement.actor.noSpending1Month'
     };
-    return actorMap[actor || 'all'] || 'All Students';
+    return actorMap[actor || 'all'] || 'voucherManagement.actor.allStudents';
   }
 
   toggleFilterMenu(): void {

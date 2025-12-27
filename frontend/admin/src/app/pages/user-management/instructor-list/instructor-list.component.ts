@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink, Router } from '@angular/router';
@@ -7,11 +7,13 @@ import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confi
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 import { TruncatePipe } from '../../../shared/pipes';
 import { LocaleUtilsService } from '../../../shared/utils';
+import { I18nService } from '../../../i18n/i18n.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-instructor-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe],
+    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe, TranslatePipe],
     templateUrl: './instructor-list.component.html',
     styleUrl: './instructor-list.component.scss'
 })
@@ -28,8 +30,22 @@ export class InstructorListComponent implements OnInit {
     totalInstructors = 0;
     paginatedInstructors: Tutor[] = [];
     isLoading = false;
+    searchPlaceholder = '';
 
-    constructor(private userService: UserService, private router: Router, private localeUtils: LocaleUtilsService) {}
+    constructor(
+        private userService: UserService, 
+        private router: Router, 
+        private localeUtils: LocaleUtilsService,
+        private i18nService: I18nService
+    ) {
+        this.searchPlaceholder = this.i18nService.translate('instructorList.searchPlaceholder');
+        
+        // Update placeholder when language changes
+        effect(() => {
+            this.i18nService.currentLanguage$();
+            this.searchPlaceholder = this.i18nService.translate('instructorList.searchPlaceholder');
+        });
+    }
 
     ngOnInit(): void {
         this.loadInstructors();
@@ -141,7 +157,23 @@ export class InstructorListComponent implements OnInit {
     get showingText(): string {
         const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
         const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalInstructors);
-        return `Showing ${startItem}-${endItem} of ${this.totalInstructors} results`;
+        return this.i18nService.translate('instructorList.pagination.showing', {
+            start: startItem,
+            end: endItem,
+            total: this.totalInstructors
+        });
+    }
+
+    getSttNumber(index: number): number {
+        // Calculate STT based on current page and items per page
+        return (this.currentPage - 1) * this.itemsPerPage + index + 1;
+    }
+
+    getDeleteMessage(): string {
+        if (!this.instructorToDelete) return '';
+        return this.i18nService.translate('instructorList.confirm.deleteMessage', {
+            name: this.instructorToDelete.name || ''
+        });
     }
 
     goToPage(page: number): void {

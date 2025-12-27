@@ -1,26 +1,26 @@
 <div class="mb-[25px] md:flex items-center justify-between">
-    <h5 class="!mb-0">
-        Learner Detail
+    <h5 class="!mb-0 text-gray-900 dark:text-white">
+        {{ 'learnerDetail.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
-                Dashboard
+                {{ 'learnerDetail.breadcrumb.dashboard' | translate }}
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard/user-management/learner-list" class="inline-block relative transition-all hover:text-primary-500">
-                User Management
+            <a routerLink="/dashboard/user-management/learner-list" class="inline-block relative transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
+                {{ 'learnerDetail.breadcrumb.userManagement' | translate }}
             </a>
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Learners
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
+            {{ 'learnerDetail.breadcrumb.learners' | translate }}
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            {{ learner?.fullname || 'Detail' }}
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:ml-0 rtl:last:mr-0 text-gray-600 dark:text-gray-400">
+            {{ learner?.fullname || ('learnerDetail.breadcrumb.detail' | translate) }}
         </li>
     </ol>
 </div>
@@ -28,7 +28,7 @@
 @if (isLoading) {
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
         <div class="flex items-center justify-center h-[400px]">
-            <p class="text-gray-500">Loading...</p>
+            <p class="text-gray-500">{{ 'learnerDetail.loading' | translate }}</p>
         </div>
     </div>
 }
@@ -42,15 +42,17 @@
 }
 
 @if (!isLoading && learner && !errorMessage) {
-
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md mb-[20px]">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-[15px] mb-[20px] overflow-visible">
-            <div class="flex items-center gap-[15px] flex-1 min-w-0">
-                <div class="relative flex-shrink-0">
-                    <img [src]="avatarPreviewUrl || learner.avatar" [alt]="learner.fullname" class="w-[60px] h-[60px] rounded-full object-cover border-2 border-gray-200 dark:border-[#172036]">
+    <!-- Header Card with Profile -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] md:p-[20px] rounded-lg mb-[16px] border border-gray-100 dark:border-[#172036]">
+        <div class="flex flex-col lg:flex-row lg:items-center gap-[12px] mb-[16px]">
+            <!-- Avatar Section -->
+            <div class="relative flex-shrink-0">
+                <div class="relative">
+                    <img [src]="avatarPreviewUrl || learner.avatar" [alt]="learner.fullname" 
+                         class="w-[80px] h-[80px] md:w-[90px] md:h-[90px] rounded-full object-cover border-3 border-gray-100 dark:border-[#15203c] shadow-sm">
                     @if (isEditing) {
-                        <label class="absolute bottom-0 right-0 cursor-pointer">
-                            <i class="material-symbols-outlined text-lg text-blue-600 hover:text-blue-700 transition-colors">add_a_photo</i>
+                        <label class="absolute -bottom-1 -right-1 cursor-pointer bg-blue-600 hover:bg-blue-700 rounded-full p-[8px] shadow-lg transition-all">
+                            <i class="material-symbols-outlined text-white text-lg">add_a_photo</i>
                             <input
                                 type="file"
                                 (change)="onAvatarSelected($event)"
@@ -60,186 +62,213 @@
                         </label>
                     }
                 </div>
-                <div class="flex-1 min-w-0">
+            </div>
+
+            <!-- Name and Info Section -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-[8px] mb-[4px]">
                     @if (isEditing) {
-                        <div class="w-1/4 min-w-[140px]">
-                            <label class="block text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Full Name</label>
+                        <div class="w-full max-w-[300px]">
                             <input
                                 [(ngModel)]="editedValues['fullname']"
                                 type="text"
-                                class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white"
+                                class="w-full px-[10px] py-[6px] border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-black dark:bg-[#15203c] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                                 placeholder="Enter full name"
                             >
                         </div>
                     } @else {
-                        <h3 class="text-lg font-semibold text-black dark:text-white">{{ learner.fullname }}</h3>
+                        <h3 class="text-lg md:text-xl font-bold text-black dark:text-white">{{ learner.fullname }}</h3>
                     }
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">ID: {{ learner.id | truncate:12 }}</p>
                 </div>
-            </div>
-            <div class="flex gap-3 flex-shrink-0 sm:justify-end">
-                @if (!isEditing) {
-                    <button
-                        (click)="toggleEditMode()"
-                        class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md text-white font-medium text-sm transition-all hover:bg-blue-600 whitespace-nowrap"
-                        style="background-color: #3b82f6 !important;"
-                    >
-                        <i class="material-symbols-outlined text-base mr-2">edit</i>
-                        Edit Profile
-                    </button>
-                }
-                @if (isEditing) {
-                    <button
-                        (click)="saveAllFields()"
-                        class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md text-white font-medium text-sm transition-all hover:bg-blue-600 whitespace-nowrap"
-                        style="background-color: #3b82f6 !important;"
-                    >
-                        <i class="material-symbols-outlined text-base mr-2">save</i>
-                        Save Changes
-                    </button>
-                    <button
-                        (click)="cancelEdit()"
-                        class="inline-block px-[13px] py-[6px] sm:px-[15px] sm:py-[8px] rounded-md text-white font-medium text-sm transition-all hover:bg-blue-600 whitespace-nowrap"
-                        style="background-color: #3b82f6 !important;"
-                    >
-                        <i class="material-symbols-outlined text-base mr-2">cancel</i>
-                        Cancel
-                    </button>
-                }
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[15px] text-sm">
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Email</p>
-                @if (isEditing) {
-                    <input [(ngModel)]="editedValues['email']" type="email" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white">
-                } @else {
-                    <p class="text-black dark:text-white break-all text-xs">{{ learner.email }}</p>
-                }
-            </div>
-
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Phone</p>
-                @if (isEditing) {
-                    <input [(ngModel)]="editedValues['phone']" type="text" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white">
-                } @else {
-                    <p class="text-black dark:text-white text-xs">{{ learner.phone }}</p>
-                }
-            </div>
-
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Join Date</p>
-                @if (isEditing) {
-                    <input [(ngModel)]="editedValues['joinDate']" type="date" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white">
-                } @else {
-                    <p class="text-black dark:text-white text-xs">{{ learner.joinDate }}</p>
-                }
-            </div>
-
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Address</p>
-                @if (isEditing) {
-                    <input [(ngModel)]="editedValues['address']" type="text" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white">
-                } @else {
-                    <p class="text-black dark:text-white text-xs">{{ learner.address }}</p>
-                }
-            </div>
-
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Date of Birth</p>
-                @if (isEditing) {
-                    <input [(ngModel)]="editedValues['dateOfBirth']" type="date" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white">
-                } @else {
-                    <p class="text-black dark:text-white text-xs">{{ learner.dateOfBirth }}</p>
-                }
-            </div>
-
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">City</p>
-                @if (isEditing) {
-                    <input [(ngModel)]="editedValues['city']" type="text" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white">
-                } @else {
-                    <p class="text-black dark:text-white text-xs">{{ learner.city }}</p>
-                }
-            </div>
-
-            <div class="relative">
-                <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Country</p>
-                @if (isEditing) {
-                    <button
-                        (click)="openArrayPopover('countryEdit', countryOptions)"
-                        class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white text-left truncate popover-trigger"
-                        style="border: 1px solid #60a5fa !important;"
-                    >
-                        {{ editedValues['country'] ? getCountryName(editedValues['country']) : 'Select Country' }}
-                    </button>
-                    @if (openPopover === 'countryEdit') {
-                        <div class="absolute left-0 mt-1 bg-white dark:bg-[#15203c] border border-gray-200 dark:border-[#172036] rounded shadow-lg z-10 min-w-[200px] max-h-[250px] overflow-y-auto popover-container">
-                            <div class="p-[8px]">
-                                <input
-                                    type="text"
-                                    [(ngModel)]="countrySearchText"
-                                    placeholder="Search..."
-                                    class="w-full px-[6px] py-[4px] border border-gray-300 rounded text-xs text-black dark:bg-[#0c1427] dark:border-[#172036] dark:text-white mb-[6px]"
-                                >
-                                <div class="space-y-[2px]">
-                                    @for (country of getFilteredCountries(); track country.code) {
-                                        <button
-                                            (click)="selectCountry(country.code)"
-                                            [ngClass]="{'bg-blue-100 dark:bg-blue-900/30': editedValues['country'] === country.code}"
-                                            class="w-full text-left px-[6px] py-[4px] rounded text-xs text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#0c1427] transition-colors"
-                                        >
-                                            {{ country.flag }} {{ country.code }} - {{ country.name }}
-                                        </button>
-                                    }
-                                </div>
-                            </div>
+                <div class="flex flex-wrap items-center gap-[8px] text-xs">
+                    <div class="text-gray-600 dark:text-gray-400">
+                        <span class="font-mono text-xs text-gray-600 dark:text-gray-400">ID: {{ learner.id | truncate:12 }}</span>
+                    </div>
+                    @if (learner.joinDate) {
+                        <div class="text-gray-600 dark:text-gray-400">
+                            <span class="text-xs text-gray-600 dark:text-gray-400">Joined: {{ learner.joinDate }}</span>
                         </div>
                     }
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="w-full lg:w-auto">
+                <div class="flex flex-col sm:flex-row lg:flex-col gap-[8px]">
+                    @if (!isEditing) {
+                        <button
+                            type="button"
+                            (click)="toggleEditMode()"
+                            class="action-btn-edit group relative px-[14px] py-[8px] bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-[6px] whitespace-nowrap min-w-[140px] border border-blue-300 dark:border-blue-700">
+                            <i class="material-symbols-outlined text-base flex-shrink-0">edit</i>
+                            <span class="flex-shrink-0 font-semibold">{{ 'learnerDetail.actions.editProfile' | translate }}</span>
+                        </button>
+                    } @else {
+                        <button
+                            type="button"
+                            (click)="saveAllFields()"
+                            class="action-btn-save group relative px-[14px] py-[8px] bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-[6px] whitespace-nowrap min-w-[140px] border border-green-300 dark:border-green-700">
+                            <i class="material-symbols-outlined text-base flex-shrink-0">save</i>
+                            <span class="flex-shrink-0 font-semibold">{{ 'learnerDetail.actions.saveChanges' | translate }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            (click)="cancelEdit()"
+                            class="action-btn-cancel px-[14px] py-[8px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-[6px] whitespace-nowrap min-w-[140px] border border-gray-300 dark:border-gray-600">
+                            <i class="material-symbols-outlined text-base flex-shrink-0">close</i>
+                            <span class="flex-shrink-0 font-semibold">{{ 'learnerDetail.actions.cancel' | translate }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Information Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[16px]">
+            <!-- Email Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.email' | translate }}</p>
+                @if (isEditing) {
+                    <input [(ngModel)]="editedValues['email']" type="email" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                 } @else {
-                    <p class="text-black dark:text-white text-xs">{{ getCountryName(learner.country) }}</p>
+                    <p class="text-sm text-black dark:text-white break-all font-medium">{{ learner.email }}</p>
+                }
+            </div>
+
+            <!-- Phone Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.phone' | translate }}</p>
+                @if (isEditing) {
+                    <input [(ngModel)]="editedValues['phone']" type="text" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                } @else {
+                    <p class="text-base text-black dark:text-white font-medium">{{ learner.phone || 'N/A' }}</p>
+                }
+            </div>
+
+            <!-- Join Date Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.joinDate' | translate }}</p>
+                @if (isEditing) {
+                    <input [(ngModel)]="editedValues['joinDate']" type="date" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                } @else {
+                    <p class="text-base text-black dark:text-white font-medium">{{ learner.joinDate }}</p>
+                }
+            </div>
+
+            <!-- Date of Birth Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.dateOfBirth' | translate }}</p>
+                @if (isEditing) {
+                    <input [(ngModel)]="editedValues['dateOfBirth']" type="date" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                } @else {
+                    <p class="text-base text-black dark:text-white font-medium">{{ learner.dateOfBirth || 'N/A' }}</p>
+                }
+            </div>
+
+            <!-- Address Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.address' | translate }}</p>
+                @if (isEditing) {
+                    <input [(ngModel)]="editedValues['address']" type="text" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                } @else {
+                    <p class="text-base text-black dark:text-white font-medium">{{ learner.address || 'N/A' }}</p>
+                }
+            </div>
+
+            <!-- City Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.city' | translate }}</p>
+                @if (isEditing) {
+                    <input [(ngModel)]="editedValues['city']" type="text" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                } @else {
+                    <p class="text-base text-black dark:text-white font-medium">{{ learner.city || 'N/A' }}</p>
+                }
+            </div>
+
+            <!-- Country Card -->
+            <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.country' | translate }}</p>
+                @if (isEditing) {
+                    <div class="relative">
+                        <button
+                            (click)="openArrayPopover('countryEdit', countryOptions)"
+                            class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-xs text-black dark:bg-[#0c1427] dark:text-white text-left truncate popover-trigger focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        >
+                            {{ editedValues['country'] ? getCountryName(editedValues['country']) : ('learnerDetail.info.selectCountry' | translate) }}
+                        </button>
+                        @if (openPopover === 'countryEdit') {
+                            <div class="fixed inset-0 z-[9]" (click)="closePopover()"></div>
+                            <div class="absolute left-0 mt-2 bg-white dark:bg-[#15203c] border border-gray-200 dark:border-[#172036] rounded-lg shadow-xl z-10 min-w-[200px] max-h-[250px] overflow-y-auto popover-container">
+                                <div class="p-[12px]">
+                                    <input
+                                        type="text"
+                                        [(ngModel)]="countrySearchText"
+                                        placeholder="Search..."
+                                        class="w-full px-[8px] py-[6px] border border-gray-300 dark:border-[#172036] rounded-lg text-xs text-black dark:bg-[#0c1427] dark:text-white mb-[8px] focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                    >
+                                    <div class="space-y-[4px]">
+                                        @for (country of getFilteredCountries(); track country.code) {
+                                            <button
+                                                (click)="selectCountry(country.code)"
+                                                [ngClass]="{'bg-blue-100 dark:bg-blue-900/30': editedValues['country'] === country.code}"
+                                                class="w-full text-left px-[8px] py-[6px] rounded-md text-xs text-black dark:text-white hover:bg-gray-100 dark:hover:bg-[#0c1427] transition-colors"
+                                            >
+                                                {{ country.flag }} {{ country.code }} - {{ country.name }}
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <p class="text-base text-black dark:text-white font-medium">{{ getCountryName(learner.country) }}</p>
                 }
             </div>
         </div>
 
-        <div class="mt-[20px] space-y-[15px]">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
-                <div class="relative">
-                    <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Bio</p>
+        <!-- Additional Information Section -->
+        <div class="mt-[12px] space-y-[10px]">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+                <!-- Bio Card -->
+                <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.bio' | translate }}</p>
                     @if (isEditing) {
-                        <textarea [(ngModel)]="editedValues['bio']" rows="2" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white"></textarea>
+                        <textarea [(ngModel)]="editedValues['bio']" rows="3" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"></textarea>
                     } @else {
-                        <p class="text-black dark:text-white text-xs">{{ learner.bio }}</p>
+                        <p class="text-base text-black dark:text-white leading-relaxed line-clamp-3">{{ learner.bio || 'N/A' }}</p>
                     }
                 </div>
 
-                <div class="relative">
-                    <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Learning Goals</p>
+                <!-- Learning Goals Card -->
+                <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.learningGoals' | translate }}</p>
                     @if (isEditing) {
-                        <textarea [(ngModel)]="editedValues['learningGoals']" rows="2" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white"></textarea>
+                        <textarea [(ngModel)]="editedValues['learningGoals']" rows="3" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"></textarea>
                     } @else {
-                        <p class="text-black dark:text-white text-xs">{{ learner.learningGoals }}</p>
+                        <p class="text-base text-black dark:text-white leading-relaxed line-clamp-3">{{ learner.learningGoals || 'N/A' }}</p>
                     }
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-[15px]">
-                <div class="relative">
-                    <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Strengths</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+                <!-- Strengths Card -->
+                <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.strengths' | translate }}</p>
                     @if (isEditing) {
-                        <textarea [(ngModel)]="editedValues['strengths']" rows="2" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white"></textarea>
+                        <textarea [(ngModel)]="editedValues['strengths']" rows="3" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"></textarea>
                     } @else {
-                        <p class="text-black dark:text-white text-xs">{{ learner.strengths }}</p>
+                        <p class="text-base text-black dark:text-white leading-relaxed line-clamp-3">{{ learner.strengths || 'N/A' }}</p>
                     }
                 </div>
 
-                <div class="relative">
-                    <p class="text-xs font-bold text-gray-800 dark:text-gray-300 mb-1">Weaknesses</p>
+                <!-- Weaknesses Card -->
+                <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'learnerDetail.info.weaknesses' | translate }}</p>
                     @if (isEditing) {
-                        <textarea [(ngModel)]="editedValues['weaknesses']" rows="2" class="w-full px-[8px] py-[6px] border border-blue-400 rounded text-xs text-black dark:bg-[#15203c] dark:border-blue-500 dark:text-white"></textarea>
+                        <textarea [(ngModel)]="editedValues['weaknesses']" rows="3" class="w-full px-[8px] py-[4px] border border-gray-300 dark:border-gray-600 rounded-md text-sm text-black dark:bg-[#0c1427] dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 resize-none"></textarea>
                     } @else {
-                        <p class="text-black dark:text-white text-xs">{{ learner.weaknesses }}</p>
+                        <p class="text-base text-black dark:text-white leading-relaxed line-clamp-3">{{ learner.weaknesses || 'N/A' }}</p>
                     }
                 </div>
             </div>
@@ -247,82 +276,81 @@
     </div>
 
     <!-- Enrolled Classes Table -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md mb-[20px] border-l-4 border-primary-500">
-        <h4 class="text-lg font-semibold text-black dark:text-white mb-[20px]">
-            Enrolled Classes
-        </h4>
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] md:p-[20px] rounded-lg mb-[16px] border border-gray-100 dark:border-[#172036]">
+        <div class="mb-[12px]">
+            <h4 class="text-lg font-bold text-black dark:text-white">
+                {{ 'learnerDetail.enrolledClasses.title' | translate }}
+            </h4>
+        </div>
 
         @if (!learner.classes || learner.classes.length === 0) {
             <div class="text-center py-[40px]">
-                <i class="material-symbols-outlined text-5xl text-gray-300 mb-[15px]">school</i>
-                <p class="text-gray-500 dark:text-gray-400">No enrolled classes yet</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">{{ 'learnerDetail.enrolledClasses.empty' | translate }}</p>
             </div>
         }
 
         @if (learner.classes && learner.classes.length > 0) {
-            <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
-                <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
-                    <table class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
-                        <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
-                            <tr>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                                    ID
-                                </th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                                    Class Name
-                                </th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                                    Tutor
-                                </th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                                    Enrolled Date
-                                </th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                                    Type
-                                </th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                                    Price
-                                </th>
+            <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200 dark:border-[#172036]">
+                <table class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
+                    <thead class="bg-primary-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                        <tr>
+                            <th class="font-medium text-center px-[10px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">
+                                {{ 'learnerDetail.enrolledClasses.stt' | translate }}
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">
+                                {{ 'learnerDetail.enrolledClasses.className' | translate }}
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">
+                                {{ 'learnerDetail.enrolledClasses.tutor' | translate }}
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">
+                                {{ 'learnerDetail.enrolledClasses.enrolledDate' | translate }}
+                            </th>
+                            <th class="font-medium text-center px-[10px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">
+                                {{ 'learnerDetail.enrolledClasses.type' | translate }}
+                            </th>
+                            <th class="font-medium text-right px-[10px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs text-gray-900 dark:text-gray-100">
+                                {{ 'learnerDetail.enrolledClasses.price' | translate }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (classItem of learner.classes; track classItem.id; let i = $index) {
+                            <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
+                                <td class="text-center whitespace-nowrap px-[10px] py-[10px]">
+                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ i + 1 }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px]">
+                                    <span class="text-xs font-medium text-gray-900 dark:text-gray-100">
+                                        {{ classItem.className }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px]">
+                                    <span class="text-xs text-gray-600 dark:text-gray-400">
+                                        {{ classItem.tutor }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[10px]">
+                                    <span class="text-xs text-gray-600 dark:text-gray-400">
+                                        {{ classItem.enrolledDate }}
+                                    </span>
+                                </td>
+                                <td class="text-center whitespace-nowrap px-[10px] py-[10px]">
+                                    <span class="inline-block px-[6px] py-[2px] rounded text-[10px] font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
+                                        {{ classItem.type }}
+                                    </span>
+                                </td>
+                                <td class="text-right whitespace-nowrap px-[10px] py-[10px]">
+                                    <span class="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                                        ${{ classItem.price }}
+                                    </span>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="text-black dark:text-white">
-                            @for (classItem of learner.classes; track classItem.id) {
-                                <tr>
-                                    <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036] text-center">
-                                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">
-                                            #{{ classItem.id | truncate:8 }}
-                                        </span>
-                                    </td>
-                                    <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                        <span class="font-medium text-gray-500 dark:text-gray-400">
-                                            {{ classItem.className }}
-                                        </span>
-                                    </td>
-                                    <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                        <span class="text-gray-500 dark:text-gray-400 text-xs">
-                                            {{ classItem.tutor }}
-                                        </span>
-                                    </td>
-                                    <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                        <span class="text-gray-500 dark:text-gray-400 text-xs">
-                                            {{ classItem.enrolledDate }}
-                                        </span>
-                                    </td>
-                                    <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ classItem.type }}
-                                        </span>
-                                    </td>
-                                    <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            ${{ classItem.price }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
             </div>
         }
     </div>

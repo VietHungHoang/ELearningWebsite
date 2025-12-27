@@ -7,11 +7,13 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 import { LocaleUtilsService } from '../../../shared/utils';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { I18nService } from '../../../i18n/i18n.service';
 
 @Component({
     selector: 'app-learner-detail',
     standalone: true,
-    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe],
+    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe, TranslatePipe],
     providers: [UserService],
     templateUrl: './learner-detail.component.html',
     styleUrl: './learner-detail.component.scss'
@@ -41,7 +43,8 @@ export class LearnerDetailComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private userService: UserService,
-        private localeUtils: LocaleUtilsService
+        private localeUtils: LocaleUtilsService,
+        public i18nService: I18nService
     ) {}
 
     ngOnInit() {

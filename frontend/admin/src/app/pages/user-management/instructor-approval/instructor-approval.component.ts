@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,12 +7,14 @@ import { SearchInputComponent } from '../../../components/search-input/search-in
 import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 import { CareerEntry } from '../../../types/instructor';
 import { LocaleUtilsService } from '../../../shared/utils/locale.utils';
+import { I18nService } from '../../../i18n/i18n.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 
 @Component({
     selector: 'app-instructor-approval',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TruncatePipe],
+    imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TruncatePipe, TranslatePipe],
     templateUrl: './instructor-approval.component.html',
     styleUrl: './instructor-approval.component.scss'
 })
@@ -47,6 +49,22 @@ export class InstructorApprovalComponent implements OnInit {
     customEditReason = '';
 
     selectedRequests: Set<string> = new Set();
+    searchPlaceholder = '';
+
+    constructor(
+        public userService: UserService, 
+        private router: Router, 
+        private localeUtils: LocaleUtilsService,
+        private i18nService: I18nService
+    ) {
+        this.searchPlaceholder = this.i18nService.translate('instructorApproval.searchPlaceholder');
+        
+        // Update placeholder when language changes
+        effect(() => {
+            this.i18nService.currentLanguage$();
+            this.searchPlaceholder = this.i18nService.translate('instructorApproval.searchPlaceholder');
+        });
+    }
 
     get totalPendingRequests(): number {
         return this.pendingRequests.filter(r =>
@@ -85,7 +103,6 @@ export class InstructorApprovalComponent implements OnInit {
         { id: 'doctor', code: 'DCT', label: 'Doctor (PhD Degree)', icon: 'local_police' }
     ];
 
-    constructor(public userService: UserService, private router: Router, private localeUtils: LocaleUtilsService) {}
 
     getEducationEntries(request: InstructorRequest): CareerEntry[] {
         return request.careerEntries?.filter(entry => entry.type === 'EDUCATION') || [];
@@ -411,10 +428,21 @@ export class InstructorApprovalComponent implements OnInit {
     }
 
     get showingText(): string {
-        if (this.totalRequests === 0) return 'Showing 0 results';
+        if (this.totalRequests === 0) {
+            return this.i18nService.translate('instructorApproval.pagination.showing', { start: 0, end: 0, total: 0 });
+        }
         const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
         const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalRequests);
-        return `Showing ${startItem}-${endItem} of ${this.totalRequests} results`;
+        return this.i18nService.translate('instructorApproval.pagination.showing', {
+            start: startItem,
+            end: endItem,
+            total: this.totalRequests
+        });
+    }
+
+    getSttNumber(index: number): number {
+        // Calculate STT based on current page and items per page
+        return (this.currentPage - 1) * this.itemsPerPage + index + 1;
     }
 
     goToPage(page: number): void {

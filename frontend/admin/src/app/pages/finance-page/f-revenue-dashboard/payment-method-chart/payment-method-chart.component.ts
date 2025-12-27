@@ -4,14 +4,14 @@ import { isPlatformBrowser } from '@angular/common';
 @Component({
     selector: 'app-payment-method-chart',
     template: `
-        <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
-            <div class="trezo-card-header mb-[20px] md:mb-[25px]">
+        <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-md">
+            <div class="trezo-card-header mb-[12px]">
                 <div class="trezo-card-title">
-                    <h5 class="!mb-0">Payment Methods</h5>
+                    <h5 class="!mb-0 text-base">Payment Methods</h5>
                 </div>
             </div>
             <div class="trezo-card-content">
-                <div class="-mt-[20px] -mb-[22px]">
+                <div class="-mt-[12px] -mb-[14px]">
                     <div id="payment_method_chart"></div>
                 </div>
             </div>
@@ -40,7 +40,7 @@ export class PaymentMethodChartComponent implements OnInit {
                     series: [60, 40],
                     chart: {
                         type: 'donut',
-                        height: 350
+                        height: 280
                     },
                     colors: ['#9CAAFF', '#605DFF'],
                     labels: ['VNPay', 'Momo'],
