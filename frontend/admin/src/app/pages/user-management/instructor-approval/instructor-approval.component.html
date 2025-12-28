@@ -2,7 +2,7 @@
     <div>
         <h5 class="!mb-0">{{ 'instructorApproval.title' | translate }}</h5>
         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {{ 'instructorApproval.subtitle' | translate: { count: pendingRequests.length } }}
+            {{ 'instructorApproval.subtitle' | translate: { count: totalRequests } }}
         </p>
     </div>
     <ol class="breadcrumb mt-[12px] md:mt-0">
@@ -26,23 +26,21 @@
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-[16px]">
             <!-- Filter Section -->
             <div class="flex flex-wrap gap-[12px] items-end flex-1">
-                <div class="flex-1 min-w-[160px]">
+                <div class="flex-1 min-w-[120px]">
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
-                        {{ 'instructorApproval.filters.category' | translate }}
+                        {{ 'instructorApproval.filters.status' | translate }}
                     </label>
-                    <select class="filter-select w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-lg text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white focus:outline-none transition-all hover:border-gray-400 dark:hover:border-gray-600">
+                    <select [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()" class="filter-select w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-lg text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white focus:outline-none transition-all hover:border-gray-400 dark:hover:border-gray-600">
                         <option value="all">{{ 'instructorApproval.filters.all' | translate }}</option>
-                        <option value="programming">{{ 'instructorApproval.filters.programming' | translate }}</option>
-                        <option value="languages">{{ 'instructorApproval.filters.languages' | translate }}</option>
-                        <option value="business">{{ 'instructorApproval.filters.business' | translate }}</option>
-                        <option value="design">{{ 'instructorApproval.filters.design' | translate }}</option>
+                        <option value="new">{{ 'instructorApproval.table.statusValue.new' | translate }}</option>
+                        <option value="edited">{{ 'instructorApproval.table.statusValue.edited' | translate }}</option>
                     </select>
                 </div>
-                <div class="flex-1 min-w-[160px]">
+                <div class="flex-1 min-w-[120px]">
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
                         {{ 'instructorApproval.filters.subject' | translate }}
                     </label>
-                    <select class="filter-select w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-lg text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white focus:outline-none transition-all hover:border-gray-400 dark:hover:border-gray-600">
+                    <select [(ngModel)]="selectedSubject" (ngModelChange)="onFilterChange()" class="filter-select w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-lg text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white focus:outline-none transition-all hover:border-gray-400 dark:hover:border-gray-600">
                         <option value="all">{{ 'instructorApproval.filters.all' | translate }}</option>
                         <option value="data-science">{{ 'instructorApproval.filters.dataScience' | translate }}</option>
                         <option value="english">{{ 'instructorApproval.filters.english' | translate }}</option>
@@ -51,11 +49,7 @@
                     </select>
                 </div>
                 <div class="flex gap-[8px] items-end">
-                    <button class="px-[14px] py-[8px] bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 transition-all shadow-sm hover:shadow-md flex items-center gap-[6px] whitespace-nowrap">
-                        <i class="material-symbols-outlined !text-base">filter_list</i>
-                        {{ 'instructorApproval.filters.apply' | translate }}
-                    </button>
-                    <button class="px-[14px] py-[8px] bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all flex items-center gap-[6px] whitespace-nowrap">
+                    <button (click)="clearFilters()" class="px-[14px] py-[8px] bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all flex items-center gap-[6px] whitespace-nowrap">
                         <i class="material-symbols-outlined !text-base">clear</i>
                         {{ 'instructorApproval.filters.clear' | translate }}
                     </button>
@@ -66,42 +60,24 @@
             <div class="flex-shrink-0">
                 <app-search-input
                     [placeholder]="searchPlaceholder"
-                    [width]="'w-full sm:w-[280px]'"
+                    [width]="'w-full sm:w-[400px]'"
                     (search)="onSearchChange($event)">
                 </app-search-input>
             </div>
         </div>
 
-        <!-- Status Section -->
-        <div class="flex flex-wrap gap-[10px] items-center justify-between mt-[16px]">
-            <div class="flex flex-wrap gap-[10px] items-center">
-                <div class="flex items-center gap-[8px] px-[14px] py-[8px] bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800/30">
-                    <i class="material-symbols-outlined text-sm text-yellow-600 dark:text-yellow-400">schedule</i>
-                    <span class="text-sm font-medium text-yellow-800 dark:text-yellow-400">
-                        {{ 'instructorApproval.status.pending' | translate }}: {{ totalPendingRequests }}
-                    </span>
-                </div>
-                <div class="flex items-center gap-[8px] px-[14px] py-[8px] bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800/30">
-                    <i class="material-symbols-outlined text-sm text-green-600 dark:text-green-400">done_all</i>
-                    <span class="text-sm font-medium text-green-800 dark:text-green-400">
-                        {{ 'instructorApproval.status.done' | translate }}: {{ historyRequests.length }}
-                    </span>
-                </div>
+        <!-- Bulk Actions -->
+        @if (selectedRequests.size > 0) {
+            <div class="flex items-center justify-end gap-[10px] min-h-[40px] mt-[16px]">
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ selectedRequests.size }} {{ 'instructorApproval.selected' | translate }}
+                </span>
+                <button type="button" (click)="bulkRejectRequests()" class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-danger-500 rounded-md hover:bg-danger-600 flex items-center gap-[6px]">
+                    <i class="material-symbols-outlined !text-base">close_circle</i>
+                    {{ 'instructorApproval.actions.rejectSelected' | translate }}
+                </button>
             </div>
-
-            <!-- Bulk Actions -->
-            @if (selectedRequests.size > 0) {
-                <div class="flex items-center gap-[10px] min-h-[40px]">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">
-                        {{ selectedRequests.size }} {{ 'instructorApproval.selected' | translate }}
-                    </span>
-                    <button type="button" (click)="bulkRejectRequests()" class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-danger-500 rounded-md hover:bg-danger-600 flex items-center gap-[6px]">
-                        <i class="material-symbols-outlined !text-base">close_circle</i>
-                        {{ 'instructorApproval.actions.rejectSelected' | translate }}
-                    </button>
-                </div>
-            }
-        </div>
+        }
     </div>
     <div class="trezo-card-content -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
@@ -125,9 +101,6 @@
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'instructorApproval.table.subject' | translate }}
-                        </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.certifications' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'instructorApproval.table.submittedDate' | translate }}
@@ -166,24 +139,13 @@
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[12px] py-[15px]">
                                 @if (request.subjects && request.subjects.length > 0) {
-                                    <span class="text-gray-700 dark:text-gray-300 text-sm block truncate" [title]="request.subjects[0].subjectName">
-                                        {{ request.subjects[0].subjectName | truncate:0:0:'first12' }}
-                                        @if (request.subjects.length > 1) {
-                                            <span class="text-blue-600 dark:text-blue-400 font-medium">+{{ request.subjects.length - 1 }}</span>
+                                    <div class="flex flex-wrap gap-[6px]">
+                                        @for (subject of request.subjects; track subject.subjectName) {
+                                            <span class="text-gray-700 dark:text-gray-300 text-sm inline-block px-[8px] py-[4px] bg-gray-100 dark:bg-[#15203c] rounded-md">
+                                                {{ subject.subjectName }}
+                                            </span>
                                         }
-                                    </span>
-                                } @else {
-                                    <span class="text-gray-400 text-sm">N/A</span>
-                                }
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[15px]">
-                                @if (request.certifications && request.certifications.length > 0) {
-                                    <span class="text-gray-700 dark:text-gray-300 text-sm block truncate" [title]="request.certifications[0].name">
-                                        {{ request.certifications[0].name | truncate:0:0:'first12' }}
-                                        @if (request.certifications.length > 1) {
-                                            <span class="text-blue-600 dark:text-blue-400 font-medium">+{{ request.certifications.length - 1 }}</span>
-                                        }
-                                    </span>
+                                    </div>
                                 } @else {
                                     <span class="text-gray-400 text-sm">N/A</span>
                                 }
@@ -260,7 +222,7 @@
                     }
                     @if (filteredRequests.length === 0) {
                         <tr>
-                            <td [attr.colspan]="activeTab === 'pending' ? 9 : (activeTab === 'history' ? 8 : 8)" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                            <td [attr.colspan]="activeTab === 'pending' ? 8 : (activeTab === 'history' ? 7 : 7)" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
                                 @switch (activeTab) {
                                     @case ('pending') {
                                         {{ 'instructorApproval.emptyState.noPendingRequests' | translate }}

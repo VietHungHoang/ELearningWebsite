@@ -398,22 +398,22 @@
     <div class="modal-overlay fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4" (click)="closeDetailModal()">
         <div class="modal-content max-w-[700px] w-full bg-white dark:bg-[#0c1427] rounded-lg shadow-xl max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
             <div class="modal-body p-[24px]">
-                <div class="flex items-center justify-between mb-[20px]">
-                    <h3 class="text-xl font-bold text-black dark:text-white">
-                        {{ 'payout.modals.orderList.title' | translate }} - {{ selectedPayout.instructorName }}
-                </h3>
+                <div class="flex items-center justify-between mb-[16px]">
+                    <h3 class="text-base font-semibold text-black dark:text-white">
+                        {{ selectedPayout.instructorName }}
+                    </h3>
                     <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" (click)="closeDetailModal()">
-                        <i class="material-symbols-outlined !text-2xl">close</i>
-                            </button>
-                        </div>
+                        <i class="material-symbols-outlined !text-xl">close</i>
+                    </button>
+                </div>
 
                 <!-- Order List Section -->
                 <div class="mb-[20px]">
                     <div class="flex items-center justify-between mb-[12px]">
-                        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        <h4 class="text-xs font-medium text-gray-600 dark:text-gray-400">
                             {{ 'payout.modals.orderList.subtitle' | translate }} ({{ selectedPayout.orderCount }})
                         </h4>
-                        <span class="text-sm font-bold text-danger-500">
+                        <span class="text-xs font-semibold text-danger-500">
                             {{ 'payout.modals.orderList.total' | translate }}: {{ formatCurrency(selectedPayout.totalOwed) }}
                         </span>
                     </div>
@@ -488,11 +488,11 @@
         <div class="modal-content max-w-[450px] w-full bg-white dark:bg-[#0c1427] rounded-lg shadow-xl" (click)="$event.stopPropagation()">
             <div class="modal-body p-[16px]">
                 <div class="flex items-center justify-between mb-[12px]">
-                    <h3 class="text-lg font-bold text-black dark:text-white truncate pr-2">
-                        {{ 'payout.modals.qrPayment.title' | translate }} - {{ selectedPayout.instructorName }}
-                </h3>
+                    <h3 class="text-base font-semibold text-black dark:text-white truncate pr-2">
+                        {{ selectedPayout.instructorName }}
+                    </h3>
                     <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 flex-shrink-0" (click)="closeQRModal()">
-                        <i class="material-symbols-outlined !text-xl">close</i>
+                        <i class="material-symbols-outlined !text-lg">close</i>
                     </button>
                 </div>
 

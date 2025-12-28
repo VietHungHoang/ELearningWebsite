@@ -1,23 +1,21 @@
 <div class="overview-container">
     <div class="stats-grid">
-        <app-total-courses [pendingApprovals]="dashboardSummary?.pendingApprovals" />
+        <app-total-courses />
         <app-total-mentors />
         <app-online-classes />
         <app-total-students />
     </div>
 </div>
 
-<div class="chart-row">
-    <div class="chart-item">
-        <app-total-sales />
-    </div>
-    <div class="chart-item">
-        <app-top-instructors [instructors]="topInstructors" />
-    </div>
+<div class="chart-row-full">
+    <app-total-sales />
 </div>
 
-<div class="bottom-row">
-    <div class="bottom-item full-width">
-        <app-students-interested-topics [popularSubjects]="popularSubjects" />
+<div class="chart-row">
+    <div class="chart-item">
+        <app-top-instructors />
+    </div>
+    <div class="chart-item">
+        <app-students-interested-topics />
     </div>
 </div>

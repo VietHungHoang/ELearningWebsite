@@ -3,25 +3,41 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center">
                 <span class="block">
-                    {{ 'dashboard.overview.onlineClasses.title' | translate }}
+                    {{ 'dashboard.overview.completedSessions.title' | translate }}
                 </span>
             </div>
-            <span class="block text-sm">
-                {{ 'dashboard.overview.onlineClasses.last7Days' | translate }}
+            <span class="block text-sm text-gray-500 dark:text-gray-400">
+                {{ 'dashboard.overview.completedSessions.last7Days' | translate }}
             </span>
         </div>
         <h5 class="!text-lg md:!text-[20px] !mb-0 mt-[5px]">
-            1.2k
+            {{ totalSessions }}
         </h5>
-        <div class="mx-auto max-w-[300px] -mt-[33px] -mb-[30px]">
+        <div class="mx-auto max-w-[300px] -mt-[33px] -mb-[30px] min-h-[150px]">
             <div id="overview_online_classes_chart"></div>
         </div>
         <div class="flex items-center justify-between text-sm">
             <span class="block">
-                {{ 'dashboard.overview.onlineClasses.mon' | translate }}
+                {{ 'dashboard.overview.completedSessions.mon' | translate }}
             </span>
             <span class="block">
-                {{ 'dashboard.overview.onlineClasses.sun' | translate }}
+                {{ 'dashboard.overview.completedSessions.sun' | translate }}
+            </span>
+        </div>
+        <div class="flex items-center gap-2 mt-[10px]">
+            @if (growthPercentage >= 0) {
+                <span class="inline-flex items-center text-sm text-green-500">
+                    <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+                    +{{ growthPercentage }}%
+                </span>
+            } @else {
+                <span class="inline-flex items-center text-sm text-red-500">
+                    <span class="material-symbols-outlined text-[16px] mr-1">trending_down</span>
+                    {{ growthPercentage }}%
+                </span>
+            }
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                {{ 'dashboard.overview.completedSessions.vsLastWeek' | translate }}
             </span>
         </div>
     </div>

@@ -167,69 +167,53 @@
             text-align: left;
         }
 
-        // Subject column
+        // Subject column - increased width to show all subjects
         th:nth-child(4),
         td:nth-child(4) {
-            width: 16%;
-            min-width: 130px;
+            width: 25%;
+            min-width: 200px;
             white-space: normal;
             text-align: left;
         }
         thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(3),
         tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(3) {
-            width: 16%;
-            min-width: 130px;
-            white-space: normal;
-            text-align: left;
-        }
-
-        // Certifications column
-        th:nth-child(5),
-        td:nth-child(5) {
-            width: 16%;
-            min-width: 130px;
-            white-space: normal;
-            text-align: left;
-        }
-        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(4),
-        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(4) {
-            width: 16%;
-            min-width: 130px;
+            width: 25%;
+            min-width: 200px;
             white-space: normal;
             text-align: left;
         }
 
         // Submitted Date column
-        th:nth-child(6),
-        td:nth-child(6) {
-            width: 14%;
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 16%;
             min-width: 140px;
             text-align: center;
         }
-        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(5),
-        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(5) {
-            width: 14%;
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(4),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(4) {
+            width: 16%;
             min-width: 140px;
             text-align: center;
         }
 
         // Status column (new status column for pending tab)
-        th:nth-child(7):not(:last-child),
-        td:nth-child(7):not(:last-child) {
+        th:nth-child(6):not(:last-child),
+        td:nth-child(6):not(:last-child) {
             width: 12%;
             min-width: 100px;
             text-align: center;
         }
-        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(6):not(:last-child),
-        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(6):not(:last-child) {
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(5):not(:last-child),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(5):not(:last-child) {
             width: 12%;
             min-width: 100px;
             text-align: center;
         }
 
         // Status column (history tab - approval/rejection status)
-        th:nth-child(8):not(:last-child),
-        td:nth-child(8):not(:last-child) {
+        th:nth-child(7):not(:last-child),
+        td:nth-child(7):not(:last-child) {
             width: 12%;
             min-width: 100px;
             text-align: center;
