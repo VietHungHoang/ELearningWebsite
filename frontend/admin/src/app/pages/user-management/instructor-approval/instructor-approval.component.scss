@@ -1,3 +1,39 @@
+// Filter dropdown styling - no border on focus
+.filter-select {
+    &:focus {
+        border-color: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    &:active {
+        border-color: transparent !important;
+    }
+}
+
+// Search input alignment with filter section
+.trezo-card-header {
+    .flex-shrink-0 {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: 160px;
+        
+        // Add invisible label spacer to match filter section label spacing
+        &::before {
+            content: '';
+            display: block;
+            height: 20px; // Label height
+            margin-bottom: 26px; // Match filter label mb-[6px]
+        }
+        
+        app-search-input {
+            width: 100%;
+            margin-top: -26px; // Negative margin to align input with filter selects
+        }
+    }
+}
+
 // Level option styling
 .level-option {
     cursor: pointer;
@@ -53,6 +89,161 @@
     }
 }
 
-// Table styling inherited from course-list (no custom styles needed)
+.table-responsive {
+    overflow-x: auto;
+    padding: 0;
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+
+        th, td {
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        thead {
+            th {
+                font-weight: 600;
+                padding: 11px 12px;
+                background-color: #f3f4f6;
+                border-bottom: 1px solid #e5e7eb;
+                white-space: nowrap;
+            }
+        }
+
+        tbody {
+            tr {
+                border-bottom: 1px solid #e5e7eb;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                    background-color: #f9fafb;
+                }
+
+                td {
+                    padding: 15px 12px;
+                    vertical-align: middle;
+                }
+            }
+        }
+
+        // Pending tab: Checkbox(1), STT(2), Name(3), Subject(4), Certifications(5), Date(6), Status(7), Actions(8) = 8 columns
+        // History tab: STT(1), Name(2), Subject(3), Certifications(4), Date(5), Status(6), Status(7), Actions(8) = 8 columns
+        
+        // Checkbox column (pending tab only)
+        th:first-child:has(input[type="checkbox"]),
+        td:first-child:has(input[type="checkbox"]) {
+            width: 4%;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        // STT column
+        th:nth-child(1):not(:has(input[type="checkbox"])),
+        td:nth-child(1):not(:has(input[type="checkbox"])),
+        th:nth-child(2):has(+ th:not(:has(input[type="checkbox"]))),
+        td:nth-child(2):has(+ td:not(:has(input[type="checkbox"]))) {
+            width: 5%;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        // Instructor Name column
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 18%;
+            min-width: 150px;
+            white-space: normal;
+            text-align: left;
+        }
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(2),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(2) {
+            width: 18%;
+            min-width: 150px;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Subject column
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 16%;
+            min-width: 130px;
+            white-space: normal;
+            text-align: left;
+        }
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(3),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(3) {
+            width: 16%;
+            min-width: 130px;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Certifications column
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 16%;
+            min-width: 130px;
+            white-space: normal;
+            text-align: left;
+        }
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(4),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(4) {
+            width: 16%;
+            min-width: 130px;
+            white-space: normal;
+            text-align: left;
+        }
+
+        // Submitted Date column
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 14%;
+            min-width: 140px;
+            text-align: center;
+        }
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(5),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(5) {
+            width: 14%;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        // Status column (new status column for pending tab)
+        th:nth-child(7):not(:last-child),
+        td:nth-child(7):not(:last-child) {
+            width: 12%;
+            min-width: 100px;
+            text-align: center;
+        }
+        thead:not(:has(th:first-child input[type="checkbox"])) th:nth-child(6):not(:last-child),
+        tbody:not(:has(td:first-child input[type="checkbox"])) td:nth-child(6):not(:last-child) {
+            width: 12%;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        // Status column (history tab - approval/rejection status)
+        th:nth-child(8):not(:last-child),
+        td:nth-child(8):not(:last-child) {
+            width: 12%;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        // Actions column (always last)
+        th:last-child,
+        td:last-child {
+            width: 13%;
+            min-width: 120px;
+            text-align: center;
+            padding-right: 0 !important;
+        }
+    }
+}
 
 

@@ -1,32 +1,32 @@
 <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
-    <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
-        <div class="trezo-card-title">
+    <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between gap-2 flex-wrap">
+        <div class="trezo-card-title flex-shrink-0">
             <h5 class="!mb-0">
-                Top Instructors
+                {{ 'dashboard.overview.topInstructors.title' | translate }}
             </h5>
         </div>
-        <div class="trezo-card-subtitle flex gap-[10px]">
+        <div class="trezo-card-subtitle flex gap-[10px] flex-shrink-0 flex-wrap">
             <!-- Ranking Criteria Dropdown -->
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="inline-block transition-all px-[12px] py-[6px] text-sm border border-gray-200 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800" (click)="toggleCardHeaderMenu()">
-                    {{ rankingLabel }}
+                    {{ rankingLabelKey | translate }}
                     <i class="ri-arrow-down-s-line"></i>
                 </button>
                 @if (isCardHeaderOpen) {
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[150px] z-[5] dark:bg-dark dark:shadow-none mt-[5px]">
                         <li>
-                            <button type="button" (click)="changeRankingCriteria('revenue', 'Revenue')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="rankingCriteria === 'revenue'">
-                                Revenue
+                            <button type="button" (click)="changeRankingCriteria('revenue', 'dashboard.overview.topInstructors.rankingCriteria.revenue')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="rankingCriteria === 'revenue'">
+                                {{ 'dashboard.overview.topInstructors.rankingCriteria.revenue' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" (click)="changeRankingCriteria('rating', 'Rating')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="rankingCriteria === 'rating'">
-                                Rating
+                            <button type="button" (click)="changeRankingCriteria('rating', 'dashboard.overview.topInstructors.rankingCriteria.rating')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="rankingCriteria === 'rating'">
+                                {{ 'dashboard.overview.topInstructors.rankingCriteria.rating' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" (click)="changeRankingCriteria('bookings', 'Total Bookings')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="rankingCriteria === 'bookings'">
-                                Total Bookings
+                            <button type="button" (click)="changeRankingCriteria('bookings', 'dashboard.overview.topInstructors.rankingCriteria.totalBookings')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="rankingCriteria === 'bookings'">
+                                {{ 'dashboard.overview.topInstructors.rankingCriteria.totalBookings' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -35,29 +35,29 @@
             <!-- Time Period Dropdown -->
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="inline-block transition-all px-[12px] py-[6px] text-sm border border-gray-200 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800" (click)="toggleTimePeriodMenu()">
-                    {{ timePeriodLabel }}
+                    {{ timePeriodLabelKey | translate }}
                     <i class="ri-arrow-down-s-line"></i>
                 </button>
                 @if (isTimePeriodOpen) {
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[150px] z-[5] dark:bg-dark dark:shadow-none mt-[5px]">
                         <li>
-                            <button type="button" (click)="changeTimePeriod('week', 'This Week')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'week'">
-                                This Week
+                            <button type="button" (click)="changeTimePeriod('week', 'dashboard.overview.topInstructors.timePeriod.thisWeek')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'week'">
+                                {{ 'dashboard.overview.topInstructors.timePeriod.thisWeek' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" (click)="changeTimePeriod('month', 'This Month')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'month'">
-                                This Month
+                            <button type="button" (click)="changeTimePeriod('month', 'dashboard.overview.topInstructors.timePeriod.thisMonth')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'month'">
+                                {{ 'dashboard.overview.topInstructors.timePeriod.thisMonth' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" (click)="changeTimePeriod('year', 'This Year')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'year'">
-                                This Year
+                            <button type="button" (click)="changeTimePeriod('year', 'dashboard.overview.topInstructors.timePeriod.thisYear')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'year'">
+                                {{ 'dashboard.overview.topInstructors.timePeriod.thisYear' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" (click)="changeTimePeriod('all', 'All Time')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'all'">
-                                All Time
+                            <button type="button" (click)="changeTimePeriod('all', 'dashboard.overview.topInstructors.timePeriod.allTime')" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" [class.bg-primary-50]="timePeriod === 'all'">
+                                {{ 'dashboard.overview.topInstructors.timePeriod.allTime' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -65,35 +65,35 @@
             </div>
         </div>
     </div>
-    <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
-        <div class="table-responsive overflow-x-auto">
+    <div class="trezo-card-content">
+        <div class="table-responsive w-full max-w-full">
             <table class="w-full">
                 <thead class="text-black dark:text-white">
                     <tr>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Rank
+                        <th class="font-medium text-center px-[10px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'dashboard.overview.topInstructors.rank' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Name
+                        <th class="font-medium ltr:text-left rtl:text-right px-[10px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'dashboard.overview.topInstructors.name' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Rating
+                        <th class="font-medium text-center px-[10px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'dashboard.overview.topInstructors.rating' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Revenue
+                        <th class="font-medium text-center px-[10px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'dashboard.overview.topInstructors.revenue' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Hours
+                        <th class="font-medium text-center px-[10px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'dashboard.overview.topInstructors.hours' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            Total Bookings
+                        <th class="font-medium text-center px-[10px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 ltr:last:pr-[25px] rtl:last:pl-[25px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'dashboard.overview.topInstructors.totalBookings' | translate }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
                     @for (instructor of paginatedInstructors; track instructor.id) {
                         <tr>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <td class="text-center whitespace-nowrap px-[10px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 <div class="flex items-center justify-center">
                                     <span class="bg-primary-500 text-white text-sm font-medium px-2 py-1 rounded-full"
                                           [ngClass]="{
@@ -106,36 +106,36 @@
                                     </span>
                                 </div>
                             </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[10px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                             <div class="flex items-center">
-                                <div class="w-[44px] h-[44px] ltr:mr-[12px] rtl:ml-[12px]">
-                                    <img [src]="instructor.image" class="rounded-full inline-block" alt="user-image">
+                                <div class="w-[32px] h-[32px] ltr:mr-[8px] rtl:ml-[8px] flex-shrink-0">
+                                    <img [src]="instructor.image" class="rounded-full w-full h-full object-cover" alt="user-image">
                                 </div>
-                                <div>
-                                    <span class="block font-medium">
+                                <div class="min-w-0 flex-1">
+                                    <span class="block font-medium truncate text-sm">
                                         {{ instructor.name }}
                                     </span>
                                 </div>
                             </div>
                         </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                        <td class="text-center whitespace-nowrap px-[10px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                             <span class="text-gray-500 dark:text-gray-400">
                                 {{ instructor.rating }}/5
                             </span>
                         </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                        <td class="text-center whitespace-nowrap px-[10px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                             <span class="text-gray-500 dark:text-gray-400 font-medium text-green-600">
-                                {{ instructor.revenue }}
+                                {{ formatRevenue(instructor.revenue) }}
                             </span>
                         </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                        <td class="text-center whitespace-nowrap px-[10px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                             <span class="text-gray-500 dark:text-gray-400">
-                                {{ instructor.hours }}
+                                {{ formatNumber(instructor.hours) }}
                             </span>
                         </td>
-                        <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                        <td class="text-center whitespace-nowrap px-[10px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 ltr:last:pr-[25px] rtl:last:pl-[25px] border-b border-gray-100 dark:border-[#172036]">
                             <span class="text-gray-500 dark:text-gray-400 font-medium text-blue-600">
-                                {{ instructor.totalBookings }}
+                                {{ formatNumber(instructor.totalBookings) }}
                             </span>
                         </td>
                     </tr>
@@ -143,13 +143,13 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-[20px] md:px-[25px] pt-[12px] md:pt-[14px] flex items-center justify-between">
+        <div class="pl-[20px] md:pl-[25px] pr-[25px] pt-[12px] md:pt-[14px] pb-[12px] md:pb-[14px] flex items-center justify-between w-full">
             <p class="!mb-0 text-sm">
-                Items per pages: <strong>{{ itemsPerPage }}</strong>
+                {{ 'dashboard.overview.topInstructors.pagination.itemsPerPage' | translate }}: <strong>{{ itemsPerPage }}</strong>
             </p>
             <div class="flex items-center">
                 <p class="!mb-0 text-sm">
-                    {{ startItem }} – {{ endItem }} of {{ totalItems }}
+                    {{ startItem }} – {{ endItem }} {{ 'dashboard.overview.topInstructors.pagination.of' | translate }} {{ totalItems }}
                 </p>
                 <ol class="ltr:ml-[10px] rtl:mr-[10px]">
                     <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">

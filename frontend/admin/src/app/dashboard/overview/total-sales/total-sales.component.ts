@@ -1,9 +1,10 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { TotalSalesService } from './total-sales.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-total-sales',
-    imports: [],
+    imports: [TranslatePipe],
     templateUrl: './total-sales.component.html',
     styleUrl: './total-sales.component.scss'
 })

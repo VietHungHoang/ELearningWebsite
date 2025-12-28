@@ -130,7 +130,7 @@ export class TopInstructorsChartComponent implements OnInit {
                     ],
                     chart: {
                         type: 'bar',
-                        height: 350,
+                        height: 240,
                         toolbar: {
                             show: false
                         }

@@ -69,8 +69,9 @@ export const extractUserRole = (decoded: DecodedUser): UserRole => {
 
   // Example mapping - adjust based on your Keycloak realm configuration
   if (roles.includes('tutor')) return 'tutor';
-  if (roles.includes('student')) return 'student';
-  return null; // Default to null if no matching role
+  if (roles.includes('student') || roles.includes('default-roles-lernen')) return 'student';
+
+  return 'student'; // Default to student if no matching role
 };
 
 /**

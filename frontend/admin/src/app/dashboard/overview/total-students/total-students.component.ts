@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { TotalStudentsService } from './total-students.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-total-students',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './total-students.component.html',
   styleUrl: './total-students.component.scss'
 })

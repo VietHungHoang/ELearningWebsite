@@ -7,13 +7,15 @@ import { InstructorRequestDetail } from '../../../types/approval';
 import { TutorSubject, CareerEntry } from '../../../types/instructor';
 import { FilterByCareerTypePipe } from '../../../shared/pipes/filter-by-career-type.pipe';
 import { LocaleUtilsService } from '../../../shared/utils';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { I18nService } from '../../../i18n/i18n.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-instructor-approval-detail',
     standalone: true,
-    imports: [RouterLink, CommonModule, FormsModule, FilterByCareerTypePipe],
+    imports: [RouterLink, CommonModule, FormsModule, FilterByCareerTypePipe, TranslatePipe],
     templateUrl: './instructor-approval-detail.component.html',
     styleUrl: './instructor-approval-detail.component.scss'
 })
@@ -82,7 +84,8 @@ export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private router: Router,
         private userService: UserService,
-        private localeUtils: LocaleUtilsService
+        private localeUtils: LocaleUtilsService,
+        public i18nService: I18nService
     ) {}
 
     ngOnInit() {

@@ -145,16 +145,16 @@ export const STUDENT_SIDEBAR_OPTIONS: SidebarOption[] = [
         path: "/dashboard/my-quizzes",
     },
     {
+        icon: <FiBell className="w-4 h-4" />,
+        activeIcon: <FiBell className="w-4 h-4" />,
+        labelKey: "dashboard.sidebar.student.requests",
+        path: "/dashboard/requests",
+    },
+    {
         icon: <FiShoppingBag className="w-4 h-4" />,
         activeIcon: <FiShoppingBag className="w-4 h-4" />,
         labelKey: "dashboard.sidebar.student.myPurchases",
         path: "/dashboard/purchases",
-    },
-    {
-        icon: <FiFileText className="w-4 h-4" />,
-        activeIcon: <FiFileText className="w-4 h-4" />,
-        labelKey: "dashboard.sidebar.student.certificates",
-        path: "/dashboard/certificates",
     },
     {
         icon: <FiMessageSquare className="w-4 h-4" />,

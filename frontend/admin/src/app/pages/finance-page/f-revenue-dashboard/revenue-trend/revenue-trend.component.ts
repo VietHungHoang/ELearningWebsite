@@ -4,8 +4,8 @@ import { isPlatformBrowser } from '@angular/common';
 @Component({
     selector: 'app-revenue-trend',
     template: `
-        <div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
-            <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
+        <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-md">
+            <div class="trezo-card-header mb-[12px] flex items-center justify-between">
                 <div class="trezo-card-title">
                     <h5 class="!mb-0">Revenue Trend</h5>
                 </div>
@@ -18,7 +18,7 @@ import { isPlatformBrowser } from '@angular/common';
                             </span>
                         </button>
                         @if (isTimeframeMenuOpen) {
-                            <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
+                            <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[4] dark:bg-dark dark:shadow-none">
                                 <li>
                                     <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Daily')">
                                         Daily
@@ -134,7 +134,7 @@ export class RevenueTrendComponent implements OnInit {
             series,
             chart: {
                 type: 'line',
-                height: 350,
+                height: 280,
                 toolbar: {
                     show: false
                 }

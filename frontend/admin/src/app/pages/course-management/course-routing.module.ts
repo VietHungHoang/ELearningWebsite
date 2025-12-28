@@ -6,7 +6,8 @@ const routes: Routes = [
     path: '',
     loadComponent: () => import('./course-management.component').then(m => m.CourseManagementComponent),
     children: [
-      { path: '', redirectTo: 'categories', pathMatch: 'full' },
+      { path: '', redirectTo: 'subjects', pathMatch: 'full' },
+      { path: 'subjects', loadComponent: () => import('./subject-list/subject-list.component').then(m => m.SubjectListComponent) },
       { path: 'categories', loadComponent: () => import('./category-list/category-list.component').then(m => m.CategoryListComponent) },
     ]
   }

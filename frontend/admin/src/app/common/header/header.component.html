@@ -9,113 +9,15 @@
                 </button>
             </div>
             <form class="relative w-[250px] lg:w-[260px]">
-                <input type="text" placeholder="Search here....." class="bg-gray-50 border border-gray-50 h-[44px] rounded-md w-full block text-black pt-[11px] pb-[12px] px-[13px] md:px-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
+                <input type="text" [placeholder]="'header.search.placeholder' | translate" class="bg-gray-50 border border-gray-50 h-[44px] rounded-md w-full block text-black pt-[11px] pb-[12px] px-[13px] md:px-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
                 <button type="button" class="absolute text-primary-500 mt-[2px] ltr:right-[13px] ltr:md:right-[15px] rtl:left-[13px] rtl:md:left-[15px] top-1/2 -translate-y-1/2">
                     <i class="material-symbols-outlined !text-[20px]">
                         search
                     </i>
                 </button>
             </form>
-            <div class="connected-apps-menu relative ltr:ml-[13px] ltr:md:ml-[18px] ltr:lg:ml-[25px] rtl:ml-[r3px] rtl:md:mr-[18px] rtl:lg:mr-[25px]">
-                <button type="button" class="transition-all relative top-[2px] hover:text-primary-500" id="connectedAppsMenuBtn" (click)="toggleClass('connectedAppsMenuBtn')" [class.active]="buttonStates['connectedAppsMenuBtn']">
-                    <i class="material-symbols-outlined !text-[22px] md:!text-xl">
-                        apps
-                    </i>
-                </button>
-                <div class="connected-apps-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[20px] md:pt-[25px] px-[10px] md:px-[15px] pb-[5px] md:pb-[8px] absolute mt-[9px] md:mt-[20px] w-[240px] z-[1] top-full right-0 rounded-md">
-                    <ul class="grid grid-cols-3 text-center gap-[5px]">
-                        <li>
-                            <a href="https://www.figma.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/figma.svg" class="inline-block" alt="figma">
-                                <span class="block mt-[7px]">
-                                    Figma
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://dribbble.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/dribbble.svg" class="inline-block" alt="dribbble">
-                                <span class="block mt-[7px]">
-                                    Dribbble
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://open.spotify.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/spotify.svg" class="inline-block" alt="spotify">
-                                <span class="block mt-[7px]">
-                                    Spotify
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://gitlab.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/gitlab.svg" class="inline-block" alt="gitlab">
-                                <span class="block mt-[7px]">
-                                    Gitlab
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://drive.google.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/google-drive.svg" class="inline-block" alt="google-drive">
-                                <span class="block mt-[7px]">
-                                    GDrive
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://trello.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/trello.svg" class="inline-block" alt="trello">
-                                <span class="block mt-[7px]">
-                                    Trello
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://slack.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/slack.svg" class="inline-block" alt="slack">
-                                <span class="block mt-[7px]">
-                                    Slack
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://www.pinterest.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/pinterest.svg" class="inline-block" alt="pinterest">
-                                <span class="block mt-[7px]">
-                                    Pinterest
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://www.facebook.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/facebook.svg" class="inline-block" alt="facebook">
-                                <span class="block mt-[7px]">
-                                    Facebook
-                                </span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://www.linkedin.com/" class="block text-xs mb-[15px] text-black transition-all hover:text-primary-500 dark:text-white" target="_blank">
-                                <img src="images/icons/linkedin.svg" class="inline-block" alt="linkedIn">
-                                <span class="block mt-[7px]">
-                                    LinkedIn
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
         <ul class="flex items-center justify-center md:justify-normal mt-[13px] md:mt-0">
-            <li class="relative mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="light-dark-toggle leading-none inline-block transition-all relative top-[2px] text-orange-400" (click)="toggleTheme()">
-                    <i class="material-symbols-outlined !text-[20px] md:!text-[22px]">
-                        light_mode
-                    </i>
-                </button>
-            </li>
             <li class="relative language-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                 <button type="button" class="leading-none pr-[12px] inline-block transition-all relative top-[2px] hover:text-primary-500" id="languageMenuButton" (click)="toggleClass('languageMenuButton')" [class.active]="buttonStates['languageMenuButton']">
                     <i class="material-symbols-outlined !text-[20px] md:!text-[22px]">
@@ -125,46 +27,28 @@
                 </button>
                 <div class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
                     <span class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
-                        Choose Language
+                        {{ 'header.language.title' | translate }}
                     </span>
                     <ul>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                            <button type="button" 
+                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                    [class.bg-primary-50]="currentLanguage === 'en'"
+                                    (click)="changeLanguage('en')">
                                 <div class="flex items-center">
-                                    <img src="images/flags/usa.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="usa">
-                                    English
+                                    <img src="images/flags/usa.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="usa" onerror="this.style.display='none'">
+                                    {{ 'header.language.english' | translate }}
                                 </div>
                             </button>
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                            <button type="button" 
+                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                    [class.bg-primary-50]="currentLanguage === 'vi'"
+                                    (click)="changeLanguage('vi')">
                                 <div class="flex items-center">
-                                    <img src="images/flags/france.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="france">
-                                    French
-                                </div>
-                            </button>
-                        </li>
-                        <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
-                                <div class="flex items-center">
-                                    <img src="images/flags/germany.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="germany">
-                                    German
-                                </div>
-                            </button>
-                        </li>
-                        <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
-                                <div class="flex items-center">
-                                    <img src="images/flags/portugal.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="portugal">
-                                    Portuguese
-                                </div>
-                            </button>
-                        </li>
-                        <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
-                                <div class="flex items-center">
-                                    <img src="images/flags/spain.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="spain">
-                                    Spanish
+                                    <img src="images/flags/vietnam.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="vietnam">
+                                    {{ 'header.language.vietnamese' | translate }}
                                 </div>
                             </button>
                         </li>
@@ -180,14 +64,14 @@
                 </button>
                 <div class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
                     <span class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
-                        Choose Currency
+                        {{ 'header.currency.title' | translate }}
                     </span>
                     <ul>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
                             <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">₫</span>
-                                    VND (Vietnamese Dong)
+                                    {{ 'header.currency.vnd' | translate }}
                                 </div>
                             </button>
                         </li>
@@ -195,7 +79,7 @@
                             <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">$</span>
-                                    USD (US Dollar)
+                                    {{ 'header.currency.usd' | translate }}
                                 </div>
                             </button>
                         </li>
@@ -203,7 +87,7 @@
                             <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">€</span>
-                                    EUR (Euro)
+                                    {{ 'header.currency.eur' | translate }}
                                 </div>
                             </button>
                         </li>
@@ -289,22 +173,20 @@
                 </div>
             </li>
             <li class="relative profile-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="flex items-center -mx-[5px] relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white" id="profileMenuBtn" (click)="toggleClass('profileMenuBtn')" [class.active]="buttonStates['profileMenuBtn']">
-                    <img src="images/admin.png" class="w-[35px] h-[35px] md:w-[42px] md:h-[42px] rounded-full ltr:md:mr-[2px] ltr:lg:mr-[8px] rtl:md:ml-[2px] rtl:lg:ml-[8px] border-[2px] border-primary-200 inline-block" alt="admin-image">
-                    <span class="block font-semibold text-[0] lg:text-base">
+                <button type="button" class="flex items-center relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white" id="profileMenuBtn" (click)="toggleClass('profileMenuBtn')" [class.active]="buttonStates['profileMenuBtn']">
+                    <span class="block font-semibold text-base">
                         Olivia
                     </span>
                     <i class="ri-arrow-down-s-line text-[15px] absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2 mt-px"></i>
                 </button>
                 <div class="profile-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none py-[22px] absolute mt-[13px] md:mt-[14px] w-[195px] z-[1] top-full ltr:right-0 rtl:left-0 rounded-md">
                     <div class="flex items-center border-b border-gray-100 dark:border-[#172036] pb-[12px] mx-[20px] mb-[10px]">
-                        <img src="images/admin.png" class="rounded-full w-[31px] h-[31px] ltr:mr-[9px] rtl:ml-[9px] border-2 border-primary-200 inline-block" alt="admin-image">
                         <div>
                             <span class="block text-black dark:text-white font-medium">
                                 Olivia John
                             </span>
                             <span class="block text-xs">
-                                Marketing Manager
+                                {{ 'header.profile.role' | translate }}
                             </span>
                         </div>
                     </div>
@@ -314,7 +196,7 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     account_circle
                                 </i>
-                                My Profile
+                                {{ 'header.profile.myProfile' | translate }}
                             </a>
                         </li>
                         <li>
@@ -322,7 +204,7 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     chat
                                 </i>
-                                Messages
+                                {{ 'header.profile.messages' | translate }}
                             </a>
                         </li>
                         <li>
@@ -330,7 +212,7 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     credit_card
                                 </i>
-                                Billing
+                                {{ 'header.profile.billing' | translate }}
                             </a>
                         </li>
                     </ul>
@@ -341,7 +223,7 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     settings
                                 </i>
-                                Settings
+                                {{ 'header.profile.settings' | translate }}
                             </a>
                         </li>
                         <li>
@@ -349,7 +231,7 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     support
                                 </i>
-                                Support
+                                {{ 'header.profile.support' | translate }}
                             </a>
                         </li>
                         <li>
@@ -357,7 +239,7 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     lock
                                 </i>
-                                Lock Screen
+                                {{ 'header.profile.lockScreen' | translate }}
                             </a>
                         </li>
                         <li>
@@ -365,34 +247,10 @@
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     logout
                                 </i>
-                                Logout
+                                {{ 'header.profile.logout' | translate }}
                             </a>
                         </li>
                     </ul>
-                </div>
-            </li>
-            <li class="relative settings-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button
-                    type="button"
-                    (click)="toggleClass('settingsMenuBtn')"
-                    [class.active]="buttonStates['settingsMenuBtn']"
-                    class="leading-none inline-block transition-all relative top-[2px] hover:text-primary-500"
-                >
-                    <i class="material-symbols-outlined !text-[22px] md:!text-xl">
-                        settings
-                    </i>
-                </button>
-                <div class="settings-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none p-[20px] absolute mt-[17px] md:mt-[20px] w-[195px] z-[1] top-full ltr:right-0 rtl:left-0 rounded-md">
-                    <button
-                        type="button"
-                        (click)="toggleDirection()"
-                        class="rtl-mode-toggle flex items-center text-black dark:text-white font-medium"
-                    >
-                        RTL Mode:
-                        <span class="inline-block relative rounded-full w-[35px] h-[20px] bg-gray-50 dark:bg-[#0a0e19] ltr:ml-[10px] rtl:mr-[10px]">
-                            <span class="inline-block transition-all absolute h-[12px] w-[12px] bg-black dark:bg-white rounded-full top-1/2 -translate-y-1/2"></span>
-                        </span>
-                    </button>
                 </div>
             </li>
         </ul>

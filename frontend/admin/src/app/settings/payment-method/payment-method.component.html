@@ -6,7 +6,7 @@
         [class.active]="activeTab === 'general'"
         class="px-[16px] py-[12px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 border-b-2 border-transparent transition-all"
         [ngClass]="{'text-primary-500 border-b-primary-500': activeTab === 'general'}">
-        General Settings
+        {{ 'settings.paymentMethodPage.generalSettings' | translate }}
     </button>
     <button
         type="button"
@@ -14,7 +14,7 @@
         [class.active]="activeTab === 'vnpay'"
         class="px-[16px] py-[12px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 border-b-2 border-transparent transition-all"
         [ngClass]="{'text-primary-500 border-b-primary-500': activeTab === 'vnpay'}">
-        VNPay Gateway
+        {{ 'settings.paymentMethodPage.vnpayGateway' | translate }}
     </button>
     <button
         type="button"
@@ -22,16 +22,16 @@
         [class.active]="activeTab === 'momo'"
         class="px-[16px] py-[12px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 dark:hover:text-primary-400 border-b-2 border-transparent transition-all"
         [ngClass]="{'text-primary-500 border-b-primary-500': activeTab === 'momo'}">
-        Momo Gateway
+        {{ 'settings.paymentMethodPage.momoGateway' | translate }}
     </button>
 </div>
 
 <div *ngIf="activeTab === 'general'" class="tab-content">
     <h5 class="!text-lg !mb-[6px]">
-        General Settings
+        {{ 'settings.paymentMethodPage.generalSettings' | translate }}
     </h5>
     <p class="!mb-[20px] md:!mb-[25px]">
-        Configure default currency and display settings.
+        {{ 'settings.paymentMethodPage.generalSettingsDesc' | translate }}
     </p>
 
     <form [formGroup]="paymentForm">
@@ -39,7 +39,7 @@
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Default Currency
+                    {{ 'settings.paymentMethodPage.defaultCurrency' | translate }}
                 </label>
                 <select formControlName="currency_code" class="h-[55px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[13px] block w-full outline-0 cursor-pointer transition-all focus:border-primary-500 text-black dark:text-white">
                     <option value="VND">VND (Vietnamese Dong)</option>
@@ -49,27 +49,27 @@
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Currency Symbol Position
+                    {{ 'settings.paymentMethodPage.currencySymbolPosition' | translate }}
                 </label>
                 <div class="flex gap-[20px]">
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" formControlName="currency_position" value="prefix" class="mr-[8px]">
-                        <span class="text-black dark:text-white">Prefix (e.g., $100)</span>
+                        <span class="text-black dark:text-white">{{ 'settings.paymentMethodPage.prefix' | translate }}</span>
                     </label>
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" formControlName="currency_position" value="suffix" class="mr-[8px]">
-                        <span class="text-black dark:text-white">Suffix (e.g., 100 VNĐ)</span>
+                        <span class="text-black dark:text-white">{{ 'settings.paymentMethodPage.suffix' | translate }}</span>
                     </label>
                 </div>
             </div>
         </div>
 
         <div class="mt-[25px]">
-            <h6 class="text-black dark:text-white font-medium mb-[15px]">Payment Gateways</h6>
+            <h6 class="text-black dark:text-white font-medium mb-[15px]">{{ 'settings.paymentMethodPage.paymentGateways' | translate }}</h6>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-[20px]">
 
                 <div class="flex items-center justify-between p-[10px] border border-gray-200 dark:border-[#172036] rounded-md">
-                    <span class="text-black dark:text-white font-medium">Enable VNPay Gateway</span>
+                    <span class="text-black dark:text-white font-medium">{{ 'settings.paymentMethodPage.enableVnpayGateway' | translate }}</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" formControlName="vnpay_enable" class="sr-only peer">
                         <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
@@ -77,7 +77,7 @@
                 </div>
 
                 <div class="flex items-center justify-between p-[10px] border border-gray-200 dark:border-[#172036] rounded-md">
-                    <span class="text-black dark:text-white font-medium">Enable Momo Gateway</span>
+                    <span class="text-black dark:text-white font-medium">{{ 'settings.paymentMethodPage.enableMomoGateway' | translate }}</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" formControlName="momo_enable" class="sr-only peer">
                         <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
@@ -90,10 +90,10 @@
 
 <div *ngIf="activeTab === 'vnpay'" class="tab-content">
     <h5 class="!text-lg !mb-[6px]">
-        VNPay Gateway Configuration
+        {{ 'settings.paymentMethodPage.vnpayConfiguration' | translate }}
     </h5>
     <p class="!mb-[20px] md:!mb-[25px]">
-        Configure VNPay payment gateway settings.
+        {{ 'settings.paymentMethodPage.vnpayConfigurationDesc' | translate }}
     </p>
 
     <form [formGroup]="paymentForm">
@@ -101,95 +101,95 @@
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Gateway Title
+                    {{ 'settings.paymentMethodPage.gatewayTitle' | translate }}
                 </label>
-                <input type="text" formControlName="vnpay_title" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" placeholder="Pay with VNPay QR">
+                <input type="text" formControlName="vnpay_title" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" [placeholder]="'settings.paymentMethodPage.payWithVnpayQr' | translate">
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Gateway Description
+                    {{ 'settings.paymentMethodPage.gatewayDescription' | translate }}
                 </label>
-                <textarea formControlName="vnpay_description" class="rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] py-[12px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 min-h-[80px]" placeholder="Scan QR code with your bank app."></textarea>
+                <textarea formControlName="vnpay_description" class="rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] py-[12px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 min-h-[80px]" [placeholder]="'settings.paymentMethodPage.scanQrVnpay' | translate"></textarea>
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Environment Mode
+                    {{ 'settings.paymentMethodPage.environmentMode' | translate }}
                 </label>
                 <div class="flex gap-[20px]">
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" formControlName="vnpay_mode" value="sandbox" class="mr-[8px]">
-                        <span class="text-black dark:text-white">Sandbox (Testing)</span>
+                        <span class="text-black dark:text-white">{{ 'settings.paymentMethodPage.sandboxTesting' | translate }}</span>
                     </label>
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" formControlName="vnpay_mode" value="live" class="mr-[8px]">
-                        <span class="text-black dark:text-white">Live (Production)</span>
+                        <span class="text-black dark:text-white">{{ 'settings.paymentMethodPage.liveProduction' | translate }}</span>
                     </label>
                 </div>
             </div>
 
             <div class="col-span-full border-t border-gray-200 dark:border-[#172036] pt-[20px]">
-                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">Sandbox Settings</h6>
+                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">{{ 'settings.paymentMethodPage.sandboxSettings' | translate }}</h6>
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Sandbox TMN Code
+                    {{ 'settings.paymentMethodPage.sandboxTmnCode' | translate }}
                 </label>
                 <input type="text" formControlName="vnpay_sandbox_tmn_code" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Sandbox Hash Secret
+                    {{ 'settings.paymentMethodPage.sandboxHashSecret' | translate }}
                 </label>
                 <input type="password" formControlName="vnpay_sandbox_hash_secret" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" placeholder="●●●●●●●●">
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Sandbox URL
+                    {{ 'settings.paymentMethodPage.sandboxUrl' | translate }}
                 </label>
                 <input type="text" formControlName="vnpay_sandbox_url" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div class="col-span-full border-t border-gray-200 dark:border-[#172036] pt-[20px]">
-                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">Live Settings</h6>
+                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">{{ 'settings.paymentMethodPage.liveSettings' | translate }}</h6>
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Live TMN Code
+                    {{ 'settings.paymentMethodPage.liveTmnCode' | translate }}
                 </label>
                 <input type="text" formControlName="vnpay_live_tmn_code" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Live Hash Secret
+                    {{ 'settings.paymentMethodPage.liveHashSecret' | translate }}
                 </label>
                 <input type="password" formControlName="vnpay_live_hash_secret" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" placeholder="●●●●●●●●">
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Live URL
+                    {{ 'settings.paymentMethodPage.liveUrl' | translate }}
                 </label>
                 <input type="text" formControlName="vnpay_live_url" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div class="col-span-full border-t border-gray-200 dark:border-[#172036] pt-[20px]">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    IPN Callback URL
+                    {{ 'settings.paymentMethodPage.ipnCallbackUrl' | translate }}
                 </label>
                 <div class="flex gap-[10px]">
                     <input type="text" value="https://yourdomain.com/api/payment/vnpay_ipn" readonly class="h-[55px] rounded-md text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#172036] bg-gray-50 dark:bg-[#0c1427] px-[17px] block w-full outline-0">
                     <button type="button" class="px-[20px] py-[10px] bg-primary-500 text-white rounded-md hover:bg-primary-600 whitespace-nowrap font-medium">
-                        Copy
+                        {{ 'settings.paymentMethodPage.copy' | translate }}
                     </button>
                 </div>
-                <p class="text-xs text-gray-500 mt-[8px]">Copy this URL to your VNPay Merchant dashboard settings.</p>
+                <p class="text-xs text-gray-500 mt-[8px]">{{ 'settings.paymentMethodPage.copyUrlDesc' | translate: {gateway: 'VNPay'} }}</p>
             </div>
         </div>
     </form>
@@ -197,10 +197,10 @@
 
 <div *ngIf="activeTab === 'momo'" class="tab-content">
     <h5 class="!text-lg !mb-[6px]">
-        Momo Gateway Configuration
+        {{ 'settings.paymentMethodPage.momoConfiguration' | translate }}
     </h5>
     <p class="!mb-[20px] md:!mb-[25px]">
-        Configure Momo payment gateway settings.
+        {{ 'settings.paymentMethodPage.momoConfigurationDesc' | translate }}
     </p>
 
     <form [formGroup]="paymentForm">
@@ -208,95 +208,95 @@
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Gateway Title
+                    {{ 'settings.paymentMethodPage.gatewayTitle' | translate }}
                 </label>
-                <input type="text" formControlName="momo_title" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" placeholder="Pay with Momo E-Wallet">
+                <input type="text" formControlName="momo_title" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" [placeholder]="'settings.paymentMethodPage.payWithMomoWallet' | translate">
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Gateway Description
+                    {{ 'settings.paymentMethodPage.gatewayDescription' | translate }}
                 </label>
-                <textarea formControlName="momo_description" class="rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] py-[12px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 min-h-[80px]" placeholder="Scan QR code with your Momo app."></textarea>
+                <textarea formControlName="momo_description" class="rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] py-[12px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 min-h-[80px]" [placeholder]="'settings.paymentMethodPage.scanQrMomo' | translate"></textarea>
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Environment Mode
+                    {{ 'settings.paymentMethodPage.environmentMode' | translate }}
                 </label>
                 <div class="flex gap-[20px]">
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" formControlName="momo_mode" value="sandbox" class="mr-[8px]">
-                        <span class="text-black dark:text-white">Sandbox (Testing)</span>
+                        <span class="text-black dark:text-white">{{ 'settings.paymentMethodPage.sandboxTesting' | translate }}</span>
                     </label>
                     <label class="flex items-center cursor-pointer">
                         <input type="radio" formControlName="momo_mode" value="live" class="mr-[8px]">
-                        <span class="text-black dark:text-white">Live (Production)</span>
+                        <span class="text-black dark:text-white">{{ 'settings.paymentMethodPage.liveProduction' | translate }}</span>
                     </label>
                 </div>
             </div>
 
             <div class="col-span-full border-t border-gray-200 dark:border-[#172036] pt-[20px]">
-                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">Sandbox Settings</h6>
+                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">{{ 'settings.paymentMethodPage.sandboxSettings' | translate }}</h6>
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Sandbox Partner Code
+                    {{ 'settings.paymentMethodPage.sandboxPartnerCode' | translate }}
                 </label>
                 <input type="text" formControlName="momo_sandbox_partner_code" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Sandbox Access Key
+                    {{ 'settings.paymentMethodPage.sandboxAccessKey' | translate }}
                 </label>
                 <input type="text" formControlName="momo_sandbox_access_key" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Sandbox Secret Key
+                    {{ 'settings.paymentMethodPage.sandboxSecretKey' | translate }}
                 </label>
                 <input type="password" formControlName="momo_sandbox_secret_key" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" placeholder="●●●●●●●●">
             </div>
 
             <div class="col-span-full border-t border-gray-200 dark:border-[#172036] pt-[20px]">
-                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">Live Settings</h6>
+                <h6 class="text-sm font-medium text-black dark:text-white mb-[15px]">{{ 'settings.paymentMethodPage.liveSettings' | translate }}</h6>
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Live Partner Code
+                    {{ 'settings.paymentMethodPage.livePartnerCode' | translate }}
                 </label>
                 <input type="text" formControlName="momo_live_partner_code" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div>
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Live Access Key
+                    {{ 'settings.paymentMethodPage.liveAccessKey' | translate }}
                 </label>
                 <input type="text" formControlName="momo_live_access_key" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500">
             </div>
 
             <div class="col-span-full">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    Live Secret Key
+                    {{ 'settings.paymentMethodPage.liveSecretKey' | translate }}
                 </label>
                 <input type="password" formControlName="momo_live_secret_key" class="h-[55px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500" placeholder="●●●●●●●●">
             </div>
 
             <div class="col-span-full border-t border-gray-200 dark:border-[#172036] pt-[20px]">
                 <label class="mb-[10px] text-black dark:text-white font-medium block">
-                    IPN Callback URL
+                    {{ 'settings.paymentMethodPage.ipnCallbackUrl' | translate }}
                 </label>
                 <div class="flex gap-[10px]">
                     <input type="text" value="https://yourdomain.com/api/payment/momo_ipn" readonly class="h-[55px] rounded-md text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-[#172036] bg-gray-50 dark:bg-[#0c1427] px-[17px] block w-full outline-0">
                     <button type="button" class="px-[20px] py-[10px] bg-primary-500 text-white rounded-md hover:bg-primary-600 whitespace-nowrap font-medium">
-                        Copy
+                        {{ 'settings.paymentMethodPage.copy' | translate }}
                     </button>
                 </div>
-                <p class="text-xs text-gray-500 mt-[8px]">Copy this URL to your Momo Merchant dashboard settings.</p>
+                <p class="text-xs text-gray-500 mt-[8px]">{{ 'settings.paymentMethodPage.copyUrlDesc' | translate: {gateway: 'Momo'} }}</p>
             </div>
         </div>
     </form>
@@ -304,9 +304,9 @@
 
 <div class="mt-[30px] pt-[20px] border-t border-gray-200 dark:border-[#172036] flex gap-[12px]">
     <button type="button" (click)="saveSettings()" class="px-[24px] py-[12px] bg-primary-500 text-white rounded-md hover:bg-primary-600 font-medium">
-        Save Settings
+        {{ 'settings.paymentMethodPage.saveSettings' | translate }}
     </button>
     <button type="button" class="px-[24px] py-[12px] border border-gray-200 dark:border-[#172036] text-black dark:text-white rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c] font-medium">
-        Cancel
+        {{ 'settings.paymentMethodPage.cancel' | translate }}
     </button>
 </div>

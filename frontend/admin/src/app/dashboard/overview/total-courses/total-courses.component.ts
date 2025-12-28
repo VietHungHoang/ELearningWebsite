@@ -3,10 +3,11 @@ import { Subscription } from 'rxjs';
 import { TotalCoursesService } from './total-courses.service';
 import { DashboardService } from '../../../services/dashboard.service';
 import { PendingApprovalsData } from '../../../types/dashboard';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-total-courses',
-    imports: [],
+    imports: [TranslatePipe],
     templateUrl: './total-courses.component.html',
     styleUrl: './total-courses.component.scss'
 })

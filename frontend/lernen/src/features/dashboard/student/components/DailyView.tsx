@@ -10,7 +10,8 @@ interface DailyViewProps {
 }
 
 const DailyView: React.FC<DailyViewProps> = ({ currentDate, bookings, onSessionClick }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
     const times = Array.from({ length: 18 }, (_, i) => i + 6); // 6 AM to 11 PM (23:00)
     const bookingsForDay = bookings.filter(session => {
         // Convert UTC datetime from backend to local timezone
@@ -23,7 +24,7 @@ const DailyView: React.FC<DailyViewProps> = ({ currentDate, bookings, onSessionC
         <div className="border border-gray-200 rounded-lg overflow-hidden">
             <div className="flex text-sm font-semibold text-gray-600 bg-white border-b border-gray-200">
                 <div className="p-3 border-r border-gray-200 w-32 flex-shrink-0 text-center">{t('dashboard.common.time')}</div>
-                <div className="p-3 flex-1 text-center">{currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} GMT +13:00</div>
+                <div className="p-3 flex-1 text-center">{currentDate.toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' })}</div>
             </div>
             <div className="relative flex">
                 <div className="w-32 flex-shrink-0 divide-y divide-gray-200">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import commonUtils from '../../../../utils/commonUtils';
 import type { Session } from '../../../../types/class';
 
@@ -9,6 +10,8 @@ interface WeeklyViewProps {
 }
 
 const WeeklyView: React.FC<WeeklyViewProps> = ({ currentDate, bookings, onSessionClick }) => {
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
     const getWeekDays = (baseDate: Date) => {
         const startOfWeek = new Date(baseDate);
         startOfWeek.setHours(0, 0, 0, 0);
@@ -29,10 +32,10 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({ currentDate, bookings, onSessio
                 {weekDays.map((day, index) => (
                     <div key={index} className={`p-3 text-center border-b border-gray-200 bg-gray-50 ${index < 6 ? 'border-r' : ''}`}>
                         <p className="font-bold text-gray-800 text-sm">
-                            {day.toLocaleDateString('en-US', { day: 'numeric' })} {day.toLocaleDateString('en-US', { month: 'long' })}
+                            {day.toLocaleDateString(locale, { day: 'numeric' })} {day.toLocaleDateString(locale, { month: 'long' })}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
-                            {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                            {day.toLocaleDateString(locale, { weekday: 'short' })}
                         </p>
                     </div>
                 ))}
@@ -56,13 +59,13 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({ currentDate, bookings, onSessio
                                             className="text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer bg-[#0b6459] text-white"
                                         >
                                             <p className="font-bold">{session.classInfo?.title || 'Session'}</p>
-                                            <p>{localSessionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                                            <p>{localSessionDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</p>
                                         </div>
                                     );
                                 })
                             ) : (
                                 <div className="bg-[#FBF6EE] text-[#B58A3F] text-xs font-semibold py-1.5 px-2 rounded-lg text-center">
-                                    No sessions
+                                    {t('dashboard.common.noSessions')}
                                 </div>
                             )}
                         </div>

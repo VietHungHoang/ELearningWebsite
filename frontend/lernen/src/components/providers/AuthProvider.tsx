@@ -92,7 +92,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const [isInitialized, setIsInitialized] = React.useState(false);
-
     const login = async (request: LoginRequest): Promise<AuthUser | null> => {
         dispatch({ type: "LOGIN_START" });
         try {

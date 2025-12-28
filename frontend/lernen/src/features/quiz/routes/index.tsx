@@ -1,9 +1,13 @@
 import type { RouteObject } from 'react-router-dom';
+import { CreateQuizPage } from '../create-quiz/create-quiz';
 import QuizTakingPage from '../pages/QuizTakingPage';
 import QuizResultPage from '../pages/QuizResultPage';
-import { CreateQuizPage } from '../create-quiz/create-quiz';
 
 const quizRoutes: RouteObject[] = [
+    {
+        path: '/quiz/create',
+        element: <CreateQuizPage />,
+    },
     {
         path: '/quiz/take',
         element: <QuizTakingPage />,
@@ -11,10 +15,6 @@ const quizRoutes: RouteObject[] = [
     {
         path: '/quiz/result',
         element: <QuizResultPage />,
-    },
-    {
-        path: '/quiz/create',
-        element: <CreateQuizPage />,
     },
 ];
 

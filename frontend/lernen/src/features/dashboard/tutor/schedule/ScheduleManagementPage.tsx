@@ -38,6 +38,7 @@ const ScheduleManagementContent: React.FC = () => {
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
     const [tempAvailability, setTempAvailability] = useState<string[]>(availability);
+    const [editModeAvailability, setEditModeAvailability] = useState<string[]>([]); // Slots for next week (for edit mode)
 
     // Marquee Selection State
     const [isDragging, setIsDragging] = useState(false);
@@ -56,7 +57,7 @@ const ScheduleManagementContent: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
     // Timezone State
-    const [selectedTimezone, setSelectedTimezone] = useState<string>("");
+    const [selectedTimezone, setSelectedTimezone] = useState<{ name: string; offset: string } | null>(null);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
     // Set breadcrumb
@@ -76,20 +77,56 @@ const ScheduleManagementContent: React.FC = () => {
     // Set default timezone to user's current timezone (only on mount)
     useEffect(() => {
         const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const currentTimezoneOption = timezoneOptions.find(option => option.startsWith(currentTimezone));
-        if (currentTimezoneOption && !selectedTimezone) { // Only set if not already set
-            setSelectedTimezone(currentTimezoneOption);
-        } else if (!selectedTimezone) {
-            setSelectedTimezone(timezoneOptions[0] || "UTC (+00:00)"); // fallback
+        const timezones = commonUtils.getAllTimezones();
+        const foundTimezone = timezones.find(tz => tz.name === currentTimezone);
+        if (foundTimezone) {
+            setSelectedTimezone(foundTimezone);
+        } else {
+            setSelectedTimezone(timezones[0] || { name: "UTC", offset: "+00:00" }); // fallback
         }
-    }, []); // Remove timezoneOptions dependency
+    }, []); // Only on mount
 
     // Fetch initial availability on mount
     useEffect(() => {
         const { start, end } = getMonthlyRange(currentDate);
         fetchAvailability(start, end);
         fetchBookedSessions(start, end);
+        
+        // Fetch availability for next week (for edit mode)
+        fetchNextWeekAvailability();
     }, []);
+
+    // Fetch availability for next week (for edit mode only)
+    const fetchNextWeekAvailability = async () => {
+        if (!user?.id) return;
+        
+        try {
+            const today = new Date();
+            const nextWeekStart = new Date(today);
+            nextWeekStart.setDate(today.getDate() + 7); // Next week start
+            
+            // Get next week range (Monday to Sunday)
+            const weekRange = getWeekRangeForDate(nextWeekStart);
+            const startDate = weekRange.start;
+            const endDate = new Date(weekRange.end);
+            
+            const response = await scheduleService.getAvailability({
+                tutorId: user.id,
+                startDate: startDate.toISOString().split('T')[0],
+                endDate: endDate.toISOString().split('T')[0]
+            });
+            
+            if (response.success) {
+                console.log('Next week availability response:', response.data);
+                // Generate slots for next week
+                const slots = generateSlotsFromAvailabilities(response.data.availabilities, startDate, endDate);
+                console.log('Next week slots generated:', slots);
+                setEditModeAvailability(slots);
+            }
+        } catch (error) {
+            console.error('Failed to fetch next week availability:', error);
+        }
+    };
 
     // Date Picker Dropdown State
     const [displayDate, setDisplayDate] = useState(
@@ -106,8 +143,11 @@ const ScheduleManagementContent: React.FC = () => {
 
     // --- HANDLERS ---
     const handleTimezoneSelect = (timezone: string) => {
-        setSelectedTimezone(timezone);
-        // TODO: Implement timezone conversion logic for schedule display
+        // Parse timezone string "Asia/Ho_Chi_Minh (+07:00)" -> { name: "Asia/Ho_Chi_Minh", offset: "+07:00" }
+        const match = timezone.match(/^(.+?)\s+\(([+-]\d{2}:\d{2})\)$/);
+        if (match) {
+            setSelectedTimezone({ name: match[1], offset: match[2] });
+        }
     };
 
     const handleSessionClick = (booking: Session, event: React.MouseEvent) => {
@@ -118,24 +158,44 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     const handleCellClick = (date: Date, hour: number) => {
-        if (!isEditMode) return;
+        if (!isEditMode || !selectedTimezone) return;
 
-        const slotDate = new Date(date);
-        slotDate.setUTCHours(hour, 0, 0, 0);
-        const slotISO = slotDate.toISOString();
-        const isCurrentlyAvailable = tempAvailability.includes(slotISO);
+        // Create slot in local timezone
+        const localSlotDate = new Date(date);
+        localSlotDate.setUTCHours(hour, 0, 0, 0);
+        const localSlotISO = localSlotDate.toISOString();
+        
+        // Convert local slot back to UTC for storage
+        const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+        if (!offsetMatch) return;
+        
+        const sign = offsetMatch[1] === "+" ? 1 : -1;
+        const offsetHours = parseInt(offsetMatch[2]);
+        const offsetMinutes = parseInt(offsetMatch[3]);
+        
+        // Reverse the timezone offset to get UTC
+        const utcSlotDate = new Date(Date.UTC(
+            localSlotDate.getUTCFullYear(),
+            localSlotDate.getUTCMonth(),
+            localSlotDate.getUTCDate(),
+            localSlotDate.getUTCHours() - sign * offsetHours,
+            localSlotDate.getUTCMinutes() - sign * offsetMinutes
+        ));
+        const utcSlotISO = utcSlotDate.toISOString();
+        
+        const isCurrentlyAvailable = tempAvailability.includes(utcSlotISO);
 
-        console.log('Cell clicked:', slotISO, 'currently available:', isCurrentlyAvailable);
+        console.log('Cell clicked - Local:', localSlotISO, 'UTC:', utcSlotISO, 'currently available:', isCurrentlyAvailable);
 
         if (isCurrentlyAvailable) {
             setTempAvailability((prev) => {
-                const updated = prev.filter((s) => s !== slotISO);
+                const updated = prev.filter((s) => s !== utcSlotISO);
                 console.log('Removed slot, new length:', updated.length);
                 return updated;
             });
         } else {
             setTempAvailability((prev) => {
-                const updated = [...prev, slotISO];
+                const updated = [...prev, utcSlotISO];
                 console.log('Added slot, new length:', updated.length);
                 return updated;
             });
@@ -144,17 +204,24 @@ const ScheduleManagementContent: React.FC = () => {
 
     // Edit Mode Handlers
     const handleEditClick = () => {
-        // Always go to current week when editing (current week is the active schedule)
+        // Navigate to next week when editing
         const today = new Date();
-        const currentWeekStart = getWeekRangeForDate(today).start;
-        setCurrentDate(currentWeekStart);
+        const nextWeekStart = new Date(today);
+        nextWeekStart.setDate(today.getDate() + 7);
+        const weekRange = getWeekRangeForDate(nextWeekStart);
+        setCurrentDate(weekRange.start);
         
-        setTempAvailability([...availability]);
+        // Use pre-fetched editModeAvailability
+        setTempAvailability([...editModeAvailability]);
         setIsEditMode(true);
     };
 
     const handleCancelClick = () => {
         setIsEditMode(false);
+        // Navigate back to current week
+        const today = new Date();
+        const currentWeekStart = getWeekRangeForDate(today).start;
+        setCurrentDate(currentWeekStart);
     };
 
     const handleDateApply = (date: Date) => {
@@ -178,12 +245,12 @@ const ScheduleManagementContent: React.FC = () => {
 
     const convertTempAvailabilityToTutorAvailabilities = (tempAvailability: string[]): Omit<TutorAvailability, 'id'>[] => {
         const availabilities: Omit<TutorAvailability, 'id'>[] = [];
-        const today = new Date();
-        const effectiveStartDate = today.toISOString().split('T')[0];
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const effectiveStartDate = tomorrow.toISOString().split('T')[0];
         
         // Group slots by day of week
         const groupedByDay: { [dayOfWeek: number]: Set<number> } = {};
-        
         tempAvailability.forEach(slot => {
             const date = new Date(slot);
             const dayOfWeek = date.getUTCDay();
@@ -199,7 +266,6 @@ const ScheduleManagementContent: React.FC = () => {
         Object.entries(groupedByDay).forEach(([dayStr, hoursSet]) => {
             const dayOfWeek = parseInt(dayStr);
             const hours = Array.from(hoursSet).sort((a, b) => a - b);
-            
             if (hours.length === 0) return;
             
             // Merge consecutive hours
@@ -236,8 +302,8 @@ const ScheduleManagementContent: React.FC = () => {
         
         availabilities.forEach((avail) => {
             // Parse time range
-            const [startHour, startMin] = avail.startTime.split(':').map(Number);
-            const [endHour, endMin] = avail.endTime.split(':').map(Number);
+            const [startHour] = avail.startTime.split(':').map(Number);
+            const [endHour] = avail.endTime.split(':').map(Number);
             
             // Check effective date range
             const effectiveStart = new Date(avail.effectiveStartDate);
@@ -341,27 +407,21 @@ const ScheduleManagementContent: React.FC = () => {
 
     const handleSaveForFuture = async () => {
         if (!user?.id) return;
-        if (!user?.id) return;
         
         try {
             console.log('=== SAVE DEBUG ===');
-            console.log('tempAvailability slots:', tempAvailability);
+            console.log('tempAvailability slots (UTC):', tempAvailability);
             console.log('tempAvailability length:', tempAvailability.length);
             
-            // Convert tempAvailability slots back to TutorAvailability format
+            // Convert tempAvailability slots (UTC ISO strings) back to TutorAvailability format
             const newAvailabilities = convertTempAvailabilityToTutorAvailabilities(tempAvailability);
-            console.log('Converted new availabilities:', newAvailabilities);
+            console.log('Converted availabilities (no IDs):', newAvailabilities);
             
-            // Get IDs of old availabilities to delete
-            const oldAvailabilityIds = originalAvailabilities.map(avail => avail.id).filter((id): id is string => id !== undefined);
-            console.log('Old availability IDs to delete:', oldAvailabilityIds);
+            console.log('Sending to API:', { availabilities: newAvailabilities });
             
-            console.log('Sending to API:', { availabilities: newAvailabilities, deleteIds: oldAvailabilityIds });
-            
-            // Call API to update availability
+            // Call API to update availability (only send new availabilities, no deleteIds)
             const response = await scheduleService.updateAvailability(user.id, { 
-                availabilities: newAvailabilities,
-                deleteIds: oldAvailabilityIds 
+                availabilities: newAvailabilities
             });
             
             if (response.success) {
@@ -372,6 +432,14 @@ const ScheduleManagementContent: React.FC = () => {
                 // Refetch to get new availability data with IDs
                 const { start, end } = getMonthlyRange(currentDate);
                 fetchAvailability(start, end);
+                
+                // Refetch next week availability for edit mode
+                fetchNextWeekAvailability();
+                
+                // Navigate back to current week
+                const today = new Date();
+                const currentWeekStart = getWeekRangeForDate(today).start;
+                setCurrentDate(currentWeekStart);
             } else {
                 setToast({ message: t('dashboard.tutor.schedule.errors.save'), type: 'error' });
             }
@@ -380,6 +448,83 @@ const ScheduleManagementContent: React.FC = () => {
             setToast({ message: t('dashboard.tutor.schedule.errors.save'), type: 'error' });
         }
     };
+
+    // Convert UTC slots to local timezone for display
+    const displaySlots = useMemo(() => {
+        if (!selectedTimezone || availability.length === 0) return [];
+
+        const slots: string[] = [];
+        
+        availability.forEach(utcSlot => {
+            // Parse UTC time from ISO string
+            const utcDate = new Date(utcSlot);
+            
+            // Get UTC components
+            const utcYear = utcDate.getUTCFullYear();
+            const utcMonth = utcDate.getUTCMonth();
+            const utcDay = utcDate.getUTCDate();
+            const utcHour = utcDate.getUTCHours();
+            const utcMinute = utcDate.getUTCMinutes();
+            
+            // Parse timezone offset
+            const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+            if (!offsetMatch) return;
+            
+            const sign = offsetMatch[1] === "+" ? 1 : -1;
+            const offsetHours = parseInt(offsetMatch[2]);
+            const offsetMinutes = parseInt(offsetMatch[3]);
+            
+            // Apply offset to create local time
+            const localDate = new Date(Date.UTC(
+                utcYear,
+                utcMonth,
+                utcDay,
+                utcHour + sign * offsetHours,
+                utcMinute + sign * offsetMinutes
+            ));
+            
+            // Store as ISO string (but represents local time)
+            slots.push(localDate.toISOString());
+        });
+
+        return slots;
+    }, [availability, selectedTimezone]);
+
+    // Convert tempAvailability (UTC) to local timezone for display in edit mode
+    const displayTempSlots = useMemo(() => {
+        if (!selectedTimezone || tempAvailability.length === 0) return [];
+
+        const slots: string[] = [];
+        
+        tempAvailability.forEach(utcSlot => {
+            const utcDate = new Date(utcSlot);
+            
+            const utcYear = utcDate.getUTCFullYear();
+            const utcMonth = utcDate.getUTCMonth();
+            const utcDay = utcDate.getUTCDate();
+            const utcHour = utcDate.getUTCHours();
+            const utcMinute = utcDate.getUTCMinutes();
+            
+            const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+            if (!offsetMatch) return;
+            
+            const sign = offsetMatch[1] === "+" ? 1 : -1;
+            const offsetHours = parseInt(offsetMatch[2]);
+            const offsetMinutes = parseInt(offsetMatch[3]);
+            
+            const localDate = new Date(Date.UTC(
+                utcYear,
+                utcMonth,
+                utcDay,
+                utcHour + sign * offsetHours,
+                utcMinute + sign * offsetMinutes
+            ));
+            
+            slots.push(localDate.toISOString());
+        });
+
+        return slots;
+    }, [tempAvailability, selectedTimezone]);
 
     // --- DATE & NAVIGATION UTILS ---
     const getWeekDays = (baseDate: Date) => {
@@ -490,7 +635,7 @@ const ScheduleManagementContent: React.FC = () => {
 
     // --- MARQUEE SELECTION LOGIC ---
     const handleMouseDown = (e: React.MouseEvent, date: Date, hour: number) => {
-        if (!isEditMode || e.button !== 0) return;
+        if (!isEditMode || e.button !== 0 || !selectedTimezone) return;
         e.preventDefault();
 
         const gridRect = gridRef.current?.getBoundingClientRect();
@@ -500,10 +645,28 @@ const ScheduleManagementContent: React.FC = () => {
         const startY = e.clientY - gridRect.top;
         setDragStartCoords({ x: startX, y: startY });
 
-        const slotDate = new Date(date);
-        slotDate.setUTCHours(hour, 0, 0, 0);
-        const slotISO = slotDate.toISOString();
-        const mode = tempAvailability.includes(slotISO) ? "removing" : "adding";
+        // Create slot in local timezone
+        const localSlotDate = new Date(date);
+        localSlotDate.setUTCHours(hour, 0, 0, 0);
+        
+        // Convert to UTC for checking
+        const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+        if (!offsetMatch) return;
+        
+        const sign = offsetMatch[1] === "+" ? 1 : -1;
+        const offsetHours = parseInt(offsetMatch[2]);
+        const offsetMinutes = parseInt(offsetMatch[3]);
+        
+        const utcSlotDate = new Date(Date.UTC(
+            localSlotDate.getUTCFullYear(),
+            localSlotDate.getUTCMonth(),
+            localSlotDate.getUTCDate(),
+            localSlotDate.getUTCHours() - sign * offsetHours,
+            localSlotDate.getUTCMinutes() - sign * offsetMinutes
+        ));
+        const utcSlotISO = utcSlotDate.toISOString();
+        
+        const mode = tempAvailability.includes(utcSlotISO) ? "removing" : "adding";
         setSelectionMode(mode);
         setInitialAvailabilityOnDrag([...tempAvailability]);
         setIsDragging(true);
@@ -544,11 +707,19 @@ const ScheduleManagementContent: React.FC = () => {
     }, [isDragging, dragStartCoords]);
 
     useEffect(() => {
-        if (!isDragging || !selectionRect || !selectionMode || !gridRef.current) return;
+        if (!isDragging || !selectionRect || !selectionMode || !gridRef.current || !selectedTimezone) return;
 
         const newAvailability = new Set(initialAvailabilityOnDrag);
         const gridRect = gridRef.current.getBoundingClientRect();
         const cellElements = gridRef.current.querySelectorAll(".calendar-cell");
+
+        // Parse timezone offset once
+        const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+        if (!offsetMatch) return;
+        
+        const sign = offsetMatch[1] === "+" ? 1 : -1;
+        const offsetHours = parseInt(offsetMatch[2]);
+        const offsetMinutes = parseInt(offsetMatch[3]);
 
         cellElements.forEach((cell) => {
             const cellRect = cell.getBoundingClientRect();
@@ -564,17 +735,28 @@ const ScheduleManagementContent: React.FC = () => {
                 selectionRect.top < relativeCellRect.bottom &&
                 selectionRect.top + selectionRect.height > relativeCellRect.top
             ) {
-                const iso = (cell as HTMLElement).dataset.iso;
-                if (iso) {
-                    if (selectionMode === "adding") newAvailability.add(iso);
-                    else if (selectionMode === "removing") newAvailability.delete(iso);
+                const localIso = (cell as HTMLElement).dataset.iso;
+                if (localIso) {
+                    // Convert local ISO to UTC ISO
+                    const localDate = new Date(localIso);
+                    const utcDate = new Date(Date.UTC(
+                        localDate.getUTCFullYear(),
+                        localDate.getUTCMonth(),
+                        localDate.getUTCDate(),
+                        localDate.getUTCHours() - sign * offsetHours,
+                        localDate.getUTCMinutes() - sign * offsetMinutes
+                    ));
+                    const utcIso = utcDate.toISOString();
+                    
+                    if (selectionMode === "adding") newAvailability.add(utcIso);
+                    else if (selectionMode === "removing") newAvailability.delete(utcIso);
                 }
             }
         });
         const updated = Array.from(newAvailability);
         console.log('Drag selection updated tempAvailability, new length:', updated.length);
         setTempAvailability(updated);
-    }, [selectionRect, selectionMode, initialAvailabilityOnDrag, isDragging]);
+    }, [selectionRect, selectionMode, initialAvailabilityOnDrag, isDragging, selectedTimezone]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -737,10 +919,20 @@ const ScheduleManagementContent: React.FC = () => {
     // --- RENDER FUNCTIONS FOR VIEWS ---
     const timeSlots = Array.from({ length: 18 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`); // 7:00-24:00 - all time slots
 
-    const renderHourlyGrid = (days: Date[]) => (
+    const renderHourlyGrid = (days: Date[], isDaily: boolean = false) => {
+        // Daily view: larger cells (h-12) for scrolling
+        // Weekly view: smaller cells (h-7) to fit without scrolling
+        const timeColumnWidth = isDaily ? '100px' : '80px';
+        const cellHeight = isDaily ? 'h-12' : 'h-7.5';
+        const timeTextSize = isDaily ? 'text-sm font-medium text-gray-700' : 'text-[10px] text-gray-500';
+        const timePadding = isDaily ? 'pr-4 py-1' : 'pr-3 py-0.5';
+        const sessionTextSize = isDaily ? 'text-xs' : 'text-[10px]';
+        const sessionPadding = isDaily ? 'px-2 py-1' : 'px-2 py-0.5';
+
+        return (
         <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full w-full min-h-0 overflow-hidden">
-            <div className="overflow-x-auto flex-1 relative min-h-0" ref={gridRef}>
-                <div className={`grid`} style={{ gridTemplateColumns: `80px repeat(${days.length}, 1fr)`, width: '100%' }}>
+            <div className="overflow-x-auto overflow-y-auto flex-1 relative min-h-0" ref={gridRef}>
+                <div className={`grid`} style={{ gridTemplateColumns: `${timeColumnWidth} repeat(${days.length}, 1fr)`, width: '100%' }}>
                     {/* Time Column Header */}
                     <div className="sticky left-0 bg-white z-10"></div>
                     {/* Day Headers */}
@@ -756,36 +948,63 @@ const ScheduleManagementContent: React.FC = () => {
                     {/* Time Slots and Availability Grid */}
                     {timeSlots.map((time) => (
                         <React.Fragment key={time}>
-                            <div className="text-right pr-3 py-0.5 border-r border-gray-200 text-[10px] text-gray-500 sticky left-0 bg-white z-10 h-7 flex items-center justify-end">
+                            <div className={`text-right border-r border-gray-200 sticky left-0 bg-white z-10 ${cellHeight} flex items-center justify-end ${timeTextSize} ${timePadding}`}>
                                 {time}
                             </div>
                             {days.map((day) => {
                                 const hour = parseInt(time.split(":")[0]);
+                                
+                                // Create slot in LOCAL timezone (day is already in local timezone from getWeekDays)
                                 const slotDate = new Date(day);
                                 slotDate.setUTCHours(hour, 0, 0, 0);
                                 const slotISO = slotDate.toISOString();
 
+                                // Check if this slot is available (compare with displaySlots)
                                 const isAvailable = isEditMode
-                                    ? tempAvailability.includes(slotISO)
-                                    : availability.includes(slotISO);
+                                    ? displayTempSlots.includes(slotISO)
+                                    : displaySlots.includes(slotISO);
+                                    
+                                // Find booked session for this slot
+                                // Convert booked session time to local timezone for comparison
                                 const bookedSession = bookedSessions.find(session => {
                                     if (!session.sessionDatetime) return false;
-                                    const sessionDate = new Date(session.sessionDatetime);
-                                    // Check if slot matches the session datetime (assuming 1-hour sessions)
-                                    return sessionDate.getTime() === slotDate.getTime();
+                                    
+                                    // Parse session datetime (UTC from BE)
+                                    const sessionUtcDate = new Date(session.sessionDatetime);
+                                    
+                                    if (!selectedTimezone) return false;
+                                    
+                                    // Convert to local timezone
+                                    const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
+                                    if (!offsetMatch) return false;
+                                    
+                                    const sign = offsetMatch[1] === "+" ? 1 : -1;
+                                    const offsetHours = parseInt(offsetMatch[2]);
+                                    const offsetMinutes = parseInt(offsetMatch[3]);
+                                    
+                                    const sessionLocalDate = new Date(Date.UTC(
+                                        sessionUtcDate.getUTCFullYear(),
+                                        sessionUtcDate.getUTCMonth(),
+                                        sessionUtcDate.getUTCDate(),
+                                        sessionUtcDate.getUTCHours() + sign * offsetHours,
+                                        sessionUtcDate.getUTCMinutes() + sign * offsetMinutes
+                                    ));
+                                    
+                                    // Compare with slot time
+                                    return sessionLocalDate.getTime() === slotDate.getTime();
                                 });
 
                                 if (bookedSession) {
                                     return (
-                                        <div key={day.toISOString()} className="border-b border-r border-gray-200 h-7.5 p-0 overflow-hidden">
+                                        <div key={day.toISOString()} className={`border-b border-r border-gray-200 ${cellHeight} p-0 overflow-hidden`}>
                                             <div
                                                 onClick={(e) => handleSessionClick(bookedSession, e)}
-                                                className={`h-full w-full rounded text-[10px] px-2 py-0.5 bg-blue-100 text-blue-800 border border-blue-200 overflow-hidden flex flex-col justify-center min-w-0 ${
+                                                className={`h-full w-full rounded ${sessionTextSize} ${sessionPadding} bg-blue-100 text-blue-800 border border-blue-200 overflow-hidden flex flex-col justify-center min-w-0 ${
                                                     !isEditMode ? "cursor-pointer" : "cursor-default opacity-70"
                                                 }`}
                                             >
-                                                <p className="font-bold leading-tight text-[10px] overflow-hidden text-ellipsis whitespace-nowrap min-w-0">{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
-                                                <p className="leading-tight text-[10px] overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
+                                                <p className={`font-bold leading-tight ${sessionTextSize} overflow-hidden text-ellipsis whitespace-nowrap min-w-0`}>{bookedSession.tutor?.fullName || 'Unknown Tutor'}</p>
+                                                <p className={`leading-tight ${sessionTextSize} overflow-hidden text-ellipsis whitespace-nowrap min-w-0`}>
                                                     {bookedSession.students && bookedSession.students.length > 0
                                                         ? (bookedSession.students.length === 1 
                                                             ? (bookedSession.students[0]?.fullName || 'Unknown Student')
@@ -802,7 +1021,7 @@ const ScheduleManagementContent: React.FC = () => {
                                     <div
                                         key={day.toISOString()}
                                         data-iso={slotISO}
-                                        className={`calendar-cell border-b border-r border-gray-200 h-7.5 text-center select-none overflow-hidden ${
+                                        className={`calendar-cell border-b border-r border-gray-200 ${cellHeight} text-center select-none overflow-hidden ${
                                             isEditMode ? "cursor-pointer" : ""
                                         }`}
                                         onMouseDown={(e) => handleMouseDown(e, day, hour)}
@@ -834,7 +1053,8 @@ const ScheduleManagementContent: React.FC = () => {
                 )}
             </div>
         </div>
-    );
+        );
+    };
 
     // Helper function to get day name from dayOfWeek (1=Monday, 7=Sunday)
     const getDayName = (dayOfWeek: number): string => {
@@ -912,8 +1132,8 @@ const ScheduleManagementContent: React.FC = () => {
         );
     };
 
-    const renderDailyView = () => renderHourlyGrid([currentDate]);
-    const renderWeeklyView = () => renderHourlyGrid(getWeekDays(currentDate));
+    const renderDailyView = () => renderHourlyGrid([currentDate], true);
+    const renderWeeklyView = () => renderHourlyGrid(getWeekDays(currentDate), false);
 
     const renderMonthlyView = () => {
         const year = currentDate.getUTCFullYear();
@@ -935,7 +1155,7 @@ const ScheduleManagementContent: React.FC = () => {
         for (let i = 1; i <= daysInMonth; i++) {
             calendarDays.push({ day: i, isCurrentMonth: true, date: new Date(Date.UTC(year, month, i)) });
         }
-        const remainingCells = 35 - calendarDays.length;
+        const remainingCells = 42 - calendarDays.length; // 6 rows * 7 days = 42
         for (let i = 1; i <= remainingCells; i++) {
             calendarDays.push({ day: i, isCurrentMonth: false, date: new Date(Date.UTC(year, month + 1, i)) });
         }
@@ -951,15 +1171,15 @@ const ScheduleManagementContent: React.FC = () => {
         ];
 
         return (
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                     {weekDayHeaders.map((day) => (
                         <div key={day} className="p-3 text-center text-sm font-semibold text-gray-600">
                             {day}
                         </div>
                     ))}
                 </div>
-                <div className="grid grid-cols-7 grid-rows-5">
+                <div className="grid grid-cols-7 auto-rows-[112px]">
                     {calendarDays.map((d, index) => {
                         const dayBookings: Session[] = []; // TODO: Implement booked sessions from API
                         return (
@@ -980,26 +1200,28 @@ const ScheduleManagementContent: React.FC = () => {
                                     );
                                     setView("Daily");
                                 }}
-                                className={`h-28 p-2 border-r border-b border-gray-200 cursor-pointer transition-colors ${
+                                className={`h-28 p-2 border-r border-b border-gray-200 cursor-pointer transition-colors flex flex-col ${
                                     d.isCurrentMonth ? "hover:bg-gray-50" : "bg-gray-50"
                                 }`}
                             >
                                 <p
-                                    className={`text-sm font-semibold ${
+                                    className={`text-sm font-semibold flex-shrink-0 ${
                                         d.isCurrentMonth ? "text-gray-800" : "text-gray-400"
                                     }`}
                                 >
                                     {d.day}
                                 </p>
-                                <div className="mt-1 space-y-1 overflow-hidden">
-                                    {dayBookings.map((session) => (
-                                        <div
-                                            key={session.id}
-                                            className="text-xs font-semibold py-0.5 px-1 rounded text-left truncate bg-blue-100 text-blue-800"
-                                        >
-                                            {session.tutor?.fullName || 'Unknown Tutor'}
-                                        </div>
-                                    ))}
+                                <div className="mt-1 space-y-1 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
+                                    {dayBookings.length > 0 ? (
+                                        dayBookings.map((session) => (
+                                            <div
+                                                key={session.id}
+                                                className="text-xs font-semibold py-0.5 px-1 rounded text-left truncate bg-blue-100 text-blue-800"
+                                            >
+                                                {session.tutor?.fullName || 'Unknown Tutor'}
+                                            </div>
+                                        ))
+                                    ) : null}
                                 </div>
                             </div>
                         );
@@ -1106,7 +1328,7 @@ const ScheduleManagementContent: React.FC = () => {
                     <div className="w-48 h-[38px] flex items-center">
                         <CustomDropdown
                             options={timezoneOptions}
-                            selectedValue={selectedTimezone}
+                            selectedValue={selectedTimezone ? `${selectedTimezone.name} (${selectedTimezone.offset})` : ""}
                             placeholder="Select timezone"
                             onSelect={handleTimezoneSelect}
                             dropdownId="timezone-dropdown"
@@ -1167,8 +1389,16 @@ const ScheduleManagementContent: React.FC = () => {
                             </div>
                         ) : (
                             <>
-                                {view === "Daily" && renderDailyView()}
-                                {view === "Monthly" && renderMonthlyView()}
+                                {view === "Daily" && (
+                                    <div className="h-full min-h-0 overflow-auto px-6 pb-6">
+                                        {renderDailyView()}
+                                    </div>
+                                )}
+                                {view === "Monthly" && (
+                                    <div className="h-full min-h-0 overflow-auto px-6 pb-6">
+                                        {renderMonthlyView()}
+                                    </div>
+                                )}
                             </>
                         )}
                     </>

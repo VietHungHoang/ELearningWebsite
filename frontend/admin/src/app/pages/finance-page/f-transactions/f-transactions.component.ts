@@ -3,11 +3,12 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TransactionService, Payment, PaymentStatus, PaymentMethod, TransactionFilters } from '../../../services/transaction.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import * as XLSX from 'xlsx';
 
 @Component({
     selector: 'app-f-transactions',
-    imports: [RouterLink, CommonModule, FormsModule],
+    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe],
     templateUrl: './f-transactions.component.html',
     styleUrl: './f-transactions.component.scss'
 })
@@ -270,18 +271,18 @@ export class FTransactionsComponent implements OnInit {
     getStatusText(status: PaymentStatus): string {
         switch (status) {
             case 'completed':
-                return 'Completed';
+                return 'transactions.status.completed';
             case 'failed':
-                return 'Failed';
+                return 'transactions.status.failed';
             case 'pending':
-                return 'Pending';
+                return 'transactions.status.pending';
             default:
                 return status;
         }
     }
 
     getPaymentMethodDisplay(method: PaymentMethod): string {
-        return method === 'momo' ? 'Momo' : method === 'vnpay' ? 'VNPay' : 'Banking';
+        return method === 'momo' ? 'transactions.paymentMethod.momo' : method === 'vnpay' ? 'transactions.paymentMethod.vnpay' : 'transactions.paymentMethod.banking';
     }
 
     getPaymentMethodIcon(method: PaymentMethod): string {

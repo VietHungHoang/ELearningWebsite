@@ -1,9 +1,10 @@
 import { Component, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-recent-orders',
-    imports: [RouterLink],
+    imports: [RouterLink, TranslatePipe],
     templateUrl: './recent-orders.component.html',
     styleUrl: './recent-orders.component.scss'
 })

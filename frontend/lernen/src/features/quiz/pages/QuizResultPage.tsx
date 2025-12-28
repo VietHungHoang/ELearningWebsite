@@ -1,15 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Breadcrumb from '../../dashboard/components/Breadcrumb';
+import { 
+    IoCheckmarkCircle, 
+    IoCloseCircle, 
+    IoCheckmarkOutline,
+    IoCloseOutline,
+    IoChevronDown,
+    IoChevronUp,
+    IoTrophyOutline,
+    IoRefreshOutline,
+    IoArrowBack,
+    IoTimeOutline,
+    IoFilterOutline
+} from 'react-icons/io5';
+import { HiChevronDown } from 'react-icons/hi';
+import { useAuth } from '../../../context/AuthContext';
+import { useTranslation } from 'react-i18next';
+import QuizLayout from '../components/QuizLayout';
 
 // Mock Data
 const quizResult = {
-    quizTitle: 'Final Exam: Time Management Mastery',
-    courseTitle: 'Time Management Mastery',
+    quizTitle: 'Chapter 1 - Introduction to Physics',
+    courseTitle: 'Physics 101',
     score: 18,
     totalQuestions: 20,
+    passingScore: 70,
     status: 'Passed',
-    dateCompleted: 'October 22, 2025',
+    dateCompleted: 'Oct 22, 2025',
+    timeTaken: '15:32',
     questions: [
         {
             id: 1,
@@ -22,6 +40,7 @@ const quizResult = {
             ],
             correctAnswer: 'It categorizes tasks based on urgency and importance.',
             userAnswer: 'It categorizes tasks based on urgency and importance.',
+            explanation: 'The Eisenhower Matrix, also known as the Urgent-Important Matrix, helps prioritize tasks by dividing them into four quadrants based on urgency and importance. This allows you to focus on what truly matters while delegating or eliminating less critical tasks.',
         },
         {
             id: 2,
@@ -34,112 +53,463 @@ const quizResult = {
             ],
             correctAnswer: 'Working in short, focused intervals with planned breaks.',
             userAnswer: 'Working on multiple tasks simultaneously.',
+            explanation: 'The Pomodoro Technique involves working in 25-minute focused intervals (called "pomodoros") followed by 5-minute breaks. After four pomodoros, take a longer 15-30 minute break. This helps maintain focus and prevents burnout.',
+        },
+        {
+            id: 3,
+            text: 'What does the "Two-Minute Rule" suggest in time management?',
+            options: [
+                'Spend only two minutes planning your day.',
+                'If a task takes less than two minutes, do it immediately.',
+                'Take a two-minute break every hour.',
+                'Limit meetings to two minutes.',
+            ],
+            correctAnswer: 'If a task takes less than two minutes, do it immediately.',
+            userAnswer: 'If a task takes less than two minutes, do it immediately.',
+            explanation: 'The Two-Minute Rule, popularized by David Allen in "Getting Things Done," states that if a task takes less than two minutes to complete, you should do it right away rather than adding it to your to-do list. This prevents small tasks from piling up.',
+        },
+        {
+            id: 4,
+            text: 'Which technique involves batching similar tasks together?',
+            options: [
+                'Time blocking',
+                'Task batching',
+                'Pomodoro Technique',
+                'Eisenhower Matrix',
+            ],
+            correctAnswer: 'Task batching',
+            userAnswer: 'Task batching',
+            explanation: 'Task batching is the practice of grouping similar tasks together and completing them in one dedicated time block. This reduces context switching, increases efficiency, and helps maintain focus by keeping your brain in one "mode" for longer periods.',
         },
     ]
 };
 
-const QuizResultPage: React.FC = () => {
-    const navigate = useNavigate();
-    const percentage = Math.round((quizResult.score / quizResult.totalQuestions) * 100);
+// Compact Circular Progress
+const CircularProgress: React.FC<{ percentage: number; isPassed: boolean; label: string }> = ({ percentage, isPassed, label }) => {
+    const [animatedPercentage, setAnimatedPercentage] = useState(0);
+    const radius = 54;
+    const strokeWidth = 8;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (animatedPercentage / 100) * circumference;
 
-    const StatCard: React.FC<{ label: string; value: string | number; }> = ({ label, value }) => (
-        <div className="bg-gray-50 rounded-lg p-4 text-center">
-            <p className="text-sm text-gray-500">{label}</p>
-            <p className="text-xl font-bold text-gray-800">{value}</p>
-        </div>
-    );
+    useEffect(() => {
+        const timer = setTimeout(() => setAnimatedPercentage(percentage), 100);
+        return () => clearTimeout(timer);
+    }, [percentage]);
 
     return (
-        <div className="max-w-7xl mx-auto">
-            <Breadcrumb
-                items={[
-                    { label: 'Dashboard', onClick: () => navigate('/dashboard') },
-                    { label: 'My Quizzes', onClick: () => navigate('/dashboard/my-quizzes') },
-                    { label: 'Quiz Result', isActive: true }
-                ]}
-                className="mb-6"
-            />
-
-            <div className="mt-6">
-                <h1 className="text-3xl font-bold text-gray-800">Quiz Result: {quizResult.quizTitle}</h1>
-                <p className="text-gray-600 mt-1">Course: {quizResult.courseTitle}</p>
-            </div>
-
-            {/* Summary Section */}
-            <div className="mt-8 bg-white p-6 rounded-2xl shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                    <div className="flex flex-col items-center justify-center text-center">
-                         <p className="text-6xl font-bold text-green-600">{percentage}%</p>
-                         <p className="text-lg font-semibold text-gray-700 mt-2">Score: {quizResult.score}/{quizResult.totalQuestions}</p>
-                         <span className={`mt-2 px-4 py-1.5 text-sm font-bold rounded-full ${quizResult.status === 'Passed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {quizResult.status}
-                        </span>
-                    </div>
-                    <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <StatCard label="Date Completed" value={quizResult.dateCompleted} />
-                        <StatCard label="Total Questions" value={quizResult.totalQuestions} />
-                        <StatCard label="Correct Answers" value={quizResult.score} />
-                        <StatCard label="Incorrect Answers" value={quizResult.totalQuestions - quizResult.score} />
-                    </div>
-                </div>
-            </div>
-
-            {/* Question Review Section */}
-            <div className="mt-10">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Review Answers</h2>
-                <div className="space-y-6">
-                    {quizResult.questions.map((q, index) => (
-                        <div key={q.id} className="bg-white p-6 rounded-2xl shadow-sm">
-                            <p className="font-semibold text-gray-800">{index + 1}. {q.text}</p>
-                            <div className="mt-4 space-y-3">
-                                {q.options.map((option, optionIndex) => {
-                                    const isCorrect = option === q.correctAnswer;
-                                    const isUserAnswer = option === q.userAnswer;
-                                    const isIncorrectUserAnswer = isUserAnswer && !isCorrect;
-
-                                    let optionClass = 'border-gray-200';
-                                    if (isCorrect) {
-                                        optionClass = 'bg-green-50 border-green-400 text-green-800';
-                                    }
-                                    if (isIncorrectUserAnswer) {
-                                        optionClass = 'bg-red-50 border-red-400 text-red-800';
-                                    }
-
-                                    return (
-                                        <div key={optionIndex} className={`flex items-center gap-3 p-3 border rounded-lg text-sm ${optionClass}`}>
-                                            {isCorrect && (
-                                                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            )}
-                                            {isIncorrectUserAnswer && (
-                                                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            )}
-                                            {!isCorrect && !isIncorrectUserAnswer && (
-                                                <div className={`w-5 h-5 flex-shrink-0 rounded-full border-2 ${isUserAnswer ? 'border-gray-700' : 'border-gray-300'}`}></div>
-                                            )}
-                                            <span className="flex-1">{option}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
-                <button className="w-full sm:w-auto px-8 py-3 bg-[#0b6459] text-white font-semibold rounded-lg hover:bg-[#084c43] transition-colors">
-                    Retake Quiz
-                </button>
-                <button onClick={() => navigate('/dashboard/my-quizzes')} className="w-full sm:w-auto px-8 py-3 bg-gray-100 text-gray-800 font-semibold rounded-lg hover:bg-gray-200 transition-colors">
-                    Back to My Quizzes
-                </button>
+        <div className="relative inline-flex items-center justify-center">
+            <svg className="transform -rotate-90" width="130" height="130">
+                <circle cx="65" cy="65" r={radius} stroke="#e5e7eb" strokeWidth={strokeWidth} fill="none" />
+                <circle
+                    cx="65" cy="65" r={radius}
+                    stroke={isPassed ? '#065A46' : '#b91c1c'}
+                    strokeWidth={strokeWidth}
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    className="transition-all duration-1000 ease-out"
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className={`text-3xl font-bold ${isPassed ? 'text-[#065A46]' : 'text-[#b91c1c]'}`}>
+                    {animatedPercentage}%
+                </span>
+                <span className="text-xs text-gray-500">{label}</span>
             </div>
         </div>
+    );
+};
+
+// Question Card Component - Compact
+const QuestionCard: React.FC<{ 
+    question: typeof quizResult.questions[0]; 
+    index: number;
+    isExpanded: boolean;
+    onToggle: () => void;
+    translations: {
+        correct: string;
+        incorrect: string;
+        yourAnswer: string;
+        correctAnswer: string;
+        explanation: string;
+        hideExplanation: string;
+    };
+}> = ({ question, index, isExpanded, onToggle, translations }) => {
+    const isCorrect = question.userAnswer === question.correctAnswer;
+    const [showExplanation, setShowExplanation] = useState(false);
+
+    return (
+        <div className={`bg-white rounded-xl border-2 overflow-hidden transition-all shadow-sm hover:shadow-md ${
+            isCorrect ? 'border-[#065A46]/40' : 'border-[#b91c1c]/40'
+        }`}>
+            <button
+                onClick={onToggle}
+                className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-gray-50 transition-colors"
+            >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    isCorrect ? 'bg-[#065A46]/10' : 'bg-[#b91c1c]/10'
+                }`}>
+                    {isCorrect ? (
+                        <IoCheckmarkCircle className="w-6 h-6 text-[#065A46]" />
+                    ) : (
+                        <IoCloseCircle className="w-6 h-6 text-[#b91c1c]" />
+                    )}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2.5 mb-1">
+                        <span className="text-xs font-semibold text-gray-500">Q{index + 1}</span>
+                        <span className={`text-xs px-2 py-1 rounded-md font-semibold ${
+                            isCorrect ? 'bg-[#065A46]/10 text-[#065A46]' : 'bg-[#b91c1c]/10 text-[#b91c1c]'
+                        }`}>
+                            {isCorrect ? translations.correct : translations.incorrect}
+                        </span>
+                    </div>
+                    <p className="text-base font-semibold text-gray-900 line-clamp-2">{question.text}</p>
+                </div>
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    {isExpanded ? (
+                        <IoChevronUp className="w-5 h-5 text-gray-600" />
+                    ) : (
+                        <IoChevronDown className="w-5 h-5 text-gray-600" />
+                    )}
+                </div>
+            </button>
+
+            <div className={`overflow-hidden transition-all duration-300 ${
+                isExpanded ? 'max-h-[700px]' : 'max-h-0'
+            }`}>
+                <div className="px-5 pb-5 space-y-3 border-t border-gray-200 pt-4">
+                    {question.options.map((option, optionIndex) => {
+                        const isCorrectOption = option === question.correctAnswer;
+                        const isUserOption = option === question.userAnswer;
+                        const isIncorrectUserOption = isUserOption && !isCorrectOption;
+
+                        let optionStyles = 'bg-gray-50 border-gray-200 text-gray-700';
+                        let iconElement = <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />;
+
+                        if (isCorrectOption) {
+                            optionStyles = 'bg-[#065A46]/5 border-[#065A46]/40 text-[#065A46]';
+                            iconElement = (
+                                <div className="w-5 h-5 rounded-full bg-[#065A46] flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <IoCheckmarkOutline className="w-3 h-3 text-white" />
+                                </div>
+                            );
+                        }
+
+                        if (isIncorrectUserOption) {
+                            optionStyles = 'bg-[#b91c1c]/5 border-[#b91c1c]/40 text-[#b91c1c]';
+                            iconElement = (
+                                <div className="w-5 h-5 rounded-full bg-[#b91c1c] flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <IoCloseOutline className="w-3 h-3 text-white" />
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <div key={optionIndex} className={`flex items-center gap-3 px-4 py-3 border-2 rounded-lg text-sm font-medium ${optionStyles}`}>
+                                {iconElement}
+                                <span className="flex-1">{option}</span>
+                                {isCorrectOption && (
+                                    <span className="text-xs font-semibold text-white bg-[#065A46] px-2 py-1 rounded-md">
+                                        {translations.correctAnswer}
+                                    </span>
+                                )}
+                                {isIncorrectUserOption && (
+                                    <span className="text-xs font-semibold text-white bg-[#b91c1c] px-2 py-1 rounded-md">
+                                        {translations.yourAnswer}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })}
+                    
+                    {/* Explanation Dropdown */}
+                    {question.explanation && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowExplanation(!showExplanation);
+                                }}
+                                className="text-sm text-[#065A46] font-semibold hover:text-[#054d3b] flex items-center gap-2 transition-colors"
+                            >
+                                {showExplanation ? (
+                                    <>
+                                        {translations.hideExplanation}
+                                    </>
+                                ) : (
+                                    <>
+                                        {translations.explanation}
+                                    </>
+                                )}
+                                <HiChevronDown
+                                    className={`w-4 h-4 transition-transform ${
+                                        showExplanation ? 'rotate-180' : ''
+                                    }`}
+                                />
+                            </button>
+                            
+                            {showExplanation && (
+                                <div className="mt-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <p className="text-sm text-gray-700 leading-relaxed">{question.explanation}</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+type FilterType = 'all' | 'correct' | 'incorrect';
+
+const QuizResultPage: React.FC = () => {
+    const navigate = useNavigate();
+    const { state } = useAuth();
+    const { t } = useTranslation();
+    const percentage = Math.round((quizResult.score / quizResult.totalQuestions) * 100);
+    const isPassed = percentage >= quizResult.passingScore;
+    const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
+    const [filter, setFilter] = useState<FilterType>('all');
+    const [showConfetti, setShowConfetti] = useState(false);
+
+    const isTutor = state.user?.role === 'tutor';
+    const quizzesPath = isTutor ? '/dashboard/quizzes' : '/dashboard/my-quizzes';
+
+    useEffect(() => {
+        document.title = 'Quiz Result - ELearning';
+    }, []);
+
+    useEffect(() => {
+        if (isPassed) {
+            setShowConfetti(true);
+            const timer = setTimeout(() => setShowConfetti(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isPassed]);
+
+    const toggleQuestion = (questionId: number) => {
+        setExpandedQuestions(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(questionId)) {
+                newSet.delete(questionId);
+            } else {
+                newSet.add(questionId);
+            }
+            return newSet;
+        });
+    };
+
+    const correctCount = quizResult.questions.filter(q => q.userAnswer === q.correctAnswer).length;
+    const incorrectCount = quizResult.questions.length - correctCount;
+
+    const filteredQuestions = quizResult.questions.filter(q => {
+        const isCorrect = q.userAnswer === q.correctAnswer;
+        if (filter === 'correct') return isCorrect;
+        if (filter === 'incorrect') return !isCorrect;
+        return true;
+    });
+
+    return (
+        <QuizLayout showBackButton={true} title="Quiz Result">
+            <div className="h-[calc(100vh-140px)] flex overflow-hidden bg-gray-50">
+            {/* Confetti Effect */}
+            {showConfetti && (
+                <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+                    {[...Array(30)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute animate-confetti"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                animationDelay: `${Math.random() * 2}s`,
+                                backgroundColor: ['#065A46', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'][Math.floor(Math.random() * 5)],
+                                width: `${Math.random() * 8 + 4}px`,
+                                height: `${Math.random() * 8 + 4}px`,
+                                borderRadius: Math.random() > 0.5 ? '50%' : '0',
+                            }}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Left Sidebar - Score & Stats */}
+            <div className="w-72 flex-shrink-0 border-r border-gray-200 bg-white p-5 hidden lg:flex flex-col">
+                {/* Score Card */}
+                <div className={`rounded-2xl p-5 mb-5 text-center shadow-lg ${
+                    isPassed ? 'bg-gradient-to-br from-[#065A46] to-[#0b6459]' : 'bg-gradient-to-br from-red-600 to-red-700'
+                }`}>
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                        {isPassed && <IoTrophyOutline className="w-6 h-6 text-yellow-300" />}
+                        <span className={`text-base font-bold ${isPassed ? 'text-yellow-300' : 'text-white'}`}>
+                            {isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}
+                        </span>
+                    </div>
+                    <div className="bg-white rounded-xl p-4 mb-3 shadow-md">
+                        <CircularProgress percentage={percentage} isPassed={isPassed} label={t('quizResult.score')} />
+                    </div>
+                    <p className="text-white text-sm font-medium">
+                        {quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}
+                    </p>
+                </div>
+
+                {/* Quiz Info */}
+                <div className="bg-white rounded-xl p-4 border border-gray-200 mb-5 shadow-sm">
+                    <h2 className="font-semibold text-gray-900 text-base mb-1.5 line-clamp-2">{quizResult.quizTitle}</h2>
+                    <p className="text-sm text-gray-500">{quizResult.courseTitle}</p>
+                </div>
+
+                {/* Stats */}
+                <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-3 h-3 rounded-full bg-[#065A46]"></div>
+                            <span className="text-sm text-gray-700 font-medium">{t('quizResult.correct')}</span>
+                        </div>
+                        <span className="font-bold text-base text-[#065A46]">{correctCount}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-3 h-3 rounded-full bg-[#b91c1c]"></div>
+                            <span className="text-sm text-gray-700 font-medium">{t('quizResult.incorrect')}</span>
+                        </div>
+                        <span className="font-bold text-base text-[#b91c1c]">{incorrectCount}</span>
+                    </div>
+                    <div className="pt-3 border-t border-gray-200 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <IoTimeOutline className="w-4 h-4 text-gray-500" />
+                                <span className="text-sm text-gray-700 font-medium">{t('quizResult.time')}</span>
+                            </div>
+                            <span className="font-semibold text-sm text-gray-900">{quizResult.timeTaken}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 font-medium">{t('quizResult.passScore')}</span>
+                            <span className="font-semibold text-sm text-gray-900">{quizResult.passingScore}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-auto space-y-3 pt-4">
+                    <button 
+                        onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
+                        className="w-full px-4 py-3 bg-[#065A46] text-white text-sm font-semibold rounded-xl hover:bg-[#054d3b] transition-all flex items-center justify-center gap-2 shadow-md"
+                    >
+                        <IoRefreshOutline className="w-5 h-5" />
+                        {t('quizResult.retakeQuiz')}
+                    </button>
+                    <button 
+                        onClick={() => navigate(quizzesPath)} 
+                        className="w-full px-4 py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                    >
+                        <IoArrowBack className="w-5 h-5" />
+                        {t('quizResult.backToQuizzes')}
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Content - Question Review */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+                {/* Header */}
+                <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-white">
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">{t('quizResult.reviewAnswers')}</h1>
+                        <p className="text-sm text-gray-500 mt-1">{quizResult.dateCompleted}</p>
+                    </div>
+                    
+                    {/* Filter Tabs */}
+                    <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                        <button
+                            onClick={() => setFilter('all')}
+                            className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
+                                filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            {t('quizResult.filter.all')} ({quizResult.questions.length})
+                        </button>
+                        <button
+                            onClick={() => setFilter('correct')}
+                            className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
+                                filter === 'correct' ? 'bg-white text-[#065A46] shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            ✓ {t('quizResult.filter.correct')} ({correctCount})
+                        </button>
+                        <button
+                            onClick={() => setFilter('incorrect')}
+                            className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
+                                filter === 'incorrect' ? 'bg-white text-[#b91c1c] shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                        >
+                            ✗ {t('quizResult.filter.incorrect')} ({incorrectCount})
+                        </button>
+                    </div>
+                </div>
+
+                {/* Mobile Stats Bar */}
+                <div className={`lg:hidden flex-shrink-0 flex items-center justify-between px-5 py-3 ${isPassed ? 'bg-gradient-to-r from-[#065A46] to-[#0b6459]' : 'bg-gradient-to-r from-red-600 to-red-700'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md">
+                            <span className={`text-xl font-bold ${isPassed ? 'text-[#065A46]' : 'text-[#b91c1c]'}`}>{percentage}%</span>
+                        </div>
+                        <div className="text-white">
+                            <p className="text-sm font-bold">{isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}</p>
+                            <p className="text-xs text-white/80">{quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
+                            className="p-2.5 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all"
+                        >
+                            <IoRefreshOutline className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Questions List */}
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                    {filteredQuestions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                            <IoFilterOutline className="w-16 h-16 mb-3 text-gray-300" />
+                            <p className="text-base font-medium">{t('quizResult.noQuestionsMatch')}</p>
+                        </div>
+                    ) : (
+                        filteredQuestions.map((question) => (
+                            <QuestionCard
+                                key={question.id}
+                                question={question}
+                                index={quizResult.questions.findIndex(q => q.id === question.id)}
+                                isExpanded={expandedQuestions.has(question.id)}
+                                onToggle={() => toggleQuestion(question.id)}
+                                translations={{
+                                    correct: t('quizResult.correct'),
+                                    incorrect: t('quizResult.incorrect'),
+                                    yourAnswer: t('quizResult.yourAnswer'),
+                                    correctAnswer: t('quizResult.correctAnswer'),
+                                    explanation: t('quizResult.explanation'),
+                                    hideExplanation: t('quizResult.hideExplanation')
+                                }}
+                            />
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {/* Custom Styles */}
+            <style>{`
+                @keyframes confetti-fall {
+                    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+                    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+                }
+                .animate-confetti { animation: confetti-fall 3s ease-in-out forwards; }
+            `}</style>
+            </div>
+        </QuizLayout>
     );
 };
 

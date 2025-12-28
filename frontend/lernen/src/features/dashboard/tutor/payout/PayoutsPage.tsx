@@ -371,7 +371,7 @@ const PayoutsPage = () => {
                             <div className="relative">
                                 <button
                                     onClick={() => setIsDateRangePickerOpen(true)}
-                                    className="bg-white rounded-lg border border-gray-200 shadow-sm px-3 py-2 h-[38px] text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none flex items-center gap-2"
+                                    className="bg-white rounded-lg border border-gray-200 shadow-sm px-3 py-2 h-[40px] text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none flex items-center gap-2"
                                 >
                                     <HiCalendar className="w-4 h-4 text-gray-400" />
                                     {t('payouts.dateRange', {
@@ -443,7 +443,7 @@ const PayoutsPage = () => {
                                     setOpenDropdown={setOpenDropdown}
                                 />
                             </div>
-                            <button className="bg-white rounded-lg border border-gray-200 shadow-sm px-4 py-2 h-[38px] text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none flex items-center gap-2">
+                            <button className="bg-white rounded-lg border border-gray-200 shadow-sm px-4 py-2 h-[40px] text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none flex items-center gap-2">
                                 <HiDownload className="w-4 h-4" />
                                 {t('payouts.export')}
                             </button>

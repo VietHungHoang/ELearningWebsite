@@ -20,7 +20,7 @@ import PersonalDetailsPage from '../tutor/personal-detail/PersonalDetailsPage';
 import ResumeHighlightsPage from '../tutor/personal-detail/ResumeHighlightsPage';
 import AccountSettingsPage from '../tutor/personal-detail/AccountSettingsPage';
 import SubjectICanTeachPage from '../tutor/personal-detail/SubjectICanTeachPage';
-import TutorMyQuizzesPage from '../../quiz/TutorMyQuizzesPage';
+import MyQuizzesPage from '../../quiz/TutorMyQuizzesPage';
 import { CreateQuizPage } from '../../quiz/create-quiz/create-quiz';
 import QuizStatsPage from '../../quiz/pages/QuizStatsPage';
 import WhiteboardPage from '../whiteboard/WhiteboardPage';
@@ -29,7 +29,7 @@ import ReviewsPage from '../tutor/reviews/ReviewsPage';
 // Student pages
 import MyBookingsPage from '../student/my-session/MyBookingsPage';
 import StudentMyClassPage from '../student/my-class/MyClassPage';
-import MyQuizzesPage from '../student/pages/MyQuizzesPage';
+import PurchasesPage from '../student/purchases/PurchasesPage';
 
 // Conditional components
 const ConditionalMyClassPage = () => {
@@ -81,7 +81,7 @@ const dashboardRoutes: RouteObject[] = [
       },
       {
         path: 'quizzes',
-        element: <TutorMyQuizzesPage />,
+        element: <MyQuizzesPage />,
       },
       {
         path: 'quizzes/create',
@@ -127,6 +127,14 @@ const dashboardRoutes: RouteObject[] = [
       {
         path: 'my-quizzes',
         element: <MyQuizzesPage />,
+      },
+      {
+        path: 'purchases',
+        element: <PurchasesPage />,
+      },
+      {
+        path: 'messages',
+        element: <InboxPage />,
       },
       // Shared routes
       {
