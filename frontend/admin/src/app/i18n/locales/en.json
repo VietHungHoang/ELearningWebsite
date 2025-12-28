@@ -121,7 +121,9 @@
       "promotion": "Promotion",
       "vouchers": "Vouchers",
       "profile": "Profile",
-      "categoriesSubjects": "Categories & Subjects"
+      "categoriesSubjects": "Categories & Subjects",
+      "categoryList": "Category List",
+      "subjectList": "Subject List"
     },
     "modulesSection": {
       "icons": "Icons",
@@ -965,6 +967,45 @@
       "cancel": "Cancel",
       "confirm": "Confirm",
       "processing": "Processing..."
+    },
+    "detail": {
+      "title": "Transaction Details",
+      "breadcrumb": {
+        "dashboard": "Dashboard",
+        "finance": "Finance",
+        "transactions": "Transactions",
+        "detail": "Transaction Details"
+      },
+      "transactionId": "Transaction ID",
+      "learnerInformation": {
+        "title": "Learner Information",
+        "learnerId": "Learner ID",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone"
+      },
+      "classInformation": {
+        "title": "Class Information",
+        "classId": "Class ID",
+        "name": "Name",
+        "type": "Type",
+        "instructor": "Instructor",
+        "classType": {
+          "oneOnOne": "1-on-1",
+          "group": "Group"
+        }
+      },
+      "paymentInformation": {
+        "title": "Payment Information",
+        "totalAmount": "Total Amount",
+        "paymentTime": "Payment Time",
+        "paymentMethod": "Payment Method",
+        "status": "Status"
+      },
+      "actions": {
+        "print": "Print",
+        "download": "Download"
+      }
     }
   },
   "categorySubjectManagement": {
@@ -980,6 +1021,7 @@
     },
     "subjectList": {
       "title": "Subject List",
+      "pageTitle": "Subject List",
       "searchPlaceholder": "Search by Name",
       "statusLabel": "Status",
       "category": "Category",
@@ -1024,13 +1066,16 @@
     },
     "categoryList": {
       "title": "Category List",
+      "pageTitle": "Category List",
       "searchPlaceholder": "Search by Category Name",
       "statusLabel": "Status",
+      "addCategory": "Add Category",
       "table": {
         "stt": "STT",
         "categoryName": "Category Name",
         "description": "Description",
         "subjects": "Subjects",
+        "tutors": "Tutors",
         "status": "Status",
         "action": "Action"
       },
@@ -1040,15 +1085,25 @@
         "inactive": "Inactive"
       },
       "emptyState": {
-        "title": "No categories found"
+        "title": "No categories found",
+        "description": "Try adjusting your filters or add a new category"
       },
       "modal": {
         "addTitle": "Add New Category",
+        "editTitle": "Edit Category",
         "categoryName": "Category Name",
         "description": "Description",
         "defaultSubjectName": "Default Subject Name",
+        "defaultSubjectHint": "Each category requires at least one subject",
         "cancel": "Cancel",
-        "add": "Add Category"
+        "add": "Add Category",
+        "update": "Update Category"
+      },
+      "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "entries": "entries"
       },
       "detailsModal": {
         "title": "Category Details",
@@ -1059,6 +1114,12 @@
         "subjectsInCategory": "Subjects in this Category",
         "noSubjects": "No subjects in this category",
         "close": "Close"
+      },
+      "deleteModal": {
+        "title": "Confirm Delete",
+        "message": "Are you sure you want to delete this category? All subjects within this category will also be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
       }
     }
   },

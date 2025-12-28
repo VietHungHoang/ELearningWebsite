@@ -8,6 +8,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'categories', pathMatch: 'full' },
       { path: 'categories', loadComponent: () => import('./category-list/category-list.component').then(m => m.CategoryListComponent) },
+      { path: 'subjects', loadComponent: () => import('./subject-list/subject-list.component').then(m => m.SubjectListComponent) },
     ]
   }
 ];

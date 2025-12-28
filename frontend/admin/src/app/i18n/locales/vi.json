@@ -121,7 +121,9 @@
       "promotion": "Khuyến mãi",
       "vouchers": "Phiếu giảm giá",
       "profile": "Hồ sơ",
-      "categoriesSubjects": "Danh mục & Môn học"
+      "categoriesSubjects": "Danh mục & Môn học",
+      "categoryList": "Danh sách Danh mục",
+      "subjectList": "Danh sách Môn học"
     },
     "modulesSection": {
       "icons": "Biểu tượng",
@@ -967,6 +969,45 @@
       "cancel": "Hủy",
       "confirm": "Xác nhận",
       "processing": "Đang xử lý..."
+    },
+    "detail": {
+      "title": "Chi tiết Giao dịch",
+      "breadcrumb": {
+        "dashboard": "Bảng điều khiển",
+        "finance": "Tài chính",
+        "transactions": "Giao dịch",
+        "detail": "Chi tiết Giao dịch"
+      },
+      "transactionId": "Mã Giao dịch",
+      "learnerInformation": {
+        "title": "Thông tin Học viên",
+        "learnerId": "Mã Học viên",
+        "name": "Tên",
+        "email": "Email",
+        "phone": "Số điện thoại"
+      },
+      "classInformation": {
+        "title": "Thông tin Lớp học",
+        "classId": "Mã Lớp học",
+        "name": "Tên",
+        "type": "Loại",
+        "instructor": "Giảng viên",
+        "classType": {
+          "oneOnOne": "1 kèm 1",
+          "group": "Nhóm"
+        }
+      },
+      "paymentInformation": {
+        "title": "Thông tin Thanh toán",
+        "totalAmount": "Tổng tiền",
+        "paymentTime": "Thời gian thanh toán",
+        "paymentMethod": "Phương thức thanh toán",
+        "status": "Trạng thái"
+      },
+      "actions": {
+        "print": "In",
+        "download": "Tải xuống"
+      }
     }
   },
   "categorySubjectManagement": {
@@ -982,6 +1023,7 @@
     },
     "subjectList": {
       "title": "Danh sách Môn học",
+      "pageTitle": "Danh sách Môn học",
       "searchPlaceholder": "Tìm kiếm theo tên",
       "statusLabel": "Trạng thái",
       "category": "Danh mục",
@@ -1026,13 +1068,16 @@
     },
     "categoryList": {
       "title": "Danh sách Danh mục",
+      "pageTitle": "Danh sách Danh mục",
       "searchPlaceholder": "Tìm kiếm theo tên danh mục",
       "statusLabel": "Trạng thái",
+      "addCategory": "Thêm Danh mục",
       "table": {
         "stt": "STT",
         "categoryName": "Tên Danh mục",
         "description": "Mô tả",
         "subjects": "Môn học",
+        "tutors": "Gia sư",
         "status": "Trạng thái",
         "action": "Thao tác"
       },
@@ -1042,15 +1087,25 @@
         "inactive": "Không hoạt động"
       },
       "emptyState": {
-        "title": "Không tìm thấy danh mục"
+        "title": "Không tìm thấy danh mục",
+        "description": "Thử điều chỉnh bộ lọc hoặc thêm danh mục mới"
       },
       "modal": {
         "addTitle": "Thêm Danh mục Mới",
+        "editTitle": "Chỉnh sửa Danh mục",
         "categoryName": "Tên Danh mục",
         "description": "Mô tả",
         "defaultSubjectName": "Tên Môn học Mặc định",
+        "defaultSubjectHint": "Mỗi danh mục yêu cầu ít nhất một môn học",
         "cancel": "Hủy",
-        "add": "Thêm Danh mục"
+        "add": "Thêm Danh mục",
+        "update": "Cập nhật Danh mục"
+      },
+      "pagination": {
+        "showing": "Hiển thị",
+        "to": "đến",
+        "of": "của",
+        "entries": "mục"
       },
       "detailsModal": {
         "title": "Chi tiết Danh mục",
@@ -1061,6 +1116,12 @@
         "subjectsInCategory": "Môn học trong Danh mục này",
         "noSubjects": "Không có môn học trong danh mục này",
         "close": "Đóng"
+      },
+      "deleteModal": {
+        "title": "Xác nhận Xóa",
+        "message": "Bạn có chắc chắn muốn xóa danh mục này? Tất cả môn học trong danh mục này cũng sẽ bị xóa.",
+        "cancel": "Hủy",
+        "confirm": "Xóa"
       }
     }
   },

@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-f-transactions-detail',
-    imports: [RouterLink, CommonModule],
+    imports: [RouterLink, CommonModule, TranslatePipe],
     templateUrl: './f-transactions-detail.component.html',
     styleUrl: './f-transactions-detail.component.scss'
 })
@@ -37,5 +38,38 @@ export class FTransactionsDetailComponent implements OnInit {
             this.learnerId = params['learnerId'] || this.learnerId;
             this.classId = params['classId'] || this.classId;
         });
+    }
+
+    getClassTypeTranslationKey(): string {
+        if (this.classType === '1-on-1') {
+            return 'transactions.detail.classInformation.classType.oneOnOne';
+        } else if (this.classType === '1 and n' || this.classType === 'Group') {
+            return 'transactions.detail.classInformation.classType.group';
+        }
+        return 'transactions.detail.classInformation.classType.oneOnOne';
+    }
+
+    getPaymentMethodTranslationKey(): string {
+        const method = this.paymentMethod.toLowerCase();
+        if (method === 'vnpay') {
+            return 'transactions.paymentMethod.vnpay';
+        } else if (method === 'momo') {
+            return 'transactions.paymentMethod.momo';
+        } else if (method === 'banking') {
+            return 'transactions.paymentMethod.banking';
+        }
+        return this.paymentMethod;
+    }
+
+    getPaymentStatusTranslationKey(): string {
+        const status = this.paymentStatus.toLowerCase();
+        if (status === 'completed') {
+            return 'transactions.status.completed';
+        } else if (status === 'failed') {
+            return 'transactions.status.failed';
+        } else if (status === 'pending') {
+            return 'transactions.status.pending';
+        }
+        return this.paymentStatus;
     }
 }

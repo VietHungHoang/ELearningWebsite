@@ -205,3 +205,23 @@ table tbody tr {
         }
     }
 }
+
+// Add/Edit Modal Overlay
+.add-new-popup {
+    opacity: 0;
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.5);
+    
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.popup-dialog {
+    transform: translateY(-20px);
+    
+    .active & {
+        transform: translateY(0);
+    }
+}
