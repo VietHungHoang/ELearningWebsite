@@ -14,7 +14,7 @@ spring:
         format_sql: true
 
 gemini:
-  api-key: ${GEMINI_API_KEY}
+  api-key: AIzaSyDRUFCJA2ZtNYRjOniJdAnGhgUTOa1uHcI
   api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
 
 services:

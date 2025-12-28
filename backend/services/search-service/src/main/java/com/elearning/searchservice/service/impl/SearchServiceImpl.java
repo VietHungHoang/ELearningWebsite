@@ -2,8 +2,10 @@ package com.elearning.searchservice.service.impl;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.elearning.searchservice.dto.request.SearchTutorRequest;
+import com.elearning.searchservice.dto.request.TutorSuggestionsRequest;
 import com.elearning.searchservice.dto.response.SearchFacets;
 import com.elearning.searchservice.dto.response.TutorSearchResult;
+import com.elearning.searchservice.dto.response.TutorSuggestion;
 import com.elearning.searchservice.entity.TutorDocument;
 import com.elearning.searchservice.service.SearchService;
 import com.elearning.searchservice.service.query.TutorFilterBuilder;
@@ -100,6 +102,72 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
+    public List<TutorSuggestion> getTutorSuggestions(TutorSuggestionsRequest request) {
+        log.info("Getting tutor suggestions for keyword: {}, language: {}, limit: {}",
+                request.getKeyword(), request.getLanguage(), request.getLimit());
+
+        if (request.getKeyword() == null || request.getKeyword().trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String language = request.getLanguage() != null ? request.getLanguage() : "en";
+        String suffix = switch (language.toLowerCase()) {
+            case "vi", "vietnamese" -> "Vi";
+            case "ja", "japanese" -> "Ja";
+            default -> "En";
+        };
+
+        // Build fuzzy search query for suggestions
+        Query fuzzyQuery = Query.of(q -> q
+                .bool(b -> b
+                        .should(s -> s
+                                .fuzzy(f -> f
+                                        .field("fullName" + suffix)
+                                        .value(request.getKeyword())
+                                        .fuzziness("AUTO")
+                                )
+                        )
+                        .should(s -> s
+                                .fuzzy(f -> f
+                                        .field("headline" + suffix)
+                                        .value(request.getKeyword())
+                                        .fuzziness("AUTO")
+                                )
+                        )
+                        .should(s -> s
+                                .fuzzy(f -> f
+                                        .field("subjects.name" + suffix)
+                                        .value(request.getKeyword())
+                                        .fuzziness("AUTO")
+                                )
+                        )
+                        .minimumShouldMatch("1")
+                )
+        );
+
+        // Build native query with limit
+        NativeQuery nativeQuery = NativeQuery.builder()
+                .withQuery(fuzzyQuery)
+                .withMaxResults(request.getLimit() != null ? request.getLimit() : 10)
+                .build();
+
+        // Execute search
+        SearchHits<TutorDocument> searchHits = elasticsearchOperations.search(
+                nativeQuery,
+                TutorDocument.class,
+                IndexCoordinates.of("tutors_v1")
+        );
+
+        log.info("Found {} suggestions", searchHits.getTotalHits());
+
+        // Map to suggestions with language context
+        final String finalSuffix = suffix;
+        return searchHits.getSearchHits().stream()
+                .map(hit -> mapToSuggestion(hit, finalSuffix))
+                .toList();
+    }
+
+    @Override
     @Deprecated
     public Page<UUID> searchTutors(
             String keyword,
@@ -130,6 +198,30 @@ public class SearchServiceImpl implements SearchService {
                 .score(hit.getScore())
                 .highlights(new HashMap<>()) // TODO: implement highlights
                 .matchedFields(new ArrayList<>()) // TODO: extract matched fields
+                .build();
+    }
+
+    private TutorSuggestion mapToSuggestion(SearchHit<TutorDocument> hit, String languageSuffix) {
+        TutorDocument tutor = hit.getContent();
+        
+        // Select name and headline based on language
+        String name = switch (languageSuffix) {
+            case "Vi" -> tutor.getFullNameVi();
+            case "Ja" -> tutor.getFullNameJa();
+            default -> tutor.getFullNameEn();
+        };
+        
+        String headline = switch (languageSuffix) {
+            case "Vi" -> tutor.getHeadlineVi();
+            case "Ja" -> tutor.getHeadlineJa();
+            default -> tutor.getHeadlineEn();
+        };
+        
+        return TutorSuggestion.builder()
+                .tutorId(tutor.getId())
+                .name(name)
+                .headline(headline)
+                .score(hit.getScore())
                 .build();
     }
 }

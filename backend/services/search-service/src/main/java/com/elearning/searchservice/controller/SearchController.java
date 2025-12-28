@@ -2,11 +2,16 @@ package com.elearning.searchservice.controller;
 
 import com.elearning.searchservice.dto.ApiResponse;
 import com.elearning.searchservice.dto.request.SearchTutorRequest;
+import com.elearning.searchservice.dto.request.TutorSuggestionsRequest;
 import com.elearning.searchservice.dto.response.SearchFacets;
 import com.elearning.searchservice.dto.response.TutorSearchResult;
+import com.elearning.searchservice.dto.response.TutorSuggestion;
 import com.elearning.searchservice.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +50,30 @@ public class SearchController {
         SearchFacets facets = searchService.getSearchFacets(request);
 
         return ResponseEntity.ok(ApiResponse.success(facets));
+    }
+
+    /**
+     * Get tutor search suggestions using fuzzy search
+     * GET /v1/search/tutors/suggestions?keyword=...&language=...&limit=...
+     */
+    @GetMapping("/tutors/suggestions")
+    public ResponseEntity<ApiResponse<List<TutorSuggestion>>> getTutorSuggestions(
+            @RequestParam String keyword,
+            @RequestParam(required = false) String language,
+            @RequestParam(defaultValue = "10") Integer limit) {
+
+        TutorSuggestionsRequest request = TutorSuggestionsRequest.builder()
+                .keyword(keyword)
+                .language(language)
+                .limit(limit)
+                .build();
+
+        log.info("Tutor suggestions request: keyword={}, language={}, limit={}",
+                request.getKeyword(), request.getLanguage(), request.getLimit());
+
+        List<TutorSuggestion> suggestions = searchService.getTutorSuggestions(request);
+
+        return ResponseEntity.ok(ApiResponse.success(suggestions));
     }
 
     /**

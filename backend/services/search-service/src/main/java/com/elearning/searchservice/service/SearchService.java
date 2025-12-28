@@ -1,8 +1,10 @@
 package com.elearning.searchservice.service;
 
 import com.elearning.searchservice.dto.request.SearchTutorRequest;
+import com.elearning.searchservice.dto.request.TutorSuggestionsRequest;
 import com.elearning.searchservice.dto.response.SearchFacets;
 import com.elearning.searchservice.dto.response.TutorSearchResult;
+import com.elearning.searchservice.dto.response.TutorSuggestion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,6 +23,11 @@ public interface SearchService {
      * Get search facets/aggregations
      */
     SearchFacets getSearchFacets(SearchTutorRequest request);
+    
+    /**
+     * Get tutor search suggestions using fuzzy search
+     */
+    List<TutorSuggestion> getTutorSuggestions(TutorSuggestionsRequest request);
     
     /**
      * Legacy search method (deprecated, for backward compatibility)

@@ -153,23 +153,24 @@ public class ElasticsearchConfig {
                 .properties("id", Property.of(p -> p.keyword(k -> k)))
                 .properties("isVerified", Property.of(p -> p.boolean_(b -> b)))
                 .properties("isActive", Property.of(p -> p.boolean_(b -> b)))
+                .properties("countryCode", Property.of(p -> p.keyword(k -> k)))
                 
-                // Multi-language name fields
-                .properties("nameVi", Property.of(p -> p.text(t -> t
+                // Full name fields
+                .properties("fullNameVi", Property.of(p -> p.text(t -> t
                         .analyzer("vietnamese_analyzer")
                         .fields("autocomplete", f -> f.text(ft -> ft
                                 .analyzer("vietnamese_autocomplete")
                                 .searchAnalyzer("vietnamese_analyzer")
                         ))
                 )))
-                .properties("nameEn", Property.of(p -> p.text(t -> t
+                .properties("fullNameEn", Property.of(p -> p.text(t -> t
                         .analyzer("english_analyzer")
                         .fields("autocomplete", f -> f.text(ft -> ft
                                 .analyzer("english_autocomplete")
                                 .searchAnalyzer("english_analyzer")
                         ))
                 )))
-                .properties("nameJa", Property.of(p -> p.text(t -> t
+                .properties("fullNameJa", Property.of(p -> p.text(t -> t
                         .analyzer("japanese_analyzer")
                         .fields("autocomplete", f -> f.text(ft -> ft
                                 .analyzer("japanese_autocomplete")
@@ -177,15 +178,15 @@ public class ElasticsearchConfig {
                         ))
                 )))
                 
-                // Multi-language specialization fields
-                .properties("specializationVi", Property.of(p -> p.text(t -> t.analyzer("vietnamese_analyzer"))))
-                .properties("specializationEn", Property.of(p -> p.text(t -> t.analyzer("english_analyzer"))))
-                .properties("specializationJa", Property.of(p -> p.text(t -> t.analyzer("japanese_analyzer"))))
+                // Headline fields
+                .properties("headlineVi", Property.of(p -> p.text(t -> t.analyzer("vietnamese_analyzer"))))
+                .properties("headlineEn", Property.of(p -> p.text(t -> t.analyzer("english_analyzer"))))
+                .properties("headlineJa", Property.of(p -> p.text(t -> t.analyzer("japanese_analyzer"))))
                 
-                // Multi-language bio fields
-                .properties("bioVi", Property.of(p -> p.text(t -> t.analyzer("vietnamese_analyzer"))))
-                .properties("bioEn", Property.of(p -> p.text(t -> t.analyzer("english_analyzer"))))
-                .properties("bioJa", Property.of(p -> p.text(t -> t.analyzer("japanese_analyzer"))))
+                // Introduction fields
+                .properties("introductionVi", Property.of(p -> p.text(t -> t.analyzer("vietnamese_analyzer"))))
+                .properties("introductionEn", Property.of(p -> p.text(t -> t.analyzer("english_analyzer"))))
+                .properties("introductionJa", Property.of(p -> p.text(t -> t.analyzer("japanese_analyzer"))))
                 
                 // Filters
                 .properties("languageCodes", Property.of(p -> p.keyword(k -> k)))
@@ -200,8 +201,6 @@ public class ElasticsearchConfig {
                 
                 // Ranking signals
                 .properties("popularityScore", Property.of(p -> p.double_(d -> d)))
-                .properties("responseRate", Property.of(p -> p.double_(d -> d)))
-                .properties("completionRate", Property.of(p -> p.double_(d -> d)))
                 .properties("totalStudents", Property.of(p -> p.integer(i -> i)))
                 .properties("totalClasses", Property.of(p -> p.integer(i -> i)))
                 
