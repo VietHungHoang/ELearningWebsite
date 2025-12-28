@@ -1,55 +1,90 @@
-
 .overview-container {
-    margin-bottom: 25px;
+    margin-bottom: 24px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     padding: 0;
     margin-right: 0;
     margin-left: 0;
+    overflow: hidden;
 
     @media (max-width: 768px) {
         margin-bottom: 20px;
     }
 
     @media (max-width: 480px) {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
     }
 }
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
     overflow: hidden;
     margin: 0;
+    padding: 0;
+
+    > * {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
 
     ::ng-deep > * {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+
         .trezo-card {
             height: 100%;
             min-height: 280px;
             display: flex;
             flex-direction: column;
             width: 100%;
+            max-width: 100%;
             box-sizing: border-box;
             overflow: hidden;
-            margin: 0;
+            margin: 0 !important;
+            margin-bottom: 0 !important;
+            padding: 16px !important;
+        }
+
+        .trezo-card-content {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+
+            > * {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+        }
+
+        h5, span, div, ul, li {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
     }
 
     // Large screens - 4 columns
     @media (min-width: 1400px) {
-        grid-template-columns: 0.45fr 0.45fr 0.45fr 0.45fr;
-        gap: 8px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
     }
 
     // Medium-large screens - 3 columns
     @media (min-width: 1024px) and (max-width: 1399px) {
         grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
+        gap: 12px;
     }
 
     // Medium screens - 2 columns
@@ -71,39 +106,52 @@
 }
 
 .chart-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 16px;
+    margin-bottom: 24px;
+    margin-top: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 
     @media (max-width: 1023px) {
-        flex-direction: column;
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 
     .chart-item {
         display: flex;
         flex-direction: column;
         min-height: 400px;
-
-        &:first-child {
-            flex: 1;
-        }
-
-        &:last-child {
-            flex: 1;
-        }
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
+        overflow: hidden;
 
         ::ng-deep > * {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100%;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
+            overflow: hidden;
 
             .trezo-card {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
                 height: 100%;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                min-width: 0;
+                overflow: hidden;
             }
         }
     }
@@ -111,30 +159,41 @@
 
 .bottom-row {
     display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-
-    @media (max-width: 1023px) {
-        flex-direction: column;
-    }
+    gap: 0;
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 
     .bottom-item {
-        flex: 1;
         display: flex;
         flex-direction: column;
         min-height: 400px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+
+        &.full-width {
+            flex: 1 1 100%;
+        }
 
         ::ng-deep > * {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100%;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
 
             .trezo-card {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
                 height: 100%;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
             }
         }
     }

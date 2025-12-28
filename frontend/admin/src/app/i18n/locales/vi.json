@@ -1,0 +1,1244 @@
+{
+  "dashboard": {
+    "welcome": {
+      "goodMorning": "Chào buổi sáng",
+      "subtitle": "Đây là những gì đang xảy ra với cửa hàng của bạn hôm nay.",
+      "newOrders": "Đơn hàng mới",
+      "awaitingProcessing": "Đang chờ xử lý",
+      "products": "Sản phẩm",
+      "outOfStock": "Hết hàng"
+    },
+    "overview": {
+      "table": {
+        "learner": "Học viên",
+        "instructor": "Gia sư",
+        "subject": "Môn học",
+        "schedule": "Lịch học",
+        "type": "Loại",
+        "status": "Trạng thái"
+      },
+      "totalCourses": {
+        "title": "Chờ phê duyệt",
+        "thisWeek": "Tuần này",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "rejected": "Đã từ chối"
+      },
+      "totalMentors": {
+        "title": "Tổng số gia sư",
+        "last5Months": "5 tháng qua",
+        "active": "Đang hoạt động",
+        "inactive": "Không hoạt động"
+      },
+      "onlineClasses": {
+        "title": "Lớp học trực tuyến",
+        "last7Days": "7 ngày qua",
+        "mon": "T2",
+        "sun": "CN"
+      },
+      "totalStudents": {
+        "title": "Tổng số học viên",
+        "last5Months": "5 tháng qua",
+        "enrolled": "Đã đăng ký",
+        "completed": "Đã hoàn thành"
+      },
+      "totalSales": {
+        "title": "Tổng doanh thu",
+        "weekly": "Theo tuần",
+        "monthly": "Theo tháng",
+        "yearly": "Theo năm"
+      },
+      "topInstructors": {
+        "title": "Gia sư hàng đầu",
+        "rank": "Hạng",
+        "name": "Tên",
+        "rating": "Đánh giá",
+        "revenue": "Doanh thu",
+        "hours": "Giờ",
+        "totalBookings": "Tổng đặt lịch",
+        "rankingCriteria": {
+          "revenue": "Doanh thu",
+          "rating": "Đánh giá",
+          "totalBookings": "Tổng đặt lịch"
+        },
+        "timePeriod": {
+          "thisWeek": "Tuần này",
+          "thisMonth": "Tháng này",
+          "thisYear": "Năm này",
+          "allTime": "Tất cả"
+        },
+        "pagination": {
+          "itemsPerPage": "Số mục mỗi trang",
+          "of": "của"
+        }
+      },
+      "popularSubjects": {
+        "title": "Môn học phổ biến",
+        "last2Months": "2 tháng qua",
+        "last4Months": "4 tháng qua",
+        "last6Months": "6 tháng qua",
+        "last8Months": "8 tháng qua",
+        "last10Months": "10 tháng qua",
+        "last12Months": "12 tháng qua"
+      }
+    }
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "view": "Xem",
+    "dashboard": "Bảng điều khiển",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "actions": "Thao tác"
+  },
+  "sidebar": {
+    "dashboard": "Bảng điều khiển",
+    "appsAndPages": "Ứng dụng & Trang",
+    "modules": "MÔ-ĐUN",
+    "dashboardSection": {
+      "title": "Bảng điều khiển",
+      "dashboard": "Bảng điều khiển"
+    },
+    "appsAndPagesSection": {
+      "class": "Lớp học",
+      "classList": "Danh sách lớp học",
+      "review": "Đánh giá",
+      "user": "Người dùng",
+      "instructors": "Gia sư",
+      "instructorApproval": "Phê duyệt gia sư",
+      "learners": "Học viên",
+      "finance": "Tài chính",
+      "revenueDashboard": "Bảng doanh thu",
+      "transactions": "Giao dịch",
+      "payoutManagement": "Quản lý thanh toán",
+      "promotion": "Khuyến mãi",
+      "vouchers": "Phiếu giảm giá",
+      "profile": "Hồ sơ",
+      "categoriesSubjects": "Danh mục & Môn học",
+      "categoryList": "Danh sách Danh mục",
+      "subjectList": "Danh sách Môn học"
+    },
+    "modulesSection": {
+      "icons": "Biểu tượng",
+      "materialSymbols": "Material Symbols",
+      "remixIcon": "RemixIcon",
+      "uiElements": "Thành phần UI",
+      "alerts": "Cảnh báo",
+      "avatars": "Ảnh đại diện",
+      "accordion": "Accordion",
+      "badges": "Huy hiệu",
+      "buttons": "Nút bấm",
+      "breadcrumb": "Breadcrumb",
+      "clipboard": "Clipboard",
+      "dropdowns": "Dropdown",
+      "images": "Hình ảnh",
+      "modal": "Modal",
+      "pagination": "Phân trang",
+      "popover": "Popover",
+      "progress": "Tiến trình",
+      "tooltips": "Tooltip",
+      "tabs": "Tab",
+      "typography": "Typography",
+      "videos": "Video",
+      "documentation": "Tài liệu",
+      "tables": "Bảng",
+      "forms": "Biểu mẫu",
+      "inputSelect": "Input & Select",
+      "checkboxesRadios": "Checkbox & Radio",
+      "richTextEditor": "Trình soạn thảo văn bản",
+      "fileUploader": "Tải tệp lên",
+      "charts": "Biểu đồ",
+      "line": "Đường",
+      "area": "Vùng",
+      "column": "Cột",
+      "mixed": "Hỗn hợp",
+      "radialbar": "RadialBar",
+      "radar": "Radar",
+      "pie": "Tròn",
+      "polar": "Polar",
+      "more": "Khác",
+      "authentication": "Xác thực",
+      "signIn": "Đăng nhập",
+      "signUp": "Đăng ký",
+      "forgotPassword": "Quên mật khẩu",
+      "resetPassword": "Đặt lại mật khẩu",
+      "confirmEmail": "Xác nhận email",
+      "lockScreen": "Khóa màn hình",
+      "logout": "Đăng xuất",
+      "extraPages": "Trang bổ sung",
+      "pricing": "Bảng giá",
+      "timeline": "Dòng thời gian",
+      "faq": "Câu hỏi thường gặp",
+      "gallery": "Thư viện",
+      "testimonials": "Lời chứng thực",
+      "search": "Tìm kiếm",
+      "comingSoon": "Sắp ra mắt",
+      "blankPage": "Trang trống",
+      "errors": "Lỗi",
+      "error404": "Trang lỗi 404",
+      "internalError": "Lỗi nội bộ",
+      "widgets": "Widget",
+      "maps": "Bản đồ",
+      "notifications": "Thông báo",
+      "members": "Thành viên"
+    }
+  },
+  "header": {
+    "language": {
+      "title": "Chọn ngôn ngữ",
+      "english": "Tiếng Anh",
+      "vietnamese": "Tiếng Việt"
+    },
+    "profile": {
+      "myProfile": "Hồ sơ của tôi",
+      "messages": "Tin nhắn",
+      "billing": "Thanh toán",
+      "settings": "Cài đặt",
+      "support": "Hỗ trợ",
+      "lockScreen": "Khóa màn hình",
+      "logout": "Đăng xuất",
+      "role": "Quản lý Marketing"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm tại đây....."
+    },
+    "currency": {
+      "title": "Chọn tiền tệ",
+      "vnd": "VND (Đồng Việt Nam)",
+      "usd": "USD (Đô la Mỹ)",
+      "eur": "EUR (Euro)",
+      "gbp": "GBP (Bảng Anh)"
+    }
+  },
+  "classManagement": {
+    "title": "Quản lý lớp học",
+    "classList": "Danh sách lớp học",
+    "searchPlaceholder": "Tìm kiếm lớp học theo tên.....",
+    "status": {
+      "all": "Tất cả trạng thái",
+      "upcoming": "Sắp diễn ra",
+      "ongoing": "Đang diễn ra",
+      "completed": "Đã hoàn thành"
+    },
+    "table": {
+      "stt": "STT",
+      "className": "Tên lớp học",
+      "instructor": "Giảng viên",
+      "startDate": "Ngày bắt đầu",
+      "duration": "Thời lượng",
+      "enrollment": "Số lượng",
+      "type": "Loại",
+      "typeValue": {
+        "oneOnOne": "1 kèm 1",
+        "oneOnN": "Nhóm"
+      },
+      "status": "Trạng thái",
+      "action": "Thao tác",
+      "noClassesFound": "Không tìm thấy lớp học"
+    },
+    "pagination": {
+      "showing": "Hiển thị",
+      "to": "đến",
+      "of": "của",
+      "classes": "lớp học"
+    },
+    "classDetails": {
+      "title": "Chi tiết lớp học",
+      "breadcrumb": {
+        "dashboard": "Bảng điều khiển",
+        "classManagement": "Quản lý lớp học",
+        "classDetails": "Chi tiết lớp học"
+      },
+      "loading": "Đang tải chi tiết lớp học...",
+      "error": {
+        "notFound": "Không tìm thấy lớp học",
+        "loadingError": "Lỗi khi tải chi tiết lớp học",
+        "backToList": "Quay lại danh sách lớp học"
+      },
+      "classInformation": {
+        "title": "Thông tin lớp học",
+        "className": "Tên lớp học",
+        "instructor": "Giảng viên",
+        "startDate": "Ngày bắt đầu",
+        "duration": "Thời lượng",
+        "enrollment": "Số lượng",
+        "status": "Trạng thái"
+      },
+      "financialReport": {
+        "title": "Báo cáo tài chính",
+        "metric": "Chỉ số",
+        "value": "Giá trị",
+        "description": "Mô tả",
+        "pricePerStudent": "Giá mỗi học viên",
+        "baseTicketPrice": "Giá vé cơ bản",
+        "totalEnrollment": "Tổng số đăng ký",
+        "ofMaxCapacity": "% dung lượng tối đa",
+        "totalRevenue": "Tổng doanh thu",
+        "priceTimesEnrollment": "Giá × Số đăng ký",
+        "platformFee": "Phí nền tảng",
+        "ofRevenue": "% doanh thu",
+        "instructorPayout": "Thanh toán giảng viên",
+        "revenueMinusFee": "Doanh thu - Phí",
+        "revenuePerHour": "Doanh thu mỗi giờ",
+        "basedOnDuration": "Dựa trên thời lượng"
+      },
+      "weeklySchedule": {
+        "title": "Lịch học hàng tuần",
+        "previousWeek": "Tuần trước",
+        "nextWeek": "Tuần sau",
+        "class": "Lớp học",
+        "noClass": "Không có lớp"
+      },
+      "studentEnrollments": {
+        "title": "Danh sách học viên",
+        "stt": "#",
+        "studentName": "Tên học viên",
+        "email": "Email",
+        "registeredAt": "Ngày đăng ký",
+        "noEnrollments": "Không tìm thấy học viên đăng ký"
+      }
+    }
+  },
+  "reviewManagement": {
+    "title": "Quản lý đánh giá",
+    "subtitle": "Kiểm duyệt bài đăng cho đánh giá và bình luận từ học viên",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "classManagement": "Quản lý lớp học",
+      "reviewManagement": "Quản lý đánh giá"
+    },
+    "tabs": {
+      "flaggedReviews": "🚩 Đánh giá bị báo cáo",
+      "allReviews": "🗂️ Tất cả đánh giá"
+    },
+    "selected": "đã chọn",
+    "selectAll": "Chọn tất cả",
+    "student": "Học viên",
+    "tutor": "Gia sư",
+    "class": "Lớp học",
+    "learner": "Học viên",
+    "id": "ID",
+    "stars": "Sao",
+    "reason": "Lý do",
+    "detail": "Chi tiết",
+    "emptyState": {
+      "noFlaggedReviews": "Không có đánh giá bị báo cáo",
+      "allProcessed": "Tất cả đánh giá đã được xử lý ✅",
+      "noReviewsFound": "Không tìm thấy đánh giá"
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm kiếm theo tên học viên hoặc gia sư...",
+      "allReasons": "Tất cả lý do",
+      "allStatus": "Tất cả trạng thái",
+      "allRatings": "Tất cả đánh giá",
+      "lowRating": "1-2 Sao",
+      "inappropriateLanguage": "Ngôn ngữ không phù hợp",
+      "spam": "Spam/Quảng cáo"
+    },
+    "status": {
+      "visible": "Hiển thị",
+      "hidden": "Ẩn"
+    },
+    "actions": {
+      "hide": "Ẩn",
+      "show": "Hiển thị",
+      "skip": "Bỏ qua",
+      "restore": "Khôi phục"
+    },
+    "bulkActions": {
+      "hide": "Ẩn",
+      "show": "Hiển thị",
+      "delete": "Xóa",
+      "skip": "Bỏ qua",
+      "restore": "Khôi phục"
+    },
+    "table": {
+      "id": "ID",
+      "stt": "STT",
+      "learner": "Học viên",
+      "tutor": "Gia sư",
+      "rating": "Đánh giá",
+      "content": "Nội dung",
+      "status": "Trạng thái",
+      "action": "Thao tác"
+    },
+    "confirm": {
+      "title": "Xác nhận thao tác",
+      "hideSingle": "Ẩn đánh giá này? Nó sẽ không còn hiển thị cho người dùng.",
+      "unflagSingle": "Đánh dấu đã xử lý? Cờ sẽ được gỡ bỏ.",
+      "restoreSingle": "Khôi phục đánh giá này? Nó sẽ hiển thị lại cho tất cả người dùng.",
+      "hideToggle": "Ẩn đánh giá này?",
+      "showToggle": "Hiển thị lại đánh giá này?",
+      "bulkHide": "Bạn có chắc chắn muốn ẩn {{count}} đánh giá? Chúng sẽ không còn hiển thị cho người dùng.",
+      "bulkShow": "Bạn có chắc chắn muốn hiển thị {{count}} đánh giá? Chúng sẽ hiển thị cho tất cả người dùng.",
+      "bulkDelete": "Bạn có chắc chắn muốn xóa vĩnh viễn {{count}} đánh giá? Hành động này không thể hoàn tác.",
+      "bulkSkip": "Đánh dấu {{count}} đánh giá đã xử lý? Cờ sẽ được gỡ bỏ.",
+      "bulkRestore": "Bạn có chắc chắn muốn khôi phục {{count}} đánh giá? Chúng sẽ hiển thị lại cho tất cả người dùng."
+    }
+  },
+  "instructorList": {
+    "title": "Danh sách Giảng viên",
+    "breadcrumb": {
+      "userManagement": "Quản lý Người dùng",
+      "instructorsList": "Danh sách Giảng viên"
+    },
+    "searchPlaceholder": "Tìm kiếm giảng viên theo tên.....",
+    "table": {
+      "stt": "STT",
+      "name": "Tên",
+      "email": "Email",
+      "joinDate": "Ngày tham gia",
+      "rating": "Đánh giá",
+      "country": "Quốc gia",
+      "action": "Thao tác"
+    },
+    "pagination": {
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} giảng viên"
+    },
+    "emptyState": {
+      "noInstructorsFound": "Không tìm thấy giảng viên nào"
+    },
+    "confirm": {
+      "deleteTitle": "Xóa Giảng viên",
+      "deleteMessage": "Bạn có chắc chắn muốn xóa giảng viên {{name}}?",
+      "delete": "Xóa"
+    }
+  },
+  "instructorApproval": {
+    "title": "Phê duyệt Giảng viên",
+    "subtitle": "Bạn có {{count}} đơn đang chờ phê duyệt.",
+    "breadcrumb": {
+      "userManagement": "Quản lý Người dùng",
+      "instructorApproval": "Phê duyệt Giảng viên"
+    },
+    "searchPlaceholder": "Tìm kiếm giảng viên...",
+    "selected": "đã chọn",
+    "filters": {
+      "category": "Lọc theo Danh mục",
+      "subject": "Lọc theo Môn học",
+      "all": "Tất cả",
+      "programming": "Lập trình & CNTT",
+      "languages": "Ngôn ngữ",
+      "business": "Kinh doanh",
+      "design": "Thiết kế",
+      "dataScience": "Khoa học Dữ liệu",
+      "english": "Tiếng Anh",
+      "marketing": "Marketing",
+      "python": "Python",
+      "apply": "Lọc",
+      "clear": "Xóa"
+    },
+    "status": {
+      "pending": "Chờ duyệt",
+      "done": "Hoàn thành",
+      "approved": "Đã duyệt",
+      "rejected": "Đã từ chối"
+    },
+    "table": {
+      "stt": "STT",
+      "instructorName": "Tên Giảng viên",
+      "subject": "Môn học",
+      "certifications": "Chứng chỉ",
+      "submittedDate": "Ngày nộp",
+      "status": "Trạng thái",
+      "statusValue": {
+        "new": "Mới",
+        "edited": "Đã edit lại"
+      },
+      "actions": "Thao tác"
+    },
+    "pagination": {
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} kết quả"
+    },
+    "emptyState": {
+      "noPendingRequests": "Không tìm thấy đơn chờ duyệt nào",
+      "noEditRequests": "Không có đơn đang chờ chỉnh sửa",
+      "noHistory": "Không có đơn đã duyệt hoặc từ chối"
+    },
+    "actions": {
+      "viewProfile": "Xem hồ sơ",
+      "approve": "Duyệt",
+      "requestEdit": "Yêu cầu chỉnh sửa",
+      "reject": "Từ chối",
+      "rejectSelected": "Từ chối đã chọn"
+    }
+  },
+  "instructorApprovalDetail": {
+    "title": "Chi tiết Phê duyệt Giảng viên",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "userManagement": "Quản lý Người dùng",
+      "instructorApproval": "Phê duyệt Giảng viên",
+      "detail": "Chi tiết"
+    },
+    "loading": "Đang tải...",
+    "status": {
+      "pending": "Chờ duyệt",
+      "approved": "Đã duyệt",
+      "rejected": "Đã từ chối",
+      "requestChanges": "Yêu cầu chỉnh sửa"
+    },
+    "actions": {
+      "approve": "Duyệt",
+      "requestEdit": "Yêu cầu chỉnh sửa",
+      "reject": "Từ chối"
+    },
+    "info": {
+      "email": "Email",
+      "country": "Quốc gia",
+      "submitted": "Ngày nộp",
+      "gender": "Giới tính",
+      "languages": "Ngôn ngữ",
+      "experience": "Kinh nghiệm",
+      "subjects": "Môn học",
+      "level": "Cấp độ",
+      "initialPrice": "Giá ban đầu",
+      "timezone": "Múi giờ",
+      "notSpecified": "Chưa chỉ định",
+      "notClassified": "Chưa phân loại",
+      "noExperience": "Không có kinh nghiệm",
+      "allLanguages": "Tất cả ngôn ngữ",
+      "allExperience": "Tất cả kinh nghiệm",
+      "allSubjects": "Tất cả môn học",
+      "allLevels": "Tất cả cấp độ"
+    },
+    "additionalInfo": {
+      "title": "Thông tin bổ sung",
+      "headline": "Tiêu đề",
+      "introduction": "Giới thiệu",
+      "videoUrl": "Video URL",
+      "watchVideo": "Xem video",
+      "notProvided": "Chưa cung cấp",
+      "socialLinks": "Liên kết mạng xã hội",
+      "none": "Không có"
+    },
+    "certifications": {
+      "title": "Chứng chỉ",
+      "credentialId": "Mã chứng chỉ",
+      "issuingOrganization": "Tổ chức cấp",
+      "issueDate": "Ngày cấp",
+      "expirationDate": "Ngày hết hạn",
+      "view": "Xem"
+    },
+    "career": {
+      "title": "Sự nghiệp",
+      "education": "Học vấn",
+      "experience": "Kinh nghiệm"
+    },
+    "schedule": {
+      "title": "Lịch trình khả dụng",
+      "time": "Thời gian"
+    },
+    "dialogs": {
+      "approve": {
+        "title": "Duyệt Giảng viên",
+        "subtitle": "Chọn cấp độ giảng viên để duyệt:",
+        "selectLevel": "Vui lòng chọn ít nhất một cấp độ",
+        "approving": "Đang duyệt...",
+        "approve": "Duyệt"
+      },
+      "reject": {
+        "title": "Từ chối Yêu cầu",
+        "subtitle": "Cung cấp lý do từ chối",
+        "reason": "Lý do từ chối",
+        "selectReason": "Chọn lý do...",
+        "customReason": "Lý do tùy chỉnh",
+        "specifyReason": "Vui lòng chỉ định lý do...",
+        "provideReason": "Vui lòng cung cấp lý do từ chối",
+        "rejecting": "Đang từ chối...",
+        "reject": "Từ chối"
+      },
+      "editRequest": {
+        "title": "Yêu cầu Chỉnh sửa",
+        "subtitle": "Chỉ định những gì cần chỉnh sửa",
+        "whatToEdit": "Cần chỉnh sửa gì?",
+        "selectReason": "Chọn lý do...",
+        "customDetails": "Chi tiết tùy chỉnh",
+        "specifyDetails": "Vui lòng chỉ định những gì cần chỉnh sửa...",
+        "provideDetails": "Vui lòng cung cấp chi tiết chỉnh sửa",
+        "sending": "Đang gửi...",
+        "sendRequest": "Gửi yêu cầu"
+      }
+    },
+    "previousReview": {
+      "title": "Ghi chú đánh giá trước",
+      "reviewedBy": "Được đánh giá bởi"
+    }
+  },
+  "learnerList": {
+    "title": "Danh sách Học viên",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "userManagement": "Quản lý Người dùng",
+      "learnerList": "Danh sách Học viên"
+    },
+    "searchPlaceholder": "Tìm kiếm học viên theo tên.....",
+    "table": {
+      "stt": "STT",
+      "name": "Tên",
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "joinDate": "Ngày tham gia",
+      "action": "Thao tác"
+    },
+    "pagination": {
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} kết quả"
+    },
+    "emptyState": {
+      "noLearnersFound": "Không tìm thấy học viên nào"
+    },
+    "actions": {
+      "viewDetails": "Xem chi tiết",
+      "delete": "Xóa"
+    },
+    "confirm": {
+      "deleteTitle": "Xóa Học Viên",
+      "deleteMessage": "Bạn có chắc chắn muốn xóa học viên {{name}}?",
+      "cancel": "Hủy",
+      "delete": "Xóa"
+    }
+  },
+  "learnerDetail": {
+    "title": "Chi tiết Học viên",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "userManagement": "Quản lý Người dùng",
+      "learners": "Danh sách Học viên",
+      "detail": "Chi tiết"
+    },
+    "loading": "Đang tải...",
+    "actions": {
+      "editProfile": "Chỉnh sửa Hồ sơ",
+      "saveChanges": "Lưu thay đổi",
+      "cancel": "Hủy"
+    },
+    "info": {
+      "email": "Email",
+      "phone": "Số điện thoại",
+      "joinDate": "Ngày tham gia",
+      "dateOfBirth": "Ngày sinh",
+      "address": "Địa chỉ",
+      "city": "Thành phố",
+      "country": "Quốc gia",
+      "selectCountry": "Chọn quốc gia",
+      "bio": "Tiểu sử",
+      "learningGoals": "Mục tiêu học tập",
+      "strengths": "Điểm mạnh",
+      "weaknesses": "Điểm yếu"
+    },
+    "enrolledClasses": {
+      "title": "Lớp học đã đăng ký",
+      "empty": "Chưa đăng ký lớp học nào",
+      "stt": "STT",
+      "className": "Tên lớp học",
+      "tutor": "Gia sư",
+      "enrolledDate": "Ngày đăng ký",
+      "type": "Loại",
+      "price": "Giá"
+    }
+  },
+  "instructorDetail": {
+    "title": "Chi tiết Giảng viên",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "userManagement": "Quản lý Người dùng",
+      "instructors": "Danh sách Giảng viên",
+      "detail": "Chi tiết"
+    },
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "actions": {
+      "editProfile": "Chỉnh sửa Hồ sơ",
+      "saveChanges": "Lưu thay đổi",
+      "cancel": "Hủy"
+    },
+    "info": {
+      "name": "Tên",
+      "email": "Email",
+      "country": "Quốc gia",
+      "selectCountry": "Chọn quốc gia",
+      "joined": "Ngày tham gia",
+      "gender": "Giới tính",
+      "languages": "Ngôn ngữ",
+      "selectLanguages": "Chọn ngôn ngữ",
+      "allLanguages": "Tất cả ngôn ngữ",
+      "experience": "Kinh nghiệm",
+      "allExperience": "Tất cả kinh nghiệm",
+      "noExperience": "Không có kinh nghiệm",
+      "subjects": "Môn học",
+      "addEditSubjects": "Thêm/Chỉnh sửa Môn học",
+      "enterSubjects": "Nhập môn học (mỗi dòng một môn)",
+      "add": "Thêm",
+      "currentSubjects": "Môn học hiện tại",
+      "allSubjects": "Tất cả môn học",
+      "level": "Cấp độ",
+      "selectLevels": "Chọn cấp độ",
+      "allLevels": "Tất cả cấp độ",
+      "notClassified": "Chưa phân loại",
+      "totalStudents": "Tổng số học viên",
+      "totalReviews": "Tổng số đánh giá",
+      "totalHours": "Tổng số giờ",
+      "currentSessionFee": "Phí buổi học hiện tại",
+      "initialPrice": "Giá ban đầu",
+      "timezone": "Múi giờ",
+      "selectTimezone": "Chọn múi giờ",
+      "searchTimezone": "Tìm kiếm múi giờ...",
+      "notSpecified": "Chưa chỉ định"
+    },
+    "additionalInfo": {
+      "title": "Thông tin bổ sung",
+      "headline": "Tiêu đề",
+      "introduction": "Giới thiệu",
+      "videoUrl": "Video URL",
+      "watchVideo": "Xem video",
+      "notProvided": "Chưa cung cấp",
+      "socialLinks": "Liên kết mạng xã hội",
+      "editSocialLinks": "Chỉnh sửa Liên kết mạng xã hội",
+      "addSocialLink": "Thêm liên kết",
+      "selectPlatform": "Chọn nền tảng",
+      "none": "Không có"
+    },
+    "certifications": {
+      "title": "Chứng chỉ",
+      "credentialId": "Mã chứng chỉ",
+      "issuingOrganization": "Tổ chức cấp",
+      "issueDate": "Ngày cấp",
+      "expirationDate": "Ngày hết hạn"
+    },
+    "career": {
+      "title": "Sự nghiệp",
+      "education": "Học vấn",
+      "experience": "Kinh nghiệm"
+    },
+    "schedule": {
+      "title": "Lịch trình khả dụng",
+      "time": "Thời gian"
+    },
+    "availabilities": {
+      "title": "Lịch khả dụng"
+    },
+    "classes": {
+      "title": "Lớp học",
+      "empty": "Chưa có lớp học nào",
+      "classId": "Mã lớp",
+      "className": "Tên lớp",
+      "students": "Học viên",
+      "rating": "Đánh giá",
+      "pricePerHour": "Giá/Giờ",
+      "classType": "Loại lớp"
+    }
+  },
+  "revenueDashboard": {
+    "title": "Bảng điều khiển Doanh thu",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "finance": "Tài chính",
+      "revenueDashboard": "Bảng điều khiển Doanh thu"
+    },
+    "dateRange": {
+      "today": "Hôm nay",
+      "last7Days": "7 ngày qua",
+      "last30Days": "30 ngày qua",
+      "thisMonth": "Tháng này"
+    },
+    "kpi": {
+      "income": {
+        "label": "Thu nhập",
+        "title": "Tài khoản Admin",
+        "description": "Từ thanh toán học viên"
+      },
+      "payout": {
+        "label": "Thanh toán",
+        "title": "Cho Giảng viên",
+        "description": "Cố định: ngày {{date}} hàng tháng",
+        "descriptionShort": "Cố định hàng tháng"
+      },
+      "balance": {
+        "label": "Số dư",
+        "title": "Lợi nhuận ròng",
+        "description": "Thu nhập - Thanh toán"
+      },
+      "peak": {
+        "label": "Cao nhất",
+        "title": "Giao dịch",
+        "description": "Thanh toán cao nhất"
+      },
+      "transactions": {
+        "label": "Giao dịch",
+        "title": "Tổng số",
+        "description": "Thanh toán đã hoàn thành"
+      },
+      "payouts": {
+        "label": "Thanh toán",
+        "title": "Tổng số",
+        "description": "Thanh toán cho giảng viên"
+      },
+      "vsPrevious": "so với trước"
+    }
+  },
+  "payout": {
+    "title": "Quản lý Thanh toán",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "finance": "Tài chính",
+      "payoutManagement": "Quản lý Thanh toán"
+    },
+    "kpi": {
+      "pending": {
+        "label": "Đang chờ",
+        "title": "Tổng số tiền",
+        "description": "giảng viên đang chờ"
+      },
+      "instructors": {
+        "label": "Số lượng",
+        "title": "Giảng viên",
+        "description": "Đang chờ thanh toán"
+      },
+      "orders": {
+        "label": "Đơn hàng",
+        "title": "Tổng số",
+        "description": "Đơn hàng chờ thanh toán"
+      }
+    },
+    "tabs": {
+      "pendingPayouts": "Thanh toán Đang chờ",
+      "paymentHistory": "Lịch sử Thanh toán"
+    },
+    "search": {
+      "placeholder": "Tìm kiếm tên giảng viên hoặc số batch..."
+    },
+    "export": {
+      "excel": "Xuất Excel"
+    },
+    "bulk": {
+      "selected": "đã chọn",
+      "total": "Tổng",
+      "clear": "Xóa",
+      "confirmAll": "Xác nhận tất cả"
+    },
+    "table": {
+      "stt": "STT",
+      "instructorBank": "Giảng viên & Ngân hàng",
+      "method": "Phương thức",
+      "totalAmount": "Tổng tiền",
+      "orders": "Đơn hàng",
+      "actions": "Thao tác",
+      "instructorName": "Tên Giảng viên",
+      "amount": "Số tiền",
+      "paymentDate": "Ngày thanh toán",
+      "approvedBy": "Người duyệt",
+      "status": "Trạng thái",
+      "ordersCount": "đơn hàng"
+    },
+    "empty": {
+      "noPendingPayouts": "Không có thanh toán đang chờ",
+      "noPaymentHistory": "Không có lịch sử thanh toán"
+    },
+    "filters": {
+      "title": "Bộ lọc",
+      "status": "Lọc theo trạng thái",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "all": "Tất cả",
+      "complete": "Hoàn thành",
+      "failed": "Thất bại",
+      "filter": "Lọc",
+      "clear": "Xóa"
+    },
+    "status": {
+      "complete": "Hoàn thành",
+      "failed": "Thất bại"
+    },
+    "paymentMethod": {
+      "vnpay": "VNPay",
+      "momo": "Momo",
+      "sepay": "SePay"
+    },
+    "modals": {
+      "orderList": {
+        "title": "Danh sách Order",
+        "subtitle": "Danh sách Order",
+        "total": "Tổng",
+        "noOrders": "Không có đơn hàng",
+        "close": "Đóng"
+      },
+      "qrPayment": {
+        "title": "QR Thanh toán",
+        "subtitle": "Mã QR Thanh toán",
+        "bank": "Ngân hàng",
+        "accountNumber": "Số tài khoản",
+        "accountHolder": "Chủ tài khoản",
+        "totalAmount": "Tổng tiền",
+        "download": "Tải QR",
+        "close": "Đóng"
+      },
+      "confirmPayment": {
+        "title": "Xác nhận Thanh toán",
+        "message": "Bạn có chắc chắn chuyển số tiền:",
+        "to": "đến",
+        "notes": "Ghi chú (tùy chọn)",
+        "notesPlaceholder": "Ví dụ: Chuyển khoản ngân hàng, Mã giao dịch: 123456...",
+        "cancel": "Hủy",
+        "confirm": "Xác nhận",
+        "processing": "Đang xử lý..."
+      },
+      "bulkConfirm": {
+        "title": "Xác nhận Thanh toán Hàng loạt",
+        "selectedInstructors": "Giảng viên đã chọn",
+        "totalAmount": "Tổng tiền",
+        "notes": "Ghi chú (Tùy chọn)",
+        "notesPlaceholder": "Thêm ghi chú thanh toán...",
+        "cancel": "Hủy",
+        "confirmPayment": "Xác nhận Thanh toán"
+      }
+    },
+    "actions": {
+      "viewDetails": "Xem chi tiết & Order List",
+      "qrPayment": "QR Thanh toán"
+    },
+    "pagination": {
+      "showing": "Hiển thị",
+      "to": "đến",
+      "of": "của"
+    }
+  },
+  "transactions": {
+    "title": "Quản lý Giao dịch",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "finance": "Tài chính",
+      "transactions": "Giao dịch"
+    },
+    "kpi": {
+      "totalRevenue": "Tổng doanh thu",
+      "completed": "Đã hoàn thành",
+      "failed": "Thất bại",
+      "orders": "đơn hàng",
+      "successfulTransactions": "Giao dịch thành công",
+      "transactionErrors": "Lỗi giao dịch"
+    },
+    "filters": {
+      "title": "Bộ lọc",
+      "status": "Lọc theo trạng thái",
+      "paymentMethod": "Lọc theo phương thức thanh toán",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "all": "Tất cả",
+      "filter": "Lọc",
+      "clearFilters": "Xóa bộ lọc"
+    },
+    "table": {
+      "stt": "STT",
+      "learner": "Học viên",
+      "class": "Lớp học",
+      "amount": "Số tiền",
+      "method": "Phương thức",
+      "date": "Ngày giờ",
+      "status": "Trạng thái",
+      "action": "Thao tác",
+      "searchPlaceholder": "Tìm kiếm mã đơn hàng...",
+      "exportExcel": "Xuất Excel",
+      "noTransactionsFound": "Không tìm thấy giao dịch nào"
+    },
+    "pagination": {
+      "showing": "Hiển thị",
+      "to": "đến",
+      "of": "của"
+    },
+    "status": {
+      "completed": "Hoàn thành",
+      "failed": "Thất bại",
+      "pending": "Đang chờ"
+    },
+    "paymentMethod": {
+      "momo": "Momo",
+      "vnpay": "VNPay",
+      "banking": "Ngân hàng"
+    },
+    "confirm": {
+      "title": "Xác nhận duyệt",
+      "message": "Duyệt đơn hàng #{{id}}?",
+      "notes": "Thêm ghi chú...",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận",
+      "processing": "Đang xử lý..."
+    },
+    "detail": {
+      "title": "Chi tiết Giao dịch",
+      "breadcrumb": {
+        "dashboard": "Bảng điều khiển",
+        "finance": "Tài chính",
+        "transactions": "Giao dịch",
+        "detail": "Chi tiết Giao dịch"
+      },
+      "transactionId": "Mã Giao dịch",
+      "learnerInformation": {
+        "title": "Thông tin Học viên",
+        "learnerId": "Mã Học viên",
+        "name": "Tên",
+        "email": "Email",
+        "phone": "Số điện thoại"
+      },
+      "classInformation": {
+        "title": "Thông tin Lớp học",
+        "classId": "Mã Lớp học",
+        "name": "Tên",
+        "type": "Loại",
+        "instructor": "Giảng viên",
+        "classType": {
+          "oneOnOne": "1 kèm 1",
+          "group": "Nhóm"
+        }
+      },
+      "paymentInformation": {
+        "title": "Thông tin Thanh toán",
+        "totalAmount": "Tổng tiền",
+        "paymentTime": "Thời gian thanh toán",
+        "paymentMethod": "Phương thức thanh toán",
+        "status": "Trạng thái"
+      },
+      "actions": {
+        "print": "In",
+        "download": "Tải xuống"
+      }
+    }
+  },
+  "categorySubjectManagement": {
+    "title": "Quản lý Danh mục & Môn học",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "courseManagement": "Quản lý Khóa học",
+      "categorySubjectManagement": "Quản lý Danh mục & Môn học"
+    },
+    "tabs": {
+      "subjectList": "Danh sách Môn học",
+      "categoryList": "Danh sách Danh mục"
+    },
+    "subjectList": {
+      "title": "Danh sách Môn học",
+      "pageTitle": "Danh sách Môn học",
+      "searchPlaceholder": "Tìm kiếm theo tên",
+      "statusLabel": "Trạng thái",
+      "category": "Danh mục",
+      "addSubject": "Thêm Môn học",
+      "table": {
+        "stt": "STT",
+        "subjectName": "Tên Môn học",
+        "description": "Mô tả",
+        "category": "Danh mục",
+        "tutors": "Gia sư",
+        "status": "Trạng thái",
+        "actions": "Thao tác"
+      },
+      "status": {
+        "all": "Tất cả",
+        "active": "Hoạt động",
+        "inactive": "Không hoạt động"
+      },
+      "emptyState": {
+        "title": "Không tìm thấy môn học",
+        "description": "Thử điều chỉnh bộ lọc hoặc thêm môn học mới"
+      },
+      "modal": {
+        "addTitle": "Thêm Môn học Mới",
+        "editTitle": "Chỉnh sửa Môn học",
+        "subjectName": "Tên Môn học",
+        "description": "Mô tả",
+        "category": "Danh mục",
+        "newCategoryName": "Tên Danh mục Mới",
+        "selectCategory": "-- Chọn danh mục --",
+        "addNewCategory": "+ Thêm Danh mục Mới",
+        "cancel": "Hủy",
+        "add": "Thêm Môn học",
+        "update": "Cập nhật Môn học"
+      },
+      "pagination": {
+        "showing": "Hiển thị",
+        "to": "đến",
+        "of": "của",
+        "entries": "mục"
+      }
+    },
+    "categoryList": {
+      "title": "Danh sách Danh mục",
+      "pageTitle": "Danh sách Danh mục",
+      "searchPlaceholder": "Tìm kiếm theo tên danh mục",
+      "statusLabel": "Trạng thái",
+      "addCategory": "Thêm Danh mục",
+      "table": {
+        "stt": "STT",
+        "categoryName": "Tên Danh mục",
+        "description": "Mô tả",
+        "subjects": "Môn học",
+        "tutors": "Gia sư",
+        "status": "Trạng thái",
+        "action": "Thao tác"
+      },
+      "status": {
+        "all": "Tất cả",
+        "active": "Hoạt động",
+        "inactive": "Không hoạt động"
+      },
+      "emptyState": {
+        "title": "Không tìm thấy danh mục",
+        "description": "Thử điều chỉnh bộ lọc hoặc thêm danh mục mới"
+      },
+      "modal": {
+        "addTitle": "Thêm Danh mục Mới",
+        "editTitle": "Chỉnh sửa Danh mục",
+        "categoryName": "Tên Danh mục",
+        "description": "Mô tả",
+        "defaultSubjectName": "Tên Môn học Mặc định",
+        "defaultSubjectHint": "Mỗi danh mục yêu cầu ít nhất một môn học",
+        "cancel": "Hủy",
+        "add": "Thêm Danh mục",
+        "update": "Cập nhật Danh mục"
+      },
+      "pagination": {
+        "showing": "Hiển thị",
+        "to": "đến",
+        "of": "của",
+        "entries": "mục"
+      },
+      "detailsModal": {
+        "title": "Chi tiết Danh mục",
+        "categoryInformation": "Thông tin Danh mục",
+        "categoryId": "Mã Danh mục",
+        "status": "Trạng thái",
+        "description": "Mô tả",
+        "subjectsInCategory": "Môn học trong Danh mục này",
+        "noSubjects": "Không có môn học trong danh mục này",
+        "close": "Đóng"
+      },
+      "deleteModal": {
+        "title": "Xác nhận Xóa",
+        "message": "Bạn có chắc chắn muốn xóa danh mục này? Tất cả môn học trong danh mục này cũng sẽ bị xóa.",
+        "cancel": "Hủy",
+        "confirm": "Xóa"
+      }
+    }
+  },
+  "voucherManagement": {
+    "title": "Quản lý Phiếu giảm giá",
+    "breadcrumb": {
+      "dashboard": "Bảng điều khiển",
+      "promotionManagement": "Quản lý Khuyến mãi",
+      "vouchers": "Phiếu giảm giá"
+    },
+    "searchPlaceholder": "Tìm kiếm mã phiếu giảm giá...",
+    "createNewVoucher": "Tạo Phiếu giảm giá Mới",
+    "filters": {
+      "creator": "Người tạo",
+      "all": "Tất cả",
+      "createdByAdmin": "Được tạo bởi Admin",
+      "createdByInstructor": "Được tạo bởi Gia sư",
+      "allStatus": "Tất cả trạng thái",
+      "allTypes": "Tất cả loại",
+      "percentageDiscount": "Giảm giá theo phần trăm",
+      "fixedAmount": "Số tiền cố định"
+    },
+    "status": {
+      "active": "Hoạt động",
+      "expired": "Hết hạn",
+      "paused": "Tạm dừng",
+      "upcoming": "Sắp tới"
+    },
+    "bulkActions": {
+      "selected": "đã chọn",
+      "deleteSelected": "Xóa đã chọn"
+    },
+    "table": {
+      "stt": "STT",
+      "code": "Mã",
+      "creator": "Người tạo",
+      "productType": "Loại sản phẩm",
+      "value": "Giá trị",
+      "actor": "Đối tượng",
+      "usage": "Sử dụng",
+      "duration": "Thời hạn",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "actor": {
+      "allStudents": "Tất cả học viên",
+      "topSpenders": "Người chi tiêu nhiều",
+      "newStudents": "Học viên mới",
+      "noSpending1Month": "Không chi tiêu (1 tháng)"
+    },
+    "actions": {
+      "edit": "Chỉnh sửa",
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "delete": "Xóa"
+    },
+    "emptyState": {
+      "noVouchersFound": "Không tìm thấy phiếu giảm giá"
+    }
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "changePassword": "Đổi mật khẩu",
+    "paymentMethod": "Phương thức thanh toán",
+    "changePasswordPage": {
+      "oldPassword": "Mật khẩu cũ",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "typePassword": "Nhập mật khẩu",
+      "changePasswordButton": "Đổi mật khẩu",
+      "forgotPassword": "Quên mật khẩu?"
+    },
+    "paymentMethodPage": {
+      "generalSettings": "Cài đặt chung",
+      "generalSettingsDesc": "Cấu hình tiền tệ mặc định và cài đặt hiển thị.",
+      "vnpayGateway": "Cổng thanh toán VNPay",
+      "momoGateway": "Cổng thanh toán Momo",
+      "defaultCurrency": "Tiền tệ mặc định",
+      "currencySymbolPosition": "Vị trí ký hiệu tiền tệ",
+      "prefix": "Tiền tố (ví dụ: $100)",
+      "suffix": "Hậu tố (ví dụ: 100 VNĐ)",
+      "paymentGateways": "Cổng thanh toán",
+      "enableVnpayGateway": "Bật cổng thanh toán VNPay",
+      "enableMomoGateway": "Bật cổng thanh toán Momo",
+      "vnpayConfiguration": "Cấu hình cổng thanh toán VNPay",
+      "vnpayConfigurationDesc": "Cấu hình cài đặt cổng thanh toán VNPay.",
+      "momoConfiguration": "Cấu hình cổng thanh toán Momo",
+      "momoConfigurationDesc": "Cấu hình cài đặt cổng thanh toán Momo.",
+      "gatewayTitle": "Tiêu đề cổng thanh toán",
+      "gatewayDescription": "Mô tả cổng thanh toán",
+      "environmentMode": "Chế độ môi trường",
+      "sandboxTesting": "Sandbox (Thử nghiệm)",
+      "liveProduction": "Live (Sản xuất)",
+      "sandboxSettings": "Cài đặt Sandbox",
+      "liveSettings": "Cài đặt Live",
+      "sandboxTmnCode": "Mã TMN Sandbox",
+      "sandboxHashSecret": "Hash Secret Sandbox",
+      "sandboxUrl": "URL Sandbox",
+      "liveTmnCode": "Mã TMN Live",
+      "liveHashSecret": "Hash Secret Live",
+      "liveUrl": "URL Live",
+      "ipnCallbackUrl": "URL Callback IPN",
+      "copy": "Sao chép",
+      "copyUrlDesc": "Sao chép URL này vào cài đặt bảng điều khiển Merchant {{gateway}} của bạn.",
+      "sandboxPartnerCode": "Mã đối tác Sandbox",
+      "sandboxAccessKey": "Access Key Sandbox",
+      "sandboxSecretKey": "Secret Key Sandbox",
+      "livePartnerCode": "Mã đối tác Live",
+      "liveAccessKey": "Access Key Live",
+      "liveSecretKey": "Secret Key Live",
+      "saveSettings": "Lưu cài đặt",
+      "cancel": "Hủy",
+      "payWithVnpayQr": "Thanh toán bằng VNPay QR",
+      "scanQrVnpay": "Quét mã QR bằng ứng dụng ngân hàng của bạn.",
+      "payWithMomoWallet": "Thanh toán bằng ví Momo",
+      "scanQrMomo": "Quét mã QR bằng ứng dụng Momo của bạn."
+    }
+  }
+}
+

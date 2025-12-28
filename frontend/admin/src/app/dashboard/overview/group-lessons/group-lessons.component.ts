@@ -2,12 +2,13 @@ import { Component, OnInit, OnDestroy, Input, HostListener } from '@angular/core
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { RecentBooking } from '../../../types/dashboard';
 import { DashboardService } from '../../../services/dashboard.service';
 
 @Component({
     selector: 'app-group-lessons',
-    imports: [RouterLink, CommonModule],
+    imports: [RouterLink, CommonModule, TranslatePipe],
     templateUrl: './group-lessons.component.html',
     styleUrl: './group-lessons.component.scss'
 })

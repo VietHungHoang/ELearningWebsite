@@ -1,10 +1,11 @@
 import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-change-password',
-    imports: [RouterLink, NgClass],
+    imports: [RouterLink, NgClass, TranslatePipe],
     templateUrl: './change-password.component.html',
     styleUrl: './change-password.component.scss'
 })

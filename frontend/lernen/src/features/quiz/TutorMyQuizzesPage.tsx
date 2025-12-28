@@ -353,7 +353,7 @@ const MyQuizzesPage: React.FC = () => {
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
-                        navigate('/dashboard/quizzes/take');
+                        navigate('/quiz/take');
                         setOpenMenuId(null);
                     }}
                     className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
@@ -398,7 +398,7 @@ const MyQuizzesPage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/dashboard/my-quizzes/take');
+                            navigate('/quiz/take');
                             setOpenMenuId(null);
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#475569]/5 active:bg-[#475569]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
@@ -412,7 +412,7 @@ const MyQuizzesPage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/dashboard/my-quizzes/take');
+                            navigate('/quiz/take');
                             setOpenMenuId(null);
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#a16207]/5 active:bg-[#a16207]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 whitespace-nowrap"
@@ -426,7 +426,7 @@ const MyQuizzesPage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/dashboard/my-quizzes/take');
+                            navigate('/quiz/take');
                             setOpenMenuId(null);
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
@@ -556,9 +556,9 @@ const MyQuizzesPage: React.FC = () => {
                     <button
                         onClick={() => {
                             if (quiz.status === 'not_started' || quiz.status === 'in_progress') {
-                                navigate('/dashboard/my-quizzes/take');
+                                navigate('/quiz/take');
                             } else if (quiz.status === 'completed') {
-                                navigate('/dashboard/my-quizzes/result');
+                                navigate('/quiz/result');
                             }
                         }}
                         className={`w-full mt-auto pt-2 py-2 rounded-lg text-xs font-semibold transition-colors ${

@@ -1,6 +1,6 @@
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
-        Class Management
+        {{ 'classManagement.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
@@ -12,10 +12,10 @@
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Class Management
+            {{ 'classManagement.title' | translate }}
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Class List
+            {{ 'classManagement.classList' | translate }}
         </li>
     </ol>
 </div>
@@ -24,7 +24,7 @@
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
             <app-search-input
-                [placeholder]="'Search classes by name.....'"
+                [placeholder]="searchPlaceholder"
                 [width]="'sm:w-[265px]'"
                 (search)="onSearchChange($event)">
             </app-search-input>
@@ -42,22 +42,22 @@
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('all')">
-                                All Status
+                                {{ 'classManagement.status.all' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('upcoming')">
-                                Upcoming
+                                {{ 'classManagement.status.upcoming' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('ongoing')">
-                                Ongoing
+                                {{ 'classManagement.status.ongoing' | translate }}
                             </button>
                         </li>
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="selectStatus('completed')">
-                                Completed
+                                {{ 'classManagement.status.completed' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -65,84 +65,84 @@
             </div>
         </div>
     </div>
-    <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
-        <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
-            <table id="classes-table" class="w-full min-w-[800px] bg-white dark:bg-[#0c1427]">
+    <div class="trezo-card-content">
+        <div class="table-responsive shadow-sm rounded-lg px-[20px] md:px-[25px]">
+            <table id="classes-table" class="w-full bg-white dark:bg-[#0c1427]">
                 <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                     <tr>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                            ID
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.stt' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                            Class Name
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.className' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
-                            Instructor
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.instructor' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[150px]">
-                            Start Date
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.startDate' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Duration
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.duration' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Enrollment
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.enrollment' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Type
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.type' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Status
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.status' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Action
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'classManagement.table.action' | translate }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    @for (groupClass of paginatedClasses; track groupClass.id) {
+                    @for (groupClass of paginatedClasses; track groupClass.id; let i = $index) {
                         <tr>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ groupClass.id }}</span>
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ getSttNumber(i) }}</span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <a [routerLink]="[groupClass.id]" class="inline-block font-medium transition-all text-gray-500 dark:text-gray-400 hover:text-primary-500">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
+                                <a [routerLink]="[groupClass.id]" class="inline-block font-medium transition-all text-gray-500 dark:text-gray-400 hover:text-primary-500 truncate max-w-full">
                                     {{ groupClass.class_name }}
                                 </a>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-gray-500 dark:text-gray-400">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
+                                <span class="text-gray-500 dark:text-gray-400 truncate block max-w-full">
                                     {{ groupClass.instructor_name }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400">
                                     {{ formatDateTime(groupClass.start_datetime) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400">
                                     {{ formatDuration(groupClass.duration_in_minutes) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400">
                                     {{ formatCapacity(groupClass.enrollment_count, groupClass.max_capacity) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span [class]="'inline-block px-[8px] py-[4px] rounded text-xs font-medium ' + (groupClass.class_type === '1-on-1' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300')">
-                                    {{ groupClass.class_type }}
+                                    {{ getClassTypeText(groupClass.class_type) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span [class]="'inline-block px-[12px] py-[6px] rounded-full text-xs font-medium ' + getStatusClass(groupClass.status)">
                                     {{ getStatusText(groupClass.status) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <div class="flex items-center gap-[9px]">
-                                    <a [routerLink]="[groupClass.id]" class="text-primary-500 leading-none hover:text-primary-600 transition-colors">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
+                                <div class="flex items-center justify-center gap-[9px]">
+                                    <a [routerLink]="[groupClass.id]" class="text-primary-500 leading-none hover:text-primary-600 transition-colors" [title]="'common.view' | translate">
                                         <i class="material-symbols-outlined !text-md">
                                             visibility
                                         </i>
@@ -153,17 +153,17 @@
                     }
                     @if (paginatedClasses.length === 0) {
                         <tr>
-                            <td [attr.colspan]="7" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
-                                No classes found
+                            <td [attr.colspan]="9" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                                {{ 'classManagement.table.noClassesFound' | translate }}
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-        <div class="px-[25px] pt-[12px] md:pt-[14px] sm:flex sm:items-center justify-between">
+        <div class="px-[20px] md:px-[25px] pt-[12px] md:pt-[14px] pb-[12px] md:pb-[14px] sm:flex sm:items-center justify-between">
             <p class="!mb-0 text-sm">
-                Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ getEndRange() }} of {{ totalClasses }} classes
+                {{ 'classManagement.pagination.showing' | translate }} {{ (currentPage - 1) * itemsPerPage + 1 }} {{ 'classManagement.pagination.to' | translate }} {{ getEndRange() }} {{ 'classManagement.pagination.of' | translate }} {{ totalClasses }} {{ 'classManagement.pagination.classes' | translate }}
             </p>
             @if (totalPages > 1) {
                 <ol class="mt-[10px] sm:mt-0">

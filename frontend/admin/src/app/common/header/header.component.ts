@@ -1,27 +1,42 @@
-import { Component, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
+import { Component, Inject, PLATFORM_ID, Renderer2, OnInit, effect } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { ToggleService } from './toggle.service';
+import { I18nService, SupportedLanguage } from '../../i18n/i18n.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-header',
-    imports: [RouterLink],
+    imports: [RouterLink, TranslatePipe],
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
 
     isSidebarVisible = true;
+    currentLanguage: SupportedLanguage = 'en';
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
         public toggleService: ToggleService,
-        private renderer: Renderer2
-    ) {}
+        private renderer: Renderer2,
+        private i18nService: I18nService
+    ) {
+        // Watch for language changes
+        effect(() => {
+            this.currentLanguage = this.i18nService.currentLanguage$();
+        });
+    }
 
     ngOnInit(): void {
-
         this.toggleService.initializeTheme();
+        this.currentLanguage = this.i18nService.getCurrentLanguage();
+    }
+
+    async changeLanguage(lang: SupportedLanguage): Promise<void> {
+        await this.i18nService.setLanguage(lang);
+        this.currentLanguage = lang;
+        this.toggleClass('languageMenuButton'); // Close dropdown after selection
     }
 
     toggleTheme() {

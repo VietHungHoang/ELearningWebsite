@@ -25,7 +25,7 @@ public class TutorRoutesConfig {
                         .path(
                                 prefix + "{tutorId}/availabilities",
                                 prefix + "{tutorId}/onboarding",
-                                prefix + "me/dashboard/**",
+                                prefix + "me/dashboard/stats",
                                 prefix + "me/earnings/**",
                                 "/api/v1/public/tutors/{tutorId}"
                                 )

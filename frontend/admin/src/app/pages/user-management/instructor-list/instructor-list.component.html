@@ -1,6 +1,6 @@
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
-        Instructors List
+        {{ 'instructorList.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
@@ -8,14 +8,14 @@
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
-                Dashboard
+                {{ 'common.dashboard' | translate }}
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            User Management
+            {{ 'instructorList.breadcrumb.userManagement' | translate }}
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Instructors List
+            {{ 'instructorList.breadcrumb.instructorsList' | translate }}
         </li>
     </ol>
 </div>
@@ -24,77 +24,73 @@
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
             <app-search-input
-                [placeholder]="'Search instructors by name.....'"
+                [placeholder]="searchPlaceholder"
                 [width]="'sm:w-[265px]'"
                 (search)="onSearchInstructors($event)">
             </app-search-input>
         </div>
     </div>
-    <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
+    <div class="trezo-card-content -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
             <table id="instructors-list-table" class="w-full bg-white dark:bg-[#0c1427]">
                 <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                     <tr>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
-                            ID
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.stt' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                            Name
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.name' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[200px]">
-                            Email
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.email' | translate }}
                         </th>
-
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
-                            Join Date
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.joinDate' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Rating
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.rating' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Country
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.country' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
-                            Action
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'instructorList.table.action' | translate }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    @for (instructor of paginatedInstructors; track instructor.id) {
+                    @for (instructor of paginatedInstructors; track instructor.id; let i = $index) {
                         <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium" [title]="instructor.id">
-                                    #{{ instructor.id | truncate }}
-                                </span>
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ getSttNumber(i) }}</span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-600 dark:text-gray-300 font-medium">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-gray-600 dark:text-gray-300 font-medium truncate max-w-full">
                                     {{ instructor.name }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <span class="text-gray-500 dark:text-gray-400">
+                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
+                                <span class="text-gray-500 dark:text-gray-400 truncate max-w-full">
                                     {{ instructor.email }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
                                 <span class="text-gray-500 dark:text-gray-400">
                                     {{ instructor.joinDate | date:'dd/MM/yyyy HH:mm:ss' }}
                                 </span>
                             </td>
-
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
                                 <span class="text-gray-500 dark:text-gray-400 font-medium">
                                     {{ getRating(instructor) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
                                 <span class="text-gray-500 dark:text-gray-400 font-medium">
                                     {{ getCountryCode(instructor) }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0">
-                                <div class="flex items-center gap-[9px]">
+                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                                <div class="flex items-center justify-center gap-[9px]">
                                     <button
                                         type="button"
                                         (click)="viewDetail(instructor)"
@@ -117,15 +113,15 @@
                     }
                     @if (paginatedInstructors.length === 0) {
                         <tr>
-                            <td [attr.colspan]="6" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
-                                No instructors found
+                            <td [attr.colspan]="7" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                                {{ 'instructorList.emptyState.noInstructorsFound' | translate }}
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-        <div class="px-[25px] pt-[12px] md:pt-[14px] sm:flex sm:items-center justify-between">
+        <div class="px-0 pt-[12px] md:pt-[14px] pb-[12px] md:pb-[14px] sm:flex sm:items-center justify-between">
             <p class="!mb-0 text-sm">
                 {{ showingText }}
             </p>
@@ -170,10 +166,10 @@
 
 <app-confirm-dialog
     [isOpen]="showDeleteDialog"
-    title="Xóa Giảng Viên"
-    [message]="'Bạn có chắc chắn muốn xóa giảng viên ' + (instructorToDelete?.name || '') + '?'"
-    cancelText="Hủy"
-    confirmText="Xóa"
+    [title]="'instructorList.confirm.deleteTitle' | translate"
+    [message]="getDeleteMessage()"
+    [cancelText]="'common.cancel' | translate"
+    [confirmText]="'instructorList.confirm.delete' | translate"
     (confirm)="confirmDelete()"
     (cancel)="cancelDelete()">
 </app-confirm-dialog>

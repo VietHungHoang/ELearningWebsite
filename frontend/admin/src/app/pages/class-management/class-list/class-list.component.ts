@@ -1,14 +1,16 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ClassService, GroupClass, ClassStatus } from '../../../services/class.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { I18nService } from '../../../i18n/i18n.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-class-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent],
+  imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent, TranslatePipe],
   templateUrl: './class-list.component.html',
   styleUrl: './class-list.component.scss'
 })
@@ -31,8 +33,20 @@ export class ClassListComponent implements OnInit {
   currentPage = 1;
   totalClasses = 0;
   totalPages = 1;
+  searchPlaceholder = '';
 
-  constructor(private classService: ClassService) {}
+  constructor(
+    private classService: ClassService,
+    private i18nService: I18nService
+  ) {
+    this.searchPlaceholder = this.i18nService.translate('classManagement.searchPlaceholder');
+    
+    // Update placeholder when language changes
+    effect(() => {
+      this.i18nService.currentLanguage$();
+      this.searchPlaceholder = this.i18nService.translate('classManagement.searchPlaceholder');
+    });
+  }
 
   ngOnInit(): void {
     this.classService.getAllClasses().subscribe(classes => {
@@ -134,12 +148,20 @@ export class ClassListComponent implements OnInit {
   }
 
   getStatusText(status: ClassStatus): string {
-    const statusMap = {
-      upcoming: 'Upcoming',
-      ongoing: 'Ongoing',
-      completed: 'Completed'
-    };
-    return statusMap[status] || status;
+    return this.i18nService.translate(`classManagement.status.${status}`);
+  }
+
+  getClassTypeText(classType: string): string {
+    if (classType === '1-on-1') {
+      return this.i18nService.translate('classManagement.table.typeValue.oneOnOne');
+    } else if (classType === '1-on-n') {
+      return this.i18nService.translate('classManagement.table.typeValue.oneOnN');
+    }
+    return classType;
+  }
+
+  getSttNumber(index: number): number {
+    return (this.currentPage - 1) * this.itemsPerPage + index + 1;
   }
 
   getStatusClass(status: ClassStatus): string {
@@ -156,7 +178,9 @@ export class ClassListComponent implements OnInit {
   }
 
   getSelectedStatusText(): string {
-    if (this.selectedStatus === 'all') return 'All Status';
+    if (this.selectedStatus === 'all') {
+      return this.i18nService.translate('classManagement.status.all');
+    }
     return this.getStatusText(this.selectedStatus as ClassStatus);
   }
 

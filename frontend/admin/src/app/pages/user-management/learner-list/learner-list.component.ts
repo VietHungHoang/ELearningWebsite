@@ -6,11 +6,13 @@ import { UserService, Student } from '../../../services/user.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { I18nService } from '../../../i18n/i18n.service';
 
 @Component({
     selector: 'app-learner-list',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe],
+    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe, TranslatePipe],
     templateUrl: './learner-list.component.html',
     styleUrl: './learner-list.component.scss'
 })
@@ -25,7 +27,7 @@ export class LearnerListComponent implements OnInit {
     paginatedLearners: Student[] = [];
     isLoading = false;
 
-    constructor(private userService: UserService, private router: Router) {}
+    constructor(private userService: UserService, private router: Router, public i18nService: I18nService) {}
 
     ngOnInit(): void {
         this.loadLearners();
@@ -103,7 +105,7 @@ export class LearnerListComponent implements OnInit {
     get showingText(): string {
         const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
         const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalLearners);
-        return `Showing ${startItem}-${endItem} of ${this.totalLearners} results`;
+        return this.i18nService.translate('learnerList.pagination.showing', { start: startItem, end: endItem, total: this.totalLearners });
     }
 
     goToPage(page: number): void {

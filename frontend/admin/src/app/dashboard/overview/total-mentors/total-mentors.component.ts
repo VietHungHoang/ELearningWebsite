@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { TotalMentorsService } from './total-mentors.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-total-mentors',
-    imports: [],
+    imports: [TranslatePipe],
     templateUrl: './total-mentors.component.html',
     styleUrl: './total-mentors.component.scss'
 })

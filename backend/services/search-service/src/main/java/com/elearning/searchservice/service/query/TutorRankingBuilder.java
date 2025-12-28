@@ -73,32 +73,6 @@ public class TutorRankingBuilder {
                 .weight(1.15)
         ));
         
-        // Boost tutors with high response rate (>= 90%) (x1.2)
-        functions.add(FunctionScore.of(f -> f
-                .filter(Query.of(q -> q
-                        .range(r -> r
-                                .number(n -> n
-                                        .field("responseRate")
-                                        .gte(0.9)
-                                )
-                        )
-                ))
-                .weight(1.2)
-        ));
-        
-        // Boost tutors with high completion rate (>= 95%) (x1.1)
-        functions.add(FunctionScore.of(f -> f
-                .filter(Query.of(q -> q
-                        .range(r -> r
-                                .number(n -> n
-                                        .field("completionRate")
-                                        .gte(0.95)
-                                )
-                        )
-                ))
-                .weight(1.1)
-        ));
-        
         // Boost based on popularity score (field value factor)
         functions.add(FunctionScore.of(f -> f
                 .fieldValueFactor(fvf -> fvf

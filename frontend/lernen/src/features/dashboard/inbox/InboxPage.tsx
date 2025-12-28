@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HiSearch, HiCog, HiPaperAirplane, HiUser, HiUsers, HiPlus, HiPhotograph, HiDocument, HiVideoCamera, HiX } from 'react-icons/hi';
+import { HiSearch, HiCog, HiPaperAirplane, HiUser, HiUsers, HiPlus, HiPhotograph, HiDocument, HiVideoCamera } from 'react-icons/hi';
 import { useBreadcrumb } from '../context/BreadcrumbContext';
-import Breadcrumb, { type BreadcrumbItem } from '../components/Breadcrumb';
+import { type BreadcrumbItem } from '../components/Breadcrumb';
+import { useAuth } from '../../../context/AuthContext';
 
 interface Message {
     id: number;
@@ -24,7 +25,8 @@ interface Conversation {
     type: 'private' | 'group';
 }
 
-const mockConversations: Conversation[] = [
+// Mock conversations for tutor
+const mockTutorConversations: Conversation[] = [
     {
         id: 1,
         contactName: 'Cynthia Hunter',
@@ -146,6 +148,92 @@ const mockConversations: Conversation[] = [
     }
 ];
 
+// Mock conversations for student
+const mockStudentConversations: Conversation[] = [
+    {
+        id: 1,
+        contactName: 'Dr. Sarah Johnson',
+        contactAvatar: 'https://picsum.photos/seed/sarah/48/48',
+        onlineStatus: 'Online',
+        lastMessage: "Great! I'll send you the materials right away.",
+        lastMessageTime: '10:30 AM',
+        unreadCount: 1,
+        type: 'private',
+        messages: [
+            { id: 1, text: "Hi Dr. Johnson, I have a question about the assignment.", timestamp: '10:25 AM', sender: 'me' },
+            { id: 2, text: "Hi! Of course, what's your question?", timestamp: '10:26 AM', sender: 'them' },
+            { id: 3, text: "I'm not sure about the format for the essay. Should it be MLA or APA?", timestamp: '10:28 AM', sender: 'me' },
+            { id: 4, text: "It should be MLA format. I'll send you the guidelines.", timestamp: '10:29 AM', sender: 'them' },
+            { id: 5, text: "Thank you so much!", timestamp: '10:29 AM', sender: 'me' },
+            { id: 6, text: "Great! I'll send you the materials right away.", timestamp: '10:30 AM', sender: 'them' },
+        ]
+    },
+    {
+        id: 2,
+        contactName: 'Prof. Michael Chen',
+        contactAvatar: 'https://picsum.photos/seed/michael/48/48',
+        onlineStatus: 'Offline',
+        lastMessage: "See you in class tomorrow!",
+        lastMessageTime: 'Yesterday',
+        unreadCount: 0,
+        type: 'private',
+        messages: [
+            { id: 1, text: "Hi Professor, I won't be able to attend class tomorrow due to a family emergency.", timestamp: 'Yesterday 3:15 PM', sender: 'me' },
+            { id: 2, text: "I understand. Please send me a note and I'll mark you excused.", timestamp: 'Yesterday 3:20 PM', sender: 'them' },
+            { id: 3, text: "Thank you! I'll send it right away.", timestamp: 'Yesterday 3:21 PM', sender: 'me' },
+            { id: 4, text: "See you in class tomorrow!", timestamp: 'Yesterday 3:25 PM', sender: 'them' },
+        ]
+    },
+    {
+        id: 3,
+        contactName: 'Ms. Emily Davis',
+        contactAvatar: 'https://picsum.photos/seed/emily/48/48',
+        onlineStatus: 'Online',
+        lastMessage: "You're doing great! Keep up the good work.",
+        lastMessageTime: 'Yesterday',
+        unreadCount: 0,
+        type: 'private',
+        messages: [
+            { id: 1, text: 'Thank you for the feedback on my presentation!', timestamp: 'Yesterday 1:00 PM', sender: 'me' },
+            { id: 2, text: "You're doing great! Keep up the good work.", timestamp: 'Yesterday 1:02 PM', sender: 'them' },
+        ]
+    },
+    {
+        id: 4,
+        contactName: 'Advanced Math Class',
+        contactAvatar: 'https://picsum.photos/seed/mathclass/48/48',
+        onlineStatus: 'Online',
+        lastMessage: "Don't forget about the quiz tomorrow!",
+        lastMessageTime: '2 hours ago',
+        unreadCount: 2,
+        type: 'group',
+        messages: [
+            { id: 1, text: "Hey everyone! Does anyone understand problem 5 from the homework?", timestamp: 'Yesterday 4:00 PM', sender: 'them', senderName: 'John' },
+            { id: 2, text: "I'm stuck on that one too. Can someone help?", timestamp: 'Yesterday 4:15 PM', sender: 'me' },
+            { id: 3, text: "I think you need to use the quadratic formula!", timestamp: 'Yesterday 4:20 PM', sender: 'them', senderName: 'Lisa' },
+            { id: 4, text: "Oh right! Thanks Lisa!", timestamp: 'Yesterday 4:25 PM', sender: 'me' },
+            { id: 5, text: "No problem! Good luck everyone!", timestamp: 'Yesterday 4:30 PM', sender: 'them', senderName: 'Lisa' },
+            { id: 6, text: "Don't forget about the quiz tomorrow!", timestamp: '2 hours ago', sender: 'them', senderName: 'Prof. Chen' },
+        ]
+    },
+    {
+        id: 5,
+        contactName: 'Study Group - Physics',
+        contactAvatar: 'https://picsum.photos/seed/physics/48/48',
+        onlineStatus: 'Offline',
+        lastMessage: "Let's meet at the library at 3 PM.",
+        lastMessageTime: '1 day ago',
+        unreadCount: 0,
+        type: 'group',
+        messages: [
+            { id: 1, text: "Hi everyone! When should we meet for the study session?", timestamp: '2 days ago 2:00 PM', sender: 'them', senderName: 'Alex' },
+            { id: 2, text: "How about tomorrow afternoon?", timestamp: '2 days ago 2:05 PM', sender: 'me' },
+            { id: 3, text: "That works for me!", timestamp: '2 days ago 2:10 PM', sender: 'them', senderName: 'Sam' },
+            { id: 4, text: "Let's meet at the library at 3 PM.", timestamp: '1 day ago 2:00 PM', sender: 'them', senderName: 'Alex' },
+        ]
+    }
+];
+
 const ContactListItem: React.FC<{ conv: Conversation; isActive: boolean; onClick: () => void; }> = ({ conv, isActive, onClick }) => (
     <div
         onClick={onClick}
@@ -179,16 +267,48 @@ const ContactListItem: React.FC<{ conv: Conversation; isActive: boolean; onClick
     </div>
 );
 
-const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversation }) => {
+const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: string }> = ({ conversation, i18nPrefix }) => {
     const { t } = useTranslation();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
     const attachmentRef = useRef<HTMLDivElement>(null);
     const [newMessage, setNewMessage] = useState('');
     const [isAttachmentPanelOpen, setIsAttachmentPanelOpen] = useState(false);
+    const prevConversationIdRef = useRef<number | null>(null);
+    const prevMessagesLengthRef = useRef<number>(0);
+    const isInitialMountRef = useRef(true);
 
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [conversation?.messages]);
+    // Scroll to bottom when conversation changes or new messages arrive
+    useLayoutEffect(() => {
+        if (!conversation || !messagesContainerRef.current) return;
+
+        const conversationChanged = prevConversationIdRef.current !== conversation.id;
+        const newMessageAdded = !conversationChanged && conversation.messages.length > prevMessagesLengthRef.current;
+        
+        // Update refs
+        if (conversationChanged) {
+            prevConversationIdRef.current = conversation.id;
+            prevMessagesLengthRef.current = conversation.messages.length;
+        } else {
+            prevMessagesLengthRef.current = conversation.messages.length;
+        }
+
+        // Use double requestAnimationFrame to ensure DOM is fully rendered and layout is stable
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                if (!messagesContainerRef.current) return;
+
+                if (conversationChanged || isInitialMountRef.current) {
+                    // When conversation changes or initial mount, scroll immediately without animation
+                    messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+                    isInitialMountRef.current = false;
+                } else if (newMessageAdded) {
+                    // When new message added, smooth scroll
+                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    }, [conversation?.id, conversation?.messages.length]);
 
     // Close attachment panel when clicking outside
     useEffect(() => {
@@ -211,8 +331,8 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
         return (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
                 <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                <h3 className="text-lg font-semibold">{t('dashboard.inbox.empty.title')}</h3>
-                <p className="text-sm">{t('dashboard.inbox.empty.description')}</p>
+                <h3 className="text-lg font-semibold">{t(`${i18nPrefix}.empty.title`)}</h3>
+                <p className="text-sm">{t(`${i18nPrefix}.empty.description`)}</p>
             </div>
         );
     }
@@ -227,16 +347,16 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
     }
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full min-h-0">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    <img src={conversation.contactAvatar} alt={conversation.contactName} className="w-10 h-10 rounded-full" />
+                    <img src={conversation.contactAvatar} alt={conversation.contactName} className="w-10 h-10 rounded-full flex-shrink-0" />
                     <div>
                         <p className="font-bold text-gray-800">{conversation.contactName}</p>
                         <p className="text-xs text-gray-500 flex items-center gap-1">
                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            {conversation.onlineStatus === 'Online' ? t('dashboard.inbox.status.online') : t('dashboard.inbox.status.offline')}
+                            {conversation.onlineStatus === 'Online' ? t(`${i18nPrefix}.status.online`) : t(`${i18nPrefix}.status.offline`)}
                         </p>
                     </div>
                 </div>
@@ -249,7 +369,7 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
                 </div>
             </div>
             {/* Messages */}
-            <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-gray-50">
+            <div ref={messagesContainerRef} className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-gray-50 min-h-0" style={{ scrollBehavior: 'auto', overflowAnchor: 'none' }}>
                 <div className="">
                     {conversation.messages.map((msg, index) => {
                         const prevMsg = index > 0 ? conversation.messages[index - 1] : null;
@@ -279,26 +399,26 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
                 <div ref={messagesEndRef} />
             </div>
             {/* Input */}
-            <div className="p-3 border-t border-gray-200 relative" ref={attachmentRef}>
+            <div className="p-3 border-t border-gray-200 relative flex-shrink-0" ref={attachmentRef}>
                 {/* Attachment Panel */}
                 {isAttachmentPanelOpen && (
                     <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 w-40">
                         <div className="flex flex-col gap-1">
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiPhotograph className="w-5 h-5 text-blue-500" />
-                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.photo')}</span>
+                                <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.photo`)}</span>
                             </button>
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiVideoCamera className="w-5 h-5 text-red-500" />
-                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.video')}</span>
+                                <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.video`)}</span>
                             </button>
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiDocument className="w-5 h-5 text-green-500" />
-                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.document')}</span>
+                                <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.document`)}</span>
                             </button>
                             <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                                 <HiUser className="w-5 h-5 text-purple-500" />
-                                <span className="text-sm text-gray-700">{t('dashboard.inbox.attachments.contact')}</span>
+                                <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.contact`)}</span>
                             </button>
                         </div>
                     </div>
@@ -316,7 +436,7 @@ const ChatWindow: React.FC<{ conversation: Conversation | null }> = ({ conversat
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder={t('dashboard.inbox.messagePlaceholder')}
+                        placeholder={t(`${i18nPrefix}.messagePlaceholder`)}
                         className="w-full bg-transparent border-transparent rounded-lg pl-12 pr-12 py-2 text-sm focus:outline-none placeholder:text-gray-400"
                     />
                     <button type="submit" className="absolute inset-y-0 right-0 px-4 text-gray-500 hover:text-[#0b6459]">
@@ -333,21 +453,40 @@ interface InboxContentProps {
 }
 
 const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) => {
+    const { state } = useAuth();
     const { t } = useTranslation();
     const { setBreadcrumb } = useBreadcrumb();
-    const [conversations, setConversations] = useState(mockConversations);
-    const [selectedConversationId, setSelectedConversationId] = useState<number | null>(initialSelectedStudentId || (mockConversations.length > 0 ? mockConversations[0].id : null));
+    
+    // Determine role
+    const isTutor = state.user?.role === 'tutor';
+    
+    // Use different i18n prefix based on role
+    const i18nPrefix = isTutor ? 'dashboard.inbox' : 'dashboard.messages';
+    
+    // Use different mock data based on role
+    const [conversations, setConversations] = useState<Conversation[]>(
+        isTutor ? mockTutorConversations : mockStudentConversations
+    );
+    const initialConversations = isTutor ? mockTutorConversations : mockStudentConversations;
+    const [selectedConversationId, setSelectedConversationId] = useState<number | null>(
+        initialSelectedStudentId || (initialConversations.length > 0 ? initialConversations[0].id : null)
+    );
     const [searchTerm, setSearchTerm] = useState('');
     const [messageTypeFilter, setMessageTypeFilter] = useState<'all' | 'private' | 'group'>('all');
     const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
 
     useEffect(() => {
+        // Update conversations when role changes
+        setConversations(isTutor ? mockTutorConversations : mockStudentConversations);
+    }, [isTutor]);
+
+    useEffect(() => {
         const breadcrumbItems: BreadcrumbItem[] = [
             { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
-            { label: t('dashboard.inbox.title'), isActive: true }
+            { label: t(`${i18nPrefix}.title`), isActive: true }
         ];
         setBreadcrumb(breadcrumbItems);
-    }, [setBreadcrumb, t]);
+    }, [setBreadcrumb, t, i18nPrefix]);
 
     useEffect(() => {
         if (initialSelectedStudentId && initialSelectedStudentId !== selectedConversationId) {
@@ -372,19 +511,19 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
     }, [conversations, selectedConversationId]);
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="flex bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="flex flex-col h-full min-h-0">
+            <div className="flex bg-white rounded-2xl shadow-sm overflow-hidden flex-1 min-h-0">
                 {/* Left Pane: Contact List */}
                 <div className="w-full md:w-2/5 xl:w-1/3 max-w-sm border-r border-gray-200 flex flex-col">
                     <div className="p-4 border-b border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-800">{t('dashboard.inbox.title')}</h2>
+                        <h2 className="text-xl font-bold text-gray-800">{t(`${i18nPrefix}.title`)}</h2>
                         <div className="relative mt-4">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <HiSearch className="w-5 h-5" />
                             </div>
                             <input
                                 type="text"
-                                placeholder={t('dashboard.inbox.searchPlaceholder')}
+                                placeholder={t(`${i18nPrefix}.searchPlaceholder`)}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full bg-white rounded-lg pl-10 pr-4 py-2.5 text-sm border border-gray-200 focus:outline-none hover:shadow-md transition-all duration-300 ease-in-out placeholder:text-gray-400"
@@ -399,7 +538,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
-                                {t('dashboard.inbox.filters.all')}
+                                {t(`${i18nPrefix}.filters.all`)}
                             </button>
                             <button
                                 onClick={() => setMessageTypeFilter('private')}
@@ -408,7 +547,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
-                                {t('dashboard.inbox.filters.private')}
+                                {t(`${i18nPrefix}.filters.private`)}
                             </button>
                             <button
                                 onClick={() => setMessageTypeFilter('group')}
@@ -417,7 +556,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
                             >
-                                {t('dashboard.inbox.filters.group')}
+                                {t(`${i18nPrefix}.filters.group`)}
                             </button>
                         </div>
                     </div>
@@ -436,9 +575,11 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                 </div>
 
                 {/* Right Pane: Chat Window */}
-                <div className="hidden md:flex w-3/5 xl:w-2/3 flex-col relative">
+                <div className="hidden md:flex w-3/5 xl:w-2/3 flex-col relative min-h-0">
                     <ChatWindow
+                        key={selectedConversationId}
                         conversation={selectedConversation}
+                        i18nPrefix={i18nPrefix}
                     />
 
                     {/* Settings Sidebar Overlay */}
@@ -459,7 +600,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                 {/* Sidebar Header */}
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-bold text-gray-800">{t('dashboard.inbox.settings.title')}</h3>
+                                        <h3 className="text-lg font-bold text-gray-800">{t(`${i18nPrefix}.settings.title`)}</h3>
                                         <button
                                             onClick={() => setIsSettingsSidebarOpen(false)}
                                             className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
@@ -477,7 +618,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                         />
                                         <div>
                                             <p className="font-bold text-gray-800">{selectedConversation.contactName}</p>
-                                            <p className="text-sm text-gray-500">{selectedConversation.onlineStatus === 'Online' ? t('dashboard.inbox.status.online') : t('dashboard.inbox.status.offline')}</p>
+                                            <p className="text-sm text-gray-500">{selectedConversation.onlineStatus === 'Online' ? t(`${i18nPrefix}.status.online`) : t(`${i18nPrefix}.status.offline`)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -487,14 +628,14 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                                     <div className="space-y-6">
                                         {/* Notifications */}
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.inbox.settings.notifications.title')}</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t(`${i18nPrefix}.settings.notifications.title`)}</h4>
                                             <div className="space-y-3">
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.notifications.enable')}</span>
+                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.notifications.enable`)}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.notifications.sound')}</span>
+                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.notifications.sound`)}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                             </div>
@@ -502,14 +643,14 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
 
                                         {/* Privacy */}
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.inbox.settings.privacy.title')}</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t(`${i18nPrefix}.settings.privacy.title`)}</h4>
                                             <div className="space-y-3">
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.privacy.showStatus')}</span>
+                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.privacy.showStatus`)}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                                 <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.privacy.readReceipts')}</span>
+                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.privacy.readReceipts`)}</span>
                                                     <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
                                                 </label>
                                             </div>
@@ -517,19 +658,19 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
 
                                         {/* Actions */}
                                         <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t('dashboard.inbox.settings.actions.title')}</h4>
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t(`${i18nPrefix}.settings.actions.title`)}</h4>
                                             <div className="space-y-2">
                                                 <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.actions.mute')}</span>
+                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.actions.mute`)}</span>
                                                 </button>
                                                 <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                    <span className="text-sm text-gray-700">{t('dashboard.inbox.settings.actions.archive')}</span>
+                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.actions.archive`)}</span>
                                                 </button>
                                                 <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                                    <span className="text-sm text-red-600 font-medium">{t('dashboard.inbox.settings.actions.block')}</span>
+                                                    <span className="text-sm text-red-600 font-medium">{t(`${i18nPrefix}.settings.actions.block`)}</span>
                                                 </button>
                                                 <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                                    <span className="text-sm text-red-600 font-medium">{t('dashboard.inbox.settings.actions.clearHistory')}</span>
+                                                    <span className="text-sm text-red-600 font-medium">{t(`${i18nPrefix}.settings.actions.clearHistory`)}</span>
                                                 </button>
                                             </div>
                                         </div>

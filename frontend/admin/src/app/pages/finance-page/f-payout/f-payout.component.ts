@@ -2,6 +2,8 @@ import { Component, OnInit, HostListener, ViewChild, ElementRef } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
+import * as XLSX from 'xlsx';
 
 declare const QRCode: any;
 
@@ -12,7 +14,12 @@ export interface InstructorPayout {
     bankAccount: string;
     bankName: string;
     accountHolderName: string;
+    paymentMethod: 'vnpay' | 'momo' | 'sepay';  // Phương thức thanh toán
     totalOwed: number;
+    baseAmount: number;        // Tiền gốc
+    platformFee: number;       // Phí nền tảng
+    tax: number;               // Thuế
+    totalAmount: number;       // Tổng tiền sau cùng
     orderCount: number;
     orders: PayoutOrder[];
     createdDate: string;
@@ -36,6 +43,7 @@ export interface PayoutHistory {
     batchNumber: string;
     instructorId: string;
     instructorName: string;
+    paymentMethod: 'vnpay' | 'momo' | 'sepay';  // Phương thức thanh toán
     paidAmount: number;
     paidDate: string;
     approvedBy: string;
@@ -47,7 +55,7 @@ export interface PayoutHistory {
 @Component({
     selector: 'app-f-payout',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
     templateUrl: './f-payout.component.html',
     styleUrl: './f-payout.component.scss'
 })
@@ -69,6 +77,13 @@ export class FPayoutComponent implements OnInit {
     searchQuery: string = '';
     fromDate: string = '';
     toDate: string = '';
+
+    // Pagination
+    currentPage: number = 1;
+    pageSize: number = 10;
+    totalPages: number = 1;
+    currentPageHistory: number = 1;
+    totalPagesHistory: number = 1;
 
     summary = {
         totalPending: 0,
@@ -93,10 +108,17 @@ export class FPayoutComponent implements OnInit {
         this.loadPayoutHistory();
         this.applyFiltersAndSearch();
         this.updateSummary();
+        this.calculatePagination();
+        this.calculatePaginationHistory();
     }
 
     switchTab(tab: 'pending' | 'history'): void {
         this.activeTab = tab;
+        if (tab === 'pending') {
+            this.calculatePagination();
+        } else {
+            this.calculatePaginationHistory();
+        }
     }
 
     private loadPayoutData(): void {
@@ -159,6 +181,34 @@ export class FPayoutComponent implements OnInit {
             }
         ];
 
+        // Generate more orders for more instructors
+        const moreOrders: PayoutOrder[] = [];
+        const learnerNames = ['Hoàng Văn F', 'Bùi Thị G', 'Đỗ Văn H', 'Lý Thị I', 'Phan Văn J', 'Vương Thị K', 'Trịnh Văn L', 'Đinh Thị M'];
+        const sessionNames = ['IELTS Preparation', 'TOEFL Training', 'Business English', 'Academic Writing', 'Speaking Practice', 'Grammar Advanced', 'Vocabulary Building', 'Pronunciation'];
+        const sessionTypes: ('1 and 1' | '1 and n')[] = ['1 and 1', '1 and n'];
+        const hourlyRates = [12, 15, 18, 20, 22, 25];
+        
+        for (let i = 0; i < 20; i++) {
+            const sessionType = sessionTypes[Math.floor(Math.random() * sessionTypes.length)];
+            const hourlyRate = hourlyRates[Math.floor(Math.random() * hourlyRates.length)];
+            const hours = Math.floor(Math.random() * 5) + 1;
+            const amount = hourlyRate * hours * (sessionType === '1 and 1' ? 1 : 0.8);
+            
+            moreOrders.push({
+                orderId: crypto.randomUUID(),
+                orderNumber: `ORD-2025-${String(i + 6).padStart(5, '0')}`,
+                learnerName: learnerNames[i % learnerNames.length],
+                sessionName: sessionNames[i % sessionNames.length],
+                sessionType: sessionType,
+                hourlyRate: hourlyRate,
+                hours: hours,
+                amount: amount,
+                date: new Date(2025, 10, Math.floor(Math.random() * 5) + 1, Math.floor(Math.random() * 12) + 8, Math.floor(Math.random() * 60)).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            });
+        }
+
+        const allOrders = [...rawPayouts, ...moreOrders];
+
         const instructorGroups: { [key: string]: InstructorPayout } = {
             'ins1': {
                 id: 'payout-1',
@@ -167,9 +217,14 @@ export class FPayoutComponent implements OnInit {
                 bankAccount: '0123456789',
                 bankName: 'Vietcombank',
                 accountHolderName: 'ĐẶNG MINH TUẤN',
+                paymentMethod: 'vnpay',
                 totalOwed: 136.8,
+                baseAmount: 120.0,
+                platformFee: 12.0,
+                tax: 4.8,
+                totalAmount: 136.8,
                 orderCount: 3,
-                orders: [rawPayouts[0], rawPayouts[1], rawPayouts[2]],
+                orders: [allOrders[0], allOrders[1], allOrders[2]],
                 createdDate: '05 Nov 2025',
                 status: 'pending'
             },
@@ -180,10 +235,87 @@ export class FPayoutComponent implements OnInit {
                 bankAccount: '9876543210',
                 bankName: 'Techcombank',
                 accountHolderName: 'NGUYỄN THỊ HƯƠNG',
+                paymentMethod: 'momo',
                 totalOwed: 102.4,
+                baseAmount: 90.0,
+                platformFee: 9.0,
+                tax: 3.4,
+                totalAmount: 102.4,
                 orderCount: 2,
-                orders: [rawPayouts[3], rawPayouts[4]],
+                orders: [allOrders[3], allOrders[4]],
                 createdDate: '02 Nov 2025',
+                status: 'pending'
+            },
+            'ins3': {
+                id: 'payout-3',
+                instructorId: 'ins3',
+                instructorName: 'Trần Quốc Bảo',
+                bankAccount: '1122334455',
+                bankName: 'BIDV',
+                accountHolderName: 'TRẦN QUỐC BẢO',
+                paymentMethod: 'sepay',
+                totalOwed: 245.6,
+                baseAmount: 220.0,
+                platformFee: 22.0,
+                tax: 3.6,
+                totalAmount: 245.6,
+                orderCount: 5,
+                orders: allOrders.slice(5, 10),
+                createdDate: '04 Nov 2025',
+                status: 'pending'
+            },
+            'ins4': {
+                id: 'payout-4',
+                instructorId: 'ins4',
+                instructorName: 'Lê Thị Mai',
+                bankAccount: '5566778899',
+                bankName: 'Vietinbank',
+                accountHolderName: 'LÊ THỊ MAI',
+                paymentMethod: 'vnpay',
+                totalOwed: 189.2,
+                baseAmount: 170.0,
+                platformFee: 17.0,
+                tax: 2.2,
+                totalAmount: 189.2,
+                orderCount: 4,
+                orders: allOrders.slice(10, 14),
+                createdDate: '03 Nov 2025',
+                status: 'pending'
+            },
+            'ins5': {
+                id: 'payout-5',
+                instructorId: 'ins5',
+                instructorName: 'Phạm Văn Đức',
+                bankAccount: '9988776655',
+                bankName: 'ACB',
+                accountHolderName: 'PHẠM VĂN ĐỨC',
+                paymentMethod: 'momo',
+                totalOwed: 312.8,
+                baseAmount: 280.0,
+                platformFee: 28.0,
+                tax: 4.8,
+                totalAmount: 312.8,
+                orderCount: 6,
+                orders: allOrders.slice(14, 20),
+                createdDate: '01 Nov 2025',
+                status: 'pending'
+            },
+            'ins6': {
+                id: 'payout-6',
+                instructorId: 'ins6',
+                instructorName: 'Võ Thị Lan',
+                bankAccount: '4433221100',
+                bankName: 'Sacombank',
+                accountHolderName: 'VÕ THỊ LAN',
+                paymentMethod: 'sepay',
+                totalOwed: 156.4,
+                baseAmount: 140.0,
+                platformFee: 14.0,
+                tax: 2.4,
+                totalAmount: 156.4,
+                orderCount: 3,
+                orders: allOrders.slice(20, 23),
+                createdDate: '06 Nov 2025',
                 status: 'pending'
             }
         };
@@ -199,6 +331,7 @@ export class FPayoutComponent implements OnInit {
                 batchNumber: 'PAYOUT-2025-10',
                 instructorId: 'ins3',
                 instructorName: 'Trần Quốc Bảo',
+                paymentMethod: 'vnpay',
                 paidAmount: 5000000,
                 paidDate: '01 Oct 2025',
                 approvedBy: 'Admin - Ngô Thanh',
@@ -211,6 +344,7 @@ export class FPayoutComponent implements OnInit {
                 batchNumber: 'PAYOUT-2025-09',
                 instructorId: 'ins4',
                 instructorName: 'Ngô Thanh Tâm',
+                paymentMethod: 'momo',
                 paidAmount: 4500000,
                 paidDate: '01 Sep 2025',
                 approvedBy: 'Admin - Ngô Thanh',
@@ -223,6 +357,7 @@ export class FPayoutComponent implements OnInit {
                 batchNumber: 'PAYOUT-2025-08',
                 instructorId: 'ins5',
                 instructorName: 'Vũ Hà Linh',
+                paymentMethod: 'sepay',
                 paidAmount: 3800000,
                 paidDate: '01 Aug 2025',
                 approvedBy: 'Admin - Vũ Hà',
@@ -270,10 +405,11 @@ export class FPayoutComponent implements OnInit {
     }
 
     toggleSelectAll(): void {
-        if (this.selectedPayouts.size === this.pendingPayouts.length) {
-            this.selectedPayouts.clear();
+        const paginatedPayouts = this.getPaginatedPendingPayouts();
+        if (this.selectedPayouts.size === paginatedPayouts.length && paginatedPayouts.every(p => this.selectedPayouts.has(p.id))) {
+            paginatedPayouts.forEach(p => this.selectedPayouts.delete(p.id));
         } else {
-            this.pendingPayouts.forEach(p => this.selectedPayouts.add(p.id));
+            paginatedPayouts.forEach(p => this.selectedPayouts.add(p.id));
         }
     }
 
@@ -282,7 +418,8 @@ export class FPayoutComponent implements OnInit {
     }
 
     isAllSelected(): boolean {
-        return this.pendingPayouts.length > 0 && this.selectedPayouts.size === this.pendingPayouts.length;
+        const paginatedPayouts = this.getPaginatedPendingPayouts();
+        return paginatedPayouts.length > 0 && paginatedPayouts.every(p => this.selectedPayouts.has(p.id));
     }
 
     getTotalSelectedAmount(): number {
@@ -328,6 +465,7 @@ export class FPayoutComponent implements OnInit {
                         batchNumber: `PAYOUT-${new Date().getFullYear()}-${this.getMonthNumber()}`,
                         instructorId: payout.instructorId,
                         instructorName: payout.instructorName,
+                        paymentMethod: payout.paymentMethod,
                         paidAmount: payout.totalOwed,
                         paidDate: currentDate.toISOString(),
                         approvedBy: 'Admin - Current User',
@@ -344,6 +482,7 @@ export class FPayoutComponent implements OnInit {
             this.selectedPayouts.clear();
 
             this.updateSummary();
+            this.calculatePagination();
             this.loadingPayment = false;
 
             this.isBulkConfirmModalOpen = false;
@@ -363,6 +502,7 @@ export class FPayoutComponent implements OnInit {
                 batchNumber: `PAYOUT-${new Date().getFullYear()}-${this.getMonthNumber()}`,
                 instructorId: this.selectedPayout!.instructorId,
                 instructorName: this.selectedPayout!.instructorName,
+                paymentMethod: this.selectedPayout!.paymentMethod,
                 paidAmount: this.selectedPayout!.totalOwed,
                 paidDate: this.getCurrentDate(),
                 approvedBy: 'Admin - Current User',
@@ -377,6 +517,7 @@ export class FPayoutComponent implements OnInit {
             this.groupedPendingPayouts = this.pendingPayouts;
 
             this.updateSummary();
+            this.calculatePagination();
 
             alert(`✓ Xác nhận thanh toán thành công!\n\nGiảng viên: ${this.selectedPayout!.instructorName}\nSố tiền: ${this.formatCurrency(this.selectedPayout!.totalOwed)}\nNgày: ${historyRecord.paidDate}`);
 
@@ -387,12 +528,17 @@ export class FPayoutComponent implements OnInit {
         }, 500);
     }
 
+    openQRPaymentModal(payout: InstructorPayout): void {
+        this.selectedPayout = payout;
+        this.generateQRCode(payout);
+    }
+
     generateQRCode(payout: InstructorPayout): void {
         if (!payout) return;
 
         try {
-
-            const qrData = `${payout.bankName}|${payout.bankAccount}|${payout.accountHolderName}|${payout.totalOwed}`;
+            // QR data includes bank info and total amount
+            const qrData = `${payout.bankName}|${payout.bankAccount}|${payout.accountHolderName}|${payout.totalAmount}`;
 
             import('qrcode').then(QRCodeModule => {
                 QRCodeModule.toDataURL(qrData, {
@@ -438,6 +584,32 @@ export class FPayoutComponent implements OnInit {
             currency: 'VND',
             maximumFractionDigits: 0
         }).format(amount);
+    }
+
+    getPaymentMethodDisplay(method: 'vnpay' | 'momo' | 'sepay'): string {
+        switch (method) {
+            case 'vnpay':
+                return 'payout.paymentMethod.vnpay';
+            case 'momo':
+                return 'payout.paymentMethod.momo';
+            case 'sepay':
+                return 'payout.paymentMethod.sepay';
+            default:
+                return method;
+        }
+    }
+
+    getPaymentMethodColor(method: 'vnpay' | 'momo' | 'sepay'): string {
+        switch (method) {
+            case 'vnpay':
+                return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
+            case 'momo':
+                return 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300';
+            case 'sepay':
+                return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+            default:
+                return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300';
+        }
     }
 
     getCurrentDate(): string {
@@ -488,17 +660,117 @@ export class FPayoutComponent implements OnInit {
         }
 
         this.filteredPayoutHistory = filtered;
+        this.calculatePaginationHistory();
+    }
+
+    calculatePagination(): void {
+        this.totalPages = Math.ceil(this.pendingPayouts.length / this.pageSize);
+        if (this.currentPage > this.totalPages) {
+            this.currentPage = Math.max(1, this.totalPages);
+        }
+    }
+
+    calculatePaginationHistory(): void {
+        this.totalPagesHistory = Math.ceil(this.filteredPayoutHistory.length / this.pageSize);
+        if (this.currentPageHistory > this.totalPagesHistory) {
+            this.currentPageHistory = Math.max(1, this.totalPagesHistory);
+        }
+    }
+
+    getPaginatedPendingPayouts(): InstructorPayout[] {
+        const start = (this.currentPage - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        return this.pendingPayouts.slice(start, end);
+    }
+
+    getPaginatedHistory(): PayoutHistory[] {
+        const start = (this.currentPageHistory - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        return this.filteredPayoutHistory.slice(start, end);
+    }
+
+    goToPage(page: number): void {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+        }
+    }
+
+    nextPage(): void {
+        if (this.currentPage < this.totalPages) {
+            this.currentPage++;
+        }
+    }
+
+    prevPage(): void {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+        }
+    }
+
+    goToPageHistory(page: number): void {
+        if (page >= 1 && page <= this.totalPagesHistory) {
+            this.currentPageHistory = page;
+        }
+    }
+
+    nextPageHistory(): void {
+        if (this.currentPageHistory < this.totalPagesHistory) {
+            this.currentPageHistory++;
+        }
+    }
+
+    prevPageHistory(): void {
+        if (this.currentPageHistory > 1) {
+            this.currentPageHistory--;
+        }
+    }
+
+    getPageNumbers(): number[] {
+        const pages: number[] = [];
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+
+        return pages;
+    }
+
+    getPageNumbersHistory(): number[] {
+        const pages: number[] = [];
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, this.currentPageHistory - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(this.totalPagesHistory, startPage + maxPagesToShow - 1);
+
+        if (endPage - startPage < maxPagesToShow - 1) {
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+
+        return pages;
     }
 
     onFilterChange(): void {
+        this.currentPageHistory = 1;
         this.applyFiltersAndSearch();
     }
 
     onSearchChange(): void {
+        this.currentPageHistory = 1;
         this.applyFiltersAndSearch();
     }
 
     onDateChange(): void {
+        this.currentPageHistory = 1;
         this.applyFiltersAndSearch();
     }
 
@@ -507,61 +779,72 @@ export class FPayoutComponent implements OnInit {
         this.searchQuery = '';
         this.fromDate = '';
         this.toDate = '';
+        this.currentPageHistory = 1;
         this.applyFiltersAndSearch();
     }
 
     exportToExcel(): void {
-        const data = this.filteredPayoutHistory.map(h => ({
-            'ID': h.id,
-            'Batch Number': h.batchNumber,
-            'Instructor Name': h.instructorName,
-            'Amount': h.paidAmount,
-            'Payment Date': h.paidDate,
-            'Approved By': h.approvedBy,
-            'Notes': h.notes,
-            'Status': h.status
-        }));
+        try {
+            if (this.activeTab === 'pending') {
+                // Export pending payouts
+                const data = this.pendingPayouts.map(p => ({
+                    'STT': this.pendingPayouts.indexOf(p) + 1,
+                    'Instructor Name': p.instructorName,
+                    'Bank Name': p.bankName,
+                    'Account Number': p.bankAccount,
+                    'Account Holder': p.accountHolderName,
+                    'Payment Method': this.getPaymentMethodDisplay(p.paymentMethod),
+                    'Base Amount': p.baseAmount,
+                    'Platform Fee': p.platformFee,
+                    'Tax': p.tax,
+                    'Total Amount': p.totalAmount,
+                    'Orders Count': p.orderCount,
+                    'Created Date': p.createdDate,
+                    'Status': p.status
+                }));
 
-        const worksheet = this.arrayToSheet(data);
-        const workbook = {
-            Sheets: { 'Payment History': worksheet },
-            SheetNames: ['Payment History']
-        };
+                if (data.length === 0) {
+                    alert('Không có dữ liệu để xuất Excel');
+                    return;
+                }
 
-        const filename = `payment-history-${new Date().getTime()}.xlsx`;
-        this.downloadExcel(workbook, filename);
-    }
+                const worksheet = XLSX.utils.json_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Pending Payouts');
 
-    private arrayToSheet(data: any[]): any {
-        if (data.length === 0) return {};
+                const currentDate = new Date().toISOString().split('T')[0];
+                const filename = `pending-payouts-${currentDate}.xlsx`;
+                XLSX.writeFile(workbook, filename);
+            } else {
+                // Export payment history
+                const data = this.filteredPayoutHistory.map(h => ({
+                    'STT': this.filteredPayoutHistory.indexOf(h) + 1,
+                    'Instructor Name': h.instructorName,
+                    'Payment Method': this.getPaymentMethodDisplay(h.paymentMethod),
+                    'Amount': h.paidAmount,
+                    'Payment Date': h.paidDate,
+                    'Approved By': h.approvedBy,
+                    'Status': h.status,
+                    'Notes': h.notes
+                }));
 
-        const headers = Object.keys(data[0]);
-        const rows = data.map(row => headers.map(h => row[h]));
+                if (data.length === 0) {
+                    alert('Không có dữ liệu để xuất Excel');
+                    return;
+                }
 
-        const sheet: any = {};
-        headers.forEach((h, i) => {
-            sheet[String.fromCharCode(65 + i) + '1'] = { t: 's', v: h };
-        });
+                const worksheet = XLSX.utils.json_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Payment History');
 
-        rows.forEach((row, i) => {
-            row.forEach((cell, j) => {
-                const key = String.fromCharCode(65 + j) + (i + 2);
-                sheet[key] = { t: typeof cell === 'number' ? 'n' : 's', v: cell };
-            });
-        });
-
-        sheet['!ref'] = `A1:${String.fromCharCode(65 + headers.length - 1)}${rows.length + 1}`;
-        return sheet;
-    }
-
-    private downloadExcel(workbook: any, filename: string): void {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js';
-        script.onload = () => {
-            const XLSX = (window as any).XLSX;
-            XLSX.writeFile(workbook, filename);
-        };
-        document.head.appendChild(script);
+                const currentDate = new Date().toISOString().split('T')[0];
+                const filename = `payment-history-${currentDate}.xlsx`;
+                XLSX.writeFile(workbook, filename);
+            }
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+            alert('Lỗi khi xuất file Excel. Vui lòng thử lại.');
+        }
     }
 
     @HostListener('document:click', ['$event'])

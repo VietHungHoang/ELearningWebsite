@@ -19,8 +19,12 @@ const RequestsPage: React.FC = () => {
     const { setBreadcrumb } = useBreadcrumb();
     const { setTotalRequestsCount } = useRequests();
     
-    // Mock data for testing UI - matching the image
-    const mockRescheduleRequests = [
+    const isTutor = state.user?.role === 'tutor';
+    const isStudent = state.user?.role === 'student';
+    const viewMode = isTutor ? 'tutor' : 'student';
+    
+    // Mock data for tutor - matching the image
+    const mockTutorRescheduleRequests = [
         {
             id: '1',
             type: 'Reschedule' as const,
@@ -78,7 +82,130 @@ const RequestsPage: React.FC = () => {
         }
     ];
 
-    const mockTrialRequests = [
+    // Mock data for student - requests they sent
+    const mockStudentRescheduleRequests = [
+        {
+            id: 's1',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Dr. Smith',
+                avatar: 'https://i.pravatar.cc/150?img=10'
+            },
+            courseTitle: 'Advanced Mathematics',
+            originalSchedule: 'Monday, 19:00',
+            proposedSchedules: [
+                { day: 'Wednesday', time: '20:00' }
+            ],
+            reason: 'I have a family event on Monday evening. Could we please reschedule to Wednesday?',
+            timestamp: '2 hours ago',
+            date: new Date(),
+            status: 'PENDING' as const
+        },
+        {
+            id: 's2',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Ms. Johnson',
+                avatar: 'https://i.pravatar.cc/150?img=11'
+            },
+            courseTitle: 'English Conversation',
+            originalSchedule: 'Every Friday, 18:00',
+            proposedSchedules: [
+                { day: 'Friday', time: '19:00' }
+            ],
+            reason: 'I would like to change the time to later in the evening if possible.',
+            timestamp: '1 day ago',
+            date: new Date(),
+            status: 'APPROVED' as const
+        },
+        {
+            id: 's3',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Prof. Brown',
+                avatar: 'https://i.pravatar.cc/150?img=15'
+            },
+            courseTitle: 'History of Art',
+            originalSchedule: 'Thursday, 16:00',
+            proposedSchedules: [
+                { day: 'Thursday', time: '17:30' }
+            ],
+            reason: 'I need to adjust the time due to my other commitments.',
+            timestamp: '2 days ago',
+            date: new Date(),
+            status: 'DECLINED' as const
+        },
+        {
+            id: 's4',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Dr. Wilson',
+                avatar: 'https://i.pravatar.cc/150?img=16'
+            },
+            courseTitle: 'Computer Science',
+            originalSchedule: 'Tuesday, 19:00',
+            proposedSchedules: [
+                { day: 'Wednesday', time: '19:00' }
+            ],
+            reason: 'I have a conflict on Tuesday. Can we move to Wednesday?',
+            timestamp: '4 hours ago',
+            date: new Date(),
+            status: 'PENDING' as const
+        },
+        {
+            id: 's5',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Dr. Smith',
+                avatar: 'https://i.pravatar.cc/150?img=10'
+            },
+            courseTitle: 'Chemistry Basics',
+            originalSchedule: 'Wednesday, 15:00',
+            proposedSchedules: [
+                { day: 'Wednesday', time: '16:00' }
+            ],
+            reason: 'I need to move the class 1 hour later due to my work schedule.',
+            timestamp: '3 days ago',
+            date: new Date(),
+            status: 'APPROVED' as const
+        },
+        {
+            id: 's6',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Ms. Johnson',
+                avatar: 'https://i.pravatar.cc/150?img=11'
+            },
+            courseTitle: 'Mathematics Advanced',
+            originalSchedule: 'Every Monday, 18:00',
+            proposedSchedules: [
+                { day: 'Monday', time: '19:00' }
+            ],
+            reason: 'I would prefer a later time slot.',
+            timestamp: '5 days ago',
+            date: new Date(),
+            status: 'DECLINED' as const
+        },
+        {
+            id: 's7',
+            type: 'Reschedule' as const,
+            tutor: {
+                name: 'Prof. Brown',
+                avatar: 'https://i.pravatar.cc/150?img=15'
+            },
+            courseTitle: 'Biology Introduction',
+            originalSchedule: 'Friday, 14:00',
+            proposedSchedules: [
+                { day: 'Saturday', time: '10:00' }
+            ],
+            reason: 'I have an exam on Friday afternoon. Can we reschedule to Saturday morning?',
+            timestamp: '6 hours ago',
+            date: new Date(),
+            status: 'PENDING' as const
+        }
+    ];
+
+    const mockTutorTrialRequests = [
         {
             id: 't1',
             sessionId: 'session1',
@@ -133,52 +260,157 @@ const RequestsPage: React.FC = () => {
         }
     ];
 
-    const [rescheduleRequests, setRescheduleRequests] = useState<any[]>(mockRescheduleRequests);
-    const [trialRequests, setTrialRequests] = useState<any[]>(mockTrialRequests);
+    // Mock data for student - trial requests they sent
+    const mockStudentTrialRequests = [
+        {
+            id: 'st1',
+            sessionId: 'session1',
+            tutor: {
+                id: 't1',
+                fullName: 'Dr. Smith',
+                avatarUrl: 'https://i.pravatar.cc/150?img=10'
+            },
+            sessionDateTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'I am interested in learning physics. I have some basic knowledge but want to improve my understanding of fundamental concepts.',
+            status: 'PENDING' as const,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'st2',
+            sessionId: 'session2',
+            tutor: {
+                id: 't2',
+                fullName: 'Ms. Johnson',
+                avatarUrl: 'https://i.pravatar.cc/150?img=11'
+            },
+            sessionDateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'Hello! I would like to try a trial session for chemistry. I am a beginner.',
+            status: 'APPROVED' as const,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'st3',
+            sessionId: 'session3',
+            tutor: {
+                id: 't3',
+                fullName: 'Prof. Brown',
+                avatarUrl: 'https://i.pravatar.cc/150?img=15'
+            },
+            sessionDateTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'I am looking for help with history. Would love to have a trial session.',
+            status: 'DECLINED' as const,
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+            id: 'st4',
+            sessionId: 'session4',
+            tutor: {
+                id: 't4',
+                fullName: 'Dr. Wilson',
+                avatarUrl: 'https://i.pravatar.cc/150?img=16'
+            },
+            sessionDateTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'Interested in learning computer science. Can we schedule a trial session?',
+            status: 'PENDING' as const,
+            createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+        },
+        {
+            id: 'st5',
+            sessionId: 'session5',
+            tutor: {
+                id: 't5',
+                fullName: 'Dr. Smith',
+                avatarUrl: 'https://i.pravatar.cc/150?img=10'
+            },
+            sessionDateTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'I need help with advanced mathematics. Looking forward to our session.',
+            status: 'PENDING' as const,
+            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+            id: 'st6',
+            sessionId: 'session6',
+            tutor: {
+                id: 't6',
+                fullName: 'Ms. Johnson',
+                avatarUrl: 'https://i.pravatar.cc/150?img=11'
+            },
+            sessionDateTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'I would like to try a trial session for mathematics. I am preparing for an exam.',
+            status: 'APPROVED' as const,
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+            id: 'st7',
+            sessionId: 'session7',
+            tutor: {
+                id: 't7',
+                fullName: 'Prof. Brown',
+                avatarUrl: 'https://i.pravatar.cc/150?img=15'
+            },
+            sessionDateTime: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString(),
+            message: 'Looking for a tutor to help with English conversation practice.',
+            status: 'DECLINED' as const,
+            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+        }
+    ];
+
+    // Initialize with appropriate mock data based on role
+    const initialRescheduleRequests = isTutor ? mockTutorRescheduleRequests : mockStudentRescheduleRequests;
+    const initialTrialRequests = isTutor ? mockTutorTrialRequests : mockStudentTrialRequests;
+    
+    const [rescheduleRequests, setRescheduleRequests] = useState<any[]>(initialRescheduleRequests);
+    const [trialRequests, setTrialRequests] = useState<any[]>(initialTrialRequests);
 
     useEffect(() => {
+        const titleKey = isTutor 
+            ? 'dashboard.tutor.requests.title' 
+            : 'dashboard.student.requests.title';
         setBreadcrumb([
             { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
-            { label: t('dashboard.tutor.requests.title') }
+            { label: t(titleKey) }
         ]);
-    }, [setBreadcrumb, t]);
+    }, [setBreadcrumb, t, isTutor]);
 
     useEffect(() => {
         const fetchRequests = async () => {
             if (state.user) {
                 try {
-                    // Fetch trial requests
-                    const trialResponse = await classService.getTrialRequests('tutor', state.user.id);
-                    if (trialResponse.success && trialResponse.data && trialResponse.data.length > 0) {
-                        setTrialRequests(trialResponse.data);
-                    } else {
-                        // Use mock data if API returns empty or fails
-                        setTrialRequests(mockTrialRequests);
+                    if (isTutor) {
+                        // Fetch trial requests for tutor
+                        const trialResponse = await classService.getTrialRequests('tutor', state.user.id);
+                        if (trialResponse.success && trialResponse.data && trialResponse.data.length > 0) {
+                            setTrialRequests(trialResponse.data);
+                        } else {
+                            setTrialRequests(mockTutorTrialRequests);
+                        }
+                        // Use mock data for reschedule requests (API not available yet)
+                        setRescheduleRequests(mockTutorRescheduleRequests);
+                    } else if (isStudent) {
+                        // Fetch trial requests for student
+                        const trialResponse = await classService.getTrialRequests('student', state.user.id);
+                        if (trialResponse.success && trialResponse.data && trialResponse.data.length > 0) {
+                            setTrialRequests(trialResponse.data);
+                        } else {
+                            setTrialRequests(mockStudentTrialRequests);
+                        }
+                        // Use mock data for reschedule requests (API not available yet)
+                        setRescheduleRequests(mockStudentRescheduleRequests);
                     }
-
-                    // Fetch reschedule requests - TODO: Replace with actual API endpoint when available
-                    // For now, use mock data
-                    // const rescheduleResponse = await classService.getRescheduleRequests('tutor', state.user.id);
-                    // if (rescheduleResponse.success && rescheduleResponse.data) {
-                    //     setRescheduleRequests(rescheduleResponse.data);
-                    // } else {
-                    //     setRescheduleRequests(mockRescheduleRequests);
-                    // }
-                    setRescheduleRequests(mockRescheduleRequests);
                 } catch (error) {
                     console.error('Failed to fetch requests:', error);
                     // Use mock data on error
-                    setTrialRequests(mockTrialRequests);
-                    setRescheduleRequests(mockRescheduleRequests);
+                    setTrialRequests(isTutor ? mockTutorTrialRequests : mockStudentTrialRequests);
+                    setRescheduleRequests(isTutor ? mockTutorRescheduleRequests : mockStudentRescheduleRequests);
                 }
             } else {
                 // Use mock data when user is not available (for testing)
-                setTrialRequests(mockTrialRequests);
-                setRescheduleRequests(mockRescheduleRequests);
+                setTrialRequests(isTutor ? mockTutorTrialRequests : mockStudentTrialRequests);
+                setRescheduleRequests(isTutor ? mockTutorRescheduleRequests : mockStudentRescheduleRequests);
             }
         };
         fetchRequests();
-    }, [state.user]);
+    }, [state.user, isTutor, isStudent]);
 
     const currentRequests = useMemo(() => {
         switch (activeFilter) {
@@ -206,15 +438,16 @@ const RequestsPage: React.FC = () => {
         setTotalRequestsCount(totalCount);
     }, [rescheduleRequests, trialRequests, setTotalRequestsCount]);
 
-    const handleChatWithStudent = (student: any) => {
-        console.log('Chat with student:', student);
+    const handleChat = (person: any) => {
+        console.log('Chat with:', person);
         // TODO: Implement chat functionality
     };
 
     const FilterButton: React.FC<{ label: Filter; count: number; }> = ({ label, count }) => {
+        const baseKey = isTutor ? 'dashboard.tutor.requests' : 'dashboard.student.requests';
         const labelKey = label === 'Reschedule Requests' 
-            ? 'dashboard.tutor.requests.filters.reschedule' 
-            : 'dashboard.tutor.requests.filters.trial';
+            ? `${baseKey}.filters.reschedule` 
+            : `${baseKey}.filters.trial`;
         return (
             <button
                 onClick={() => setActiveFilter(label)}
@@ -243,23 +476,25 @@ const RequestsPage: React.FC = () => {
                 {currentRequests.length > 0 ? (
                     currentRequests.map(request => {
                         if (activeFilter === 'Reschedule Requests') {
+                            const chatPerson = isTutor ? request.student : request.tutor;
                             return (
                                 <RescheduleRequestCard
                                     key={request.id}
                                     request={request as any}
-                                    viewMode="tutor"
+                                    viewMode={viewMode}
                                     onRequestProcessed={setUpdatedRequestId}
-                                    onChat={() => handleChatWithStudent(request.student)}
+                                    onChat={() => handleChat(chatPerson)}
                                 />
                             );
                         } else {
+                            const chatPerson = isTutor ? request.student : request.tutor;
                             return (
                                 <TrialRequestCard
                                     key={request.id}
-                                    request={request as any} // Type assertion needed due to different interfaces
-                                    viewMode="tutor"
+                                    request={request as any}
+                                    viewMode={viewMode}
                                     onRequestProcessed={setUpdatedRequestId}
-                                    onChat={() => handleChatWithStudent(request.student)}
+                                    onChat={() => handleChat(chatPerson)}
                                 />
                             );
                         }
@@ -271,8 +506,12 @@ const RequestsPage: React.FC = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">{t('dashboard.tutor.requests.empty.title')}</h3>
-                        <p className="text-gray-500 text-center max-w-md">{t('dashboard.tutor.requests.empty.description')}</p>
+                        <h3 className="text-xl font-bold text-gray-800 mb-2">
+                            {t(isTutor ? 'dashboard.tutor.requests.empty.title' : 'dashboard.student.requests.empty.title')}
+                        </h3>
+                        <p className="text-gray-500 text-center max-w-md">
+                            {t(isTutor ? 'dashboard.tutor.requests.empty.description' : 'dashboard.student.requests.empty.description')}
+                        </p>
                     </div>
                 )}
             </div>

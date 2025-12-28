@@ -1,7 +1,7 @@
 
 <div class="mb-[25px] md:flex items-center justify-between">
-    <h5 class="!mb-0">
-        Class Details
+    <h5 class="!mb-0 text-gray-900 dark:text-white">
+        {{ 'classManagement.classDetails.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
@@ -9,94 +9,94 @@
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
-                Dashboard
+                {{ 'classManagement.classDetails.breadcrumb.dashboard' | translate }}
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Class Management
+            {{ 'classManagement.classDetails.breadcrumb.classManagement' | translate }}
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Class Details
+            {{ 'classManagement.classDetails.breadcrumb.classDetails' | translate }}
         </li>
     </ol>
 </div>
 
 @if (loading) {
-    <div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md text-center py-[50px]">
-        <i class="material-symbols-outlined !text-[48px] animate-spin text-gray-400 mb-[15px] block">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md text-center py-[50px]">
+        <i class="material-symbols-outlined !text-[48px] animate-spin text-gray-400 dark:text-gray-500 mb-[15px] block">
             autorenew
         </i>
-        <p class="text-gray-500">Loading class details...</p>
+        <p class="text-gray-500 dark:text-gray-400">{{ 'classManagement.classDetails.loading' | translate }}</p>
     </div>
 }
 
 @if (error && !loading) {
-    <div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md text-center py-[50px]">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md text-center py-[50px]">
         <i class="material-symbols-outlined !text-[48px] text-red-500 mb-[15px] block">
             error
         </i>
-        <p class="text-red-600 mb-[15px]">{{ error }}</p>
-        <a routerLink="/dashboard/class-management" class="text-primary-500 hover:text-primary-600">
-            Back to Class List
+        <p class="text-red-600 dark:text-red-400 mb-[15px]">{{ error | translate }}</p>
+        <a routerLink="/dashboard/class-management" class="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+            {{ 'classManagement.classDetails.error.backToList' | translate }}
         </a>
     </div>
 }
 
 @if (!loading && !error && groupClass) {
 
-    <div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md shadow-sm">
         <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
             <div class="trezo-card-title">
-                <h5 class="!mb-0">
-                    Class Information
+                <h5 class="!mb-0 text-gray-900 dark:text-white">
+                    {{ 'classManagement.classDetails.classInformation.title' | translate }}
                 </h5>
             </div>
         </div>
         <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
             <div class="table-responsive overflow-x-auto">
                 <table class="w-full">
-                    <thead class="text-black">
+                    <thead class="text-black dark:text-white">
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Class Name
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.classInformation.className' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Instructor
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.classInformation.instructor' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Start Date
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.classInformation.startDate' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Duration
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.classInformation.duration' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Enrollment
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.classInformation.enrollment' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Status
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.classInformation.status' | translate }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="text-black">
+                    <tbody class="text-black dark:text-gray-300">
                         <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ groupClass.class_name }}</strong>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ groupClass.class_name }}</strong>
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ groupClass.instructor_name }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ formatDateTime(groupClass.start_datetime) }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ formatDuration(groupClass.duration_in_minutes) }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ groupClass.enrollment_count }} / {{ groupClass.max_capacity }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 <span [class]="'inline-block px-[12px] py-[6px] rounded-full text-xs font-medium ' + getStatusClass(groupClass.status)">
-                                    {{ getStatusText(groupClass.status) }}
+                                    {{ getStatusText(groupClass.status) | translate }}
                                 </span>
                             </td>
                         </tr>
@@ -107,95 +107,95 @@
     </div>
 
     @if (financialReport) {
-    <div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md shadow-sm">
         <div class="trezo-card-header mb-[20px] md:mb-[25px]">
             <div class="trezo-card-title">
-                <h5 class="!mb-0">
-                    Financial Report
+                <h5 class="!mb-0 text-gray-900 dark:text-white">
+                    {{ 'classManagement.classDetails.financialReport.title' | translate }}
                 </h5>
             </div>
         </div>
         <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
             <div class="table-responsive overflow-x-auto">
                 <table class="w-full">
-                    <thead class="text-black">
+                    <thead class="text-black dark:text-white">
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Metric
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.financialReport.metric' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Value
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.financialReport.value' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Description
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.financialReport.description' | translate }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="text-black">
+                    <tbody class="text-black dark:text-gray-300">
                         <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Price Per Student
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.pricePerStudent' | translate }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ formatCurrency(financialReport.price_per_student) }}</strong>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.price_per_student) }}</strong>
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Base ticket price
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.baseTicketPrice' | translate }}
                             </td>
                         </tr>
                         <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Total Enrollment
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.totalEnrollment' | translate }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ financialReport.enrollment_count }}</strong>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ financialReport.enrollment_count }}</strong>
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                {{ getEnrollmentPercentage() }}% of max capacity
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Total Revenue
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ formatCurrency(financialReport.total_revenue) }}</strong>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Price × Enrollment
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ getEnrollmentPercentage() }}{{ 'classManagement.classDetails.financialReport.ofMaxCapacity' | translate }}
                             </td>
                         </tr>
                         <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Platform Fee
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.totalRevenue' | translate }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ formatCurrency(financialReport.platform_fee) }}</strong>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.total_revenue) }}</strong>
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                {{ groupClass.platform_fee_percentage }}% of revenue
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Instructor Payout
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ formatCurrency(financialReport.instructor_payout) }}</strong>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Revenue - Fee
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.priceTimesEnrollment' | translate }}
                             </td>
                         </tr>
                         <tr>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Revenue Per Hour
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.platformFee' | translate }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                <strong>{{ formatCurrency(financialReport.revenue_per_hour) }}</strong>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.platform_fee) }}</strong>
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
-                                Based on duration {{ formatDuration(groupClass.duration_in_minutes) }}
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ groupClass.platform_fee_percentage }}{{ 'classManagement.classDetails.financialReport.ofRevenue' | translate }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.instructorPayout' | translate }}
+                            </td>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.instructor_payout) }}</strong>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.revenueMinusFee' | translate }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.revenuePerHour' | translate }}
+                            </td>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.revenue_per_hour) }}</strong>
+                            </td>
+                            <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
+                                {{ 'classManagement.classDetails.financialReport.basedOnDuration' | translate }} {{ formatDuration(groupClass.duration_in_minutes) }}
                             </td>
                         </tr>
                     </tbody>
@@ -205,94 +205,156 @@
     </div>
     }
 
-    <div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
-        <div class="trezo-card-header mb-[20px] md:mb-[25px]">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+        <div class="trezo-card-header mb-[20px] md:mb-[25px] flex items-center justify-between">
             <div class="trezo-card-title">
-                <h5 class="!mb-0">
-                    Weekly Schedule
+                <h5 class="!mb-0 text-gray-900 dark:text-white">
+                    {{ 'classManagement.classDetails.weeklySchedule.title' | translate }}
                 </h5>
+            </div>
+            <div class="flex items-center gap-[12px]">
+                <button type="button" class="w-[32px] h-[32px] flex items-center justify-center rounded-md border border-gray-200 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors" (click)="previousWeek()" [title]="'classManagement.classDetails.weeklySchedule.previousWeek' | translate">
+                    <i class="material-symbols-outlined text-lg text-gray-600 dark:text-gray-400">chevron_left</i>
+                </button>
+                <button type="button" class="px-[12px] py-[6px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors flex items-center gap-[6px]">
+                    <i class="material-symbols-outlined text-base">calendar_today</i>
+                    <span>{{ getCurrentWeekRange() }}</span>
+                </button>
+                <button type="button" class="w-[32px] h-[32px] flex items-center justify-center rounded-md border border-gray-200 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors" (click)="nextWeek()" [title]="'classManagement.classDetails.weeklySchedule.nextWeek' | translate">
+                    <i class="material-symbols-outlined text-lg text-gray-600 dark:text-gray-400">chevron_right</i>
+                </button>
             </div>
         </div>
         <div class="trezo-card-content">
-            <div class="grid grid-cols-7 gap-2">
+            <!-- Desktop: Grid 7 columns -->
+            <div class="hidden md:grid grid-cols-7 gap-[10px]">
                 @for (day of weekDays; track day.dayIndex; let i = $index) {
-                    <div class="text-center">
-                        <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                            {{ day.dayName }}
+                    <div class="flex flex-col">
+                        <div class="text-center mb-[8px]">
+                            <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                {{ day.dayName }}
+                            </div>
                         </div>
-                        <div class="p-3 rounded-lg border border-gray-200 dark:border-[#172036] bg-gray-50 dark:bg-[#15203c] min-h-[120px]">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        <div class="flex-1 rounded-lg border border-gray-200 dark:border-[#172036] bg-gray-50 dark:bg-[#15203c] p-[12px] min-h-[100px] flex flex-col">
+                            <p class="text-xs font-medium text-gray-900 dark:text-white mb-[8px] text-center">
                                 {{ day.date }}
                             </p>
                             @if (day.hasClass) {
-                                <div class="bg-primary-100 dark:bg-primary-900/30 rounded p-2">
-                                    <p class="text-xs font-semibold text-primary-700 dark:text-primary-300">
-                                        Class
-                                    </p>
-                                    <p class="text-xs text-primary-600 dark:text-primary-400 mt-1">
-                                        {{ day.time }}
-                                    </p>
+                                <div class="flex-1 flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-900/20 rounded-md p-[10px] border border-primary-200 dark:border-primary-800">
+                                    <div class="text-center">
+                                        <div class="w-[32px] h-[32px] mx-auto mb-[6px] rounded-full bg-primary-500 flex items-center justify-center">
+                                            <i class="material-symbols-outlined text-white text-sm">event</i>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wide mb-[4px]">
+                                            {{ 'classManagement.classDetails.weeklySchedule.class' | translate }}
+                                        </p>
+                                        <p class="text-xs font-semibold text-primary-600 dark:text-primary-400">
+                                            {{ day.time }}
+                                        </p>
+                                    </div>
                                 </div>
                             } @else {
-                                <p class="text-xs text-gray-500 dark:text-gray-400 italic">
-                                    No class
-                                </p>
+                                <div class="flex-1 flex items-center justify-center">
+                                    <p class="text-[10px] text-gray-400 dark:text-gray-500 italic">
+                                        {{ 'classManagement.classDetails.weeklySchedule.noClass' | translate }}
+                                    </p>
+                                </div>
                             }
                         </div>
                     </div>
                 }
             </div>
+            <!-- Mobile: Horizontal scroll -->
+            <div class="md:hidden overflow-x-auto pb-[8px] -mx-[20px] px-[20px]">
+                <div class="flex gap-[8px] min-w-max">
+                    @for (day of weekDays; track day.dayIndex; let i = $index) {
+                        <div class="flex flex-col min-w-[100px]">
+                            <div class="text-center mb-[8px]">
+                                <div class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                                    {{ day.dayName }}
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-gray-200 dark:border-[#172036] bg-gray-50 dark:bg-[#15203c] p-[12px] min-h-[100px] w-[100px] flex flex-col">
+                                <p class="text-xs font-medium text-gray-900 dark:text-white mb-[8px] text-center">
+                                    {{ day.date }}
+                                </p>
+                                @if (day.hasClass) {
+                                    <div class="flex-1 flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-900/20 rounded-md p-[10px] border border-primary-200 dark:border-primary-800">
+                                        <div class="text-center">
+                                            <div class="w-[28px] h-[28px] mx-auto mb-[4px] rounded-full bg-primary-500 flex items-center justify-center">
+                                                <i class="material-symbols-outlined text-white text-xs">event</i>
+                                            </div>
+                                            <p class="text-[9px] font-bold text-primary-700 dark:text-primary-300 uppercase tracking-wide mb-[2px]">
+                                                {{ 'classManagement.classDetails.weeklySchedule.class' | translate }}
+                                            </p>
+                                            <p class="text-[10px] font-semibold text-primary-600 dark:text-primary-400">
+                                                {{ day.time }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                } @else {
+                                    <div class="flex-1 flex items-center justify-center">
+                                        <p class="text-[9px] text-gray-400 dark:text-gray-500 italic">
+                                            {{ 'classManagement.classDetails.weeklySchedule.noClass' | translate }}
+                                        </p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md shadow-sm">
         <div class="trezo-card-header mb-[20px] md:mb-[25px]">
             <div class="trezo-card-title">
-                <h5 class="!mb-0">
-                    Student Enrollments ({{ enrollments.length }})
+                <h5 class="!mb-0 text-gray-900 dark:text-white">
+                    {{ 'classManagement.classDetails.studentEnrollments.title' | translate }} ({{ enrollments.length }})
                 </h5>
             </div>
         </div>
         <div class="trezo-card-content -mx-[20px] md:-mx-[25px]">
             <div class="table-responsive overflow-x-auto">
                 <table class="w-full">
-                    <thead class="text-black">
+                    <thead class="text-black dark:text-white">
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap w-[50px]">
-                                #
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap w-[50px]">
+                                {{ 'classManagement.classDetails.studentEnrollments.stt' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Student Name
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.studentEnrollments.studentName' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Email
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.studentEnrollments.email' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 whitespace-nowrap">
-                                Registered At
+                            <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                                {{ 'classManagement.classDetails.studentEnrollments.registeredAt' | translate }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="text-black">
+                    <tbody class="text-black dark:text-gray-300">
                         @for (enrollment of enrollments; track enrollment.student_id; let idx = $index) {
                             <tr>
-                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 text-center">
+                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036] text-center">
                                     {{ idx + 1 }}
                                 </td>
-                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                     {{ enrollment.student_name }}
                                 </td>
-                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                     {{ enrollment.student_email }}
                                 </td>
-                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100">
+                                <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                     {{ formatDateOnly(enrollment.registered_at) }}
                                 </td>
                             </tr>
                         }
                         @if (enrollments.length === 0) {
                             <tr>
-                                <td [attr.colspan]="4" class="text-center py-[30px] text-gray-500">
-                                    No student enrollments found
+                                <td [attr.colspan]="4" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                                    {{ 'classManagement.classDetails.studentEnrollments.noEnrollments' | translate }}
                                 </td>
                             </tr>
                         }

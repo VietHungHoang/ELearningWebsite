@@ -51,4 +51,15 @@ public interface TutorAvailabilityRepository extends JpaRepository<TutorAvailabi
      */
     void deleteByTutorIdAndEffectiveStartDateGreaterThanEqualAndEffectiveEndDateLessThanEqual(
             UUID tutorId, LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Delete availabilities for a tutor with specific effective start date
+     */
+    void deleteByTutorIdAndEffectiveStartDate(UUID tutorId, LocalDate effectiveStartDate);
+
+    /**
+     * Find availabilities for a tutor that are still open (effectiveEndDate is null)
+     */
+    @Query("SELECT a FROM TutorAvailability a WHERE a.tutor.id = :tutorId AND a.effectiveEndDate IS NULL")
+    List<TutorAvailability> findByTutorIdAndEffectiveEndDateIsNull(@Param("tutorId") UUID tutorId);
 }

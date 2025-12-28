@@ -31,7 +31,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
                     <div className="text-center">
                         <p className="text-xs text-gray-500">Score</p>
                         <p className="text-lg font-bold text-green-600">{quiz.score}/{quiz.totalQuestions} Correct</p>
-                        <button onClick={() => navigate('/dashboard/my-quizzes/result')} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                        <button onClick={() => navigate('/quiz/result')} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
                             View Result
                         </button>
                     </div>
@@ -46,7 +46,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
                         <div className="w-full bg-gray-200 rounded-full h-2">
                             <div className="bg-[#0b6459] h-2 rounded-full" style={{ width: `${progress}%` }}></div>
                         </div>
-                        <button onClick={() => navigate('/dashboard/my-quizzes/take')} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                        <button onClick={() => navigate('/quiz/take')} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
                             Continue Quiz
                         </button>
                     </div>
@@ -54,7 +54,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
             case 'not_started':
             default:
                 return (
-                     <button onClick={() => navigate('/dashboard/my-quizzes/take')} className="w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                     <button onClick={() => navigate('/quiz/take')} className="w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
                         Start Quiz
                     </button>
                 );

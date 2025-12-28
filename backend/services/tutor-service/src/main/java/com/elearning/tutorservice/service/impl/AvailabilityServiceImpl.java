@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -58,18 +59,22 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         Tutor tutor = tutorRepository.findById(tutorId)
                 .orElseThrow(() -> new RuntimeException("Tutor not found"));
 
-        // End all existing availabilities by setting effectiveEndDate to yesterday
-        // Get all current/future availabilities (effectiveEndDate >= today or null)
-        LocalDate today = LocalDate.now();
-        List<TutorAvailability> existingAvailabilities = availabilityRepository.findByTutorIdAndDateRange(
-                tutorId, today, LocalDate.of(2100, 12, 31));
-        if (!existingAvailabilities.isEmpty()) {
-            existingAvailabilities.forEach(availability -> availability.setEffectiveEndDate(today.minusDays(1)));
-            availabilityRepository.saveAll(existingAvailabilities);
-            log.info("Ended {} existing availabilities for tutor {}", existingAvailabilities.size(), tutorId);
+        LocalDate today = LocalDate.now(Clock.systemUTC());
+        LocalDate tomorrow = today.plusDays(1);
+
+        // 1. Delete all schedules where effectiveStartDate is tomorrow
+        availabilityRepository.deleteByTutorIdAndEffectiveStartDate(tutorId, tomorrow);
+        log.info("Deleted availabilities starting tomorrow for tutor {}", tutorId);
+
+        // 2. Set effectiveEndDate of records where effectiveEndDate is null to today
+        List<TutorAvailability> openAvailabilities = availabilityRepository.findByTutorIdAndEffectiveEndDateIsNull(tutorId);
+        if (!openAvailabilities.isEmpty()) {
+            openAvailabilities.forEach(availability -> availability.setEffectiveEndDate(today));
+            availabilityRepository.saveAll(openAvailabilities);
+            log.info("Closed {} open availabilities for tutor {}", openAvailabilities.size(), tutorId);
         }
 
-        // Create new availabilities from the input list
+        // 3. Insert new availabilities from the request
         List<TutorAvailability> newAvailabilities = request.getAvailabilities().stream()
                 .map(availabilityInput -> TutorAvailability.builder()
                         .tutor(tutor)
@@ -82,6 +87,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
         availabilityRepository.saveAll(newAvailabilities);
         
-        log.info("Updated availability schedule for tutor {} with {} new slots", tutorId, newAvailabilities.size());
+        log.info("Inserted {} new availabilities for tutor {}", newAvailabilities.size(), tutorId);
     }
 }

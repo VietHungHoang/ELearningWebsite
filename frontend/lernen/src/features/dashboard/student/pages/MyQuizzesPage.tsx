@@ -253,15 +253,10 @@ const MyQuizzesPage: React.FC = () => {
                         {/* Action Button */}
                         <button
                             onClick={() => {
-                                if (quiz.status === 'not_started') {
-                                    // Start quiz
-                                    alert('Starting quiz...');
-                                } else if (quiz.status === 'in_progress') {
-                                    // Continue quiz
-                                    alert('Continuing quiz...');
+                                if (quiz.status === 'not_started' || quiz.status === 'in_progress') {
+                                    navigate('/quiz/take');
                                 } else {
-                                    // View results
-                                    alert('Viewing results...');
+                                    navigate('/quiz/result');
                                 }
                             }}
                             className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${

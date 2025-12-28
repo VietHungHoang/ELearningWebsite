@@ -1,0 +1,28 @@
+// Add/Edit Subject Modal Overlay
+.add-new-popup {
+    opacity: 0;
+    visibility: hidden;
+    background-color: rgba(0, 0, 0, 0.5);
+    
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.popup-dialog {
+    transform: translateY(-20px);
+    
+    .active & {
+        transform: translateY(0);
+    }
+}
+
+// Line clamp utility
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+

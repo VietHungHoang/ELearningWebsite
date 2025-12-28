@@ -35,7 +35,7 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
     /**
      * Find sessions by student ID (through class enrollment) and date range
      */
-    @Query("SELECT s FROM Session s JOIN s.classEntity c JOIN ClassEnrollment e ON e.classEntity.id = c.id WHERE e.studentId = :studentId AND s.startTime BETWEEN :startDate AND :endDate")
+    @Query("SELECT s FROM Session s JOIN s.classEntity c JOIN ClassEnrollment e ON e.classEntity.id = c.id WHERE e.student.id = :studentId AND s.startTime BETWEEN :startDate AND :endDate")
     List<Session> findByStudentIdAndStartTimeBetween(@Param("studentId") UUID studentId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     /**

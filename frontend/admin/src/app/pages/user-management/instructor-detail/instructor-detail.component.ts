@@ -8,13 +8,14 @@ import { ClassService, GroupClass } from '../../../services/class.service';
 import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 import { FilterByCareerTypePipe } from '../../../shared/pipes/filter-by-career-type.pipe';
 import { LocaleUtilsService } from '../../../shared/utils';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-instructor-detail',
     standalone: true,
-    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe, FilterByCareerTypePipe],
+    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe, FilterByCareerTypePipe, TranslatePipe],
     templateUrl: './instructor-detail.component.html',
     styleUrl: './instructor-detail.component.scss'
 })

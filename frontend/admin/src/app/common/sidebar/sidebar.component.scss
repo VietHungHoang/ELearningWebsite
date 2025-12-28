@@ -1,0 +1,44 @@
+.logo {
+    a {
+        .admin-text {
+            background: linear-gradient(135deg, #605DFF 0%, #8B88FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+        
+        &:hover {
+            .admin-text {
+                background: linear-gradient(135deg, #4F4CE8 0%, #7A77FF 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                transform: scale(1.02);
+            }
+        }
+    }
+}
+
+:host-context(.dark) {
+    .logo {
+        a {
+            .admin-text {
+                background: linear-gradient(135deg, #8B88FF 0%, #A5A2FF 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            &:hover {
+                .admin-text {
+                    background: linear-gradient(135deg, #9D9AFF 0%, #B8B5FF 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+            }
+        }
+    }
+}
+

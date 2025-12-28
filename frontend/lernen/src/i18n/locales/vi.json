@@ -359,6 +359,7 @@
         "myBookings": "Lịch học của tôi",
         "myClass": "Lớp học",
         "myQuizzes": "Bài kiểm tra của tôi",
+        "requests": "Yêu cầu",
         "myCourses": "Khóa học của tôi",
         "myPurchases": "Mua hàng của tôi",
         "certificates": "Chứng chỉ",
@@ -403,6 +404,50 @@
     },
     "inbox": {
       "title": "Hộp thư",
+      "searchPlaceholder": "Tìm kiếm...",
+      "filters": {
+        "all": "Tất cả",
+        "private": "Riêng tư",
+        "group": "Nhóm"
+      },
+      "status": {
+        "online": "Đang trực tuyến",
+        "offline": "Ngoại tuyến"
+      },
+      "empty": {
+        "title": "Chọn cuộc trò chuyện",
+        "description": "Bắt đầu bằng cách chọn một liên hệ từ danh sách bên trái."
+      },
+      "messagePlaceholder": "Nhập tin nhắn...",
+      "attachments": {
+        "photo": "Ảnh",
+        "video": "Video",
+        "document": "Tài liệu",
+        "contact": "Liên hệ"
+      },
+      "settings": {
+        "title": "Cài đặt trò chuyện",
+        "notifications": {
+          "title": "Thông báo",
+          "enable": "Bật thông báo",
+          "sound": "Cảnh báo âm thanh"
+        },
+        "privacy": {
+          "title": "Quyền riêng tư",
+          "showStatus": "Hiển thị trạng thái trực tuyến",
+          "readReceipts": "Xác nhận đã đọc"
+        },
+        "actions": {
+          "title": "Hành động",
+          "mute": "Tắt tiếng cuộc trò chuyện",
+          "archive": "Lưu trữ cuộc trò chuyện",
+          "block": "Chặn người dùng",
+          "clearHistory": "Xóa lịch sử trò chuyện"
+        }
+      }
+    },
+    "messages": {
+      "title": "Tin nhắn",
       "searchPlaceholder": "Tìm kiếm...",
       "filters": {
         "all": "Tất cả",
@@ -515,6 +560,58 @@
         "tryAgain": "Thử lại",
         "noClassesFound": "Không tìm thấy lớp học nào",
         "noClassesDescription": "Bạn chưa đăng ký lớp học nào. Duyệt qua các khóa học có sẵn để bắt đầu."
+      },
+      "requests": {
+        "title": "Yêu cầu của tôi",
+        "filters": {
+          "reschedule": "Yêu cầu đổi lịch",
+          "trial": "Yêu cầu học thử"
+        },
+        "empty": {
+          "title": "Không có yêu cầu chờ xử lý",
+          "description": "Bạn đã xử lý hết! Tất cả các yêu cầu đã được xử lý."
+        }
+      },
+      "purchases": {
+        "title": "Mua hàng của tôi",
+        "searchPlaceholder": "Tìm kiếm theo khóa học hoặc số hóa đơn...",
+        "selectStatus": "Chọn trạng thái",
+        "filterOptions": {
+          "allStatus": "Tất cả",
+          "pending": "Đang chờ",
+          "completed": "Đã hoàn thành",
+          "cancelled": "Đã hủy",
+          "refunded": "Đã hoàn tiền"
+        },
+        "loading": "Đang tải danh sách mua hàng...",
+        "errorTitle": "Lỗi khi tải danh sách mua hàng",
+        "tryAgain": "Thử lại",
+        "tableHeaders": {
+          "courseTitle": "Tên lớp học",
+          "type": "Loại",
+          "amount": "Số tiền",
+          "status": "Trạng thái",
+          "purchaseDate": "Ngày mua",
+          "actions": "Hành động"
+        },
+        "classTypes": {
+          "oneOnOne": "1 kèm 1",
+          "group": "Nhóm",
+          "course": "Khóa học"
+        },
+        "statusLabels": {
+          "pending": "Đang chờ",
+          "completed": "Đã hoàn thành",
+          "cancelled": "Đã hủy",
+          "refunded": "Đã hoàn tiền"
+        },
+        "noPurchasesFound": "Không tìm thấy mua hàng",
+        "noPurchasesDescription": "Bạn chưa thực hiện giao dịch mua hàng nào. Duyệt các khóa học có sẵn để bắt đầu.",
+        "actions": {
+          "view": "Xem chi tiết",
+          "downloadInvoice": "Tải hóa đơn",
+          "contactSupport": "Liên hệ hỗ trợ"
+        }
       }
     },
     "tutor": {
@@ -802,6 +899,7 @@
           "declining": "Đang từ chối...",
           "chat": "Nhắn tin",
           "cancelRequest": "Hủy yêu cầu",
+          "cancelConfirmMessage": "Bạn có chắc chắn muốn hủy yêu cầu học thử này? Hành động này không thể hoàn tác.",
           "acceptSuccess": "Yêu cầu học thử đã được chấp nhận thành công!",
           "acceptFailed": "Không thể chấp nhận yêu cầu",
           "acceptError": "Đã xảy ra lỗi khi chấp nhận yêu cầu",
@@ -822,6 +920,7 @@
           "declining": "Đang từ chối...",
           "chat": "Nhắn tin",
           "cancelRequest": "Hủy yêu cầu",
+          "cancelConfirmMessage": "Bạn có chắc chắn muốn hủy yêu cầu đổi lịch này? Hành động này không thể hoàn tác.",
           "acceptSuccess": "Yêu cầu đổi lịch đã được chấp nhận thành công!",
           "acceptFailed": "Không thể chấp nhận yêu cầu",
           "acceptError": "Đã xảy ra lỗi khi chấp nhận yêu cầu",

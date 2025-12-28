@@ -64,6 +64,25 @@ button {
     }
 }
 
+// Override for action buttons to ensure text color is visible
+.action-btn-edit,
+.action-btn-save,
+.action-btn-cancel {
+    color: #000000 !important;
+    
+    i, span, .material-symbols-outlined {
+        color: #000000 !important;
+    }
+    
+    &:hover {
+        color: #000000 !important;
+        
+        i, span, .material-symbols-outlined {
+            color: #000000 !important;
+        }
+    }
+}
+
 .bg-gradient-to-br {
     position: relative;
     overflow: hidden;

@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { TopInstructor, RankingCriteria, TimePeriod } from '../../../types/dashboard';
 import { DashboardService } from '../../../services/dashboard.service';
+import { I18nService } from '../../../i18n/i18n.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-top-instructors',
-    imports: [CommonModule],
+    imports: [CommonModule, TranslatePipe],
     templateUrl: './top-instructors.component.html',
     styleUrl: './top-instructors.component.scss'
 })
@@ -16,9 +18,9 @@ export class TopInstructorsComponent implements OnInit, OnDestroy {
     isCardHeaderOpen = false;
     isTimePeriodOpen = false;
     rankingCriteria: RankingCriteria = 'revenue';
-    rankingLabel = 'Revenue';
+    rankingLabelKey = 'dashboard.overview.topInstructors.rankingCriteria.revenue';
     timePeriod: TimePeriod = 'month';
-    timePeriodLabel = 'This Month';
+    timePeriodLabelKey = 'dashboard.overview.topInstructors.timePeriod.thisMonth';
 
     // Pagination properties
     currentPage = 1;
@@ -28,7 +30,10 @@ export class TopInstructorsComponent implements OnInit, OnDestroy {
     instructorsData: TopInstructor[] = [];
     private subscriptions: Subscription[] = [];
 
-    constructor(private dashboardService: DashboardService) {}
+    constructor(
+        private dashboardService: DashboardService,
+        private i18nService: I18nService
+    ) {}
 
     ngOnInit(): void {
         // If instructors provided via Input, use them
@@ -80,9 +85,9 @@ export class TopInstructorsComponent implements OnInit, OnDestroy {
         this.instructorsData = sorted;
     }
 
-    changeRankingCriteria(criteria: RankingCriteria, label: string): void {
+    changeRankingCriteria(criteria: RankingCriteria, labelKey: string): void {
         this.rankingCriteria = criteria;
-        this.rankingLabel = label;
+        this.rankingLabelKey = labelKey;
         this.loadInstructors(); // Reload data with new criteria
         this.currentPage = 1;
         this.isCardHeaderOpen = false;
@@ -95,9 +100,9 @@ export class TopInstructorsComponent implements OnInit, OnDestroy {
         }
     }
 
-    changeTimePeriod(period: TimePeriod, label: string): void {
+    changeTimePeriod(period: TimePeriod, labelKey: string): void {
         this.timePeriod = period;
-        this.timePeriodLabel = label;
+        this.timePeriodLabelKey = labelKey;
         this.isTimePeriodOpen = false;
         this.loadInstructors(); // Reload data with new time period
     }
@@ -153,6 +158,27 @@ export class TopInstructorsComponent implements OnInit, OnDestroy {
             this.isCardHeaderOpen = false;
             this.isTimePeriodOpen = false;
         }
+    }
+
+    formatRevenue(amount: number | undefined): string {
+        if (amount === undefined || amount === null) {
+            return '-';
+        }
+        if (amount >= 1000000000) {
+            return (amount / 1000000000).toFixed(1) + 'B';
+        } else if (amount >= 1000000) {
+            return (amount / 1000000).toFixed(1) + 'M';
+        } else if (amount >= 1000) {
+            return (amount / 1000).toFixed(1) + 'K';
+        }
+        return amount.toString();
+    }
+
+    formatNumber(num: number | undefined): string {
+        if (num === undefined || num === null) {
+            return '-';
+        }
+        return new Intl.NumberFormat('en-US').format(num);
     }
 
 }
