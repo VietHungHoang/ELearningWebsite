@@ -25,13 +25,13 @@ public interface ClassEnrollmentRepository extends JpaRepository<ClassEnrollment
     /**
      * Lấy tất cả enrollments của các lớp do tutor này dạy
      */
-    @Query("SELECT ce FROM ClassEnrollment ce WHERE ce.classEntity.tutorId = :tutorId AND ce.status = 'APPROVED'")
+    @Query("SELECT ce FROM ClassEnrollment ce WHERE ce.classEntity.tutor.id = :tutorId AND ce.status = 'APPROVED'")
     List<ClassEnrollment> findByTutorId(@Param("tutorId") UUID tutorId);
     
     /**
      * Tìm tất cả students đã approved trong các lớp của tutor
      */
-    @Query("SELECT DISTINCT ce.studentId FROM ClassEnrollment ce WHERE ce.classEntity.tutorId = :tutorId AND ce.status = 'APPROVED'")
+    @Query("SELECT DISTINCT ce.student.id FROM ClassEnrollment ce WHERE ce.classEntity.tutor.id = :tutorId AND ce.status = 'APPROVED'")
     List<UUID> findDistinctStudentIdsByTutorId(@Param("tutorId") UUID tutorId);
     
     /**
@@ -47,21 +47,21 @@ public interface ClassEnrollmentRepository extends JpaRepository<ClassEnrollment
     /**
      * Find enrollment for a specific student in tutor's classes
      */
-    @Query("SELECT ce FROM ClassEnrollment ce WHERE ce.classEntity.tutorId = :tutorId AND ce.studentId = :studentId")
+    @Query("SELECT ce FROM ClassEnrollment ce WHERE ce.classEntity.tutor.id = :tutorId AND ce.student.id = :studentId")
     Optional<ClassEnrollment> findByTutorIdAndStudentId(@Param("tutorId") UUID tutorId, @Param("studentId") UUID studentId);
 
     /**
      * Đếm số học sinh duy nhất của tutor trong khoảng thời gian
      */
-    @Query("SELECT COUNT(DISTINCT ce.studentId) FROM ClassEnrollment ce WHERE ce.classEntity.tutorId = :tutorId AND ce.createdAt BETWEEN :startDate AND :endDate AND ce.status = 'APPROVED'")
+    @Query("SELECT COUNT(DISTINCT ce.student.id) FROM ClassEnrollment ce WHERE ce.classEntity.tutor.id = :tutorId AND ce.createdAt BETWEEN :startDate AND :endDate AND ce.status = 'APPROVED'")
     Long countDistinctStudentsByTutorIdAndDateRange(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     /**
      * Lấy thống kê số học sinh hàng tháng của tutor trong 12 tháng gần nhất
      */
-    @Query("SELECT YEAR(ce.createdAt) as year, MONTH(ce.createdAt) as month, COUNT(DISTINCT ce.studentId) as students " +
+    @Query("SELECT YEAR(ce.createdAt) as year, MONTH(ce.createdAt) as month, COUNT(DISTINCT ce.student.id) as students " +
            "FROM ClassEnrollment ce " +
-           "WHERE ce.classEntity.tutorId = :tutorId AND ce.status = 'APPROVED' AND ce.createdAt >= :startDate " +
+           "WHERE ce.classEntity.tutor.id = :tutorId AND ce.status = 'APPROVED' AND ce.createdAt >= :startDate " +
            "GROUP BY YEAR(ce.createdAt), MONTH(ce.createdAt) " +
            "ORDER BY YEAR(ce.createdAt) DESC, MONTH(ce.createdAt) DESC")
     List<Object[]> getMonthlyStudentStats(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate);

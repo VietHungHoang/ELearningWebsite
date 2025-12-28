@@ -98,21 +98,18 @@ public class TutorQueryBuilder {
         };
         
         return List.of(
-                // Name fields (highest boost)
-                "name" + suffix + "^5.0",
-                "name" + suffix + "Autocomplete^4.0",
+                // Full name fields (highest boost)
+                "fullName" + suffix + "^5.0",
+                "fullName" + suffix + "Autocomplete^4.0",
                 
-                // Specialization (high boost)
-                "specialization" + suffix + "^3.0",
-                
-                // Headline (medium-high boost)
-                "headline" + suffix + "^2.5",
+                // Headline (high boost)
+                "headline" + suffix + "^3.0",
                 
                 // Subjects (medium boost) - nested field
                 "subjects.name" + suffix + "^2.0",
                 
-                // Bio (medium-low boost)
-                "bio" + suffix + "^1.5",
+                // Introduction (medium-low boost)
+                "introduction" + suffix + "^1.5",
                 
                 // Education titles (low boost)
                 "education.title" + suffix + "^1.2",

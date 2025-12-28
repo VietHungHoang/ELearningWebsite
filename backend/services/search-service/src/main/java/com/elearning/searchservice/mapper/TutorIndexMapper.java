@@ -23,26 +23,22 @@ public class TutorIndexMapper {
                 .id(event.getTutorId())
                 .isVerified(event.getIsVerified())
                 .isActive(event.getIsActive())
+                .countryCode(event.getCountryCode())
                 
-                // Multi-language name
-                .nameVi(event.getNameVi())
-                .nameEn(event.getNameEn())
-                .nameJa(event.getNameJa())
-                .nameViAutocomplete(event.getNameVi())
-                .nameEnAutocomplete(event.getNameEn())
-                .nameJaAutocomplete(event.getNameJa())
+                // Full name
+                .fullNameVi(event.getFullNameVi())
+                .fullNameEn(event.getFullNameEn())
+                .fullNameJa(event.getFullNameJa())
+                .fullNameViAutocomplete(event.getFullNameVi())
+                .fullNameEnAutocomplete(event.getFullNameEn())
+                .fullNameJaAutocomplete(event.getFullNameJa())
                 
-                // Multi-language bio
-                .bioVi(event.getBioVi())
-                .bioEn(event.getBioEn())
-                .bioJa(event.getBioJa())
+                // Introduction
+                .introductionVi(event.getIntroductionVi())
+                .introductionEn(event.getIntroductionEn())
+                .introductionJa(event.getIntroductionJa())
                 
-                // Multi-language specialization
-                .specializationVi(event.getSpecializationVi())
-                .specializationEn(event.getSpecializationEn())
-                .specializationJa(event.getSpecializationJa())
-                
-                // Multi-language headline
+                // Headline
                 .headlineVi(event.getHeadlineVi())
                 .headlineEn(event.getHeadlineEn())
                 .headlineJa(event.getHeadlineJa())
@@ -83,8 +79,6 @@ public class TutorIndexMapper {
                 
                 // Ranking signals
                 .popularityScore(event.getPopularityScore())
-                .responseRate(event.getResponseRate())
-                .completionRate(event.getCompletionRate())
                 
                 // Metadata
                 .createdAt(event.getCreatedAt())

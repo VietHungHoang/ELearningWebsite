@@ -12,6 +12,12 @@ import { mapTutorResponseToTutor, mapTutorProfileHeaderResponseToTutorProfileHea
 import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse } from "../types/tutor";
 import type { SubmitReviewRequest } from "../types/student";
 
+interface FuzzySearchSuggestion {
+    id: string;
+    text: string;
+    type: 'tutor' | 'subject' | 'category';
+}
+
 export interface ChartsData {
     incomes: Array<{ month: string; income: number }>; // month format: "YYYY-MM"
     students: Array<{ month: string; students: number }>; // month format: "YYYY-MM"
@@ -20,6 +26,14 @@ export interface ChartsData {
 export const tutorService = {
     getFilterData: async (): Promise<ApiResponse<FilterData>> => {
         return await apiService.get<FilterData>("/v1/public/common/tutor-filter");
+    },
+
+    getFuzzySearchSuggestions: async (keyword: string, language?: string): Promise<ApiResponse<FuzzySearchSuggestion[]>> => {
+        const params: Record<string, string> = { keyword };
+        if (language) {
+            params.language = language;
+        }
+        return await apiService.get<FuzzySearchSuggestion[]>(`/v1/public/search/tutors/suggestions`, params);
     },
 
     searchTutors: async (filters: TutorSearchFilter, studentId?: string): Promise<ApiResponse<PaginatedResponse<Tutor>>> => {

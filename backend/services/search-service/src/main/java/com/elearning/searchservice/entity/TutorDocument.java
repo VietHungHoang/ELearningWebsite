@@ -38,47 +38,40 @@ public class TutorDocument {
     @Field(type = FieldType.Boolean)
     private Boolean isActive;
 
-    // ============= MULTI-LANGUAGE NAME =============
+    @Field(type = FieldType.Keyword)
+    private String countryCode;
+
+    // ============= FULL NAME (single field, multi-language search based on countryCode) =============
     @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
-    private String nameVi;
+    private String fullNameVi;
 
     @Field(type = FieldType.Text, analyzer = "english_analyzer")
-    private String nameEn;
+    private String fullNameEn;
 
     @Field(type = FieldType.Text, analyzer = "japanese_analyzer")
-    private String nameJa;
+    private String fullNameJa;
 
     // Autocomplete fields
     @Field(type = FieldType.Text, analyzer = "vietnamese_autocomplete", searchAnalyzer = "vietnamese_analyzer")
-    private String nameViAutocomplete;
+    private String fullNameViAutocomplete;
 
     @Field(type = FieldType.Text, analyzer = "english_autocomplete", searchAnalyzer = "english_analyzer")
-    private String nameEnAutocomplete;
+    private String fullNameEnAutocomplete;
 
     @Field(type = FieldType.Text, analyzer = "japanese_autocomplete", searchAnalyzer = "japanese_analyzer")
-    private String nameJaAutocomplete;
+    private String fullNameJaAutocomplete;
 
-    // ============= MULTI-LANGUAGE BIO =============
+    // ============= INTRODUCTION (single field, multi-language search based on countryCode) =============
     @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
-    private String bioVi;
+    private String introductionVi;
 
     @Field(type = FieldType.Text, analyzer = "english_analyzer")
-    private String bioEn;
+    private String introductionEn;
 
     @Field(type = FieldType.Text, analyzer = "japanese_analyzer")
-    private String bioJa;
+    private String introductionJa;
 
-    // ============= MULTI-LANGUAGE SPECIALIZATION =============
-    @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
-    private String specializationVi;
-
-    @Field(type = FieldType.Text, analyzer = "english_analyzer")
-    private String specializationEn;
-
-    @Field(type = FieldType.Text, analyzer = "japanese_analyzer")
-    private String specializationJa;
-
-    // ============= MULTI-LANGUAGE HEADLINE =============
+    // ============= HEADLINE (single field, multi-language search based on countryCode) =============
     @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
     private String headlineVi;
 
@@ -168,12 +161,6 @@ public class TutorDocument {
     // ============= RANKING SIGNALS =============
     @Field(type = FieldType.Float)
     private Double popularityScore;
-
-    @Field(type = FieldType.Float)
-    private Double responseRate;
-
-    @Field(type = FieldType.Float)
-    private Double completionRate;
 
     // ============= METADATA =============
     @Field(type = FieldType.Date)

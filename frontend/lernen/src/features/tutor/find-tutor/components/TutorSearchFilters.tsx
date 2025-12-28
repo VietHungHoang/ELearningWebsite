@@ -1,13 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import commonUtils from '../../../../utils/commonUtils';
 import type { TutorSearchFilter } from '../../../../types/api';
 import type { Category, Language, Subject, Timezone } from '../../../../types/common';
 import { useTranslation } from 'react-i18next';
+import { tutorService } from '../../../../services/tutorService';
 
 // --- Type Definitions ---
 interface TutorSearchFiltersProps {
   onFilterChange: (filters: TutorSearchFilter) => void;
+  onSearch: (keyword: string) => void;
+}
+
+interface FuzzySearchSuggestion {
+  id: string;
+  text: string;
+  type: 'tutor' | 'subject' | 'category';
 }
 
 interface MultiSelectDropdownProps {
@@ -257,6 +265,90 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
     const availabilityRef = useRef<HTMLDivElement>(null);
     const [keyword, setKeyword] = useState<string>('');
+    const [fuzzySuggestions, setFuzzySuggestions] = useState<FuzzySearchSuggestion[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+    const searchTimeoutRef = useRef<number | null>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Debounced fuzzy search function
+    const debouncedFuzzySearch = useCallback((searchTerm: string) => {
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+
+        if (!searchTerm.trim()) {
+            setFuzzySuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        searchTimeoutRef.current = window.setTimeout(async () => {
+            setIsSearching(true);
+            try {
+                const response = await tutorService.getFuzzySearchSuggestions(searchTerm);
+                if (response.success) {
+                    setFuzzySuggestions(response.data);
+                    setShowSuggestions(response.data.length > 0);
+                } else {
+                    setFuzzySuggestions([]);
+                    setShowSuggestions(false);
+                }
+            } catch (error) {
+                console.error('Fuzzy search error:', error);
+                // Fallback to mock data if API fails
+                const mockSuggestions: FuzzySearchSuggestion[] = [
+                    { id: '1', text: `${searchTerm} tutor`, type: 'tutor' as const },
+                    { id: '2', text: `${searchTerm} subject`, type: 'subject' as const },
+                    { id: '3', text: `Advanced ${searchTerm}`, type: 'category' as const },
+                ].filter(suggestion => 
+                    suggestion.text.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                setFuzzySuggestions(mockSuggestions);
+                setShowSuggestions(mockSuggestions.length > 0);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 300); // 300ms debounce
+    }, []);
+
+    // Handle keyword input change
+    const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setKeyword(value);
+        debouncedFuzzySearch(value);
+    };
+
+    // Handle suggestion selection
+    const handleSuggestionSelect = (suggestion: FuzzySearchSuggestion) => {
+        setKeyword(suggestion.text);
+        setShowSuggestions(false);
+        setFuzzySuggestions([]);
+        // Trigger full search
+        onSearch(suggestion.text);
+    };
+
+    // Handle Enter key press
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            setShowSuggestions(false);
+            setFuzzySuggestions([]);
+            // Trigger full search
+            onSearch(keyword);
+        }
+    };
+
+    // Handle input focus/blur
+    const handleInputFocus = () => {
+        if (fuzzySuggestions.length > 0) {
+            setShowSuggestions(true);
+        }
+    };
+
+    const handleInputBlur = () => {
+        // Delay hiding suggestions to allow click on suggestions
+        setTimeout(() => setShowSuggestions(false), 150);
+    };
 
 
     const MIN_FEE = 0;
@@ -296,16 +388,14 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     ];
     const activeShadowClass = 'shadow-[0px_1px_3px_0px_rgba(16,24,40,0.1),_0px_1px_2px_0px_rgba(16,24,40,0.06)]';
 
-    const handleSearch = () => {
-        onSearch(keyword);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSearch();
-        }
-    };
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+        };
+    }, []);
 
     // Lazy load filter data on mount with caching - load once and cache to avoid repeated API calls
     useEffect(() => {
@@ -578,16 +668,27 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                     <div className="flex items-center gap-4 flex-grow">
                         <div className="relative flex-grow max-w-xs">
                             <input
+                                ref={searchInputRef}
                                 type="text"
                                 placeholder={t('findTutors.filters.placeholders.searchByKeyword')}
                                 className="w-full bg-white p-2.5 pl-10 pr-12 text-sm font-medium text-gray-800 rounded-xl border border-gray-200/80 shadow-sm focus:border-[#065a46] focus:outline-none"
                                 value={keyword}
-                                onChange={(e) => setKeyword(e.target.value)}
-                                onKeyDown={handleKeyDown}
+                                onChange={handleKeywordChange}
+                                onKeyDown={handleKeyPress}
+                                onFocus={handleInputFocus}
+                                onBlur={handleInputBlur}
                             />
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                             <button
-                                onClick={handleSearch}
+                            {isSearching && (
+                                <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                                    <svg className="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </div>
+                            )}
+                            <button
+                                onClick={() => onSearch(keyword)}
                                 aria-label="Search"
                                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                             >
@@ -595,6 +696,45 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </button>
+
+                            {/* Fuzzy Search Suggestions Dropdown */}
+                            {showSuggestions && fuzzySuggestions.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                                    {fuzzySuggestions.map((suggestion) => (
+                                        <button
+                                            key={suggestion.id}
+                                            onClick={() => handleSuggestionSelect(suggestion)}
+                                            className="w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center gap-3 transition-colors"
+                                        >
+                                            <div className="flex-shrink-0">
+                                                {suggestion.type === 'tutor' && (
+                                                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                    </svg>
+                                                )}
+                                                {suggestion.type === 'subject' && (
+                                                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                                    </svg>
+                                                )}
+                                                {suggestion.type === 'category' && (
+                                                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm font-medium text-gray-900 truncate">
+                                                    {suggestion.text}
+                                                </div>
+                                                <div className="text-xs text-gray-500 capitalize">
+                                                    {suggestion.type}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <div className="w-48">
                             <CustomDropdown

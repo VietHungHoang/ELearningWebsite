@@ -43,30 +43,30 @@ public interface SessionParticipantRepository extends JpaRepository<SessionParti
     /**
      * Tìm tất cả sessions của một student trong một class
      */
-    @Query("SELECT sp FROM SessionParticipant sp WHERE sp.studentId = :studentId AND sp.session.classEntity.id = :classId ORDER BY sp.session.startTime")
+    @Query("SELECT sp FROM SessionParticipant sp WHERE sp.student.id = :studentId AND sp.session.classEntity.id = :classId ORDER BY sp.session.startTime")
     List<SessionParticipant> findByStudentIdAndClassId(@Param("studentId") UUID studentId, @Param("classId") UUID classId);
     
     /**
      * Lấy attendance history của student (tính phần trăm tham dự)
      */
-    @Query("SELECT COUNT(sp) FROM SessionParticipant sp WHERE sp.studentId = :studentId AND sp.attendanceStatus IN ('PRESENT', 'LATE')")
+    @Query("SELECT COUNT(sp) FROM SessionParticipant sp WHERE sp.student.id = :studentId AND sp.attendanceStatus IN ('PRESENT', 'LATE')")
     Long countAttendedSessions(@Param("studentId") UUID studentId);
     
     /**
      * Kiểm tra student đã join session chưa (có Zoom participant ID)
      */
-    @Query("SELECT CASE WHEN COUNT(sp) > 0 THEN true ELSE false END FROM SessionParticipant sp WHERE sp.session.id = :sessionId AND sp.studentId = :studentId AND sp.zoomParticipantId IS NOT NULL")
+    @Query("SELECT CASE WHEN COUNT(sp) > 0 THEN true ELSE false END FROM SessionParticipant sp WHERE sp.session.id = :sessionId AND sp.student.id = :studentId AND sp.zoomParticipantId IS NOT NULL")
     boolean hasJoinedZoomMeeting(@Param("sessionId") UUID sessionId, @Param("studentId") UUID studentId);
     
     /**
      * Tìm tất cả trial students của một tutor (participants trong trial sessions)
      */
-    @Query("SELECT DISTINCT sp.studentId FROM SessionParticipant sp WHERE sp.session.tutorId = :tutorId AND sp.session.isTrial = true")
+    @Query("SELECT DISTINCT sp.student.id FROM SessionParticipant sp WHERE sp.session.tutor.id = :tutorId AND sp.session.isTrial = true")
     List<UUID> findDistinctTrialStudentsByTutorId(@Param("tutorId") UUID tutorId);
     
     /**
      * Tìm tất cả participants trong trial sessions của tutor
      */
-    @Query("SELECT sp FROM SessionParticipant sp WHERE sp.session.tutorId = :tutorId AND sp.session.isTrial = true ORDER BY sp.createdAt DESC")
+    @Query("SELECT sp FROM SessionParticipant sp WHERE sp.session.tutor.id = :tutorId AND sp.session.isTrial = true ORDER BY sp.createdAt DESC")
     List<SessionParticipant> findTrialParticipantsByTutorId(@Param("tutorId") UUID tutorId);
 }
