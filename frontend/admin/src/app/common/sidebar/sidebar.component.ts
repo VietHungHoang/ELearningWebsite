@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 
@@ -16,6 +16,8 @@ interface MenuItem {
     styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
+
+    constructor(private router: Router) {}
 
     openSectionIndex: number = -1;
     openSectionIndex2: number = -1;
@@ -49,6 +51,10 @@ export class SidebarComponent {
     }
     isSectionOpen3(index: number): boolean {
         return this.openSectionIndex3 === index;
+    }
+
+    navigateToCourseManagement(): void {
+        this.router.navigate(['/dashboard/course-management/subjects']);
     }
 
 }
