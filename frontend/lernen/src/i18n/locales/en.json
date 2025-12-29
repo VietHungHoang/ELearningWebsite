@@ -98,7 +98,7 @@
     "signup": {
       "signUpAsTutor": "Sign up as a tutor",
       "signUpAsStudent": "Sign up as a student",
-      "tutorJourney": "Start your teaching journey today.",
+      "tutorJourney": "Teach online, earn flexible income.",
       "studentJourney": "Start your learning journey today.",
       "fullName": "Full name",
       "fullNamePlaceholder": "Your full name",
@@ -119,7 +119,21 @@
       "alreadyHaveAccount": "Already have an account?",
       "signIn": "Sign in",
       "orSeparator": "OR",
-      "signUpWithGoogle": "Sign up with Google"
+      "signUpWithGoogle": "Sign up with Google",
+      "introPanel": {
+        "title": "Yes! we're making progress!",
+        "subtitle": "every minute & every second",
+        "description": "Begin your learning journey today and experience the transformative power of personalized education.",
+        "registeredTutors": "4k+ Registered Tutors",
+        "tutor1": "Tutor 1",
+        "tutor2": "Tutor 2",
+        "tutor3": "Tutor 3",
+        "tutorName": "Phan Thị Hà",
+        "tutorSubject": "Database",
+        "tutorLocation": "Hanoi, Vietnam",
+        "tutorRating": "4.8",
+        "videoAlt": "Online tutoring session"
+      }
     },
     "otpVerification": {
       "title": "Check your email",
@@ -192,6 +206,19 @@
       "rating": "4.9/5 Rating",
       "studentsCount": "15,000+ students",
       "certifiedTutors": "Certified tutors"
+    },
+    "introPanel": {
+      "registeredTutors": "4k+ Registered Tutors",
+      "tutor1": "Tutor 1",
+      "tutor2": "Tutor 2",
+      "tutor3": "Tutor 3",
+      "tutorName": "Phan Thị Hà",
+      "tutorSubject": "Database",
+      "tutorLocation": "Hanoi, Vietnam",
+      "tutorRating": "4.8",
+      "videoAlt": "Online tutoring session",
+      "rotatingText": "EXPLORE & FIND THE BEST TUTOR",
+      "description": "Begin your learning journey today and experience the transformative power of personalized education."
     }
   },
   "findTutors": {

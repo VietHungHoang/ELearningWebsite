@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 const WhyChooseUs = () => {
@@ -62,10 +61,6 @@ const WhyChooseUs = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left content */}
           <div className="space-y-8">
-            {/* Icon header */}
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400/20 backdrop-blur rounded-2xl border border-yellow-400/30">
-              <span className="text-2xl">📋</span>
-            </div>
 
             {/* Section label */}
             <div className="flex items-center space-x-4">
@@ -105,12 +100,12 @@ const WhyChooseUs = () => {
 
             {/* CTA Button */}
             <div className="pt-4">
-              <Link
-                to="/get-started"
+              <button
+                onClick={() => window.location.href = '/login'}
                 className="inline-flex items-center px-8 py-3.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-all duration-200 shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105"
               >
                 {t('whyChooseUs.getStarted')}
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -118,7 +113,7 @@ const WhyChooseUs = () => {
           <div className="relative lg:pl-8">
             <div className="relative">
               <img 
-                src="/media/homepage/homepage-laptop.png" 
+                src="/media/homepage/homepage-laptop-Photoroom.png" 
                 alt="Lernen Platform"
                 className="w-full h-auto rounded-2xl shadow-2xl"
                 style={{ objectPosition: 'center 25%' }}

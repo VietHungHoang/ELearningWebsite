@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 interface Tutor {
   id: number
   name: string
-  degree: string
+  teachingSubjects: string
   hourlyRate: number
   rating: number
   reviewCount: number
@@ -26,68 +26,68 @@ const FeatureTutors: React.FC = () => {
   const tutors: Tutor[] = [
     {
       id: 1,
-      name: "Inocencia",
-      degree: "Bachelor of Computer Science",
-      hourlyRate: 40.00,
-      rating: 0.0,
-      reviewCount: 0,
-      activeStudents: 0,
+      name: "Nguyễn Văn An",
+      teachingSubjects: "Toán lớp 9, Toán lớp 10, Toán lớp 11, Lý lớp 10, Lý lớp 11",
+      hourlyRate: 400000,
+      rating: 4.8,
+      reviewCount: 15,
+      activeStudents: 8,
       videoThumbnail: "/media/homepage/Anthony Shao.png",
       videoSource: "/media/homepage/tutor-video-1.mp4",
       profileImage: "/media/homepage/Anthony Shao.png",
-      subjects: ["Computer Science", "Programming"]
+      subjects: ["Toán", "Lý"]
     },
     {
       id: 2,
-      name: "Antony Clara",
-      degree: "Bachelor of Computer Science",
-      hourlyRate: 20.00,
+      name: "Trần Thị Bình",
+      teachingSubjects: "Tiếng Anh lớp 3, Tiếng Anh lớp 4, Tiếng Anh lớp 5, Văn lớp 6, Văn lớp 7",
+      hourlyRate: 500000,
       rating: 5.0,
-      reviewCount: 2,
-      activeStudents: 3,
+      reviewCount: 23,
+      activeStudents: 12,
       videoThumbnail: "/media/homepage/Steven Ford.png",
       videoSource: "/media/homepage/tutor-video-2.mp4",
       profileImage: "/media/homepage/Steven Ford.png",
-      subjects: ["Computer Science", "Web Development"]
+      subjects: ["Tiếng Anh", "Văn"]
     },
     {
       id: 3,
-      name: "Simonth Chapman",
-      degree: "Bachelor of Computer Science",
-      hourlyRate: 20.00,
-      rating: 4.0,
-      reviewCount: 1,
-      activeStudents: 1,
+      name: "Lê Minh Cường",
+      teachingSubjects: "Hóa lớp 10, Hóa lớp 11, Hóa lớp 12, Sinh lớp 11, Sinh lớp 12",
+      hourlyRate: 350000,
+      rating: 4.7,
+      reviewCount: 18,
+      activeStudents: 6,
       videoThumbnail: "/media/homepage/Anthony Shao.png",
       videoSource: "/media/homepage/tutor-video-3.mp4",
       profileImage: "/media/homepage/Anthony Shao.png",
-      subjects: ["Computer Science", "Data Science"]
+      subjects: ["Hóa", "Sinh"]
     },
     {
       id: 4,
-      name: "Swinney Swinney",
-      degree: "Bachelor of Computer Science",
-      hourlyRate: 40.00,
-      rating: 4.0,
-      reviewCount: 1,
-      activeStudents: 1,
+      name: "Phạm Thị Dung",
+      teachingSubjects: "Toán lớp 1, Toán lớp 2, Toán lớp 3, Lý lớp 8, Lý lớp 9",
+      hourlyRate: 600000,
+      rating: 4.9,
+      reviewCount: 31,
+      activeStudents: 15,
       videoThumbnail: "/media/homepage/Steven Ford.png",
       videoSource: "/media/homepage/tutor-video-4.mp4",
       profileImage: "/media/homepage/Steven Ford.png",
-      subjects: ["Computer Science", "AI/ML"]
+      subjects: ["Toán", "Lý"]
     },
     {
       id: 5,
-      name: "John Smith",
-      degree: "Bachelor of Computer Science",
-      hourlyRate: 20.00,
-      rating: 4.0,
-      reviewCount: 3,
-      activeStudents: 2,
+      name: "Hoàng Văn Em",
+      teachingSubjects: "Văn lớp 8, Văn lớp 9, Sử lớp 10, Sử lớp 11, Địa lớp 10",
+      hourlyRate: 300000,
+      rating: 4.6,
+      reviewCount: 12,
+      activeStudents: 5,
       videoThumbnail: "/media/homepage/Anthony Shao.png",
       videoSource: "/media/homepage/tutor-video-1.mp4",
       profileImage: "/media/homepage/Anthony Shao.png",
-      subjects: ["Computer Science", "Mobile Development"]
+      subjects: ["Văn", "Sử", "Địa"]
     }
   ]
 
@@ -142,7 +142,7 @@ const FeatureTutors: React.FC = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <svg
         key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+        className={`w-3.5 h-3.5 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -177,7 +177,10 @@ const FeatureTutors: React.FC = () => {
           
           {/* View All Button */}
           <div className="mt-8 lg:mt-0 lg:ml-8">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+            <button 
+              onClick={() => window.location.href = '/find-tutors'}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
               {t('featureTutors.viewAllTutors')}
             </button>
           </div>
@@ -215,7 +218,7 @@ const FeatureTutors: React.FC = () => {
             {tutors.map((tutor) => (
               <motion.div
                 key={tutor.id}
-                className="flex-shrink-0 w-80 bg-white rounded-xl shadow-lg overflow-hidden"
+                className="flex-shrink-0 w-72 bg-white rounded-xl shadow-md overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -270,52 +273,45 @@ const FeatureTutors: React.FC = () => {
                 </div>
 
                 {/* Tutor Information */}
-                <div className="p-6">
+                <div className="p-4 flex flex-col flex-1">
                   {/* Profile Section */}
-                  <div className="flex items-start space-x-3 mb-4">
+                  <div className="flex items-start space-x-2.5 mb-3">
                     <img
                       src={tutor.profileImage}
                       alt={tutor.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg">{tutor.name}</h3>
-                      <p className="text-gray-600 text-sm">{tutor.degree}</p>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                      </div>
-                      <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-base truncate">{tutor.name}</h3>
+                      <p className="text-gray-600 text-xs line-clamp-2">
+                        {tutor.teachingSubjects.split(', ').slice(0, 2).join(', ')}
+                        {tutor.teachingSubjects.split(', ').length > 2 && '...'}
+                      </p>
                     </div>
                   </div>
 
                   {/* Pricing and Reviews */}
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-2 mb-4 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-gray-900">${tutor.hourlyRate.toFixed(2)}{t('featureTutors.perHour')}</span>
+                      <span className="text-xl font-bold text-gray-900">{tutor.hourlyRate.toLocaleString('vi-VN')}₫{t('featureTutors.perHour')}</span>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1.5">
+                      <div className="flex items-center space-x-0.5">
                         {renderStars(tutor.rating)}
                       </div>
-                      <span className="text-gray-600 text-sm">
+                      <span className="text-gray-600 text-xs">
                         {tutor.rating.toFixed(1)}/5.0 ({tutor.reviewCount} {t('featureTutors.reviews')})
                       </span>
                     </div>
                     
-                    <div className="text-gray-600 text-sm">
+                    <div className="text-gray-600 text-xs">
                       {tutor.activeStudents} {t('featureTutors.activeStudents')}
                     </div>
                   </div>
 
                   {/* View Profile Button */}
-                  <button className="w-full bg-[#065A46] hover:bg-[#054A3A] text-white py-3 rounded-lg font-semibold transition-colors">
+                  <button className="w-full bg-[#065A46] hover:bg-[#054A3A] text-white py-2.5 rounded-lg font-semibold text-sm transition-colors mt-auto">
                     {t('featureTutors.viewProfile')}
                   </button>
                 </div>

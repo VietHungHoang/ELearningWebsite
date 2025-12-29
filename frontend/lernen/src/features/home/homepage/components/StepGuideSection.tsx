@@ -44,7 +44,10 @@ const StepGuideSection: React.FC = () => {
               </p>
             </div>
             <div className="px-6 pb-6">
-              <button className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/login'}
+                className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors"
+              >
                 {t('stepGuide.steps.step1.button')}
               </button>
             </div>
@@ -69,7 +72,10 @@ const StepGuideSection: React.FC = () => {
               </p>
             </div>
             <div className="px-6 pb-6">
-              <button className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/find-tutors'}
+                className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors"
+              >
                 {t('stepGuide.steps.step2.button')}
               </button>
             </div>
@@ -94,7 +100,10 @@ const StepGuideSection: React.FC = () => {
               </p>
             </div>
             <div className="px-6 pb-6">
-              <button className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/login'}
+                className="w-full rounded-lg bg-gray-100 text-gray-800 text-sm font-medium py-2.5 border border-gray-300 hover:bg-gray-200 transition-colors"
+              >
                 {t('stepGuide.steps.step3.button')}
               </button>
             </div>
@@ -116,7 +125,10 @@ const StepGuideSection: React.FC = () => {
               </p>
             </div>
             <div className="px-6 pb-6">
-              <button className="w-full rounded-lg bg-orange-500 text-white text-sm font-semibold py-2.5 hover:bg-orange-600 transition-colors flex items-center justify-center">
+              <button 
+                onClick={() => window.location.href = '/login'}
+                className="w-full rounded-lg bg-orange-500 text-white text-sm font-semibold py-2.5 hover:bg-orange-600 transition-colors flex items-center justify-center"
+              >
                 {t('stepGuide.steps.step4.button')}
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

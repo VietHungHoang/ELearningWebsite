@@ -1,15 +1,18 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { LernenLogo } from "../LernenLogo.tsx";
 import { InteractiveImagePanelLogin } from './InteractiveImagePanelLogin.tsx';
 
 
 const IntroducePanelLogin: React.FC = () => {
+    const { t } = useTranslation();
+    
     return (
         <div className="bg-[#0b6459] text-white p-8 rounded-2xl lg:rounded-l-2xl lg:rounded-tr-[100px] lg:rounded-br-[100px] flex flex-col justify-around relative">
             <div>
                 <LernenLogo />
-                <h1 className="text-3xl font-bold mt-8">Yes! we're making progress!</h1>
-                <p className="text-lg mt-2 text-gray-200">every minute & every second</p>
+                <h1 className="text-3xl font-bold mt-8">{t('auth.signup.introPanel.title')}</h1>
+                <p className="text-lg mt-2 text-gray-200">{t('auth.signup.introPanel.subtitle')}</p>
             </div>
 
             <div className="my-8">
@@ -17,7 +20,7 @@ const IntroducePanelLogin: React.FC = () => {
             </div>
 
             <div className="flex items-end mt-8">
-                <p className="text-base text-gray-200">Begin your learning journey today and experience the transformative power of personalized education.</p>
+                <p className="text-base text-gray-200">{t('auth.signup.introPanel.description')}</p>
             </div>
         </div>
     );

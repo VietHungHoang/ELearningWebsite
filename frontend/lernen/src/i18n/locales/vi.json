@@ -100,7 +100,7 @@
     "signup": {
       "signUpAsTutor": "Đăng ký làm gia sư",
       "signUpAsStudent": "Đăng ký làm học sinh",
-      "tutorJourney": "Bắt đầu hành trình dạy học của bạn ngay hôm nay.",
+      "tutorJourney": "Dạy học trực tuyến, thu nhập linh hoạt.",
       "studentJourney": "Bắt đầu hành trình học tập của bạn ngay hôm nay.",
       "fullName": "Họ và tên",
       "fullNamePlaceholder": "Họ và tên đầy đủ của bạn",
@@ -122,7 +122,21 @@
       "alreadyHaveAccount": "Đã có tài khoản?",
       "signIn": "Đăng nhập",
       "orSeparator": "HOẶC",
-      "signUpWithGoogle": "Đăng ký bằng Google"
+      "signUpWithGoogle": "Đăng ký bằng Google",
+      "introPanel": {
+        "title": "Vâng! Chúng ta đang tiến bộ!",
+        "subtitle": "từng phút & từng giây",
+        "description": "Bắt đầu hành trình học tập của bạn ngay hôm nay và trải nghiệm sức mạnh biến đổi của giáo dục cá nhân hóa.",
+        "registeredTutors": "4k+ Gia sư đã đăng ký",
+        "tutor1": "Gia sư 1",
+        "tutor2": "Gia sư 2",
+        "tutor3": "Gia sư 3",
+        "tutorName": "Phan Thị Hà",
+        "tutorSubject": "Cơ sở dữ liệu",
+        "tutorLocation": "Hà Nội, Việt Nam",
+        "tutorRating": "4.8",
+        "videoAlt": "Buổi học trực tuyến"
+      }
     },
     "otpVerification": {
       "title": "Kiểm tra email của bạn",
@@ -195,6 +209,19 @@
       "rating": "Đánh giá 4.9/5",
       "studentsCount": "15,000+ học viên",
       "certifiedTutors": "Gia sư được chứng nhận"
+    },
+    "introPanel": {
+      "registeredTutors": "4k+ Gia sư đã đăng ký",
+      "tutor1": "Gia sư 1",
+      "tutor2": "Gia sư 2",
+      "tutor3": "Gia sư 3",
+      "tutorName": "Phan Thị Hà",
+      "tutorSubject": "Cơ sở dữ liệu",
+      "tutorLocation": "Hà Nội, Việt Nam",
+      "tutorRating": "4.8",
+      "videoAlt": "Buổi học trực tuyến",
+      "rotatingText": "KHÁM PHÁ & TÌM GIA SƯ TỐT NHẤT",
+      "description": "Bắt đầu hành trình học tập của bạn ngay hôm nay và trải nghiệm sức mạnh biến đổi của giáo dục cá nhân hóa."
     }
   },
   "findTutors": {
@@ -321,37 +348,37 @@
     "items": [
       {
         "text": "Chúng tôi đã thử nghiệm nhiều nền tảng gia sư khác nhau, nhưng không có nền tảng nào có thể so sánh với Lernen. Đội ngũ gia sư chất lượng cao và quy trình đặt lịch vô cùng thuận tiện.",
-        "name": "Arlene M",
-        "title": "Agile District",
+        "name": "Nguyễn Thị Lan",
+        "title": "Phụ huynh",
         "companyName": "Agile District"
       },
       {
         "text": "Lernen đã tạo nên bước ngoặt lớn cho học sinh của chúng tôi. Sự đa dạng của đội ngũ gia sư cùng với tính tiện lợi trong việc đặt lịch học đã mang lại trải nghiệm tuyệt vời cho cả phụ huynh và học sinh. Điểm số của học sinh đã được cải thiện đáng kể kể từ khi chúng tôi sử dụng nền tảng này.",
-        "name": "Marvin M",
+        "name": "Trần Văn Minh",
         "title": "Chuyên gia gia sư",
         "companyName": "Learning Hub"
       },
       {
         "text": "Lernen là một nguồn tài nguyên tuyệt vời dành cho học sinh của chúng tôi. Sự đa dạng của đội ngũ gia sư đảm bảo rằng chúng tôi luôn tìm được sự kết hợp hoàn hảo cho từng học sinh.",
-        "name": "Devon L",
+        "name": "Lê Thị Hương",
         "title": "Giáo viên lớp học",
         "companyName": "Wisdom Academy"
       },
       {
         "text": "Lernen là một công cụ đáng tin cậy và hiệu quả cho tổ chức của chúng tôi, cung cấp đội ngũ gia sư giàu kiến thức và tận tâm.",
-        "name": "Ronald R",
+        "name": "Phạm Đức Anh",
         "title": "Tư vấn giáo dục",
         "companyName": "Xero Education"
       },
       {
         "text": "Chúng tôi vô cùng hài lòng với Lernen. Đội ngũ gia sư hàng đầu cùng nền tảng thân thiện với người dùng đã góp phần thúc đẩy đáng kể thành tích của học sinh.",
-        "name": "Courtney H",
+        "name": "Hoàng Thị Mai",
         "title": "Tư vấn học đường",
         "companyName": "Growth Learning"
       },
       {
         "text": "Trải nghiệm của chúng tôi với Lernen thực sự xuất sắc. Nền tảng thân thiện với người dùng và đội ngũ gia sư có trình độ chuyên môn cao.",
-        "name": "Darlene R",
+        "name": "Vũ Văn Đức",
         "title": "Tư vấn học thuật",
         "companyName": "EduTech Solutions"
       }

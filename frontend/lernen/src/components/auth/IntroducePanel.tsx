@@ -1,8 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { InteractiveImagePanel } from './InteractiveImagePanel';
 
 
 const IntroducePanel: React.FC = () => {
+    const { t } = useTranslation();
+    
     return (
         <div className="bg-[#065A46] text-white p-4 rounded-2xl flex flex-col justify-around relative">
             <div className="mb-8">
@@ -25,7 +28,7 @@ const IntroducePanel: React.FC = () => {
                         </defs>
                         <text className="text-[11px] uppercase tracking-[0.15em] fill-[#065A46] font-semibold">
                             <textPath href="#circlePath" startOffset="0%">
-                                EXPLORE & FIND THE BEST TUTOR •
+                                {t('home.introPanel.rotatingText')} •
                             </textPath>
                         </text>
                     </svg>
@@ -38,7 +41,7 @@ const IntroducePanel: React.FC = () => {
                     </div>
                 </div>
 
-                <p className="text-base text-gray-200 italic">Begin your learning journey today and experience the transformative power of personalized education.</p>
+                <p className="text-base text-gray-200 italic">{t('home.introPanel.description')}</p>
             </div>
         </div>
     );
