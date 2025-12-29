@@ -20,8 +20,8 @@ import java.util.UUID;
 })
 @Data
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"questions", "attempts"})
-@ToString(exclude = {"questions", "attempts"})
+@EqualsAndHashCode(callSuper = true, exclude = {"questions", "attempts", "creator"})
+@ToString(exclude = {"questions", "attempts", "creator"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Quiz extends BaseEntity {
@@ -83,6 +83,13 @@ public class Quiz extends BaseEntity {
     @OneToMany(mappedBy = "quiz")
     @Builder.Default
     private List<QuizAttempt> attempts = new ArrayList<>();
+    
+    /**
+     * Creator (Tutor) user info - for display purposes
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", insertable = false, updatable = false)
+    private User creator;
     
     public enum QuizStatus {
         DRAFT,

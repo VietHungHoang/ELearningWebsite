@@ -59,4 +59,12 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
            "AND (LOWER(q.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "OR LOWER(q.description) LIKE LOWER(CONCAT('%', :search, '%')))")
     List<Quiz> searchByClassId(@Param("classId") UUID classId, @Param("search") String search);
+    
+    /**
+     * Find all published (active status) quizzes
+     */
+    @Query("SELECT q FROM Quiz q LEFT JOIN FETCH q.creator " +
+           "WHERE q.status = 'ACTIVE' AND q.isActive = true " +
+           "ORDER BY q.publishedAt DESC")
+    List<Quiz> findAllPublishedQuizzesWithCreator();
 }

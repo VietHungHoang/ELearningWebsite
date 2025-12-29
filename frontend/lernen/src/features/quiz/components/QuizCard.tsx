@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 export interface Quiz {
     id: number;
     title: string;
-    courseTitle: string;
+    classTitle: string;
     tutor: { name: string; avatar: string };
     totalQuestions: number;
     timeLimitMinutes: number;
@@ -54,7 +54,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
             case 'not_started':
             default:
                 return (
-                     <button onClick={() => navigate('/quiz/take')} className="w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                    <button onClick={() => navigate('/quiz/take')} className="w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
                         Start Quiz
                     </button>
                 );
@@ -67,7 +67,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
                 <img src={quiz.tutor.avatar} alt={quiz.tutor.name} className="w-10 h-10 rounded-full" />
                 <div>
                     <p className="text-sm font-semibold text-gray-800">{quiz.tutor.name}</p>
-                    <p className="text-xs text-gray-500">{quiz.courseTitle}</p>
+                    <p className="text-xs text-gray-500">{quiz.classTitle}</p>
                 </div>
             </div>
 

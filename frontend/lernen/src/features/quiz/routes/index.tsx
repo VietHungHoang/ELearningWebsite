@@ -9,11 +9,11 @@ const quizRoutes: RouteObject[] = [
         element: <CreateQuizPage />,
     },
     {
-        path: '/quiz/take',
+        path: '/quiz/take/:quizId',
         element: <QuizTakingPage />,
     },
     {
-        path: '/quiz/result',
+        path: '/quiz/result/:attemptId',
         element: <QuizResultPage />,
     },
 ];

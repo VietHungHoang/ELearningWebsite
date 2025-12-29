@@ -12,7 +12,8 @@ jwt:
 
 keycloak:
   auth-server-url: http://localhost:8080
-  realm: elearning
+  public-url: http://localhost:8080
+  realm: lernen
   resource: auth-service
   client-secret: your-client-secret
   admin-username: admin

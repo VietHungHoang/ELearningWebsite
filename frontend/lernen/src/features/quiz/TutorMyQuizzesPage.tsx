@@ -1,16 +1,18 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch, HiPlus, HiPencil, HiEye, HiChartBar, HiPlay } from 'react-icons/hi';
 import { IoHelpCircleOutline, IoTimeOutline, IoPeopleOutline, IoCalendarOutline, IoEllipsisVertical, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import { useBreadcrumb } from '../dashboard/context/BreadcrumbContext';
 import { useAuth } from '../../context/AuthContext';
+import quizService from '../../services/quizService';
+import type { QuizSummary, StudentQuizSummary } from '../../types/quiz';
 
-// Types - unified for both roles
+// Unified Quiz type for display (maps both tutor and student responses)
 interface Quiz {
     id: string;
     title: string;
-    courseTitle: string;
+    classTitle: string; // Will be empty for now until class integration
     courseId: string;
     totalQuestions: number;
     timeLimitMinutes: number;
@@ -30,164 +32,46 @@ interface Quiz {
     assignedAt?: string;
     questionsAnswered?: number;
     timeRemaining?: number;
+    currentAttemptId?: string;
 }
 
-// Mock data for Tutor
-const mockTutorQuizzes: Quiz[] = [
-    {
-        id: '1',
-        title: 'Final Exam: Advanced Calculus Calculus Calculus',
-        courseTitle: 'Advanced Calculus II s',
-        courseId: 'course-1',
-        totalQuestions: 25,
-        timeLimitMinutes: 60,
-        createdAt: '2025-10-01T10:00:00Z',
-        lastModified: '2025-10-15T14:30:00Z',
-        attempts: 45,
-        averageScore: 88,
-        highestScore: 100,
-        status: 'active',
-    },
-    {
-        id: '2',
-        title: 'Mid-term: Physics Fundamentals',
-        courseTitle: 'Physics 101',
-        courseId: 'course-2',
-        totalQuestions: 20,
-        timeLimitMinutes: 45,
-        createdAt: '2025-09-15T09:00:00Z',
-        lastModified: '2025-09-20T11:15:00Z',
-        attempts: 32,
-        averageScore: 82,
-        highestScore: 98,
-        status: 'active',
-    },
-    {
-        id: '3',
-        title: 'Weekly Quiz: Literature Analysis Analysis',
-        courseTitle: 'English Literature',
-        courseId: 'course-3',
-        totalQuestions: 15,
-        timeLimitMinutes: 30,
-        createdAt: '2025-11-01T08:30:00Z',
-        lastModified: '2025-11-01T08:30:00Z',
-        attempts: 0,
-        status: 'draft',
-    },
-    {
-        id: '4',
-        title: 'Practice Quiz: Basic Algebra',
-        courseTitle: 'Mathematics Fundamentals',
-        courseId: 'course-4',
-        totalQuestions: 10,
-        timeLimitMinutes: 20,
-        createdAt: '2025-08-20T12:00:00Z',
-        lastModified: '2025-08-25T16:45:00Z',
-        attempts: 67,
-        averageScore: 91,
-        highestScore: 100,
-        status: 'active',
-    },
-    {
-        id: '5',
-        title: 'Final Assessment: Chemistry Lab',
-        courseTitle: 'Chemistry 10 sv svsv dvsv s s1',
-        courseId: 'course-5',
-        totalQuestions: 30,
-        timeLimitMinutes: 90,
-        createdAt: '2025-07-10T14:00:00Z',
-        lastModified: '2025-07-15T10:30:00Z',
-        attempts: 28,
-        averageScore: 85,
-        highestScore: 97,
-        status: 'archived',
-    },
-];
+// Map backend QuizSummary to display Quiz type (Tutor)
+const mapTutorQuiz = (q: QuizSummary): Quiz => ({
+    id: q.id,
+    title: q.title,
+    classTitle: '', // TODO: integrate with class service
+    courseId: q.classId,
+    totalQuestions: q.totalQuestions,
+    timeLimitMinutes: q.timeLimitMinutes,
+    createdAt: q.createdAt,
+    lastModified: q.updatedAt,
+    attempts: q.totalAttempts,
+    averageScore: q.averagePercentage,
+    highestScore: q.highestScore,
+    status: q.status.toLowerCase() as 'active' | 'draft' | 'archived',
+});
 
-// Mock data for Student
-const mockStudentQuizzes: Quiz[] = [
-    {
-        id: '1',
-        title: 'Final Exam: Advanced Calculus',
-        courseTitle: 'Advanced Calculus II',
-        courseId: 'course-1',
-        totalQuestions: 25,
-        timeLimitMinutes: 60,
-        createdAt: '2025-11-01T09:00:00Z',
-        lastModified: '2025-11-15T14:30:00Z',
-        status: 'completed',
-        tutorName: 'Dr. Sarah Johnson',
-        tutorAvatar: 'https://picsum.photos/seed/sarah/48/48',
-        score: 22,
-        maxScore: 25,
-        completedAt: '2025-11-15T14:30:00Z',
-        assignedAt: '2025-11-01T09:00:00Z',
-    },
-    {
-        id: '2',
-        title: 'Mid-term: Physics Fundamentals',
-        courseTitle: 'Physics 101',
-        courseId: 'course-2',
-        totalQuestions: 20,
-        timeLimitMinutes: 45,
-        createdAt: '2025-10-15T09:00:00Z',
-        lastModified: '2025-10-28T10:15:00Z',
-        status: 'completed',
-        tutorName: 'Prof. Michael Chen',
-        tutorAvatar: 'https://picsum.photos/seed/michael/48/48',
-        score: 18,
-        maxScore: 20,
-        completedAt: '2025-10-28T10:15:00Z',
-        assignedAt: '2025-10-15T09:00:00Z',
-    },
-    {
-        id: '3',
-        title: 'Weekly Quiz: Literature Analysis',
-        courseTitle: 'English Literature',
-        courseId: 'course-3',
-        totalQuestions: 15,
-        timeLimitMinutes: 30,
-        createdAt: '2025-11-20T09:00:00Z',
-        lastModified: '2025-11-20T09:00:00Z',
-        status: 'in_progress',
-        tutorName: 'Ms. Emily Davis',
-        tutorAvatar: 'https://picsum.photos/seed/emily/48/48',
-        questionsAnswered: 8,
-        timeRemaining: 15,
-        assignedAt: '2025-11-20T09:00:00Z',
-    },
-    {
-        id: '4',
-        title: 'Practice Quiz: Basic Algebra',
-        courseTitle: 'Mathematics Fundamentals',
-        courseId: 'course-4',
-        totalQuestions: 10,
-        timeLimitMinutes: 20,
-        createdAt: '2025-11-25T10:00:00Z',
-        lastModified: '2025-11-25T10:00:00Z',
-        status: 'not_started',
-        tutorName: 'Mr. David Wilson',
-        tutorAvatar: 'https://picsum.photos/seed/david/48/48',
-        assignedAt: '2025-11-25T10:00:00Z',
-    },
-    {
-        id: '5',
-        title: 'Final Assessment: Chemistry Lab',
-        courseTitle: 'Chemistry 101',
-        courseId: 'course-5',
-        totalQuestions: 30,
-        timeLimitMinutes: 90,
-        createdAt: '2025-10-20T09:00:00Z',
-        lastModified: '2025-11-01T16:45:00Z',
-        status: 'completed',
-        tutorName: 'Dr. Lisa Brown',
-        tutorAvatar: 'https://picsum.photos/seed/lisa/48/48',
-        score: 27,
-        maxScore: 30,
-        completedAt: '2025-11-01T16:45:00Z',
-        assignedAt: '2025-10-20T09:00:00Z',
-    },
-];
+// Map backend StudentQuizSummary to display Quiz type (Student)
+const mapStudentQuiz = (q: StudentQuizSummary): Quiz => ({
+    id: q.id,
+    title: q.title,
+    classTitle: '', // TODO: integrate with class service
+    courseId: '',
+    totalQuestions: q.totalQuestions,
+    timeLimitMinutes: q.timeLimitMinutes,
+    createdAt: q.createdAt,
+    lastModified: q.createdAt,
+    status: q.studentStatus.toLowerCase().replace('_', '_') as 'completed' | 'in_progress' | 'not_started',
+    tutorName: q.tutorName,
+    tutorAvatar: q.tutorAvatar,
+    score: q.score,
+    maxScore: q.maxScore,
+    completedAt: q.completedAt,
+    assignedAt: q.assignedAt,
+    questionsAnswered: q.questionsAnswered,
+    timeRemaining: q.timeRemainingSeconds ? Math.floor(q.timeRemainingSeconds / 60) : undefined,
+    currentAttemptId: q.currentAttemptId,
+});
 
 type TutorFilterTab = 'all' | 'active' | 'draft';
 type StudentFilterTab = 'all' | 'completed' | 'in_progress' | 'not_started';
@@ -207,7 +91,38 @@ const MyQuizzesPage: React.FC = () => {
     // State based on role
     const [tutorActiveTab, setTutorActiveTab] = useState<TutorFilterTab>('all');
     const [studentActiveTab, setStudentActiveTab] = useState<StudentFilterTab>('all');
-    const [quizzes] = useState<Quiz[]>(isTutor ? mockTutorQuizzes : mockStudentQuizzes);
+
+    // API data state
+    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch quizzes based on role
+    const fetchQuizzes = useCallback(async () => {
+        if (!state.user?.id) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            if (isTutor) {
+                const data = await quizService.getQuizzesByCreator(state.user.id);
+                setQuizzes(data.map(mapTutorQuiz));
+            } else if (isStudent) {
+                const data = await quizService.getStudentQuizzes();
+                setQuizzes(data.map(mapStudentQuiz));
+            }
+        } catch (err) {
+            console.error('Failed to fetch quizzes:', err);
+            setError('Failed to load quizzes. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }, [state.user?.id, isTutor, isStudent]);
+
+    useEffect(() => {
+        fetchQuizzes();
+    }, [fetchQuizzes]);
 
     useEffect(() => {
         setBreadcrumb([
@@ -240,7 +155,7 @@ const MyQuizzesPage: React.FC = () => {
         if (searchTerm) {
             filtered = filtered.filter(quiz =>
                 quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                quiz.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                quiz.classTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (quiz.tutorName && quiz.tutorName.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
@@ -298,7 +213,7 @@ const MyQuizzesPage: React.FC = () => {
             active: t('dashboard.tutor.myQuizzes.tabs.active'),
             draft: t('dashboard.tutor.myQuizzes.tabs.draft'),
         };
-        
+
         return (
             <button
                 onClick={() => setTutorActiveTab(tab)}
@@ -471,13 +386,13 @@ const MyQuizzesPage: React.FC = () => {
                                 >
                                     <IoEllipsisVertical className="w-4 h-4 flex-shrink-0" />
                                 </button>
-                                
+
                                 {/* Dropdown menu based on role */}
                                 {isMenuOpen && (isTutor ? renderTutorMenu() : renderStudentMenu())}
                             </div>
                         )}
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{quiz.courseTitle}</p>
+                    <p className="text-sm text-gray-600 mb-3">{quiz.classTitle}</p>
                 </div>
 
                 {/* Quiz Details */}
@@ -496,7 +411,7 @@ const MyQuizzesPage: React.FC = () => {
                         </span>
                         <span className="text-gray-600 font-medium">{quiz.timeLimitMinutes} min</span>
                     </div>
-                    
+
                     {/* Tutor-specific details */}
                     {isTutor && (
                         <>
@@ -561,15 +476,14 @@ const MyQuizzesPage: React.FC = () => {
                                 navigate('/quiz/result');
                             }
                         }}
-                        className={`w-full mt-auto pt-2 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                            quiz.status === 'completed'
-                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                : 'bg-[#065A46] text-white hover:bg-[#054d3b]'
-                        }`}
+                        className={`w-full mt-auto pt-2 py-2 rounded-lg text-xs font-semibold transition-colors ${quiz.status === 'completed'
+                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-[#065A46] text-white hover:bg-[#054d3b]'
+                            }`}
                     >
                         {quiz.status === 'completed' ? t('dashboard.student.myQuizzes.actions.viewResults') :
-                         quiz.status === 'in_progress' ? t('dashboard.student.myQuizzes.actions.continueQuiz') :
-                         t('dashboard.student.myQuizzes.actions.startQuiz')}
+                            quiz.status === 'in_progress' ? t('dashboard.student.myQuizzes.actions.continueQuiz') :
+                                t('dashboard.student.myQuizzes.actions.startQuiz')}
                     </button>
                 )}
             </div>
@@ -638,19 +552,43 @@ const MyQuizzesPage: React.FC = () => {
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredQuizzes.map((quiz) => (
-                    <QuizCard key={quiz.id} quiz={quiz} />
-                ))}
-            </div>
+            {/* Loading State */}
+            {loading && (
+                <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459]"></div>
+                    <span className="ml-3 text-gray-500">Loading quizzes...</span>
+                </div>
+            )}
 
-            {filteredQuizzes.length === 0 && (
+            {/* Error State */}
+            {error && !loading && (
+                <div className="text-center py-20">
+                    <p className="text-red-500 mb-4">{error}</p>
+                    <button
+                        onClick={fetchQuizzes}
+                        className="text-[#0b6459] hover:underline"
+                    >
+                        Try again
+                    </button>
+                </div>
+            )}
+
+            {/* Quiz Grid */}
+            {!loading && !error && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredQuizzes.map((quiz) => (
+                        <QuizCard key={quiz.id} quiz={quiz} />
+                    ))}
+                </div>
+            )}
+
+            {!loading && !error && filteredQuizzes.length === 0 && (
                 <div className="text-center py-20">
                     <h3 className="text-lg font-bold text-gray-800 mb-2">
                         {isTutor ? t('dashboard.tutor.myQuizzes.empty.title') : t('dashboard.student.myQuizzes.empty.title')}
                     </h3>
                     <p className="text-gray-500">
-                        {searchTerm 
+                        {searchTerm
                             ? (isTutor ? t('dashboard.tutor.myQuizzes.empty.descriptionSearch') : t('dashboard.student.myQuizzes.empty.descriptionSearch'))
                             : (isTutor ? t('dashboard.tutor.myQuizzes.empty.description') : t('dashboard.student.myQuizzes.empty.description'))
                         }

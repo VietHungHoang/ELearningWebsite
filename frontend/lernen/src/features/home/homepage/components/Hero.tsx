@@ -76,7 +76,7 @@ const Hero: React.FC = () => {
 
         {/* Right Column */}
         <div className="relative flex items-center justify-center lg:justify-start">
-          <div className="transform animate-fade-in-up w-full max-w-md" style={{ animationDelay: '0.3s' }}>
+          <div className="transform animate-fade-in-up w-full max-w-[510px] lg:-ml-8" style={{ animationDelay: '0.3s' }}>
             <IntroducePanel />
           </div>
         </div>

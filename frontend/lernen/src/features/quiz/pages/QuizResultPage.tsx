@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    IoCheckmarkCircle, 
-    IoCloseCircle, 
+import {
+    IoCheckmarkCircle,
+    IoCloseCircle,
     IoCheckmarkOutline,
     IoCloseOutline,
     IoChevronDown,
@@ -21,7 +21,7 @@ import QuizLayout from '../components/QuizLayout';
 // Mock Data
 const quizResult = {
     quizTitle: 'Chapter 1 - Introduction to Physics',
-    courseTitle: 'Physics 101',
+    classTitle: 'Physics 101',
     score: 18,
     totalQuestions: 20,
     passingScore: 70,
@@ -123,8 +123,8 @@ const CircularProgress: React.FC<{ percentage: number; isPassed: boolean; label:
 };
 
 // Question Card Component - Compact
-const QuestionCard: React.FC<{ 
-    question: typeof quizResult.questions[0]; 
+const QuestionCard: React.FC<{
+    question: typeof quizResult.questions[0];
     index: number;
     isExpanded: boolean;
     onToggle: () => void;
@@ -141,16 +141,14 @@ const QuestionCard: React.FC<{
     const [showExplanation, setShowExplanation] = useState(false);
 
     return (
-        <div className={`bg-white rounded-xl border-2 overflow-hidden transition-all shadow-sm hover:shadow-md ${
-            isCorrect ? 'border-[#065A46]/40' : 'border-[#b91c1c]/40'
-        }`}>
+        <div className={`bg-white rounded-xl border-2 overflow-hidden transition-all shadow-sm hover:shadow-md ${isCorrect ? 'border-[#065A46]/40' : 'border-[#b91c1c]/40'
+            }`}>
             <button
                 onClick={onToggle}
                 className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-gray-50 transition-colors"
             >
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    isCorrect ? 'bg-[#065A46]/10' : 'bg-[#b91c1c]/10'
-                }`}>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${isCorrect ? 'bg-[#065A46]/10' : 'bg-[#b91c1c]/10'
+                    }`}>
                     {isCorrect ? (
                         <IoCheckmarkCircle className="w-6 h-6 text-[#065A46]" />
                     ) : (
@@ -160,9 +158,8 @@ const QuestionCard: React.FC<{
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5 mb-1">
                         <span className="text-xs font-semibold text-gray-500">Q{index + 1}</span>
-                        <span className={`text-xs px-2 py-1 rounded-md font-semibold ${
-                            isCorrect ? 'bg-[#065A46]/10 text-[#065A46]' : 'bg-[#b91c1c]/10 text-[#b91c1c]'
-                        }`}>
+                        <span className={`text-xs px-2 py-1 rounded-md font-semibold ${isCorrect ? 'bg-[#065A46]/10 text-[#065A46]' : 'bg-[#b91c1c]/10 text-[#b91c1c]'
+                            }`}>
                             {isCorrect ? translations.correct : translations.incorrect}
                         </span>
                     </div>
@@ -177,9 +174,8 @@ const QuestionCard: React.FC<{
                 </div>
             </button>
 
-            <div className={`overflow-hidden transition-all duration-300 ${
-                isExpanded ? 'max-h-[700px]' : 'max-h-0'
-            }`}>
+            <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[700px]' : 'max-h-0'
+                }`}>
                 <div className="px-5 pb-5 space-y-3 border-t border-gray-200 pt-4">
                     {question.options.map((option, optionIndex) => {
                         const isCorrectOption = option === question.correctAnswer;
@@ -224,7 +220,7 @@ const QuestionCard: React.FC<{
                             </div>
                         );
                     })}
-                    
+
                     {/* Explanation Dropdown */}
                     {question.explanation && (
                         <div className="mt-4 pt-4 border-t border-gray-200">
@@ -245,12 +241,11 @@ const QuestionCard: React.FC<{
                                     </>
                                 )}
                                 <HiChevronDown
-                                    className={`w-4 h-4 transition-transform ${
-                                        showExplanation ? 'rotate-180' : ''
-                                    }`}
+                                    className={`w-4 h-4 transition-transform ${showExplanation ? 'rotate-180' : ''
+                                        }`}
                                 />
                             </button>
-                            
+
                             {showExplanation && (
                                 <div className="mt-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <p className="text-sm text-gray-700 leading-relaxed">{question.explanation}</p>
@@ -316,192 +311,188 @@ const QuizResultPage: React.FC = () => {
     return (
         <QuizLayout showBackButton={true} title="Quiz Result">
             <div className="h-[calc(100vh-140px)] flex overflow-hidden bg-gray-50">
-            {/* Confetti Effect */}
-            {showConfetti && (
-                <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-                    {[...Array(30)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute animate-confetti"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                animationDelay: `${Math.random() * 2}s`,
-                                backgroundColor: ['#065A46', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'][Math.floor(Math.random() * 5)],
-                                width: `${Math.random() * 8 + 4}px`,
-                                height: `${Math.random() * 8 + 4}px`,
-                                borderRadius: Math.random() > 0.5 ? '50%' : '0',
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
-
-            {/* Left Sidebar - Score & Stats */}
-            <div className="w-72 flex-shrink-0 border-r border-gray-200 bg-white p-5 hidden lg:flex flex-col">
-                {/* Score Card */}
-                <div className={`rounded-2xl p-5 mb-5 text-center shadow-lg ${
-                    isPassed ? 'bg-gradient-to-br from-[#065A46] to-[#0b6459]' : 'bg-gradient-to-br from-red-600 to-red-700'
-                }`}>
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        {isPassed && <IoTrophyOutline className="w-6 h-6 text-yellow-300" />}
-                        <span className={`text-base font-bold ${isPassed ? 'text-yellow-300' : 'text-white'}`}>
-                            {isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}
-                        </span>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 mb-3 shadow-md">
-                        <CircularProgress percentage={percentage} isPassed={isPassed} label={t('quizResult.score')} />
-                    </div>
-                    <p className="text-white text-sm font-medium">
-                        {quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}
-                    </p>
-                </div>
-
-                {/* Quiz Info */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200 mb-5 shadow-sm">
-                    <h2 className="font-semibold text-gray-900 text-base mb-1.5 line-clamp-2">{quizResult.quizTitle}</h2>
-                    <p className="text-sm text-gray-500">{quizResult.courseTitle}</p>
-                </div>
-
-                {/* Stats */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-3 h-3 rounded-full bg-[#065A46]"></div>
-                            <span className="text-sm text-gray-700 font-medium">{t('quizResult.correct')}</span>
-                        </div>
-                        <span className="font-bold text-base text-[#065A46]">{correctCount}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-3 h-3 rounded-full bg-[#b91c1c]"></div>
-                            <span className="text-sm text-gray-700 font-medium">{t('quizResult.incorrect')}</span>
-                        </div>
-                        <span className="font-bold text-base text-[#b91c1c]">{incorrectCount}</span>
-                    </div>
-                    <div className="pt-3 border-t border-gray-200 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <IoTimeOutline className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-700 font-medium">{t('quizResult.time')}</span>
-                            </div>
-                            <span className="font-semibold text-sm text-gray-900">{quizResult.timeTaken}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-700 font-medium">{t('quizResult.passScore')}</span>
-                            <span className="font-semibold text-sm text-gray-900">{quizResult.passingScore}%</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="mt-auto space-y-3 pt-4">
-                    <button 
-                        onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
-                        className="w-full px-4 py-3 bg-[#065A46] text-white text-sm font-semibold rounded-xl hover:bg-[#054d3b] transition-all flex items-center justify-center gap-2 shadow-md"
-                    >
-                        <IoRefreshOutline className="w-5 h-5" />
-                        {t('quizResult.retakeQuiz')}
-                    </button>
-                    <button 
-                        onClick={() => navigate(quizzesPath)} 
-                        className="w-full px-4 py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
-                    >
-                        <IoArrowBack className="w-5 h-5" />
-                        {t('quizResult.backToQuizzes')}
-                    </button>
-                </div>
-            </div>
-
-            {/* Main Content - Question Review */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-                {/* Header */}
-                <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-white">
-                    <div>
-                        <h1 className="text-xl font-bold text-gray-900">{t('quizResult.reviewAnswers')}</h1>
-                        <p className="text-sm text-gray-500 mt-1">{quizResult.dateCompleted}</p>
-                    </div>
-                    
-                    {/* Filter Tabs */}
-                    <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
-                        <button
-                            onClick={() => setFilter('all')}
-                            className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
-                                filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            {t('quizResult.filter.all')} ({quizResult.questions.length})
-                        </button>
-                        <button
-                            onClick={() => setFilter('correct')}
-                            className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
-                                filter === 'correct' ? 'bg-white text-[#065A46] shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            ✓ {t('quizResult.filter.correct')} ({correctCount})
-                        </button>
-                        <button
-                            onClick={() => setFilter('incorrect')}
-                            className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${
-                                filter === 'incorrect' ? 'bg-white text-[#b91c1c] shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            ✗ {t('quizResult.filter.incorrect')} ({incorrectCount})
-                        </button>
-                    </div>
-                </div>
-
-                {/* Mobile Stats Bar */}
-                <div className={`lg:hidden flex-shrink-0 flex items-center justify-between px-5 py-3 ${isPassed ? 'bg-gradient-to-r from-[#065A46] to-[#0b6459]' : 'bg-gradient-to-r from-red-600 to-red-700'}`}>
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md">
-                            <span className={`text-xl font-bold ${isPassed ? 'text-[#065A46]' : 'text-[#b91c1c]'}`}>{percentage}%</span>
-                        </div>
-                        <div className="text-white">
-                            <p className="text-sm font-bold">{isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}</p>
-                            <p className="text-xs text-white/80">{quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
-                            className="p-2.5 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all"
-                        >
-                            <IoRefreshOutline className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Questions List */}
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-                    {filteredQuestions.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                            <IoFilterOutline className="w-16 h-16 mb-3 text-gray-300" />
-                            <p className="text-base font-medium">{t('quizResult.noQuestionsMatch')}</p>
-                        </div>
-                    ) : (
-                        filteredQuestions.map((question) => (
-                            <QuestionCard
-                                key={question.id}
-                                question={question}
-                                index={quizResult.questions.findIndex(q => q.id === question.id)}
-                                isExpanded={expandedQuestions.has(question.id)}
-                                onToggle={() => toggleQuestion(question.id)}
-                                translations={{
-                                    correct: t('quizResult.correct'),
-                                    incorrect: t('quizResult.incorrect'),
-                                    yourAnswer: t('quizResult.yourAnswer'),
-                                    correctAnswer: t('quizResult.correctAnswer'),
-                                    explanation: t('quizResult.explanation'),
-                                    hideExplanation: t('quizResult.hideExplanation')
+                {/* Confetti Effect */}
+                {showConfetti && (
+                    <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+                        {[...Array(30)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="absolute animate-confetti"
+                                style={{
+                                    left: `${Math.random() * 100}%`,
+                                    animationDelay: `${Math.random() * 2}s`,
+                                    backgroundColor: ['#065A46', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'][Math.floor(Math.random() * 5)],
+                                    width: `${Math.random() * 8 + 4}px`,
+                                    height: `${Math.random() * 8 + 4}px`,
+                                    borderRadius: Math.random() > 0.5 ? '50%' : '0',
                                 }}
                             />
-                        ))
-                    )}
-                </div>
-            </div>
+                        ))}
+                    </div>
+                )}
 
-            {/* Custom Styles */}
-            <style>{`
+                {/* Left Sidebar - Score & Stats */}
+                <div className="w-72 flex-shrink-0 border-r border-gray-200 bg-white p-5 hidden lg:flex flex-col">
+                    {/* Score Card */}
+                    <div className={`rounded-2xl p-5 mb-5 text-center shadow-lg ${isPassed ? 'bg-gradient-to-br from-[#065A46] to-[#0b6459]' : 'bg-gradient-to-br from-red-600 to-red-700'
+                        }`}>
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                            {isPassed && <IoTrophyOutline className="w-6 h-6 text-yellow-300" />}
+                            <span className={`text-base font-bold ${isPassed ? 'text-yellow-300' : 'text-white'}`}>
+                                {isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}
+                            </span>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 mb-3 shadow-md">
+                            <CircularProgress percentage={percentage} isPassed={isPassed} label={t('quizResult.score')} />
+                        </div>
+                        <p className="text-white text-sm font-medium">
+                            {quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}
+                        </p>
+                    </div>
+
+                    {/* Quiz Info */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 mb-5 shadow-sm">
+                        <h2 className="font-semibold text-gray-900 text-base mb-1.5 line-clamp-2">{quizResult.quizTitle}</h2>
+                        <p className="text-sm text-gray-500">{quizResult.classTitle}</p>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3 shadow-sm">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-3 h-3 rounded-full bg-[#065A46]"></div>
+                                <span className="text-sm text-gray-700 font-medium">{t('quizResult.correct')}</span>
+                            </div>
+                            <span className="font-bold text-base text-[#065A46]">{correctCount}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-3 h-3 rounded-full bg-[#b91c1c]"></div>
+                                <span className="text-sm text-gray-700 font-medium">{t('quizResult.incorrect')}</span>
+                            </div>
+                            <span className="font-bold text-base text-[#b91c1c]">{incorrectCount}</span>
+                        </div>
+                        <div className="pt-3 border-t border-gray-200 space-y-2.5">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <IoTimeOutline className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm text-gray-700 font-medium">{t('quizResult.time')}</span>
+                                </div>
+                                <span className="font-semibold text-sm text-gray-900">{quizResult.timeTaken}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-700 font-medium">{t('quizResult.passScore')}</span>
+                                <span className="font-semibold text-sm text-gray-900">{quizResult.passingScore}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-auto space-y-3 pt-4">
+                        <button
+                            onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
+                            className="w-full px-4 py-3 bg-[#065A46] text-white text-sm font-semibold rounded-xl hover:bg-[#054d3b] transition-all flex items-center justify-center gap-2 shadow-md"
+                        >
+                            <IoRefreshOutline className="w-5 h-5" />
+                            {t('quizResult.retakeQuiz')}
+                        </button>
+                        <button
+                            onClick={() => navigate(quizzesPath)}
+                            className="w-full px-4 py-3 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+                        >
+                            <IoArrowBack className="w-5 h-5" />
+                            {t('quizResult.backToQuizzes')}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Main Content - Question Review */}
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+                    {/* Header */}
+                    <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-white">
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900">{t('quizResult.reviewAnswers')}</h1>
+                            <p className="text-sm text-gray-500 mt-1">{quizResult.dateCompleted}</p>
+                        </div>
+
+                        {/* Filter Tabs */}
+                        <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                            <button
+                                onClick={() => setFilter('all')}
+                                className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                {t('quizResult.filter.all')} ({quizResult.questions.length})
+                            </button>
+                            <button
+                                onClick={() => setFilter('correct')}
+                                className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${filter === 'correct' ? 'bg-white text-[#065A46] shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                ✓ {t('quizResult.filter.correct')} ({correctCount})
+                            </button>
+                            <button
+                                onClick={() => setFilter('incorrect')}
+                                className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${filter === 'incorrect' ? 'bg-white text-[#b91c1c] shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                            >
+                                ✗ {t('quizResult.filter.incorrect')} ({incorrectCount})
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Mobile Stats Bar */}
+                    <div className={`lg:hidden flex-shrink-0 flex items-center justify-between px-5 py-3 ${isPassed ? 'bg-gradient-to-r from-[#065A46] to-[#0b6459]' : 'bg-gradient-to-r from-red-600 to-red-700'}`}>
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md">
+                                <span className={`text-xl font-bold ${isPassed ? 'text-[#065A46]' : 'text-[#b91c1c]'}`}>{percentage}%</span>
+                            </div>
+                            <div className="text-white">
+                                <p className="text-sm font-bold">{isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}</p>
+                                <p className="text-xs text-white/80">{quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
+                                className="p-2.5 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all"
+                            >
+                                <IoRefreshOutline className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Questions List */}
+                    <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                        {filteredQuestions.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                                <IoFilterOutline className="w-16 h-16 mb-3 text-gray-300" />
+                                <p className="text-base font-medium">{t('quizResult.noQuestionsMatch')}</p>
+                            </div>
+                        ) : (
+                            filteredQuestions.map((question) => (
+                                <QuestionCard
+                                    key={question.id}
+                                    question={question}
+                                    index={quizResult.questions.findIndex(q => q.id === question.id)}
+                                    isExpanded={expandedQuestions.has(question.id)}
+                                    onToggle={() => toggleQuestion(question.id)}
+                                    translations={{
+                                        correct: t('quizResult.correct'),
+                                        incorrect: t('quizResult.incorrect'),
+                                        yourAnswer: t('quizResult.yourAnswer'),
+                                        correctAnswer: t('quizResult.correctAnswer'),
+                                        explanation: t('quizResult.explanation'),
+                                        hideExplanation: t('quizResult.hideExplanation')
+                                    }}
+                                />
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Custom Styles */}
+                <style>{`
                 @keyframes confetti-fall {
                     0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
                     100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
