@@ -8,7 +8,7 @@ import { useAuth } from '../../../../context/AuthContext';
 interface QuizAttempt {
     id: string;
     quizTitle: string;
-    courseTitle: string;
+    classTitle: string;
     tutorName: string;
     tutorAvatar: string;
     totalQuestions: number;
@@ -27,7 +27,7 @@ const mockQuizAttempts: QuizAttempt[] = [
     {
         id: '1',
         quizTitle: 'Final Exam: Advanced Calculus',
-        courseTitle: 'Advanced Calculus II',
+        classTitle: 'Advanced Calculus II',
         tutorName: 'Dr. Sarah Johnson',
         tutorAvatar: 'https://picsum.photos/seed/sarah/48/48',
         totalQuestions: 25,
@@ -41,7 +41,7 @@ const mockQuizAttempts: QuizAttempt[] = [
     {
         id: '2',
         quizTitle: 'Mid-term: Physics Fundamentals',
-        courseTitle: 'Physics 101',
+        classTitle: 'Physics 101',
         tutorName: 'Prof. Michael Chen',
         tutorAvatar: 'https://picsum.photos/seed/michael/48/48',
         totalQuestions: 20,
@@ -55,7 +55,7 @@ const mockQuizAttempts: QuizAttempt[] = [
     {
         id: '3',
         quizTitle: 'Weekly Quiz: Literature Analysis',
-        courseTitle: 'English Literature',
+        classTitle: 'English Literature',
         tutorName: 'Ms. Emily Davis',
         tutorAvatar: 'https://picsum.photos/seed/emily/48/48',
         totalQuestions: 15,
@@ -68,7 +68,7 @@ const mockQuizAttempts: QuizAttempt[] = [
     {
         id: '4',
         quizTitle: 'Practice Quiz: Basic Algebra',
-        courseTitle: 'Mathematics Fundamentals',
+        classTitle: 'Mathematics Fundamentals',
         tutorName: 'Mr. David Wilson',
         tutorAvatar: 'https://picsum.photos/seed/david/48/48',
         totalQuestions: 10,
@@ -79,7 +79,7 @@ const mockQuizAttempts: QuizAttempt[] = [
     {
         id: '5',
         quizTitle: 'Final Assessment: Chemistry Lab',
-        courseTitle: 'Chemistry 101',
+        classTitle: 'Chemistry 101',
         tutorName: 'Dr. Lisa Brown',
         tutorAvatar: 'https://picsum.photos/seed/lisa/48/48',
         totalQuestions: 30,
@@ -118,7 +118,7 @@ const MyQuizzesPage: React.FC = () => {
         if (searchTerm) {
             filtered = filtered.filter(quiz =>
                 quiz.quizTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                quiz.courseTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                quiz.classTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 quiz.tutorName.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
@@ -163,11 +163,10 @@ const MyQuizzesPage: React.FC = () => {
     const TabButton: React.FC<{ label: FilterTab }> = ({ label }) => (
         <button
             onClick={() => setActiveTab(label)}
-            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                activeTab === label
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-500 hover:bg-white/50'
-            }`}
+            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${activeTab === label
+                ? 'bg-white text-gray-800 shadow-sm'
+                : 'text-gray-500 hover:bg-white/50'
+                }`}
         >
             {label}
         </button>
@@ -220,7 +219,7 @@ const MyQuizzesPage: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm text-gray-600">{quiz.courseTitle}</p>
+                                    <p className="text-sm text-gray-600">{quiz.classTitle}</p>
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
@@ -259,15 +258,14 @@ const MyQuizzesPage: React.FC = () => {
                                     navigate('/quiz/result');
                                 }
                             }}
-                            className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${
-                                quiz.status === 'completed'
-                                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    : 'bg-[#0b6459] text-white hover:bg-[#084c43]'
-                            }`}
+                            className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${quiz.status === 'completed'
+                                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                : 'bg-[#0b6459] text-white hover:bg-[#084c43]'
+                                }`}
                         >
                             {quiz.status === 'completed' ? 'View Results' :
-                             quiz.status === 'in_progress' ? 'Continue Quiz' :
-                             'Start Quiz'}
+                                quiz.status === 'in_progress' ? 'Continue Quiz' :
+                                    'Start Quiz'}
                         </button>
 
                         {quiz.completedAt ? (

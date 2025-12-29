@@ -32,6 +32,14 @@ public class QuizSummaryResponse {
     private Integer maxAttempts;
     private Long totalAttempts;
     private Double averagePercentage;
+    
+    // Creator info (from User entity)
+    private String creatorName;
+    private String creatorAvatar;
+    
+    // Statistics
+    private Double highestScore;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

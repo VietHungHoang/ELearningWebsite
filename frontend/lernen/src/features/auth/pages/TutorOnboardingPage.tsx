@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {useNavigate, useSearchParams} from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AuthLayout from '../components/AuthLayout';
 import BasicInformationStep from '../components/onboarding/BasicInformationStep';
 import ProfessionalProfileStep from '../components/onboarding/ProfessionalProfileStep';
@@ -7,19 +7,19 @@ import MediaPortfolioStep from '../components/onboarding/MediaPortfolioStep';
 import EducationExperienceStep from '../components/onboarding/EducationExperienceStep';
 import CertificationsStep from '../components/onboarding/CertificationsStep';
 import AvailabilityStep from '../components/onboarding/AvailabilityStep';
-import {LernenLogo} from '../../../components/LernenLogo';
+import { LernenLogo } from '../../../components/LernenLogo';
 import authService from '../../../services/authService';
-import {HiArrowLeft, HiArrowRight} from 'react-icons/hi';
-import {useAuth} from '../../../context/AuthContext';
+import { HiArrowLeft, HiArrowRight } from 'react-icons/hi';
+import { useAuth } from '../../../context/AuthContext';
 import type { TutorOnboardingData } from '../../../types/tutor';
 
 const STEPS = [
-    {number: 1, label: 'Basic Info'},
-    {number: 2, label: 'Professional'},
-    {number: 3, label: 'Media'},
-    {number: 4, label: 'Education'},
-    {number: 5, label: 'Certifications'},
-    {number: 6, label: 'Availability'},
+    { number: 1, label: 'Basic Info' },
+    { number: 2, label: 'Professional' },
+    { number: 3, label: 'Media' },
+    { number: 4, label: 'Education' },
+    { number: 5, label: 'Certifications' },
+    { number: 6, label: 'Availability' },
 ];
 
 const TutorOnboardingPage: React.FC = () => {
@@ -30,7 +30,7 @@ const TutorOnboardingPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const {state} = useAuth();
+    const { state } = useAuth();
     const tutorId = state.user?.id || (() => {
         try {
             const storedData = localStorage.getItem('tutor_onboarding_data');
@@ -103,9 +103,9 @@ const TutorOnboardingPage: React.FC = () => {
     }, [searchParams, navigate, tutorId, loadStepData]);
 
     const handleStepDataChange = useCallback((updates: Partial<TutorOnboardingData>) => {
-        setStepData((prev: Partial<TutorOnboardingData>) => ({...prev, ...updates}));
+        setStepData((prev: Partial<TutorOnboardingData>) => ({ ...prev, ...updates }));
     }, []);
-    
+
     const saveStepData = async (): Promise<void> => {
         if (!tutorId || !currentStep) return;
 
@@ -253,7 +253,7 @@ const TutorOnboardingPage: React.FC = () => {
 
     return (
         <AuthLayout>
-            <main className="relative w-full max-w-4xl mx-auto mt-8 mb-8 bg-white rounded-lg shadow-lg overflow-hidden">
+            <main className="relative w-full max-w-5xl mx-auto mt-8 mb-8 bg-white rounded-lg shadow-lg overflow-hidden">
                 {/* Simple Header */}
                 <div className="border-b border-gray-200 bg-white px-6 py-4">
                     <div className="flex items-center justify-between">
@@ -262,7 +262,7 @@ const TutorOnboardingPage: React.FC = () => {
                             <p className="text-sm text-gray-500 mt-0.5">Complete your profile to start teaching</p>
                         </div>
                         <div className="text-right w-24">
-                            <LernenLogo/>
+                            <LernenLogo />
                         </div>
                     </div>
                 </div>
@@ -275,19 +275,17 @@ const TutorOnboardingPage: React.FC = () => {
                             {STEPS.map((step, index) => (
                                 <React.Fragment key={step.number}>
                                     <div
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-                                            currentStep === step.number
-                                                ? 'bg-[#0b6459] text-white'
-                                                : currentStep > step.number
-                                                    ? 'bg-green-500 text-white'
-                                                    : 'bg-gray-200 text-gray-500'
-                                        }`}>
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${currentStep === step.number
+                                            ? 'bg-[#0b6459] text-white'
+                                            : currentStep > step.number
+                                                ? 'bg-green-500 text-white'
+                                                : 'bg-gray-200 text-gray-500'
+                                            }`}>
                                         {currentStep > step.number ? '✓' : step.number}
                                     </div>
                                     {index < STEPS.length - 1 && (
-                                        <div className={`flex-1 h-0.5 mx-2 ${
-                                            currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
-                                        }`}/>
+                                        <div className={`flex-1 h-0.5 mx-2 ${currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
+                                            }`} />
                                     )}
                                 </React.Fragment>
                             ))}
@@ -296,9 +294,8 @@ const TutorOnboardingPage: React.FC = () => {
                         <div className="flex items-center justify-between">
                             {STEPS.map((step) => (
                                 <div key={step.number} className="w-8 flex justify-center">
-                                    <span className={`text-xs whitespace-nowrap ${
-                                        currentStep === step.number ? 'text-[#0b6459] font-medium' : 'text-gray-500'
-                                    }`}>
+                                    <span className={`text-xs whitespace-nowrap ${currentStep === step.number ? 'text-[#0b6459] font-medium' : 'text-gray-500'
+                                        }`}>
                                         {step.label}
                                     </span>
                                 </div>
@@ -329,37 +326,37 @@ const TutorOnboardingPage: React.FC = () => {
                         <>
                             {/* Conditional Step Rendering */}
                             {currentStep === 1 &&
-                                <BasicInformationStep data={stepData} onChange={handleStepDataChange}/>}
+                                <BasicInformationStep data={stepData} onChange={handleStepDataChange} />}
                             {currentStep === 2 &&
-                                <ProfessionalProfileStep data={stepData} onChange={handleStepDataChange}/>}
-                            {currentStep === 3 && <MediaPortfolioStep data={stepData} onChange={handleStepDataChange}/>}
+                                <ProfessionalProfileStep data={stepData} onChange={handleStepDataChange} />}
+                            {currentStep === 3 && <MediaPortfolioStep data={stepData} onChange={handleStepDataChange} />}
                             {currentStep === 4 &&
-                                <EducationExperienceStep data={stepData} onChange={handleStepDataChange}/>}
-                            {currentStep === 5 && <CertificationsStep data={stepData} onChange={handleStepDataChange}/>}
-                            {currentStep === 6 && <AvailabilityStep data={stepData} onChange={handleStepDataChange}/>}
+                                <EducationExperienceStep data={stepData} onChange={handleStepDataChange} />}
+                            {currentStep === 5 && <CertificationsStep data={stepData} onChange={handleStepDataChange} />}
+                            {currentStep === 6 && <AvailabilityStep data={stepData} onChange={handleStepDataChange} />}
                         </>
                     )}
 
                     {/* Navigation Controls */}
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
                         <button onClick={handleBack} disabled={currentStep === 1}
-                                className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                            <HiArrowLeft className="w-4 h-4"/>
+                            className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                            <HiArrowLeft className="w-4 h-4" />
                             Back
                         </button>
                         <div className="flex items-center gap-2">
                             {/* Skip Button - Only show for steps 4-5 */}
                             {currentStep >= 4 && currentStep < STEPS.length && (
                                 <button onClick={handleSkip} disabled={saving}
-                                        className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
+                                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
                                     Skip
                                 </button>
                             )}
                             {/* Next/Complete Button */}
                             <button onClick={handleNext} disabled={saving}
-                                    className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
                                 {saving ? 'Saving...' : currentStep === STEPS.length ? 'Complete' : 'Next'}
-                                {!saving && <HiArrowRight className="w-4 h-4"/>}
+                                {!saving && <HiArrowRight className="w-4 h-4" />}
                             </button>
                         </div>
                     </div>

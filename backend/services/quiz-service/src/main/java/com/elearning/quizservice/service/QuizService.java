@@ -4,7 +4,9 @@ import com.elearning.quizservice.dto.request.CreateQuizRequest;
 import com.elearning.quizservice.dto.request.UpdateQuizRequest;
 import com.elearning.quizservice.dto.response.QuizDetailResponse;
 import com.elearning.quizservice.dto.response.QuizSummaryResponse;
+import com.elearning.quizservice.dto.response.StudentQuizSummaryResponse;
 import com.elearning.quizservice.entity.Quiz;
+import com.elearning.quizservice.entity.StudentQuizStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +42,11 @@ public interface QuizService {
     List<QuizSummaryResponse> getQuizzesByCreator(UUID creatorId);
     
     /**
+     * Get all quizzes for a student with their status and progress
+     */
+    List<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus status);
+    
+    /**
      * Update a quiz
      */
     QuizDetailResponse updateQuiz(UUID quizId, UpdateQuizRequest request);
@@ -69,3 +76,4 @@ public interface QuizService {
      */
     void validateQuizAccess(UUID quizId);
 }
+

@@ -52,7 +52,15 @@
     "selectDate": "Select a date",
     "selectDateDescription": "to see available time slots.",
     "pleaseSelectDateTime": "Please select a date and time to proceed.",
-    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ]
   },
   "headerNoNavbar": {
     "exit": "Exit"
@@ -73,6 +81,10 @@
       "emailPlaceholder": "Email address",
       "passwordPlaceholder": "Password",
       "rememberMe": "Remember me",
+      "termsAgreement": "By clicking Log in or Continue with, you agree to Lernen's",
+      "termsOfUse": "Terms of Use",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
       "forgotPassword": "Forgot password?",
       "loggingIn": "Logging in...",
       "login": "Login",
@@ -98,12 +110,27 @@
       "agreeToTerms": "You must agree to the terms and conditions",
       "agreeTermsText": "I agree to the",
       "termsAndConditions": "Terms and conditions",
+      "termsAgreement": "By clicking Create account or Continue with, you agree to Lernen's",
+      "termsOfUse": "Terms of Use",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
       "creatingAccount": "Creating account...",
       "createAccount": "Create account",
       "alreadyHaveAccount": "Already have an account?",
       "signIn": "Sign in",
       "orSeparator": "OR",
       "signUpWithGoogle": "Sign up with Google"
+    },
+    "otpVerification": {
+      "title": "Check your email",
+      "description": "We've sent a 6-digit code to your email address.",
+      "invalidOtp": "Please enter a valid 6-digit OTP.",
+      "noSession": "No verification session found. Please sign up first.",
+      "verifying": "Verifying...",
+      "verificationFailed": "OTP verification failed",
+      "didntReceiveCode": "Didn't receive the code?",
+      "resend": "Resend",
+      "backToLogin": "Back to Login"
     },
     "forgotPassword": {
       "title": "Forgot password?",
@@ -112,6 +139,45 @@
       "emailPlaceholder": "Enter your email",
       "sendResetLink": "Send reset link",
       "backToLogin": "Back to login"
+    },
+    "createPassword": {
+      "title": "Create New Password",
+      "titleReset": "Reset Password",
+      "description": "Your new password must be different from previous used passwords.",
+      "descriptionReset": "Enter your new password below.",
+      "password": "Password",
+      "passwordPlaceholder": "New Password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm New Password",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordsNotMatch": "Passwords do not match",
+      "creating": "Creating...",
+      "createPassword": "Create Password",
+      "resetPassword": "Reset Password",
+      "failedToCreate": "Failed to create password",
+      "accountCreated": "Account created successfully! Redirecting to login...",
+      "backToLogin": "Back to Login"
+    },
+    "resumeInput": {
+      "welcome": "Welcome to Lernen!",
+      "subtitle": "Let's get started by adding your resume",
+      "howToAdd": "How would you like to add your resume?",
+      "chooseOption": "Choose one of the options below to get started",
+      "uploadFile": "Upload File",
+      "uploadDescription": "Upload PDF or image file (JPG, PNG, TIFF)",
+      "uploadNote": "We'll extract text automatically using OCR",
+      "enterManually": "Enter Manually",
+      "manualDescription": "Type or paste your resume content",
+      "manualNote": "Copy and paste from your existing resume",
+      "processing": "Waiting for process...",
+      "invalidFileType": "Please select a valid PDF or image file (JPG, PNG, TIFF, etc.)",
+      "fileTooLarge": "File size must be less than 10MB",
+      "noTextExtracted": "No text could be extracted from the file. Please try manual input.",
+      "tutorDataNotFound": "Tutor onboarding data not found. Please try signing up again.",
+      "tutorIdNotFound": "Tutor ID not found. Please try signing up again.",
+      "failedToProcess": "Failed to process file",
+      "failedToSubmit": "Failed to submit resume"
     }
   },
   "home": {
@@ -336,37 +402,37 @@
     "lessons": "lessons"
   },
   "dashboard": {
-      "sidebar": {
-        "tutor": {
-          "dashboard": "Dashboard",
-          "myStudents": "My students",
-          "myCourses": "My courses",
-          "myClass": "My class",
-          "schedule": "Schedule",
-          "payouts": "Payouts",
-          "dealsCoupons": "Deals & Coupons",
-          "myQuizzes": "My quizzes",
-          "requests": "Requests",
-          "inbox": "Inbox",
-          "reviews": "Reviews",
-          "profileSettings": "Profile settings",
-          "api": "API",
-          "whiteboard": "Whiteboard"
-        },
-        "student": {
-          "myBookings": "My bookings",
-          "myClass": "My class",
-          "myQuizzes": "My quizzes",
-          "requests": "Requests",
-          "myCourses": "My courses",
-          "myPurchases": "My purchases",
-          "certificates": "Certificates",
-          "messages": "Messages",
-          "profileSettings": "Profile settings",
-          "whiteboard": "Whiteboard"
-        },
-        "signOut": "Sign out"
+    "sidebar": {
+      "tutor": {
+        "dashboard": "Dashboard",
+        "myStudents": "My students",
+        "myCourses": "My courses",
+        "myClass": "My class",
+        "schedule": "Schedule",
+        "payouts": "Payouts",
+        "dealsCoupons": "Deals & Coupons",
+        "myQuizzes": "My quizzes",
+        "requests": "Requests",
+        "inbox": "Inbox",
+        "reviews": "Reviews",
+        "profileSettings": "Profile settings",
+        "api": "API",
+        "whiteboard": "Whiteboard"
       },
+      "student": {
+        "myBookings": "My bookings",
+        "myClass": "My class",
+        "myQuizzes": "My quizzes",
+        "requests": "Requests",
+        "myCourses": "My courses",
+        "myPurchases": "My purchases",
+        "certificates": "Certificates",
+        "messages": "Messages",
+        "profileSettings": "Profile settings",
+        "whiteboard": "Whiteboard"
+      },
+      "signOut": "Sign out"
+    },
     "header": {
       "welcome": "Welcome back",
       "balance": "Balance",
@@ -971,7 +1037,7 @@
           "slots": "availability slots"
         }
       },
-        "scheduleTab": {
+      "scheduleTab": {
         "upcomingSessions": "Upcoming sessions",
         "noUpcomingSessions": "No upcoming sessions",
         "pastSessions": "Past sessions",

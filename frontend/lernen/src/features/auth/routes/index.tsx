@@ -8,9 +8,11 @@ import CreateNewPasswordPage from '../pages/CreateNewPasswordPage';
 import TutorResumeInputPage from '../pages/TutorResumeInputPage';
 import TutorOnboardingPage from '../pages/TutorOnboardingPage';
 import TutorOnboardingCompletionPage from '../pages/TutorOnboardingCompletionPage';
+import OAuthCallbackPage from '../pages/OAuthCallbackPage';
 
 export default [
   { path: '/login', element: <LoginPage /> },
+  { path: '/oauth/callback', element: <OAuthCallbackPage /> },
   { path: '/signup', element: <SignUpPage /> },
   { path: '/tutor-signup', element: <TutorSignUpPage /> },
   { path: '/student-signup', element: <StudentSignUpPage /> },

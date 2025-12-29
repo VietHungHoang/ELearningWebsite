@@ -6,6 +6,8 @@ import com.elearning.quizservice.dto.response.ApiResponse;
 import com.elearning.quizservice.dto.response.QuizAttemptResponse;
 import com.elearning.quizservice.dto.response.QuizDetailResponse;
 import com.elearning.quizservice.dto.response.QuizResultResponse;
+import com.elearning.quizservice.dto.response.StudentQuizSummaryResponse;
+import com.elearning.quizservice.entity.StudentQuizStatus;
 import com.elearning.quizservice.service.QuizAttemptService;
 import com.elearning.quizservice.service.QuizService;
 import jakarta.validation.Valid;
@@ -29,6 +31,20 @@ public class StudentQuizController {
     
     private final QuizService quizService;
     private final QuizAttemptService attemptService;
+    
+    /**
+     * Get all quizzes assigned to student with their status and progress
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<StudentQuizSummaryResponse>>> getStudentQuizzes(
+            @RequestHeader("X-User-Id") UUID studentId,
+            @RequestParam(required = false) StudentQuizStatus status) {
+        log.info("Getting quizzes for student: {} with status filter: {}", studentId, status);
+        
+        List<StudentQuizSummaryResponse> response = quizService.getQuizzesForStudent(studentId, status);
+        
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
     
     /**
      * Get quiz for student (without answers)

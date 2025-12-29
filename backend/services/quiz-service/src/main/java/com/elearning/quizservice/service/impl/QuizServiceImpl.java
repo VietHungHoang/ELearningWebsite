@@ -6,7 +6,11 @@ import com.elearning.quizservice.dto.request.UpdateQuizRequest;
 import com.elearning.quizservice.dto.response.QuestionResponse;
 import com.elearning.quizservice.dto.response.QuizDetailResponse;
 import com.elearning.quizservice.dto.response.QuizSummaryResponse;
+import com.elearning.quizservice.dto.response.StudentQuizSummaryResponse;
 import com.elearning.quizservice.entity.Quiz;
+import com.elearning.quizservice.entity.QuizAttempt;
+import com.elearning.quizservice.entity.StudentQuizStatus;
+import com.elearning.quizservice.entity.User;
 import com.elearning.quizservice.exception.InvalidOperationException;
 import com.elearning.quizservice.exception.ResourceNotFoundException;
 import com.elearning.quizservice.exception.ValidationException;
@@ -20,9 +24,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of QuizService
@@ -216,12 +224,105 @@ public class QuizServiceImpl implements QuizService {
         }
     }
     
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus statusFilter) {
+        log.info("Getting quizzes for student: {} with status filter: {}", studentId, statusFilter);
+        
+        // Get all published quizzes with creator info
+        List<Quiz> quizzes = quizRepository.findAllPublishedQuizzesWithCreator();
+        
+        // Get student's latest attempts for all quizzes
+        List<QuizAttempt> latestAttempts = attemptRepository.findLatestAttemptsByStudentId(studentId);
+        Map<UUID, QuizAttempt> attemptsByQuizId = latestAttempts.stream()
+                .collect(Collectors.toMap(a -> a.getQuiz().getId(), a -> a));
+        
+        // Build response list
+        List<StudentQuizSummaryResponse> result = new ArrayList<>();
+        
+        for (Quiz quiz : quizzes) {
+            QuizAttempt latestAttempt = attemptsByQuizId.get(quiz.getId());
+            StudentQuizStatus studentStatus = calculateStudentStatus(latestAttempt);
+            
+            // Apply filter if specified
+            if (statusFilter != null && studentStatus != statusFilter) {
+                continue;
+            }
+            
+            StudentQuizSummaryResponse response = buildStudentQuizSummary(quiz, latestAttempt, studentStatus);
+            result.add(response);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Calculate student's status for a quiz based on their latest attempt
+     */
+    private StudentQuizStatus calculateStudentStatus(QuizAttempt latestAttempt) {
+        if (latestAttempt == null) {
+            return StudentQuizStatus.NOT_STARTED;
+        }
+        
+        return switch (latestAttempt.getStatus()) {
+            case IN_PROGRESS -> StudentQuizStatus.IN_PROGRESS;
+            case SUBMITTED, GRADED -> StudentQuizStatus.COMPLETED;
+            case ABANDONED -> StudentQuizStatus.NOT_STARTED; // Can retry
+        };
+    }
+    
+    /**
+     * Build StudentQuizSummaryResponse from quiz and attempt data
+     */
+    private StudentQuizSummaryResponse buildStudentQuizSummary(Quiz quiz, QuizAttempt latestAttempt, StudentQuizStatus studentStatus) {
+        User creator = quiz.getCreator();
+        
+        StudentQuizSummaryResponse.StudentQuizSummaryResponseBuilder builder = StudentQuizSummaryResponse.builder()
+                .id(quiz.getId())
+                .title(quiz.getTitle())
+                .description(quiz.getDescription())
+                .totalQuestions(quiz.getQuestions() != null ? quiz.getQuestions().size() : 0)
+                .timeLimitMinutes(quiz.getTimeLimitMinutes())
+                .passingScore(quiz.getPassingScore())
+                .dueDate(quiz.getDueDate())
+                .studentStatus(studentStatus)
+                .tutorName(creator != null ? creator.getFullName() : null)
+                .tutorAvatar(creator != null ? creator.getAvatarUrl() : null)
+                .assignedAt(quiz.getPublishedAt())
+                .createdAt(quiz.getCreatedAt());
+        
+        // Add attempt-specific data
+        if (latestAttempt != null) {
+            builder.currentAttemptId(latestAttempt.getId());
+            
+            if (studentStatus == StudentQuizStatus.IN_PROGRESS) {
+                // Calculate time remaining
+                builder.questionsAnswered(latestAttempt.getAnswersCount());
+                
+                if (latestAttempt.getStartedAt() != null && quiz.getTimeLimitMinutes() != null) {
+                    long elapsedSeconds = Duration.between(latestAttempt.getStartedAt(), LocalDateTime.now()).getSeconds();
+                    long totalSeconds = quiz.getTimeLimitMinutes() * 60L;
+                    int remainingSeconds = (int) Math.max(0, totalSeconds - elapsedSeconds);
+                    builder.timeRemainingSeconds(remainingSeconds);
+                }
+            } else if (studentStatus == StudentQuizStatus.COMPLETED) {
+                builder.score(latestAttempt.getCorrectAnswers())
+                        .maxScore(latestAttempt.getTotalQuestions())
+                        .percentage(latestAttempt.getPercentage())
+                        .passed(latestAttempt.getPassed())
+                        .completedAt(latestAttempt.getSubmittedAt());
+            }
+        }
+        
+        return builder.build();
+    }
+    
     /**
      * Convert quiz to summary response with statistics
      */
     private QuizSummaryResponse toSummaryWithStats(Quiz quiz) {
         Long totalAttempts = attemptRepository.countByQuizIdAndStatus(
-                quiz.getId(), com.elearning.quizservice.entity.QuizAttempt.AttemptStatus.GRADED);
+                quiz.getId(), QuizAttempt.AttemptStatus.GRADED);
         Double avgScore = attemptRepository.getAverageScoreByQuizId(quiz.getId());
         Double highScore = attemptRepository.getHighestScoreByQuizId(quiz.getId());
         

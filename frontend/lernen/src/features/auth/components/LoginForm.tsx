@@ -86,29 +86,29 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
             >
-              {showPassword ? <FiEyeOff className='h-5 w-5' /> : <FiEye className='h-5 w-5'/>}
+              {showPassword ? <FiEyeOff className='h-5 w-5' /> : <FiEye className='h-5 w-5' />}
             </button>
           </div>
 
           <div className="flex items-center justify-between">
             <label htmlFor="remember-me" className="flex items-center cursor-pointer select-none group">
-                <div className="relative">
-                    <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="peer sr-only"
-                    />
-                    <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded-sm transition-colors duration-200 group-hover:border-gray-400 peer-focus:ring-2 peer-focus:ring-offset-1 peer-focus:ring-[#0b6459]/50 peer-checked:bg-[#0b6459] peer-checked:border-[#0b6459]"></div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 pointer-events-none">
-                        <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1.5 4L3.5 6L8.5 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </div>
+              <div className="relative">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="peer sr-only"
+                />
+                <div className="w-4 h-4 bg-white border-2 border-gray-300 rounded-sm transition-colors duration-200 group-hover:border-gray-400 peer-focus:ring-2 peer-focus:ring-offset-1 peer-focus:ring-[#0b6459]/50 peer-checked:bg-[#0b6459] peer-checked:border-[#0b6459]"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 pointer-events-none">
+                  <svg className="w-2.5 h-2.5" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.5 4L3.5 6L8.5 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </div>
-                <span className="ml-2 block text-sm text-gray-900">
-                    {t('auth.login.rememberMe')}
-                </span>
+              </div>
+              <span className="ml-2 block text-sm text-gray-900">
+                {t('auth.login.rememberMe')}
+              </span>
             </label>
 
             <div className="text-sm">
@@ -147,23 +147,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
           <span className="flex-shrink mx-4 text-gray-500 text-sm">{t('auth.login.orSeparator')}</span>
           <div className="flex-grow border-t border-gray-300"></div>
         </div>
-        
+
         <div className="mt-5">
-           <button
-              type="button"
-              onClick={async () => {
-                try {
-                  const authUrl = await authService.getGoogleAuthUrl(window.location.origin + '/login');
-                  window.location.href = authUrl;
-                } catch (error) {
-                  console.error('Failed to get Google auth URL:', error);
-                }
-              }}
-              className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer"
-            >
-              <FcGoogle />
-              <span className="ml-3">{t('auth.login.signInWithGoogle')}</span>
-            </button>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const authUrl = await authService.getGoogleAuthUrl(window.location.origin + '/login');
+                window.location.href = authUrl;
+              } catch (error) {
+                console.error('Failed to get Google auth URL:', error);
+              }
+            }}
+            className="group relative w-full flex justify-center items-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0b6459] transition-colors cursor-pointer"
+          >
+            <FcGoogle />
+            <span className="ml-3">{t('auth.login.signInWithGoogle')}</span>
+          </button>
         </div>
 
       </div>

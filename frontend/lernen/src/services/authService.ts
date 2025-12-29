@@ -80,7 +80,7 @@ const getOnboardingData = async (tutorId: string): Promise<TutorOnboarding> => {
 };
 
 const saveOnboardingStep = async (tutorId: string, step: number, data: string): Promise<void> => {
-    const payload = { 
+    const payload = {
         step: step,
         data: data // data đã là string JSON từ frontend
     };

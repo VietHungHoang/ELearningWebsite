@@ -21,8 +21,8 @@ import java.util.UUID;
 })
 @Data
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"quiz", "answers"})
-@ToString(exclude = {"quiz", "answers"})
+@EqualsAndHashCode(callSuper = true, exclude = {"quiz", "answers", "student"})
+@ToString(exclude = {"quiz", "answers", "student"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizAttempt extends BaseEntity {
@@ -69,6 +69,13 @@ public class QuizAttempt extends BaseEntity {
     @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<StudentAnswer> answers = new ArrayList<>();
+    
+    /**
+     * Student user info - for display purposes
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", insertable = false, updatable = false)
+    private User student;
     
     public enum AttemptStatus {
         IN_PROGRESS,

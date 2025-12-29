@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,8 +24,15 @@ public class QuizStatisticsResponse {
     private Long completedAttempts;
     private Double averagePercentage;
     private Double passRate;
-    private Integer averageTimeSpent;
+    private Integer averageTimeSpentMinutes;
+    
+    // Additional stats for FE
+    private Double highestPercentage;
+    private Double lowestPercentage;
+    private Double completionRate;
+    
     private List<QuestionStatistics> questionStatistics;
+    private List<StudentPerformance> studentPerformances;
     
     @Data
     @Builder
@@ -37,6 +45,7 @@ public class QuizStatisticsResponse {
         private Long totalAnswers;
         private Long correctAnswers;
         private Double correctRate;
+        private Double averageTimeSeconds;
         private List<OptionStatistics> optionStatistics;
     }
     
@@ -50,5 +59,19 @@ public class QuizStatisticsResponse {
         private Boolean isCorrect;
         private Long selectedCount;
         private Double selectedRate;
+    }
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class StudentPerformance {
+        private UUID studentId;
+        private String studentName;
+        private String studentAvatar;
+        private Double score;
+        private Integer completionTimeMinutes;
+        private LocalDateTime attemptDate;
+        private Boolean passed;
     }
 }
