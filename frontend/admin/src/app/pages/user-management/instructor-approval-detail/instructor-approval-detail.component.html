@@ -88,36 +88,42 @@
             <!-- Action Buttons (Only for PENDING status) -->
             @if (instructor.requestStatus === 'PENDING' || instructor.requestStatus === 'REQUEST_CHANGES') {
                 <div class="w-full lg:w-auto">
-                    <div class="flex flex-col sm:flex-row lg:flex-col gap-[8px]">
-                        <!-- Primary Action: Approve -->
+                    <div class="flex flex-col gap-[8px]">
+                        <!-- Approve Button -->
                         <button
                             type="button"
                             (click)="openApproveDialog()"
-                            class="action-button-primary group relative px-[14px] py-[8px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-[6px] whitespace-nowrap min-w-[140px] border border-gray-300 dark:border-gray-600">
-                            <i class="material-symbols-outlined text-base flex-shrink-0">check_circle</i>
-                            <span class="flex-shrink-0 font-semibold">{{ 'instructorApprovalDetail.actions.approve' | translate }}</span>
+                            class="w-full px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-[6px] border
+                                bg-white dark:bg-[#15203c] border-success-300 dark:border-success-700 text-success-600 dark:text-success-400
+                                hover:bg-success-50 dark:hover:bg-success-900/20 hover:border-success-400 dark:hover:border-success-600
+                                whitespace-nowrap">
+                            <i class="material-symbols-outlined !text-lg">check_circle</i>
+                            {{ 'instructorApprovalDetail.actions.approve' | translate }}
                         </button>
 
-                        <!-- Secondary Actions Group -->
-                        <div class="flex gap-[8px]">
-                            <!-- Request Edit -->
-                            <button
-                                type="button"
-                                (click)="openEditRequestDialog()"
-                                class="action-button-secondary flex-1 px-[14px] py-[8px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-[6px] whitespace-nowrap border border-gray-300 dark:border-gray-600">
-                                <i class="material-symbols-outlined text-base flex-shrink-0">edit</i>
-                                <span class="flex-shrink-0 font-semibold">{{ 'instructorApprovalDetail.actions.requestEdit' | translate }}</span>
-                            </button>
-                            
-                            <!-- Reject -->
-                            <button
-                                type="button"
-                                (click)="openRejectDialog()"
-                                class="action-button-danger flex-1 px-[14px] py-[8px] bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-[6px] whitespace-nowrap border border-gray-300 dark:border-gray-600">
-                                <i class="material-symbols-outlined text-base flex-shrink-0">cancel</i>
-                                <span class="flex-shrink-0 font-semibold">{{ 'instructorApprovalDetail.actions.reject' | translate }}</span>
-                            </button>
-                        </div>
+                        <!-- Request Edit Button -->
+                        <button
+                            type="button"
+                            (click)="openEditRequestDialog()"
+                            class="w-full px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-[6px] border
+                                bg-white dark:bg-[#15203c] border-warning-300 dark:border-warning-700 text-warning-600 dark:text-warning-400
+                                hover:bg-warning-50 dark:hover:bg-warning-900/20 hover:border-warning-400 dark:hover:border-warning-600
+                                whitespace-nowrap">
+                            <i class="material-symbols-outlined !text-lg">edit</i>
+                            {{ 'instructorApprovalDetail.actions.requestEdit' | translate }}
+                        </button>
+                        
+                        <!-- Reject Button -->
+                        <button
+                            type="button"
+                            (click)="openRejectDialog()"
+                            class="w-full px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-[6px] border
+                                bg-white dark:bg-[#15203c] border-danger-300 dark:border-danger-700 text-danger-600 dark:text-danger-400
+                                hover:bg-danger-50 dark:hover:bg-danger-900/20 hover:border-danger-400 dark:hover:border-danger-600
+                                whitespace-nowrap">
+                            <i class="material-symbols-outlined !text-lg">cancel</i>
+                            {{ 'instructorApprovalDetail.actions.reject' | translate }}
+                        </button>
                     </div>
                 </div>
             }

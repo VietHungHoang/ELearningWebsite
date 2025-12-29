@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 export interface TopInstructor {
@@ -16,9 +16,17 @@ export interface TopInstructor {
     templateUrl: './top-instructors-chart.component.html',
     styleUrl: './top-instructors-chart.component.scss'
 })
-export class TopInstructorsChartComponent implements OnInit {
+export class TopInstructorsChartComponent implements OnInit, OnChanges {
     private isBrowser: boolean;
     private chartInstance: any;
+
+    @Input() topInstructorsData: {
+        day: TopInstructor[];
+        week: TopInstructor[];
+        month: TopInstructor[];
+    } | null = null;
+    @Input() selectedTimeFilter: 'day' | 'week' | 'month' = 'month';
+    @Output() timeFilterChange = new EventEmitter<'day' | 'week' | 'month'>();
 
     topInstructors: TopInstructor[] = [];
     selectedView: 'chart' | 'table' = 'chart';
@@ -28,13 +36,28 @@ export class TopInstructorsChartComponent implements OnInit {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
 
-    selectedTimeFilter: 'day' | 'week' | 'month' = 'month';
     isTimeFilterDropdownOpen: boolean = false;
 
     ngOnInit(): void {
         this.loadInstructorData();
         if (this.selectedView === 'chart') {
             setTimeout(() => this.loadChart(), 100);
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['topInstructorsData'] && this.topInstructorsData) {
+            this.loadInstructorData();
+            if (this.selectedView === 'chart' && this.chartInstance) {
+                setTimeout(() => this.loadChart(), 100);
+            }
+        }
+        if (changes['selectedTimeFilter']) {
+            // Update data when timeFilter changes from parent
+            this.loadInstructorData();
+            if (this.selectedView === 'chart' && this.chartInstance) {
+                setTimeout(() => this.loadChart(), 100);
+            }
         }
     }
 
@@ -57,6 +80,7 @@ export class TopInstructorsChartComponent implements OnInit {
     setTimeFilter(filter: 'day' | 'week' | 'month'): void {
         this.selectedTimeFilter = filter;
         this.isTimeFilterDropdownOpen = false;
+        this.timeFilterChange.emit(filter);
         this.loadInstructorData();
         if (this.selectedView === 'chart') {
             setTimeout(() => this.loadChart(), 100);
@@ -64,53 +88,65 @@ export class TopInstructorsChartComponent implements OnInit {
     }
 
     private loadInstructorData(): void {
-        const baseData = [
-            {
-                instructorId: 'ins1',
-                instructorName: 'Đặng Minh Tuấn',
-                totalSessions: 24,
-                totalEarnings: 456,
-                avgEarningsPerSession: 19
-            },
-            {
-                instructorId: 'ins2',
-                instructorName: 'Nguyễn Thị Hương',
-                totalSessions: 18,
-                totalEarnings: 342,
-                avgEarningsPerSession: 19
-            },
-            {
-                instructorId: 'ins3',
-                instructorName: 'Trần Quốc Bảo',
-                totalSessions: 16,
-                totalEarnings: 288,
-                avgEarningsPerSession: 18
-            },
-            {
-                instructorId: 'ins4',
-                instructorName: 'Lý Công Đức',
-                totalSessions: 14,
-                totalEarnings: 245,
-                avgEarningsPerSession: 17.5
-            },
-            {
-                instructorId: 'ins5',
-                instructorName: 'Vũ Hà Phương',
-                totalSessions: 12,
-                totalEarnings: 198,
-                avgEarningsPerSession: 16.5
+        if (this.topInstructorsData) {
+            // Use data from API
+            if (this.selectedTimeFilter === 'day') {
+                this.topInstructors = this.topInstructorsData.day;
+            } else if (this.selectedTimeFilter === 'week') {
+                this.topInstructors = this.topInstructorsData.week;
+            } else {
+                this.topInstructors = this.topInstructorsData.month;
             }
-        ];
+        } else {
+            // Fallback to mock data
+            const baseData = [
+                {
+                    instructorId: 'ins1',
+                    instructorName: 'Đặng Minh Tuấn',
+                    totalSessions: 24,
+                    totalEarnings: 456,
+                    avgEarningsPerSession: 19
+                },
+                {
+                    instructorId: 'ins2',
+                    instructorName: 'Nguyễn Thị Hương',
+                    totalSessions: 18,
+                    totalEarnings: 342,
+                    avgEarningsPerSession: 19
+                },
+                {
+                    instructorId: 'ins3',
+                    instructorName: 'Trần Quốc Bảo',
+                    totalSessions: 16,
+                    totalEarnings: 288,
+                    avgEarningsPerSession: 18
+                },
+                {
+                    instructorId: 'ins4',
+                    instructorName: 'Lý Công Đức',
+                    totalSessions: 14,
+                    totalEarnings: 245,
+                    avgEarningsPerSession: 17.5
+                },
+                {
+                    instructorId: 'ins5',
+                    instructorName: 'Vũ Hà Phương',
+                    totalSessions: 12,
+                    totalEarnings: 198,
+                    avgEarningsPerSession: 16.5
+                }
+            ];
 
-        // Apply time filter multiplier
-        const multiplier = this.selectedTimeFilter === 'day' ? 0.14 : this.selectedTimeFilter === 'week' ? 0.35 : 1;
+            // Apply time filter multiplier
+            const multiplier = this.selectedTimeFilter === 'day' ? 0.14 : this.selectedTimeFilter === 'week' ? 0.35 : 1;
 
-        this.topInstructors = baseData.map(instructor => ({
-            ...instructor,
-            totalSessions: Math.ceil(instructor.totalSessions * multiplier),
-            totalEarnings: Math.round(instructor.totalEarnings * multiplier * 10) / 10,
-            avgEarningsPerSession: Math.round(instructor.avgEarningsPerSession * 10) / 10
-        }));
+            this.topInstructors = baseData.map(instructor => ({
+                ...instructor,
+                totalSessions: Math.ceil(instructor.totalSessions * multiplier),
+                totalEarnings: Math.round(instructor.totalEarnings * multiplier * 10) / 10,
+                avgEarningsPerSession: Math.round(instructor.avgEarningsPerSession * 10) / 10
+            }));
+        }
     }
 
     private async loadChart(): Promise<void> {

@@ -1,7 +1,46 @@
 <div class="mb-[16px] md:flex items-center justify-between">
-    <h5 class="!mb-0 text-gray-900 dark:text-white">
-        {{ 'transactions.title' | translate }}
-    </h5>
+    <div class="flex items-center gap-[12px]">
+        <h5 class="!mb-0 text-gray-900 dark:text-white">
+            {{ 'transactions.title' | translate }}
+        </h5>
+        <div class="trezo-card-dropdown relative">
+        <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[4px] px-[10px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19] whitespace-nowrap" (click)="toggleSummaryFilterMenu()">
+            <span class="inline-block relative text-sm ltr:pr-[16px] rtl:pl-[16px]">
+                {{ getSummaryFilterText() | translate }}
+                <i class="ri-arrow-down-s-line text-base absolute ltr:-right-[2px] rtl:-left-[2px] top-1/2 -translate-y-1/2"></i>
+            </span>
+        </button>
+        @if (isSummaryFilterMenuOpen) {
+            <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[120px] z-[4] dark:bg-dark dark:shadow-none">
+                <li>
+                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('all')">
+                        {{ 'transactions.summaryFilter.all' | translate }}
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('today')">
+                        {{ 'transactions.summaryFilter.today' | translate }}
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('7days')">
+                        {{ 'transactions.summaryFilter.last7Days' | translate }}
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('30days')">
+                        {{ 'transactions.summaryFilter.last30Days' | translate }}
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('thisMonth')">
+                        {{ 'transactions.summaryFilter.thisMonth' | translate }}
+                    </button>
+                </li>
+            </ul>
+        }
+        </div>
+    </div>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
@@ -60,7 +99,7 @@
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[16px] rounded-md">
     <!-- Header with Search and Export -->
     <div class="trezo-card-header mb-[12px] sm:flex items-end justify-between gap-[12px]">
-        <div class="trezo-card-title flex-1 min-w-0">
+        <div class="trezo-card-title flex-1 min-w-[500px]">
             <form class="relative" (ngSubmit)="onSearchSubmit()">
                 <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
                     <i class="material-symbols-outlined !text-[20px]">search</i>

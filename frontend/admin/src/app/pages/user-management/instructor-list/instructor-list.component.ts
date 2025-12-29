@@ -5,7 +5,6 @@ import { RouterLink, Router } from '@angular/router';
 import { UserService, Tutor } from '../../../services/user.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
-import { TruncatePipe } from '../../../shared/pipes';
 import { LocaleUtilsService } from '../../../shared/utils';
 import { I18nService } from '../../../i18n/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
@@ -13,7 +12,7 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 @Component({
     selector: 'app-instructor-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe, TranslatePipe],
+    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TranslatePipe],
     templateUrl: './instructor-list.component.html',
     styleUrl: './instructor-list.component.scss'
 })
@@ -90,9 +89,21 @@ export class InstructorListComponent implements OnInit {
 
     confirmDelete(): void {
         if (this.instructorToDelete) {
-            this.userService.deleteInstructor(this.instructorToDelete.id);
-            this.showDeleteDialog = false;
-            this.instructorToDelete = null;
+            this.userService.deleteInstructor(this.instructorToDelete.id).subscribe({
+                next: () => {
+                    // Reload instructors after successful deletion
+                    this.loadInstructors();
+                    this.showDeleteDialog = false;
+                    this.instructorToDelete = null;
+                },
+                error: (error) => {
+                    console.error('Error deleting instructor:', error);
+                    // Still reload to update UI (fallback already updated local state)
+                    this.loadInstructors();
+                    this.showDeleteDialog = false;
+                    this.instructorToDelete = null;
+                }
+            });
         }
     }
 

@@ -6,6 +6,8 @@ import { ReviewService, Review } from '../../../services/review.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { I18nService } from '../../../i18n/i18n.service';
+import { Observable } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 @Component({
     selector: 'app-review-management',
@@ -20,6 +22,13 @@ export class ReviewManagementComponent implements OnInit {
 
     // New tab naming: 'flagged' (cần xử lý) vs 'all' (tất cả)
     activeTab: 'flagged' | 'all' = 'flagged';
+
+    // Pagination
+    itemsPerPage = 10;
+    currentPage = 0; // 0-based for backend
+    totalReviews = 0;
+    totalPages = 1;
+    loading = false;
 
     // Tab 1: Flagged Reviews (with flag status)
     selectedFlagReason: string = 'all';
@@ -53,6 +62,8 @@ export class ReviewManagementComponent implements OnInit {
     selectedReviewForDetail: Review | null = null;
     selectedReviews: Set<string> = new Set();
     bulkConfirmType: 'hide' | 'restore' | null = null;
+    isProcessingAction = false; // Loading state for single action
+    isProcessingBulk = false; // Loading state for bulk action
 
     Math = Math;
 
@@ -90,40 +101,61 @@ export class ReviewManagementComponent implements OnInit {
     }
 
     loadReviews(): void {
-        this.reviewService.getReviews().subscribe(reviews => {
-            this.reviews = reviews;
-            this.applyFilters();
+        this.loading = true;
+        const filters: any = {
+            type: this.activeTab
+        };
+
+        if (this.activeTab === 'flagged') {
+            if (this.selectedFlagReason && this.selectedFlagReason !== 'all') {
+                filters.flagReason = this.selectedFlagReason;
+            }
+        } else {
+            if (this.selectedVisibility && this.selectedVisibility !== 'all') {
+                filters.visibility = this.selectedVisibility;
+            }
+            if (this.selectedRating && this.selectedRating !== 'all') {
+                filters.rating = this.selectedRating;
+            }
+            if (this.searchQuery && this.searchQuery.trim()) {
+                filters.search = this.searchQuery.trim();
+            }
+        }
+
+        console.log('[ReviewManagement] loadReviews called:', { currentPage: this.currentPage, itemsPerPage: this.itemsPerPage, filters, activeTab: this.activeTab });
+        
+        this.reviewService.getReviews(this.currentPage, this.itemsPerPage, filters).subscribe(response => {
+            console.log('[ReviewManagement] Received response:', {
+                totalElements: response.totalElements,
+                contentLength: response.content.length,
+                content: response.content.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged }))
+            });
+            
+            this.filteredReviews = response.content;
+            this.reviews = response.content; // For backward compatibility
+            this.totalReviews = response.totalElements;
+            this.totalPages = response.totalPages;
+            this.loading = false;
+            
+            console.log('[ReviewManagement] Updated component state:', {
+                filteredReviewsLength: this.filteredReviews.length,
+                totalReviews: this.totalReviews,
+                totalPages: this.totalPages
+            });
         });
     }
 
     applyFilters(): void {
-        if (this.activeTab === 'flagged') {
-            // Tab 1: Show only flagged (visible + flagged) reviews
-            this.filteredReviews = this.reviews.filter(r => {
-                const isFlagged = r.isFlagged === true;
-                const isVisible = r.status === 'visible'; // Visible = visible status
-                const reasonMatch = this.selectedFlagReason === 'all' || r.flagReason === this.selectedFlagReason;
-                return isFlagged && isVisible && reasonMatch;
-            });
-        } else {
-            // Tab 2: Show all reviews with visibility filter
-            this.filteredReviews = this.reviews.filter(r => {
-                const visibilityMatch = this.selectedVisibility === 'all' ||
-                    (this.selectedVisibility === 'visible' && r.status === 'visible') ||
-                    (this.selectedVisibility === 'hidden' && r.status === 'hidden');
-                const ratingMatch = this.selectedRating === 'all' || r.rating === this.selectedRating;
-                const searchMatch = !this.searchQuery ||
-                    r.learnerName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                    r.tutorName.toLowerCase().includes(this.searchQuery.toLowerCase());
-                return visibilityMatch && ratingMatch && searchMatch;
-            });
-        }
+        // Reset to first page when filters change
+        this.currentPage = 0;
+        this.loadReviews();
     }
 
     switchTab(tab: 'flagged' | 'all'): void {
         this.activeTab = tab;
         this.selectedReviews.clear();
-        this.applyFilters();
+        this.currentPage = 0;
+        this.loadReviews();
     }
 
     selectFlagReason(reason: string): void {
@@ -201,41 +233,43 @@ export class ReviewManagementComponent implements OnInit {
     }
 
     confirmAction(): void {
-        if (!this.selectedReviewForAction || !this.actionConfirmType) return;
+        if (!this.selectedReviewForAction || !this.actionConfirmType || this.isProcessingAction) return;
+
+        this.isProcessingAction = true;
+        let action$: Observable<boolean>;
 
         if (this.actionConfirmType === 'hide') {
-            this.reviewService.hideReview(this.selectedReviewForAction.id);
-            // Remove from review array
-            this.reviews = this.reviews.map(r =>
-                r.id === this.selectedReviewForAction!.id
-                    ? { ...r, status: 'hidden', isFlagged: false }
-                    : r
-            );
+            action$ = this.reviewService.hideReview(this.selectedReviewForAction.id);
         } else if (this.actionConfirmType === 'restore') {
-            // Restore the review (make it visible again)
-            this.reviewService.makeReviewVisible(this.selectedReviewForAction.id);
-            this.reviews = this.reviews.map(r =>
-                r.id === this.selectedReviewForAction!.id
-                    ? { ...r, status: 'visible' as const, isFlagged: false }
-                    : r
-            );
+            action$ = this.reviewService.makeReviewVisible(this.selectedReviewForAction.id);
         } else if (this.actionConfirmType === 'toggleVisibility') {
             // Toggle between visible and hidden
             const newStatus = this.selectedReviewForAction.status === 'hidden' ? 'visible' : 'hidden';
-            if (newStatus === 'hidden') {
-                this.reviewService.hideReview(this.selectedReviewForAction.id);
-            } else {
-                this.reviewService.makeReviewVisible(this.selectedReviewForAction.id);
-            }
-            this.reviews = this.reviews.map(r =>
-                r.id === this.selectedReviewForAction!.id
-                    ? { ...r, status: newStatus }
-                    : r
-            );
+            action$ = newStatus === 'hidden' 
+                ? this.reviewService.hideReview(this.selectedReviewForAction.id)
+                : this.reviewService.makeReviewVisible(this.selectedReviewForAction.id);
+        } else {
+            this.isProcessingAction = false;
+            return;
         }
 
-        this.loadReviews();
-        this.cancelAction();
+        action$.subscribe({
+            next: (success) => {
+                this.isProcessingAction = false;
+                if (success) {
+                    this.loadReviews();
+                    this.cancelAction();
+                } else {
+                    console.error('[ReviewManagement] Action failed');
+                    // Keep dialog open on error, user can retry
+                }
+            },
+            error: (error) => {
+                console.error('[ReviewManagement] Action error:', error);
+                this.isProcessingAction = false;
+                // Keep dialog open on error, user can retry
+            }
+        });
     }
 
     cancelAction(): void {
@@ -305,8 +339,33 @@ export class ReviewManagementComponent implements OnInit {
         return this.selectedReviews.size > 0 && this.selectedReviews.size < this.filteredReviews.length;
     }
 
+    /**
+     * Check if at least one selected review is hidden (can be restored)
+     */
+    canRestoreSelected(): boolean {
+        if (this.selectedReviews.size === 0) return false;
+        return Array.from(this.selectedReviews).some(reviewId => {
+            const review = this.filteredReviews.find(r => r.id === reviewId);
+            return review && review.status === 'hidden';
+        });
+    }
+
+    /**
+     * Check if at least one selected review is visible (can be hidden)
+     */
+    canHideSelected(): boolean {
+        if (this.selectedReviews.size === 0) return false;
+        return Array.from(this.selectedReviews).some(reviewId => {
+            const review = this.filteredReviews.find(r => r.id === reviewId);
+            return review && review.status === 'visible';
+        });
+    }
+
     showBulkConfirmDialog(action: 'hide' | 'restore'): void {
         if (this.selectedReviews.size === 0) return;
+        // Additional check: only allow action if it's applicable
+        if (action === 'restore' && !this.canRestoreSelected()) return;
+        if (action === 'hide' && !this.canHideSelected()) return;
         this.bulkConfirmType = action;
     }
 
@@ -315,32 +374,57 @@ export class ReviewManagementComponent implements OnInit {
     }
 
     confirmBulkAction(): void {
-        if (!this.bulkConfirmType || this.selectedReviews.size === 0) return;
+        if (!this.bulkConfirmType || this.selectedReviews.size === 0 || this.isProcessingBulk) return;
+
+        this.isProcessingBulk = true;
+        const reviewIds = Array.from(this.selectedReviews);
+        const operations: Observable<boolean>[] = [];
 
         switch (this.bulkConfirmType) {
             case 'hide':
-            this.selectedReviews.forEach(id => {
-                this.reviewService.hideReview(id);
-                this.reviews = this.reviews.map(r =>
-                    r.id === id ? { ...r, status: 'hidden', isFlagged: false } : r
-                );
-            });
+                reviewIds.forEach(id => {
+                    operations.push(this.reviewService.hideReview(id));
+                });
                 break;
             case 'restore':
-                this.selectedReviews.forEach(id => {
-                    this.reviewService.makeReviewVisible(id);
-                    this.reviews = this.reviews.map(r =>
-                        r.id === id ? { ...r, status: 'visible' as const } : r
-                    );
+                reviewIds.forEach(id => {
+                    operations.push(this.reviewService.makeReviewVisible(id));
                 });
                 break;
         }
 
+        // Execute all operations in parallel
+        if (operations.length > 0) {
+            forkJoin(operations).subscribe({
+                next: (results) => {
+                    this.isProcessingBulk = false;
+                    const successCount = results.filter(r => r === true).length;
+                    const failCount = results.length - successCount;
+                    
+                    if (failCount > 0) {
+                        console.warn(`[ReviewManagement] Bulk action completed: ${successCount} succeeded, ${failCount} failed`);
+                    }
+                    
+                    // Reload data regardless of success/failure to sync with backend
+                    this.selectedReviews.clear();
+                    this.bulkConfirmType = null;
+                    this.loadReviews();
+                },
+                error: (error) => {
+                    console.error('[ReviewManagement] Bulk action error:', error);
+                    this.isProcessingBulk = false;
+                    // Still reload data and clear selection
+                    this.selectedReviews.clear();
+                    this.bulkConfirmType = null;
+                    this.loadReviews();
+                }
+            });
+        } else {
+            this.isProcessingBulk = false;
             this.selectedReviews.clear();
-        this.bulkConfirmType = null;
-            this.loadReviews();
-        this.applyFilters();
+            this.bulkConfirmType = null;
         }
+    }
 
     getBulkConfirmMessage(): string {
         if (!this.bulkConfirmType) return '';

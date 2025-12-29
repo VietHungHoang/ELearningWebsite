@@ -1,8 +1,47 @@
 
-<div class="mb-[25px] md:flex items-center justify-between">
-    <h5 class="!mb-0 text-gray-900 dark:text-white">
-        {{ 'payout.title' | translate }}
-    </h5>
+<div class="mb-[16px] md:flex items-center justify-between">
+    <div class="flex items-center gap-[12px]">
+        <h5 class="!mb-0 text-gray-900 dark:text-white">
+            {{ 'payout.title' | translate }}
+        </h5>
+        <div class="trezo-card-dropdown relative">
+            <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[4px] px-[10px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19] whitespace-nowrap" (click)="toggleSummaryFilterMenu()">
+                <span class="inline-block relative text-sm ltr:pr-[16px] rtl:pl-[16px]">
+                    {{ getSummaryFilterText() | translate }}
+                    <i class="ri-arrow-down-s-line text-base absolute ltr:-right-[2px] rtl:-left-[2px] top-1/2 -translate-y-1/2"></i>
+                </span>
+            </button>
+            @if (isSummaryFilterMenuOpen) {
+                <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[120px] z-[4] dark:bg-dark dark:shadow-none">
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('all')">
+                            {{ 'payout.summaryFilter.all' | translate }}
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('today')">
+                            {{ 'payout.summaryFilter.today' | translate }}
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('7days')">
+                            {{ 'payout.summaryFilter.last7Days' | translate }}
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('30days')">
+                            {{ 'payout.summaryFilter.last30Days' | translate }}
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('thisMonth')">
+                            {{ 'payout.summaryFilter.thisMonth' | translate }}
+                        </button>
+                    </li>
+                </ul>
+            }
+        </div>
+    </div>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
@@ -80,7 +119,7 @@
     <!-- Search, Filter and Export Section -->
     <div class="mb-[12px] p-[12px] bg-gray-50 dark:bg-[#15203c] rounded-lg border border-gray-200 dark:border-[#172036]">
         <div class="flex flex-wrap gap-[12px] items-end mb-[12px]">
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[500px]">
                 <form class="relative" (ngSubmit)="onSearchChange()">
                     <label class="leading-none absolute ltr:left-[10px] rtl:right-[10px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
                         <i class="material-symbols-outlined !text-[18px]">search</i>

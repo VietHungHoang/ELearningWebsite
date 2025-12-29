@@ -5,14 +5,13 @@ import { RouterLink, Router } from '@angular/router';
 import { UserService, Student } from '../../../services/user.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
-import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { I18nService } from '../../../i18n/i18n.service';
 
 @Component({
     selector: 'app-learner-list',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TruncatePipe, TranslatePipe],
+    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TranslatePipe],
     templateUrl: './learner-list.component.html',
     styleUrl: './learner-list.component.scss'
 })
@@ -63,9 +62,21 @@ export class LearnerListComponent implements OnInit {
 
     confirmDelete(): void {
         if (this.learnerToDelete) {
-            this.userService.deleteStudent(this.learnerToDelete.id);
-            this.showDeleteDialog = false;
-            this.learnerToDelete = null;
+            this.userService.deleteStudent(this.learnerToDelete.id).subscribe({
+                next: () => {
+                    // Reload learners after successful deletion
+                    this.loadLearners();
+                    this.showDeleteDialog = false;
+                    this.learnerToDelete = null;
+                },
+                error: (error) => {
+                    console.error('Error deleting student:', error);
+                    // Still reload to update UI (fallback already updated local state)
+                    this.loadLearners();
+                    this.showDeleteDialog = false;
+                    this.learnerToDelete = null;
+                }
+            });
         }
     }
 

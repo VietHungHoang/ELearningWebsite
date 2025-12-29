@@ -17,23 +17,20 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 export class ClassListComponent implements OnInit {
 [x: string]: any;
   classes: GroupClass[] = [];
-  filteredClasses: GroupClass[] = [];
   paginatedClasses: GroupClass[] = [];
 
   isStatusDropdownOpen = false;
-  isInstructorDropdownOpen = false;
-  instructors: { id: string; name: string }[] = [];
 
   selectedStatus: ClassStatus | 'all' = 'all';
-  selectedInstructor: string | 'all' = 'all';
   selectedDateRange = { start: '', end: '' };
   searchQuery = '';
 
   itemsPerPage = 5;
-  currentPage = 1;
+  currentPage = 0; // 0-based for backend
   totalClasses = 0;
   totalPages = 1;
   searchPlaceholder = '';
+  loading = false;
 
   constructor(
     private classService: ClassService,
@@ -49,16 +46,32 @@ export class ClassListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.classService.getAllClasses().subscribe(classes => {
-      this.classes = classes;
-      this.loadInstructors();
-      this.applyFilters();
-    });
+    this.loadClasses();
   }
 
-  loadInstructors(): void {
-    this.classService.getInstructorsList().subscribe(instructors => {
-      this.instructors = instructors;
+  loadClasses(): void {
+    this.loading = true;
+    const filters: any = {};
+    
+    if (this.selectedStatus !== 'all') {
+      filters.status = this.selectedStatus;
+    }
+    if (this.searchQuery.trim()) {
+      filters.search = this.searchQuery.trim();
+    }
+    if (this.selectedDateRange.start) {
+      filters.startDate = this.selectedDateRange.start;
+    }
+    if (this.selectedDateRange.end) {
+      filters.endDate = this.selectedDateRange.end;
+    }
+
+    this.classService.getClasses(this.currentPage, this.itemsPerPage, filters).subscribe(response => {
+      this.paginatedClasses = response.content;
+      this.classes = response.content; // For backward compatibility
+      this.totalClasses = response.totalElements;
+      this.totalPages = response.totalPages;
+      this.loading = false;
     });
   }
 
@@ -66,84 +79,39 @@ export class ClassListComponent implements OnInit {
     this.isStatusDropdownOpen = !this.isStatusDropdownOpen;
   }
 
-  toggleInstructorDropdown(): void {
-    this.isInstructorDropdownOpen = !this.isInstructorDropdownOpen;
-  }
-
   selectStatus(status: ClassStatus | 'all'): void {
     this.selectedStatus = status;
     this.isStatusDropdownOpen = false;
-    this.currentPage = 1;
-    this.applyFilters();
+    this.currentPage = 0;
+    this.loadClasses();
   }
 
-  selectInstructor(instructorId: string | 'all'): void {
-    this.selectedInstructor = instructorId;
-    this.isInstructorDropdownOpen = false;
-    this.currentPage = 1;
-    this.applyFilters();
-  }
 
   applyDateRangeFilter(): void {
     if (this.selectedDateRange.start && this.selectedDateRange.end) {
-      const startDate = new Date(this.selectedDateRange.start);
-      const endDate = new Date(this.selectedDateRange.end);
-      endDate.setHours(23, 59, 59, 999);
-
-      this.classService.getClassesByDateRange(startDate, endDate).subscribe(classes => {
-        this.classes = classes;
-        this.currentPage = 1;
-        this.applyFilters();
-      });
+      this.currentPage = 0;
+      this.loadClasses();
     }
   }
 
   clearDateRangeFilter(): void {
     this.selectedDateRange = { start: '', end: '' };
-    this.classService.getAllClasses().subscribe(classes => {
-      this.classes = classes;
-      this.currentPage = 1;
-      this.applyFilters();
-    });
+    this.currentPage = 0;
+    this.loadClasses();
   }
 
   onSearchChange(query: string): void {
     this.searchQuery = query;
-    this.currentPage = 1;
-    this.applyFilters();
-  }
-
-  applyFilters(): void {
-    let result = [...this.classes];
-
-    if (this.selectedStatus !== 'all') {
-      result = result.filter(c => c.status === this.selectedStatus);
-    }
-
-    if (this.searchQuery.trim()) {
-      const lowerQuery = this.searchQuery.toLowerCase();
-      result = result.filter(c =>
-        c.class_name.toLowerCase().includes(lowerQuery) ||
-        c.instructor_name.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    this.filteredClasses = result;
-    this.totalClasses = result.length;
-    this.totalPages = Math.ceil(this.totalClasses / this.itemsPerPage);
-    this.updatePaginatedClasses();
-  }
-
-  updatePaginatedClasses(): void {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedClasses = this.filteredClasses.slice(startIndex, endIndex);
+    this.currentPage = 0;
+    this.loadClasses();
   }
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.updatePaginatedClasses();
+    // Convert from 1-based to 0-based
+    const zeroBasedPage = page - 1;
+    if (zeroBasedPage >= 0 && zeroBasedPage < this.totalPages) {
+      this.currentPage = zeroBasedPage;
+      this.loadClasses();
     }
   }
 
@@ -161,7 +129,7 @@ export class ClassListComponent implements OnInit {
   }
 
   getSttNumber(index: number): number {
-    return (this.currentPage - 1) * this.itemsPerPage + index + 1;
+    return this.currentPage * this.itemsPerPage + index + 1;
   }
 
   getStatusClass(status: ClassStatus): string {
@@ -184,18 +152,12 @@ export class ClassListComponent implements OnInit {
     return this.getStatusText(this.selectedStatus as ClassStatus);
   }
 
-  getSelectedInstructorText(): string {
-    if (this.selectedInstructor === 'all') return 'All Instructors';
-    const instructor = this.instructors.find(i => i.id === this.selectedInstructor);
-    return instructor ? instructor.name : 'All Instructors';
-  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.dropdown-container')) {
       this.isStatusDropdownOpen = false;
-      this.isInstructorDropdownOpen = false;
     }
   }
 
@@ -208,20 +170,25 @@ export class ClassListComponent implements OnInit {
   }
 
   getEndRange(): number {
-    return Math.min(this.currentPage * this.itemsPerPage, this.totalClasses);
+    return Math.min((this.currentPage + 1) * this.itemsPerPage, this.totalClasses);
+  }
+
+  getStartRange(): number {
+    return this.currentPage * this.itemsPerPage + 1;
   }
 
   getVisiblePages(): number[] {
     const visiblePages: number[] = [];
     const maxVisible = 5;
+    const currentPageOneBased = this.currentPage + 1; // Convert to 1-based for display
 
     if (this.totalPages <= maxVisible) {
       for (let i = 1; i <= this.totalPages; i++) {
         visiblePages.push(i);
       }
     } else {
-      const startPage = Math.max(1, this.currentPage - 2);
-      const endPage = Math.min(this.totalPages, this.currentPage + 2);
+      const startPage = Math.max(1, currentPageOneBased - 2);
+      const endPage = Math.min(this.totalPages, currentPageOneBased + 2);
 
       if (startPage > 1) {
         visiblePages.push(1);

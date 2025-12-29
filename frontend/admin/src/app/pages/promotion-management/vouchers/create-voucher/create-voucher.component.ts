@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { VoucherService } from '../../../../services/voucher.service';
+import { TranslatePipe } from '../../../../i18n/translate.pipe';
+import { I18nService } from '../../../../i18n/i18n.service';
 
 @Component({
   selector: 'app-create-voucher',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './create-voucher.component.html',
   styleUrl: './create-voucher.component.scss'
 })
@@ -17,12 +19,7 @@ export class CreateVoucherComponent implements OnInit {
   message: { type: 'success' | 'error', text: string } | null = null;
 
   // Student Segment Management
-  studentSegments: { id: string; label: string; value: string }[] = [
-    { id: 'all', label: 'All Students', value: 'all' },
-    { id: 'top-spenders', label: 'Top Spenders (Highest spending in month)', value: 'top-spenders' },
-    { id: 'new-students', label: 'New Students (Registered < 30 days)', value: 'new-students' },
-    { id: 'no-spending-1month', label: 'No Spending (No purchase in 1 month)', value: 'no-spending-1month' }
-  ];
+  studentSegments: { id: string; label: string; value: string }[] = [];
   isAddingSegment = false;
   newSegmentLabel = '';
   isSegmentDropdownOpen = false;
@@ -30,11 +27,26 @@ export class CreateVoucherComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private voucherService: VoucherService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private i18nService: I18nService
+  ) {
+    this.initStudentSegments();
+  }
 
   ngOnInit(): void {
     this.initForm();
+    // Update segments when language changes
+    this.i18nService.currentLanguage$();
+    this.initStudentSegments();
+  }
+
+  initStudentSegments(): void {
+    this.studentSegments = [
+      { id: 'all', label: this.i18nService.translate('voucherManagement.createVoucher.studentSegments.allStudents'), value: 'all' },
+      { id: 'top-spenders', label: this.i18nService.translate('voucherManagement.createVoucher.studentSegments.topSpenders'), value: 'top-spenders' },
+      { id: 'new-students', label: this.i18nService.translate('voucherManagement.createVoucher.studentSegments.newStudents'), value: 'new-students' },
+      { id: 'no-spending-1month', label: this.i18nService.translate('voucherManagement.createVoucher.studentSegments.noSpending1Month'), value: 'no-spending-1month' }
+    ];
   }
 
   initForm(): void {
@@ -90,17 +102,20 @@ export class CreateVoucherComponent implements OnInit {
       this.isLoading = true;
       this.message = null;
 
-      this.voucherService.createVoucher(this.voucherForm.value).then(() => {
-        this.isLoading = false;
-        this.message = { type: 'success', text: 'Voucher created successfully!' };
+      this.voucherService.createVoucher(this.voucherForm.value).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.message = { type: 'success', text: this.i18nService.translate('voucherManagement.createVoucher.messages.createSuccess') };
 
-        setTimeout(() => {
-          this.router.navigate(['/dashboard/promotion/vouchers']);
-        }, 1500);
-      }).catch((error: any) => {
-        this.isLoading = false;
-        this.message = { type: 'error', text: 'Failed to create voucher. Please try again.' };
-        console.error('Error creating voucher:', error);
+          setTimeout(() => {
+            this.router.navigate(['/dashboard/promotion/vouchers']);
+          }, 1500);
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          this.message = { type: 'error', text: this.i18nService.translate('voucherManagement.createVoucher.messages.createError') };
+          console.error('Error creating voucher:', error);
+        }
       });
     } else {
       this.showValidationErrors();
@@ -169,7 +184,7 @@ export class CreateVoucherComponent implements OnInit {
         this.newSegmentLabel = '';
         this.isSegmentDropdownOpen = false;
       } else {
-        this.message = { type: 'error', text: 'This student segment already exists!' };
+        this.message = { type: 'error', text: this.i18nService.translate('voucherManagement.createVoucher.messages.segmentExists') };
       }
     }
   }
@@ -177,6 +192,6 @@ export class CreateVoucherComponent implements OnInit {
   getSelectedSegmentLabel(): string {
     const selectedValue = this.voucherForm.get('targetAudience')?.value;
     const segment = this.studentSegments.find(s => s.value === selectedValue);
-    return segment ? segment.label : 'Select Student Segment';
+    return segment ? segment.label : this.i18nService.translate('voucherManagement.createVoucher.fields.selectStudentSegment');
   }
 }

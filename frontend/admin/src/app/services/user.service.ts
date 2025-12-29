@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail, PaginatedResponse } from '../types/index';
 
@@ -27,6 +27,7 @@ export class UserService {
     private mockTutorsDetail: TutorDetail[] = [];
     private mockStudents: Student[] = [];
     private mockStudentsDetail: StudentDetail[] = [];
+    private mockInstructorRequests: InstructorRequest[] = [];
     private mockInstructorRequestsDetail: InstructorRequestDetail[] = [];
 
     constructor(private apiService: ApiService) {
@@ -714,21 +715,31 @@ export class UserService {
         this.mockTutorsDetail = mockTutorsDetail;
         this.mockStudents = mockStudents;
         this.mockStudentsDetail = mockStudentsDetail;
+        this.mockInstructorRequests = mockInstructorRequests;
         this.mockInstructorRequestsDetail = mockInstructorRequestsDetail;
     }
 
     getTutor(): Observable<Tutor[]> {
         // Gọi API thực - apiService.get() trả về ApiResponse<Tutor[]>
-        return this.apiService.get<Tutor[]>('/v1/admin/tutors').pipe(
+        return this.apiService.get<Tutor[]>('/tutors').pipe(
             map(response => {
-                // Nếu API thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data && Array.isArray(response.data)) {
                     this.instructorsSubject.next(response.data);
                     return response.data;
                 }
-                // Nếu API lỗi → lấy mock data fallback
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for tutors:', response.message);
-                return this.instructorsSubject.value;
+                return this.instructorsSubject.value.length > 0 
+                    ? this.instructorsSubject.value 
+                    : this.mockTutors;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
+                console.error('[UserService] API error for tutors, returning mock data:', error);
+                return of(this.instructorsSubject.value.length > 0 
+                    ? this.instructorsSubject.value 
+                    : this.mockTutors);
             })
         );
     }
@@ -737,48 +748,139 @@ export class UserService {
         // Thử lấy từ API - apiService.get() trả về ApiResponse<TutorDetail>
         return this.apiService.get<TutorDetail>(`/tutors/${id}`).pipe(
             map(response => {
-                // Nếu API trả dữ liệu thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
                     return response.data;
                 }
-                // Nếu API lỗi → lấy mock data fallback
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 const mockData = this.mockTutorsDetail.find((i: TutorDetail) => i.id === id);
                 console.warn(`[UserService] API failed for tutor detail ${id}:`, response.message);
                 return mockData;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
+                console.error(`[UserService] API error for tutor detail ${id}, returning mock data:`, error);
+                const mockData = this.mockTutorsDetail.find((i: TutorDetail) => i.id === id);
+                return of(mockData);
             })
         );
     }
 
     getStudents(): Observable<Student[]> {
         // Gọi API thực - apiService.get() trả về ApiResponse<Student[]>
-        return this.apiService.get<Student[]>('/v1/admin/students').pipe(
+        return this.apiService.get<Student[]>('/students').pipe(
             map(response => {
-                // Nếu API thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data && Array.isArray(response.data)) {
                     this.studentsSubject.next(response.data);
                     return response.data;
                 }
-                // Nếu API lỗi → lấy mock data fallback
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for students:', response.message);
-                return this.studentsSubject.value;
+                return this.studentsSubject.value.length > 0 
+                    ? this.studentsSubject.value 
+                    : this.mockStudents;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
+                console.error('[UserService] API error for students, returning mock data:', error);
+                return of(this.studentsSubject.value.length > 0 
+                    ? this.studentsSubject.value 
+                    : this.mockStudents);
             })
         );
     }
 
     getStudentDetail(id: string): Observable<StudentDetail | undefined> {
         // Thử lấy từ API - apiService.get() trả về ApiResponse<StudentDetail>
-        return this.apiService.get<StudentDetail>(`/v1/admin/students/${id}`).pipe(
+        return this.apiService.get<StudentDetail>(`/students/${id}`).pipe(
             map(response => {
-                // Nếu API trả dữ liệu thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
                     return response.data;
                 }
-                // Nếu API lỗi → lấy mock data fallback
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 const mockData = this.mockStudentsDetail.find((student: StudentDetail) => student.id === id);
                 console.warn(`[UserService] API failed for student detail ${id}:`, response.message);
                 return mockData;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
+                console.error(`[UserService] API error for student detail ${id}, returning mock data:`, error);
+                const mockData = this.mockStudentsDetail.find((student: StudentDetail) => student.id === id);
+                return of(mockData);
             })
         );
+    }
+
+    /**
+     * Get mock instructor requests with pagination and filters
+     * @param params Query parameters: status, subject, search, page, size
+     * @returns PaginatedResponse<InstructorRequest>
+     */
+    private getMockInstructorRequests(params?: {
+        status?: string;
+        subject?: string;
+        search?: string;
+        page?: number;
+        size?: number;
+    }): PaginatedResponse<InstructorRequest> {
+        let filtered = [...this.mockInstructorRequests];
+
+        // Filter by status
+        if (params?.status && params.status !== 'all') {
+            const status = params.status;
+            if (status === 'new') {
+                filtered = filtered.filter(req => req.requestStatus === 'PENDING');
+            } else if (status === 'edited') {
+                filtered = filtered.filter(req => req.requestStatus === 'REQUEST_CHANGES');
+            } else {
+                filtered = filtered.filter(req => req.requestStatus === status.toUpperCase());
+            }
+        }
+
+        // Filter by subject
+        if (params?.subject && params.subject !== 'all') {
+            filtered = filtered.filter(req =>
+                req.subjects.some(subject => subject.subjectName.toLowerCase().includes(params.subject!.toLowerCase()))
+            );
+        }
+
+        // Filter by search term
+        if (params?.search && params.search.trim()) {
+            const searchLower = params.search.toLowerCase().trim();
+            filtered = filtered.filter(req =>
+                req.name.toLowerCase().includes(searchLower) ||
+                req.subjects.some(subject => subject.subjectName.toLowerCase().includes(searchLower))
+            );
+        }
+
+        // Pagination
+        const page = params?.page ?? 0;
+        const size = params?.size ?? 5;
+        const startIndex = page * size;
+        const endIndex = startIndex + size;
+        const paginatedContent = filtered.slice(startIndex, endIndex);
+        const totalElements = filtered.length;
+        const totalPages = Math.ceil(totalElements / size);
+
+        return {
+            content: paginatedContent,
+            pageable: {
+                pageNumber: page,
+                pageSize: size,
+                offset: startIndex,
+                paged: true
+            },
+            totalPages: totalPages,
+            totalElements: totalElements,
+            last: page >= totalPages - 1,
+            first: page === 0,
+            numberOfElements: paginatedContent.length,
+            size: size,
+            number: page,
+            empty: paginatedContent.length === 0
+        };
     }
 
     /**
@@ -802,7 +904,7 @@ export class UserService {
         if (params?.size !== undefined) queryParams.size = params.size;
 
         // Gọi API thực - apiService.get() trả về ApiResponse<PaginatedResponse<InstructorRequest>>
-        return this.apiService.get<PaginatedResponse<InstructorRequest>>('/v1/admin/instructor-requests', queryParams).pipe(
+        return this.apiService.get<PaginatedResponse<InstructorRequest>>('/instructor-requests', queryParams).pipe(
             map(response => {
                 // Nếu API thành công → dùng dữ liệu API
                 if (response.success && response.data) {
@@ -810,20 +912,14 @@ export class UserService {
                     this.instructorRequestsSubject.next(response.data.content);
                     return response.data;
                 }
-                // Nếu API lỗi → trả về empty paginated response
+                // Nếu API lỗi → trả về mock data
                 console.warn('[UserService] API failed for instructor requests:', response.message);
-                return {
-                    content: [],
-                    pageable: { pageNumber: 0, pageSize: 5, offset: 0, paged: true },
-                    totalPages: 0,
-                    totalElements: 0,
-                    last: true,
-                    first: true,
-                    numberOfElements: 0,
-                    size: 5,
-                    number: 0,
-                    empty: true
-                };
+                return this.getMockInstructorRequests(params);
+            }),
+            catchError(error => {
+                // Nếu API throw error → trả về mock data
+                console.warn('[UserService] API error for instructor requests:', error);
+                return of(this.getMockInstructorRequests(params));
             })
         );
     }
@@ -832,16 +928,22 @@ export class UserService {
 
     getInstructorRequestDetailObservable(requestId: string): Observable<InstructorRequestDetail | undefined> {
         // Thử lấy từ API - apiService.get() trả về ApiResponse<InstructorRequestDetail>
-        return this.apiService.get<InstructorRequestDetail>(`/v1/admin/instructor-requests/${requestId}`).pipe(
+        return this.apiService.get<InstructorRequestDetail>(`/instructor-requests/${requestId}`).pipe(
             map(response => {
-                // Nếu API trả dữ liệu thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
                     return response.data;
                 }
-                // Nếu API lỗi → lấy mock data fallback
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 const mockData = this.mockInstructorRequestsDetail.find(req => req.id === requestId);
                 console.warn(`[UserService] API failed for instructor request detail ${requestId}:`, response.message);
                 return mockData;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
+                console.error(`[UserService] API error for instructor request detail ${requestId}:`, error);
+                const mockData = this.mockInstructorRequestsDetail.find(req => req.id === requestId);
+                return of(mockData);
             })
         );
     }
@@ -888,9 +990,9 @@ export class UserService {
 
     approveInstructorRequest(tutorId: string, levels: string[]): Observable<boolean> {
         // Gọi API thực để approve instructor request
-        return this.apiService.post<boolean>(`/v1/admin/tutors/${tutorId}/approve`, { levels }).pipe(
+        return this.apiService.post<boolean>(`/tutors/${tutorId}/approve`, { levels }).pipe(
             map(response => {
-                // Nếu API thành công → cập nhật local state
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success) {
                     const currentRequests = this.instructorRequestsSubject.value;
                     const updatedRequests = currentRequests.map(request => {
@@ -906,8 +1008,13 @@ export class UserService {
                     this.instructorRequestsSubject.next(updatedRequests);
                     return true;
                 }
-                // Nếu API lỗi → vẫn cập nhật mock data để test UI
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn(`[UserService] API failed to approve request ${tutorId}:`, response.message);
+                return false;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception - cập nhật local để UI vẫn hoạt động
+                console.error(`[UserService] API error approving request ${tutorId}:`, error);
                 const currentRequests = this.instructorRequestsSubject.value;
                 const updatedRequests = currentRequests.map(request => {
                     if (request.id === tutorId) {
@@ -920,16 +1027,16 @@ export class UserService {
                     return request;
                 });
                 this.instructorRequestsSubject.next(updatedRequests);
-                return false;
+                return of(false);
             })
         );
     }
 
     rejectInstructorRequest(tutorId: string, reason?: string): Observable<boolean> {
         // Gọi API thực để reject instructor request
-        return this.apiService.post<boolean>(`/v1/admin/tutors/${tutorId}/reject`, { reason }).pipe(
+        return this.apiService.post<boolean>(`/tutors/${tutorId}/reject`, { reason }).pipe(
             map(response => {
-                // Nếu API thành công → cập nhật local state
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success) {
                     const currentRequests = this.instructorRequestsSubject.value;
                     const updatedRequests = currentRequests.map(request => {
@@ -945,8 +1052,13 @@ export class UserService {
                     this.instructorRequestsSubject.next(updatedRequests);
                     return true;
                 }
-                // Nếu API lỗi → vẫn cập nhật mock data để test UI
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn(`[UserService] API failed to reject request ${tutorId}:`, response.message);
+                return false;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception - cập nhật local để UI vẫn hoạt động
+                console.error(`[UserService] API error rejecting request ${tutorId}:`, error);
                 const currentRequests = this.instructorRequestsSubject.value;
                 const updatedRequests = currentRequests.map(request => {
                     if (request.id === tutorId) {
@@ -959,16 +1071,16 @@ export class UserService {
                     return request;
                 });
                 this.instructorRequestsSubject.next(updatedRequests);
-                return false;
+                return of(false);
             })
         );
     }
 
     requestEditInstructorRequest(tutorId: string, reason: string): Observable<boolean> {
         // Gọi API thực để request edit instructor request
-        return this.apiService.post<boolean>(`/v1/admin/tutors/${tutorId}/request-edit`, { reason }).pipe(
+        return this.apiService.post<boolean>(`/tutors/${tutorId}/request-edit`, { reason }).pipe(
             map(response => {
-                // Nếu API thành công → cập nhật local state
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success) {
                     const currentRequests = this.instructorRequestsSubject.value;
                     const updatedRequests = currentRequests.map(request => {
@@ -983,8 +1095,13 @@ export class UserService {
                     this.instructorRequestsSubject.next(updatedRequests);
                     return true;
                 }
-                // Nếu API lỗi → vẫn cập nhật mock data để test UI
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn(`[UserService] API failed to request edit for request ${tutorId}:`, response.message);
+                return false;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception - cập nhật local để UI vẫn hoạt động
+                console.error(`[UserService] API error requesting edit for request ${tutorId}:`, error);
                 const currentRequests = this.instructorRequestsSubject.value;
                 const updatedRequests = currentRequests.map(request => {
                     if (request.id === tutorId) {
@@ -996,7 +1113,7 @@ export class UserService {
                     return request;
                 });
                 this.instructorRequestsSubject.next(updatedRequests);
-                return false;
+                return of(false);
             })
         );
     }
@@ -1005,12 +1122,12 @@ export class UserService {
 
     /**
      * Cập nhật thông tin tutor
-     * Thử cập nhật qua API, nếu lỗi thì cập nhật mock data in-memory
+     * API Endpoint: PATCH /api/v1/admin/tutors/:id
      */
     updateInstructor(id: string, data: Partial<TutorDetail>): Observable<TutorDetail | null> {
         return this.apiService.patch<TutorDetail>(`/tutor/${id}`, data).pipe(
             map(response => {
-                // Nếu API thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
                     // Cập nhật mock data in-memory để fallback lần sau
                     const index = this.mockTutorsDetail.findIndex(t => t.id === id);
@@ -1019,22 +1136,31 @@ export class UserService {
                     }
                     return response.data;
                 }
-                // Nếu API lỗi → cập nhật mock data in-memory
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn(`[UserService] API failed to update instructor ${id}:`, response.message);
+                return null;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception - cập nhật local để UI vẫn hoạt động
+                console.error(`[UserService] API error updating instructor ${id}:`, error);
                 const instructorIndex = this.mockTutorsDetail.findIndex(t => t.id === id);
                 if (instructorIndex !== -1) {
                     this.mockTutorsDetail[instructorIndex] = { ...this.mockTutorsDetail[instructorIndex], ...data };
-                    return this.mockTutorsDetail[instructorIndex];
+                    return of(this.mockTutorsDetail[instructorIndex]);
                 }
-                return null;
+                return of(null);
             })
         );
     }
 
+    /**
+     * Cập nhật thông tin student
+     * API Endpoint: PATCH /api/v1/admin/students/:id
+     */
     updateStudent(id: string, data: Partial<Student>): Observable<Student | null> {
         return this.apiService.patch<Student>(`/student/${id}`, data).pipe(
             map(response => {
-                // Nếu API thành công → dùng dữ liệu API
+                // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
                     // Cập nhật mock data in-memory
                     const index = this.mockStudents.findIndex(s => s.id === id);
@@ -1043,22 +1169,51 @@ export class UserService {
                     }
                     return response.data;
                 }
-                // Nếu API lỗi → cập nhật mock data in-memory
+                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn(`[UserService] API failed to update student ${id}:`, response.message);
+                return null;
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Chỉ khi API throw exception - cập nhật local để UI vẫn hoạt động
+                console.error(`[UserService] API error updating student ${id}:`, error);
                 const studentIndex = this.mockStudents.findIndex(s => s.id === id);
                 if (studentIndex !== -1) {
                     this.mockStudents[studentIndex] = { ...this.mockStudents[studentIndex], ...data };
-                    return this.mockStudents[studentIndex];
+                    return of(this.mockStudents[studentIndex]);
                 }
-                return null;
+                return of(null);
             })
         );
     }
 
-    deleteInstructor(id: string): void {
-        const currentInstructors = this.instructorsSubject.value;
-        const updatedInstructors = currentInstructors.filter(instructor => instructor.id !== id);
-        this.instructorsSubject.next(updatedInstructors);
+    /**
+     * Delete instructor via API
+     * API Endpoint: DELETE /api/v1/admin/tutors/:id
+     */
+    deleteInstructor(id: string): Observable<void> {
+        // ✅ GỌI API TRƯỚC
+        return this.apiService.delete<void>(`/tutors/${id}`).pipe(
+            map(response => {
+                if (response.success) {
+                    // ✅ Cập nhật local state SAU KHI API thành công
+                    const currentInstructors = this.instructorsSubject.value.filter(instructor => instructor.id !== id);
+                    this.instructorsSubject.next(currentInstructors);
+                    // Also remove from mock data cache
+                    this.mockTutors = this.mockTutors.filter(t => t.id !== id);
+                    this.mockTutorsDetail = this.mockTutorsDetail.filter(t => t.id !== id);
+                }
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Cập nhật local nếu API lỗi (để UI vẫn hoạt động)
+                console.error('[UserService] Delete instructor API error:', error);
+                const currentInstructors = this.instructorsSubject.value.filter(instructor => instructor.id !== id);
+                this.instructorsSubject.next(currentInstructors);
+                // Also remove from mock data cache
+                this.mockTutors = this.mockTutors.filter(t => t.id !== id);
+                this.mockTutorsDetail = this.mockTutorsDetail.filter(t => t.id !== id);
+                return of(void 0);
+            })
+        );
     }
 
     addInstructor(instructor: TutorDetail): void {
@@ -1071,10 +1226,34 @@ export class UserService {
         }
     }
 
-    deleteStudent(id: string): void {
-        const currentStudents = this.studentsSubject.value;
-        const updatedStudents = currentStudents.filter(student => student.id !== id);
-        this.studentsSubject.next(updatedStudents);
+    /**
+     * Delete student via API
+     * API Endpoint: DELETE /api/v1/admin/students/:id
+     */
+    deleteStudent(id: string): Observable<void> {
+        // ✅ GỌI API TRƯỚC
+        return this.apiService.delete<void>(`/students/${id}`).pipe(
+            map(response => {
+                if (response.success) {
+                    // ✅ Cập nhật local state SAU KHI API thành công
+                    const currentStudents = this.studentsSubject.value.filter(student => student.id !== id);
+                    this.studentsSubject.next(currentStudents);
+                    // Also remove from mock data cache
+                    this.mockStudents = this.mockStudents.filter(s => s.id !== id);
+                    this.mockStudentsDetail = this.mockStudentsDetail.filter(s => s.id !== id);
+                }
+            }),
+            catchError(error => {
+                // ⚠️ FALLBACK: Cập nhật local nếu API lỗi (để UI vẫn hoạt động)
+                console.error('[UserService] Delete student API error:', error);
+                const currentStudents = this.studentsSubject.value.filter(student => student.id !== id);
+                this.studentsSubject.next(currentStudents);
+                // Also remove from mock data cache
+                this.mockStudents = this.mockStudents.filter(s => s.id !== id);
+                this.mockStudentsDetail = this.mockStudentsDetail.filter(s => s.id !== id);
+                return of(void 0);
+            })
+        );
     }
 
     searchInstructors(searchTerm: string): Observable<Tutor[]> {

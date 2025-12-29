@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
@@ -19,9 +19,11 @@ import { isPlatformBrowser } from '@angular/common';
     `,
     styleUrl: './payment-method-chart.component.scss'
 })
-export class PaymentMethodChartComponent implements OnInit {
+export class PaymentMethodChartComponent implements OnInit, OnChanges {
     private isBrowser: boolean;
     private chartInstance: any;
+
+    @Input() paymentMethodsData: { series: number[]; labels: string[] } | null = null;
 
     constructor(@Inject(PLATFORM_ID) private platformId: any) {
         this.isBrowser = isPlatformBrowser(this.platformId);
@@ -31,19 +33,28 @@ export class PaymentMethodChartComponent implements OnInit {
         this.loadChart();
     }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['paymentMethodsData'] && this.paymentMethodsData && this.chartInstance) {
+            this.updateChart();
+        }
+    }
+
     private async loadChart(): Promise<void> {
         if (this.isBrowser) {
             try {
                 const ApexCharts = (await import('apexcharts')).default;
 
+                const series = this.paymentMethodsData?.series || [60, 40];
+                const labels = this.paymentMethodsData?.labels || ['VNPay', 'Momo'];
+
                 const options = {
-                    series: [60, 40],
+                    series,
                     chart: {
                         type: 'donut',
                         height: 280
                     },
                     colors: ['#9CAAFF', '#605DFF'],
-                    labels: ['VNPay', 'Momo'],
+                    labels,
                     plotOptions: {
                         pie: {
                             donut: {
@@ -81,6 +92,15 @@ export class PaymentMethodChartComponent implements OnInit {
             } catch (error) {
                 console.error('Error loading ApexCharts:', error);
             }
+        }
+    }
+
+    private updateChart(): void {
+        if (this.chartInstance && this.paymentMethodsData) {
+            this.chartInstance.updateOptions({
+                series: this.paymentMethodsData.series,
+                labels: this.paymentMethodsData.labels
+            });
         }
     }
 }

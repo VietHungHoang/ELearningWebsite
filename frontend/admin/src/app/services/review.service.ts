@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApiService } from './api.service';
+import { PaginatedResponse } from '../types/pagination';
 
 export interface Review {
     id: string;
@@ -19,6 +22,14 @@ export interface Review {
     updatedDate?: string;
 }
 
+export interface ReviewFilters {
+    type: 'flagged' | 'all';
+    flagReason?: 'low_rating' | 'bad_words' | 'spam' | 'all';
+    visibility?: 'all' | 'visible' | 'hidden';
+    rating?: number | 'all';
+    search?: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -26,7 +37,9 @@ export class ReviewService {
     private reviewsSubject = new BehaviorSubject<Review[]>([]);
     public reviews$ = this.reviewsSubject.asObservable();
 
-    constructor() {
+    private mockReviews: Review[] = [];
+
+    constructor(private apiService: ApiService) {
         this.loadMockData();
     }
 
@@ -194,12 +207,156 @@ export class ReviewService {
             }
         ];
 
+        this.mockReviews = mockReviews;
         this.reviewsSubject.next(mockReviews);
     }
 
-    // Get all reviews
-    getReviews(): Observable<Review[]> {
+    /**
+     * Get paginated reviews with filters
+     * @param page Page number (0-based)
+     * @param size Page size
+     * @param filters Filter options
+     * @returns Observable of paginated reviews
+     */
+    getReviews(page: number = 0, size: number = 10, filters?: ReviewFilters): Observable<PaginatedResponse<Review>> {
+        const params: any = {
+            page,
+            size
+        };
+
+        if (filters) {
+            params.type = filters.type;
+            
+            if (filters.type === 'flagged') {
+                if (filters.flagReason && filters.flagReason !== 'all') {
+                    params.flagReason = filters.flagReason;
+                }
+            } else if (filters.type === 'all') {
+                if (filters.visibility && filters.visibility !== 'all') {
+                    params.visibility = filters.visibility;
+                }
+                if (filters.rating && filters.rating !== 'all') {
+                    params.rating = filters.rating;
+                }
+                if (filters.search && filters.search.trim()) {
+                    params.search = filters.search.trim();
+                }
+            }
+        }
+
+        console.log('[ReviewService] getReviews called:', { page, size, filters, params });
+        
+        return this.apiService.get<PaginatedResponse<Review>>('/reviews', params).pipe(
+            map(response => {
+                console.log('[ReviewService] API response:', response);
+                if (response.success && response.data) {
+                    console.log('[ReviewService] API success - data received:', {
+                        totalElements: response.data.totalElements,
+                        contentLength: response.data.content.length,
+                        content: response.data.content.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged }))
+                    });
+                    return response.data;
+                }
+                console.warn('[ReviewService] API failed, returning mock data:', response.message);
+                const mockResponse = this.getMockPaginatedResponse(page, size, filters);
+                console.log('[ReviewService] Mock data response:', {
+                    totalElements: mockResponse.totalElements,
+                    contentLength: mockResponse.content.length,
+                    content: mockResponse.content.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged }))
+                });
+                return mockResponse;
+            }),
+            catchError(error => {
+                console.error('[ReviewService] API error, returning mock data:', error);
+                const mockResponse = this.getMockPaginatedResponse(page, size, filters);
+                console.log('[ReviewService] Mock data response (error fallback):', {
+                    totalElements: mockResponse.totalElements,
+                    contentLength: mockResponse.content.length,
+                    content: mockResponse.content.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged }))
+                });
+                return of(mockResponse);
+            })
+        );
+    }
+
+    /**
+     * Get all reviews (for backward compatibility)
+     * @deprecated Use getReviews() instead
+     */
+    getReviewsOld(): Observable<Review[]> {
         return this.reviews$;
+    }
+
+    /**
+     * Get mock paginated response
+     */
+    private getMockPaginatedResponse(page: number, size: number, filters?: ReviewFilters): PaginatedResponse<Review> {
+        console.log('[ReviewService] getMockPaginatedResponse called:', { page, size, filters });
+        console.log('[ReviewService] Mock reviews before filter:', this.mockReviews.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged })));
+        
+        let filtered = [...this.mockReviews];
+
+        // Apply filters
+        if (filters) {
+            if (filters.type === 'flagged') {
+                // Tab "flagged": Show all flagged reviews (both visible and hidden)
+                // They will be displayed with appropriate badge
+                console.log('[ReviewService] Filtering for flagged tab - before filter:', filtered.length);
+                filtered = filtered.filter(r => r.isFlagged === true);
+                console.log('[ReviewService] After isFlagged filter:', filtered.length, filtered.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged })));
+                if (filters.flagReason && filters.flagReason !== 'all') {
+                    filtered = filtered.filter(r => r.flagReason === filters.flagReason);
+                    console.log('[ReviewService] After flagReason filter:', filtered.length);
+                }
+            } else if (filters.type === 'all') {
+                // Tab "all": Show all reviews (visible and hidden) unless filtered by visibility
+                console.log('[ReviewService] Filtering for all tab - before filter:', filtered.length);
+                if (filters.visibility && filters.visibility !== 'all') {
+                    filtered = filtered.filter(r => r.status === filters.visibility);
+                    console.log('[ReviewService] After visibility filter:', filtered.length);
+                }
+                if (filters.rating && filters.rating !== 'all') {
+                    filtered = filtered.filter(r => r.rating === filters.rating);
+                    console.log('[ReviewService] After rating filter:', filtered.length);
+                }
+                if (filters.search && filters.search.trim()) {
+                    const lowerQuery = filters.search.toLowerCase();
+                    filtered = filtered.filter(r =>
+                        r.learnerName.toLowerCase().includes(lowerQuery) ||
+                        r.tutorName.toLowerCase().includes(lowerQuery) ||
+                        r.content.toLowerCase().includes(lowerQuery)
+                    );
+                    console.log('[ReviewService] After search filter:', filtered.length);
+                }
+            }
+        }
+        
+        console.log('[ReviewService] Filtered reviews after all filters:', filtered.length, filtered.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged })));
+
+        // Paginate
+        const totalElements = filtered.length;
+        const totalPages = Math.ceil(totalElements / size);
+        const startIndex = page * size;
+        const endIndex = startIndex + size;
+        const content = filtered.slice(startIndex, endIndex);
+
+        return {
+            content,
+            pageable: {
+                pageNumber: page,
+                pageSize: size,
+                offset: startIndex,
+                paged: true
+            },
+            totalPages,
+            totalElements,
+            last: page >= totalPages - 1,
+            first: page === 0,
+            numberOfElements: content.length,
+            size,
+            number: page,
+            empty: content.length === 0
+        };
     }
 
     // Get flagged reviews (for moderation queue)
@@ -217,17 +374,61 @@ export class ReviewService {
         return this.reviewsSubject.value.find(r => r.id === id);
     }
 
-    // Make review visible
-    makeReviewVisible(id: string): boolean {
-        const reviews = this.reviewsSubject.value;
-        const review = reviews.find(r => r.id === id);
-        if (!review) return false;
+    /**
+     * Make review visible (restore)
+     * @param id Review ID
+     * @returns Observable<boolean> - true if successful, false otherwise
+     */
+    makeReviewVisible(id: string): Observable<boolean> {
+        if (!id || id.trim() === '') {
+            console.error('[ReviewService] Invalid review ID:', id);
+            return of(false);
+        }
 
-        review.status = 'visible';
-        review.isFlagged = false;
-        review.updatedDate = this.getCurrentDate();
-        this.reviewsSubject.next([...reviews]);
-        return true;
+        console.log('[ReviewService] Making review visible:', id);
+        return this.apiService.patch<boolean>(`/reviews/${id}/visible`, {}).pipe(
+            map(response => {
+                if (response.success) {
+                    // Update local mock data for fallback
+                    const review = this.mockReviews.find(r => r.id === id);
+                    if (review) {
+                        console.log('[ReviewService] Before making visible - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                        review.status = 'visible';
+                        // Keep isFlagged as is - don't change it when making visible
+                        review.updatedDate = this.getCurrentDate();
+                        console.log('[ReviewService] After making visible - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                    } else {
+                        console.warn('[ReviewService] Review not found in mock data:', id);
+                    }
+                    console.log('[ReviewService] Review made visible successfully:', id);
+                    return true;
+                }
+                console.warn('[ReviewService] API returned unsuccessful response:', response.message);
+                // Update local mock data for fallback
+                const review = this.mockReviews.find(r => r.id === id);
+                if (review) {
+                    console.log('[ReviewService] Before making visible (unsuccessful) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                    review.status = 'visible';
+                    // Keep isFlagged as is - don't change it when making visible
+                    review.updatedDate = this.getCurrentDate();
+                    console.log('[ReviewService] After making visible (unsuccessful) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                }
+                return false;
+            }),
+            catchError(error => {
+                console.error('[ReviewService] API error making review visible:', error);
+                // Update local mock data for fallback
+                const review = this.mockReviews.find(r => r.id === id);
+                if (review) {
+                    console.log('[ReviewService] Before making visible (error) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                    review.status = 'visible';
+                    // Keep isFlagged as is - don't change it when making visible
+                    review.updatedDate = this.getCurrentDate();
+                    console.log('[ReviewService] After making visible (error) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                }
+                return of(false);
+            })
+        );
     }
 
     // Unflag review (mark as processed, keep it visible)
@@ -242,17 +443,67 @@ export class ReviewService {
         return true;
     }
 
-    // Hide review
-    hideReview(id: string, reason?: string): boolean {
-        const reviews = this.reviewsSubject.value;
-        const review = reviews.find(r => r.id === id);
-        if (!review) return false;
+    /**
+     * Hide review
+     * @param id Review ID
+     * @param reason Optional reason for hiding
+     * @returns Observable<boolean> - true if successful, false otherwise
+     */
+    hideReview(id: string, reason?: string): Observable<boolean> {
+        if (!id || id.trim() === '') {
+            console.error('[ReviewService] Invalid review ID:', id);
+            return of(false);
+        }
 
-        review.status = 'hidden';
-        review.isFlagged = false;
-        review.updatedDate = this.getCurrentDate();
-        this.reviewsSubject.next([...reviews]);
-        return true;
+        console.log('[ReviewService] Hiding review:', id, reason ? `Reason: ${reason}` : '');
+        const body = reason ? { reason } : {};
+        
+        return this.apiService.patch<boolean>(`/reviews/${id}/hide`, body).pipe(
+            map(response => {
+                if (response.success) {
+                    // Update local mock data for fallback
+                    const review = this.mockReviews.find(r => r.id === id);
+                    if (review) {
+                        console.log('[ReviewService] Before hiding - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                        review.status = 'hidden';
+                        // Keep isFlagged as is - don't change it when hiding
+                        // Review will still show in "flagged" tab with "hidden" badge
+                        review.updatedDate = this.getCurrentDate();
+                        console.log('[ReviewService] After hiding - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                    } else {
+                        console.warn('[ReviewService] Review not found in mock data:', id);
+                    }
+                    console.log('[ReviewService] Review hidden successfully:', id);
+                    return true;
+                }
+                console.warn('[ReviewService] API returned unsuccessful response:', response.message);
+                // Update local mock data for fallback
+                const review = this.mockReviews.find(r => r.id === id);
+                if (review) {
+                    console.log('[ReviewService] Before hiding (unsuccessful) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                    review.status = 'hidden';
+                    // Keep isFlagged as is - don't change it when hiding
+                    // Review will still show in "flagged" tab with "hidden" badge
+                    review.updatedDate = this.getCurrentDate();
+                    console.log('[ReviewService] After hiding (unsuccessful) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                }
+                return false;
+            }),
+            catchError(error => {
+                console.error('[ReviewService] API error hiding review:', error);
+                // Update local mock data for fallback
+                const review = this.mockReviews.find(r => r.id === id);
+                if (review) {
+                    console.log('[ReviewService] Before hiding (error) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                    review.status = 'hidden';
+                    // Keep isFlagged as is - don't change it when hiding
+                    // Review will still show in "flagged" tab with "hidden" badge
+                    review.updatedDate = this.getCurrentDate();
+                    console.log('[ReviewService] After hiding (error) - review:', { id: review.id, status: review.status, isFlagged: review.isFlagged });
+                }
+                return of(false);
+            })
+        );
     }
 
     // Delete review permanently

@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ClassService } from './class.service';
 import { UserService } from './user.service';
+import { ApiService } from './api.service';
+import { PaginatedResponse } from '../types/pagination';
 
 // Payment statuses for learner payment
 export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
@@ -136,6 +139,38 @@ export interface TransactionListResponse {
     };
 }
 
+/**
+ * API Response for transactions with pagination and summary
+ */
+export interface TransactionsApiResponse {
+    content: Payment[];
+    pageable: {
+        pageNumber: number;
+        pageSize: number;
+        offset: number;
+        paged: boolean;
+    };
+    totalPages: number;
+    totalElements: number;
+    last: boolean;
+    first: boolean;
+    numberOfElements: number;
+    size: number;
+    number: number;
+    empty: boolean;
+    summary: TransactionsSummary; // Summary based on summaryFilter params
+}
+
+/**
+ * Summary response (can be filtered by summaryFilter params)
+ */
+export interface TransactionsSummary {
+    totalRevenue: number;
+    completedPayments: number;
+    failedPayments: number;
+    pendingPayments: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -153,7 +188,8 @@ export class TransactionService {
 
     constructor(
         private classService: ClassService,
-        private userService: UserService
+        private userService: UserService,
+        private apiService: ApiService
     ) {
         this.loadMockData();
     }
@@ -825,12 +861,215 @@ export class TransactionService {
         this.paymentsSubject.next(mockPayments);
     }
 
+    /**
+     * Get transactions from API with pagination, filters, and summary
+     * API Endpoint: GET /api/v1/admin/transactions
+     * Query Params: 
+     *   - page, size, status, paymentMethod, search, startDate, endDate, sortOrder, typeFilter (for table)
+     *   - summaryFilter (for KPI cards: 'all' | 'today' | '7days' | '30days' | 'thisMonth')
+     * @returns Observable of TransactionsApiResponse with summary
+     */
+    getTransactions(params?: {
+        page?: number;
+        size?: number;
+        status?: PaymentStatus;
+        paymentMethod?: PaymentMethod;
+        search?: string;
+        startDate?: string;
+        endDate?: string;
+        sortOrder?: 'asc' | 'desc';
+        typeFilter?: '1 and 1' | '1 and n';
+        summaryFilter?: string; // Filter for summary/KPI cards: 'all' | 'today' | '7days' | '30days' | 'thisMonth'
+    }): Observable<TransactionsApiResponse> {
+        const queryParams: any = {};
+        if (params?.page !== undefined) queryParams.page = params.page - 1; // Convert to 0-based
+        if (params?.size !== undefined) queryParams.size = params.size;
+        if (params?.status) queryParams.status = params.status;
+        if (params?.paymentMethod) queryParams.paymentMethod = params.paymentMethod;
+        if (params?.search) queryParams.search = params.search;
+        if (params?.startDate) queryParams.startDate = params.startDate;
+        if (params?.endDate) queryParams.endDate = params.endDate;
+        if (params?.sortOrder) queryParams.sortOrder = params.sortOrder;
+        if (params?.typeFilter) queryParams.typeFilter = params.typeFilter;
+        if (params?.summaryFilter) queryParams.summaryFilter = params.summaryFilter; // Filter for summary/KPI cards
+
+        return this.apiService.get<TransactionsApiResponse>('/transactions', queryParams).pipe(
+            map(response => {
+                if (response.success && response.data) {
+                    // Update local state
+                    this.paymentsSubject.next(response.data.content);
+                    return response.data;
+                }
+                // If API returns error response, use mock data
+                console.warn('[TransactionService] API failed:', response.message);
+                return this.getMockTransactionsResponse(params);
+            }),
+            catchError(error => {
+                // If API throws error, use mock data
+                console.warn('[TransactionService] API error:', error);
+                return of(this.getMockTransactionsResponse(params));
+            })
+        );
+    }
+
+    /**
+     * Get mock transactions response for fallback
+     */
+    private getMockTransactionsResponse(params?: {
+        page?: number;
+        size?: number;
+        status?: PaymentStatus;
+        paymentMethod?: PaymentMethod;
+        search?: string;
+        startDate?: string;
+        endDate?: string;
+        sortOrder?: 'asc' | 'desc';
+        typeFilter?: '1 and 1' | '1 and n';
+        summaryFilter?: string;
+    }): TransactionsApiResponse {
+        const allPayments = this.paymentsSubject.value;
+        let filtered = [...allPayments];
+
+        // Apply filters
+        if (params?.status) {
+            filtered = filtered.filter(payment => payment.status === params.status);
+        }
+
+        if (params?.paymentMethod) {
+            filtered = filtered.filter(payment => payment.paymentMethod === params.paymentMethod);
+        }
+
+        if (params?.typeFilter) {
+            filtered = filtered.filter(payment => {
+                if (params.typeFilter === '1 and 1') {
+                    return payment.session?.classType === '1 and 1';
+                } else {
+                    return payment.session?.classType === '1 and n';
+                }
+            });
+        }
+
+        if (params?.startDate || params?.endDate) {
+            filtered = filtered.filter(payment => {
+                const paymentDate = new Date(payment.createdDate);
+                if (params.startDate) {
+                    const startDate = new Date(params.startDate);
+                    startDate.setHours(0, 0, 0, 0);
+                    if (paymentDate < startDate) return false;
+                }
+                if (params.endDate) {
+                    const endDate = new Date(params.endDate);
+                    endDate.setHours(23, 59, 59, 999);
+                    if (paymentDate > endDate) return false;
+                }
+                return true;
+            });
+        }
+
+        if (params?.search) {
+            const searchLower = params.search.toLowerCase();
+            filtered = filtered.filter(payment =>
+                payment.id.toLowerCase().includes(searchLower) ||
+                payment.paymentNumber.toLowerCase().includes(searchLower) ||
+                payment.learnerName.toLowerCase().includes(searchLower) ||
+                payment.learnerEmail.toLowerCase().includes(searchLower) ||
+                payment.session?.className.toLowerCase().includes(searchLower) ||
+                payment.session?.instructorName.toLowerCase().includes(searchLower)
+            );
+        }
+
+        // Sort
+        if (params?.sortOrder) {
+            filtered.sort((a, b) => {
+                const dateA = new Date(a.createdDate).getTime();
+                const dateB = new Date(b.createdDate).getTime();
+                return params.sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+            });
+        }
+
+        // Pagination
+        const page = (params?.page ?? 1) - 1; // Convert to 0-based
+        const size = params?.size ?? 10;
+        const startIndex = page * size;
+        const endIndex = startIndex + size;
+        const paginatedContent = filtered.slice(startIndex, endIndex);
+        const totalElements = filtered.length;
+        const totalPages = Math.ceil(totalElements / size);
+
+        // Calculate summary based on summaryFilter
+        let summaryPayments = allPayments;
+        if (params?.summaryFilter && params.summaryFilter !== 'all') {
+            const today = new Date();
+            let summaryStartDate: Date | null = null;
+            let summaryEndDate: Date | null = null;
+
+            if (params.summaryFilter === 'today') {
+                summaryStartDate = new Date(today);
+                summaryStartDate.setHours(0, 0, 0, 0);
+                summaryEndDate = new Date(today);
+                summaryEndDate.setHours(23, 59, 59, 999);
+            } else if (params.summaryFilter === '7days') {
+                summaryStartDate = new Date(today);
+                summaryStartDate.setDate(today.getDate() - 7);
+                summaryStartDate.setHours(0, 0, 0, 0);
+                summaryEndDate = new Date(today);
+                summaryEndDate.setHours(23, 59, 59, 999);
+            } else if (params.summaryFilter === '30days') {
+                summaryStartDate = new Date(today);
+                summaryStartDate.setDate(today.getDate() - 30);
+                summaryStartDate.setHours(0, 0, 0, 0);
+                summaryEndDate = new Date(today);
+                summaryEndDate.setHours(23, 59, 59, 999);
+            } else if (params.summaryFilter === 'thisMonth') {
+                summaryStartDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                summaryStartDate.setHours(0, 0, 0, 0);
+                summaryEndDate = new Date(today);
+                summaryEndDate.setHours(23, 59, 59, 999);
+            }
+
+            if (summaryStartDate && summaryEndDate) {
+                summaryPayments = allPayments.filter(payment => {
+                    const paymentDate = new Date(payment.createdDate);
+                    return paymentDate >= summaryStartDate! && paymentDate <= summaryEndDate!;
+                });
+            }
+        }
+
+        const summary: TransactionsSummary = {
+            totalRevenue: summaryPayments
+                .filter(p => p.status === 'completed')
+                .reduce((sum, p) => sum + p.totalAmount, 0),
+            completedPayments: summaryPayments.filter(p => p.status === 'completed').length,
+            failedPayments: summaryPayments.filter(p => p.status === 'failed').length,
+            pendingPayments: summaryPayments.filter(p => p.status === 'pending').length
+        };
+
+        return {
+            content: paginatedContent,
+            pageable: {
+                pageNumber: page,
+                pageSize: size,
+                offset: startIndex,
+                paged: true
+            },
+            totalPages: totalPages,
+            totalElements: totalElements,
+            last: page >= totalPages - 1,
+            first: page === 0,
+            numberOfElements: paginatedContent.length,
+            size: size,
+            number: page,
+            empty: paginatedContent.length === 0,
+            summary: summary
+        };
+    }
+
     // Get all payments
     getPayments(): Observable<Payment[]> {
         return this.payments$;
     }
 
-    // Get filtered payments
+    // Get filtered payments (legacy method - kept for backward compatibility)
     getPaymentsFiltered(filters: TransactionFilters, page: number = 1, pageSize: number = 10): Payment[] {
         const allPayments = this.paymentsSubject.value;
         let filtered = [...allPayments];

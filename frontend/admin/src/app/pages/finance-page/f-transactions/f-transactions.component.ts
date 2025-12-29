@@ -28,13 +28,19 @@ export class FTransactionsComponent implements OnInit {
     dateRangeFilter: string = 'all';
     sortOrder: 'asc' | 'desc' = 'desc';
 
-    // Date range filter
+    // Date range filter for table
     startDate: string = '';
     endDate: string = '';
+
+    // Summary filter for KPI cards
+    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days' | 'thisMonth'
+    isSummaryFilterMenuOpen: boolean = false;
 
     currentPage: number = 1;
     pageSize: number = 10;
     totalPages: number = 1;
+    totalElements: number = 0;
+    loading: boolean = false;
 
     isDetailModalOpen = false;
     isApproveConfirmOpen = false;
@@ -55,60 +61,55 @@ export class FTransactionsComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadOrders();
-        this.updateSummary();
     }
 
     loadOrders(): void {
-        const filters: TransactionFilters = {
-            searchTerm: this.searchTerm,
+        this.loading = true;
+        
+        this.transactionService.getTransactions({
+            page: this.currentPage,
+            size: this.pageSize,
             status: this.statusFilter || undefined,
-            paymentMethod: this.paymentMethodFilter || undefined
-        };
-
-        this.filteredOrders = this.transactionService.getPaymentsFiltered(filters);
-
-        // Apply date range filter
-        if (this.startDate || this.endDate) {
-            this.filteredOrders = this.filteredOrders.filter(order => {
-                const orderDate = new Date(order.createdDate);
-
-                if (this.startDate) {
-                    const startDate = new Date(this.startDate);
-                    startDate.setHours(0, 0, 0, 0);
-                    if (orderDate < startDate) return false;
+            paymentMethod: this.paymentMethodFilter || undefined,
+            search: this.searchTerm || undefined,
+            startDate: this.startDate || undefined,
+            endDate: this.endDate || undefined,
+            sortOrder: this.sortOrder,
+            typeFilter: this.typeFilter || undefined,
+            summaryFilter: this.summaryFilter || 'all' // Filter for KPI cards
+        }).subscribe({
+            next: (response) => {
+                this.filteredOrders = response.content;
+                this.orders = response.content;
+                this.totalPages = response.totalPages;
+                this.totalElements = response.totalElements;
+                this.currentPage = response.number + 1; // Convert from 0-based to 1-based
+                
+                // Update summary from API response
+                if (response.summary) {
+                    this.summary = {
+                        totalRevenue: response.summary.totalRevenue,
+                        completedOrders: response.summary.completedPayments,
+                        failedOrders: response.summary.failedPayments
+                    };
                 }
-
-                if (this.endDate) {
-                    const endDate = new Date(this.endDate);
-                    endDate.setHours(23, 59, 59, 999);
-                    if (orderDate > endDate) return false;
-                }
-
-                return true;
-            });
-        }
-
-        this.calculatePagination();
+                
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Error loading transactions:', error);
+                this.loading = false;
+            }
+        });
     }
 
     calculatePagination(): void {
-        this.totalPages = Math.ceil(this.filteredOrders.length / this.pageSize);
-        if (this.currentPage > this.totalPages) {
-            this.currentPage = Math.max(1, this.totalPages);
-        }
+        // No longer needed - pagination handled by backend
     }
 
     getPaginatedOrders(): Payment[] {
-
-        const sortedOrders = [...this.filteredOrders].sort((a, b) => {
-            const dateA = new Date(a.createdDate).getTime();
-            const dateB = new Date(b.createdDate).getTime();
-            return this.sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-        });
-
-        const start = (this.currentPage - 1) * this.pageSize;
-        const end = start + this.pageSize;
-        return sortedOrders.slice(start, end);
+        // Return current page data (already paginated by backend)
+        return this.filteredOrders;
     }
 
     onSearchChange(value: string): void {
@@ -137,6 +138,29 @@ export class FTransactionsComponent implements OnInit {
     onDateRangeChange(range: string): void {
         this.dateRangeFilter = range;
         this.currentPage = 1;
+        // Set date range based on selection
+        const today = new Date();
+        if (range === 'today') {
+            this.startDate = today.toISOString().split('T')[0];
+            this.endDate = today.toISOString().split('T')[0];
+        } else if (range === '7days') {
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            this.startDate = sevenDaysAgo.toISOString().split('T')[0];
+            this.endDate = today.toISOString().split('T')[0];
+        } else if (range === '30days') {
+            const thirtyDaysAgo = new Date(today);
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            this.startDate = thirtyDaysAgo.toISOString().split('T')[0];
+            this.endDate = today.toISOString().split('T')[0];
+        } else if (range === 'thisMonth') {
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            this.startDate = firstDay.toISOString().split('T')[0];
+            this.endDate = today.toISOString().split('T')[0];
+        } else {
+            this.startDate = '';
+            this.endDate = '';
+        }
         this.loadOrders();
         this.isDateMenuOpen = false;
     }
@@ -152,41 +176,55 @@ export class FTransactionsComponent implements OnInit {
         this.approvalNotes = '';
     }
 
+    onSummaryFilterChange(filter: string): void {
+        this.summaryFilter = filter;
+        this.isSummaryFilterMenuOpen = false;
+        this.loadOrders(); // Reload to update summary with new filter
+    }
+
+    toggleSummaryFilterMenu(): void {
+        this.isSummaryFilterMenuOpen = !this.isSummaryFilterMenuOpen;
+    }
+
+    getSummaryFilterText(): string {
+        const filterMap: { [key: string]: string } = {
+            'all': 'transactions.summaryFilter.all',
+            'today': 'transactions.summaryFilter.today',
+            '7days': 'transactions.summaryFilter.last7Days',
+            '30days': 'transactions.summaryFilter.last30Days',
+            'thisMonth': 'transactions.summaryFilter.thisMonth'
+        };
+        return filterMap[this.summaryFilter] || 'transactions.summaryFilter.all';
+    }
+
     approveOrderManually(): void {
         if (!this.selectedOrder) return;
 
         this.loadingApproval = true;
 
-        setTimeout(() => {
-            const success = this.transactionService.approvePaymentManually(
-                this.selectedOrder!.id,
-                this.approvalNotes
-            );
+        // TODO: Call API to approve payment manually
+        // For now, use local service method
+        const success = this.transactionService.approvePaymentManually(
+            this.selectedOrder!.id,
+            this.approvalNotes
+        );
 
-            if (success) {
+        if (success) {
+            alert('✓ Thanh toán đã được duyệt thủ công thành công!\nHệ thống sẽ bao gồm trong bảng thanh toán hàng tháng cho giảng viên.');
+            this.loadOrders(); // Reload transactions and summary from API
+            this.isApproveConfirmOpen = false;
+            this.isDetailModalOpen = false;
+            this.selectedOrder = null;
+        } else {
+            alert('✗ Lỗi: Không thể duyệt thanh toán này (có thể đã hoàn thành hoặc không tồn tại)');
+        }
 
-                alert('✓ Thanh toán đã được duyệt thủ công thành công!\nHệ thống sẽ bao gồm trong bảng thanh toán hàng tháng cho giảng viên.');
-
-                this.loadOrders();
-                this.updateSummary();
-                this.isApproveConfirmOpen = false;
-                this.isDetailModalOpen = false;
-                this.selectedOrder = null;
-            } else {
-                alert('✗ Lỗi: Không thể duyệt thanh toán này (có thể đã hoàn thành hoặc không tồn tại)');
-            }
-
-            this.loadingApproval = false;
-        }, 500);
+        this.loadingApproval = false;
     }
 
     updateSummary(): void {
-        const stats = this.transactionService.getSummary();
-        this.summary = {
-            totalRevenue: stats.totalRevenue,
-            completedOrders: stats.completedPayments,
-            failedOrders: stats.failedPayments
-        };
+        // Summary is now updated from API response in loadOrders()
+        // This method kept for backward compatibility if needed
     }
 
     goToPage(page: number): void {
@@ -358,6 +396,9 @@ export class FTransactionsComponent implements OnInit {
         }
         if (!target.closest('.date-dropdown')) {
             this.isDateMenuOpen = false;
+        }
+        if (!target.closest('.trezo-card-dropdown')) {
+            this.isSummaryFilterMenuOpen = false;
         }
     }
 

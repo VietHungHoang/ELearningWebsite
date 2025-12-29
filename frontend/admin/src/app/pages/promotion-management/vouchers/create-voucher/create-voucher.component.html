@@ -1,250 +1,322 @@
 
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
-        Create Voucher
+        {{ 'voucherManagement.createVoucher.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">home</i>
-                Dashboard
+                {{ 'voucherManagement.createVoucher.breadcrumb.dashboard' | translate }}
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard/promotion/vouchers" class="transition-all hover:text-primary-500">Promotion Management</a>
+            <a routerLink="/dashboard/promotion/vouchers" class="transition-all hover:text-primary-500">{{ 'voucherManagement.createVoucher.breadcrumb.promotionManagement' | translate }}</a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            Create Voucher
+            {{ 'voucherManagement.createVoucher.breadcrumb.createVoucher' | translate }}
         </li>
     </ol>
 </div>
 
-<div class="trezo-card bg-white dark:bg-[#0c1427] p-[20px] md:p-[25px] rounded-md">
+<div class="trezo-card bg-white dark:bg-[#0c1427] p-[18px] rounded-md">
     <form [formGroup]="voucherForm" (ngSubmit)="saveVoucher()">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-[15px] mb-[15px]">
+        <!-- Basic Information Section -->
+        <div class="mb-[14px]">
+            <h6 class="text-sm font-semibold text-black dark:text-white mb-[10px] flex items-center gap-2">
+                <i class="material-symbols-outlined text-primary-500 text-lg">info</i>
+                {{ 'voucherManagement.createVoucher.sections.basicInformation' | translate }}
+            </h6>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-[12px]">
+                <div>
+                    <label class="block text-sm font-medium text-black dark:text-white mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.voucherCode' | translate }} <span class="text-danger-500">*</span>
+                    </label>
+                    <div class="flex gap-[8px]">
+                        <input
+                            type="text"
+                            formControlName="code"
+                            placeholder="e.g., SUMMER2025"
+                            class="flex-1 px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-md text-sm text-black dark:text-white dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500">
+                        <button 
+                            type="button" 
+                            (click)="generateRandomCode()" 
+                            class="px-[12px] py-[8px] bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-md hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors text-sm flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="material-symbols-outlined text-base">auto_fix_high</i>
+                            {{ 'voucherManagement.createVoucher.buttons.generate' | translate }}
+                        </button>
+                    </div>
+                </div>
 
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    Voucher Code <span class="text-danger-500">*</span>
-                </label>
-                <div class="flex gap-[10px]">
+                <div class="optional-field lg:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.description' | translate }}
+                    </label>
                     <input
                         type="text"
-                        formControlName="code"
-                        placeholder="BLACKFRIDAY"
-                        class="flex-1 px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-                    <button type="button" (click)="generateRandomCode()" class="px-[16px] py-[8px] bg-primary-50 text-primary-600 rounded-md hover:bg-primary-100 dark:bg-[#15203c] dark:hover:bg-[#1a2a4a]">
-                        Generate Random
-                    </button>
+                        formControlName="description"
+                        [placeholder]="'voucherManagement.createVoucher.fields.descriptionPlaceholder' | translate"
+                        class="w-full px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm text-gray-600 dark:text-gray-400 dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Discount Configuration Section -->
+        <div class="mb-[14px]">
+            <h6 class="text-sm font-semibold text-black dark:text-white mb-[10px] flex items-center gap-2">
+                <i class="material-symbols-outlined text-primary-500 text-lg">percent</i>
+                {{ 'voucherManagement.createVoucher.sections.discountConfiguration' | translate }}
+            </h6>
+            
+            <div class="mb-[10px]">
+                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
+                    {{ 'voucherManagement.createVoucher.fields.discountType' | translate }} <span class="text-danger-500">*</span>
+                </label>
+                <div class="flex flex-wrap gap-[14px]">
+                    <label class="flex items-center cursor-pointer group">
+                        <input
+                            type="radio"
+                            formControlName="discountType"
+                            value="percentage"
+                            class="mr-[8px] w-4 h-4 text-primary-500 focus:ring-primary-500">
+                        <span class="text-sm text-black dark:text-white font-medium">{{ 'voucherManagement.createVoucher.fields.percentage' | translate }}</span>
+                        <input 
+                            type="number" 
+                            formControlName="discountValue" 
+                            placeholder="20" 
+                            class="ml-[8px] w-[70px] px-[8px] py-[6px] border border-gray-300 dark:border-[#172036] rounded-md text-sm text-black dark:text-white dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400">
+                        <span class="ml-[4px] text-sm text-gray-600 dark:text-gray-400">%</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer group">
+                        <input
+                            type="radio"
+                            formControlName="discountType"
+                            value="fixed"
+                            class="mr-[8px] w-4 h-4 text-primary-500 focus:ring-primary-500">
+                        <span class="text-sm text-black dark:text-white font-medium">{{ 'voucherManagement.createVoucher.fields.fixed' | translate }}</span>
+                        <input 
+                            type="number" 
+                            formControlName="discountValue" 
+                            placeholder="100000" 
+                            class="ml-[8px] w-[110px] px-[8px] py-[6px] border border-gray-300 dark:border-[#172036] rounded-md text-sm text-black dark:text-white dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400">
+                        <span class="ml-[4px] text-sm text-gray-600 dark:text-gray-400">VNĐ</span>
+                    </label>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    Description (Internal Note)
-                </label>
-                <input
-                    type="text"
-                    formControlName="description"
-                    placeholder="Code for 11/11 campaign"
-                    class="w-full px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-            </div>
-        </div>
-
-        <div class="mb-[15px]">
-            <label class="block text-sm font-medium text-black dark:text-white mb-[12px]">
-                Discount Type <span class="text-danger-500">*</span>
-            </label>
-            <div class="flex gap-[20px]">
-                <label class="flex items-center cursor-pointer">
+            @if (voucherForm.get('discountType')?.value === 'percentage') {
+                <div class="optional-field">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.maxDiscount' | translate }} <span class="text-xs text-gray-400">(optional)</span>
+                    </label>
                     <input
-                        type="radio"
-                        formControlName="discountType"
-                        value="percentage"
-                        class="mr-[8px]">
-                    <span class="text-black dark:text-white">Percentage (%)</span>
-                    <input type="number" formControlName="discountValue" placeholder="30" class="ml-[8px] w-[80px] px-[8px] py-[4px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-                    <span class="ml-[4px]">%</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input
-                        type="radio"
-                        formControlName="discountType"
-                        value="fixed"
-                        class="mr-[8px]">
-                    <span class="text-black dark:text-white">Fixed Amount</span>
-                    <input type="number" formControlName="discountValue" placeholder="100000" class="ml-[8px] w-[120px] px-[8px] py-[4px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-                    <span class="ml-[4px]">VNĐ</span>
-                </label>
-            </div>
+                        type="number"
+                        formControlName="maxDiscount"
+                        [placeholder]="'voucherManagement.createVoucher.fields.maxDiscountPlaceholder' | translate"
+                        class="w-[200px] px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm text-gray-600 dark:text-gray-400 dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500">
+                </div>
+            }
         </div>
 
-        @if (voucherForm.get('discountType')?.value === 'percentage') {
-            <div class="mb-[15px]">
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    Maximum Discount (VNĐ)
-                </label>
-                <input
-                    type="number"
-                    formControlName="maxDiscount"
-                    placeholder="200000"
-                    class="w-[200px] px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-                <p class="text-xs text-gray-500 mt-[4px]">Leave blank if unlimited</p>
-            </div>
-        }
-
-        <div class="mb-[15px]">
-            <label class="block text-sm font-medium text-black dark:text-white mb-[12px]">
-                Product Type <span class="text-danger-500">*</span>
-            </label>
-            <div class="flex gap-[20px]">
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" formControlName="productType" value="class" class="mr-[8px]">
-                    <span class="text-black dark:text-white">1-on-1 Classes Only</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" formControlName="productType" value="group" class="mr-[8px]">
-                    <span class="text-black dark:text-white">Group Classes</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                    <input type="radio" formControlName="productType" value="both" class="mr-[8px]">
-                    <span class="text-black dark:text-white">Both (All Products)</span>
-                </label>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-[12px] mb-[15px]">
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[12px]">
-                    Target Audience / Student Segment <span class="text-danger-500">*</span>
-                </label>
-                <div class="relative">
-                    <button
-                        type="button"
-                        (click)="toggleSegmentDropdown()"
-                        class="w-full px-[12px] py-[8px] bg-white border border-gray-200 rounded-md text-sm text-left text-black dark:bg-[#15203c] dark:border-[#172036] dark:text-white hover:bg-gray-50 dark:hover:bg-[#1a2a4a] transition-colors flex items-center justify-between">
-                        <span>{{ getSelectedSegmentLabel() }}</span>
-                        <i class="ri-arrow-down-s-line"></i>
-                    </button>
-
-                    @if (isSegmentDropdownOpen) {
-                        <div class="absolute top-full mt-[8px] w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 dark:bg-[#0c1427] dark:border-[#172036]">
-                        @for (segment of studentSegments; track segment.value) {
-                            <button
-                                type="button"
-                                (click)="selectSegment(segment.value)"
-                                class="block w-full px-[16px] py-[10px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors text-sm text-black dark:text-white">
-                                {{ segment.label }}
-                            </button>
-                        }
-                        <div class="border-t border-gray-200 dark:border-[#172036] p-[8px]">
-                            @if (!isAddingSegment) {
-                                <button
-                                    type="button"
-                                    (click)="toggleAddSegmentMode()"
-                                    class="w-full px-[12px] py-[8px] bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-[6px]">
-                                    <i class="ri-add-line"></i>
-                                    Add New Segment
-                                </button>
-                            } @else {
-                                <div class="flex gap-[8px]">
-                                    <input
-                                        type="text"
-                                        [(ngModel)]="newSegmentLabel"
-                                        placeholder="Enter segment name..."
-                                        (keyup.enter)="addNewSegment()"
-                                        class="flex-1 px-[12px] py-[8px] border border-gray-200 rounded-md text-sm text-black dark:bg-[#15203c] dark:border-[#172036] dark:text-white placeholder:text-gray-400" />
-                                    <button
-                                        type="button"
-                                        (click)="addNewSegment()"
-                                        class="px-[12px] py-[8px] bg-blue-500 hover:bg-blue-600 text-white rounded-md text-sm font-medium transition-colors">
-                                        Add
-                                    </button>
-                                    <button
-                                        type="button"
-                                        (click)="toggleAddSegmentMode()"
-                                        class="px-[12px] py-[8px] bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 text-black dark:text-white rounded-md text-sm font-medium transition-colors">
-                                        Cancel
-                                    </button>
-                                </div>
-                            }
-                        </div>
+        <!-- Product & Audience Settings Section -->
+        <div class="mb-[14px]">
+            <h6 class="text-sm font-semibold text-black dark:text-white mb-[10px] flex items-center gap-2">
+                <i class="material-symbols-outlined text-primary-500 text-lg">category</i>
+                {{ 'voucherManagement.createVoucher.sections.productAudienceSettings' | translate }}
+            </h6>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-[12px]">
+                <div>
+                    <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
+                        {{ 'voucherManagement.createVoucher.fields.productType' | translate }} <span class="text-danger-500">*</span>
+                    </label>
+                    <div class="flex flex-wrap gap-[10px]">
+                        <label class="flex items-center cursor-pointer group px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
+                            <input 
+                                type="radio" 
+                                formControlName="productType" 
+                                value="class" 
+                                class="mr-[8px] w-4 h-4 text-primary-500 focus:ring-primary-500">
+                            <span class="text-sm text-black dark:text-white">{{ 'voucherManagement.createVoucher.fields.oneOnOne' | translate }}</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
+                            <input 
+                                type="radio" 
+                                formControlName="productType" 
+                                value="group" 
+                                class="mr-[8px] w-4 h-4 text-primary-500 focus:ring-primary-500">
+                            <span class="text-sm text-black dark:text-white">{{ 'voucherManagement.createVoucher.fields.group' | translate }}</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer group px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
+                            <input 
+                                type="radio" 
+                                formControlName="productType" 
+                                value="both" 
+                                class="mr-[8px] w-4 h-4 text-primary-500 focus:ring-primary-500">
+                            <span class="text-sm text-black dark:text-white">{{ 'voucherManagement.createVoucher.fields.both' | translate }}</span>
+                        </label>
                     </div>
-                }
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
+                        {{ 'voucherManagement.createVoucher.fields.targetAudience' | translate }} <span class="text-danger-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <button
+                            type="button"
+                            (click)="toggleSegmentDropdown()"
+                            class="w-full px-[12px] py-[8px] bg-white dark:bg-[#15203c] border border-gray-300 dark:border-[#172036] rounded-md text-sm text-left text-black dark:text-white hover:bg-gray-50 dark:hover:bg-[#1a2a4a] transition-colors flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                            <span class="flex items-center gap-2">
+                                <i class="material-symbols-outlined text-sm text-gray-500">people</i>
+                                <span class="truncate">{{ getSelectedSegmentLabel() }}</span>
+                            </span>
+                            <i class="material-symbols-outlined text-sm text-gray-500">arrow_drop_down</i>
+                        </button>
+
+                        @if (isSegmentDropdownOpen) {
+                            <div class="absolute top-full mt-[8px] w-full bg-white dark:bg-[#0c1427] border border-gray-200 dark:border-[#172036] rounded-lg shadow-xl z-20 max-h-[300px] overflow-y-auto">
+                                @for (segment of studentSegments; track segment.value) {
+                                    <button
+                                        type="button"
+                                        (click)="selectSegment(segment.value)"
+                                        class="block w-full px-[16px] py-[12px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors text-sm text-black dark:text-white">
+                                        {{ segment.label }}
+                                    </button>
+                                }
+                                <div class="border-t border-gray-200 dark:border-[#172036] p-[12px]">
+                                    @if (!isAddingSegment) {
+                                        <button
+                                            type="button"
+                                            (click)="toggleAddSegmentMode()"
+                                            class="w-full px-[12px] py-[10px] bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-[8px]">
+                                            <i class="material-symbols-outlined text-sm">add</i>
+                                            {{ 'voucherManagement.createVoucher.fields.addNewSegment' | translate }}
+                                        </button>
+                                    } @else {
+                                        <div class="flex gap-[8px]">
+                                            <input
+                                                type="text"
+                                                [(ngModel)]="newSegmentLabel"
+                                                [placeholder]="'voucherManagement.createVoucher.fields.enterSegmentName' | translate"
+                                                (keyup.enter)="addNewSegment()"
+                                                class="flex-1 px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-lg text-sm text-black dark:bg-[#15203c] dark:text-white placeholder:text-gray-400 focus:ring-2 focus:ring-primary-500" />
+                                            <button
+                                                type="button"
+                                                (click)="addNewSegment()"
+                                                class="px-[12px] py-[8px] bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                                {{ 'voucherManagement.createVoucher.fields.add' | translate }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                (click)="toggleAddSegmentMode()"
+                                                class="px-[12px] py-[8px] bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-700 text-black dark:text-white rounded-lg text-sm font-medium transition-colors">
+                                                {{ 'common.cancel' | translate }}
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-[12px] mb-[15px]">
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    Minimum Order Value (VNĐ)
-                </label>
-                <input
-                    type="number"
-                    formControlName="minOrderValue"
-                    placeholder="500000"
-                    min="1"
-                    class="w-full px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
+        <!-- Usage Limits & Validity Section -->
+        <div class="mb-[14px]">
+            <h6 class="text-sm font-semibold text-black dark:text-white mb-[10px] flex items-center gap-2">
+                <i class="material-symbols-outlined text-primary-500 text-lg">settings</i>
+                {{ 'voucherManagement.createVoucher.sections.usageLimitsValidity' | translate }}
+            </h6>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-[10px] mb-[10px]">
+                <div class="optional-field">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.minOrderValue' | translate }}
+                    </label>
+                    <input
+                        type="number"
+                        formControlName="minOrderValue"
+                        [placeholder]="'voucherManagement.createVoucher.fields.minOrderPlaceholder' | translate"
+                        min="1"
+                        class="w-full px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm text-gray-600 dark:text-gray-400 dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500">
+                </div>
+                <div class="optional-field">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.usageLimit' | translate }}
+                    </label>
+                    <input
+                        type="number"
+                        formControlName="totalUsageLimit"
+                        [placeholder]="'voucherManagement.createVoucher.fields.usageLimitPlaceholder' | translate"
+                        min="1"
+                        class="w-full px-[12px] py-[8px] border border-gray-200 dark:border-[#172036] rounded-md text-sm text-gray-600 dark:text-gray-400 dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-black dark:text-white mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.startDate' | translate }} <span class="text-danger-500">*</span>
+                    </label>
+                    <input
+                        type="datetime-local"
+                        formControlName="startDate"
+                        class="w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-md text-sm text-black dark:text-white dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-black dark:text-white mb-[6px]">
+                        {{ 'voucherManagement.createVoucher.fields.endDate' | translate }} <span class="text-danger-500">*</span>
+                    </label>
+                    <input
+                        type="datetime-local"
+                        formControlName="endDate"
+                        class="w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-md text-sm text-black dark:text-white dark:bg-[#15203c] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    Total Usage Limit
+
+            <div class="optional-field">
+                <label class="flex items-center cursor-pointer px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors w-fit">
+                    <input 
+                        type="checkbox" 
+                        formControlName="isUnlimited" 
+                        class="mr-[8px] w-4 h-4 text-primary-500 focus:ring-primary-500 rounded">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ 'voucherManagement.createVoucher.fields.unlimitedValidity' | translate }}</span>
                 </label>
-                <input
-                    type="number"
-                    formControlName="totalUsageLimit"
-                    placeholder="500"
-                    min="1"
-                    class="w-full px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    Start Date <span class="text-danger-500">*</span>
-                </label>
-                <input
-                    type="datetime-local"
-                    formControlName="startDate"
-                    class="w-full px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-black dark:text-white mb-[8px]">
-                    End Date <span class="text-danger-500">*</span>
-                </label>
-                <input
-                    type="datetime-local"
-                    formControlName="endDate"
-                    class="w-full px-[12px] py-[8px] border border-gray-200 rounded-md text-black dark:text-white dark:bg-[#15203c] dark:border-[#172036]">
             </div>
         </div>
 
-        <div class="mb-[15px]">
-            <label class="flex items-center cursor-pointer">
-                <input type="checkbox" formControlName="isUnlimited" class="mr-[8px]">
-                <span class="text-black dark:text-white text-sm">Set as unlimited</span>
-            </label>
-        </div>
-
+        <!-- Message Display -->
         @if (message) {
-        <div class="mb-[15px] p-[12px] rounded-md" [ngClass]="{
-            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': message.type === 'success',
-            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': message.type === 'error'
+        <div class="mb-[10px] p-[10px] rounded-md flex items-center gap-2 text-sm" [ngClass]="{
+            'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800': message.type === 'success',
+            'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800': message.type === 'error'
         }">
-            {{ message.text }}
+            <i class="material-symbols-outlined text-base">
+                {{ message.type === 'success' ? 'check_circle' : 'error' }}
+            </i>
+            <span class="font-medium">{{ message.text }}</span>
         </div>
         }
 
-        <div class="flex gap-[12px]">
-            <button type="submit" [disabled]="isLoading" class="px-[24px] py-[10px] bg-primary-500 text-white rounded-md hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">
+        <!-- Action Buttons -->
+        <div class="flex gap-[10px] pt-[10px] border-t border-gray-200 dark:border-[#172036]">
+            <button 
+                type="submit" 
+                [disabled]="isLoading" 
+                class="px-[20px] py-[10px] bg-primary-500 text-white rounded-md hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm font-medium flex items-center gap-2">
                 @if (isLoading) {
-                <span class="inline-block mr-2">
-                    <i class="material-symbols-outlined animate-spin text-sm">refresh</i>
-                </span>
+                <i class="material-symbols-outlined animate-spin text-base">refresh</i>
+                } @else {
+                <i class="material-symbols-outlined text-base">save</i>
                 }
-                {{ isLoading ? 'Saving...' : 'Save Voucher' }}
+                {{ isLoading ? ('voucherManagement.createVoucher.buttons.creating' | translate) : ('voucherManagement.createVoucher.buttons.createVoucher' | translate) }}
             </button>
-            <button type="button" routerLink="/dashboard/promotion/vouchers" class="px-[24px] py-[10px] bg-gray-200 text-black rounded-md hover:bg-gray-300 dark:bg-[#15203c] dark:text-white dark:hover:bg-[#1a2a4a]">
-                Cancel
+            <button 
+                type="button" 
+                routerLink="/dashboard/promotion/vouchers" 
+                class="px-[20px] py-[10px] bg-gray-100 dark:bg-[#15203c] text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-[#1a2a4a] transition-all text-sm font-medium flex items-center gap-2">
+                <i class="material-symbols-outlined text-base">close</i>
+                {{ 'voucherManagement.createVoucher.buttons.cancel' | translate }}
             </button>
         </div>
     </form>

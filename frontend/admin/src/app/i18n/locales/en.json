@@ -340,6 +340,7 @@
     },
     "selected": "selected",
     "selectAll": "Select All",
+    "selectReviews": "Select reviews to perform actions",
     "student": "Student",
     "tutor": "Tutor",
     "class": "Class",
@@ -438,6 +439,7 @@
     },
     "searchPlaceholder": "Search instructors...",
     "selected": "selected",
+    "selectInstructors": "Select instructors to perform actions",
     "filters": {
       "category": "Filter by Category",
       "status": "Filter by Status",
@@ -486,6 +488,8 @@
       "approve": "Approve",
       "requestEdit": "Request Edit",
       "reject": "Reject",
+      "approveSelected": "Approve Selected",
+      "requestEditSelected": "Request Edit Selected",
       "rejectSelected": "Reject Selected"
     }
   },
@@ -871,6 +875,13 @@
       "filter": "Filter",
       "clear": "Clear"
     },
+    "summaryFilter": {
+      "all": "All",
+      "today": "Today",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "thisMonth": "This Month"
+    },
     "status": {
       "complete": "Complete",
       "failed": "Failed"
@@ -936,12 +947,20 @@
       "transactions": "Transactions"
     },
     "kpi": {
+      "title": "Statistics",
       "totalRevenue": "Total Revenue",
       "completed": "Completed",
       "failed": "Failed",
       "orders": "orders",
       "successfulTransactions": "Successful transactions",
       "transactionErrors": "Transaction errors"
+    },
+    "summaryFilter": {
+      "all": "All",
+      "today": "Today",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "thisMonth": "This Month"
     },
     "filters": {
       "title": "Filters",
@@ -1156,8 +1175,8 @@
     "filters": {
       "creator": "Creator",
       "all": "All",
-      "createdByAdmin": "Created by Admin",
-      "createdByInstructor": "Created by Instructor",
+      "createdByAdmin": "Admin",
+      "createdByInstructor": "Instructor",
       "allStatus": "All Status",
       "allTypes": "All Types",
       "percentageDiscount": "Percentage Discount",
@@ -1199,6 +1218,116 @@
     },
     "emptyState": {
       "noVouchersFound": "No vouchers found"
+    },
+    "createVoucher": {
+      "title": "Create Voucher",
+      "breadcrumb": {
+        "dashboard": "Dashboard",
+        "promotionManagement": "Promotion Management",
+        "createVoucher": "Create Voucher"
+      },
+      "sections": {
+        "basicInformation": "Basic Information",
+        "discountConfiguration": "Discount Configuration",
+        "productAudienceSettings": "Product & Audience Settings",
+        "usageLimitsValidity": "Usage Limits & Validity"
+      },
+      "fields": {
+        "voucherCode": "Voucher Code",
+        "description": "Description (Optional)",
+        "descriptionPlaceholder": "Internal notes (optional)",
+        "discountType": "Discount Type",
+        "percentage": "Percentage",
+        "fixed": "Fixed",
+        "maxDiscount": "Max Discount (VNĐ)",
+        "maxDiscountPlaceholder": "e.g., 200000",
+        "productType": "Product Type",
+        "oneOnOne": "1-on-1",
+        "group": "Group",
+        "both": "Both",
+        "targetAudience": "Target Audience",
+        "selectStudentSegment": "Select Student Segment",
+        "addNewSegment": "Add New Segment",
+        "enterSegmentName": "Enter segment name...",
+        "add": "Add",
+        "minOrderValue": "Min Order (VNĐ)",
+        "minOrderPlaceholder": "500000",
+        "usageLimit": "Usage Limit",
+        "usageLimitPlaceholder": "500",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "unlimitedValidity": "Unlimited validity"
+      },
+      "buttons": {
+        "generate": "Generate",
+        "createVoucher": "Create Voucher",
+        "creating": "Creating...",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "createSuccess": "Voucher created successfully!",
+        "createError": "Failed to create voucher. Please try again.",
+        "segmentExists": "This student segment already exists!"
+      },
+      "studentSegments": {
+        "allStudents": "All Students",
+        "topSpenders": "Top Spenders (Highest spending in month)",
+        "newStudents": "New Students (Registered < 30 days)",
+        "noSpending1Month": "No Spending (No purchase in 1 month)"
+      }
+    },
+    "editVoucher": {
+      "title": "Edit Voucher",
+      "breadcrumb": {
+        "dashboard": "Dashboard",
+        "promotionManagement": "Promotion Management",
+        "editVoucher": "Edit Voucher"
+      },
+      "fields": {
+        "voucherCode": "Voucher Code",
+        "description": "Description (Internal Note)",
+        "descriptionPlaceholder": "Code for 11/11 campaign",
+        "discountType": "Discount Type",
+        "percentage": "Percentage (%)",
+        "fixedAmount": "Fixed Amount",
+        "maxDiscount": "Maximum Discount (VNĐ)",
+        "maxDiscountPlaceholder": "200000",
+        "maxDiscountHint": "Leave blank if unlimited",
+        "productType": "Product Type",
+        "oneOnOneOnly": "1-on-1 Classes Only",
+        "groupClasses": "Group Classes",
+        "bothAllProducts": "Both (All Products)",
+        "targetAudience": "Target Audience / Student Segment",
+        "selectStudentSegment": "Select Student Segment",
+        "addNewSegment": "Add New Segment",
+        "enterSegmentName": "Enter segment name...",
+        "add": "Add",
+        "minOrderValue": "Minimum Order Value (VNĐ)",
+        "minOrderPlaceholder": "500000",
+        "totalUsageLimit": "Total Usage Limit",
+        "totalUsagePlaceholder": "500",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "setAsUnlimited": "Set as unlimited"
+      },
+      "buttons": {
+        "generateRandom": "Generate Random",
+        "updateVoucher": "Update Voucher",
+        "updating": "Updating...",
+        "cancel": "Hủy"
+      },
+      "messages": {
+        "updateSuccess": "Voucher updated successfully!",
+        "updateError": "Failed to update voucher. Please try again.",
+        "loadError": "Failed to load voucher. Please try again.",
+        "segmentExists": "This student segment already exists!"
+      },
+      "studentSegments": {
+        "allStudents": "All Students",
+        "topSpenders": "Top Spenders (Highest spending in month)",
+        "newStudents": "New Students (Registered < 30 days)",
+        "noSpending1Month": "No Spending (No purchase in 1 month)"
+      }
     }
   },
   "settings": {
