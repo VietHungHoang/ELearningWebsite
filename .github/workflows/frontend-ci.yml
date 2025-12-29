@@ -1,0 +1,63 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'frontend/lernen/**'
+      - '.github/workflows/frontend-ci.yml'
+
+jobs:
+  build-and-deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend/lernen
+          file: ./frontend/lernen/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-frontend:latest
+
+      - name: Setup SSH Key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Deploy to AWS EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.AWS_LERNEN_FRONTEND }} << 'EOF'
+            # Login to Docker Hub
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+            
+            # Pull latest image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/lernen-frontend:latest
+            
+            # Stop and remove existing container if exists
+            docker stop lernen-frontend || true
+            docker rm lernen-frontend || true
+            
+            # Run new container
+            docker run -d \
+              --name lernen-frontend \
+              --restart unless-stopped \
+              -p 80:80 \
+              -p 443:443 \
+              ${{ secrets.DOCKER_USERNAME }}/lernen-frontend:latest
+            
+            # Cleanup old images
+            docker image prune -f
+          EOF
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: rm -f private_key.pem
