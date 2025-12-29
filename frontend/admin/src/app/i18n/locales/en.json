@@ -18,7 +18,7 @@
         "status": "Status"
       },
       "totalCourses": {
-        "title": "Pending Approvals",
+        "title": "Tutor Pending Approvals",
         "thisWeek": "This week",
         "pending": "Pending",
         "approved": "Approved",
@@ -30,11 +30,31 @@
         "active": "Active",
         "inactive": "Inactive"
       },
-      "onlineClasses": {
-        "title": "Online Classes",
+      "newTutors": {
+        "title": "New Tutors",
+        "lastMonth": "This month",
+        "vsLastMonth": "vs last month"
+      },
+      "newStudents": {
+        "title": "New Students",
+        "lastMonth": "This month",
+        "vsLastMonth": "vs last month"
+      },
+      "completedSessions": {
+        "title": "Completed Sessions",
         "last7Days": "Last 7 days",
         "mon": "Mon",
-        "sun": "Sun"
+        "sun": "Sun",
+        "vsLastWeek": "vs last week",
+        "days": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat"
+        }
       },
       "totalStudents": {
         "title": "Total Students",
@@ -420,6 +440,7 @@
     "selected": "selected",
     "filters": {
       "category": "Filter by Category",
+      "status": "Filter by Status",
       "subject": "Filter by Subject",
       "all": "All",
       "programming": "Programming & IT",

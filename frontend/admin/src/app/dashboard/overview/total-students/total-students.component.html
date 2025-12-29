@@ -3,36 +3,34 @@
         <div class="flex items-center justify-between mb-[10px]">
             <div class="flex items-center">
                 <span class="block">
-                    {{ 'dashboard.overview.totalStudents.title' | translate }}
+                    {{ 'dashboard.overview.newStudents.title' | translate }}
                 </span>
             </div>
             <span class="block text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
-                {{ 'dashboard.overview.totalStudents.last5Months' | translate }}
+                {{ 'dashboard.overview.newStudents.lastMonth' | translate }}
             </span>
         </div>
         <h5 class="!text-lg md:!text-[20px] !mb-0 mb-[15px]">
-            15.8k
+            {{ totalNewStudents }}
         </h5>
         <div class="w-full h-[100px] mb-[15px] overflow-hidden">
-            <div id="overview_total_students_chart" class="w-full h-full"></div>
+            <div id="overview_new_students_chart" class="w-full h-full"></div>
         </div>
-        <ul class="mt-[10px]">
-            <li class="text-sm ltr:pl-[30px] rtl:pr-[30px] flex justify-between relative mb-[6px] last:mb-0">
-                <span class="inline-block bg-primary-500 ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 w-[20px] h-[5px] rounded-md"></span>
-                <span class="block">
-                    {{ 'dashboard.overview.totalStudents.enrolled' | translate }}
+        <div class="flex items-center gap-2 mt-[10px]">
+            @if (growthPercentage >= 0) {
+                <span class="inline-flex items-center text-sm text-green-500">
+                    <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+                    +{{ growthPercentage }}%
                 </span>
-                <span class="block">
-                    75%
+            } @else {
+                <span class="inline-flex items-center text-sm text-red-500">
+                    <span class="material-symbols-outlined text-[16px] mr-1">trending_down</span>
+                    {{ growthPercentage }}%
                 </span>
-            </li>
-            <li class="text-sm ltr:pl-[30px] rtl:pr-[30px] flex justify-between relative mb-[6px] last:mb-0">
-                <span class="inline-block bg-primary-200 ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 w-[20px] h-[5px] rounded-md"></span>
-                <span class="block">
-                    {{ 'dashboard.overview.totalStudents.completed' | translate }}
-                </span>
-                <span class="block">
-                    25%
-                </span>
-            </li>
-        </ul>
+            }
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                {{ 'dashboard.overview.newStudents.vsLastMonth' | translate }}
+            </span>
+        </div>
+    </div>
+</div>

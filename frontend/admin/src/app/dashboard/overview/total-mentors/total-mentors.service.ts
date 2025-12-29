@@ -1,5 +1,39 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+/**
+ * Response data for New Tutors API
+ * API Endpoint: GET /api/v1/admin/dashboard/new-tutors
+ * Query Params: startDate (YYYY-MM-DD), endDate (YYYY-MM-DD)
+ */
+export interface NewTutorsData {
+    /** Total number of new tutors registered in the period */
+    totalNewTutors: number;
+    /** Growth percentage compared to previous period (can be negative) */
+    growthPercentage: number;
+    /** Daily breakdown of new tutor registrations */
+    dailyData: {
+        /** Date in YYYY-MM-DD format */
+        date: string;
+        /** Number of new tutors registered on this date */
+        count: number;
+    }[];
+}
+
+/**
+ * Standard API response wrapper
+ */
+interface ApiResponse<T> {
+    /** Indicates if the request was successful */
+    success: boolean;
+    /** Response data payload */
+    data: T;
+    /** Optional error or info message */
+    message?: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -7,130 +41,138 @@ import { isPlatformBrowser } from '@angular/common';
 export class TotalMentorsService {
 
     private isBrowser: boolean;
+    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private chart: any = null;
 
-    constructor(@Inject(PLATFORM_ID) private platformId: any) {
+    constructor(
+        @Inject(PLATFORM_ID) private platformId: any,
+        private http: HttpClient
+    ) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
 
-    async loadChart(): Promise<void> {
-        if (this.isBrowser) {
-            try {
+    getNewTutorsData(startDate?: string, endDate?: string): Observable<NewTutorsData> {
+        let params = new HttpParams();
+        
+        // Default to current month (from 1st day to today)
+        if (!startDate || !endDate) {
+            const today = new Date();
+            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            startDate = start.toISOString().split('T')[0];
+            endDate = today.toISOString().split('T')[0];
+        }
+        
+        params = params.set('startDate', startDate);
+        params = params.set('endDate', endDate);
 
+        return this.http.get<ApiResponse<NewTutorsData>>(`${this.apiUrl}/new-tutors`, { params })
+            .pipe(
+                map(response => {
+                    if (response.success && response.data) {
+                        return response.data;
+                    }
+                    throw new Error(response.message || 'Invalid response');
+                })
+            );
+    }
+
+    async loadChart(data: NewTutorsData): Promise<void> {
+        if (this.isBrowser && data) {
+            try {
                 const ApexCharts = (await import('apexcharts')).default;
+
+                // Destroy existing chart if any
+                if (this.chart) {
+                    this.chart.destroy();
+                }
 
                 const options = {
                     series: [
                         {
-                            name: "Active",
-                            data: [85, 70, 75, 80, 65]
-                        },
-                        {
-                            name: "Inactive",
-                            data: [15, 30, 25, 20, 35]
+                            name: "Gia sư mới",
+                            data: data.dailyData.map(d => d.count)
                         }
                     ],
                     chart: {
-                        type: "bar",
+                        type: "line",
                         height: 100,
                         toolbar: {
                             show: false
+                        },
+                        zoom: {
+                            enabled: false
+                        },
+                        sparkline: {
+                            enabled: true
                         }
                     },
                     colors: [
-                        "#1F64F1", "#C2CDFF"
+                        "#1F64F1"
                     ],
-                    plotOptions: {
-                        bar: {
-                            columnWidth: "85%"
+                    stroke: {
+                        width: 3,
+                        curve: "smooth"
+                    },
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shade: 'light',
+                            type: 'vertical',
+                            shadeIntensity: 0.5,
+                            gradientToColors: ['#1F64F1'],
+                            inverseColors: false,
+                            opacityFrom: 0.6,
+                            opacityTo: 0.1,
+                            stops: [0, 100]
                         }
+                    },
+                    markers: {
+                        size: 0
                     },
                     dataLabels: {
                         enabled: false
                     },
-                    stroke: {
-                        width: 2,
-                        show: true,
-                        colors: ["transparent"]
-                    },
                     grid: {
-                        show: true,
-                        borderColor: "#ffffff"
+                        show: false
                     },
                     xaxis: {
-                        categories: [
-                            "Jan",
-                            "Feb",
-                            "Mar",
-                            "Apr",
-                            "May"
-                        ],
-                        axisTicks: {
-                            show: false,
-                            color: '#ECEEF2'
+                        categories: data.dailyData.map(d => d.date),
+                        labels: {
+                            show: false
                         },
                         axisBorder: {
-                            show: false,
-                            color: '#ECEEF2'
+                            show: false
                         },
-                        labels: {
-                            show: false,
-                            style: {
-                                colors: "#8695AA",
-                                fontSize: "12px"
-                            }
+                        axisTicks: {
+                            show: false
                         }
                     },
                     yaxis: {
-                        show: false,
-                        labels: {
-                            style: {
-                                colors: "#64748B",
-                                fontSize: "12px"
-                            }
-                        },
-                        axisBorder: {
-                            show: false,
-                            color: '#ECEEF2'
-                        },
-                        axisTicks: {
-                            show: false,
-                            color: '#ECEEF2'
-                        }
+                        show: false
                     },
                     tooltip: {
-                        y: {
-                            formatter: function(val:any) {
-                                return val + "%";
+                        x: {
+                            formatter: function(val: any, opts: any) {
+                                const date = new Date(data.dailyData[opts.dataPointIndex]?.date);
+                                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
                             }
-                        }
-                    },
-                    legend: {
-                        show: false,
-                        fontSize: '12px',
-                        position: 'bottom',
-                        horizontalAlign: 'center',
-                        itemMargin: {
-                            horizontal: 8,
-                            vertical: 0
                         },
-                        labels: {
-                            colors: '#64748B'
-                        },
-                        markers: {
-                            size: 7,
-                            offsetX: -2,
-                            offsetY: -.5,
-                            shape: 'diamond'
+                        y: {
+                            formatter: function(val: any) {
+                                return val + " gia sư";
+                            }
                         }
                     }
                 };
 
-                const chart = new ApexCharts(document.querySelector('#overview_total_mentors_chart'), options);
-                chart.render();
+                const chartElement = document.querySelector('#overview_new_tutors_chart');
+                if (chartElement) {
+                    this.chart = new ApexCharts(chartElement, options);
+                    this.chart.render();
+                }
             } catch (error) {
                 console.error('Error loading ApexCharts:', error);
             }
         }
     }
-
 }

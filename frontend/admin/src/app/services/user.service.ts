@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail } from '../types/index';
+import { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail, PaginatedResponse } from '../types/index';
 
 export type { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail } from '../types/index';
 export type Instructor = TutorDetail;
@@ -781,18 +781,49 @@ export class UserService {
         );
     }
 
-    getInstructorRequests(): Observable<InstructorRequest[]> {
-        // Gọi API thực - apiService.get() trả về ApiResponse<InstructorRequest[]>
-        return this.apiService.get<InstructorRequest[]>('/v1/admin/instructor-requests').pipe(
+    /**
+     * Get instructor requests with pagination and filters
+     * @param params Query parameters: status, subject, search, page, size
+     * @returns Observable of PaginatedResponse<InstructorRequest>
+     */
+    getInstructorRequests(params?: {
+        status?: string;
+        subject?: string;
+        search?: string;
+        page?: number;
+        size?: number;
+    }): Observable<PaginatedResponse<InstructorRequest>> {
+        // Build query params
+        const queryParams: any = {};
+        if (params?.status && params.status !== 'all') queryParams.status = params.status;
+        if (params?.subject && params.subject !== 'all') queryParams.subject = params.subject;
+        if (params?.search) queryParams.search = params.search;
+        if (params?.page !== undefined) queryParams.page = params.page;
+        if (params?.size !== undefined) queryParams.size = params.size;
+
+        // Gọi API thực - apiService.get() trả về ApiResponse<PaginatedResponse<InstructorRequest>>
+        return this.apiService.get<PaginatedResponse<InstructorRequest>>('/v1/admin/instructor-requests', queryParams).pipe(
             map(response => {
                 // Nếu API thành công → dùng dữ liệu API
-                if (response.success && response.data && Array.isArray(response.data)) {
-                    this.instructorRequestsSubject.next(response.data);
+                if (response.success && response.data) {
+                    // Update subject with content array for backward compatibility
+                    this.instructorRequestsSubject.next(response.data.content);
                     return response.data;
                 }
-                // Nếu API lỗi → lấy mock data fallback
+                // Nếu API lỗi → trả về empty paginated response
                 console.warn('[UserService] API failed for instructor requests:', response.message);
-                return this.instructorRequestsSubject.value;
+                return {
+                    content: [],
+                    pageable: { pageNumber: 0, pageSize: 5, offset: 0, paged: true },
+                    totalPages: 0,
+                    totalElements: 0,
+                    last: true,
+                    first: true,
+                    numberOfElements: 0,
+                    size: 5,
+                    number: 0,
+                    empty: true
+                };
             })
         );
     }

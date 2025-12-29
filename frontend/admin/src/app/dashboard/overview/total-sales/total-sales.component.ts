@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { TotalSalesService } from './total-sales.service';
+import { Subscription } from 'rxjs';
+import { TotalSalesService, TotalRevenueData } from './total-sales.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
@@ -10,32 +11,12 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 })
 export class TotalSalesComponent implements OnInit, OnDestroy {
 
-    selectedTimeframe: string = 'Monthly'; 
+    selectedTimeframe: string = 'monthly';
     instanceId: string;
+    totalRevenue: number = 0;
+    growthPercentage: number = 0;
     private initialized = false;
-    chartData: { [key: string]: { series: { name: string; data: number[] }[]; categories: string[] } } = {
-        Weekly: {
-            series: [
-                { name: 'Current Sale', data: [35, 50, 55, 60, 50, 60, 55] },
-                { name: 'Last Year Sale', data: [70, 50, 40, 40, 62, 52, 80] }
-            ],
-            categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
-        Monthly: {
-            series: [
-                { name: 'Current Sale', data: [35, 50, 55, 60, 50, 60, 55, 60, 78, 40, 95, 80] },
-                { name: 'Last Year Sale', data: [70, 50, 40, 40, 62, 52, 80, 40, 60, 53, 70, 70] }
-            ],
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        },
-        Yearly: {
-            series: [
-                { name: 'Current Sale', data: [2000, 3000, 2500, 4000] },
-                { name: 'Last Year Sale', data: [1500, 2000, 1800, 3000] }
-            ],
-            categories: ['Q1', 'Q2', 'Q3', 'Q4']
-        }
-    };
+    private subscription?: Subscription;
 
     constructor(
         private totalSalesService: TotalSalesService
@@ -48,21 +29,44 @@ export class TotalSalesComponent implements OnInit, OnDestroy {
             return;
         }
         this.initialized = true;
+        this.loadData();
+    }
 
-        const defaultData = this.chartData[this.selectedTimeframe];
-        this.totalSalesService.loadChart(defaultData.series, defaultData.categories, 'overview_total_sales_chart');
+    ngOnDestroy(): void {
+        this.subscription?.unsubscribe();
+        this.totalSalesService.destroyChart();
+    }
+
+    private loadData(): void {
+        this.subscription = this.totalSalesService.getTotalRevenueData(this.selectedTimeframe).subscribe({
+            next: (data: TotalRevenueData) => {
+                this.totalRevenue = data.totalRevenue;
+                this.growthPercentage = data.growthPercentage;
+                
+                const series = [
+                    { name: data.series.currentPeriod.name, data: data.series.currentPeriod.data },
+                    { name: data.series.previousPeriod.name, data: data.series.previousPeriod.data }
+                ];
+                
+                this.totalSalesService.loadChart(series, data.categories, 'overview_total_sales_chart');
+            },
+            error: (error) => {
+                console.error('Error loading total revenue data:', error);
+            }
+        });
     }
 
     onTimeframeChange(timeframe: string): void {
-        this.selectedTimeframe = timeframe; 
-        const selectedData = this.chartData[timeframe];
-        this.totalSalesService.updateChart(selectedData.series, selectedData.categories);
+        this.selectedTimeframe = timeframe;
+        this.isCardHeaderOpen = false;
+        this.loadData();
     }
 
     isCardHeaderOpen = false;
     toggleCardHeaderMenu() {
         this.isCardHeaderOpen = !this.isCardHeaderOpen;
     }
+
     @HostListener('document:click', ['$event'])
     handleClickOutside(event: Event) {
         const target = event.target as HTMLElement;
@@ -71,9 +75,14 @@ export class TotalSalesComponent implements OnInit, OnDestroy {
         }
     }
 
-    ngOnDestroy(): void {
-        if (this.totalSalesService['chartInstance']) {
-            this.totalSalesService['chartInstance'].destroy();
+    formatRevenue(amount: number): string {
+        if (amount >= 1000000000) {
+            return (amount / 1000000000).toFixed(1) + 'B';
+        } else if (amount >= 1000000) {
+            return (amount / 1000000).toFixed(1) + 'M';
+        } else if (amount >= 1000) {
+            return (amount / 1000).toFixed(1) + 'K';
         }
+        return amount.toString();
     }
 }

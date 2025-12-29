@@ -1,8 +1,6 @@
-import { Component, HostListener, OnInit, OnDestroy, AfterViewInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PopularSubject, TimePeriod } from '../../../types/dashboard';
-import { DashboardService } from '../../../services/dashboard.service';
-import { StudentsInterestedTopicsService } from './students-interested-topics.service';
+import { StudentsInterestedTopicsService, PopularSubjectsData } from './students-interested-topics.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
@@ -12,18 +10,15 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
     styleUrl: './students-interested-topics.component.scss'
 })
 export class StudentsInterestedTopicsComponent implements OnInit, OnDestroy, AfterViewInit {
-    @Input() popularSubjects?: PopularSubject[];
 
-    selectedTimeframe: TimePeriod = 'month';
     instanceId: string;
     private initialized = false;
     private chartLoaded = false;
-    private subscriptions: Subscription[] = [];
+    private subscription?: Subscription;
 
-    subjectsData: PopularSubject[] = [];
+    subjectsData: PopularSubjectsData['subjects'] = [];
 
     constructor(
-        private dashboardService: DashboardService,
         private studentsInterestedTopicsService: StudentsInterestedTopicsService
     ) {
         this.instanceId = 'students-interested-' + Math.random().toString(36).substr(2, 9);
@@ -34,43 +29,36 @@ export class StudentsInterestedTopicsComponent implements OnInit, OnDestroy, Aft
             return;
         }
         this.initialized = true;
-
-        // If popularSubjects provided via Input, use them
-        if (this.popularSubjects && this.popularSubjects.length > 0) {
-            this.subjectsData = this.popularSubjects;
-        } else {
-            // Otherwise, load from service
-            this.loadPopularSubjects();
-        }
     }
 
     ngAfterViewInit(): void {
-        // Load chart after view is initialized
-        if (this.subjectsData.length > 0) {
-            this.loadChartData();
-        }
+        // Load data after view is initialized
+        setTimeout(() => this.loadData(), 100);
     }
 
     ngOnDestroy() {
-        this.subscriptions.forEach(sub => sub.unsubscribe());
+        this.subscription?.unsubscribe();
+        this.studentsInterestedTopicsService.destroyChart();
     }
 
-    private loadPopularSubjects() {
-        const sub = this.dashboardService.getPopularSubjects(this.selectedTimeframe).subscribe(subjects => {
-            this.subjectsData = subjects;
-            // Load chart after data is loaded
-            setTimeout(() => this.loadChartData(), 100);
+    private loadData(): void {
+        this.subscription = this.studentsInterestedTopicsService.getPopularSubjectsData().subscribe({
+            next: (data: PopularSubjectsData) => {
+                this.subjectsData = data.subjects;
+                this.loadChartData();
+            },
+            error: (error) => {
+                console.error('Error loading popular subjects data:', error);
+            }
         });
-        this.subscriptions.push(sub);
     }
 
-    private loadChartData() {
+    private loadChartData(): void {
         // Transform subjects data to chart format
-        const series = [{ name: 'Students', data: this.subjectsData.map(s => s.studentCount || s.instructors) }];
-        const categories = this.subjectsData.map(s => s.subject);
+        const series = [{ name: 'Học viên', data: this.subjectsData.map(s => s.studentCount) }];
+        const categories = this.subjectsData.map(s => s.name);
 
         // Use the chart service to render/update chart
-        // Always load chart first time, then update for subsequent calls
         if (!this.chartLoaded) {
             this.studentsInterestedTopicsService.loadChart(series, categories);
             this.chartLoaded = true;
@@ -78,22 +66,4 @@ export class StudentsInterestedTopicsComponent implements OnInit, OnDestroy, Aft
             this.studentsInterestedTopicsService.updateChart(series, categories);
         }
     }
-
-    onTimeframeChange(timeframe: TimePeriod): void {
-        this.selectedTimeframe = timeframe;
-        this.loadPopularSubjects();
-    }
-
-    isCardHeaderOpen = false;
-    toggleCardHeaderMenu() {
-        this.isCardHeaderOpen = !this.isCardHeaderOpen;
-    }
-    @HostListener('document:click', ['$event'])
-    handleClickOutside(event: Event) {
-        const target = event.target as HTMLElement;
-        if (!target.closest('.trezo-card-dropdown')) {
-            this.isCardHeaderOpen = false;
-        }
-    }
-
 }

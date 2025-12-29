@@ -18,7 +18,7 @@
         "status": "Trạng thái"
       },
       "totalCourses": {
-        "title": "Chờ phê duyệt",
+        "title": "Gia sư chờ phê duyệt",
         "thisWeek": "Tuần này",
         "pending": "Chờ duyệt",
         "approved": "Đã duyệt",
@@ -30,11 +30,31 @@
         "active": "Đang hoạt động",
         "inactive": "Không hoạt động"
       },
-      "onlineClasses": {
-        "title": "Lớp học trực tuyến",
+      "newTutors": {
+        "title": "Gia sư mới",
+        "lastMonth": "Tháng này",
+        "vsLastMonth": "so với tháng trước"
+      },
+      "newStudents": {
+        "title": "Học viên mới",
+        "lastMonth": "Tháng này",
+        "vsLastMonth": "so với tháng trước"
+      },
+      "completedSessions": {
+        "title": "Các phiên đã học",
         "last7Days": "7 ngày qua",
         "mon": "T2",
-        "sun": "CN"
+        "sun": "CN",
+        "vsLastWeek": "so với tuần trước",
+        "days": {
+          "sun": "CN",
+          "mon": "T2",
+          "tue": "T3",
+          "wed": "T4",
+          "thu": "T5",
+          "fri": "T6",
+          "sat": "T7"
+        }
       },
       "totalStudents": {
         "title": "Tổng số học viên",
@@ -422,6 +442,7 @@
     "selected": "đã chọn",
     "filters": {
       "category": "Lọc theo Danh mục",
+      "status": "Lọc theo trạng thái",
       "subject": "Lọc theo Môn học",
       "all": "Tất cả",
       "programming": "Lập trình & CNTT",

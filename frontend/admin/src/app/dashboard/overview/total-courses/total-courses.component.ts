@@ -1,8 +1,6 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { TotalCoursesService } from './total-courses.service';
-import { DashboardService } from '../../../services/dashboard.service';
-import { PendingApprovalsData } from '../../../types/dashboard';
+import { TotalCoursesService, TutorPendingApprovalsData } from './total-courses.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
@@ -12,8 +10,6 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
     styleUrl: './total-courses.component.scss'
 })
 export class TotalCoursesComponent implements OnInit, OnDestroy {
-    @Input() pendingApprovals?: PendingApprovalsData;
-
     pendingCount = 0;
     approvedCount = 0;
     rejectedCount = 0;
@@ -26,29 +22,33 @@ export class TotalCoursesComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription[] = [];
 
     constructor(
-        private totalCoursesService: TotalCoursesService,
-        private dashboardService: DashboardService
-    ) {}    ngOnInit(): void {
-        console.log('TotalCoursesComponent ngOnInit called');
-        // If data is provided via Input, use it
-        if (this.pendingApprovals) {
-            this.updateFromData(this.pendingApprovals);
-        } else {
-            // Otherwise, load from service (fallback for backward compatibility)
-            this.loadFromService();
-        }
+        private totalCoursesService: TotalCoursesService
+    ) {}
 
-        // Load chart
-        setTimeout(() => {
-            this.totalCoursesService.loadChart();
-        }, 100);
+    ngOnInit(): void {
+        this.loadData();
     }
 
     ngOnDestroy() {
         this.subscriptions.forEach(sub => sub.unsubscribe());
     }
 
-    private updateFromData(data: PendingApprovalsData) {
+    private loadData(): void {
+        const sub = this.totalCoursesService.getTutorPendingApprovalsData().subscribe({
+            next: (data: TutorPendingApprovalsData) => {
+                this.updateFromData(data);
+                setTimeout(() => {
+                    this.totalCoursesService.loadChart(data);
+                }, 100);
+            },
+            error: (error) => {
+                console.error('Error loading tutor pending approvals data:', error);
+            }
+        });
+        this.subscriptions.push(sub);
+    }
+
+    private updateFromData(data: TutorPendingApprovalsData) {
         this.pendingCount = data.pending;
         this.approvedCount = data.approved;
         this.rejectedCount = data.rejected;
@@ -60,15 +60,4 @@ export class TotalCoursesComponent implements OnInit, OnDestroy {
             this.rejectedPercentage = Math.round((this.rejectedCount / this.totalCount) * 100);
         }
     }
-
-    private loadFromService() {
-        // Fallback: load from dashboard service
-        const sub = this.dashboardService.dashboardSummary.subscribe(summary => {
-            if (summary?.pendingApprovals) {
-                this.updateFromData(summary.pendingApprovals);
-            }
-        });
-        this.subscriptions.push(sub);
-    }
-
 }

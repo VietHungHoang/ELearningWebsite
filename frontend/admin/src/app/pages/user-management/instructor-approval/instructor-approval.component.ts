@@ -9,6 +9,7 @@ import { CareerEntry } from '../../../types/instructor';
 import { LocaleUtilsService } from '../../../shared/utils/locale.utils';
 import { I18nService } from '../../../i18n/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { PaginatedResponse } from '../../../types/pagination';
 
 
 @Component({
@@ -21,18 +22,20 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 export class InstructorApprovalComponent implements OnInit {
     // Tab management
     activeTab: 'pending' | 'requestEdit' | 'history' = 'pending';
-    pendingRequests: InstructorRequest[] = [];
-    requestEditRequests: InstructorRequest[] = [];
-    historyRequests: InstructorRequest[] = [];
-
+    
+    // Data from API
     filteredRequests: InstructorRequest[] = [];
-    allFilteredRequests: InstructorRequest[] = [];
     searchTerm: string = '';
+    
+    // Filter properties
+    selectedStatus: string = 'all';
+    selectedSubject: string = 'all';
 
-    // Pagination
+    // Pagination (from backend)
     itemsPerPage = 5;
-    currentPage = 1;
+    currentPage = 0; // 0-based for Spring Boot
     totalRequests = 0;
+    totalPages = 0;
 
     showLevelDialog = false;
     selectedRequest: InstructorRequest | null = null;
@@ -67,9 +70,8 @@ export class InstructorApprovalComponent implements OnInit {
     }
 
     get totalPendingRequests(): number {
-        return this.pendingRequests.filter(r =>
-            r.requestStatus === 'PENDING' || r.requestStatus === 'REQUEST_CHANGES'
-        ).length;
+        // This is now handled by backend, return 0 or remove if not needed
+        return 0;
     }
 
     rejectionReasons = [
@@ -123,66 +125,79 @@ export class InstructorApprovalComponent implements OnInit {
     switchTab(tab: 'pending' | 'requestEdit' | 'history'): void {
         this.activeTab = tab;
         this.selectedRequests.clear(); // Clear selections when switching tabs
-        this.currentPage = 1;
-        this.filterRequests();
+        this.currentPage = 0; // Reset to first page (0-based)
+        this.loadApprovalRequests();
     }
 
     loadApprovalRequests(): void {
-        // Sử dụng dữ liệu thực từ service với API call
-        this.userService.getInstructorRequests().subscribe(requests => {
-            this.pendingRequests = requests;
-            this.currentPage = 1;
-            this.filterRequests();
-        });
-    }
+        // Build params for API call
+        const params: any = {
+            page: this.currentPage,
+            size: this.itemsPerPage
+        };
 
-    filterRequests(): void {
-        // Select data based on active tab
-        let source: InstructorRequest[] = [];
-
-        switch (this.activeTab) {
-            case 'pending':
-                // Gộp cả PENDING và REQUEST_CHANGES vào tab Pending
-                source = this.pendingRequests.filter(req =>
-                    req.requestStatus === 'PENDING' || req.requestStatus === 'REQUEST_CHANGES'
-                );
-                break;
-            case 'requestEdit':
-                source = this.requestEditRequests;
-                break;
-            case 'history':
-                source = this.historyRequests;
-                break;
+        // Map activeTab to status filter
+        // pending tab: show PENDING and REQUEST_CHANGES
+        // requestEdit tab: show REQUEST_CHANGES
+        // history tab: show APPROVED and REJECTED
+        if (this.activeTab === 'pending') {
+            // For pending tab, use status filter if selected, otherwise backend should return PENDING + REQUEST_CHANGES
+            if (this.selectedStatus !== 'all') {
+                params.status = this.selectedStatus;
+            }
+        } else if (this.activeTab === 'requestEdit') {
+            params.status = 'edited'; // REQUEST_CHANGES
+        } else if (this.activeTab === 'history') {
+            // For history tab, backend should return APPROVED + REJECTED
+            // Can add status filter if needed
         }
 
-        let filtered = source;
+        // Add subject filter if not 'all'
+        if (this.selectedSubject !== 'all') {
+            params.subject = this.selectedSubject;
+        }
 
+        // Add search term if exists
         if (this.searchTerm.trim()) {
-            const term = this.searchTerm.toLowerCase().trim();
-            filtered = filtered.filter(req =>
-                req.name.toLowerCase().includes(term) ||
-                (req.subjects && Array.isArray(req.subjects) &&
-                 req.subjects.some(s => s.subjectName.toLowerCase().includes(term)))
-            );
+            params.search = this.searchTerm.trim();
         }
 
-        this.allFilteredRequests = filtered;
-        this.totalRequests = filtered.length;
-        this.applyPagination();
-    }
-
-    private applyPagination(): void {
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        this.filteredRequests = this.allFilteredRequests.slice(startIndex, endIndex);
+        // Call API with params
+        this.userService.getInstructorRequests(params).subscribe({
+            next: (response: PaginatedResponse<InstructorRequest>) => {
+                this.filteredRequests = response.content;
+                this.totalRequests = response.totalElements;
+                this.totalPages = response.totalPages;
+                this.currentPage = response.number; // Update current page from backend
+            },
+            error: (error) => {
+                console.error('Error loading instructor requests:', error);
+                this.filteredRequests = [];
+                this.totalRequests = 0;
+                this.totalPages = 0;
+            }
+        });
     }
 
     onSearchChange(searchTerm?: string): void {
         if (searchTerm !== undefined) {
             this.searchTerm = searchTerm;
         }
-        this.currentPage = 1;
-        this.filterRequests();
+        this.currentPage = 0; // Reset to first page (0-based)
+        this.loadApprovalRequests();
+    }
+
+    onFilterChange(): void {
+        this.currentPage = 0; // Reset to first page (0-based)
+        this.loadApprovalRequests();
+    }
+
+    clearFilters(): void {
+        this.selectedStatus = 'all';
+        this.selectedSubject = 'all';
+        this.searchTerm = '';
+        this.currentPage = 0; // Reset to first page (0-based)
+        this.loadApprovalRequests();
     }
 
     viewProfile(request: InstructorRequest): void {
@@ -191,7 +206,8 @@ export class InstructorApprovalComponent implements OnInit {
 
     clearSearch(): void {
         this.searchTerm = '';
-        this.filterRequests();
+        this.currentPage = 0; // Reset to first page (0-based)
+        this.loadApprovalRequests();
     }
 
     viewCertification(request: InstructorRequest): void {
@@ -240,20 +256,18 @@ export class InstructorApprovalComponent implements OnInit {
             });
 
             // Approve request via API
-            this.userService.approveInstructorRequest(this.selectedRequest.id, levelCodes).subscribe(success => {
-                if (success) {
-                    // Xóa request khỏi danh sách pending
-                    const index = this.pendingRequests.indexOf(this.selectedRequest!);
-                    if (index >= 0) {
-                        this.selectedRequest!.requestStatus = 'APPROVED';
-                        this.historyRequests.push(this.selectedRequest!);
-                        this.pendingRequests.splice(index, 1);
+            this.userService.approveInstructorRequest(this.selectedRequest.id, levelCodes).subscribe({
+                next: (success) => {
+                    if (success) {
+                        // Reload data from API
+                        this.loadApprovalRequests();
                     }
-
-                    // Cập nhật filtered list
-                    this.filterRequests();
+                    this.closeLevelDialog();
+                },
+                error: (error) => {
+                    console.error('Error approving instructor request:', error);
+                    this.closeLevelDialog();
                 }
-                this.closeLevelDialog();
             });
         }
     }
@@ -274,19 +288,18 @@ export class InstructorApprovalComponent implements OnInit {
         const finalReason = this.rejectReason === 'Khác' ? this.customRejectReason : this.rejectReason;
         if (this.requestToReject && finalReason.trim()) {
             // Reject request via API
-            this.userService.rejectInstructorRequest(this.requestToReject.id, finalReason).subscribe(success => {
-                if (success) {
-                    // Move request to history
-                    const index = this.pendingRequests.indexOf(this.requestToReject!);
-                    if (index >= 0) {
-                        this.requestToReject!.requestStatus = 'REJECTED';
-                        this.historyRequests.push(this.requestToReject!);
-                        this.pendingRequests.splice(index, 1);
+            this.userService.rejectInstructorRequest(this.requestToReject.id, finalReason).subscribe({
+                next: (success) => {
+                    if (success) {
+                        // Reload data from API
+                        this.loadApprovalRequests();
                     }
-
-                    this.filterRequests();
+                    this.closeRejectDialog();
+                },
+                error: (error) => {
+                    console.error('Error rejecting instructor request:', error);
+                    this.closeRejectDialog();
                 }
-                this.closeRejectDialog();
             });
         }
     }
@@ -306,16 +319,20 @@ export class InstructorApprovalComponent implements OnInit {
     confirmEditRequest(): void {
         const finalReason = this.editRequestReason === 'Khác' ? this.customEditReason : this.editRequestReason;
         if (this.requestToEdit && finalReason.trim()) {
-            // Move request to requestEdit tab
-            const index = this.pendingRequests.indexOf(this.requestToEdit);
-            if (index >= 0) {
-                this.requestToEdit.requestStatus = 'REQUEST_CHANGES';
-                this.requestEditRequests.push(this.requestToEdit);
-                this.pendingRequests.splice(index, 1);
-            }
-
-            this.filterRequests();
-            this.closeEditRequestDialog();
+            // Request edit via API
+            this.userService.requestEditInstructorRequest(this.requestToEdit.id, finalReason).subscribe({
+                next: (success) => {
+                    if (success) {
+                        // Reload data from API
+                        this.loadApprovalRequests();
+                    }
+                    this.closeEditRequestDialog();
+                },
+                error: (error) => {
+                    console.error('Error requesting edit for instructor:', error);
+                    this.closeEditRequestDialog();
+                }
+            });
         }
     }
 
@@ -386,7 +403,7 @@ export class InstructorApprovalComponent implements OnInit {
             // Call API for each rejection
             let completedCount = 0;
             requestsToReject.forEach(requestId => {
-                const request = this.pendingRequests.find(r => r.id === requestId);
+                const request = this.filteredRequests.find(r => r.id === requestId);
                 if (request) {
                     this.userService.rejectInstructorRequest(requestId, 'Bulk rejected').subscribe(success => {
                         completedCount++;
@@ -395,12 +412,10 @@ export class InstructorApprovalComponent implements OnInit {
                             rejectsToMove.push(request);
                         }
 
-                        // After all requests processed, update UI
+                        // After all requests processed, reload data from API
                         if (completedCount === requestsToReject.length) {
-                            this.pendingRequests = this.pendingRequests.filter(r => !this.selectedRequests.has(r.id));
-                            this.historyRequests.push(...rejectsToMove);
                             this.selectedRequests.clear();
-                            this.filterRequests();
+                            this.loadApprovalRequests();
                         }
                     });
                 }
@@ -423,16 +438,13 @@ export class InstructorApprovalComponent implements OnInit {
     }
 
     // Pagination methods
-    get totalPages(): number {
-        return Math.ceil(this.totalRequests / this.itemsPerPage);
-    }
-
     get showingText(): string {
         if (this.totalRequests === 0) {
             return this.i18nService.translate('instructorApproval.pagination.showing', { start: 0, end: 0, total: 0 });
         }
-        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
-        const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalRequests);
+        // Convert 0-based page to 1-based for display
+        const startItem = this.currentPage * this.itemsPerPage + 1;
+        const endItem = Math.min((this.currentPage + 1) * this.itemsPerPage, this.totalRequests);
         return this.i18nService.translate('instructorApproval.pagination.showing', {
             start: startItem,
             end: endItem,
@@ -441,34 +453,38 @@ export class InstructorApprovalComponent implements OnInit {
     }
 
     getSttNumber(index: number): number {
-        // Calculate STT based on current page and items per page
-        return (this.currentPage - 1) * this.itemsPerPage + index + 1;
+        // Calculate STT based on current page (0-based) and items per page
+        return this.currentPage * this.itemsPerPage + index + 1;
     }
 
     goToPage(page: number): void {
-        if (page < 1 || page > this.totalPages) return;
-        this.currentPage = page;
-        this.applyPagination();
+        // page is 1-based from UI, convert to 0-based for API
+        const pageIndex = page - 1;
+        if (pageIndex < 0 || pageIndex >= this.totalPages) return;
+        this.currentPage = pageIndex;
+        this.loadApprovalRequests();
     }
 
     previousPage(): void {
-        if (this.currentPage > 1) {
+        if (this.currentPage > 0) {
             this.currentPage--;
-            this.applyPagination();
+            this.loadApprovalRequests();
         }
     }
 
     nextPage(): void {
-        if (this.currentPage < this.totalPages) {
+        if (this.currentPage < this.totalPages - 1) {
             this.currentPage++;
-            this.applyPagination();
+            this.loadApprovalRequests();
         }
     }
 
     get visiblePages(): number[] {
         const pages: number[] = [];
         const maxVisiblePages = 4;
-        let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
+        // Convert 0-based to 1-based for display
+        const currentPage1Based = this.currentPage + 1;
+        let startPage = Math.max(1, currentPage1Based - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
 
         if (endPage - startPage + 1 < maxVisiblePages) {
