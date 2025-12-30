@@ -17,7 +17,7 @@ public interface QuestionService {
     /**
      * Create a new question for a quiz
      */
-    QuestionResponse createQuestion(Quiz quiz, CreateQuestionRequest request);
+    QuestionResponse createQuestion(UUID quizId, CreateQuestionRequest request);
     
     /**
      * Get question by ID

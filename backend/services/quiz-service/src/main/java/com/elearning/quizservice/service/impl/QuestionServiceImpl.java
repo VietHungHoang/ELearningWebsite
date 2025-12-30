@@ -11,6 +11,7 @@ import com.elearning.quizservice.mapper.QuestionMapper;
 import com.elearning.quizservice.repository.QuestionOptionRepository;
 import com.elearning.quizservice.repository.QuestionRepository;
 import com.elearning.quizservice.service.QuestionService;
+import com.elearning.quizservice.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,11 +32,15 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionOptionRepository optionRepository;
     private final QuestionMapper questionMapper;
+    private final QuizService quizService;
     
     @Override
     @Transactional
-    public QuestionResponse createQuestion(Quiz quiz, CreateQuestionRequest request) {
-        log.info("Creating question for quiz: {}", quiz.getId());
+    public QuestionResponse createQuestion(UUID quizId, CreateQuestionRequest request) {
+        log.info("Creating question for quiz: {}", quizId);
+        
+        // Get quiz
+        Quiz quiz = quizService.getQuizById(quizId);
         
         // Get next order index
         Integer maxOrderIndex = questionRepository.findMaxOrderIndexByQuizId(quiz.getId());

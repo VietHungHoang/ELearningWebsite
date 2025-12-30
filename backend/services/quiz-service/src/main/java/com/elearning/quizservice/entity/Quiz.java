@@ -107,4 +107,8 @@ public class Quiz extends BaseEntity {
         questions.remove(question);
         question.setQuiz(null);
     }
+
+    public int getTotalQuestions() {
+        return questions.size();
+    }
 }
