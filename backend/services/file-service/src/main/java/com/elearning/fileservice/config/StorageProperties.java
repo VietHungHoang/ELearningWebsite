@@ -1,69 +1,52 @@
 package com.elearning.fileservice.config;
 
 import lombok.Data;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import com.elearning.fileservice.enums.MediaType;
-
-import jakarta.annotation.PostConstruct;
+import java.util.Map;
 
 @Component
 @ConfigurationProperties(prefix = "aws.s3")
 @Data
 public class StorageProperties {
 
-    // Use String keys to match YAML, then convert to MediaType keys
-    private Map<String, StorageInfo> buckets = new HashMap<>();
-    
-    // Internal map for MediaType lookup
-    private Map<MediaType, StorageInfo> mediaTypeBuckets = new HashMap<>();
+    private String bucketName;
+    private String region;
+    private String baseUrl;
+    private Map<String, String> folders;
 
-    @PostConstruct
-    public void init() {
-        System.out.println("StorageProperties init() called");
-        System.out.println("Buckets from YAML: " + buckets);
-        
-        // Convert String keys from YAML to MediaType keys
-        if (buckets.containsKey("IMAGE")) {
-            mediaTypeBuckets.put(MediaType.IMAGE, buckets.get("IMAGE"));
-            System.out.println("Added IMAGE config: " + buckets.get("IMAGE"));
-        } else {
-            System.out.println("No IMAGE config found in buckets");
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public String getBaseUrl() {
+        if (baseUrl != null) {
+            return baseUrl;
         }
-        if (buckets.containsKey("VIDEO")) {
-            mediaTypeBuckets.put(MediaType.VIDEO, buckets.get("VIDEO"));
-            System.out.println("Added VIDEO config: " + buckets.get("VIDEO"));
-        } else {
-            System.out.println("No VIDEO config found in buckets");
-        }
-        if (buckets.containsKey("DOCUMENT")) {
-            mediaTypeBuckets.put(MediaType.DOCUMENT, buckets.get("DOCUMENT"));
-            System.out.println("Added DOCUMENT config: " + buckets.get("DOCUMENT"));
-        } else {
-            System.out.println("No DOCUMENT config found in buckets");
-        }
-        
-        System.out.println("Final mediaTypeBuckets: " + mediaTypeBuckets);
+        return String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
     }
 
-    public StorageInfo getImagesConfig() {
-        return mediaTypeBuckets.get(MediaType.IMAGE);
+    public String getImagesFolder() {
+        return folders != null ? folders.get("images") : "lernen/images";
     }
 
-    public StorageInfo getVideosRaw() {
-        return mediaTypeBuckets.get(MediaType.VIDEO);
+    public String getVideosFolder() {
+        return folders != null ? folders.get("videos") : "lernen/videos";
     }
 
-    public StorageInfo getDocumentsConfig() {
-        return mediaTypeBuckets.get(MediaType.DOCUMENT);
+    public String getDocumentsFolder() {
+        return folders != null ? folders.get("documents") : "lernen/documents";
     }
-    
-    public StorageInfo getBucketInfo(MediaType mediaType) {
-        return mediaTypeBuckets.get(mediaType);
+
+    /**
+     * Get StorageInfo for API compatibility
+     */
+    public StorageInfo getStorageInfo() {
+        return new StorageInfo(bucketName, region, getBaseUrl());
     }
 }
