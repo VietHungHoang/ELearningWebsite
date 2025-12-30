@@ -11,7 +11,7 @@ import com.elearning.quizservice.mapper.QuestionMapper;
 import com.elearning.quizservice.repository.QuestionOptionRepository;
 import com.elearning.quizservice.repository.QuestionRepository;
 import com.elearning.quizservice.service.QuestionService;
-import com.elearning.quizservice.service.QuizService;
+import com.elearning.quizservice.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,8 +32,8 @@ public class QuestionServiceImpl implements QuestionService {
     
     private final QuestionRepository questionRepository;
     private final QuestionOptionRepository optionRepository;
+    private final QuizRepository quizRepository;
     private final QuestionMapper questionMapper;
-    private final QuizService quizService;
     
     @Override
     @Transactional
@@ -41,7 +41,8 @@ public class QuestionServiceImpl implements QuestionService {
         log.info("Creating question for quiz: {}", quizId);
         
         // Get quiz
-        Quiz quiz = quizService.getQuizById(quizId);
+        Quiz quiz = quizRepository.findByIdAndIsActiveTrue(quizId)
+                .orElseThrow(() -> ResourceNotFoundException.quiz(quizId.toString()));
         
         // Get next order index
         Integer maxOrderIndex = questionRepository.findMaxOrderIndexByQuizId(quiz.getId());
