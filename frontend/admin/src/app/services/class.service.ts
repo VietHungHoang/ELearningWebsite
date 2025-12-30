@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { ApiService } from './api.service';
+import { PaginatedResponse } from '../types/pagination';
 
 export type ClassStatus = 'upcoming' | 'ongoing' | 'completed';
 export type ClassType = '1-on-1' | '1-on-n';
@@ -42,6 +45,14 @@ export interface ClassFinancialReport {
   revenue_per_hour: number;
 }
 
+export interface ClassFilters {
+  status?: ClassStatus | 'all';
+  instructorId?: string | 'all';
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -52,7 +63,9 @@ export class ClassService {
   private enrollmentsSubject = new BehaviorSubject<{ [classId: string]: StudentEnrollment[] }>({});
   public enrollments$ = this.enrollmentsSubject.asObservable();
 
-  constructor() {
+  private mockClasses: GroupClass[] = [];
+
+  constructor(private apiService: ApiService) {
     this.initializeMockData();
   }
 
@@ -212,6 +225,7 @@ export class ClassService {
       }
     ];
 
+    this.mockClasses = mockClasses;
     this.classesSubject.next(mockClasses);
 
     const mockEnrollments: { [classId: string]: StudentEnrollment[] } = {
@@ -252,8 +266,70 @@ export class ClassService {
     this.enrollmentsSubject.next(mockEnrollments);
   }
 
+  /**
+   * Get paginated classes with filters
+   * @param page Page number (0-based)
+   * @param size Page size
+   * @param filters Filter options
+   * @returns Observable of paginated classes
+   */
+  getClasses(page: number = 0, size: number = 10, filters?: ClassFilters): Observable<PaginatedResponse<GroupClass>> {
+    const params: any = {
+      page,
+      size
+    };
+
+    if (filters) {
+      if (filters.status && filters.status !== 'all') {
+        params.status = filters.status;
+      }
+      if (filters.instructorId && filters.instructorId !== 'all') {
+        params.instructorId = filters.instructorId;
+      }
+      if (filters.search && filters.search.trim()) {
+        params.search = filters.search.trim();
+      }
+      if (filters.startDate) {
+        params.startDate = filters.startDate;
+      }
+      if (filters.endDate) {
+        params.endDate = filters.endDate;
+      }
+    }
+
+    return this.apiService.get<PaginatedResponse<GroupClass>>('/classes', params).pipe(
+      map(response => {
+        if (response.success && response.data) {
+          // Convert date strings to Date objects
+          const classes = response.data.content.map(c => ({
+            ...c,
+            start_datetime: new Date(c.start_datetime),
+            end_datetime: new Date(c.end_datetime),
+            created_at: new Date(c.created_at)
+          }));
+          return {
+            ...response.data,
+            content: classes
+          };
+        }
+        console.warn('[ClassService] API failed, returning mock data:', response.message);
+        return this.getMockPaginatedResponse(page, size, filters);
+      }),
+      catchError(error => {
+        console.error('[ClassService] API error, returning mock data:', error);
+        return of(this.getMockPaginatedResponse(page, size, filters));
+      })
+    );
+  }
+
+  /**
+   * Get all classes (for backward compatibility, uses first page with large size)
+   * @deprecated Use getClasses() instead
+   */
   getAllClasses(): Observable<GroupClass[]> {
-    return this.classes$;
+    return this.getClasses(0, 1000).pipe(
+      map(response => response.content)
+    );
   }
 
   getClassById(classId: string): Observable<GroupClass | undefined> {
@@ -327,18 +403,64 @@ export class ClassService {
     });
   }
 
-  getInstructorsList(): Observable<{ id: string; name: string }[]> {
-    const classes = this.classesSubject.value;
-    const instructorsMap = new Map<string, string>();
 
-    classes.forEach(c => {
-      if (!instructorsMap.has(c.instructor_id)) {
-        instructorsMap.set(c.instructor_id, c.instructor_name);
+  /**
+   * Get mock paginated response
+   */
+  private getMockPaginatedResponse(page: number, size: number, filters?: ClassFilters): PaginatedResponse<GroupClass> {
+    let filtered = [...this.mockClasses];
+
+    // Apply filters
+    if (filters) {
+      if (filters.status && filters.status !== 'all') {
+        filtered = filtered.filter(c => c.status === filters.status);
       }
-    });
+      if (filters.instructorId && filters.instructorId !== 'all') {
+        filtered = filtered.filter(c => c.instructor_id === filters.instructorId);
+      }
+      if (filters.search && filters.search.trim()) {
+        const lowerQuery = filters.search.toLowerCase();
+        filtered = filtered.filter(c =>
+          c.class_name.toLowerCase().includes(lowerQuery) ||
+          c.instructor_name.toLowerCase().includes(lowerQuery) ||
+          c.course_name.toLowerCase().includes(lowerQuery)
+        );
+      }
+      if (filters.startDate) {
+        const startDate = new Date(filters.startDate);
+        filtered = filtered.filter(c => new Date(c.start_datetime) >= startDate);
+      }
+      if (filters.endDate) {
+        const endDate = new Date(filters.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(c => new Date(c.start_datetime) <= endDate);
+      }
+    }
 
-    const instructorsList = Array.from(instructorsMap, ([id, name]) => ({ id, name }));
-    return of(instructorsList);
+    // Paginate
+    const totalElements = filtered.length;
+    const totalPages = Math.ceil(totalElements / size);
+    const startIndex = page * size;
+    const endIndex = startIndex + size;
+    const content = filtered.slice(startIndex, endIndex);
+
+    return {
+      content,
+      pageable: {
+        pageNumber: page,
+        pageSize: size,
+        offset: startIndex,
+        paged: true
+      },
+      totalPages,
+      totalElements,
+      last: page >= totalPages - 1,
+      first: page === 0,
+      numberOfElements: content.length,
+      size,
+      number: page,
+      empty: content.length === 0
+    };
   }
 
   determineClassStatus(startDate: Date, endDate: Date): ClassStatus {

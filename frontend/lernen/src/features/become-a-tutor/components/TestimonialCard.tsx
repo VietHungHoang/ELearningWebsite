@@ -13,7 +13,7 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({
     testimonial,
 }) => (
     <div className="bg-white p-8 rounded-2xl shadow-sm flex flex-col h-full interactive-card">
-        <div className="text-[#0b6459] w-10 h-10 mb-4 flex items-center justify-center">
+        <div className="text-[#065A46] w-10 h-10 mb-4 flex items-center justify-center">
             <FaQuoteLeft className="w-6 h-6" />
         </div>
         <p className="text-gray-600 italic flex-grow">"{testimonial.quote}"</p>
@@ -21,7 +21,7 @@ const TestimonialCard: React.FC<{ testimonial: Testimonial }> = ({
             <img
                 src={testimonial.avatar}
                 alt={testimonial.name}
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-12 h-12 rounded-lg object-cover"
             />
             <div className="ml-4">
                 <p className="font-bold text-gray-800">{testimonial.name}</p>

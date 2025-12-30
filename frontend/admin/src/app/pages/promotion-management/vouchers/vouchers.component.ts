@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { VoucherService, Voucher } from '../../../services/voucher.service';
 
@@ -27,11 +27,26 @@ export class VouchersComponent implements OnInit, OnDestroy {
   constructor(private voucherService: VoucherService) {}
 
   ngOnInit(): void {
+    this.loadVouchers();
+  }
 
+  loadVouchers(): void {
+    console.log('[VouchersComponent] Loading vouchers...');
     this.subscription.add(
-      this.voucherService.vouchers$.subscribe(vouchers => {
-        this.vouchers = vouchers;
-        this.filterVouchers();
+      this.voucherService.getVouchers({
+        search: this.searchTerm || undefined,
+        creator: this.selectedCreator !== 'all' ? this.selectedCreator : undefined,
+        status: this.selectedStatus !== 'all' ? this.selectedStatus : undefined,
+        type: this.selectedType !== 'all' ? this.selectedType : undefined
+      }).subscribe({
+        next: (vouchers) => {
+          console.log('[VouchersComponent] Received vouchers:', vouchers);
+          this.vouchers = vouchers;
+          this.filteredVouchers = vouchers; // API already filters, so use directly
+        },
+        error: (error) => {
+          console.error('[VouchersComponent] Error loading vouchers:', error);
+        }
       })
     );
   }
@@ -41,16 +56,8 @@ export class VouchersComponent implements OnInit, OnDestroy {
   }
 
   filterVouchers(): void {
-    this.filteredVouchers = this.vouchers.filter(v => {
-      const matchSearch = v.code.toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchCreator = this.selectedCreator === 'all' ||
-        (this.selectedCreator === 'admin' && v.createdBy === 'Admin') ||
-        (this.selectedCreator === 'instructor' && v.createdBy === 'Instructor');
-      const matchStatus = this.selectedStatus === 'all' || v.status === this.selectedStatus;
-      const matchType = this.selectedType === 'all' || v.value.includes(this.selectedType);
-
-      return matchSearch && matchCreator && matchStatus && matchType;
-    });
+    // Reload from API with filters
+    this.loadVouchers();
   }
 
   getStatusClass(status: string): string {
@@ -88,22 +95,42 @@ export class VouchersComponent implements OnInit, OnDestroy {
   }
 
   pauseVoucher(voucher: Voucher): void {
-    if (voucher.status !== 'paused') {
-      voucher.status = 'paused';
-    } else {
-      voucher.status = 'active';
-    }
+    const newStatus = voucher.status === 'paused' ? 'active' : 'paused';
+    this.subscription.add(
+      this.voucherService.updateVoucherStatus(voucher.id, newStatus).subscribe({
+        next: () => {
+          this.loadVouchers(); // Reload to get updated data
+        },
+        error: (error) => {
+          console.error('Error updating voucher status:', error);
+        }
+      })
+    );
   }
 
   deleteVoucher(id: string): void {
-    this.vouchers = this.vouchers.filter(v => v.id !== id);
-    this.filterVouchers();
+    const voucher = this.filteredVouchers.find(v => v.id === id);
+    const voucherCode = voucher?.code || 'this voucher';
+    
+    if (confirm(`Are you sure you want to delete "${voucherCode}"? This action cannot be undone.`)) {
+      this.subscription.add(
+        this.voucherService.deleteVoucher(id).subscribe({
+          next: () => {
+            this.loadVouchers(); // Reload to get updated data
+          },
+          error: (error) => {
+            console.error('Error deleting voucher:', error);
+            alert('Failed to delete voucher. Please try again.');
+          }
+        })
+      );
+    }
   }
 
   onSearchChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm = target.value;
-    this.filterVouchers();
+    this.loadVouchers(); // Reload with new search term
   }
 
   onCreatorChange(creator: string): void {
@@ -149,9 +176,22 @@ export class VouchersComponent implements OnInit, OnDestroy {
     if (this.selectedVouchers.size === 0) return;
 
     if (confirm(`Delete ${this.selectedVouchers.size} voucher(s)?`)) {
-      this.vouchers = this.vouchers.filter(v => !this.selectedVouchers.has(v.id));
-      this.selectedVouchers.clear();
-      this.filterVouchers();
+      const deleteObservables = Array.from(this.selectedVouchers).map(id =>
+        this.voucherService.deleteVoucher(id)
+      );
+
+      // Use forkJoin to wait for all deletions to complete
+      this.subscription.add(
+        forkJoin(deleteObservables).subscribe({
+          next: () => {
+            this.selectedVouchers.clear();
+            this.loadVouchers(); // Reload to get updated data
+          },
+          error: (error) => {
+            console.error('Error bulk deleting vouchers:', error);
+          }
+        })
+      );
     }
   }
 }

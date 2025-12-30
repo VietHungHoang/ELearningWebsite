@@ -1,11 +1,9 @@
 import React, { useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import useIntersectionObserver from "./useIntersectionObserver";
 import { TutorHeroPanel } from "./TutorHeroPanel";
 
 const TutorHero: React.FC = () => {
-    const navigate = useNavigate();
     const { t } = useTranslation();
     const sectionRef = useRef<HTMLElement>(null);
     const isVisible = useIntersectionObserver(sectionRef as React.RefObject<Element>, { threshold: 0.1 });
@@ -15,13 +13,15 @@ const TutorHero: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 {/* Left Column */}
                 <div className="text-center lg:text-left">
-                    <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
-                        <span className="text-[#0b6459]">
+                    <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 leading-tight transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+                        <span className="text-[#065A46]">
                             {t('becomeTutor.hero.title')}
-                        </span>
+                        </span>{' '}
+                        <br />
+                        <span className="text-gray-700 text-3xl sm:text-3xl md:text-4xl">{t('becomeTutor.hero.subtitle')}</span>
                     </h1>
                     <p
-                        className={`mt-6 text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
+                        className={`mt-4 text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
                         style={{ animationDelay: "0.2s" }}
                     >
                         {t('becomeTutor.hero.description')}
@@ -31,8 +31,8 @@ const TutorHero: React.FC = () => {
                         style={{ animationDelay: "0.4s" }}
                     >
                         <button
-                            onClick={() => navigate('/signup?role=tutor')}
-                            className="px-8 py-4 bg-[#0b6459] text-white font-bold rounded-lg transition-colors btn-scale text-lg"
+                            onClick={() => window.location.href = '/signup?role=tutor'}
+                            className="px-8 py-4 bg-[#065A46] text-white font-bold rounded-lg transition-colors btn-scale text-lg"
                         >
                             {t('becomeTutor.hero.ctaButton')}
                         </button>

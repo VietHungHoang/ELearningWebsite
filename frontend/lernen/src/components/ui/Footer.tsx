@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
     return (
         <footer ref={footerRef} className="relative overflow-hidden">
             {/* Multi-layer Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0b6459] via-[#0d7a6d] to-[#0a5249]"></div>
+            <div className="absolute inset-0 bg-[#065A46]"></div>
             <div 
                 className="absolute inset-0 opacity-30"
                 style={{
@@ -88,15 +88,15 @@ const Footer: React.FC = () => {
                                 {/* Trust Badges */}
                                 <div className="flex flex-wrap gap-3 mb-6">
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                                        <FaShieldAlt className="text-teal-300" size={14} />
+                                        <FaShieldAlt className="text-[#065A46]" size={14} />
                                         <span className="text-xs text-white font-medium">{t('footer.secure')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                                        <FaAward className="text-teal-300" size={14} />
+                                        <FaAward className="text-[#065A46]" size={14} />
                                         <span className="text-xs text-white font-medium">{t('footer.verified')}</span>
                                     </div>
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-                                        <FaCheckCircle className="text-teal-300" size={14} />
+                                        <FaCheckCircle className="text-[#065A46]" size={14} />
                                         <span className="text-xs text-white font-medium">{t('footer.trusted')}</span>
                                     </div>
                                 </div>
@@ -161,7 +161,7 @@ const Footer: React.FC = () => {
                                     <button
                                         type="submit"
                                         disabled={isSubmitting || isSubmitted}
-                                        className="w-full px-4 py-2.5 bg-gradient-to-r from-teal-400 to-teal-500 hover:from-teal-500 hover:to-teal-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {isSubmitted ? (
                                             <>

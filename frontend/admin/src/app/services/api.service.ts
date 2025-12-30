@@ -9,7 +9,7 @@ import { ApiResponse } from '../types/ApiResponse.js';  // import từ file bạ
 })
 export class ApiService {
 
-    private apiUrl = 'http://localhost:4200/api/v1/admin';
+    private apiUrl = 'http://localhost:8081/api/v1/admin';
     private readonly API_TIMEOUT = 5000;
 
     private isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -77,14 +77,22 @@ export class ApiService {
                 }
             });
         }
+        const url = `${this.apiUrl}${endpoint}`;
+        console.log('[ApiService] GET request:', url, 'params:', httpParams.toString());
         return this.handleRequest<T>(
-            this.http.get<ApiResponse<T>>(`${this.apiUrl}${endpoint}`, { params: httpParams })
+            this.http.get<ApiResponse<T>>(url, { params: httpParams })
         );
     }
 
     post<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
         return this.handleRequest<T>(
             this.http.post<ApiResponse<T>>(`${this.apiUrl}${endpoint}`, body)
+        );
+    }
+
+    put<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+        return this.handleRequest<T>(
+            this.http.put<ApiResponse<T>>(`${this.apiUrl}${endpoint}`, body)
         );
     }
 

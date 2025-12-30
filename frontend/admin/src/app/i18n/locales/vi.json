@@ -340,6 +340,7 @@
     },
     "selected": "đã chọn",
     "selectAll": "Chọn tất cả",
+    "selectReviews": "Chọn đánh giá để thực hiện thao tác",
     "student": "Học viên",
     "tutor": "Gia sư",
     "class": "Lớp học",
@@ -440,6 +441,7 @@
     },
     "searchPlaceholder": "Tìm kiếm giảng viên...",
     "selected": "đã chọn",
+    "selectInstructors": "Chọn gia sư để thực hiện thao tác",
     "filters": {
       "category": "Lọc theo Danh mục",
       "status": "Lọc theo trạng thái",
@@ -488,6 +490,8 @@
       "approve": "Duyệt",
       "requestEdit": "Yêu cầu chỉnh sửa",
       "reject": "Từ chối",
+      "approveSelected": "Phê duyệt đã chọn",
+      "requestEditSelected": "Yêu cầu chỉnh sửa đã chọn",
       "rejectSelected": "Từ chối đã chọn"
     }
   },
@@ -873,6 +877,13 @@
       "filter": "Lọc",
       "clear": "Xóa"
     },
+    "summaryFilter": {
+      "all": "Tất cả",
+      "today": "Hôm nay",
+      "last7Days": "7 ngày qua",
+      "last30Days": "30 ngày qua",
+      "thisMonth": "Tháng này"
+    },
     "status": {
       "complete": "Hoàn thành",
       "failed": "Thất bại"
@@ -938,12 +949,20 @@
       "transactions": "Giao dịch"
     },
     "kpi": {
+      "title": "Thống kê",
       "totalRevenue": "Tổng doanh thu",
       "completed": "Đã hoàn thành",
       "failed": "Thất bại",
       "orders": "đơn hàng",
       "successfulTransactions": "Giao dịch thành công",
       "transactionErrors": "Lỗi giao dịch"
+    },
+    "summaryFilter": {
+      "all": "Tất cả",
+      "today": "Hôm nay",
+      "last7Days": "7 ngày qua",
+      "last30Days": "30 ngày qua",
+      "thisMonth": "Tháng này"
     },
     "filters": {
       "title": "Bộ lọc",
@@ -1158,8 +1177,8 @@
     "filters": {
       "creator": "Người tạo",
       "all": "Tất cả",
-      "createdByAdmin": "Được tạo bởi Admin",
-      "createdByInstructor": "Được tạo bởi Gia sư",
+      "createdByAdmin": "Admin",
+      "createdByInstructor": "Gia Sư",
       "allStatus": "Tất cả trạng thái",
       "allTypes": "Tất cả loại",
       "percentageDiscount": "Giảm giá theo phần trăm",
@@ -1201,6 +1220,116 @@
     },
     "emptyState": {
       "noVouchersFound": "Không tìm thấy phiếu giảm giá"
+    },
+    "createVoucher": {
+      "title": "Tạo Phiếu giảm giá",
+      "breadcrumb": {
+        "dashboard": "Bảng điều khiển",
+        "promotionManagement": "Quản lý Khuyến mãi",
+        "createVoucher": "Tạo Phiếu giảm giá"
+      },
+      "sections": {
+        "basicInformation": "Thông tin cơ bản",
+        "discountConfiguration": "Cấu hình giảm giá",
+        "productAudienceSettings": "Cài đặt Sản phẩm & Đối tượng",
+        "usageLimitsValidity": "Giới hạn sử dụng & Hiệu lực"
+      },
+      "fields": {
+        "voucherCode": "Mã phiếu giảm giá",
+        "description": "Mô tả (Tùy chọn)",
+        "descriptionPlaceholder": "Ghi chú nội bộ (tùy chọn)",
+        "discountType": "Loại giảm giá",
+        "percentage": "Phần trăm",
+        "fixed": "Cố định",
+        "maxDiscount": "Giảm giá tối đa (VNĐ)",
+        "maxDiscountPlaceholder": "ví dụ: 200000",
+        "productType": "Loại sản phẩm",
+        "oneOnOne": "1 kèm 1",
+        "group": "Nhóm",
+        "both": "Cả hai",
+        "targetAudience": "Đối tượng mục tiêu",
+        "selectStudentSegment": "Chọn phân khúc học viên",
+        "addNewSegment": "Thêm phân khúc mới",
+        "enterSegmentName": "Nhập tên phân khúc...",
+        "add": "Thêm",
+        "minOrderValue": "Đơn hàng tối thiểu (VNĐ)",
+        "minOrderPlaceholder": "500000",
+        "usageLimit": "Giới hạn sử dụng",
+        "usageLimitPlaceholder": "500",
+        "startDate": "Ngày bắt đầu",
+        "endDate": "Ngày kết thúc",
+        "unlimitedValidity": "Hiệu lực không giới hạn"
+      },
+      "buttons": {
+        "generate": "Tạo ngẫu nhiên",
+        "createVoucher": "Tạo Phiếu giảm giá",
+        "creating": "Đang tạo...",
+        "cancel": "Hủy"
+      },
+      "messages": {
+        "createSuccess": "Tạo phiếu giảm giá thành công!",
+        "createError": "Không thể tạo phiếu giảm giá. Vui lòng thử lại.",
+        "segmentExists": "Phân khúc học viên này đã tồn tại!"
+      },
+      "studentSegments": {
+        "allStudents": "Tất cả học viên",
+        "topSpenders": "Người chi tiêu nhiều (Chi tiêu cao nhất trong tháng)",
+        "newStudents": "Học viên mới (Đăng ký < 30 ngày)",
+        "noSpending1Month": "Không chi tiêu (Không mua hàng trong 1 tháng)"
+      }
+    },
+    "editVoucher": {
+      "title": "Chỉnh sửa Phiếu giảm giá",
+      "breadcrumb": {
+        "dashboard": "Bảng điều khiển",
+        "promotionManagement": "Quản lý Khuyến mãi",
+        "editVoucher": "Chỉnh sửa Phiếu giảm giá"
+      },
+      "fields": {
+        "voucherCode": "Mã phiếu giảm giá",
+        "description": "Mô tả (Ghi chú nội bộ)",
+        "descriptionPlaceholder": "Mã cho chiến dịch 11/11",
+        "discountType": "Loại giảm giá",
+        "percentage": "Phần trăm (%)",
+        "fixedAmount": "Số tiền cố định",
+        "maxDiscount": "Giảm giá tối đa (VNĐ)",
+        "maxDiscountPlaceholder": "200000",
+        "maxDiscountHint": "Để trống nếu không giới hạn",
+        "productType": "Loại sản phẩm",
+        "oneOnOneOnly": "Chỉ lớp 1 kèm 1",
+        "groupClasses": "Lớp nhóm",
+        "bothAllProducts": "Cả hai (Tất cả sản phẩm)",
+        "targetAudience": "Đối tượng mục tiêu / Phân khúc học viên",
+        "selectStudentSegment": "Chọn phân khúc học viên",
+        "addNewSegment": "Thêm phân khúc mới",
+        "enterSegmentName": "Nhập tên phân khúc...",
+        "add": "Thêm",
+        "minOrderValue": "Giá trị đơn hàng tối thiểu (VNĐ)",
+        "minOrderPlaceholder": "500000",
+        "totalUsageLimit": "Tổng giới hạn sử dụng",
+        "totalUsagePlaceholder": "500",
+        "startDate": "Ngày bắt đầu",
+        "endDate": "Ngày kết thúc",
+        "setAsUnlimited": "Đặt không giới hạn"
+      },
+      "buttons": {
+        "generateRandom": "Tạo ngẫu nhiên",
+        "updateVoucher": "Cập nhật Phiếu giảm giá",
+        "updating": "Đang cập nhật...",
+        "cancel": "Hủy"
+      },
+      "messages": {
+        "updateSuccess": "Cập nhật phiếu giảm giá thành công!",
+        "updateError": "Không thể cập nhật phiếu giảm giá. Vui lòng thử lại.",
+        "loadError": "Không thể tải phiếu giảm giá. Vui lòng thử lại.",
+        "segmentExists": "Phân khúc học viên này đã tồn tại!"
+      },
+      "studentSegments": {
+        "allStudents": "Tất cả học viên",
+        "topSpenders": "Người chi tiêu nhiều (Chi tiêu cao nhất trong tháng)",
+        "newStudents": "Học viên mới (Đăng ký < 30 ngày)",
+        "noSpending1Month": "Không chi tiêu (Không mua hàng trong 1 tháng)"
+      }
     }
   },
   "settings": {

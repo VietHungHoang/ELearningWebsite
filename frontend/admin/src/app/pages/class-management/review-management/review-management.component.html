@@ -22,6 +22,43 @@
     </ol>
 </div>
 
+<!-- Bulk Actions - Always Visible -->
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md border border-gray-200 dark:border-[#172036]">
+    <div class="flex items-center justify-between gap-[12px] flex-wrap">
+        <div class="flex items-center gap-[12px] flex-1">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                {{ selectedReviews.size > 0 ? (selectedReviews.size + ' ' + ('reviewManagement.selected' | translate)) : ('reviewManagement.selectReviews' | translate) }}
+            </span>
+        </div>
+        <div class="flex items-center gap-[8px] flex-wrap">
+            <button 
+                type="button" 
+                (click)="showBulkConfirmDialog('restore')" 
+                [disabled]="!canRestoreSelected()"
+                class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    bg-white dark:bg-[#15203c] border-success-300 dark:border-success-700 text-success-600 dark:text-success-400
+                    hover:bg-success-50 dark:hover:bg-success-900/20 hover:border-success-400 dark:hover:border-success-600
+                    disabled:hover:bg-white disabled:hover:border-success-300">
+                <i class="material-symbols-outlined !text-lg">restore</i>
+                {{ 'reviewManagement.bulkActions.restore' | translate }}
+            </button>
+            <button 
+                type="button" 
+                (click)="showBulkConfirmDialog('hide')" 
+                [disabled]="!canHideSelected()"
+                class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    bg-white dark:bg-[#15203c] border-danger-300 dark:border-danger-700 text-danger-600 dark:text-danger-400
+                    hover:bg-danger-50 dark:hover:bg-danger-900/20 hover:border-danger-400 dark:hover:border-danger-600
+                    disabled:hover:bg-white disabled:hover:border-danger-300">
+                <i class="material-symbols-outlined !text-lg">visibility_off</i>
+                {{ 'reviewManagement.bulkActions.hide' | translate }}
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Main Card with Tabs -->
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <!-- Tab Navigation -->
@@ -74,44 +111,17 @@
                     }
                 </div>
 
-                <!-- Select All Bar (Always visible) -->
-                <div class="flex-1 flex items-center gap-[12px] flex-wrap min-w-0">
-                    <!-- Checkbox and Label - Fixed Position (Always visible) -->
-                    <div class="flex items-center gap-[12px] flex-shrink-0">
-                        <input type="checkbox"
-                            [checked]="isAllReviewsSelected()"
-                            [indeterminate]="isReviewsIndeterminate()"
-                            (change)="toggleSelectAllReviews()"
-                            [disabled]="filteredReviews.length === 0"
-                            class="select-all-checkbox cursor-pointer w-[20px] h-[20px] text-primary-500 rounded border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
-                            {{ 'reviewManagement.selectAll' | translate }}
-                        </span>
-                    </div>
-                    <!-- Selection Count and Buttons - Appear on the right when selected -->
-                    <div class="flex items-center gap-[10px] flex-wrap flex-1 min-w-0">
-                        @if (selectedReviews.size > 0) {
-                            <span class="inline-flex items-center px-[8px] py-[3px] rounded-full text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 whitespace-nowrap">
-                                {{ selectedReviews.size }} {{ 'reviewManagement.selected' | translate }}
-                            </span>
-                            <div class="flex items-center gap-[8px] flex-wrap">
-                                <button 
-                                    type="button" 
-                                    (click)="showBulkConfirmDialog('restore')" 
-                                    class="bulk-action-btn inline-flex items-center gap-[4px] px-[12px] py-[6px] bg-green-500 hover:bg-green-600 text-white font-medium rounded-md text-xs transition-all shadow-sm hover:shadow-md whitespace-nowrap">
-                                    <i class="material-symbols-outlined !text-sm">restore</i>
-                                    {{ 'reviewManagement.bulkActions.restore' | translate }}
-                                </button>
-                                <button 
-                                    type="button" 
-                                    (click)="showBulkConfirmDialog('hide')" 
-                                    class="bulk-action-btn inline-flex items-center gap-[4px] px-[12px] py-[6px] bg-danger-500 hover:bg-danger-600 text-white font-medium rounded-md text-xs transition-all shadow-sm hover:shadow-md whitespace-nowrap">
-                                    <i class="material-symbols-outlined !text-sm">visibility_off</i>
-                                    {{ 'reviewManagement.bulkActions.hide' | translate }}
-                                </button>
-                            </div>
-                        }
-                    </div>
+                <!-- Select All Bar -->
+                <div class="flex items-center gap-[12px]">
+                    <input type="checkbox"
+                        [checked]="isAllReviewsSelected()"
+                        [indeterminate]="isReviewsIndeterminate()"
+                        (change)="toggleSelectAllReviews()"
+                        [disabled]="filteredReviews.length === 0"
+                        class="select-all-checkbox cursor-pointer w-[20px] h-[20px] text-primary-500 rounded border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span class="text-sm font-semibold text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                        {{ 'reviewManagement.selectAll' | translate }}
+                    </span>
                 </div>
             </div>
 
@@ -143,16 +153,13 @@
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ review.createdDate | date:'dd/MM/yyyy HH:mm' }}</span>
                                 </div>
                                 <div class="flex items-center gap-[12px]">
-                                    <button
-                                        type="button"
-                                        (click)="toggleReviewVisibility(review)"
-                                        [class]="'flex items-center gap-[6px] px-[10px] py-[6px] rounded-md text-xs font-medium transition-colors ' + (review.status === 'visible' ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600')"
-                                        [title]="review.status === 'visible' ? ('reviewManagement.actions.hide' | translate) : ('reviewManagement.actions.show' | translate)">
+                                    <span
+                                        [class]="'inline-flex items-center gap-[6px] px-[10px] py-[6px] rounded-full text-xs font-medium ' + (review.status === 'visible' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300')">
                                         <i class="material-symbols-outlined !text-base">
                                             {{ review.status === 'visible' ? 'visibility' : 'visibility_off' }}
                                         </i>
                                         <span>{{ review.status === 'visible' ? ('reviewManagement.status.visible' | translate) : ('reviewManagement.status.hidden' | translate) }}</span>
-                                    </button>
+                                    </span>
                                 </div>
                             </div>
 
@@ -226,30 +233,6 @@
                     }
                 </div>
 
-                <!-- Bulk Actions Bar (Only when selected) -->
-                @if (selectedReviews.size > 0) {
-                    <div class="flex items-center gap-[10px] flex-wrap">
-                        <span class="inline-flex items-center px-[8px] py-[3px] rounded-full text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 whitespace-nowrap">
-                            {{ selectedReviews.size }} {{ 'reviewManagement.selected' | translate }}
-                        </span>
-                        <div class="flex items-center gap-[8px] flex-wrap">
-                            <button 
-                                type="button" 
-                                (click)="showBulkConfirmDialog('restore')" 
-                                class="bulk-action-btn inline-flex items-center gap-[4px] px-[12px] py-[6px] bg-green-500 hover:bg-green-600 text-white font-medium rounded-md text-xs transition-all shadow-sm hover:shadow-md whitespace-nowrap">
-                                <i class="material-symbols-outlined !text-sm">restore</i>
-                                {{ 'reviewManagement.bulkActions.restore' | translate }}
-                            </button>
-                            <button 
-                                type="button" 
-                                (click)="showBulkConfirmDialog('hide')" 
-                                class="bulk-action-btn inline-flex items-center gap-[4px] px-[12px] py-[6px] bg-danger-500 hover:bg-danger-600 text-white font-medium rounded-md text-xs transition-all shadow-sm hover:shadow-md whitespace-nowrap">
-                                <i class="material-symbols-outlined !text-sm">visibility_off</i>
-                                {{ 'reviewManagement.bulkActions.hide' | translate }}
-                            </button>
-                        </div>
-                    </div>
-                }
             </div>
 
             <!-- Reviews Table -->
@@ -330,16 +313,13 @@
                                             </div>
                                         </td>
                                         <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
-                                            <button
-                                                type="button"
-                                                (click)="toggleReviewVisibility(review)"
-                                                [class]="'inline-flex items-center gap-[4px] px-[10px] py-[5px] rounded-full text-xs font-medium transition-colors ' + (review.status === 'visible' ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600')"
-                                                [title]="review.status === 'visible' ? ('reviewManagement.actions.hide' | translate) : ('reviewManagement.actions.show' | translate)">
+                                            <span
+                                                [class]="'inline-flex items-center gap-[4px] px-[10px] py-[5px] rounded-full text-xs font-medium ' + (review.status === 'visible' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300')">
                                                 <i class="material-symbols-outlined !text-xs">
                                                     {{ review.status === 'visible' ? 'visibility' : 'visibility_off' }}
                                                 </i>
                                                 <span>{{ getStatusText(review.status) }}</span>
-                                            </button>
+                                            </span>
                                         </td>
                                         <td class="text-center whitespace-nowrap pl-[12px] pr-0 py-[15px]">
                                             <div class="flex items-center justify-center gap-[10px]">
@@ -352,6 +332,28 @@
                                                         visibility
                                                     </i>
                                                 </button>
+                                                @if (review.status === 'hidden') {
+                                                    <button
+                                                        type="button"
+                                                        (click)="restoreReview(review)"
+                                                        class="text-success-500 leading-none hover:text-success-600 transition-colors"
+                                                        [title]="'reviewManagement.actions.restore' | translate">
+                                                        <i class="material-symbols-outlined !text-md">
+                                                            restore
+                                                        </i>
+                                                    </button>
+                                                }
+                                                @if (review.status === 'visible') {
+                                                    <button
+                                                        type="button"
+                                                        (click)="hideReview(review)"
+                                                        class="text-danger-500 leading-none hover:text-danger-600 transition-colors"
+                                                        [title]="'reviewManagement.actions.hide' | translate">
+                                                        <i class="material-symbols-outlined !text-md">
+                                                            visibility_off
+                                                        </i>
+                                                    </button>
+                                                }
                                             </div>
                                         </td>
                                     </tr>
@@ -382,14 +384,26 @@
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-[24px] leading-relaxed">{{ getActionConfirmMessage() }}</p>
                 <div class="flex gap-[12px] justify-end">
-                    <button type="button" (click)="cancelAction()" class="px-[20px] py-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+                    <button 
+                        type="button" 
+                        (click)="cancelAction()" 
+                        [disabled]="isProcessingAction"
+                        class="px-[20px] py-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ 'common.cancel' | translate }}
                     </button>
-                    <button type="button" (click)="confirmAction()" [class]="actionConfirmType === 'hide' || (actionConfirmType === 'toggleVisibility' && selectedReviewForAction.status !== 'hidden')
-                        ? 'bg-danger-500 hover:bg-danger-600 text-white'
-                        : actionConfirmType === 'restore' ? 'bg-green-500 hover:bg-green-600 text-white'
-                        : 'bg-primary-500 hover:bg-primary-600 text-white'" class="px-[20px] py-[10px] rounded-lg transition-colors font-medium">
-                        {{ actionConfirmType === 'hide' ? ('reviewManagement.actions.hide' | translate) : actionConfirmType === 'restore' ? ('reviewManagement.actions.restore' | translate) : selectedReviewForAction.status === 'hidden' ? ('reviewManagement.actions.show' | translate) : ('reviewManagement.actions.hide' | translate) }}
+                    <button 
+                        type="button" 
+                        (click)="confirmAction()" 
+                        [disabled]="isProcessingAction"
+                        [class]="actionConfirmType === 'hide' || (actionConfirmType === 'toggleVisibility' && selectedReviewForAction.status !== 'hidden')
+                            ? 'bg-danger-500 hover:bg-danger-600 text-white'
+                            : actionConfirmType === 'restore' ? 'bg-green-500 hover:bg-green-600 text-white'
+                            : 'bg-primary-500 hover:bg-primary-600 text-white'" 
+                        class="px-[20px] py-[10px] rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-[8px]">
+                        @if (isProcessingAction) {
+                            <i class="material-symbols-outlined animate-spin !text-base">sync</i>
+                        }
+                        <span>{{ actionConfirmType === 'hide' ? ('reviewManagement.actions.hide' | translate) : actionConfirmType === 'restore' ? ('reviewManagement.actions.restore' | translate) : selectedReviewForAction.status === 'hidden' ? ('reviewManagement.actions.show' | translate) : ('reviewManagement.actions.hide' | translate) }}</span>
                     </button>
                 </div>
             </div>
@@ -414,11 +428,23 @@
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-[24px] leading-relaxed">{{ getBulkConfirmMessage() }}</p>
                 <div class="flex gap-[12px] justify-end">
-                    <button type="button" (click)="cancelBulkAction()" class="px-[20px] py-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+                    <button 
+                        type="button" 
+                        (click)="cancelBulkAction()" 
+                        [disabled]="isProcessingBulk"
+                        class="px-[20px] py-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ 'common.cancel' | translate }}
                     </button>
-                    <button type="button" (click)="confirmBulkAction()" [class]="bulkConfirmType === 'hide' ? 'bg-danger-500 hover:bg-danger-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'" class="px-[20px] py-[10px] rounded-lg transition-colors font-medium">
-                        {{ getBulkConfirmButtonText() }}
+                    <button 
+                        type="button" 
+                        (click)="confirmBulkAction()" 
+                        [disabled]="isProcessingBulk"
+                        [class]="bulkConfirmType === 'hide' ? 'bg-danger-500 hover:bg-danger-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'" 
+                        class="px-[20px] py-[10px] rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-[8px]">
+                        @if (isProcessingBulk) {
+                            <i class="material-symbols-outlined animate-spin !text-base">sync</i>
+                        }
+                        <span>{{ getBulkConfirmButtonText() }}</span>
                     </button>
                 </div>
             </div>

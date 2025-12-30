@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { VoucherService } from '../../../../services/voucher.service';
+import { TranslatePipe } from '../../../../i18n/translate.pipe';
+import { I18nService } from '../../../../i18n/i18n.service';
 
 @Component({
   selector: 'app-edit-voucher',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './edit-voucher.component.html',
   styleUrl: './edit-voucher.component.scss'
 })
@@ -18,12 +20,7 @@ export class EditVoucherComponent implements OnInit {
   message: { type: 'success' | 'error', text: string } | null = null;
 
   // Student Segment Management
-  studentSegments: { id: string; label: string; value: string }[] = [
-    { id: 'all', label: 'All Students', value: 'all' },
-    { id: 'top-spenders', label: 'Top Spenders (Highest spending in month)', value: 'top-spenders' },
-    { id: 'new-students', label: 'New Students (Registered < 30 days)', value: 'new-students' },
-    { id: 'no-spending-1month', label: 'No Spending (No purchase in 1 month)', value: 'no-spending-1month' }
-  ];
+  studentSegments: { id: string; label: string; value: string }[] = [];
   isAddingSegment = false;
   newSegmentLabel = '';
   isSegmentDropdownOpen = false;
@@ -32,15 +29,33 @@ export class EditVoucherComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private voucherService: VoucherService
-  ) {}
+    private voucherService: VoucherService,
+    private i18nService: I18nService
+  ) {
+    this.initStudentSegments();
+  }
 
   ngOnInit(): void {
+    // Update segments when language changes
+    this.i18nService.currentLanguage$();
+    this.initStudentSegments();
+    
     this.route.params.subscribe(params => {
       this.voucherId = params['id'];
+      console.log('[EditVoucherComponent] Route params:', params);
+      console.log('[EditVoucherComponent] Voucher ID from route:', this.voucherId);
       this.initForm();
       this.loadVoucher();
     });
+  }
+
+  initStudentSegments(): void {
+    this.studentSegments = [
+      { id: 'all', label: this.i18nService.translate('voucherManagement.editVoucher.studentSegments.allStudents'), value: 'all' },
+      { id: 'top-spenders', label: this.i18nService.translate('voucherManagement.editVoucher.studentSegments.topSpenders'), value: 'top-spenders' },
+      { id: 'new-students', label: this.i18nService.translate('voucherManagement.editVoucher.studentSegments.newStudents'), value: 'new-students' },
+      { id: 'no-spending-1month', label: this.i18nService.translate('voucherManagement.editVoucher.studentSegments.noSpending1Month'), value: 'no-spending-1month' }
+    ];
   }
 
   initForm(): void {
@@ -83,24 +98,135 @@ export class EditVoucherComponent implements OnInit {
   }
 
   loadVoucher(): void {
-    const voucher = this.voucherService.getVoucherById(this.voucherId);
-    if (voucher) {
+    this.isLoading = true;
+    console.log('[EditVoucherComponent] Loading voucher with ID:', this.voucherId);
+    this.voucherService.getVoucher(this.voucherId).subscribe({
+      next: (voucher) => {
+        this.isLoading = false;
+        console.log('[EditVoucherComponent] Voucher loaded:', voucher);
+        
+        // Parse dates if they're in string format
+        let startDate = voucher.startDate || '';
+        let endDate = voucher.endDate || '';
+        
+        // If dates are in format like "11/11 - 15/11", try to extract and convert
+        if (voucher.date && voucher.date.includes(' - ') && !startDate) {
+          const dateParts = voucher.date.split(' - ');
+          if (dateParts.length === 2) {
+            // Parse dates from format "dd/MM" or "dd/MM/yyyy" to "yyyy-MM-dd"
+            startDate = this.parseDateString(dateParts[0].trim());
+            endDate = this.parseDateString(dateParts[1].trim());
+            console.log('[EditVoucherComponent] Parsed dates from date string:', { startDate, endDate });
+          }
+        } else if (startDate && !this.isValidDateInput(startDate)) {
+          // If startDate exists but not in correct format, convert it
+          startDate = this.parseDateString(startDate);
+        } else if (endDate && !this.isValidDateInput(endDate)) {
+          // If endDate exists but not in correct format, convert it
+          endDate = this.parseDateString(endDate);
+        }
 
-      this.voucherForm.patchValue({
-        code: voucher.code,
-        description: voucher.description || '',
-        discountType: voucher.discountType || 'percentage',
-        discountValue: voucher.discountValue || '',
-        maxDiscount: voucher.maxDiscount || '',
-        productType: voucher.productType || 'course',
-        minOrderValue: voucher.minOrderValue || '',
-        totalUsageLimit: voucher.totalUsageLimit || '',
-        usagePerUser: voucher.usagePerUser || '',
-        startDate: voucher.startDate || '',
-        endDate: voucher.endDate || '',
-        isUnlimited: voucher.isUnlimited || false
-      });
+        this.voucherForm.patchValue({
+          code: voucher.code,
+          description: voucher.description || '',
+          discountType: voucher.discountType || 'percentage',
+          discountValue: voucher.discountValue || this.extractDiscountValue(voucher.value),
+          maxDiscount: voucher.maxDiscount || this.extractMaxDiscount(voucher.value),
+          productType: voucher.productType || 'course',
+          targetAudience: voucher.targetAudience || 'all',
+          minOrderValue: voucher.minOrderValue || '',
+          totalUsageLimit: voucher.totalUsageLimit || this.extractTotalUsageLimit(voucher.usage),
+          usagePerUser: voucher.usagePerUser || '',
+          startDate: startDate,
+          endDate: endDate,
+          isUnlimited: voucher.isUnlimited || (voucher.date && voucher.date.includes('Unlimited'))
+        });
+        console.log('[EditVoucherComponent] Form patched with values');
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.message = { type: 'error', text: this.i18nService.translate('voucherManagement.editVoucher.messages.loadError') };
+        console.error('Error loading voucher:', error);
+      }
+    });
+  }
+
+  /**
+   * Parse date string from various formats to yyyy-MM-dd
+   * Supports: "dd/MM", "dd/MM/yyyy", "MM/dd/yyyy", etc.
+   */
+  private parseDateString(dateStr: string): string {
+    if (!dateStr || dateStr.trim() === '') return '';
+    
+    // If already in yyyy-MM-dd format, return as is
+    if (this.isValidDateInput(dateStr)) {
+      return dateStr;
     }
+    
+    try {
+      // Try to parse "dd/MM" or "dd/MM/yyyy" format (assuming current year if year missing)
+      const parts = dateStr.split('/');
+      if (parts.length >= 2) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const year = parts.length === 3 ? parseInt(parts[2], 10) : new Date().getFullYear();
+        
+        if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+          // Create date and format to yyyy-MM-dd
+          const date = new Date(year, month - 1, day);
+          if (!isNaN(date.getTime())) {
+            const yearStr = date.getFullYear().toString();
+            const monthStr = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dayStr = date.getDate().toString().padStart(2, '0');
+            return `${yearStr}-${monthStr}-${dayStr}`;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[EditVoucherComponent] Failed to parse date:', dateStr, e);
+    }
+    
+    return '';
+  }
+
+  /**
+   * Check if date string is in valid format for input type="date" (yyyy-MM-dd)
+   */
+  private isValidDateInput(dateStr: string): boolean {
+    if (!dateStr) return false;
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    return dateRegex.test(dateStr);
+  }
+
+  private extractDiscountValue(value: string): string {
+    // Extract discount value from string like "30% off" or "100,000 VND off"
+    if (value.includes('%')) {
+      const match = value.match(/(\d+)%/);
+      return match ? match[1] : '';
+    } else if (value.includes('VND') || value.includes('đ')) {
+      const match = value.match(/([\d,]+)/);
+      return match ? match[1].replace(/,/g, '') : '';
+    }
+    return '';
+  }
+
+  private extractMaxDiscount(value: string): string {
+    // Extract max discount from string like "30% off (Max 200k)"
+    const match = value.match(/Max\s+([\d,]+[kK]?)/i);
+    if (match) {
+      let max = match[1].replace(/,/g, '');
+      if (max.toLowerCase().endsWith('k')) {
+        max = (parseInt(max) * 1000).toString();
+      }
+      return max;
+    }
+    return '';
+  }
+
+  private extractTotalUsageLimit(usage: string): string {
+    // Extract total usage limit from string like "150/500"
+    const match = usage.match(/\/(\d+)/);
+    return match ? match[1] : '';
   }
 
   generateRandomCode(): void {
@@ -117,17 +243,20 @@ export class EditVoucherComponent implements OnInit {
       this.isLoading = true;
       this.message = null;
 
-      this.voucherService.updateVoucher(this.voucherId, this.voucherForm.value).then(() => {
-        this.isLoading = false;
-        this.message = { type: 'success', text: 'Voucher updated successfully!' };
+      this.voucherService.updateVoucher(this.voucherId, this.voucherForm.value).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.message = { type: 'success', text: this.i18nService.translate('voucherManagement.editVoucher.messages.updateSuccess') };
 
-        setTimeout(() => {
-          this.router.navigate(['/dashboard/promotion/vouchers']);
-        }, 1500);
-      }).catch((error: any) => {
-        this.isLoading = false;
-        this.message = { type: 'error', text: 'Failed to update voucher. Please try again.' };
-        console.error('Error updating voucher:', error);
+          setTimeout(() => {
+            this.router.navigate(['/dashboard/promotion/vouchers']);
+          }, 1500);
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          this.message = { type: 'error', text: this.i18nService.translate('voucherManagement.editVoucher.messages.updateError') };
+          console.error('Error updating voucher:', error);
+        }
       });
     } else {
       this.showValidationErrors();
@@ -196,7 +325,7 @@ export class EditVoucherComponent implements OnInit {
         this.newSegmentLabel = '';
         this.isSegmentDropdownOpen = false;
       } else {
-        this.message = { type: 'error', text: 'This student segment already exists!' };
+        this.message = { type: 'error', text: this.i18nService.translate('voucherManagement.editVoucher.messages.segmentExists') };
       }
     }
   }
@@ -204,6 +333,6 @@ export class EditVoucherComponent implements OnInit {
   getSelectedSegmentLabel(): string {
     const selectedValue = this.voucherForm.get('targetAudience')?.value;
     const segment = this.studentSegments.find(s => s.value === selectedValue);
-    return segment ? segment.label : 'Select Student Segment';
+    return segment ? segment.label : this.i18nService.translate('voucherManagement.editVoucher.fields.selectStudentSegment');
   }
 }

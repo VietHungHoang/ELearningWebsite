@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 interface Testimonial {
@@ -13,6 +13,7 @@ interface Testimonial {
 
 const TestimonialsSection: React.FC = () => {
   const { t } = useTranslation();
+  const [expandedCards, setExpandedCards] = useState<{ [key: number]: boolean }>({});
 
   const testimonials: Testimonial[] = [
     {
@@ -84,17 +85,6 @@ const TestimonialsSection: React.FC = () => {
     ))
   }
 
-  const getCompanyIconColor = (companyIcon: string) => {
-    const colors: { [key: string]: string } = {
-      'A': 'bg-blue-500',
-      'L': 'bg-blue-400',
-      'W': 'bg-blue-500',
-      'X': 'bg-blue-300',
-      'G': 'bg-green-500',
-      'E': 'bg-orange-500'
-    }
-    return colors[companyIcon] || 'bg-gray-500'
-  }
 
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-[#faf8f5]">
@@ -120,30 +110,40 @@ const TestimonialsSection: React.FC = () => {
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
             >
               {/* Review Text */}
-              <p className="text-gray-700 leading-relaxed mb-4 text-sm">
+              <p className={`text-gray-700 leading-relaxed mb-2 text-sm ${expandedCards[testimonial.id] ? '' : 'line-clamp-3'}`}>
                 "{testimonial.text}"
               </p>
               
+              {/* Expand/Collapse Button */}
+              {testimonial.text.length > 150 && (
+                <button
+                  onClick={() => setExpandedCards(prev => ({ ...prev, [testimonial.id]: !prev[testimonial.id] }))}
+                  className="text-[#065A46] text-xs font-medium mb-2 hover:underline self-start"
+                >
+                  {expandedCards[testimonial.id] ? 'Thu gọn' : 'Xem thêm'}
+                </button>
+              )}
+              
               {/* Star Rating */}
-              <div className="flex items-center space-x-1 mb-4">
+              <div className="flex items-center space-x-1 mb-3">
                 {renderStars()}
               </div>
               
               {/* Reviewer Information */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <div className="flex items-center space-x-3">
                   {/* Profile Picture */}
                   <img
                     src={testimonial.profileImage}
                     alt={testimonial.name}
-                    className="w-10 h-10 rounded-full object-cover"
+                    className="w-10 h-10 rounded-lg object-cover"
                   />
                   
                   {/* Name and Title */}
@@ -151,13 +151,6 @@ const TestimonialsSection: React.FC = () => {
                     <h4 className="font-semibold text-gray-900 text-sm">{testimonial.name}</h4>
                     <p className="text-gray-600 text-xs">{testimonial.title}</p>
                   </div>
-                </div>
-                
-                {/* Company Icon */}
-                <div className={`w-8 h-8 ${getCompanyIconColor(testimonial.companyIcon)} rounded-full flex items-center justify-center`}>
-                  <span className="text-white font-bold text-xs">
-                    {testimonial.companyIcon}
-                  </span>
                 </div>
               </div>
             </div>

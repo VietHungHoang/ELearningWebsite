@@ -6,6 +6,7 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { RevenueTrendComponent } from './revenue-trend/revenue-trend.component';
 import { PaymentMethodChartComponent } from './payment-method-chart/payment-method-chart.component';
 import { TopInstructorsChartComponent } from './top-instructors-chart/top-instructors-chart.component';
+import { RevenueDashboardService, RevenueDashboardData } from './revenue-dashboard.service';
 
 @Component({
     selector: 'app-f-revenue-dashboard',
@@ -23,6 +24,8 @@ import { TopInstructorsChartComponent } from './top-instructors-chart/top-instru
 })
 export class FRevenueDashboardComponent implements OnInit {
     selectedDateRange: string = '30days';
+    selectedTimeframe: string = 'Daily';  // For Revenue Trend chart
+    selectedTimeFilter: 'day' | 'week' | 'month' = 'month';  // For Top Instructors chart
     isDateRangeDropdownOpen: boolean = false;
 
     kpis = {
@@ -41,7 +44,9 @@ export class FRevenueDashboardComponent implements OnInit {
         payoutsTrend: 0                 // % thay đổi payouts
     };
 
-    constructor() {}
+    dashboardData: RevenueDashboardData | null = null;
+
+    constructor(private revenueDashboardService: RevenueDashboardService) {}
 
     ngOnInit(): void {
         this.loadDashboardData();
@@ -57,68 +62,30 @@ export class FRevenueDashboardComponent implements OnInit {
         this.loadDashboardData();
     }
 
+    onTimeframeChange(timeframe: string): void {
+        this.selectedTimeframe = timeframe;
+        this.loadDashboardData();
+    }
+
+    onTimeFilterChange(timeFilter: 'day' | 'week' | 'month'): void {
+        this.selectedTimeFilter = timeFilter;
+        this.loadDashboardData();
+    }
+
     private loadDashboardData(): void {
-
-        const mockData: { [key: string]: any } = {
-            today: {
-                adminAccountIncome: 15000000,
-                adminAccountPayout: 0,
-                peakTransactionAmount: 2000000,
-                payoutFixedDate: 1,
-                totalTransactions: 8,
-                totalPayouts: 0,
-                incomeTrend: 12.5,
-                payoutTrend: 0,
-                balanceTrend: 15.2,
-                peakTrend: 8.3,
-                transactionsTrend: 14.3,
-                payoutsTrend: 0
+        this.revenueDashboardService.getRevenueDashboardData(
+            this.selectedDateRange,
+            this.selectedTimeframe,
+            this.selectedTimeFilter
+        ).subscribe({
+            next: (data: RevenueDashboardData) => {
+                this.dashboardData = data;
+                this.kpis = data.kpis;
             },
-            '7days': {
-                adminAccountIncome: 85000000,
-                adminAccountPayout: 0,
-                peakTransactionAmount: 3500000,
-                payoutFixedDate: 1,
-                totalTransactions: 42,
-                totalPayouts: 0,
-                incomeTrend: 8.7,
-                payoutTrend: 0,
-                balanceTrend: 10.5,
-                peakTrend: 5.2,
-                transactionsTrend: 9.1,
-                payoutsTrend: 0
-            },
-            '30days': {
-                adminAccountIncome: 280000000,
-                adminAccountPayout: 224000000,
-                peakTransactionAmount: 5000000,
-                payoutFixedDate: 1,
-                totalTransactions: 168,
-                totalPayouts: 1,
-                incomeTrend: 15.8,
-                payoutTrend: 12.0,
-                balanceTrend: 22.5,
-                peakTrend: 4.2,
-                transactionsTrend: 18.3,
-                payoutsTrend: 0
-            },
-            thisMonth: {
-                adminAccountIncome: 250000000,
-                adminAccountPayout: 200000000,
-                peakTransactionAmount: 4800000,
-                payoutFixedDate: 1,
-                totalTransactions: 155,
-                totalPayouts: 1,
-                incomeTrend: 12.3,
-                payoutTrend: 10.5,
-                balanceTrend: 16.8,
-                peakTrend: 3.7,
-                transactionsTrend: 15.2,
-                payoutsTrend: 0
+            error: (error) => {
+                console.error('Error loading revenue dashboard data:', error);
             }
-        };
-
-        this.kpis = mockData[this.selectedDateRange];
+        });
     }
 
     formatCurrency(amount: number): string {

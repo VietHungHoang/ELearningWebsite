@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { PayoutService } from './payout.service';
 import * as XLSX from 'xlsx';
 
 declare const QRCode: any;
@@ -91,6 +92,10 @@ export class FPayoutComponent implements OnInit {
         totalOrders: 0
     };
 
+    // Summary filter for KPI cards
+    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days' | 'thisMonth'
+    isSummaryFilterMenuOpen: boolean = false;
+
     isDetailModalOpen = false;
     isConfirmPaymentOpen = false;
     isQRModalOpen = false;
@@ -101,15 +106,10 @@ export class FPayoutComponent implements OnInit {
     loadingPayment = false;
     qrCodeDataUrl: string = '';
 
-    constructor() {}
+    constructor(private payoutService: PayoutService) {}
 
     ngOnInit(): void {
         this.loadPayoutData();
-        this.loadPayoutHistory();
-        this.applyFiltersAndSearch();
-        this.updateSummary();
-        this.calculatePagination();
-        this.calculatePaginationHistory();
     }
 
     switchTab(tab: 'pending' | 'history'): void {
@@ -121,258 +121,45 @@ export class FPayoutComponent implements OnInit {
         }
     }
 
-    private loadPayoutData(): void {
-
-        const rawPayouts: PayoutOrder[] = [
-            {
-                orderId: crypto.randomUUID(),
-                orderNumber: `ORD-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(5, '0')}`,
-                learnerName: 'Nguyễn Văn A',
-                sessionName: 'English Conversation',
-                sessionType: '1 and 1',
-                hourlyRate: 15,
-                hours: 5,
-                amount: 60,
-                date: '05 Nov 2025 14:30:25'
+    loadPayoutData(): void {
+        this.payoutService.getPayoutData(this.summaryFilter).subscribe({
+            next: (response) => {
+                this.pendingPayouts = response.pendingPayouts;
+                this.groupedPendingPayouts = response.pendingPayouts;
+                this.payoutHistory = response.payoutHistory;
+                this.filteredPayoutHistory = response.payoutHistory;
+                this.summary = response.summary;
+                this.applyFiltersAndSearch();
+                this.calculatePagination();
+                this.calculatePaginationHistory();
             },
-            {
-                orderId: '12346',
-                orderNumber: 'ORD-2025-00002',
-                learnerName: 'Trần Thị B',
-                sessionName: 'Business English',
-                sessionType: '1 and n',
-                hourlyRate: 12,
-                hours: 3,
-                amount: 28.8,
-                date: '04 Nov 2025 10:15:45'
-            },
-            {
-                orderId: '12347',
-                orderNumber: 'ORD-2025-00003',
-                learnerName: 'Lê Văn C',
-                sessionName: 'English Conversation',
-                sessionType: '1 and 1',
-                hourlyRate: 15,
-                hours: 4,
-                amount: 48,
-                date: '03 Nov 2025 16:45:10'
-            },
-            {
-                orderId: '12348',
-                orderNumber: 'ORD-2025-00004',
-                learnerName: 'Phạm Thị D',
-                sessionName: 'Advanced Grammar',
-                sessionType: '1 and n',
-                hourlyRate: 10,
-                hours: 2,
-                amount: 16,
-                date: '02 Nov 2025 09:20:30'
-            },
-            {
-                orderId: '12349',
-                orderNumber: 'ORD-2025-00005',
-                learnerName: 'Võ Văn E',
-                sessionName: 'Advanced Grammar',
-                sessionType: '1 and 1',
-                hourlyRate: 18,
-                hours: 6,
-                amount: 86.4,
-                date: '01 Nov 2025 15:00:00'
+            error: (error) => {
+                console.error('Error loading payout data:', error);
             }
-        ];
+        });
+    }
 
-        // Generate more orders for more instructors
-        const moreOrders: PayoutOrder[] = [];
-        const learnerNames = ['Hoàng Văn F', 'Bùi Thị G', 'Đỗ Văn H', 'Lý Thị I', 'Phan Văn J', 'Vương Thị K', 'Trịnh Văn L', 'Đinh Thị M'];
-        const sessionNames = ['IELTS Preparation', 'TOEFL Training', 'Business English', 'Academic Writing', 'Speaking Practice', 'Grammar Advanced', 'Vocabulary Building', 'Pronunciation'];
-        const sessionTypes: ('1 and 1' | '1 and n')[] = ['1 and 1', '1 and n'];
-        const hourlyRates = [12, 15, 18, 20, 22, 25];
-        
-        for (let i = 0; i < 20; i++) {
-            const sessionType = sessionTypes[Math.floor(Math.random() * sessionTypes.length)];
-            const hourlyRate = hourlyRates[Math.floor(Math.random() * hourlyRates.length)];
-            const hours = Math.floor(Math.random() * 5) + 1;
-            const amount = hourlyRate * hours * (sessionType === '1 and 1' ? 1 : 0.8);
-            
-            moreOrders.push({
-                orderId: crypto.randomUUID(),
-                orderNumber: `ORD-2025-${String(i + 6).padStart(5, '0')}`,
-                learnerName: learnerNames[i % learnerNames.length],
-                sessionName: sessionNames[i % sessionNames.length],
-                sessionType: sessionType,
-                hourlyRate: hourlyRate,
-                hours: hours,
-                amount: amount,
-                date: new Date(2025, 10, Math.floor(Math.random() * 5) + 1, Math.floor(Math.random() * 12) + 8, Math.floor(Math.random() * 60)).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
-            });
-        }
+    onSummaryFilterChange(filter: string): void {
+        this.summaryFilter = filter;
+        this.isSummaryFilterMenuOpen = false;
+        this.loadPayoutData();
+    }
 
-        const allOrders = [...rawPayouts, ...moreOrders];
+    toggleSummaryFilterMenu(): void {
+        this.isSummaryFilterMenuOpen = !this.isSummaryFilterMenuOpen;
+    }
 
-        const instructorGroups: { [key: string]: InstructorPayout } = {
-            'ins1': {
-                id: 'payout-1',
-                instructorId: 'ins1',
-                instructorName: 'Đặng Minh Tuấn',
-                bankAccount: '0123456789',
-                bankName: 'Vietcombank',
-                accountHolderName: 'ĐẶNG MINH TUẤN',
-                paymentMethod: 'vnpay',
-                totalOwed: 136.8,
-                baseAmount: 120.0,
-                platformFee: 12.0,
-                tax: 4.8,
-                totalAmount: 136.8,
-                orderCount: 3,
-                orders: [allOrders[0], allOrders[1], allOrders[2]],
-                createdDate: '05 Nov 2025',
-                status: 'pending'
-            },
-            'ins2': {
-                id: 'payout-2',
-                instructorId: 'ins2',
-                instructorName: 'Nguyễn Thị Hương',
-                bankAccount: '9876543210',
-                bankName: 'Techcombank',
-                accountHolderName: 'NGUYỄN THỊ HƯƠNG',
-                paymentMethod: 'momo',
-                totalOwed: 102.4,
-                baseAmount: 90.0,
-                platformFee: 9.0,
-                tax: 3.4,
-                totalAmount: 102.4,
-                orderCount: 2,
-                orders: [allOrders[3], allOrders[4]],
-                createdDate: '02 Nov 2025',
-                status: 'pending'
-            },
-            'ins3': {
-                id: 'payout-3',
-                instructorId: 'ins3',
-                instructorName: 'Trần Quốc Bảo',
-                bankAccount: '1122334455',
-                bankName: 'BIDV',
-                accountHolderName: 'TRẦN QUỐC BẢO',
-                paymentMethod: 'sepay',
-                totalOwed: 245.6,
-                baseAmount: 220.0,
-                platformFee: 22.0,
-                tax: 3.6,
-                totalAmount: 245.6,
-                orderCount: 5,
-                orders: allOrders.slice(5, 10),
-                createdDate: '04 Nov 2025',
-                status: 'pending'
-            },
-            'ins4': {
-                id: 'payout-4',
-                instructorId: 'ins4',
-                instructorName: 'Lê Thị Mai',
-                bankAccount: '5566778899',
-                bankName: 'Vietinbank',
-                accountHolderName: 'LÊ THỊ MAI',
-                paymentMethod: 'vnpay',
-                totalOwed: 189.2,
-                baseAmount: 170.0,
-                platformFee: 17.0,
-                tax: 2.2,
-                totalAmount: 189.2,
-                orderCount: 4,
-                orders: allOrders.slice(10, 14),
-                createdDate: '03 Nov 2025',
-                status: 'pending'
-            },
-            'ins5': {
-                id: 'payout-5',
-                instructorId: 'ins5',
-                instructorName: 'Phạm Văn Đức',
-                bankAccount: '9988776655',
-                bankName: 'ACB',
-                accountHolderName: 'PHẠM VĂN ĐỨC',
-                paymentMethod: 'momo',
-                totalOwed: 312.8,
-                baseAmount: 280.0,
-                platformFee: 28.0,
-                tax: 4.8,
-                totalAmount: 312.8,
-                orderCount: 6,
-                orders: allOrders.slice(14, 20),
-                createdDate: '01 Nov 2025',
-                status: 'pending'
-            },
-            'ins6': {
-                id: 'payout-6',
-                instructorId: 'ins6',
-                instructorName: 'Võ Thị Lan',
-                bankAccount: '4433221100',
-                bankName: 'Sacombank',
-                accountHolderName: 'VÕ THỊ LAN',
-                paymentMethod: 'sepay',
-                totalOwed: 156.4,
-                baseAmount: 140.0,
-                platformFee: 14.0,
-                tax: 2.4,
-                totalAmount: 156.4,
-                orderCount: 3,
-                orders: allOrders.slice(20, 23),
-                createdDate: '06 Nov 2025',
-                status: 'pending'
-            }
+    getSummaryFilterText(): string {
+        const filterMap: { [key: string]: string } = {
+            'all': 'payout.summaryFilter.all',
+            'today': 'payout.summaryFilter.today',
+            '7days': 'payout.summaryFilter.last7Days',
+            '30days': 'payout.summaryFilter.last30Days',
+            'thisMonth': 'payout.summaryFilter.thisMonth'
         };
-
-        this.pendingPayouts = Object.values(instructorGroups);
-        this.groupedPendingPayouts = Object.values(instructorGroups);
+        return filterMap[this.summaryFilter] || 'payout.summaryFilter.all';
     }
 
-    private loadPayoutHistory(): void {
-        this.payoutHistory = [
-            {
-                id: 'payout-3',  // Dùng cùng ID format như pending payout
-                batchNumber: 'PAYOUT-2025-10',
-                instructorId: 'ins3',
-                instructorName: 'Trần Quốc Bảo',
-                paymentMethod: 'vnpay',
-                paidAmount: 5000000,
-                paidDate: '01 Oct 2025',
-                approvedBy: 'Admin - Ngô Thanh',
-                notes: 'Thanh toán hàng tháng - Tháng 9/2025',
-                orderCount: 12,
-                status: 'complete'
-            },
-            {
-                id: 'payout-4',  // Dùng cùng ID format như pending payout
-                batchNumber: 'PAYOUT-2025-09',
-                instructorId: 'ins4',
-                instructorName: 'Ngô Thanh Tâm',
-                paymentMethod: 'momo',
-                paidAmount: 4500000,
-                paidDate: '01 Sep 2025',
-                approvedBy: 'Admin - Ngô Thanh',
-                notes: 'Thanh toán hàng tháng - Tháng 8/2025',
-                orderCount: 10,
-                status: 'complete'
-            },
-            {
-                id: 'payout-5',  // Dùng cùng ID format như pending payout
-                batchNumber: 'PAYOUT-2025-08',
-                instructorId: 'ins5',
-                instructorName: 'Vũ Hà Linh',
-                paymentMethod: 'sepay',
-                paidAmount: 3800000,
-                paidDate: '01 Aug 2025',
-                approvedBy: 'Admin - Vũ Hà',
-                notes: 'Thanh toán hàng tháng - Tháng 7/2025',
-                orderCount: 8,
-                status: 'complete'
-            }
-        ];
-    }
-
-    private updateSummary(): void {
-        this.summary.totalPending = this.pendingPayouts.reduce((sum, p) => sum + p.totalOwed, 0);
-        this.summary.totalInstructors = this.pendingPayouts.length;
-        this.summary.totalOrders = this.pendingPayouts.reduce((sum, p) => sum + p.orderCount, 0);
-    }
 
     openDetailModal(payout: InstructorPayout): void {
         this.selectedPayout = payout;
@@ -481,7 +268,7 @@ export class FPayoutComponent implements OnInit {
             this.groupedPendingPayouts = this.pendingPayouts;
             this.selectedPayouts.clear();
 
-            this.updateSummary();
+            this.loadPayoutData(); // Reload to update summary
             this.calculatePagination();
             this.loadingPayment = false;
 
@@ -516,7 +303,7 @@ export class FPayoutComponent implements OnInit {
             this.pendingPayouts = this.pendingPayouts.filter(p => p.id !== this.selectedPayout!.id);
             this.groupedPendingPayouts = this.pendingPayouts;
 
-            this.updateSummary();
+            this.loadPayoutData(); // Reload to update summary
             this.calculatePagination();
 
             alert(`✓ Xác nhận thanh toán thành công!\n\nGiảng viên: ${this.selectedPayout!.instructorName}\nSố tiền: ${this.formatCurrency(this.selectedPayout!.totalOwed)}\nNgày: ${historyRecord.paidDate}`);
@@ -852,6 +639,9 @@ export class FPayoutComponent implements OnInit {
         const target = event.target as HTMLElement;
         if (!target.closest('.modal')) {
 
+        }
+        if (!target.closest('.trezo-card-dropdown')) {
+            this.isSummaryFilterMenuOpen = false;
         }
     }
 }

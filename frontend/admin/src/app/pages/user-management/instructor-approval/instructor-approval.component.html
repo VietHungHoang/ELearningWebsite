@@ -21,6 +21,55 @@
     </ol>
 </div>
 
+<!-- Bulk Actions - Always Visible -->
+<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md border border-gray-200 dark:border-[#172036]">
+    <div class="flex items-center justify-between gap-[12px] flex-wrap">
+        <div class="flex items-center gap-[12px] flex-1">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                {{ selectedRequests.size > 0 ? (selectedRequests.size + ' ' + ('instructorApproval.selected' | translate)) : ('instructorApproval.selectInstructors' | translate) }}
+            </span>
+        </div>
+        <div class="flex items-center gap-[8px] flex-wrap">
+            <button 
+                type="button" 
+                (click)="bulkApproveRequests()" 
+                [disabled]="selectedRequests.size === 0"
+                class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    bg-white dark:bg-[#15203c] border-success-300 dark:border-success-700 text-success-600 dark:text-success-400
+                    hover:bg-success-50 dark:hover:bg-success-900/20 hover:border-success-400 dark:hover:border-success-600
+                    disabled:hover:bg-white disabled:hover:border-success-300">
+                <i class="material-symbols-outlined !text-lg">check_circle</i>
+                {{ 'instructorApproval.actions.approve' | translate }}
+            </button>
+            <button 
+                type="button" 
+                (click)="bulkRequestEditRequests()" 
+                [disabled]="selectedRequests.size === 0"
+                class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    bg-white dark:bg-[#15203c] border-warning-300 dark:border-warning-700 text-warning-600 dark:text-warning-400
+                    hover:bg-warning-50 dark:hover:bg-warning-900/20 hover:border-warning-400 dark:hover:border-warning-600
+                    disabled:hover:bg-white disabled:hover:border-warning-300">
+                <i class="material-symbols-outlined !text-lg">edit</i>
+                {{ 'instructorApproval.actions.requestEdit' | translate }}
+            </button>
+            <button 
+                type="button" 
+                (click)="bulkRejectRequests()" 
+                [disabled]="selectedRequests.size === 0"
+                class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    bg-white dark:bg-[#15203c] border-danger-300 dark:border-danger-700 text-danger-600 dark:text-danger-400
+                    hover:bg-danger-50 dark:hover:bg-danger-900/20 hover:border-danger-400 dark:hover:border-danger-600
+                    disabled:hover:bg-white disabled:hover:border-danger-300">
+                <i class="material-symbols-outlined !text-lg">cancel</i>
+                {{ 'instructorApproval.actions.reject' | translate }}
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-header mb-[20px] md:mb-[25px]">
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-[16px]">
@@ -65,19 +114,6 @@
                 </app-search-input>
             </div>
         </div>
-
-        <!-- Bulk Actions -->
-        @if (selectedRequests.size > 0) {
-            <div class="flex items-center justify-end gap-[10px] min-h-[40px] mt-[16px]">
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ selectedRequests.size }} {{ 'instructorApproval.selected' | translate }}
-                </span>
-                <button type="button" (click)="bulkRejectRequests()" class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-danger-500 rounded-md hover:bg-danger-600 flex items-center gap-[6px]">
-                    <i class="material-symbols-outlined !text-base">close_circle</i>
-                    {{ 'instructorApproval.actions.rejectSelected' | translate }}
-                </button>
-            </div>
-        }
     </div>
     <div class="trezo-card-content -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
@@ -180,43 +216,14 @@
                                 </td>
                             }
                             <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
-                                <div class="flex items-center justify-center gap-[9px]">
-                                    <button
-                                        (click)="viewProfile(request)"
-                                        class="text-primary-500 leading-none hover:text-primary-600 transition-colors"
-                                        [title]="'instructorApproval.actions.viewProfile' | translate">
-                                        <i class="material-symbols-outlined !text-md">
-                                            visibility
-                                        </i>
-                                    </button>
-
-                                    @if (activeTab === 'pending') {
-                                        <button
-                                            (click)="openLevelDialog(request)"
-                                            class="text-green-500 leading-none hover:text-green-600 transition-colors"
-                                            [title]="'instructorApproval.actions.approve' | translate">
-                                            <i class="material-symbols-outlined !text-md">
-                                                check_circle
-                                            </i>
-                                        </button>
-                                        <button
-                                            (click)="openEditRequestDialog(request)"
-                                            class="text-yellow-500 leading-none hover:text-yellow-600 transition-colors"
-                                            [title]="'instructorApproval.actions.requestEdit' | translate">
-                                            <i class="material-symbols-outlined !text-md">
-                                                edit
-                                            </i>
-                                        </button>
-                                        <button
-                                            (click)="openRejectDialog(request)"
-                                            class="text-red-500 leading-none hover:text-red-600 transition-colors"
-                                            [title]="'instructorApproval.actions.reject' | translate">
-                                            <i class="material-symbols-outlined !text-md">
-                                                cancel
-                                            </i>
-                                        </button>
-                                    }
-                                </div>
+                                <button
+                                    (click)="viewProfile(request)"
+                                    class="text-primary-500 leading-none hover:text-primary-600 transition-colors"
+                                    [title]="'instructorApproval.actions.viewProfile' | translate">
+                                    <i class="material-symbols-outlined !text-2xl">
+                                        visibility
+                                    </i>
+                                </button>
                             </td>
                         </tr>
                     }

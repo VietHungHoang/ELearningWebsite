@@ -46,18 +46,18 @@
     <div class="mb-[20px] flex flex-wrap gap-[12px]">
 
         <div class="relative">
-            <button type="button" class="inline-block px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm hover:bg-gray-100 dark:bg-[#15203c] dark:border-[#172036] dark:hover:bg-[#1a2a4a]" (click)="toggleFilterMenu()">
+            <button type="button" class="inline-block px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm hover:bg-gray-100 dark:bg-[#15203c] dark:border-[#172036] dark:hover:bg-[#1a2a4a] whitespace-nowrap" (click)="toggleFilterMenu()">
                 {{ 'voucherManagement.filters.creator' | translate }} <i class="ri-arrow-down-s-line ml-[4px]"></i>
             </button>
             @if (isFilterMenuOpen) {
-                <div class="absolute top-full mt-[8px] bg-white border border-gray-200 rounded-md shadow-lg z-10 dark:bg-[#0c1427] dark:border-[#172036]">
-                    <button type="button" (click)="onCreatorChange('all')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                <div class="absolute top-full left-0 right-0 mt-[8px] bg-white border border-gray-200 rounded-md shadow-lg z-10 dark:bg-[#0c1427] dark:border-[#172036] min-w-full">
+                    <button type="button" (click)="onCreatorChange('all')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036] whitespace-nowrap">
                         {{ 'voucherManagement.filters.all' | translate }}
                     </button>
-                    <button type="button" (click)="onCreatorChange('admin')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
+                    <button type="button" (click)="onCreatorChange('admin')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036] whitespace-nowrap">
                         {{ 'voucherManagement.filters.createdByAdmin' | translate }}
                     </button>
-                    <button type="button" (click)="onCreatorChange('instructor')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c]">
+                    <button type="button" (click)="onCreatorChange('instructor')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] whitespace-nowrap">
                         {{ 'voucherManagement.filters.createdByInstructor' | translate }}
                     </button>
                 </div>

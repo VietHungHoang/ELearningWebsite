@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, PLATFORM_ID, HostListener } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID, HostListener, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
@@ -48,11 +48,18 @@ import { isPlatformBrowser } from '@angular/common';
     `,
     styleUrl: './revenue-trend.component.scss'
 })
-export class RevenueTrendComponent implements OnInit {
+export class RevenueTrendComponent implements OnInit, OnChanges {
     private isBrowser: boolean;
     private chartInstance: any;
 
-    selectedTimeframe: string = 'Daily';
+    @Input() revenueTrendData: {
+        Daily: { series: Array<{ name: string; data: number[] }>; categories: string[] };
+        Weekly: { series: Array<{ name: string; data: number[] }>; categories: string[] };
+        Monthly: { series: Array<{ name: string; data: number[] }>; categories: string[] };
+    } | null = null;
+    @Input() selectedTimeframe: string = 'Daily';
+    @Output() timeframeChange = new EventEmitter<string>();
+
     isTimeframeMenuOpen = false;
 
     chartData: { [key: string]: { series: any[]; categories: string[] } } = {
@@ -90,7 +97,25 @@ export class RevenueTrendComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        if (this.revenueTrendData) {
+            this.chartData = this.revenueTrendData as any;
+        }
         this.loadChart();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['revenueTrendData'] && this.revenueTrendData) {
+            this.chartData = this.revenueTrendData as any;
+            if (this.chartInstance) {
+                this.updateChart();
+            }
+        }
+        if (changes['selectedTimeframe']) {
+            // Update chart when timeframe changes from parent
+            if (this.chartInstance) {
+                this.updateChart();
+            }
+        }
     }
 
     toggleTimeframeMenu(): void {
@@ -100,6 +125,7 @@ export class RevenueTrendComponent implements OnInit {
     changeTimeframe(timeframe: string): void {
         this.selectedTimeframe = timeframe;
         this.isTimeframeMenuOpen = false;
+        this.timeframeChange.emit(timeframe);
         this.updateChart();
     }
 

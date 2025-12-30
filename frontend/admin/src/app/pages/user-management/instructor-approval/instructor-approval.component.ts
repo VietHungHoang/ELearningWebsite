@@ -4,7 +4,6 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UserService, TutorDetail,Tutor, InstructorRequest } from '../../../services/user.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
-import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 import { CareerEntry } from '../../../types/instructor';
 import { LocaleUtilsService } from '../../../shared/utils/locale.utils';
 import { I18nService } from '../../../i18n/i18n.service';
@@ -15,7 +14,7 @@ import { PaginatedResponse } from '../../../types/pagination';
 @Component({
     selector: 'app-instructor-approval',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TruncatePipe, TranslatePipe],
+    imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TranslatePipe],
     templateUrl: './instructor-approval.component.html',
     styleUrl: './instructor-approval.component.scss'
 })
@@ -393,32 +392,96 @@ export class InstructorApprovalComponent implements OnInit {
         return this.selectedRequests.size > 0 && this.selectedRequests.size < this.filteredRequests.length;
     }
 
+    bulkApproveRequests(): void {
+        if (this.selectedRequests.size === 0) return;
+
+        if (confirm(`Approve ${this.selectedRequests.size} instructor application(s)?`)) {
+            const requestsToApprove = Array.from(this.selectedRequests);
+
+            // Call API for each approval (using default level - first level)
+            let completedCount = 0;
+            const defaultLevelCode = this.levelOptions.length > 0 ? this.levelOptions[0].code : 'BEGINNER';
+
+            requestsToApprove.forEach(requestId => {
+                this.userService.approveInstructorRequest(requestId, [defaultLevelCode]).subscribe({
+                    next: (success) => {
+                        completedCount++;
+                        if (completedCount === requestsToApprove.length) {
+                            this.selectedRequests.clear();
+                            this.loadApprovalRequests();
+                        }
+                    },
+                    error: (error) => {
+                        console.error('Error approving instructor request:', error);
+                        completedCount++;
+                        if (completedCount === requestsToApprove.length) {
+                            this.selectedRequests.clear();
+                            this.loadApprovalRequests();
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    bulkRequestEditRequests(): void {
+        if (this.selectedRequests.size === 0) return;
+
+        if (confirm(`Request edit for ${this.selectedRequests.size} instructor application(s)?`)) {
+            const requestsToEdit = Array.from(this.selectedRequests);
+
+            // Call API for each edit request
+            let completedCount = 0;
+            const defaultReason = 'Yêu cầu chỉnh sửa thông tin';
+
+            requestsToEdit.forEach(requestId => {
+                this.userService.requestEditInstructorRequest(requestId, defaultReason).subscribe({
+                    next: (success) => {
+                        completedCount++;
+                        if (completedCount === requestsToEdit.length) {
+                            this.selectedRequests.clear();
+                            this.loadApprovalRequests();
+                        }
+                    },
+                    error: (error) => {
+                        console.error('Error requesting edit for instructor request:', error);
+                        completedCount++;
+                        if (completedCount === requestsToEdit.length) {
+                            this.selectedRequests.clear();
+                            this.loadApprovalRequests();
+                        }
+                    }
+                });
+            });
+        }
+    }
+
     bulkRejectRequests(): void {
         if (this.selectedRequests.size === 0) return;
 
         if (confirm(`Reject ${this.selectedRequests.size} instructor application(s)?`)) {
-            const rejectsToMove: InstructorRequest[] = [];
             const requestsToReject = Array.from(this.selectedRequests);
 
             // Call API for each rejection
             let completedCount = 0;
             requestsToReject.forEach(requestId => {
-                const request = this.filteredRequests.find(r => r.id === requestId);
-                if (request) {
-                    this.userService.rejectInstructorRequest(requestId, 'Bulk rejected').subscribe(success => {
+                this.userService.rejectInstructorRequest(requestId, 'Bulk rejected').subscribe({
+                    next: (success) => {
                         completedCount++;
-                        if (success) {
-                            request.requestStatus = 'REJECTED';
-                            rejectsToMove.push(request);
-                        }
-
-                        // After all requests processed, reload data from API
                         if (completedCount === requestsToReject.length) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
                         }
-                    });
-                }
+                    },
+                    error: (error) => {
+                        console.error('Error rejecting instructor request:', error);
+                        completedCount++;
+                        if (completedCount === requestsToReject.length) {
+                            this.selectedRequests.clear();
+                            this.loadApprovalRequests();
+                        }
+                    }
+                });
             });
         }
     }
