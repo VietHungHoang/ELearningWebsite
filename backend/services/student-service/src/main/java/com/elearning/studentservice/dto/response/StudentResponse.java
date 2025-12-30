@@ -1,16 +1,20 @@
 package com.elearning.studentservice.dto.response;
 
+import lombok.EqualsAndHashCode;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class StudentResponse extends UserInfoResponse {
     private String bio;
     private LocalDateTime dateOfBirth;

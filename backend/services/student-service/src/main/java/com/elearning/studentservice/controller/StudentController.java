@@ -1,6 +1,5 @@
 package com.elearning.studentservice.controller;
 
-import com.elearning.studentservice.dto.request.StudentRequest;
 import com.elearning.studentservice.dto.response.ApiResponse;
 import com.elearning.studentservice.dto.response.StudentResponse;
 import com.elearning.studentservice.service.StudentService;
@@ -9,12 +8,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
