@@ -12,12 +12,12 @@ interface BenefitCardProps {
 }
 
 const BenefitCard: React.FC<BenefitCardProps> = ({ icon, title, description, delay, isVisible }) => (
-    <div className={`bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: delay }}>
-        <div className="w-12 h-12 bg-green-100 text-[#0b6459] rounded-lg flex items-center justify-center">
+    <div className={`bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: delay }}>
+        <div className="w-12 h-12 bg-white/20 text-white rounded-lg flex items-center justify-center">
             {icon}
         </div>
-        <h3 className="text-lg font-bold text-gray-800 mt-4">{title}</h3>
-        <p className="text-gray-600 text-sm mt-1">{description}</p>
+        <h3 className="text-lg font-bold text-white mt-4">{title}</h3>
+        <p className="text-white/80 text-sm mt-1">{description}</p>
     </div>
 );
 
@@ -27,13 +27,13 @@ const WhyTeach: React.FC = () => {
     const isVisible = useIntersectionObserver(sectionRef as React.RefObject<Element>, { threshold: 0.1 });
 
     return (
-        <section ref={sectionRef} className="py-16 sm:py-24 bg-[#F8F7F4]">
+        <section ref={sectionRef} className="py-16 sm:py-24 bg-gradient-to-br from-[#065A46] via-[#065A46] to-[#054A3A]">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className={`text-4xl font-bold text-gray-800 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+                    <h2 className={`text-4xl font-bold text-white transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
                         {t('becomeTutor.whyTeach.title')}
                     </h2>
-                    <p className={`mt-4 text-lg text-gray-600 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: "0.1s" }}>
+                    <p className={`mt-4 text-lg text-white/80 transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: "0.1s" }}>
                         {t('becomeTutor.whyTeach.subtitle')}
                     </p>
                 </div>

@@ -787,6 +787,115 @@
         },
         "classPlaceholder": "Toán A1"
       },
+      "studentDetail": {
+        "breadcrumb": {
+          "dashboard": "Trang quản trị",
+          "myStudents": "Học viên của tôi"
+        },
+        "notFound": {
+          "title": "Không tìm thấy học viên",
+          "backButton": "Quay lại danh sách học viên"
+        },
+        "actions": {
+          "message": "Nhắn tin",
+          "schedule": "Lịch học"
+        },
+        "tabs": {
+          "overview": {
+            "label": "Tổng quan",
+            "description": "Thống kê & Thông tin"
+          },
+          "schedule": {
+            "label": "Lịch học",
+            "description": "Buổi học & Lịch sử"
+          },
+          "progress": {
+            "label": "Tiến độ",
+            "description": "Hiệu suất & Mục tiêu"
+          },
+          "notes": {
+            "label": "Ghi chú",
+            "description": "Ghi chú riêng & Nhật ký"
+          }
+        },
+        "overview": {
+          "stats": {
+            "sessionsCompleted": "Buổi học đã hoàn thành",
+            "complete": "{{percent}}% hoàn thành",
+            "sessionsRemaining": "Buổi học còn lại",
+            "attendanceRate": "Tỷ lệ tham gia",
+            "lastSession": "Buổi học cuối"
+          },
+          "contact": {
+            "title": "Thông tin liên hệ",
+            "email": "Email",
+            "phone": "Số điện thoại",
+            "joinedDate": "Ngày tham gia"
+          },
+          "class": {
+            "title": "Lớp học",
+            "className": "Tên lớp",
+            "instructor": "Giáo viên",
+            "schedule": "Lịch học"
+          },
+          "payment": {
+            "title": "Trạng thái thanh toán",
+            "status": "Trạng thái",
+            "totalPaid": "Tổng đã thanh toán",
+            "nextDue": "Hạn thanh toán tiếp theo"
+          }
+        },
+        "schedule": {
+          "upcomingSessions": {
+            "title": "Buổi học sắp tới",
+            "scheduled": "Đã lên lịch"
+          },
+          "attendance": {
+            "title": "Tỷ lệ tham gia tổng thể"
+          },
+          "history": {
+            "title": "Lịch sử buổi học",
+            "date": "Ngày",
+            "topic": "Chủ đề",
+            "duration": "Thời lượng",
+            "attendance": "Tham gia",
+            "present": "Có mặt",
+            "absent": "Vắng mặt"
+          }
+        },
+        "progress": {
+          "courseProgress": {
+            "title": "Tiến độ khóa học"
+          },
+          "metrics": {
+            "averageTestScore": "Điểm trung bình bài kiểm tra",
+            "basedOnTests": "Dựa trên {{count}} bài kiểm tra",
+            "homeworkCompletion": "Hoàn thành bài tập về nhà",
+            "excellentRate": "Tỷ lệ hoàn thành xuất sắc"
+          },
+          "strengths": {
+            "title": "💪 Điểm mạnh"
+          },
+          "weaknesses": {
+            "title": "📈 Cần cải thiện"
+          }
+        },
+        "notes": {
+          "title": "Ghi chú riêng của gia sư",
+          "placeholder": "Thêm ghi chú riêng về học viên này...",
+          "saveButton": "Lưu ghi chú",
+          "defaultNote": "Tiến bộ tốt trong tháng này! Rất tích cực trong các cuộc thảo luận trên lớp.",
+          "communicationHistory": {
+            "title": "Lịch sử giao tiếp"
+          },
+          "quickActions": {
+            "title": "Hành động nhanh",
+            "sendMessage": "Gửi tin nhắn",
+            "scheduleSession": "Lên lịch buổi học",
+            "lastContacted": "Liên hệ lần cuối"
+          }
+        }
+      },
       "myClass": {
         "title": "Lớp học",
         "description": "Quản lý và theo dõi các lớp học của bạn",
@@ -1338,7 +1447,8 @@
   },
   "becomeTutor": {
     "hero": {
-      "title": "Chia Sẻ Kiến Thức, Truyền Cảm Hứng Cho Tương Lai",
+      "title": "Chia sẻ kiến thức",
+      "subtitle": "Truyền cảm hứng cho tương lai",
       "description": "Tham gia cộng đồng các nhà giáo dục đam mê và bắt đầu kiếm tiền theo lịch trình của riêng bạn. Trao quyền cho học sinh trên toàn thế giới và tạo ra tác động thực sự.",
       "ctaButton": "Bắt đầu dạy học ngay hôm nay"
     },
@@ -1365,25 +1475,60 @@
       }
     },
     "howToStart": {
+      "sectionLabel": "Quy trình đăng ký",
       "title": "Bắt Đầu Chỉ Trong Vài Phút",
+      "description": "Tham gia cộng đồng gia sư của chúng tôi chỉ với 3 bước đơn giản và bắt đầu hành trình dạy học của bạn ngay hôm nay.",
       "steps": {
         "profile": {
-          "title": "1. Tạo Hồ Sơ Của Bạn",
-          "description": "Hoàn thành đơn đăng ký đơn giản của chúng tôi để giới thiệu kỹ năng và trình độ của bạn."
+          "title": "Tạo Hồ Sơ Của Bạn",
+          "description": "Hoàn thành đơn đăng ký đơn giản của chúng tôi để giới thiệu kỹ năng và trình độ của bạn.",
+          "button": "Tạo hồ sơ"
         },
         "availability": {
-          "title": "2. Đặt Thời Gian Có Sẵn",
-          "description": "Bạn quyết định khi nào và tần suất bạn muốn dạy. Sự linh hoạt hoàn toàn."
+          "title": "Đặt Thời Gian Có Sẵn",
+          "description": "Bạn quyết định khi nào và tần suất bạn muốn dạy. Sự linh hoạt hoàn toàn.",
+          "button": "Đặt lịch"
         },
         "earning": {
-          "title": "3. Bắt Đầu Kiếm Tiền",
-          "description": "Sau khi được phê duyệt, học sinh có thể đặt lịch học và bạn có thể bắt đầu kiếm tiền."
+          "title": "Bắt Đầu Kiếm Tiền",
+          "description": "Sau khi được phê duyệt, học sinh có thể đặt lịch học và bạn có thể bắt đầu kiếm tiền.",
+          "button": "Bắt đầu ngay"
         }
       }
     },
     "testimonials": {
       "title": "Nghe Từ Các Gia Sư Của Chúng Tôi",
-      "subtitle": "Xem những gì các nhà giáo dục khác đang nói về trải nghiệm của họ trên Lernen."
+      "subtitle": "Xem những gì các nhà giáo dục khác đang nói về trải nghiệm của họ trên Lernen.",
+      "items": [
+        {
+          "quote": "Dạy học trên Lernen là một trải nghiệm vô cùng bổ ích. Nền tảng hoạt động mượt mà và cho phép tôi tập trung vào điều tôi yêu thích: dạy học.",
+          "name": "Nguyễn Thị Lan",
+          "role": "Gia sư Toán học"
+        },
+        {
+          "quote": "Tôi yêu thích sự linh hoạt. Tôi có thể tự đặt lịch và dạy từ bất cứ đâu trên thế giới. Đây là cách hoàn hảo để chia sẻ niềm đam mê Vật lý của tôi.",
+          "name": "Trần Văn Minh",
+          "role": "Gia sư Vật lý"
+        },
+        {
+          "quote": "Cộng đồng gia sư và sự hỗ trợ từ đội ngũ Lernen thật tuyệt vời. Tôi đã phát triển rất nhiều với tư cách là một nhà giáo dục kể từ khi tham gia.",
+          "name": "Lê Thị Hương",
+          "role": "Gia sư Lịch sử"
+        }
+      ]
+    },
+    "heroPanel": {
+      "averageEarnings": "Thu nhập trung bình hàng tháng",
+      "earningsAmount": "58.000.000₫",
+      "verified": "Đã xác minh",
+      "topRated": "Đánh giá cao",
+      "setYourRate": "Đặt mức giá của bạn",
+      "rateRange": "500.000 - 2.000.000₫/giờ",
+      "tutorName": "Phan Thị Hà",
+      "tutorSubject": "Gia sư Toán học",
+      "tutorRating": "4.9",
+      "tutorReviews": "(250+)",
+      "tutorQuote": "Kiếm 60 triệu/tháng dạy học bán thời gian!"
     }
   },
   "errors": {

@@ -31,7 +31,7 @@ const Hero: React.FC = () => {
               {t('home.hero.title')}
             </span>{' '}
             <br />
-            <span className="text-gray-700 text-4xl sm:text-4xl md:text-5xl whitespace-nowrap">{t('home.hero.subtitle')}</span>
+            <span className="text-gray-700 text-3xl sm:text-3xl md:text-4xl whitespace-nowrap">{t('home.hero.subtitle')}</span>
           </h1>
 
           {/* Subheading */}

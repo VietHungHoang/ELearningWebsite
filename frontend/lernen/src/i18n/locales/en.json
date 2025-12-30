@@ -785,6 +785,115 @@
         },
         "classPlaceholder": "Math A1"
       },
+      "studentDetail": {
+        "breadcrumb": {
+          "dashboard": "Dashboard",
+          "myStudents": "My Students"
+        },
+        "notFound": {
+          "title": "Student Not Found",
+          "backButton": "Back to Students"
+        },
+        "actions": {
+          "message": "Message",
+          "schedule": "Schedule"
+        },
+        "tabs": {
+          "overview": {
+            "label": "Overview",
+            "description": "Stats & Info"
+          },
+          "schedule": {
+            "label": "Schedule",
+            "description": "Sessions & History"
+          },
+          "progress": {
+            "label": "Progress",
+            "description": "Performance & Goals"
+          },
+          "notes": {
+            "label": "Notes",
+            "description": "Private Notes & Logs"
+          }
+        },
+        "overview": {
+          "stats": {
+            "sessionsCompleted": "Sessions Completed",
+            "complete": "{{percent}}% complete",
+            "sessionsRemaining": "Sessions Remaining",
+            "attendanceRate": "Attendance Rate",
+            "lastSession": "Last Session"
+          },
+          "contact": {
+            "title": "Contact Information",
+            "email": "Email",
+            "phone": "Phone",
+            "joinedDate": "Joined Date"
+          },
+          "class": {
+            "title": "Class Assignment",
+            "className": "Class Name",
+            "instructor": "Instructor",
+            "schedule": "Schedule"
+          },
+          "payment": {
+            "title": "Payment Status",
+            "status": "Status",
+            "totalPaid": "Total Paid",
+            "nextDue": "Next Due"
+          }
+        },
+        "schedule": {
+          "upcomingSessions": {
+            "title": "Upcoming Sessions",
+            "scheduled": "Scheduled"
+          },
+          "attendance": {
+            "title": "Overall Attendance"
+          },
+          "history": {
+            "title": "Session History",
+            "date": "Date",
+            "topic": "Topic",
+            "duration": "Duration",
+            "attendance": "Attendance",
+            "present": "Present",
+            "absent": "Absent"
+          }
+        },
+        "progress": {
+          "courseProgress": {
+            "title": "Course Progress"
+          },
+          "metrics": {
+            "averageTestScore": "Average Test Score",
+            "basedOnTests": "Based on {{count}} tests",
+            "homeworkCompletion": "Homework Completion",
+            "excellentRate": "Excellent completion rate"
+          },
+          "strengths": {
+            "title": "💪 Strengths"
+          },
+          "weaknesses": {
+            "title": "📈 Areas for Improvement"
+          }
+        },
+        "notes": {
+          "title": "Private Tutor Notes",
+          "placeholder": "Add your private notes about this student here...",
+          "saveButton": "Save Notes",
+          "defaultNote": "Great progress this month! Very engaged in class discussions.",
+          "communicationHistory": {
+            "title": "Communication History"
+          },
+          "quickActions": {
+            "title": "Quick Actions",
+            "sendMessage": "Send Message",
+            "scheduleSession": "Schedule Session",
+            "lastContacted": "Last contacted"
+          }
+        }
+      },
       "myClass": {
         "title": "My classes",
         "description": "Manage and monitor your teaching classes",
@@ -1344,7 +1453,8 @@
   },
   "becomeTutor": {
     "hero": {
-      "title": "Share Your Knowledge, Inspire the Future",
+      "title": "Share Your Knowledge",
+      "subtitle": "Inspire the Future",
       "description": "Join our community of passionate educators and start earning on your own schedule. Empower students worldwide and make a real impact.",
       "ctaButton": "Start teaching today"
     },
@@ -1371,25 +1481,60 @@
       }
     },
     "howToStart": {
+      "sectionLabel": "Registration Process",
       "title": "Start in Just a Few Minutes",
+      "description": "Join our tutor community in just 3 simple steps and start your teaching journey today.",
       "steps": {
         "profile": {
-          "title": "1. Create Your Profile",
-          "description": "Complete our simple application to showcase your skills and qualifications."
+          "title": "Create Your Profile",
+          "description": "Complete our simple application to showcase your skills and qualifications.",
+          "button": "Create Profile"
         },
         "availability": {
-          "title": "2. Set Your Availability",
-          "description": "You decide when and how often you want to teach. Total flexibility."
+          "title": "Set Your Availability",
+          "description": "You decide when and how often you want to teach. Total flexibility.",
+          "button": "Set Schedule"
         },
         "earning": {
-          "title": "3. Start Earning",
-          "description": "Once approved, students can book sessions and you can start earning."
+          "title": "Start Earning",
+          "description": "Once approved, students can book sessions and you can start earning.",
+          "button": "Get Started"
         }
       }
     },
     "testimonials": {
       "title": "Hear From Our Tutors",
-      "subtitle": "See what other educators are saying about their experience on Lernen."
+      "subtitle": "See what other educators are saying about their experience on Lernen.",
+      "items": [
+        {
+          "quote": "Teaching on Lernen has been an incredibly rewarding experience. The platform is seamless and allows me to focus on what I love: teaching.",
+          "name": "Cynthia H.",
+          "role": "Mathematics Tutor"
+        },
+        {
+          "quote": "I love the flexibility. I can set my own hours and teach from anywhere in the world. It's the perfect way to share my passion for physics.",
+          "name": "Steven F.",
+          "role": "Physics Tutor"
+        },
+        {
+          "quote": "The community of tutors and the support from the Lernen team are fantastic. I've grown so much as an educator since I joined.",
+          "name": "Arianne K.",
+          "role": "History Tutor"
+        }
+      ]
+    },
+    "heroPanel": {
+      "averageEarnings": "Average Monthly Earnings",
+      "earningsAmount": "$2,450",
+      "verified": "Verified",
+      "topRated": "Top Rated",
+      "setYourRate": "Set Your Rate",
+      "rateRange": "$25-100/hr",
+      "tutorName": "Sarah M.",
+      "tutorSubject": "Math Tutor",
+      "tutorRating": "4.9",
+      "tutorReviews": "(250+)",
+      "tutorQuote": "Earning $3k/month teaching part-time!"
     }
   },
   "errors": {
