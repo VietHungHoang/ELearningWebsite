@@ -71,7 +71,7 @@ public class QuizServiceImpl implements QuizService {
         // Create questions if provided
         if (request.getQuestions() != null && !request.getQuestions().isEmpty()) {
             for (CreateQuestionRequest questionRequest : request.getQuestions()) {
-                questionService.createQuestion(quiz, questionRequest);
+                questionService.createQuestion(quiz.getId(), questionRequest);
             }
             
             quiz = quizRepository.save(quiz);
@@ -169,7 +169,7 @@ public class QuizServiceImpl implements QuizService {
         Quiz quiz = getQuizById(quizId);
         
         // Validate quiz has questions
-        Long questionCount = questionService.getQuestionsByQuizId(quizId).size();
+        Long questionCount = Long.valueOf(questionService.getQuestionsByQuizId(quizId).size());
         if (questionCount == 0) {
             throw ValidationException.noQuestions();
         }
@@ -182,7 +182,7 @@ public class QuizServiceImpl implements QuizService {
         // Publish
         quiz.setStatus(Quiz.QuizStatus.ACTIVE);
         quiz.setPublishedAt(LocalDateTime.now());
-        quiz.setTotalQuestions(questionCount.intValue());
+        // quiz.setTotalQuestions(questionCount.intValue()); // Field does not exist in Quiz entity
         quizRepository.save(quiz);
         
         log.info("Published quiz: {}", quizId);

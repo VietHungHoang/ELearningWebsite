@@ -29,7 +29,6 @@ public class GradingServiceImpl implements GradingService {
     private final StudentAnswerRepository answerRepository;
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
-    private final QuestionOptionRepository optionRepository;
     private final QuestionService questionService;
     private final ObjectMapper objectMapper;
     
@@ -191,11 +190,10 @@ public class GradingServiceImpl implements GradingService {
         Double avgPercentage = attemptRepository.getAverageScoreByQuizId(quizId);
         Double passRate = attemptRepository.getPassRateByQuizId(quizId);
         
-        Integer avgTimeSpent = gradedAttempts.stream()
+        Integer avgTimeSpent = (int) Math.ceil(gradedAttempts.stream()
                 .mapToInt(a -> a.getTimeSpentSeconds() != null ? a.getTimeSpentSeconds() : 0)
                 .average()
-                .orElse(0.0)
-                .intValue();
+                .orElse(0.0) / 60.0); // Convert seconds to minutes
         
         // Build question statistics
         List<Question> questions = questionService.getQuestionsByQuizId(quizId);
@@ -210,7 +208,7 @@ public class GradingServiceImpl implements GradingService {
                 .completedAttempts((long) gradedAttempts.size())
                 .averagePercentage(avgPercentage)
                 .passRate(passRate)
-                .averageTimeSpent(avgTimeSpent)
+                .averageTimeSpentMinutes(avgTimeSpent)
                 .questionStatistics(questionStats)
                 .build();
     }

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -58,7 +59,7 @@ public class QuestionServiceImpl implements QuestionService {
         question = questionRepository.save(question);
         
         // Create options
-        List<QuestionOption> options = createOptions(question.getId(), request.getOptions());
+        List<QuestionOption> options = createOptions(question, request.getOptions());
         
         // Validate
         validateQuestion(question, options);
@@ -89,7 +90,7 @@ public class QuestionServiceImpl implements QuestionService {
     
     @Override
     public List<Question> getQuestionsByQuizId(UUID quizId) {
-        return questionRepository.findByQuizIdAndIsActiveTrueOrderByOrderIndexAsc(quizId);
+        return questionRepository.findByQuiz_IdAndIsActiveTrueOrderByOrderIndexAsc(quizId);
     }
     
     @Override
@@ -125,7 +126,7 @@ public class QuestionServiceImpl implements QuestionService {
         optionRepository.saveAll(oldOptions);
         
         // Create new options
-        List<QuestionOption> options = createOptions(questionId, request.getOptions());
+        List<QuestionOption> options = createOptions(question, request.getOptions());
         
         // Validate
         validateQuestion(question, options);
@@ -153,12 +154,12 @@ public class QuestionServiceImpl implements QuestionService {
     
     @Override
     public List<QuestionOption> getQuestionOptions(UUID questionId) {
-        return optionRepository.findByQuestionIdAndIsActiveTrueOrderByOrderIndexAsc(questionId);
+        return optionRepository.findByQuestion_IdAndIsActiveTrueOrderByOrderIndexAsc(questionId);
     }
     
     @Override
     public List<QuestionOption> getCorrectOptions(UUID questionId) {
-        return optionRepository.findByQuestionIdAndIsCorrectTrueAndIsActiveTrue(questionId);
+        return optionRepository.findByQuestion_IdAndIsCorrectTrueAndIsActiveTrue(questionId);
     }
     
     @Override
@@ -185,20 +186,19 @@ public class QuestionServiceImpl implements QuestionService {
     /**
      * Create question options from request
      */
-    private List<QuestionOption> createOptions(UUID questionId, 
+    private List<QuestionOption> createOptions(Question question, 
                                                 List<CreateQuestionRequest.QuestionOptionRequest> optionRequests) {
         return IntStream.range(0, optionRequests.size())
                 .mapToObj(index -> {
                     CreateQuestionRequest.QuestionOptionRequest optionRequest = optionRequests.get(index);
                     return QuestionOption.builder()
-                            .questionId(questionId)
+                            .question(question)
                             .optionText(optionRequest.getOptionText())
                             .orderIndex(index)
                             .isCorrect(optionRequest.getIsCorrect())
                             .isActive(true)
                             .build();
                 })
-                .map(optionRepository::save)
-                .toList();
+                .collect(Collectors.toList());
     }
 }
