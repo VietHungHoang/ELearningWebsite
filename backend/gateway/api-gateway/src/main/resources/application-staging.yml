@@ -46,3 +46,7 @@ services:
     url: ${SEARCH_SERVICE_URL:http://search-service:8086}
   chat-service:
     url: ${CHAT_SERVICE_URL}
+  payment-service:
+    url: ${PAYMENT_SERVICE_URL:http://payment-service:8091}
+  booking-service:
+    url: ${BOOKING_SERVICE_URL:http://booking-service:8092}

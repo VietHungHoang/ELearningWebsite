@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ChatRoutesConfig {
 
-    private String chatServiceUrl = "http://chat-service:8089";
+    @Value("${services.chat-service.url}")
+    private String chatServiceUrl;
 
     @Value("${services.bff-service.url}")
     private String bffServiceUrl;
