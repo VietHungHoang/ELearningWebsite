@@ -1,8 +1,8 @@
 server:
-  port: 8085
-  
+  port: ${SERVER_PORT:8091}
+
 spring:
   application:
-    name: tutor-service
+    name: payment-service
   profiles:
     active: dev
