@@ -1,0 +1,32 @@
+name: File Service CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'backend/services/file-service/**'
+      - '.github/workflows/file-service-ci.yml'
+
+jobs:
+  build-and-push-file-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push File Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/services/file-service
+          file: ./backend/services/file-service/docker/Dockerfile.prod
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-file-service:latest
+          
+      - name: Trigger OnRender Deploy for File Service
+        run: curl -X POST ${{ secrets.ONRENDER_HOOK_FILE_SERVICE }}
