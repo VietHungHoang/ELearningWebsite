@@ -13,6 +13,20 @@ spring:
       location: ${java.io.tmpdir}
       resolve-lazily: true
 
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:singapore-keyvalue.render.com}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:HopCfDDFzZhoWeOgf5jZ9vKWNVtmxzqZ}
+      timeout: 60000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
 # Server Configuration
 server:
   port: ${SERVER_PORT:8083}
