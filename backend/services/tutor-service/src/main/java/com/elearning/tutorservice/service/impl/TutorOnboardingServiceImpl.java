@@ -13,6 +13,7 @@ import com.elearning.tutorservice.mapper.TutorIndexEventMapper;
 import com.elearning.tutorservice.mapper.TutorMapper;
 import com.elearning.tutorservice.repository.*;
 import com.elearning.tutorservice.service.AvailabilityService;
+import com.elearning.tutorservice.service.GeminiService;
 import com.elearning.tutorservice.service.TutorOnboardingService;
 import com.elearning.tutorservice.service.producer.KafkaProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
     private final TutorAvailabilityRepository availabilityRepository;
     private final TutorSocialRepository tutorSocialRepository;
     private final CertificationRepository certificationRepository;
+    private final GeminiService geminiService;
 
     private final EntityManager entityManager;
 
@@ -107,6 +109,32 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
         } catch (Exception e) {
             log.error("Failed to create tutor onboarding", e);
             throw new RuntimeException("Failed to create tutor onboarding", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void processResumeSubmission(UUID tutorId, String resumeText) {
+        log.info("Processing resume submission for tutor: {}", tutorId);
+
+        TutorOnboarding onboarding = onboardingRepository.findById(tutorId)
+                .orElseThrow(() -> new RuntimeException("Onboarding not found for tutor: " + tutorId));
+
+        try {
+            // Get existing JSON data (contains id, email, fullName)
+            String existingJsonData = onboarding.getJsonData();
+            
+            // Call Gemini to parse resume and get structured JSON
+            String parsedJson = geminiService.parseResumeToJson(resumeText, existingJsonData);
+            
+            // Update onboarding with parsed data
+            onboarding.setJsonData(parsedJson);
+            onboardingRepository.save(onboarding);
+
+            log.info("Successfully processed resume submission for tutor: {}", tutorId);
+        } catch (Exception e) {
+            log.error("Failed to process resume submission for tutor: {}", tutorId, e);
+            throw new RuntimeException("Failed to process resume submission: " + e.getMessage(), e);
         }
     }
 

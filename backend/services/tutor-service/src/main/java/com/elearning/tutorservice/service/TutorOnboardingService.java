@@ -16,4 +16,7 @@ public interface TutorOnboardingService {
 
     void approveTutor(UUID tutorId);
 
+    void processResumeSubmission(UUID tutorId, String resumeText);
+
 }
+

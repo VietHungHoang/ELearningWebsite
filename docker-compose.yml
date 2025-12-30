@@ -328,6 +328,23 @@ services:
       - db
       - kafka
 
+  quiz-service:
+    build:
+      context: ./backend/services/quiz-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: quiz-service
+    ports:
+      - "8093:8093"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/quiz-service/src:/app/src
+      - ./backend/services/quiz-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
+
   booking-service:
     build:
       context: ./backend/services/booking-service
