@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { HiSparkles, HiChevronDown } from "react-icons/hi";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
 import commonUtils from "../../../../utils/commonUtils";
+import { useTranslation } from "react-i18next";
 import type { Category, Subject } from "../../../../types/common";
 import type { TutorOnboardingData } from "../../../../types/tutor";
 
@@ -11,6 +12,7 @@ interface ProfessionalProfileStepProps {
 }
 
 const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data, onChange }) => {
+    const { t } = useTranslation();
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [subjectOptions, setSubjectOptions] = useState<Subject[]>([]);
     const [categoryOptions, setCategoryOptions] = useState<Category[]>([]);
@@ -118,14 +120,16 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
                 <div className="mb-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Filter by Category</label>
                     <CustomDropdown
-                        options={["All Categories", ...categoryOptions.map((c) => c.name)]}
-                        selectedValue={selectedCategory ? categoryOptions.find((c) => c.id === selectedCategory)?.name || "All Categories" : "All Categories"}
+                        options={["All Categories", ...categoryOptions.map((c) => t('locale') === 'vi' ? c.nameVi : c.nameEn)]}
+                        selectedValue={selectedCategory ? categoryOptions.find((c) => c.id === selectedCategory)?.[t('locale') === 'vi' ? 'nameVi' : 'nameEn'] || "All Categories" : "All Categories"}
                         placeholder="Select category..."
                         onSelect={(value) => {
                             if (value === "All Categories") {
                                 setSelectedCategory("");
                             } else {
-                                const cat = categoryOptions.find((c) => c.name === value);
+                                const cat = categoryOptions.find((c) =>
+                                    (t('locale') === 'vi' ? c.nameVi : c.nameEn) === value
+                                );
                                 if (cat) setSelectedCategory(cat.id);
                             }
                         }}
@@ -141,7 +145,7 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
                             key={subject.id}
                             className="bg-white px-3 py-1 rounded-md text-sm font-medium flex items-center gap-2 border border-gray-200"
                         >
-                            {subject.name}
+                            {t('locale') === 'vi' ? subject.nameVi : subject.nameEn}
                             <button
                                 type="button"
                                 onClick={() =>
@@ -157,11 +161,13 @@ const ProfessionalProfileStep: React.FC<ProfessionalProfileStepProps> = ({ data,
                     ))}
                     <div className="flex-grow min-w-[150px]">
                         <CustomDropdown
-                            options={availableSubjects.map((s) => s.name)}
+                            options={availableSubjects.map((s) => t('locale') === 'vi' ? s.nameVi : s.nameEn)}
                             selectedValue="Add a subject..."
                             placeholder="Add a subject..."
                             onSelect={(value) => {
-                                const subj = availableSubjects.find((s) => s.name === value);
+                                const subj = availableSubjects.find((s) =>
+                                    (t('locale') === 'vi' ? s.nameVi : s.nameEn) === value
+                                );
                                 if (subj) handleAddSubject(subj);
                             }}
                             dropdownId="subjects"

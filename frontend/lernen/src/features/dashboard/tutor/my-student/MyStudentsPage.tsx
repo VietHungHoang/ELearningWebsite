@@ -1,12 +1,13 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {HiChat, HiEye, HiSearch} from 'react-icons/hi';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { HiChat, HiEye, HiSearch } from 'react-icons/hi';
+import BirdLoading from '../../../../components/ui/BirdLoading';
 import EnrollmentTypeBadge from '../components/EnrollmentTypeBadge';
 import StudentStatusBadge from '../components/StudentStatusBadge';
 import Pagination from '../../../../components/ui/Pagination';
-import {type StudentFilters, studentService} from '../../../../services/studentService';
-import type {Student, StudentListItem} from '../../../../types/api';
-import {useAuth} from '../../../../context/AuthContext';
+import { type StudentFilters, studentService } from '../../../../services/studentService';
+import type { Student, StudentListItem } from '../../../../types/api';
+import { useAuth } from '../../../../context/AuthContext';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import { useTranslation } from 'react-i18next';
@@ -182,9 +183,11 @@ const MyStudentsPage: React.FC = () => {
             {/* Students Table */}
             <div className="mt-6 bg-white rounded-2xl shadow-sm overflow-hidden">
                 {loading ? (
-                    <div className="text-center py-16">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto"></div>
-                        <p className="text-gray-500 mt-4">{t('dashboard.tutor.myStudents.loading')}</p>
+                    <div className="py-16">
+                        <BirdLoading
+                            title={t('dashboard.tutor.myStudents.loading')}
+                            size="md"
+                        />
                     </div>
                 ) : error ? (
                     <div className="text-center py-16">

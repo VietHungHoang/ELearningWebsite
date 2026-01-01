@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import commonUtils from '../../../../utils/commonUtils';
 import type { Category, Subject } from '../../../../types/common';
 
 const SubjectICanTeachPage: React.FC = () => {
@@ -13,50 +14,25 @@ const SubjectICanTeachPage: React.FC = () => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [tuitionFee, setTuitionFee] = useState<string>('');
 
-    // Mock data - in real app this would come from API
-    const categories: Category[] = [
-        { id: '1', name: 'Academic Subjects' },
-        { id: '2', name: 'Languages' },
-        { id: '3', name: 'Arts & Music' },
-        { id: '4', name: 'Technology' },
-        { id: '5', name: 'Professional Skills' }
-    ];
+    // Fetch from commonUtils instead of local mock
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
 
-    const subjects: Subject[] = [
-        // Academic Subjects
-        { id: '1', name: 'Mathematics', categoryId: '1' },
-        { id: '2', name: 'Physics', categoryId: '1' },
-        { id: '3', name: 'Chemistry', categoryId: '1' },
-        { id: '4', name: 'Biology', categoryId: '1' },
-        { id: '5', name: 'English Literature', categoryId: '1' },
-        { id: '6', name: 'History', categoryId: '1' },
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const data = await commonUtils.getCategories();
+            setCategories(data);
+        };
+        fetchCategories();
+    }, []);
 
-        // Languages
-        { id: '7', name: 'English', categoryId: '2' },
-        { id: '8', name: 'Spanish', categoryId: '2' },
-        { id: '9', name: 'French', categoryId: '2' },
-        { id: '10', name: 'German', categoryId: '2' },
-        { id: '11', name: 'Chinese', categoryId: '2' },
-
-        // Arts & Music
-        { id: '12', name: 'Piano', categoryId: '3' },
-        { id: '13', name: 'Guitar', categoryId: '3' },
-        { id: '14', name: 'Drawing', categoryId: '3' },
-        { id: '15', name: 'Painting', categoryId: '3' },
-        { id: '16', name: 'Singing', categoryId: '3' },
-
-        // Technology
-        { id: '17', name: 'Programming', categoryId: '4' },
-        { id: '18', name: 'Web Development', categoryId: '4' },
-        { id: '19', name: 'Data Science', categoryId: '4' },
-        { id: '20', name: 'Mobile Development', categoryId: '4' },
-
-        // Professional Skills
-        { id: '21', name: 'Public Speaking', categoryId: '5' },
-        { id: '22', name: 'Business Writing', categoryId: '5' },
-        { id: '23', name: 'Project Management', categoryId: '5' },
-        { id: '24', name: 'Leadership', categoryId: '5' }
-    ];
+    useEffect(() => {
+        const fetchSubjects = async () => {
+            const data = await commonUtils.getSubjects();
+            setSubjects(data);
+        };
+        fetchSubjects();
+    }, []);
 
     const filteredSubjects = selectedCategory
         ? subjects.filter(subject => subject.categoryId === selectedCategory.id)
@@ -166,11 +142,13 @@ const SubjectICanTeachPage: React.FC = () => {
                                 {t('dashboard.tutor.subjectsICanTeach.modal.category')}
                             </label>
                             <CustomDropdown
-                                options={categories.map(c => c.name)}
-                                selectedValue={selectedCategory?.name || ''}
+                                options={categories.map(c => t('locale') === 'vi' ? c.nameVi : c.nameEn)}
+                                selectedValue={selectedCategory ? (t('locale') === 'vi' ? selectedCategory.nameVi : selectedCategory.nameEn) : ''}
                                 placeholder={t('dashboard.tutor.subjectsICanTeach.modal.categoryPlaceholder')}
                                 onSelect={(categoryName) => {
-                                    const category = categories.find(c => c.name === categoryName);
+                                    const category = categories.find(c =>
+                                        (t('locale') === 'vi' ? c.nameVi : c.nameEn) === categoryName
+                                    );
                                     if (category) handleCategorySelect(category);
                                 }}
                                 dropdownId="category"
@@ -181,51 +159,53 @@ const SubjectICanTeachPage: React.FC = () => {
 
                         {/* Subject Selection */}
                         <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {t('dashboard.tutor.subjectsICanTeach.modal.subjects')} <span className="text-red-500">*</span>
-                                </label>
-                                <CustomDropdown
-                                    options={filteredSubjects
-                                        .filter(subject => !selectedSubjects.some(s => s.id === subject.id))
-                                        .map(subject => subject.name)}
-                                    selectedValue=""
-                                    placeholder={t('dashboard.tutor.subjectsICanTeach.modal.addSubject')}
-                                    onSelect={(value: string) => {
-                                        const selectedSubject = filteredSubjects.find(s => s.name === value);
-                                        if (selectedSubject && !selectedSubjects.some(s => s.id === selectedSubject.id)) {
-                                            setSelectedSubjects(prev => [...prev, selectedSubject]);
-                                        }
-                                    }}
-                                    dropdownId="subjects"
-                                    openDropdown={openDropdown}
-                                    setOpenDropdown={setOpenDropdown}
-                                    hasSearch={true}
-                                />
-                                {/* Selected Subjects List */}
-                                {selectedSubjects.length > 0 && (
-                                    <div className="mt-3">
-                                        <div className="flex flex-wrap gap-2">
-                                            {selectedSubjects.map((subject, index) => (
-                                                <div key={index} className="bg-white border border-gray-200 shadow-xs rounded-lg px-2 py-0.75 text-xs font-normal flex items-center gap-2">
-                                                    <span>{subject.name}</span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedSubjects(prev => prev.filter(s => s.id !== subject.id));
-                                                        }}
-                                                        className="text-gray-400 hover:text-red-500"
-                                                    >
-                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t('dashboard.tutor.subjectsICanTeach.modal.subjects')} <span className="text-red-500">*</span>
+                            </label>
+                            <CustomDropdown
+                                options={filteredSubjects
+                                    .filter(subject => !selectedSubjects.some(s => s.id === subject.id))
+                                    .map(subject => t('locale') === 'vi' ? subject.nameVi : subject.nameEn)}
+                                selectedValue=""
+                                placeholder={t('dashboard.tutor.subjectsICanTeach.modal.addSubject')}
+                                onSelect={(value: string) => {
+                                    const selectedSubject = filteredSubjects.find(s =>
+                                        (t('locale') === 'vi' ? s.nameVi : s.nameEn) === value
+                                    );
+                                    if (selectedSubject && !selectedSubjects.some(s => s.id === selectedSubject.id)) {
+                                        setSelectedSubjects(prev => [...prev, selectedSubject]);
+                                    }
+                                }}
+                                dropdownId="subjects"
+                                openDropdown={openDropdown}
+                                setOpenDropdown={setOpenDropdown}
+                                hasSearch={true}
+                            />
+                            {/* Selected Subjects List */}
+                            {selectedSubjects.length > 0 && (
+                                <div className="mt-3">
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedSubjects.map((subject, index) => (
+                                            <div key={index} className="bg-white border border-gray-200 shadow-xs rounded-lg px-2 py-0.75 text-xs font-normal flex items-center gap-2">
+                                                <span>{t('locale') === 'vi' ? subject.nameVi : subject.nameEn}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSelectedSubjects(prev => prev.filter(s => s.id !== subject.id));
+                                                    }}
+                                                    className="text-gray-400 hover:text-red-500"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
                                     </div>
-                                )}
-                            </div>
-                        
+                                </div>
+                            )}
+                        </div>
+
                     </div>
 
                     {/* Modal Actions */}

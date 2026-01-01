@@ -25,7 +25,8 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class Category extends BaseEntity {
 
-    private String name;
+    private String nameVi;
+    private String nameEn;
     private String description;
 
     @ManyToOne

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import NotificationsPopup from "./NotificationsPopup";
 import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from "react-icons/fi";
@@ -31,6 +31,7 @@ const Header: React.FC = () => {
     const isLoggedIn = state.isAuthenticated;
 
     const navigate = useNavigate();
+    const location = useLocation();
 
     const currentLanguageOption = languageOptions.find(option => option.code === i18n.language) || languageOptions[0];
 
@@ -83,7 +84,13 @@ const Header: React.FC = () => {
     };
 
     const handleSignIn = () => {
-        navigate("/login");
+        // Intelligent routing based on current page context using query params
+        const currentPath = location.pathname;
+        const isTutorContext = currentPath.includes('tutor') ||
+            currentPath.includes('become-a-tutor') ||
+            currentPath.includes('/teach');
+
+        navigate(isTutorContext ? "/login?role=tutor" : "/login?role=student");
     };
 
     const handleGetStarted = () => {

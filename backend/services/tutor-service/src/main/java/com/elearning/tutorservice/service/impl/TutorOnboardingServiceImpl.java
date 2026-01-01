@@ -1,6 +1,7 @@
 package com.elearning.tutorservice.service.impl;
 
 import com.elearning.tutorservice.dto.event.AccountCreatedEvent;
+import com.elearning.tutorservice.dto.event.RoleAssignRequestEvent;
 import com.elearning.tutorservice.dto.event.TutorApprovedEvent;
 import com.elearning.tutorservice.dto.event.TutorIndexEvent;
 import com.elearning.tutorservice.dto.onboarding.TutorOnboardingDto;
@@ -164,6 +165,14 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             onboarding.setStatus(OnboardingStatus.APPROVED);
             onboardingRepository.save(onboarding);
             log.info("Updated onboarding status to APPROVED for: {}", tutorId);
+
+            // Send role assignment request to Auth Service via Kafka
+            RoleAssignRequestEvent roleEvent = RoleAssignRequestEvent.builder()
+                    .userId(tutorId)
+                    .role("TUTOR")
+                    .build();
+            kafkaProducer.sendRoleAssignRequest(roleEvent);
+            log.info("Sent role assignment request for tutor: {}", tutorId);
 
             // Send notification event
             TutorApprovedEvent event = TutorApprovedEvent.builder()

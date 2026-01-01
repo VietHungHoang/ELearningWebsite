@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FiCalendar, FiUsers, FiFileText, FiFolder, FiChevronLeft, FiMessageSquare, FiSettings } from "react-icons/fi";
+import BirdLoading from "../../../../../components/ui/BirdLoading";
 import ScheduleTab from "./components/ScheduleTab";
 import StudentsTab from "./components/StudentsTab";
 import QuizzesTab from "./components/QuizzesTab";
@@ -14,10 +15,10 @@ const ClassDetailPage: React.FC = () => {
     const { classId } = useParams<{ classId: string }>();
     const navigate = useNavigate();
     const location = useLocation();
-    
+
     // Get class data from navigation state or fetch from API
     const initialClassData = location.state?.classData as ClassData | undefined;
-    
+
     const [classData, setClassData] = useState<ClassData | null>(initialClassData || null);
     const [activeTab, setActiveTab] = useState<DetailTab>("Schedule");
     const [isLoading, setIsLoading] = useState(!initialClassData);
@@ -28,7 +29,7 @@ const ClassDetailPage: React.FC = () => {
         if (!initialClassData && classId) {
             const loadClassData = async () => {
                 setIsLoading(true);
-                
+
                 try {
                     const data = await classService.getClassDetailForPage(classId);
                     setClassData(data);
@@ -41,7 +42,7 @@ const ClassDetailPage: React.FC = () => {
                     setIsLoading(false);
                 }
             };
-            
+
             loadClassData();
         }
     }, [classId, initialClassData]);
@@ -91,7 +92,7 @@ const ClassDetailPage: React.FC = () => {
             notes: 'Review homework and practice speaking'
         },
         {
-            id: 'session-2', 
+            id: 'session-2',
             sessionDatetime: '2025-12-24T14:00:00',
             sessionType: classData.type === '1-on-1' ? 'ON_ONE_ONE' : 'GROUP',
             classInfo: {
@@ -163,10 +164,10 @@ const ClassDetailPage: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0b6459] mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading class details...</p>
-                </div>
+                <BirdLoading
+                    title="Loading class details..."
+                    size="md"
+                />
             </div>
         );
     }
@@ -193,11 +194,10 @@ const ClassDetailPage: React.FC = () => {
     const NavItem: React.FC<{ label: DetailTab, icon: React.ReactNode }> = ({ label, icon }) => (
         <button
             onClick={() => setActiveTab(label)}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
-                activeTab === label
-                ? 'bg-[#0b6459] text-white shadow-md'
-                : 'hover:bg-gray-100 text-gray-600'
-            }`}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${activeTab === label
+                    ? 'bg-[#0b6459] text-white shadow-md'
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
         >
             <div className={`w-6 h-6 flex-shrink-0 flex items-center justify-center ${activeTab === label ? 'text-white' : 'text-gray-500'}`}>
                 {icon}
@@ -210,7 +210,7 @@ const ClassDetailPage: React.FC = () => {
         <>
             {/* Main Container - Single unified block */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                
+
                 {/* Header Section */}
                 <div className="p-4 border-b border-gray-100">
                     <div className="flex items-start gap-4">
@@ -235,7 +235,7 @@ const ClassDetailPage: React.FC = () => {
                                         <FiCalendar className="w-4 h-4" />
                                         <span>Mon, Wed 7:00 PM - 8:30 PM</span>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => setShowUpdateScheduleModal(true)}
                                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                         title="Update Class Schedule"
@@ -254,7 +254,7 @@ const ClassDetailPage: React.FC = () => {
 
                 {/* Main Content Layout */}
                 <div className="flex flex-col lg:flex-row">
-                    
+
                     {/* Left Sidebar Navigation */}
                     <div className="w-full lg:w-64 flex-shrink-0 p-4 border-r border-gray-100 lg:min-h-[600px]">
                         <nav className="space-y-2">
@@ -271,11 +271,11 @@ const ClassDetailPage: React.FC = () => {
                             {classData && (
                                 <>
                                     {activeTab === "Schedule" && (
-                                        <ScheduleTab 
+                                        <ScheduleTab
                                             upcomingSessions={upcomingSessions}
                                             pastSessions={pastSessions}
-                                            onOpenReschedule={handleOpenReschedule} 
-                                            onViewPastSession={handleViewPastSession} 
+                                            onOpenReschedule={handleOpenReschedule}
+                                            onViewPastSession={handleViewPastSession}
                                         />
                                     )}
                                     {activeTab === "Students" && (

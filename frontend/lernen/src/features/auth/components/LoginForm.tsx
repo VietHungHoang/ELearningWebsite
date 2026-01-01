@@ -9,9 +9,10 @@ import authService from '../../../services/authService';
 interface LoginFormProps {
   handleLogin: (email: string, password: string) => void;
   isLoading?: boolean;
+  role: 'student' | 'tutor';
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false, role }) => {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -153,7 +154,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ handleLogin, isLoading = false })
             type="button"
             onClick={async () => {
               try {
-                const authUrl = await authService.getGoogleAuthUrl(window.location.origin + '/login');
+                const authUrl = await authService.getGoogleAuthUrl(
+                  window.location.origin + `/login?role=${role}`
+                );
                 window.location.href = authUrl;
               } catch (error) {
                 console.error('Failed to get Google auth URL:', error);

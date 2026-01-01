@@ -55,7 +55,7 @@ const getGoogleAuthUrl = async (redirectUri: string): Promise<string> => {
     return (response.data as { authUrl: string }).authUrl;
 };
 
-const googleLogin = async (request: { code: string; redirectUri: string }): Promise<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number; scope: string }> => {
+const googleLogin = async (request: { code: string; redirectUri: string; role?: string }): Promise<{ accessToken: string; refreshToken: string; tokenType: string; expiresIn: number; scope: string }> => {
     const response = await apiService.post('/v1/auth/google/callback', request);
     if (!response.success) {
         throw new Error(response.message);

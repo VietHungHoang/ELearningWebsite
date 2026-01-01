@@ -10,7 +10,8 @@ public class CategoryMapper {
 
     public Category toEntity(CategoryRequest request) {
         Category category = Category.builder()
-                .name(request.getName())
+                .nameVi(request.getNameVi())
+                .nameEn(request.getNameEn())
                 .description(request.getDescription())
                 .build();
 
@@ -20,7 +21,8 @@ public class CategoryMapper {
     public CategoryResponse toResponse(Category category) {
         return CategoryResponse.builder()
                 .id(category.getId())
-                .name(category.getName())
+                .nameVi(category.getNameVi())
+                .nameEn(category.getNameEn())
                 .description(category.getDescription())
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .createdAt(category.getCreatedAt())

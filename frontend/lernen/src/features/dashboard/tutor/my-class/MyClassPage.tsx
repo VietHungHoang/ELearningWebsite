@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch, HiPlus } from 'react-icons/hi';
 import { FiEye, FiMessageSquare, FiEdit, FiTrash } from 'react-icons/fi';
+import BirdLoading from '../../../../components/ui/BirdLoading';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CreateClassModal, { type ClassFormData } from './components/CreateClassModal';
 import EditClassModal, { type ClassData } from './components/EditClassModal';
@@ -17,10 +18,10 @@ type FilterTab = 'All Status' | 'Ongoing' | 'Opening' | 'Completed';
 const formatDate = (isoDate: string): string => {
     try {
         const date = new Date(isoDate);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
         });
     } catch (error) {
         return isoDate; // Return original if parsing fails
@@ -115,8 +116,8 @@ const MyClassPage: React.FC = () => {
 
     const handleViewDetails = (classData: ClassTable) => {
         // Navigate to class detail page with class data in state
-        navigate(`/dashboard/my-class/${classData.id}`, { 
-            state: { classData } 
+        navigate(`/dashboard/my-class/${classData.id}`, {
+            state: { classData }
         });
     };
 
@@ -225,9 +226,9 @@ const MyClassPage: React.FC = () => {
                         ]}
                         selectedValue={
                             activeTab === 'All Status' ? t('dashboard.tutor.myClass.filterOptions.allStatus') :
-                            activeTab === 'Ongoing' ? t('dashboard.tutor.myClass.filterOptions.ongoing') :
-                            activeTab === 'Opening' ? t('dashboard.tutor.myClass.filterOptions.opening') :
-                            t('dashboard.tutor.myClass.filterOptions.completed')
+                                activeTab === 'Ongoing' ? t('dashboard.tutor.myClass.filterOptions.ongoing') :
+                                    activeTab === 'Opening' ? t('dashboard.tutor.myClass.filterOptions.opening') :
+                                        t('dashboard.tutor.myClass.filterOptions.completed')
                         }
                         placeholder={t('dashboard.tutor.myClass.selectStatus')}
                         onSelect={(value: string) => {
@@ -249,9 +250,11 @@ const MyClassPage: React.FC = () => {
 
             <div className="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
                 {loading ? (
-                    <div className="text-center py-16">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto"></div>
-                        <p className="text-gray-500 mt-4">{t('dashboard.tutor.myClass.loading')}</p>
+                    <div className="py-16">
+                        <BirdLoading
+                            title={t('dashboard.tutor.myClass.loading')}
+                            size="md"
+                        />
                     </div>
                 ) : error ? (
                     <div className="text-center py-16">
@@ -293,21 +296,20 @@ const MyClassPage: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                classData.type === 'ON_ONE_ONE'
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : 'bg-purple-100 text-purple-800'
-                                            }`}>
-                                                {classData.type === 'ON_ONE_ONE' 
-                                                    ? t('dashboard.tutor.myClass.classTypes.oneOnOne') 
+                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${classData.type === 'ON_ONE_ONE'
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : 'bg-purple-100 text-purple-800'
+                                                }`}>
+                                                {classData.type === 'ON_ONE_ONE'
+                                                    ? t('dashboard.tutor.myClass.classTypes.oneOnOne')
                                                     : t('dashboard.tutor.myClass.classTypes.group')
                                                 }
                                             </span>
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="text-sm text-gray-600">
-                                                {classData.students.length} {classData.students.length === 1 
-                                                    ? t('dashboard.tutor.myClass.studentCount.singular') 
+                                                {classData.students.length} {classData.students.length === 1
+                                                    ? t('dashboard.tutor.myClass.studentCount.singular')
                                                     : t('dashboard.tutor.myClass.studentCount.plural')
                                                 }
                                             </span>
@@ -340,18 +342,17 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
-                                                <span className={`w-1.5 h-1.5 rounded-full ${
-                                                    classData.status === 'ONGOING'
-                                                        ? 'bg-green-600'
-                                                        : classData.status === 'COMPLETED'
+                                                <span className={`w-1.5 h-1.5 rounded-full ${classData.status === 'ONGOING'
+                                                    ? 'bg-green-600'
+                                                    : classData.status === 'COMPLETED'
                                                         ? 'bg-gray-600'
                                                         : 'bg-yellow-600'
-                                                }`}></span>
-                                                {classData.status === 'ONGOING' 
+                                                    }`}></span>
+                                                {classData.status === 'ONGOING'
                                                     ? t('dashboard.tutor.myClass.statusLabels.ongoing')
                                                     : classData.status === 'COMPLETED'
-                                                    ? t('dashboard.tutor.myClass.statusLabels.completed')
-                                                    : t('dashboard.tutor.myClass.statusLabels.opening')
+                                                        ? t('dashboard.tutor.myClass.statusLabels.completed')
+                                                        : t('dashboard.tutor.myClass.statusLabels.opening')
                                                 }
                                             </span>
                                         </td>

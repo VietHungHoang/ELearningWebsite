@@ -19,7 +19,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Subject extends BaseEntity {
-    private String name;
+    private String nameVi;
+    private String nameEn;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
