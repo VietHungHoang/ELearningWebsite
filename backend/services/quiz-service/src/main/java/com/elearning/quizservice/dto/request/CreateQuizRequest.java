@@ -46,6 +46,5 @@ public class CreateQuizRequest {
     @Min(value = 1, message = "Max attempts must be at least 1")
     private Integer maxAttempts;
     
-    @Valid
     private List<CreateQuestionRequest> questions;
 }

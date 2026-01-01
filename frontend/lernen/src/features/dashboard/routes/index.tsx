@@ -88,6 +88,10 @@ const dashboardRoutes: RouteObject[] = [
         element: <CreateQuizPage />,
       },
       {
+        path: 'quizzes/:quizId/edit',
+        element: <CreateQuizPage />,
+      },
+      {
         path: 'quizzes/:quizId/stats',
         element: <QuizStatsPage />,
       },

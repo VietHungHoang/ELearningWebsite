@@ -197,12 +197,12 @@ export interface QuizStatistics {
 export interface CreateQuestionRequest {
     questionText: string;
     type: QuestionType;
-    orderIndex: number;
+    orderIndex?: number;
     explanation?: string;
     options: {
         optionText: string;
         isCorrect: boolean;
-        orderIndex: number;
+        orderIndex?: number;
     }[];
 }
 

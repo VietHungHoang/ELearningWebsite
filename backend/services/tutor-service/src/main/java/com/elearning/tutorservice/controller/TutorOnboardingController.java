@@ -1,8 +1,10 @@
 package com.elearning.tutorservice.controller;
 
+import com.elearning.tutorservice.dto.request.GenerateIntroductionRequest;
 import com.elearning.tutorservice.dto.request.SubmitResumeRequest;
 import com.elearning.tutorservice.dto.request.UpdateOnboardingRequest;
 import com.elearning.tutorservice.dto.response.ApiResponse;
+import com.elearning.tutorservice.dto.response.GenerateIntroductionResponse;
 import com.elearning.tutorservice.dto.response.OnboardingResponse;
 import com.elearning.tutorservice.service.TutorOnboardingService;
 import jakarta.validation.Valid;
@@ -47,5 +49,22 @@ public class TutorOnboardingController {
 
         tutorOnboardingService.processResumeSubmission(id, request.getResumeText());
         return ResponseEntity.ok(ApiResponse.success(null, "Resume processed successfully"));
+    }
+
+    /**
+     * POST /tutors/{id}/onboarding/generate-introduction
+     * Generate introduction for tutor based on prompt and onboarding data
+     */
+    @PostMapping("/{id}/onboarding/generate-introduction")
+    public ResponseEntity<ApiResponse<GenerateIntroductionResponse>> generateIntroduction(
+            @PathVariable UUID id,
+            @Valid @RequestBody GenerateIntroductionRequest request) {
+
+        String introduction = tutorOnboardingService.generateIntroduction(id, request.getPrompt());
+        GenerateIntroductionResponse response = GenerateIntroductionResponse.builder()
+                .introduction(introduction)
+                .build();
+        
+        return ResponseEntity.ok(ApiResponse.success(response, "Introduction generated successfully"));
     }
 }

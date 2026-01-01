@@ -188,6 +188,16 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             kafkaProducer.sendTutorIndexEvent(indexEvent);
             log.info("Published tutor index event for new tutor: {}", tutorId);
 
+            // Send tutor approved event for notifications and other services (quiz-service, etc.)
+            TutorApprovedEvent approvedEvent = TutorApprovedEvent.builder()
+                    .tutorId(tutorId)
+                    .fullName(tutor.getFullName())
+                    .avatarUrl(tutor.getAvatarUrl())
+                    .email(tutor.getEmail())
+                    .build();
+            kafkaProducer.sendTutorApprovedEvent(approvedEvent);
+            log.info("Published tutor approved event for tutor: {}", tutorId);
+
         } catch (Exception e) {
             log.error("Failed to approve tutor {}: {}", tutorId, e.getMessage(), e);
             throw new RuntimeException("Failed to approve tutor", e);
@@ -335,6 +345,91 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             } else {
                 log.warn("No valid language data to insert for tutor: {}", tutor.getId());
             }
+        }
+    }
+
+    @Override
+    public String generateIntroduction(UUID tutorId, String prompt) {
+        log.info("Generating introduction for tutor: {} with prompt: {}", tutorId, prompt);
+
+        // Get tutor onboarding data
+        TutorOnboarding onboarding = onboardingRepository.findById(tutorId)
+                .orElseThrow(() -> new RuntimeException("Onboarding not found for tutor: " + tutorId));
+
+        String jsonData = onboarding.getJsonData();
+        if (jsonData == null || jsonData.isEmpty()) {
+            throw new RuntimeException("No onboarding data found for tutor: " + tutorId);
+        }
+
+        // Build prompt for Gemini
+        String fullPrompt = buildIntroductionPrompt(prompt, jsonData);
+
+        // Call Gemini API
+        String generatedIntroduction = callGeminiForIntroduction(fullPrompt);
+
+        log.info("Successfully generated introduction for tutor: {}", tutorId);
+        return generatedIntroduction;
+    }
+
+    private String buildIntroductionPrompt(String userPrompt, String jsonData) {
+        return """
+                You are a professional writer helping tutors create compelling introductions for their profiles.
+                
+                Based on the following tutor information and user request, generate a professional introduction:
+                
+                Tutor Information (JSON):
+                %s
+                
+                User Request:
+                %s
+                
+                Instructions:
+                1. Write a professional, engaging introduction in the first person
+                2. Highlight the tutor's experience, qualifications, and teaching style
+                3. Keep it concise (2-3 paragraphs, around 150-250 words)
+                4. Make it warm and approachable while maintaining professionalism
+                5. Focus on what makes this tutor unique and valuable to students
+                6. Only return the introduction text, no additional formatting or explanations
+                
+                Generate the introduction now:
+                """.formatted(jsonData, userPrompt);
+    }
+
+    private String callGeminiForIntroduction(String prompt) {
+        try {
+            String response = geminiService.callGeminiApi(prompt);
+            return extractTextFromGeminiResponse(response);
+        } catch (Exception e) {
+            log.error("Failed to generate introduction with Gemini", e);
+            throw new RuntimeException("Failed to generate introduction", e);
+        }
+    }
+
+    private String extractTextFromGeminiResponse(String response) {
+        try {
+            com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(response);
+            com.fasterxml.jackson.databind.JsonNode candidates = rootNode.get("candidates");
+            
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                com.fasterxml.jackson.databind.JsonNode firstCandidate = candidates.get(0);
+                com.fasterxml.jackson.databind.JsonNode content = firstCandidate.get("content");
+                
+                if (content != null) {
+                    com.fasterxml.jackson.databind.JsonNode parts = content.get("parts");
+                    
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        com.fasterxml.jackson.databind.JsonNode text = parts.get(0).get("text");
+                        if (text != null) {
+                            return text.asText().trim();
+                        }
+                    }
+                }
+            }
+            
+            throw new RuntimeException("Could not extract text from Gemini response");
+        } catch (Exception e) {
+            log.error("Failed to parse Gemini response", e);
+            throw new RuntimeException("Failed to parse Gemini response", e);
         }
     }
 }

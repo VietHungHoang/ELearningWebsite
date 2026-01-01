@@ -102,8 +102,8 @@ public class VideoController {
     public ResponseEntity<ApiResponse<PresignedUrlResponse>> generatePresignedUrl(
             @Valid @RequestBody VideoUploadRequest request) {
         
-        log.info("Generating presigned URL for video upload of lesson ID {} with content type: {}", 
-                request.getCourseId(), request.getContentType());
+        log.info("Generating presigned URL for video upload with content type: {}", 
+                request.getContentType());
         
         try {
             // Use S3Service to generate presigned URL with automatic strategy selection

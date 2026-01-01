@@ -121,7 +121,12 @@ public class GeminiService {
             """.formatted(id, email, fullName, id, email, fullName, resumeText);
     }
     
-    private String callGeminiApi(String prompt) {
+    /**
+     * Call Gemini API with a prompt and return raw response
+     * @param prompt The prompt to send to Gemini
+     * @return Raw response from Gemini API
+     */
+    public String callGeminiApi(String prompt) {
         String url = geminiConfig.getApiUrl() + "?key=" + geminiConfig.getApiKey();
         
         // Build request body

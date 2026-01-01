@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/file/images")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
 public class ImageController {
     
     private final S3Service s3Service;
@@ -30,7 +29,7 @@ public class ImageController {
     public ResponseEntity<ApiResponse<PresignedUrlResponse>> generatePresignedUrl(
             @Valid @RequestBody ImageUploadRequest request) {
         
-        log.info("Generating presigned URL for image upload of course ID {}", request.getCourseId());
+        log.info("Generating presigned URL for image upload with content type {}", request.getContentType());
         
         try {
             PresignedUrlResponse response = s3Service.generatePresignedUrl(request.getContentType());

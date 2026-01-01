@@ -345,6 +345,24 @@ services:
     depends_on:
       - db
 
+  file-service:
+    build:
+      context: ./backend/services/file-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: file-service
+    ports:
+      - "8094:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/file-service/src:/app/src
+      - ./backend/services/file-service/pom.xml:/app/pom.xml
+      - file_uploads:/app/uploads
+    depends_on:
+      - redis
+
   booking-service:
     build:
       context: ./backend/services/booking-service
@@ -365,4 +383,6 @@ volumes:
   esdata:
     driver: local
   mongodb_data:
+    driver: local
+  file_uploads:
     driver: local
