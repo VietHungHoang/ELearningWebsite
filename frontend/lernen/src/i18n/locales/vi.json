@@ -1147,6 +1147,7 @@
         "edit": "Chỉnh sửa",
         "cancel": "Hủy",
         "save": "Lưu",
+        "saving": "Đang lưu...",
         "editTooltip": "Lịch này sẽ áp dụng cho những ngày còn lại của từ tuần này và các tuần sau",
         "views": {
           "daily": "Ngày",

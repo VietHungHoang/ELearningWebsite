@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Coupon, CouponDiscountType } from '../DealsAndCouponsPage';
-import CustomDropdown from '../../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../../components/ui/CustomDropdownDashboard';
 import ModalLayout from '../../../../../components/ui/ModalLayout';
 
 const mockCourseList = [
@@ -119,7 +119,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
-                                <CustomDropdown
+                                <CustomDropdownDashboard
                                     options={['Percentage', 'Fixed']}
                                     selectedValue={discountType}
                                     placeholder="Select type"
@@ -147,7 +147,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                         {/* Applicable Courses */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Applicable Courses</label>
-                            <CustomDropdown 
+                            <CustomDropdownDashboard 
                                 options={['All', ...mockCourseList]}
                                 selectedValue={applicableCourses.length === 1 && applicableCourses[0] === 'All' ? 'All Courses' : `${applicableCourses.length} course(s) selected`}
                                 placeholder="Select courses"

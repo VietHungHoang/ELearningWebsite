@@ -1146,6 +1146,7 @@
         "edit": "Edit",
         "cancel": "Cancel",
         "save": "Save",
+        "saving": "Saving...",
         "editTooltip": "This schedule will apply to the remaining days of this week and future weeks",
         "views": {
           "daily": "Daily",
