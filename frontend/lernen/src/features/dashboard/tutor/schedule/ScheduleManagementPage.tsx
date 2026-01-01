@@ -44,6 +44,7 @@ const ScheduleManagementContent: React.FC = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [selectionMode, setSelectionMode] = useState<"adding" | "removing" | null>(null);
     const [dragStartCoords, setDragStartCoords] = useState<{ x: number; y: number } | null>(null);
+    const [dragStartScroll, setDragStartScroll] = useState<{ scrollLeft: number; scrollTop: number } | null>(null);
     const [selectionRect, setSelectionRect] = useState<{
         top: number;
         left: number;
@@ -641,9 +642,18 @@ const ScheduleManagementContent: React.FC = () => {
         const gridRect = gridRef.current?.getBoundingClientRect();
         if (!gridRect) return;
 
+        const container = gridRef.current;
+        if (!container) return;
+        
         const startX = e.clientX - gridRect.left;
         const startY = e.clientY - gridRect.top;
         setDragStartCoords({ x: startX, y: startY });
+        
+        // Lưu scroll position tại thời điểm bắt đầu drag
+        setDragStartScroll({
+            scrollLeft: container.scrollLeft,
+            scrollTop: container.scrollTop
+        });
 
         // Create slot in local timezone
         const localSlotDate = new Date(date);
@@ -674,16 +684,29 @@ const ScheduleManagementContent: React.FC = () => {
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isDragging || !dragStartCoords || !gridRef.current) return;
+            if (!isDragging || !dragStartCoords || !dragStartScroll || !gridRef.current) return;
             e.preventDefault();
-            const gridRect = gridRef.current.getBoundingClientRect();
+            
+            const container = gridRef.current;
+            const gridRect = container.getBoundingClientRect();
+            
+            // Vị trí hiện tại của chuột tương đối với viewport
             const currentX = e.clientX - gridRect.left;
             const currentY = e.clientY - gridRect.top;
+            
+            // Tính toán sự thay đổi scroll từ lúc bắt đầu drag
+            const scrollDeltaX = container.scrollLeft - dragStartScroll.scrollLeft;
+            const scrollDeltaY = container.scrollTop - dragStartScroll.scrollTop;
+            
+            // Điều chỉnh vị trí bắt đầu theo scroll delta
+            const adjustedStartX = dragStartCoords.x - scrollDeltaX;
+            const adjustedStartY = dragStartCoords.y - scrollDeltaY;
+            
             const rect = {
-                left: Math.min(dragStartCoords.x, currentX),
-                top: Math.min(dragStartCoords.y, currentY),
-                width: Math.abs(dragStartCoords.x - currentX),
-                height: Math.abs(dragStartCoords.y - currentY),
+                left: Math.min(adjustedStartX, currentX),
+                top: Math.min(adjustedStartY, currentY),
+                width: Math.abs(adjustedStartX - currentX),
+                height: Math.abs(adjustedStartY - currentY),
             };
             setSelectionRect(rect);
         };
@@ -691,6 +714,7 @@ const ScheduleManagementContent: React.FC = () => {
             if (isDragging) {
                 setIsDragging(false);
                 setDragStartCoords(null);
+                setDragStartScroll(null);
                 setSelectionRect(null);
                 setSelectionMode(null);
                 setInitialAvailabilityOnDrag([]);
@@ -704,7 +728,7 @@ const ScheduleManagementContent: React.FC = () => {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [isDragging, dragStartCoords]);
+    }, [isDragging, dragStartCoords, dragStartScroll]);
 
     useEffect(() => {
         if (!isDragging || !selectionRect || !selectionMode || !gridRef.current || !selectedTimezone) return;
@@ -917,39 +941,48 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     // --- RENDER FUNCTIONS FOR VIEWS ---
-    const timeSlots = Array.from({ length: 18 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`); // 7:00-24:00 - all time slots
+    const timeSlots = Array.from({ length: 17 }, (_, i) => `${String(i + 7).padStart(2, "0")}:00`); // 7:00-23:00 - all time slots
 
     const renderHourlyGrid = (days: Date[], isDaily: boolean = false) => {
         // Daily view: larger cells (h-12) for scrolling
         // Weekly view: smaller cells (h-7) to fit without scrolling
-        const timeColumnWidth = isDaily ? '100px' : '80px';
-        const cellHeight = isDaily ? 'h-12' : 'h-7.5';
-        const timeTextSize = isDaily ? 'text-sm font-medium text-gray-700' : 'text-[10px] text-gray-500';
-        const timePadding = isDaily ? 'pr-4 py-1' : 'pr-3 py-0.5';
-        const sessionTextSize = isDaily ? 'text-xs' : 'text-[10px]';
-        const sessionPadding = isDaily ? 'px-2 py-1' : 'px-2 py-0.5';
+        const timeColumnWidth = isDaily ? '100px' : '60px';
+        const cellHeight = isDaily ? 'h-12' : 'h-10';
+        const timeTextSize = isDaily ? 'text-sm font-medium' : 'text-xs font-bold';
+        const sessionTextSize = isDaily ? 'text-xs' : 'text-xs';
+        const sessionPadding = isDaily ? 'px-2 py-1' : 'px-2 py-1';
 
         return (
-        <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full w-full min-h-0 overflow-hidden">
+        <div className="bg-white flex flex-col h-full w-full min-h-0 overflow-hidden">
             <div className="overflow-x-auto overflow-y-auto flex-1 relative min-h-0" ref={gridRef}>
                 <div className={`grid`} style={{ gridTemplateColumns: `${timeColumnWidth} repeat(${days.length}, 1fr)`, width: '100%' }}>
                     {/* Time Column Header */}
                     <div className="sticky left-0 bg-white z-10"></div>
                     {/* Day Headers */}
-                    {days.map((day) => (
-                        <div key={day.toISOString()} className="text-center p-0.5 border-b border-gray-200 bg-white sticky top-0 z-10">
-                            <p className="text-[10px] text-gray-500">
-                                {day.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" })}
-                            </p>
-                            <p className="text-xs font-bold text-gray-800">{day.getUTCDate()}</p>
-                        </div>
-                    ))}
+                    {days.map((day) => {
+                        const dayOfWeek = day.getUTCDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+                        const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+                        const dayKey = dayKeys[dayOfWeek];
+                        return (
+                            <div key={day.toISOString()} className="text-center p-0.5 border-b border-gray-200 bg-white">
+                                <p className="text-[10px] text-gray-500">
+                                    {t(`dashboard.tutor.schedule.days.${dayKey}`)}
+                                </p>
+                                <p className="text-xs font-bold text-gray-800">{day.getUTCDate()}</p>
+                            </div>
+                        );
+                    })}
 
                     {/* Time Slots and Availability Grid */}
                     {timeSlots.map((time) => (
                         <React.Fragment key={time}>
-                            <div className={`text-right border-r border-gray-200 sticky left-0 bg-white z-10 ${cellHeight} flex items-center justify-end ${timeTextSize} ${timePadding}`}>
-                                {time}
+                            <div className={`relative border-r border-t border-gray-200 sticky left-0 bg-white z-10 ${cellHeight}`}>
+                                <span 
+                                    className={`absolute right-2 ${timeTextSize} text-gray-500 bg-white px-0.5`}
+                                    style={{ top: 0, transform: 'translateY(-50%)' }}
+                                >
+                                    {time}
+                                </span>
                             </div>
                             {days.map((day) => {
                                 const hour = parseInt(time.split(":")[0]);
@@ -996,7 +1029,7 @@ const ScheduleManagementContent: React.FC = () => {
 
                                 if (bookedSession) {
                                     return (
-                                        <div key={day.toISOString()} className={`border-b border-r border-gray-200 ${cellHeight} p-0 overflow-hidden`}>
+                                        <div key={day.toISOString()} className={`border-t border-r border-gray-200 ${cellHeight} p-0 overflow-hidden`}>
                                             <div
                                                 onClick={(e) => handleSessionClick(bookedSession, e)}
                                                 className={`h-full w-full rounded ${sessionTextSize} ${sessionPadding} bg-blue-100 text-blue-800 border border-blue-200 overflow-hidden flex flex-col justify-center min-w-0 ${
@@ -1021,7 +1054,7 @@ const ScheduleManagementContent: React.FC = () => {
                                     <div
                                         key={day.toISOString()}
                                         data-iso={slotISO}
-                                        className={`calendar-cell border-b border-r border-gray-200 ${cellHeight} text-center select-none overflow-hidden ${
+                                        className={`calendar-cell border-t border-r border-gray-200 ${cellHeight} text-center select-none overflow-hidden ${
                                             isEditMode ? "cursor-pointer" : ""
                                         }`}
                                         onMouseDown={(e) => handleMouseDown(e, day, hour)}
@@ -1039,13 +1072,26 @@ const ScheduleManagementContent: React.FC = () => {
                             })}
                         </React.Fragment>
                     ))}
+                    
+                    {/* Bottom border row with 24:00 label */}
+                    <div className={`relative border-r border-t border-gray-200 sticky left-0 bg-white z-10 h-3`}>
+                        <span 
+                            className={`absolute right-2 ${timeTextSize} text-gray-500 bg-white px-0.5`}
+                            style={{ top: 0, transform: 'translateY(-50%)' }}
+                        >
+                            24:00
+                        </span>
+                    </div>
+                    {days.map((day) => (
+                        <div key={`bottom-${day.toISOString()}`} className="border-t border-gray-200 h-3"></div>
+                    ))}
                 </div>
                 {isDragging && selectionRect && (
                     <div
-                        className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
+                        className="absolute bg-blue-200 bg-opacity-40 border border-blue-400 pointer-events-none z-20"
                         style={{
-                            left: selectionRect.left,
-                            top: selectionRect.top,
+                            left: selectionRect.left + (gridRef.current?.scrollLeft || 0),
+                            top: selectionRect.top + (gridRef.current?.scrollTop || 0),
                             width: selectionRect.width,
                             height: selectionRect.height,
                         }}
@@ -1379,13 +1425,8 @@ const ScheduleManagementContent: React.FC = () => {
                 ) : (
                     <>
                         {view === "Weekly" ? (
-                            <div className="grid grid-cols-10 gap-4 h-full min-h-0 px-6 pb-6">
-                                <div className="col-span-7 flex flex-col h-full min-h-0">
-                                    {renderWeeklyView()}
-                                </div>
-                                <div className="col-span-3 flex flex-col h-full min-h-0">
-                                    {renderAvailabilityDetails()}
-                                </div>
+                            <div className="h-full min-h-0 px-6 pb-6">
+                                {renderWeeklyView()}
                             </div>
                         ) : (
                             <>

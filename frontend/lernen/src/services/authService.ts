@@ -90,4 +90,32 @@ const saveOnboardingStep = async (tutorId: string, step: number, data: string): 
     }
 };
 
-export default { login, signup, signUpInitiate: startSignUp, verifyOtp, createAccount, getGoogleAuthUrl, googleLogin, getOnboardingLatestStep, getOnboardingData, saveOnboardingStep };
+const skipOnboardingStep = async (tutorId: string, step: number): Promise<void> => {
+    const response = await apiService.post(`/v1/tutors/${tutorId}/onboarding/skip`, { step });
+    if (!response.success) {
+        throw new Error(response.message);
+    }
+};
+
+const generateIntroductionWithAI = async (tutorId: string, prompt: string): Promise<string> => {
+    const response = await apiService.post<{ introduction: string }>(`v1/tutors/${tutorId}/onboarding/generate-introduction`, { prompt });
+    if (!response.success) {
+        throw new Error(response.message || "Failed to generate introduction");
+    }
+    return response.data.introduction;
+};
+
+export default { 
+    login, 
+    signup, 
+    signUpInitiate: startSignUp, 
+    verifyOtp, 
+    createAccount, 
+    getGoogleAuthUrl, 
+    googleLogin, 
+    getOnboardingLatestStep, 
+    getOnboardingData, 
+    saveOnboardingStep,
+    skipOnboardingStep,
+    generateIntroductionWithAI
+};

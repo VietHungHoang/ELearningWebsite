@@ -89,15 +89,14 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
     return (
         <div className="relative" ref={dropdownRef}>
             <div className={`
-                bg-white rounded-lg border border-gray-200 shadow-sm 
-                ${label ? 'p-3 min-h-[70px] flex flex-col justify-center' : ''}
+                ${label ? 'bg-white rounded-lg border border-gray-200 shadow-sm p-3 min-h-[70px] flex flex-col justify-center' : 'bg-gray-100 border border-transparent rounded-lg'}
             `}>
                 {label && <label className="text-xs text-[#585858] block mb-1.5">{label}</label>}
                 <button 
                     type="button"
                     onClick={handleToggle}
                     onMouseDown={(e) => e.preventDefault()}
-                    className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[38px]'}`}
+                    className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[48.75px] text-gray-800 hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out'}`}
                 >
                     <span className={`dropdown-label text-sm font-normal truncate ${isPlaceholder && label ? 'text-[rgba(88,88,88,0.4)]' : 'text-[#585858]'}`}>{selectedValue}</span>
                     <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
