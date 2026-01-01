@@ -29,13 +29,6 @@ public class Category extends BaseEntity {
     private String nameEn;
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Category> children;
-
     @OneToMany(mappedBy = "category")
     private List<Subject> subjects;
 }

@@ -24,7 +24,6 @@ public class CategoryMapper {
                 .nameVi(category.getNameVi())
                 .nameEn(category.getNameEn())
                 .description(category.getDescription())
-                .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .build();

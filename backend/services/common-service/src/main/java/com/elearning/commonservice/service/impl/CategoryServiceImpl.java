@@ -26,12 +26,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse create(CategoryRequest request) {
         Category category = categoryMapper.toEntity(request);
-
-        if (request.getParentId() != null) {
-            Category parent = getCategoryById(request.getParentId());
-            category.setParent(parent);
-        }
-
         Category created = categoryRepository.save(category);
 
         return categoryMapper.toResponse(created);
@@ -54,15 +48,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponse update(UUID id, CategoryRequest request) {
         Category existing = getCategoryById(id);
-        existing.setName(request.getName());
+        existing.setNameEn(request.getNameEn());
+        existing.setNameVi(request.getNameVi());
         existing.setDescription(request.getDescription());
-
-        if (request.getParentId() != null) {
-            Category parent = getCategoryById(request.getParentId());
-            existing.setParent(parent);
-        } else {
-            existing.setParent(null);
-        }
 
         Category updated = categoryRepository.save(existing);
         return categoryMapper.toResponse(updated);
