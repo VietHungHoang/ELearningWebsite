@@ -4,7 +4,7 @@ import { HiChevronLeft, HiChevronRight, HiPencil, HiX } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/ui/Toast";
 import Tooltip from "../../../../components/ui/Tooltip";
-import CustomDropdown from "../../../../components/ui/CustomDropdown";
+import CustomDropdownDashboard from "../../../../components/ui/CustomDropdownDashboard";
 import { CalendarSkeleton, MonthlyCalendarSkeleton } from "./components/SchedulePageSkeleton";
 import TutorSessionDetailModal from "../components/TutorSessionDetailModal";
 import { scheduleService } from "../../../../services/scheduleService";
@@ -37,6 +37,7 @@ const ScheduleManagementContent: React.FC = () => {
 
     // Edit Mode State
     const [isEditMode, setIsEditMode] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [tempAvailability, setTempAvailability] = useState<string[]>(availability);
     const [editModeAvailability, setEditModeAvailability] = useState<string[]>([]); // Slots for next week (for edit mode)
 
@@ -407,8 +408,9 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     const handleSaveForFuture = async () => {
-        if (!user?.id) return;
+        if (!user?.id || isSaving) return;
         
+        setIsSaving(true);
         try {
             console.log('=== SAVE DEBUG ===');
             console.log('tempAvailability slots (UTC):', tempAvailability);
@@ -447,6 +449,8 @@ const ScheduleManagementContent: React.FC = () => {
         } catch (error) {
             console.error('Failed to save availability:', error);
             setToast({ message: t('dashboard.tutor.schedule.errors.save'), type: 'error' });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -1372,7 +1376,7 @@ const ScheduleManagementContent: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="w-48 h-[38px] flex items-center">
-                        <CustomDropdown
+                        <CustomDropdownDashboard
                             options={timezoneOptions}
                             selectedValue={selectedTimezone ? `${selectedTimezone.name} (${selectedTimezone.offset})` : ""}
                             placeholder="Select timezone"
@@ -1392,17 +1396,34 @@ const ScheduleManagementContent: React.FC = () => {
                     </div>
                     {isEditMode ? (
                         <div className="flex items-center gap-2">
-                            <button
-                                onClick={handleCancelClick}
-                                className="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg text-sm hover:bg-gray-300 transition-colors"
-                            >
-                                {t('dashboard.tutor.schedule.cancel')}
-                            </button>
+                            {!isSaving && (
+                                <button
+                                    onClick={handleCancelClick}
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg text-sm hover:bg-gray-300 transition-colors"
+                                >
+                                    {t('dashboard.tutor.schedule.cancel')}
+                                </button>
+                            )}
                             <button
                                 onClick={handleSaveForFuture}
-                                className="px-4 py-2 bg-[#0b6459] text-white font-medium rounded-lg text-sm hover:bg-[#084c43] transition-colors"
+                                disabled={isSaving}
+                                className={`flex items-center gap-2 bg-[#0b6459] text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors min-w-[80px] ${
+                                    isSaving 
+                                        ? 'opacity-70 cursor-not-allowed' 
+                                        : 'hover:bg-[#084c43]'
+                                }`}
                             >
-                                {t('dashboard.tutor.schedule.save')}
+                                {isSaving ? (
+                                    <>
+                                        <svg className="animate-spin h-4 w-4 text-white flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span className="whitespace-nowrap">{t('dashboard.tutor.schedule.saving')}</span>
+                                    </>
+                                ) : (
+                                    <span className="whitespace-nowrap">{t('dashboard.tutor.schedule.save')}</span>
+                                )}
                             </button>
                         </div>
                     ) : (

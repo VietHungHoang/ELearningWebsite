@@ -9,7 +9,7 @@ import {
   HiChevronLeft,
   HiInformationCircle
 } from 'react-icons/hi';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import DynamicListInput from '../components/DynamicListInput';
 import CurriculumBuilder from '../components/CurriculumBuilder';
 import FileUpload from '../components/FileUpload';
@@ -180,7 +180,7 @@ const CreateCoursePage: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                <CustomDropdown
+                                <CustomDropdownDashboard
                                     options={['Productivity', 'Web Development', 'Marketing']}
                                     selectedValue={courseData.category}
                                     placeholder="Select course category"
@@ -192,7 +192,7 @@ const CreateCoursePage: React.FC = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
-                                 <CustomDropdown
+                                 <CustomDropdownDashboardDashboard
                                     options={['Beginner', 'Intermediate', 'Expert']}
                                     selectedValue={courseData.level}
                                     placeholder="Select course level"
@@ -204,7 +204,7 @@ const CreateCoursePage: React.FC = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                                 <CustomDropdown
+                                 <CustomDropdownDashboardDashboard
                                     options={['English', 'Spanish', 'French']}
                                     selectedValue={courseData.language}
                                     placeholder="Select language"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Coupon, CouponDiscountType } from '../pages/DealsAndCouponsPage';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import { useTranslation } from 'react-i18next';
 
@@ -124,7 +124,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.tutor.dealsCoupons.modal.discountType.label')}</label>
-                           <CustomDropdown
+                           <CustomDropdownDashboard
                                 options={discountTypeOptions.map(opt => opt.label)}
                                 selectedValue={discountTypeOptions.find(opt => opt.value === discountType)?.label ?? ''}
                                 placeholder={t('dashboard.tutor.dealsCoupons.modal.discountType.placeholder')}
@@ -149,7 +149,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                     {/* Applicable Courses */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">{t('dashboard.tutor.dealsCoupons.modal.courses.label')}</label>
-                        <CustomDropdown 
+                        <CustomDropdownDashboard 
                             options={courseOptions.map(opt => opt.label)}
                             selectedValue={applicableCourses.length === 1 && applicableCourses[0] === 'All' ? t('dashboard.tutor.dealsCoupons.modal.courses.allCoursesLabel') : t('dashboard.tutor.dealsCoupons.modal.courses.selectedCount', { count: applicableCourses.length })}
                             placeholder={t('dashboard.tutor.dealsCoupons.modal.courses.placeholder')}

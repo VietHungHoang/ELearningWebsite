@@ -5,7 +5,7 @@ import i18n from 'i18next';
 import Toast from '../../../../components/ui/Toast';
 import BirdLoading from '../../../../components/ui/BirdLoading';
 import DateRangePicker from '../../../../components/ui/DateRangePicker';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import AddPayoutMethodModal from '../components/AddPayoutMethodModal';
 import PayoutStatusBadge from '../components/PayoutStatusBadge';
 import Pagination from '../../../../components/ui/Pagination';
@@ -394,7 +394,7 @@ const PayoutsPage = () => {
 
                                     {/* Status Filter */}
                                     <div className="w-32">
-                                        <CustomDropdown
+                                        <CustomDropdownDashboard
                                             options={activeTab === 'earnings'
                                                 ? [t('payouts.allTypes'), t('payouts.oneOnOne'), t('payouts.group')]
                                                 : [t('payouts.allStatus'), t('payouts.statusLabels.completed'), t('payouts.statusLabels.processing'), t('payouts.statusLabels.failed')]

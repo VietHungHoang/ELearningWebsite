@@ -8,7 +8,7 @@ import Pagination from '../../../../components/ui/Pagination';
 import { type StudentFilters, studentService } from '../../../../services/studentService';
 import type { Student, StudentListItem } from '../../../../types/api';
 import { useAuth } from '../../../../context/AuthContext';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import { useTranslation } from 'react-i18next';
 
@@ -152,7 +152,7 @@ const MyStudentsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="w-48">
-                        <CustomDropdown
+                        <CustomDropdownDashboard
                             options={enrollmentOptions.map(opt => opt.label)}
                             selectedValue={selectedEnrollmentLabel}
                             placeholder={t('dashboard.tutor.myStudents.filters.allTypes')}
