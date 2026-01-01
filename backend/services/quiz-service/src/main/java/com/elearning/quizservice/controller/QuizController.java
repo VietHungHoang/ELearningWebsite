@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/quizzes")
+@RequestMapping("/quizzes")
 @RequiredArgsConstructor
 public class QuizController {
     

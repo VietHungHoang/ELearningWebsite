@@ -7,7 +7,7 @@ import { useFullscreen } from '../../../context/FullscreenContext';
 import { useSidebar } from '../../../context/SidebarContext';
 
 interface ExtendedDashboardLayoutProps extends DashboardLayoutProps {
-    breadcrumb?: BreadcrumbItem[];
+  breadcrumb?: BreadcrumbItem[];
 }
 
 const DashboardLayout: React.FC<ExtendedDashboardLayoutProps> = ({ children, sidebarOptions, headerProps, breadcrumb }) => {
@@ -35,8 +35,8 @@ const DashboardLayout: React.FC<ExtendedDashboardLayoutProps> = ({ children, sid
       <div className="flex h-[calc(100vh-3.5rem)]">
         <DashboardSidebar options={sidebarOptions} isOpen={isSidebarOpen} />
         <div className="flex-1 overflow-visible py-2 pr-4 pl-8 bg-[#f7f7f8]">
-          <main className="h-full overflow-y-auto custom-scrollbar-main bg-white rounded-2xl shadow-2xl border border-gray-100 lg:p-1.5 -ml-8">
-              {children}
+          <main className="h-full overflow-y-auto custom-scrollbar-main bg-white rounded-2xl shadow-2xl border border-gray-100 -ml-8">
+            {children}
           </main>
         </div>
       </div>

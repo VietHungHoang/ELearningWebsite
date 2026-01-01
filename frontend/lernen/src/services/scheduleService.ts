@@ -80,7 +80,7 @@ export const scheduleService = {
     },
 
     updateAvailability: async (tutorId: string, request: UpdateAvailabilityRequest): Promise<ApiResponse<null>> => {
-        return await apiService.post<null>(`/v1/tutors/${tutorId}/availabilities`, request);
+        return await apiService.put<null>(`/v1/tutors/${tutorId}/availabilities`, request);
     }
 };
 

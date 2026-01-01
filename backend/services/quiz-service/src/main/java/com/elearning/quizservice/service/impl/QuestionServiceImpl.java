@@ -189,7 +189,7 @@ public class QuestionServiceImpl implements QuestionService {
      */
     private List<QuestionOption> createOptions(Question question, 
                                                 List<CreateQuestionRequest.QuestionOptionRequest> optionRequests) {
-        return IntStream.range(0, optionRequests.size())
+        List<QuestionOption> options = IntStream.range(0, optionRequests.size())
                 .mapToObj(index -> {
                     CreateQuestionRequest.QuestionOptionRequest optionRequest = optionRequests.get(index);
                     return QuestionOption.builder()
@@ -201,5 +201,8 @@ public class QuestionServiceImpl implements QuestionService {
                             .build();
                 })
                 .collect(Collectors.toList());
+        
+        // Save options to database
+        return optionRepository.saveAll(options);
     }
 }

@@ -1068,13 +1068,21 @@
           "createdAt": "Created at:",
           "takeQuiz": "Take quiz",
           "stats": "Stats",
-          "edit": "Edit"
+          "edit": "Edit",
+          "delete": "Delete"
         },
         "empty": {
           "title": "No quizzes found",
           "description": "You haven't created any quizzes yet.",
           "descriptionSearch": "Try adjusting your search terms.",
           "createFirst": "Create your first quiz"
+        },
+        "deleteConfirm": {
+          "title": "Delete Quiz",
+          "message": "Are you sure you want to delete \"{{title}}\"? This action cannot be undone.",
+          "inline": "Delete this quiz?",
+          "confirm": "Delete",
+          "cancel": "Cancel"
         }
       },
       "requests": {
@@ -1837,6 +1845,7 @@
   "quiz": {
     "create": {
       "title": "Create new quiz",
+      "editTitle": "Edit quiz",
       "saveDraft": "Save draft",
       "publish": "Publish quiz",
       "infoTitle": "Quiz information",
@@ -1872,6 +1881,17 @@
         "answerOptions": "Answer options",
         "optionPlaceholder": "Option {{option}}",
         "answerHint": "* Mark the correct answer in the quiz settings"
+      },
+      "validation": {
+        "titleRequired": "Quiz title is required",
+        "classRequired": "Please select a class",
+        "atLeastOneQuestion": "At least one question is required",
+        "questionTextRequired": "Question {{number}} text is required",
+        "atLeastTwoOptions": "Question {{number}} needs at least 2 options",
+        "correctAnswerRequired": "Question {{number}} needs at least one correct answer selected",
+        "saveFailed": "Failed to save quiz. Please try again.",
+        "publishFailed": "Failed to publish quiz. Please try again.",
+        "loadFailed": "Failed to load quiz. Please try again."
       }
     },
     "assign": {

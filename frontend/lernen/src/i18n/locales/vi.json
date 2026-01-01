@@ -1069,13 +1069,21 @@
           "createdAt": "Ngày tạo:",
           "takeQuiz": "Làm bài",
           "stats": "Thống kê",
-          "edit": "Chỉnh sửa"
+          "edit": "Chỉnh sửa",
+          "delete": "Xóa"
         },
         "empty": {
           "title": "Không tìm thấy bài kiểm tra",
           "description": "Bạn chưa tạo bài kiểm tra nào.",
           "descriptionSearch": "Thử điều chỉnh từ khóa tìm kiếm.",
           "createFirst": "Tạo bài kiểm tra đầu tiên"
+        },
+        "deleteConfirm": {
+          "title": "Xóa bài kiểm tra",
+          "message": "Bạn có chắc chắn muốn xóa \"{{title}}\"? Hành động này không thể hoàn tác.",
+          "inline": "Xóa quiz này?",
+          "confirm": "Xóa",
+          "cancel": "Hủy"
         }
       },
       "requests": {
@@ -1781,6 +1789,7 @@
   "quiz": {
     "create": {
       "title": "Tạo bài kiểm tra",
+      "editTitle": "Chỉnh sửa bài kiểm tra",
       "saveDraft": "Lưu nháp",
       "publish": "Xuất bản",
       "infoTitle": "Thông tin bài kiểm tra",
@@ -1816,6 +1825,17 @@
         "answerOptions": "Các lựa chọn",
         "optionPlaceholder": "Phương án {{option}}",
         "answerHint": "* Đánh dấu đáp án đúng trong phần cài đặt quiz"
+      },
+      "validation": {
+        "titleRequired": "Tiêu đề bài kiểm tra là bắt buộc",
+        "classRequired": "Vui lòng chọn một lớp",
+        "atLeastOneQuestion": "Cần ít nhất một câu hỏi",
+        "questionTextRequired": "Câu hỏi {{number}} cần có nội dung",
+        "atLeastTwoOptions": "Câu hỏi {{number}} cần ít nhất 2 lựa chọn",
+        "correctAnswerRequired": "Câu hỏi {{number}} cần chọn ít nhất một đáp án đúng",
+        "saveFailed": "Không thể lưu bài kiểm tra. Vui lòng thử lại.",
+        "publishFailed": "Không thể xuất bản bài kiểm tra. Vui lòng thử lại.",
+        "loadFailed": "Không thể tải bài kiểm tra. Vui lòng thử lại."
       }
     },
     "assign": {

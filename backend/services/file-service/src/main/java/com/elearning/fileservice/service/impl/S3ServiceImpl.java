@@ -11,7 +11,6 @@ import com.elearning.fileservice.strategy.MediaStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -36,6 +35,8 @@ public class S3ServiceImpl implements S3Service {
     
     private final MediaStrategyFactory mediaStrategyFactory;
     private final StorageProperties storageProperties;
+    private final S3Presigner s3Presigner;
+    private final S3Client s3Client;
     
     @Override
     public String generateObjectKey(String contentType) {
@@ -86,10 +87,7 @@ public class S3ServiceImpl implements S3Service {
      * Generate actual S3 presigned URL using AWS SDK
      */
     private String generateS3PresignedUrl(String objectKey, String contentType, long expiryMinutes) {
-        try (S3Presigner presigner = S3Presigner.builder()
-                .region(Region.of(storageProperties.getRegion()))
-                .build()) {
-
+        try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(storageProperties.getBucketName())
                     .key(objectKey)
@@ -101,7 +99,7 @@ public class S3ServiceImpl implements S3Service {
                     .putObjectRequest(putObjectRequest)
                     .build();
 
-            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
+            PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
             return presignedRequest.url().toString();
 
         } catch (Exception e) {
@@ -111,10 +109,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     public String getUploadIDForMultipartUpload(StorageInfo storageInfo, String videoKey) {
-        try (S3Client s3Client = S3Client.builder()
-                .region(Region.of(storageInfo.getRegion()))
-                .build()) {
-
+        try {
             // Initiate multipart upload
             CreateMultipartUploadRequest createRequest = CreateMultipartUploadRequest.builder()
                     .bucket(storageInfo.getBucketName())
@@ -171,9 +166,7 @@ public class S3ServiceImpl implements S3Service {
         
         List<String> presignedUrls = new ArrayList<>();
         
-        try (S3Presigner presigner = S3Presigner.builder()
-                .region(Region.of(storageInfo.getRegion()))
-                .build()) {
+        try {
             // Generate presigned URL for each part
             for (int partNumber = 1; partNumber <= totalChunks; partNumber++) {
                 UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
@@ -183,7 +176,7 @@ public class S3ServiceImpl implements S3Service {
                         .partNumber(partNumber)
                         .build();
                 
-                String presignedUrl = getPresignedUrlForUploadPart(presigner, uploadPartRequest);
+                String presignedUrl = getPresignedUrlForUploadPart(s3Presigner, uploadPartRequest);
                 presignedUrls.add(presignedUrl);
             }
             
@@ -198,10 +191,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     public void completeMultipartUpload(StorageInfo storageInfo, String videoKey, String uploadId, List<String> etags) {
-        try (S3Client s3Client = S3Client.builder()
-                .region(Region.of(storageInfo.getRegion()))
-                .build()) {
-
+        try {
             // Build completed parts list
             List<CompletedPart> completedParts = new ArrayList<>();
             for (int i = 0; i < etags.size(); i++) {

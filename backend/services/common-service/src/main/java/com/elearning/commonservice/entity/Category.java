@@ -15,9 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "categories", indexes = {
-    @Index(name = "idx_categories_parent_id", columnList = "parent_id")
-})
+@Table(name = "categories")
 @Data
 @Builder
 @NoArgsConstructor

@@ -17,8 +17,4 @@ public class VideoUploadRequest {
     @Pattern(regexp = "^video/(mp4|quicktime|x-msvideo|webm|x-ms-wmv)$", 
              message = "Content type must be video/mp4, video/quicktime, video/x-msvideo, video/webm, or video/x-ms-wmv")
     private String contentType;
-    
-    private Long courseId;
-    
-    private String description;
 }

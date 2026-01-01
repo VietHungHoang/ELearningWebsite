@@ -18,5 +18,13 @@ public interface TutorOnboardingService {
 
     void processResumeSubmission(UUID tutorId, String resumeText);
 
+    /**
+     * Generate introduction for tutor based on prompt and onboarding data
+     * @param tutorId Tutor ID
+     * @param prompt User prompt for generating introduction
+     * @return Generated introduction text
+     */
+    String generateIntroduction(UUID tutorId, String prompt);
+
 }
 

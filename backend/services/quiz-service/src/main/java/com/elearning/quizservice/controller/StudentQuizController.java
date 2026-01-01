@@ -25,7 +25,7 @@ import java.util.UUID;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/student/quizzes")
+@RequestMapping("/quizzes/student")
 @RequiredArgsConstructor
 public class StudentQuizController {
     
