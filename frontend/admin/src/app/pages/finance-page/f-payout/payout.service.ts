@@ -30,7 +30,7 @@ export class PayoutService {
     /**
      * Get payout data from API
      * API Endpoint: GET /api/v1/admin/payout
-     * Query Params: summaryFilter (for KPI cards: 'all' | 'today' | '7days' | '30days' | 'thisMonth')
+     * Query Params: summaryFilter (for KPI cards: 'all' | 'today' | '7days' | '30days')
      * @returns Observable of PayoutApiResponse
      */
     getPayoutData(summaryFilter?: string): Observable<PayoutApiResponse> {
@@ -81,11 +81,6 @@ export class PayoutService {
             } else if (summaryFilter === '30days') {
                 startDate = new Date(today);
                 startDate.setDate(today.getDate() - 30);
-                startDate.setHours(0, 0, 0, 0);
-                endDate = new Date(today);
-                endDate.setHours(23, 59, 59, 999);
-            } else if (summaryFilter === 'thisMonth') {
-                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
                 startDate.setHours(0, 0, 0, 0);
                 endDate = new Date(today);
                 endDate.setHours(23, 59, 59, 999);

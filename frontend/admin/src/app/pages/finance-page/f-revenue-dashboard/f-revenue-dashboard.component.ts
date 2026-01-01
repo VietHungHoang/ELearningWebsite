@@ -100,8 +100,7 @@ export class FRevenueDashboardComponent implements OnInit {
         const displayMap: { [key: string]: string } = {
             'today': 'revenueDashboard.dateRange.today',
             '7days': 'revenueDashboard.dateRange.last7Days',
-            '30days': 'revenueDashboard.dateRange.last30Days',
-            'thisMonth': 'revenueDashboard.dateRange.thisMonth'
+            '30days': 'revenueDashboard.dateRange.last30Days'
         };
         return displayMap[this.selectedDateRange] || 'revenueDashboard.dateRange.last30Days';
     }

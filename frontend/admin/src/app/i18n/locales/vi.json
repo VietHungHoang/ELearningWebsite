@@ -250,7 +250,7 @@
     "table": {
       "stt": "STT",
       "className": "Tên lớp học",
-      "instructor": "Giảng viên",
+      "instructor": "Gia sư",
       "startDate": "Ngày bắt đầu",
       "duration": "Thời lượng",
       "enrollment": "Số lượng",
@@ -285,7 +285,7 @@
       "classInformation": {
         "title": "Thông tin lớp học",
         "className": "Tên lớp học",
-        "instructor": "Giảng viên",
+        "instructor": "Gia sư",
         "startDate": "Ngày bắt đầu",
         "duration": "Thời lượng",
         "enrollment": "Số lượng",
@@ -304,7 +304,7 @@
         "priceTimesEnrollment": "Giá × Số đăng ký",
         "platformFee": "Phí nền tảng",
         "ofRevenue": "% doanh thu",
-        "instructorPayout": "Thanh toán giảng viên",
+        "instructorPayout": "Thanh toán gia sư",
         "revenueMinusFee": "Doanh thu - Phí",
         "revenuePerHour": "Doanh thu mỗi giờ",
         "basedOnDuration": "Dựa trên thời lượng"
@@ -405,12 +405,12 @@
     }
   },
   "instructorList": {
-    "title": "Danh sách Giảng viên",
+    "title": "Danh sách Gia sư",
     "breadcrumb": {
       "userManagement": "Quản lý Người dùng",
-      "instructorsList": "Danh sách Giảng viên"
+      "instructorsList": "Danh sách Gia sư"
     },
-    "searchPlaceholder": "Tìm kiếm giảng viên theo tên.....",
+    "searchPlaceholder": "Tìm kiếm gia sư theo tên.....",
     "table": {
       "stt": "STT",
       "name": "Tên",
@@ -421,25 +421,25 @@
       "action": "Thao tác"
     },
     "pagination": {
-      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} giảng viên"
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} gia sư"
     },
     "emptyState": {
-      "noInstructorsFound": "Không tìm thấy giảng viên nào"
+      "noInstructorsFound": "Không tìm thấy gia sư nào"
     },
     "confirm": {
-      "deleteTitle": "Xóa Giảng viên",
-      "deleteMessage": "Bạn có chắc chắn muốn xóa giảng viên {{name}}?",
+      "deleteTitle": "Xóa Gia sư",
+      "deleteMessage": "Bạn có chắc chắn muốn xóa gia sư {{name}}?",
       "delete": "Xóa"
     }
   },
   "instructorApproval": {
-    "title": "Phê duyệt Giảng viên",
+    "title": "Phê duyệt Gia sư",
     "subtitle": "Bạn có {{count}} đơn đang chờ phê duyệt.",
     "breadcrumb": {
       "userManagement": "Quản lý Người dùng",
-      "instructorApproval": "Phê duyệt Giảng viên"
+      "instructorApproval": "Phê duyệt Gia sư"
     },
-    "searchPlaceholder": "Tìm kiếm giảng viên...",
+    "searchPlaceholder": "Tìm kiếm gia sư...",
     "selected": "đã chọn",
     "selectInstructors": "Chọn gia sư để thực hiện thao tác",
     "filters": {
@@ -466,7 +466,7 @@
     },
     "table": {
       "stt": "STT",
-      "instructorName": "Tên Giảng viên",
+      "instructorName": "Tên Gia sư",
       "subject": "Môn học",
       "certifications": "Chứng chỉ",
       "submittedDate": "Ngày nộp",
@@ -496,11 +496,11 @@
     }
   },
   "instructorApprovalDetail": {
-    "title": "Chi tiết Phê duyệt Giảng viên",
+    "title": "Chi tiết Phê duyệt Gia sư",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "userManagement": "Quản lý Người dùng",
-      "instructorApproval": "Phê duyệt Giảng viên",
+      "instructorApproval": "Phê duyệt Gia sư",
       "detail": "Chi tiết"
     },
     "loading": "Đang tải...",
@@ -563,8 +563,8 @@
     },
     "dialogs": {
       "approve": {
-        "title": "Duyệt Giảng viên",
-        "subtitle": "Chọn cấp độ giảng viên để duyệt:",
+        "title": "Duyệt Gia sư",
+        "subtitle": "Chọn cấp độ gia sư để duyệt:",
         "selectLevel": "Vui lòng chọn ít nhất một cấp độ",
         "approving": "Đang duyệt...",
         "approve": "Duyệt"
@@ -670,11 +670,11 @@
     }
   },
   "instructorDetail": {
-    "title": "Chi tiết Giảng viên",
+    "title": "Chi tiết Gia sư",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "userManagement": "Quản lý Người dùng",
-      "instructors": "Danh sách Giảng viên",
+      "instructors": "Danh sách Gia sư",
       "detail": "Chi tiết"
     },
     "loading": "Đang tải...",
@@ -781,7 +781,7 @@
       },
       "payout": {
         "label": "Thanh toán",
-        "title": "Cho Giảng viên",
+        "title": "Cho Gia sư",
         "description": "Cố định: ngày {{date}} hàng tháng",
         "descriptionShort": "Cố định hàng tháng"
       },
@@ -803,7 +803,7 @@
       "payouts": {
         "label": "Thanh toán",
         "title": "Tổng số",
-        "description": "Thanh toán cho giảng viên"
+        "description": "Thanh toán cho gia sư"
       },
       "vsPrevious": "so với trước"
     }
@@ -819,11 +819,11 @@
       "pending": {
         "label": "Đang chờ",
         "title": "Tổng số tiền",
-        "description": "giảng viên đang chờ"
+        "description": "gia sư đang chờ"
       },
       "instructors": {
         "label": "Số lượng",
-        "title": "Giảng viên",
+        "title": "Gia sư",
         "description": "Đang chờ thanh toán"
       },
       "orders": {
@@ -837,7 +837,7 @@
       "paymentHistory": "Lịch sử Thanh toán"
     },
     "search": {
-      "placeholder": "Tìm kiếm tên giảng viên hoặc số batch..."
+      "placeholder": "Tìm kiếm tên gia sư hoặc số batch..."
     },
     "export": {
       "excel": "Xuất Excel"
@@ -850,12 +850,12 @@
     },
     "table": {
       "stt": "STT",
-      "instructorBank": "Giảng viên & Ngân hàng",
+      "instructorBank": "Gia sư & Ngân hàng",
       "method": "Phương thức",
       "totalAmount": "Tổng tiền",
       "orders": "Đơn hàng",
       "actions": "Thao tác",
-      "instructorName": "Tên Giảng viên",
+      "instructorName": "Tên Gia sư",
       "amount": "Số tiền",
       "paymentDate": "Ngày thanh toán",
       "approvedBy": "Người duyệt",
@@ -923,7 +923,7 @@
       },
       "bulkConfirm": {
         "title": "Xác nhận Thanh toán Hàng loạt",
-        "selectedInstructors": "Giảng viên đã chọn",
+        "selectedInstructors": "Gia sư đã chọn",
         "totalAmount": "Tổng tiền",
         "notes": "Ghi chú (Tùy chọn)",
         "notesPlaceholder": "Thêm ghi chú thanh toán...",
@@ -1031,7 +1031,7 @@
         "classId": "Mã Lớp học",
         "name": "Tên",
         "type": "Loại",
-        "instructor": "Giảng viên",
+        "instructor": "Gia sư",
         "classType": {
           "oneOnOne": "1 kèm 1",
           "group": "Nhóm"

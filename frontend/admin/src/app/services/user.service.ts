@@ -39,8 +39,8 @@ export class UserService {
         const mockTutorsDetail: TutorDetail[] = [
             {
                 id: '550e8400-e29b-41d4-a716-446655440001',
-                name: 'Oliver Khan',
-                email: 'oliver.khan@example.com',
+                name: 'Nguyễn Văn Hùng',
+                email: 'nguyen.van.hung@example.com',
 
                 avatarUrl: 'images/users/user6.jpg',
                 countryCode: 'US',
@@ -56,20 +56,20 @@ export class UserService {
                     { languageCode: 'de', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'tech', subjectName: 'Technology' },
-                    { categoryId: 'cyber', subjectName: 'Cybersecurity' },
-                    { categoryId: 'cloud', subjectName: 'Cloud Computing' },
-                    { categoryId: 'network', subjectName: 'Networking' }
+                    { categoryId: 'tech', subjectName: 'Công nghệ' },
+                    { categoryId: 'cyber', subjectName: 'An ninh mạng' },
+                    { categoryId: 'cloud', subjectName: 'Điện toán đám mây' },
+                    { categoryId: 'network', subjectName: 'Mạng máy tính' }
                 ],
                 instructorLevel: ['PRO', 'MST'],
                 isVerified: true,
                 currentSessionFee: 75,
                 classes: [
-                    { id: '550e8400-e29b-41d4-a716-446655440101', title: 'Advanced Cybersecurity Fundamentals', enrollmentCount: 245, rating: 4.8, pricePerHour: 50, classType: 'ONE_ON_ONE' },
-                    { id: '550e8400-e29b-41d4-a716-446655440102', title: 'Network Penetration Testing', enrollmentCount: 189, rating: 4.7, pricePerHour: 60, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440103', title: 'Cloud Security for Enterprises', enrollmentCount: 156, rating: 4.9, pricePerHour: 75, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440104', title: 'Cryptography Basics', enrollmentCount: 312, rating: 4.6, pricePerHour: 45, classType: 'ONE_ON_ONE' },
-                    { id: '550e8400-e29b-41d4-a716-446655440105', title: 'Incident Response Strategy', enrollmentCount: 98, rating: 4.5, pricePerHour: 65, classType: 'SMALL_GROUP' }
+                    { id: '550e8400-e29b-41d4-a716-446655440101', title: 'An ninh mạng Nâng cao Cơ bản', enrollmentCount: 245, rating: 4.8, pricePerHour: 50, classType: 'ONE_ON_ONE' },
+                    { id: '550e8400-e29b-41d4-a716-446655440102', title: 'Kiểm thử Xâm nhập Mạng', enrollmentCount: 189, rating: 4.7, pricePerHour: 60, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440103', title: 'Bảo mật Đám mây cho Doanh nghiệp', enrollmentCount: 156, rating: 4.9, pricePerHour: 75, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440104', title: 'Mật mã học Cơ bản', enrollmentCount: 312, rating: 4.6, pricePerHour: 45, classType: 'ONE_ON_ONE' },
+                    { id: '550e8400-e29b-41d4-a716-446655440105', title: 'Chiến lược Phản ứng Sự cố', enrollmentCount: 98, rating: 4.5, pricePerHour: 65, classType: 'SMALL_GROUP' }
                 ],
                 certifications: [
                     { id: 'cert-550e8400-e29b-41d4-a716-446655440001', name: 'CISSP Certificate', issuingOrganization: 'ISC2', issueDate: '2022-01-15', expirationDate: '2025-01-15', credentialId: 'CISSP-20220115-001', credentialUrl: 'https://example.com/files/cissp_cert.pdf' },
@@ -78,8 +78,8 @@ export class UserService {
                 ],
                 totalReviews: 2847,
                 totalHours: 45,
-                headline: 'Expert Cybersecurity Instructor | CISSP & CEH Certified | 12+ Years Experience',
-                introduction: 'Hello! I\'m Oliver Khan, a passionate cybersecurity expert with over 12 years of experience in the field.',
+                headline: 'Chuyên gia An ninh mạng | Chứng chỉ CISSP & CEH | Hơn 12 năm Kinh nghiệm',
+                introduction: 'Xin chào! Tôi là Nguyễn Văn Hùng, một chuyên gia an ninh mạng đầy đam mê với hơn 12 năm kinh nghiệm trong lĩnh vực này.',
                 videoUrl: 'https://media-cdn.example.com/videos/oliver-intro.mp4',
                 videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/oliver-intro.jpg',
                 socialLinks: [
@@ -106,8 +106,8 @@ export class UserService {
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655440002',
-                name: 'Ava Cooper',
-                email: 'ava.cooper@example.com',
+                name: 'Trần Thị Lan',
+                email: 'tran.thi.lan@example.com',
                 avatarUrl: 'images/users/user7.jpg',
                 countryCode: 'CA',
 
@@ -122,30 +122,30 @@ export class UserService {
                     { languageCode: 'es', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'tech', subjectName: 'Technology' },
+                    { categoryId: 'tech', subjectName: 'Công nghệ' },
                     { categoryId: 'python', subjectName: 'Python' },
-                    { categoryId: 'data', subjectName: 'Data Science' },
-                    { categoryId: 'ml', subjectName: 'Machine Learning' },
-                    { categoryId: 'web', subjectName: 'Web Development' }
+                    { categoryId: 'data', subjectName: 'Khoa học Dữ liệu' },
+                    { categoryId: 'ml', subjectName: 'Học máy' },
+                    { categoryId: 'web', subjectName: 'Phát triển Web' }
                 ],
                 instructorLevel: ['PRO', 'SNR'],
                 isVerified: true,
                 currentSessionFee: 70,
                 classes: [
-                    { id: '550e8400-e29b-41d4-a716-446655440201', title: 'Python for Data Science', enrollmentCount: 567, rating: 4.9, pricePerHour: 55, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440202', title: 'Full Stack Web Development', enrollmentCount: 423, rating: 4.8, pricePerHour: 65, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440201', title: 'Python cho Khoa học Dữ liệu', enrollmentCount: 567, rating: 4.9, pricePerHour: 55, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440202', title: 'Phát triển Web Full Stack', enrollmentCount: 423, rating: 4.8, pricePerHour: 65, classType: 'LARGE_GROUP' },
                     { id: '550e8400-e29b-41d4-a716-446655440203', title: 'Django REST Framework', enrollmentCount: 234, rating: 4.7, pricePerHour: 60, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440204', title: 'Machine Learning with Python', enrollmentCount: 345, rating: 4.8, pricePerHour: 70, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440205', title: 'Database Design', enrollmentCount: 289, rating: 4.6, pricePerHour: 55, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440206', title: 'FastAPI Modern Development', enrollmentCount: 167, rating: 4.7, pricePerHour: 60, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440207', title: 'Testing in Python', enrollmentCount: 198, rating: 4.5, pricePerHour: 50, classType: 'ONE_ON_ONE' },
+                    { id: '550e8400-e29b-41d4-a716-446655440204', title: 'Học máy với Python', enrollmentCount: 345, rating: 4.8, pricePerHour: 70, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440205', title: 'Thiết kế Cơ sở dữ liệu', enrollmentCount: 289, rating: 4.6, pricePerHour: 55, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440206', title: 'Phát triển FastAPI Hiện đại', enrollmentCount: 167, rating: 4.7, pricePerHour: 60, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440207', title: 'Kiểm thử trong Python', enrollmentCount: 198, rating: 4.5, pricePerHour: 50, classType: 'ONE_ON_ONE' },
                     { id: '550e8400-e29b-41d4-a716-446655440208', title: 'Docker & Kubernetes', enrollmentCount: 276, rating: 4.8, pricePerHour: 75, classType: 'SMALL_GROUP' }
                 ],
 
                 totalReviews: 4156,
                 totalHours: 72,
-                headline: 'Python & Full Stack Developer | Machine Learning Specialist | 10+ Years in Tech',
-                introduction: 'Hi there! I\'m Ava Cooper, a full-stack developer and machine learning enthusiast with a decade of experience in the tech industry.',
+                headline: 'Python & Full Stack Developer | Chuyên gia Học máy | Hơn 10 năm trong Công nghệ',
+                introduction: 'Xin chào! Tôi là Trần Thị Lan, một nhà phát triển full-stack và người đam mê học máy với một thập kỷ kinh nghiệm trong ngành công nghệ.',
                 videoUrl: 'https://media-cdn.example.com/videos/ava-intro.mp4',
                 videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/ava-intro.jpg',
                 socialLinks: [
@@ -173,8 +173,8 @@ export class UserService {
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655440003',
-                name: 'James Wilson',
-                email: 'james.wilson@example.com',
+                name: 'Lê Minh Tuấn',
+                email: 'le.minh.tuan@example.com',
                 avatarUrl: 'images/users/user8.jpg',
                 countryCode: 'GB',
                 joinDate: '10 May 2023',
@@ -183,17 +183,17 @@ export class UserService {
                 experience: 8,
                 timezone: 'UTC-5',
                 languages: [{ languageCode: 'en', isNative: true }],
-                subjects: [{ categoryId: 'tech', subjectName: 'Technology' }],
+                subjects: [{ categoryId: 'tech', subjectName: 'Công nghệ' }],
                 instructorLevel: ['PRO'],
                 isVerified: true,
                 currentSessionFee: 60,
                 classes: [
-                    { id: '550e8400-e29b-41d4-a716-446655440301', title: 'Digital Marketing Fundamentals', enrollmentCount: 421, rating: 4.7, pricePerHour: 45, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440302', title: 'SEO Mastery 2024', enrollmentCount: 356, rating: 4.8, pricePerHour: 55, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440303', title: 'Social Media Strategy', enrollmentCount: 234, rating: 4.6, pricePerHour: 50, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440304', title: 'Content Marketing Excellence', enrollmentCount: 278, rating: 4.7, pricePerHour: 52, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440305', title: 'Email Campaign Automation', enrollmentCount: 145, rating: 4.5, pricePerHour: 48, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440306', title: 'Analytics & ROI Tracking', enrollmentCount: 189, rating: 4.6, pricePerHour: 60, classType: 'ONE_ON_ONE' }
+                    { id: '550e8400-e29b-41d4-a716-446655440301', title: 'Tiếp thị Số Cơ bản', enrollmentCount: 421, rating: 4.7, pricePerHour: 45, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440302', title: 'Thành thạo SEO 2024', enrollmentCount: 356, rating: 4.8, pricePerHour: 55, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440303', title: 'Chiến lược Mạng xã hội', enrollmentCount: 234, rating: 4.6, pricePerHour: 50, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440304', title: 'Tiếp thị Nội dung Xuất sắc', enrollmentCount: 278, rating: 4.7, pricePerHour: 52, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440305', title: 'Tự động hóa Chiến dịch Email', enrollmentCount: 145, rating: 4.5, pricePerHour: 48, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440306', title: 'Phân tích & Theo dõi ROI', enrollmentCount: 189, rating: 4.6, pricePerHour: 60, classType: 'ONE_ON_ONE' }
                 ],
 
                 certifications: [
@@ -203,8 +203,8 @@ export class UserService {
                 ],
                 totalReviews: 3923,
                 totalHours: 38,
-                headline: 'Digital Marketing Expert | Google & HubSpot Certified | SEO & Content Specialist',
-                introduction: 'Greetings! I\'m James Wilson, a digital marketing strategist with extensive experience in SEO, content marketing, and social media advertising.',
+                headline: 'Chuyên gia Tiếp thị Số | Chứng chỉ Google & HubSpot | Chuyên gia SEO & Nội dung',
+                introduction: 'Xin chào! Tôi là Lê Minh Tuấn, một chiến lược gia tiếp thị số với kinh nghiệm sâu rộng về SEO, tiếp thị nội dung và quảng cáo mạng xã hội.',
                 videoUrl: 'https://media-cdn.example.com/videos/james-intro.mp4',
                 videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/james-intro.jpg',
                 socialLinks: [
@@ -222,8 +222,8 @@ export class UserService {
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655440004',
-                name: 'Emma Davis',
-                email: 'emma.davis@example.com',
+                name: 'Phạm Thị Mai',
+                email: 'pham.thi.mai@example.com',
                 avatarUrl: 'images/users/user9.jpg',
                 countryCode: 'AU',
                 joinDate: '25 Jun 2023',
@@ -232,18 +232,18 @@ export class UserService {
                 experience: 6,
                 timezone: 'UTC-5',
                 languages: [{ languageCode: 'en', isNative: true }],
-                subjects: [{ categoryId: 'tech', subjectName: 'Technology' }],
+                subjects: [{ categoryId: 'tech', subjectName: 'Công nghệ' }],
                 instructorLevel: ['PRO'],
                 isVerified: true,
                 currentSessionFee: 65,
                 classes: [
-                    { id: '550e8400-e29b-41d4-a716-446655440401', title: 'React.js Mastery', enrollmentCount: 523, rating: 4.9, pricePerHour: 65, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440402', title: 'Vue.js Comprehensive Guide', enrollmentCount: 267, rating: 4.7, pricePerHour: 60, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440403', title: 'Angular Advanced Patterns', enrollmentCount: 198, rating: 4.8, pricePerHour: 62, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440404', title: 'TypeScript Mastery', enrollmentCount: 412, rating: 4.8, pricePerHour: 60, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440401', title: 'Thành thạo React.js', enrollmentCount: 523, rating: 4.9, pricePerHour: 65, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440402', title: 'Hướng dẫn Toàn diện Vue.js', enrollmentCount: 267, rating: 4.7, pricePerHour: 60, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440403', title: 'Angular Mẫu Nâng cao', enrollmentCount: 198, rating: 4.8, pricePerHour: 62, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440404', title: 'Thành thạo TypeScript', enrollmentCount: 412, rating: 4.8, pricePerHour: 60, classType: 'LARGE_GROUP' },
                     { id: '550e8400-e29b-41d4-a716-446655440405', title: 'CSS Grid & Flexbox', enrollmentCount: 634, rating: 4.7, pricePerHour: 50, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440406', title: 'Web Performance Optimization', enrollmentCount: 234, rating: 4.6, pricePerHour: 55, classType: 'SMALL_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440407', title: 'Responsive Design Principles', enrollmentCount: 345, rating: 4.7, pricePerHour: 50, classType: 'LARGE_GROUP' }
+                    { id: '550e8400-e29b-41d4-a716-446655440406', title: 'Tối ưu Hiệu suất Web', enrollmentCount: 234, rating: 4.6, pricePerHour: 55, classType: 'SMALL_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440407', title: 'Nguyên tắc Thiết kế Đáp ứng', enrollmentCount: 345, rating: 4.7, pricePerHour: 50, classType: 'LARGE_GROUP' }
                 ],
                 certifications: [
                     { id: 'cert-550e8400-e29b-41d4-a716-446655440010', name: 'Google Cloud Engineer Certificate', issuingOrganization: 'Google Cloud', issueDate: '2023-05-12', expirationDate: '2026-05-12', credentialId: 'GCE-20230512-010', credentialUrl: 'https://example.com/files/google_cloud_engineer_cert.pdf' },
@@ -252,8 +252,8 @@ export class UserService {
                 ],
                 totalReviews: 3421,
                 totalHours: 54,
-                headline: 'Frontend Expert | React, Vue & Angular Specialist | Web Performance Optimization',
-                introduction: 'Hello! I\'m Emma Davis, a passionate frontend developer with 9 years of experience building beautiful and performant web applications.',
+                headline: 'Chuyên gia Frontend | Chuyên gia React, Vue & Angular | Tối ưu Hiệu suất Web',
+                introduction: 'Xin chào! Tôi là Phạm Thị Mai, một nhà phát triển frontend đầy đam mê với 9 năm kinh nghiệm xây dựng các ứng dụng web đẹp và hiệu suất cao.',
                 videoUrl: 'https://media-cdn.example.com/videos/emma-intro.mp4',
                 videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/emma-intro.jpg',
                 socialLinks: [
@@ -271,8 +271,8 @@ export class UserService {
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655440005',
-                name: 'Michael Brown',
-                email: 'michael.brown@example.com',
+                name: 'Hoàng Văn Quang',
+                email: 'hoang.van.quang@example.com',
                 avatarUrl: 'images/users/user10.jpg',
                 countryCode: 'US',
                 joinDate: '12 May 2023',
@@ -281,13 +281,13 @@ export class UserService {
                 experience: 11,
                 timezone: 'UTC-5',
                 languages: [{ languageCode: 'en', isNative: true }],
-                subjects: [{ categoryId: 'tech', subjectName: 'Technology' }],
+                subjects: [{ categoryId: 'tech', subjectName: 'Công nghệ' }],
                 instructorLevel: ['PRO'],
                 isVerified: true,
                 currentSessionFee: 70,
                 classes: [
-                    { id: '550e8400-e29b-41d4-a716-446655440501', title: 'React Hooks Deep Dive', enrollmentCount: 389, rating: 4.9, pricePerHour: 70, classType: 'LARGE_GROUP' },
-                    { id: '550e8400-e29b-41d4-a716-446655440502', title: 'State Management with Redux', enrollmentCount: 276, rating: 4.8, pricePerHour: 65, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440501', title: 'Tìm hiểu Sâu về React Hooks', enrollmentCount: 389, rating: 4.9, pricePerHour: 70, classType: 'LARGE_GROUP' },
+                    { id: '550e8400-e29b-41d4-a716-446655440502', title: 'Quản lý State với Redux', enrollmentCount: 276, rating: 4.8, pricePerHour: 65, classType: 'LARGE_GROUP' },
                     { id: '550e8400-e29b-41d4-a716-446655440503', title: 'Next.js Full Stack', enrollmentCount: 234, rating: 4.9, pricePerHour: 75, classType: 'SMALL_GROUP' },
                     { id: '550e8400-e29b-41d4-a716-446655440504', title: 'React Testing Library', enrollmentCount: 167, rating: 4.7, pricePerHour: 60, classType: 'SMALL_GROUP' }
                 ],
@@ -298,8 +298,8 @@ export class UserService {
                 ],
                 totalReviews: 2156,
                 totalHours: 42,
-                headline: 'React Master | State Management & Advanced Patterns | 11+ Years Development Experience',
-                introduction: 'Hi! I\'m Michael Brown, a React expert with over 11 years of experience in frontend development.',
+                headline: 'Bậc thầy React | Quản lý State & Mẫu Nâng cao | Hơn 11 năm Kinh nghiệm Phát triển',
+                introduction: 'Xin chào! Tôi là Hoàng Văn Quang, một chuyên gia React với hơn 11 năm kinh nghiệm trong phát triển frontend.',
                 videoUrl: 'https://media-cdn.example.com/videos/michael-intro.mp4',
                 videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/michael-intro.jpg',
                 socialLinks: [
@@ -511,7 +511,7 @@ export class UserService {
         const mockInstructorRequests: InstructorRequest[] = [
             {
                 id: '550e8400-e29b-41d4-a716-446655442001',
-                name: 'Oliver Khan',
+                name: 'Nguyễn Văn Hùng',
                 experience: 12,
                 languages: [
                     { languageCode: 'en', isNative: true },
@@ -520,9 +520,9 @@ export class UserService {
                     { languageCode: 'de', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'tech', subjectName: 'Technology' },
-                    { categoryId: 'cyber', subjectName: 'Cybersecurity' },
-                    { categoryId: 'cloud', subjectName: 'Cloud Computing' }
+                    { categoryId: 'tech', subjectName: 'Công nghệ' },
+                    { categoryId: 'cyber', subjectName: 'An ninh mạng' },
+                    { categoryId: 'cloud', subjectName: 'Điện toán đám mây' }
                 ],
                 certifications: [
                     { id: 'cert-001', name: 'CISSP Certificate', issuingOrganization: 'ISC2', issueDate: '2022-01-15', expirationDate: '2025-01-15', credentialId: 'CISSP-001', credentialUrl: 'https://example.com/cert1.pdf' },
@@ -530,41 +530,41 @@ export class UserService {
                     { id: 'cert-003', name: 'AWS Solutions Architect', issuingOrganization: 'Amazon Web Services', issueDate: '2023-05-12', expirationDate: '2026-05-12', credentialId: 'AWS-SA-001', credentialUrl: 'https://example.com/aws-cert.pdf' }
                 ],
                 careerEntries: [
-                    { id: 'career-1', type: 'EDUCATION', title: 'Master of Science in Cybersecurity', institution: 'Stanford University', startDate: '2009-09', endDate: '2011-05', location: 'Stanford, CA', description: 'Specialized in network security and cryptography' },
-                    { id: 'career-2', type: 'EDUCATION', title: 'Bachelor of Science in Computer Science', institution: 'MIT', startDate: '2005-09', endDate: '2009-05', location: 'Cambridge, MA' },
-                    { id: 'career-3', type: 'EXPERIENCE', title: 'Senior Security Architect', institution: 'Google Cloud', startDate: '2018-06', endDate: '', location: 'Mountain View, CA', description: 'Leading security architecture for enterprise cloud solutions' },
-                    { id: 'career-4', type: 'EXPERIENCE', title: 'Security Engineer', institution: 'Cisco Systems', startDate: '2014-01', endDate: '2018-05', location: 'San Jose, CA', description: 'Designed network security solutions for Fortune 500 companies' }
+                    { id: 'career-1', type: 'EDUCATION', title: 'Thạc sĩ Khoa học An ninh mạng', institution: 'Đại học Stanford', startDate: '2009-09', endDate: '2011-05', location: 'Stanford, CA', description: 'Chuyên sâu về bảo mật mạng và mật mã học' },
+                    { id: 'career-2', type: 'EDUCATION', title: 'Cử nhân Khoa học Máy tính', institution: 'MIT', startDate: '2005-09', endDate: '2009-05', location: 'Cambridge, MA' },
+                    { id: 'career-3', type: 'EXPERIENCE', title: 'Kiến trúc sư Bảo mật Cấp cao', institution: 'Google Cloud', startDate: '2018-06', endDate: '', location: 'Mountain View, CA', description: 'Dẫn dắt kiến trúc bảo mật cho giải pháp đám mây doanh nghiệp' },
+                    { id: 'career-4', type: 'EXPERIENCE', title: 'Kỹ sư Bảo mật', institution: 'Cisco Systems', startDate: '2014-01', endDate: '2018-05', location: 'San Jose, CA', description: 'Thiết kế giải pháp bảo mật mạng cho các công ty Fortune 500' }
                 ],
                 requestStatus: 'PENDING',
                 submittedAt: '2024-11-28T09:30:00Z'
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655442002',
-                name: 'Ava Cooper',
+                name: 'Trần Thị Lan',
                 experience: 8,
                 languages: [
                     { languageCode: 'en', isNative: true },
                     { languageCode: 'es', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'marketing', subjectName: 'Digital Marketing' },
-                    { categoryId: 'social', subjectName: 'Social Media Marketing' },
-                    { categoryId: 'seo', subjectName: 'SEO Optimization' }
+                    { categoryId: 'marketing', subjectName: 'Tiếp thị Số' },
+                    { categoryId: 'social', subjectName: 'Tiếp thị Mạng xã hội' },
+                    { categoryId: 'seo', subjectName: 'Tối ưu SEO' }
                 ],
                 certifications: [
                     { id: 'cert-004', name: 'Google Analytics Professional', issuingOrganization: 'Google', issueDate: '2023-03-10', credentialId: 'GA-003', credentialUrl: 'https://example.com/cert3.pdf' },
                     { id: 'cert-005', name: 'Facebook Blueprint Certification', issuingOrganization: 'Meta', issueDate: '2023-07-22', credentialId: 'FB-BP-002' }
                 ],
                 careerEntries: [
-                    { id: 'career-5', type: 'EDUCATION', title: 'MBA in Marketing', institution: 'Harvard Business School', startDate: '2014-09', endDate: '2016-05', location: 'Boston, MA', description: 'Focus on digital marketing and consumer behavior' },
-                    { id: 'career-6', type: 'EXPERIENCE', title: 'Digital Marketing Manager', institution: 'Adobe Inc.', startDate: '2019-03', endDate: '', location: 'San Francisco, CA', description: 'Managing global digital campaigns for Creative Cloud products' }
+                    { id: 'career-5', type: 'EDUCATION', title: 'MBA Tiếp thị', institution: 'Trường Kinh doanh Harvard', startDate: '2014-09', endDate: '2016-05', location: 'Boston, MA', description: 'Tập trung vào tiếp thị số và hành vi người tiêu dùng' },
+                    { id: 'career-6', type: 'EXPERIENCE', title: 'Quản lý Tiếp thị Số', institution: 'Adobe Inc.', startDate: '2019-03', endDate: '', location: 'San Francisco, CA', description: 'Quản lý chiến dịch tiếp thị số toàn cầu cho sản phẩm Creative Cloud' }
                 ],
                 requestStatus: 'PENDING',
                 submittedAt: '2024-11-29T14:15:00Z'
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655442003',
-                name: 'Chen Wei',
+                name: 'Lê Minh Tuấn',
                 experience: 15,
                 languages: [
                     { languageCode: 'zh', isNative: true },
@@ -572,10 +572,10 @@ export class UserService {
                     { languageCode: 'ja', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'ai', subjectName: 'Artificial Intelligence' },
-                    { categoryId: 'ml', subjectName: 'Machine Learning' },
-                    { categoryId: 'python', subjectName: 'Python Programming' },
-                    { categoryId: 'data', subjectName: 'Data Science' }
+                    { categoryId: 'ai', subjectName: 'Trí tuệ Nhân tạo' },
+                    { categoryId: 'ml', subjectName: 'Học máy' },
+                    { categoryId: 'python', subjectName: 'Lập trình Python' },
+                    { categoryId: 'data', subjectName: 'Khoa học Dữ liệu' }
                 ],
                 certifications: [
                     { id: 'cert-006', name: 'TensorFlow Developer Certificate', issuingOrganization: 'Google', issueDate: '2022-11-05', credentialId: 'TF-DEV-006' },
@@ -583,16 +583,16 @@ export class UserService {
                     { id: 'cert-008', name: 'AWS Machine Learning Specialty', issuingOrganization: 'Amazon Web Services', issueDate: '2023-02-20', expirationDate: '2026-02-20', credentialId: 'AWS-ML-008' }
                 ],
                 careerEntries: [
-                    { id: 'career-7', type: 'EDUCATION', title: 'Ph.D. in Computer Science', institution: 'Tsinghua University', startDate: '2005-09', endDate: '2009-06', location: 'Beijing, China', description: 'Research in machine learning and neural networks' },
-                    { id: 'career-8', type: 'EXPERIENCE', title: 'AI Research Scientist', institution: 'Microsoft Research', startDate: '2015-07', endDate: '', location: 'Redmond, WA', description: 'Leading research on large language models and computer vision' },
-                    { id: 'career-9', type: 'EXPERIENCE', title: 'Senior ML Engineer', institution: 'Baidu', startDate: '2009-07', endDate: '2015-06', location: 'Beijing, China', description: 'Developed recommendation systems and NLP models' }
+                    { id: 'career-7', type: 'EDUCATION', title: 'Tiến sĩ Khoa học Máy tính', institution: 'Đại học Thanh Hoa', startDate: '2005-09', endDate: '2009-06', location: 'Bắc Kinh, Trung Quốc', description: 'Nghiên cứu về học máy và mạng nơ-ron' },
+                    { id: 'career-8', type: 'EXPERIENCE', title: 'Nhà khoa học Nghiên cứu AI', institution: 'Microsoft Research', startDate: '2015-07', endDate: '', location: 'Redmond, WA', description: 'Dẫn dắt nghiên cứu về mô hình ngôn ngữ lớn và thị giác máy tính' },
+                    { id: 'career-9', type: 'EXPERIENCE', title: 'Kỹ sư ML Cấp cao', institution: 'Baidu', startDate: '2009-07', endDate: '2015-06', location: 'Bắc Kinh, Trung Quốc', description: 'Phát triển hệ thống đề xuất và mô hình NLP' }
                 ],
                 requestStatus: 'REQUEST_CHANGES',
                 submittedAt: '2024-11-25T10:00:00Z'
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655442004',
-                name: 'Maria Rodriguez',
+                name: 'Phạm Thị Mai',
                 experience: 6,
                 languages: [
                     { languageCode: 'es', isNative: true },
@@ -600,48 +600,48 @@ export class UserService {
                     { languageCode: 'pt', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'spanish', subjectName: 'Spanish Language' },
-                    { categoryId: 'culture', subjectName: 'Latin American Culture' },
-                    { categoryId: 'business', subjectName: 'Business Spanish' }
+                    { categoryId: 'spanish', subjectName: 'Tiếng Tây Ban Nha' },
+                    { categoryId: 'culture', subjectName: 'Văn hóa Mỹ Latinh' },
+                    { categoryId: 'business', subjectName: 'Tiếng Tây Ban Nha Thương mại' }
                 ],
                 certifications: [
                     { id: 'cert-009', name: 'DELE C2 Certificate', issuingOrganization: 'Instituto Cervantes', issueDate: '2018-06-30', credentialId: 'DELE-C2-009', credentialUrl: 'https://example.com/dele-cert.pdf' },
                     { id: 'cert-010', name: 'Teaching Spanish as Foreign Language', issuingOrganization: 'University of Barcelona', issueDate: '2019-12-15', credentialId: 'ELE-010' }
                 ],
                 careerEntries: [
-                    { id: 'career-10', type: 'EDUCATION', title: 'Master in Spanish Philology', institution: 'Universidad Complutense de Madrid', startDate: '2016-09', endDate: '2018-06', location: 'Madrid, Spain' },
-                    { id: 'career-11', type: 'EXPERIENCE', title: 'Spanish Instructor', institution: 'International Language Academy', startDate: '2019-01', endDate: '', location: 'Barcelona, Spain', description: 'Teaching Spanish to international students and business professionals' }
+                    { id: 'career-10', type: 'EDUCATION', title: 'Thạc sĩ Ngôn ngữ học Tây Ban Nha', institution: 'Đại học Complutense Madrid', startDate: '2016-09', endDate: '2018-06', location: 'Madrid, Tây Ban Nha' },
+                    { id: 'career-11', type: 'EXPERIENCE', title: 'Giảng viên Tiếng Tây Ban Nha', institution: 'Học viện Ngôn ngữ Quốc tế', startDate: '2019-01', endDate: '', location: 'Barcelona, Tây Ban Nha', description: 'Dạy tiếng Tây Ban Nha cho sinh viên quốc tế và chuyên gia kinh doanh' }
                 ],
                 requestStatus: 'PENDING',
                 submittedAt: '2024-12-01T08:45:00Z'
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655442005',
-                name: 'James Wilson',
+                name: 'Hoàng Văn Quang',
                 experience: 10,
                 languages: [
                     { languageCode: 'en', isNative: true },
                     { languageCode: 'fr', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'finance', subjectName: 'Finance' },
-                    { categoryId: 'accounting', subjectName: 'Accounting' },
-                    { categoryId: 'investment', subjectName: 'Investment Banking' }
+                    { categoryId: 'finance', subjectName: 'Tài chính' },
+                    { categoryId: 'accounting', subjectName: 'Kế toán' },
+                    { categoryId: 'investment', subjectName: 'Ngân hàng Đầu tư' }
                 ],
                 certifications: [
                     { id: 'cert-011', name: 'CFA Level III', issuingOrganization: 'CFA Institute', issueDate: '2020-09-01', credentialId: 'CFA-L3-011', credentialUrl: 'https://example.com/cfa-cert.pdf' },
                     { id: 'cert-012', name: 'CPA License', issuingOrganization: 'AICPA', issueDate: '2018-05-20', credentialId: 'CPA-012' }
                 ],
                 careerEntries: [
-                    { id: 'career-12', type: 'EDUCATION', title: 'MBA in Finance', institution: 'Wharton School, University of Pennsylvania', startDate: '2012-09', endDate: '2014-05', location: 'Philadelphia, PA' },
-                    { id: 'career-13', type: 'EXPERIENCE', title: 'Investment Banker', institution: 'Goldman Sachs', startDate: '2014-07', endDate: '', location: 'New York, NY', description: 'Advising on M&A and capital raising for Fortune 500 companies' }
+                    { id: 'career-12', type: 'EDUCATION', title: 'MBA Tài chính', institution: 'Trường Wharton, Đại học Pennsylvania', startDate: '2012-09', endDate: '2014-05', location: 'Philadelphia, PA' },
+                    { id: 'career-13', type: 'EXPERIENCE', title: 'Chuyên viên Ngân hàng Đầu tư', institution: 'Goldman Sachs', startDate: '2014-07', endDate: '', location: 'New York, NY', description: 'Tư vấn về M&A và huy động vốn cho các công ty Fortune 500' }
                 ],
                 requestStatus: 'APPROVED',
                 submittedAt: '2024-11-20T11:20:00Z'
             },
             {
                 id: '550e8400-e29b-41d4-a716-446655442006',
-                name: 'Yuki Tanaka',
+                name: 'Vũ Thị Hương',
                 experience: 7,
                 languages: [
                     { languageCode: 'ja', isNative: true },
@@ -649,17 +649,17 @@ export class UserService {
                     { languageCode: 'ko', isNative: false }
                 ],
                 subjects: [
-                    { categoryId: 'design', subjectName: 'Graphic Design' },
-                    { categoryId: 'ui', subjectName: 'UI/UX Design' },
-                    { categoryId: 'branding', subjectName: 'Brand Identity' }
+                    { categoryId: 'design', subjectName: 'Thiết kế Đồ họa' },
+                    { categoryId: 'ui', subjectName: 'Thiết kế UI/UX' },
+                    { categoryId: 'branding', subjectName: 'Nhận diện Thương hiệu' }
                 ],
                 certifications: [
                     { id: 'cert-013', name: 'Adobe Certified Expert', issuingOrganization: 'Adobe', issueDate: '2021-04-10', credentialId: 'ACE-013', credentialUrl: 'https://example.com/adobe-cert.pdf' },
                     { id: 'cert-014', name: 'Google UX Design Certificate', issuingOrganization: 'Google', issueDate: '2022-09-25', credentialId: 'GUX-014' }
                 ],
                 careerEntries: [
-                    { id: 'career-14', type: 'EDUCATION', title: 'Bachelor in Visual Design', institution: 'Tokyo University of the Arts', startDate: '2013-04', endDate: '2017-03', location: 'Tokyo, Japan' },
-                    { id: 'career-15', type: 'EXPERIENCE', title: 'Senior UX Designer', institution: 'Sony Interactive Entertainment', startDate: '2020-04', endDate: '', location: 'Tokyo, Japan', description: 'Designing user experiences for PlayStation products' }
+                    { id: 'career-14', type: 'EDUCATION', title: 'Cử nhân Thiết kế Thị giác', institution: 'Đại học Nghệ thuật Tokyo', startDate: '2013-04', endDate: '2017-03', location: 'Tokyo, Nhật Bản' },
+                    { id: 'career-15', type: 'EXPERIENCE', title: 'Nhà thiết kế UX Cấp cao', institution: 'Sony Interactive Entertainment', startDate: '2020-04', endDate: '', location: 'Tokyo, Nhật Bản', description: 'Thiết kế trải nghiệm người dùng cho sản phẩm PlayStation' }
                 ],
                 requestStatus: 'REJECTED',
                 submittedAt: '2024-11-18T16:30:00Z'
@@ -668,7 +668,12 @@ export class UserService {
 
         const mockInstructorRequestsDetail: InstructorRequestDetail[] = mockInstructorRequests.map(req => ({
             ...req,
-            email: `${req.name.toLowerCase().replace(' ', '.')}@example.com`,
+            email: req.id === '550e8400-e29b-41d4-a716-446655442001' ? 'nguyen.van.hung@example.com' :
+                   req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'tran.thi.lan@example.com' :
+                   req.id === '550e8400-e29b-41d4-a716-446655442003' ? 'le.minh.tuan@example.com' :
+                   req.id === '550e8400-e29b-41d4-a716-446655442004' ? 'pham.thi.mai@example.com' :
+                   req.id === '550e8400-e29b-41d4-a716-446655442005' ? 'hoang.van.quang@example.com' :
+                   'vu.thi.huong@example.com',
             avatarUrl: 'images/users/user6.jpg',
             countryCode: req.id === '550e8400-e29b-41d4-a716-446655442001' ? 'US' :
                          req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'US' :
@@ -679,8 +684,8 @@ export class UserService {
             instructorLevel: [],
             initialPrice: req.experience > 10 ? 75 : req.experience > 7 ? 60 : 50,
             timezone: 'America/New_York',
-            headline: `${req.subjects.map(s => s.subjectName).join(' & ')} Expert | ${req.experience}+ Years Experience`,
-            introduction: `Hello! I'm ${req.name}, a dedicated ${req.subjects.map(s => s.subjectName).join(' and ')} instructor with ${req.experience}+ years of professional experience. I specialize in teaching ${req.subjects.length > 1 ? 'various aspects of ' + req.subjects.map(s => s.subjectName).join(' and ') : req.subjects[0].subjectName} with a focus on practical applications and real-world scenarios.`,
+            headline: `Chuyên gia ${req.subjects.map(s => s.subjectName).join(' & ')} | ${req.experience}+ năm Kinh nghiệm`,
+            introduction: `Xin chào! Tôi là ${req.name}, một giảng viên ${req.subjects.map(s => s.subjectName).join(' và ')} tận tâm với ${req.experience}+ năm kinh nghiệm chuyên môn. Tôi chuyên giảng dạy ${req.subjects.length > 1 ? 'các khía cạnh khác nhau của ' + req.subjects.map(s => s.subjectName).join(' và ') : req.subjects[0].subjectName} với trọng tâm vào ứng dụng thực tế và các tình huống thực tế.`,
             videoUrl: 'https://media-cdn.example.com/videos/intro.mp4',
             videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/intro.jpg',
             socialLinks: [
@@ -702,7 +707,7 @@ export class UserService {
                 { id: `avail-${req.id}-3`, dayOfWeek: 2, startTime: '10:00', endTime: '12:00', effectiveStartDate: '2024-01-01', status: 'AVAILABLE' }
             ],
             reason: req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'Cần bổ sung thông tin chứng chỉ và cập nhật ảnh đại diện rõ nét hơn.' : undefined,
-            reviewedBy: req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'Admin John Doe' : undefined,
+            reviewedBy: req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'Quản trị viên Nguyễn Văn A' : undefined,
             reviewedAt: req.id === '550e8400-e29b-41d4-a716-446655442002' ? '2024-12-05T10:30:00' : undefined
         }));
 

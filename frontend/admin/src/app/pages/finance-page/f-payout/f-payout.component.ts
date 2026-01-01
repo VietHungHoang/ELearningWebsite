@@ -93,7 +93,7 @@ export class FPayoutComponent implements OnInit {
     };
 
     // Summary filter for KPI cards
-    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days' | 'thisMonth'
+    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days'
     isSummaryFilterMenuOpen: boolean = false;
 
     isDetailModalOpen = false;
@@ -154,8 +154,7 @@ export class FPayoutComponent implements OnInit {
             'all': 'payout.summaryFilter.all',
             'today': 'payout.summaryFilter.today',
             '7days': 'payout.summaryFilter.last7Days',
-            '30days': 'payout.summaryFilter.last30Days',
-            'thisMonth': 'payout.summaryFilter.thisMonth'
+            '30days': 'payout.summaryFilter.last30Days'
         };
         return filterMap[this.summaryFilter] || 'payout.summaryFilter.all';
     }

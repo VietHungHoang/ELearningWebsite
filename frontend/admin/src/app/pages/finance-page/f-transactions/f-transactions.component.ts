@@ -33,7 +33,7 @@ export class FTransactionsComponent implements OnInit {
     endDate: string = '';
 
     // Summary filter for KPI cards
-    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days' | 'thisMonth'
+    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days'
     isSummaryFilterMenuOpen: boolean = false;
 
     currentPage: number = 1;
@@ -153,10 +153,6 @@ export class FTransactionsComponent implements OnInit {
             thirtyDaysAgo.setDate(today.getDate() - 30);
             this.startDate = thirtyDaysAgo.toISOString().split('T')[0];
             this.endDate = today.toISOString().split('T')[0];
-        } else if (range === 'thisMonth') {
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            this.startDate = firstDay.toISOString().split('T')[0];
-            this.endDate = today.toISOString().split('T')[0];
         } else {
             this.startDate = '';
             this.endDate = '';
@@ -191,8 +187,7 @@ export class FTransactionsComponent implements OnInit {
             'all': 'transactions.summaryFilter.all',
             'today': 'transactions.summaryFilter.today',
             '7days': 'transactions.summaryFilter.last7Days',
-            '30days': 'transactions.summaryFilter.last30Days',
-            'thisMonth': 'transactions.summaryFilter.thisMonth'
+            '30days': 'transactions.summaryFilter.last30Days'
         };
         return filterMap[this.summaryFilter] || 'transactions.summaryFilter.all';
     }
