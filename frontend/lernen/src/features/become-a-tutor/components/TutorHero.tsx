@@ -13,15 +13,15 @@ const TutorHero: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 {/* Left Column */}
                 <div className="text-center lg:text-left">
-                    <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 leading-tight transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+                    <h1 className={`text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 leading-none transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
                         <span className="text-[#065A46]">
                             {t('becomeTutor.hero.title')}
-                        </span>{' '}
-                        <br />
+                        </span>
+                        <br className="leading-none" />
                         <span className="text-gray-700 text-3xl sm:text-3xl md:text-4xl">{t('becomeTutor.hero.subtitle')}</span>
                     </h1>
                     <p
-                        className={`mt-4 text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
+                        className={`mt-2 text-lg text-gray-600 max-w-xl mx-auto lg:mx-0 leading-relaxed transition-all duration-700 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
                         style={{ animationDelay: "0.2s" }}
                     >
                         {t('becomeTutor.hero.description')}

@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { Tutor, TutorAvailability } from '../../../../types/api.ts'
+import { useTranslation } from 'react-i18next';
+import type { TutorOnboardingData, TutorAvailability } from '../../../../types/tutor'
 
 interface AvailabilityStepProps {
-    data?: Partial<Tutor>;
-    onChange: (data: Partial<Tutor>) => void;
+    data?: Partial<TutorOnboardingData>;
+    onChange: (data: Partial<TutorOnboardingData>) => void;
 }
 
 const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) => {
+    const { t } = useTranslation();
     // Use current week
     const getCurrentWeek = () => {
         const now = new Date();
@@ -57,14 +59,23 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
         const slotsByDay: { [key: number]: Date[] } = {};
         selectedSlots.forEach(slotISO => {
             const date = new Date(slotISO);
-            const dayOfWeek = date.getDay();
+            // Convert to UTC for dayOfWeek calculation
+            const utcDate = new Date(Date.UTC(
+                date.getUTCFullYear(),
+                date.getUTCMonth(),
+                date.getUTCDate(),
+                date.getUTCHours(),
+                0,
+                0
+            ));
+            const dayOfWeek = utcDate.getUTCDay();
             if (!slotsByDay[dayOfWeek]) {
                 slotsByDay[dayOfWeek] = [];
             }
-            slotsByDay[dayOfWeek].push(date);
+            slotsByDay[dayOfWeek].push(utcDate);
         });
 
-        // Convert to TutorAvailability format with time ranges
+        // Convert to TutorAvailability format with time ranges (UTC+0)
         Object.keys(slotsByDay).forEach(dayKey => {
             const dayOfWeek = parseInt(dayKey);
             const slots = slotsByDay[dayOfWeek].sort((a, b) => a.getTime() - b.getTime());
@@ -82,13 +93,12 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                     // Consecutive slot
                     rangeEnd = currentSlot;
                 } else {
-                    // End of range, save it
+                    // End of range, save it - convert to UTC+0
                     availabilities.push({
                         dayOfWeek,
-                        startTime: `${String(rangeStart.getHours()).padStart(2, '0')}:00`,
-                        endTime: `${String(rangeEnd.getHours() + 1).padStart(2, '0')}:00`,
+                        startTime: `${String(rangeStart.getUTCHours()).padStart(2, '0')}:00`,
+                        endTime: `${String(rangeEnd.getUTCHours() + 1).padStart(2, '0')}:00`,
                         effectiveStartDate: new Date().toISOString().split('T')[0],
-                        status: 'AVAILABLE'
                     });
                     
                     if (currentSlot) {
@@ -106,17 +116,29 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
     const [isDragging, setIsDragging] = useState(false);
     const [selectionMode, setSelectionMode] = useState<'adding' | 'removing' | null>(null);
     const [dragStartCoords, setDragStartCoords] = useState<{ x: number; y: number } | null>(null);
+    const [dragStartScroll, setDragStartScroll] = useState<{ scrollLeft: number; scrollTop: number } | null>(null);
     const [selectionRect, setSelectionRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
     const [initialAvailability, setInitialAvailability] = useState<string[]>([]);
     const gridRef = useRef<HTMLDivElement>(null);
 
-    // Reduced time slots: 8:00 AM - 8:00 PM (12 hours)
-    const timeSlots = Array.from({ length: 12 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
+    // Time slots: 8:00 AM - 11:00 PM (16 hours: 8:00 to 23:00)
+    // 24:00 is only a label at the bottom, not a selectable slot
+    const timeSlots = Array.from({ length: 16 }, (_, i) => `${String(i + 8).padStart(2, '0')}:00`);
 
     const handleCellClick = (date: Date, hour: number) => {
+        // Create date with local time first
         const slotDate = new Date(date);
         slotDate.setHours(hour, 0, 0, 0);
-        const slotISO = slotDate.toISOString();
+        // Convert to UTC+0 for storage
+        const utcDate = new Date(Date.UTC(
+            slotDate.getUTCFullYear(),
+            slotDate.getUTCMonth(),
+            slotDate.getUTCDate(),
+            slotDate.getUTCHours(),
+            0,
+            0
+        ));
+        const slotISO = utcDate.toISOString();
         const isCurrentlyAvailable = selectedSlots.includes(slotISO);
 
         if (isCurrentlyAvailable) {
@@ -130,16 +152,35 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
         if (e.button !== 0) return;
         e.preventDefault();
 
-        const gridRect = gridRef.current?.getBoundingClientRect();
-        if (!gridRect) return;
+        const container = gridRef.current;
+        if (!container) return;
 
+        const gridRect = container.getBoundingClientRect();
+        
+        // Lưu vị trí bắt đầu tương đối với viewport (không tính scroll)
         const startX = e.clientX - gridRect.left;
         const startY = e.clientY - gridRect.top;
         setDragStartCoords({ x: startX, y: startY });
+        
+        // Lưu scroll position tại thời điểm bắt đầu drag
+        setDragStartScroll({
+            scrollLeft: container.scrollLeft,
+            scrollTop: container.scrollTop
+        });
 
+        // Create date with local time first
         const slotDate = new Date(date);
         slotDate.setHours(hour, 0, 0, 0);
-        const slotISO = slotDate.toISOString();
+        // Convert to UTC+0 for storage
+        const utcDate = new Date(Date.UTC(
+            slotDate.getUTCFullYear(),
+            slotDate.getUTCMonth(),
+            slotDate.getUTCDate(),
+            slotDate.getUTCHours(),
+            0,
+            0
+        ));
+        const slotISO = utcDate.toISOString();
         const mode = selectedSlots.includes(slotISO) ? 'removing' : 'adding';
         setSelectionMode(mode);
 
@@ -149,16 +190,29 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            if (!isDragging || !dragStartCoords || !gridRef.current) return;
+            if (!isDragging || !dragStartCoords || !dragStartScroll || !gridRef.current) return;
             e.preventDefault();
-            const gridRect = gridRef.current.getBoundingClientRect();
+            
+            const container = gridRef.current;
+            const gridRect = container.getBoundingClientRect();
+            
+            // Vị trí hiện tại của chuột tương đối với viewport
             const currentX = e.clientX - gridRect.left;
             const currentY = e.clientY - gridRect.top;
+            
+            // Tính toán sự thay đổi scroll từ lúc bắt đầu drag
+            const scrollDeltaX = container.scrollLeft - dragStartScroll.scrollLeft;
+            const scrollDeltaY = container.scrollTop - dragStartScroll.scrollTop;
+            
+            // Điều chỉnh vị trí bắt đầu theo scroll delta
+            const adjustedStartX = dragStartCoords.x - scrollDeltaX;
+            const adjustedStartY = dragStartCoords.y - scrollDeltaY;
+            
             const rect = {
-                left: Math.min(dragStartCoords.x, currentX),
-                top: Math.min(dragStartCoords.y, currentY),
-                width: Math.abs(dragStartCoords.x - currentX),
-                height: Math.abs(dragStartCoords.y - currentY)
+                left: Math.min(adjustedStartX, currentX),
+                top: Math.min(adjustedStartY, currentY),
+                width: Math.abs(adjustedStartX - currentX),
+                height: Math.abs(adjustedStartY - currentY)
             };
             setSelectionRect(rect);
         };
@@ -167,6 +221,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
             if (isDragging) {
                 setIsDragging(false);
                 setDragStartCoords(null);
+                setDragStartScroll(null);
                 setSelectionRect(null);
                 setSelectionMode(null);
                 setInitialAvailability([]);
@@ -181,7 +236,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, dragStartCoords]);
+    }, [isDragging, dragStartCoords, dragStartScroll]);
 
     useEffect(() => {
         if (!isDragging || !selectionRect || !selectionMode || !gridRef.current) return;
@@ -287,12 +342,6 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
 
     return (
         <div className="space-y-2">
-            <div>
-                <h3 className="text-lg font-bold text-gray-800">Availability Schedule</h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                    Click or drag on time slots to mark when you're available (optional)
-                </p>
-            </div>
 
             {/* Main Content: Grid Layout - Calendar Left, Selected Slots Right */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-2.5">
@@ -301,7 +350,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                     {/* Tips and Timezone - Same row */}
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-1.5 flex items-center justify-between">
                         <p className="text-xs text-blue-800">
-                            <strong>💡 Tip:</strong> Click to toggle, drag to select multiple. Green = available.
+                            <strong>{t('onboarding.availability.tip')}</strong>
                         </p>
                         <p className="text-xs text-blue-800">
                             🌍 <strong>{Intl.DateTimeFormat().resolvedOptions().timeZone}</strong>
@@ -309,9 +358,9 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                     </div>
                     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
                         <div className="overflow-x-auto relative max-h-[400px] overflow-y-auto" ref={gridRef}>
-                            <div className="grid min-w-[400px]" style={{ gridTemplateColumns: `auto repeat(7, 1fr)` }}>
+                            <div className="grid min-w-[400px]" style={{ gridTemplateColumns: `50px repeat(7, 1fr)` }}>
                                 {/* Time Column Header */}
-                                <div className="sticky left-0 bg-white z-10"></div>
+                                <div className="sticky left-0 bg-white z-10 border-b border-gray-200"></div>
 
                                 {/* Day Headers */}
                                 {weekDays.map(day => (
@@ -323,24 +372,39 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                                 ))}
 
                                 {/* Time Slots and Availability Grid */}
-                                {timeSlots.map(time => (
+                                {timeSlots.map((time) => (
                                     <React.Fragment key={time}>
-                                        <div className="text-right pr-2 py-1 border-r border-gray-200 text-xs text-gray-500 sticky left-0 bg-white z-10 h-6 flex items-center justify-end">
-                                            {time}
+                                        <div className="relative border-r border-t border-gray-200 sticky left-0 bg-white z-10 h-6">
+                                            <span 
+                                                className="absolute right-2 text-xs text-gray-500 bg-white px-0.5"
+                                                style={{ top: 0, transform: 'translateY(-50%)' }}
+                                            >
+                                                {time}
+                                            </span>
                                         </div>
 
                                         {weekDays.map(day => {
                                             const hour = parseInt(time.split(':')[0]);
+                                            // Create date with local time first
                                             const slotDate = new Date(day);
                                             slotDate.setHours(hour, 0, 0, 0);
-                                            const slotISO = slotDate.toISOString();
+                                            // Convert to UTC+0 for comparison
+                                            const utcDate = new Date(Date.UTC(
+                                                slotDate.getUTCFullYear(),
+                                                slotDate.getUTCMonth(),
+                                                slotDate.getUTCDate(),
+                                                slotDate.getUTCHours(),
+                                                0,
+                                                0
+                                            ));
+                                            const slotISO = utcDate.toISOString();
                                             const isAvailable = selectedSlots.includes(slotISO);
 
                                             return (
                                                 <div
                                                     key={day.toISOString()}
                                                     data-iso={slotISO}
-                                                    className="calendar-cell border-b border-r border-gray-200 h-6 cursor-pointer select-none hover:bg-gray-50 transition"
+                                                    className="calendar-cell border-r border-t border-gray-200 h-6 cursor-pointer select-none hover:bg-gray-50 transition"
                                                     onMouseDown={(e) => handleMouseDown(e, day, hour)}
                                                     onClick={() => handleCellClick(day, hour)}
                                                 >
@@ -352,15 +416,28 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                                         })}
                                     </React.Fragment>
                                 ))}
+                                
+                                {/* Bottom border line with 24:00 label - no selectable cells */}
+                                <div className="relative border-r border-t border-gray-200 sticky left-0 bg-white z-10 h-3">
+                                    <span 
+                                        className="absolute right-2 text-xs text-gray-500 bg-white px-0.5"
+                                        style={{ top: 0, transform: 'translateY(-50%)' }}
+                                    >
+                                        24:00
+                                    </span>
+                                </div>
+                                {weekDays.map(day => (
+                                    <div key={`bottom-${day.toISOString()}`} className="border-t border-gray-200 h-3"></div>
+                                ))}
                             </div>
 
                             {/* Marquee Selection Rectangle */}
                             {isDragging && selectionRect && (
                                 <div
-                                    className="absolute bg-blue-500 bg-opacity-30 border-2 border-blue-600 pointer-events-none z-20"
+                                    className="absolute bg-blue-200 bg-opacity-40 border border-blue-400 pointer-events-none z-20"
                                     style={{
-                                        left: selectionRect.left,
-                                        top: selectionRect.top,
+                                        left: selectionRect.left + (gridRef.current?.scrollLeft || 0),
+                                        top: selectionRect.top + (gridRef.current?.scrollTop || 0),
                                         width: selectionRect.width,
                                         height: selectionRect.height
                                     }}
@@ -375,7 +452,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                     {selectedSlots.length > 0 ? (
                         <div className="bg-white border border-gray-200 rounded-lg p-2.5 max-h-[380px] overflow-y-auto">
                             <h4 className="font-semibold text-xs text-gray-800 mb-2">
-                                Selected Slots ({selectedSlots.length})
+                                {t('onboarding.availability.selectedSlots')} ({selectedSlots.length})
                             </h4>
                             <div className="space-y-1.5">
                                 {sortedDays.map(day => (
@@ -394,10 +471,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                         </div>
                     ) : (
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
-                            <p className="text-xs text-gray-500">
-                                No time slots selected yet.<br />
-                                Click on the calendar to add availability.
-                            </p>
+                            <p className="text-xs text-gray-500" dangerouslySetInnerHTML={{ __html: t('onboarding.availability.noSlotsSelected') }} />
                         </div>
                     )}
                 </div>

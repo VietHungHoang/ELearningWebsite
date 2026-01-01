@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthLayout from '../components/AuthLayout';
 import BasicInformationStep from '../components/onboarding/BasicInformationStep';
 import ProfessionalProfileStep from '../components/onboarding/ProfessionalProfileStep';
@@ -12,25 +13,30 @@ import authService from '../../../services/authService';
 import { HiArrowLeft, HiArrowRight } from 'react-icons/hi';
 import { useAuth } from '../../../context/AuthContext';
 import type { TutorOnboardingData } from '../../../types/tutor';
-
-const STEPS = [
-    { number: 1, label: 'Basic Info' },
-    { number: 2, label: 'Professional' },
-    { number: 3, label: 'Media' },
-    { number: 4, label: 'Education' },
-    { number: 5, label: 'Certifications' },
-    { number: 6, label: 'Availability' },
-];
+import type { Subject } from '../../../types/common';
+import commonUtils from '../../../utils/commonUtils';
+import Toast from '../../../components/ui/Toast';
 
 const TutorOnboardingPage: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const { t } = useTranslation();
     const [currentStep, setCurrentStep] = useState<number | null>(null);
     const [stepData, setStepData] = useState<Partial<TutorOnboardingData>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { state } = useAuth();
+    
+    const STEPS = [
+        { number: 1, label: t('onboarding.steps.basicInfo') },
+        { number: 2, label: t('onboarding.steps.professional') },
+        { number: 3, label: t('onboarding.steps.media') },
+        { number: 4, label: t('onboarding.steps.education') },
+        { number: 5, label: t('onboarding.steps.certifications') },
+        { number: 6, label: t('onboarding.steps.availability') },
+    ];
+    
     const tutorId = state.user?.id || (() => {
         try {
             const storedData = localStorage.getItem('tutor_onboarding_data');
@@ -51,15 +57,68 @@ const TutorOnboardingPage: React.FC = () => {
             const response = await authService.getOnboardingData(tutorId);
 
             if (response.jsonData) {
-                const onboardingData = JSON.parse(response.jsonData) as TutorOnboardingData;
-                console.log(onboardingData);
-                setStepData(onboardingData);
+                // jsonData đã được Axios tự động unescape, nên có thể parse trực tiếp
+                let onboardingData: TutorOnboardingData;
+                try {
+                    // Nếu jsonData là string, parse nó
+                    if (typeof response.jsonData === 'string') {
+                        onboardingData = JSON.parse(response.jsonData) as TutorOnboardingData;
+                    } else {
+                        // Nếu đã là object (có thể do double parse), dùng trực tiếp
+                        onboardingData = response.jsonData as TutorOnboardingData;
+                    }
+                    
+                    // Normalize languages format: convert { code, isNative } to { language: { code, name }, isNative }
+                    if (onboardingData.languages && Array.isArray(onboardingData.languages)) {
+                        const allLanguages = commonUtils.getAllLanguages();
+                        onboardingData.languages = onboardingData.languages.map((lang: any) => {
+                            // Nếu đã có format đúng { language: { code, name }, isNative }
+                            if (lang.language && lang.language.code) {
+                                return lang;
+                            }
+                            // Nếu chỉ có { code, isNative }, convert sang format đúng
+                            if (lang.code) {
+                                const languageInfo = allLanguages.find(l => l.code === lang.code);
+                                return {
+                                    language: languageInfo || { code: lang.code, name: lang.code },
+                                    isNative: lang.isNative || false
+                                };
+                            }
+                            // Fallback: giữ nguyên nếu không match format nào
+                            return lang;
+                        });
+                    }
+
+                    // Convert subjectIds to subjects if <needed></needed>
+                    const parsedData = onboardingData as any;
+                    if (parsedData.subjectIds && Array.isArray(parsedData.subjectIds) && parsedData.subjectIds.length > 0) {
+                        try {
+                            const allSubjects = await commonUtils.getSubjects();
+                            onboardingData.subjects = parsedData.subjectIds
+                                .map((subjectId: string) => allSubjects.find(s => s.id === subjectId))
+                                .filter((subject: Subject | undefined): subject is Subject => subject !== undefined);
+                        } catch (error) {
+                            console.error('Failed to fetch subjects for subjectIds:', error);
+                            onboardingData.subjects = [];
+                        }
+                    } else if (!onboardingData.subjects) {
+                        // If no subjectIds and no subjects, set empty array
+                        onboardingData.subjects = [];
+                    }
+                    
+                    console.log('✅ Parsed onboarding data:', onboardingData);
+                    setStepData(onboardingData);
+                } catch (parseError) {
+                    console.error('❌ Failed to parse jsonData:', parseError);
+                    console.error('❌ jsonData content:', response.jsonData);
+                    throw new Error('Invalid JSON data in response');
+                }
             } else {
                 setStepData({
                     id: tutorId,
                     fullName: state.user?.name || '',
                     email: state.user?.email || '',
-                    gender: 'Not specified',
+                    gender: 'Male',
                     countryCode: 'US', // Default to US
                     languages: [],
                     subjects: [],
@@ -186,11 +245,32 @@ const TutorOnboardingPage: React.FC = () => {
             setSaving(true);
             setError(null);
             try {
-                await saveStepData();
-                // setShowCompletionModal(true);
+                // Clean data before saving
+                const cleanedData = {
+                    ...stepData,
+                    subjectIds: stepData.subjects?.map(s => s.id) || [],
+                    languages: stepData.languages?.map(l => ({
+                        code: 'language' in l ? l.language.code : "",
+                        isNative: l.isNative
+                    })) || []
+                };
+                // Remove subjects from cleanedData if backend expects subjectIds instead
+                delete cleanedData.subjects;
+
+                const jsonData = JSON.stringify(cleanedData);
+                
+                // Log data for debugging
+                console.log('📤 Data gửi xuống backend khi hoàn thành:');
+                console.log('📋 Cleaned Data (Object):', cleanedData);
+                console.log('📦 JSON Data (String):', jsonData);
+                
+                // Call API to save onboarding data
+                await authService.saveOnboardingStep(tutorId, currentStep, jsonData);
+                
+                // Navigate to completion page
                 navigate('/onboarding-completion');
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to save data');
+                setError(err instanceof Error ? err.message : t('onboarding.errors.failedToSave'));
             } finally {
                 setSaving(false);
             }
@@ -208,7 +288,7 @@ const TutorOnboardingPage: React.FC = () => {
                 // setShowCompletionModal(true);
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to save data');
+            setError(err instanceof Error ? err.message : t('onboarding.errors.failedToSave'));
         } finally {
             setSaving(false);
         }
@@ -232,7 +312,7 @@ const TutorOnboardingPage: React.FC = () => {
                 navigate('/dashboard');
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to skip step');
+            setError(err instanceof Error ? err.message : t('onboarding.errors.failedToSkip'));
         } finally {
             setSaving(false);
         }
@@ -244,7 +324,7 @@ const TutorOnboardingPage: React.FC = () => {
                 <div className="flex justify-center items-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0b6459] mx-auto"></div>
-                        <p className="mt-4 text-gray-600">Loading onboarding...</p>
+                        <p className="mt-4 text-gray-600">{t('onboarding.loadingOnboarding')}</p>
                     </div>
                 </div>
             </AuthLayout>
@@ -258,8 +338,42 @@ const TutorOnboardingPage: React.FC = () => {
                 <div className="border-b border-gray-200 bg-white px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-xl font-semibold text-gray-900">Tutor Onboarding</h1>
-                            <p className="text-sm text-gray-500 mt-0.5">Complete your profile to start teaching</p>
+                            {currentStep === 1 && (
+                                <>
+                                    <h1 className="text-xl font-semibold text-gray-900">{t('onboarding.basicInfo.title')}</h1>
+                                    <p className="text-sm text-gray-500 mt-0.5">{t('onboarding.basicInfo.subtitle')}</p>
+                                </>
+                            )}
+                            {currentStep === 2 && (
+                                <>
+                                    <h1 className="text-xl font-semibold text-gray-900">{t('onboarding.professionalProfile.title')}</h1>
+                                    <p className="text-sm text-gray-500 mt-0.5">{t('onboarding.professionalProfile.subtitle')}</p>
+                                </>
+                            )}
+                            {currentStep === 3 && (
+                                <>
+                                    <h1 className="text-xl font-semibold text-gray-900">{t('onboarding.mediaPortfolio.title')}</h1>
+                                    <p className="text-sm text-gray-500 mt-0.5">{t('onboarding.mediaPortfolio.subtitle')}</p>
+                                </>
+                            )}
+                            {currentStep === 4 && (
+                                <>
+                                    <h1 className="text-xl font-semibold text-gray-900">{t('onboarding.educationExperience.title')}</h1>
+                                    <p className="text-sm text-gray-500 mt-0.5">{t('onboarding.educationExperience.subtitle')}</p>
+                                </>
+                            )}
+                            {currentStep === 5 && (
+                                <>
+                                    <h1 className="text-xl font-semibold text-gray-900">{t('onboarding.certifications.title')}</h1>
+                                    <p className="text-sm text-gray-500 mt-0.5">{t('onboarding.certifications.subtitle')}</p>
+                                </>
+                            )}
+                            {currentStep === 6 && (
+                                <>
+                                    <h1 className="text-xl font-semibold text-gray-900">{t('onboarding.availability.title')}</h1>
+                                    <p className="text-sm text-gray-500 mt-0.5">{t('onboarding.availability.subtitle')}</p>
+                                </>
+                            )}
                         </div>
                         <div className="text-right w-24">
                             <LernenLogo />
@@ -278,13 +392,13 @@ const TutorOnboardingPage: React.FC = () => {
                                         className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${currentStep === step.number
                                             ? 'bg-[#0b6459] text-white'
                                             : currentStep > step.number
-                                                ? 'bg-green-500 text-white'
+                                                ? 'bg-[#0b6459] text-white'
                                                 : 'bg-gray-200 text-gray-500'
                                             }`}>
                                         {currentStep > step.number ? '✓' : step.number}
                                     </div>
                                     {index < STEPS.length - 1 && (
-                                        <div className={`flex-1 h-0.5 mx-2 ${currentStep > step.number ? 'bg-green-500' : 'bg-gray-200'
+                                        <div className={`flex-1 h-0.5 mx-2 ${currentStep > step.number ? 'bg-[#0b6459]' : 'bg-gray-200'
                                             }`} />
                                     )}
                                 </React.Fragment>
@@ -306,11 +420,13 @@ const TutorOnboardingPage: React.FC = () => {
 
                 {/* Main Content Area */}
                 <div className="px-8 pt-4 pb-8">
-                    {/* Error Message Display */}
+                    {/* Toast notification */}
                     {error && (
-                        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-                            <p className="text-red-800 text-xs">{error}</p>
-                        </div>
+                        <Toast
+                            message={error}
+                            type="error"
+                            onClose={() => setError(null)}
+                        />
                     )}
 
                     {/* Loading State or Step Content */}
@@ -319,7 +435,7 @@ const TutorOnboardingPage: React.FC = () => {
                             <div className="text-center">
                                 <div
                                     className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0b6459] mx-auto"></div>
-                                <p className="mt-4 text-gray-600">Loading...</p>
+                                <p className="mt-4 text-gray-600">{t('onboarding.loading')}</p>
                             </div>
                         </div>
                     ) : (
@@ -342,20 +458,20 @@ const TutorOnboardingPage: React.FC = () => {
                         <button onClick={handleBack} disabled={currentStep === 1}
                             className="flex items-center gap-1.5 px-4 py-2 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition">
                             <HiArrowLeft className="w-4 h-4" />
-                            Back
+                            {t('onboarding.back')}
                         </button>
                         <div className="flex items-center gap-2">
                             {/* Skip Button - Only show for steps 4-5 */}
                             {currentStep >= 4 && currentStep < STEPS.length && (
                                 <button onClick={handleSkip} disabled={saving}
                                     className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition disabled:opacity-50">
-                                    Skip
+                                    {t('onboarding.skip')}
                                 </button>
                             )}
                             {/* Next/Complete Button */}
                             <button onClick={handleNext} disabled={saving}
                                 className="flex items-center gap-1.5 px-4 py-2 text-sm bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-                                {saving ? 'Saving...' : currentStep === STEPS.length ? 'Complete' : 'Next'}
+                                {saving ? t('onboarding.saving') : currentStep === STEPS.length ? t('onboarding.complete') : t('onboarding.next')}
                                 {!saving && <HiArrowRight className="w-4 h-4" />}
                             </button>
                         </div>

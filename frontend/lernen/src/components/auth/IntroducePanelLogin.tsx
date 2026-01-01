@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
-import { LernenLogo } from "../LernenLogo.tsx";
 import { InteractiveImagePanelLogin } from './InteractiveImagePanelLogin.tsx';
 
 
@@ -12,7 +11,7 @@ const IntroducePanelLogin: React.FC = () => {
         <div className="bg-[#0b6459] text-white p-8 rounded-2xl lg:rounded-l-2xl lg:rounded-tr-[100px] lg:rounded-br-[100px] flex flex-col justify-around relative">
             <div>
                 <NavLink to="/" className="inline-block cursor-pointer">
-                    <LernenLogo />
+                    <img src="/images/logo-white.svg" alt="Lernen Logo" />
                 </NavLink>
                 <h1 className="text-3xl font-bold mt-8">{t('auth.signup.introPanel.title')}</h1>
                 <p className="text-lg mt-2 text-gray-200">{t('auth.signup.introPanel.subtitle')}</p>

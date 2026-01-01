@@ -1,15 +1,157 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HiPlus, HiPencil, HiTrash, HiAcademicCap, HiBriefcase } from 'react-icons/hi';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
-import commonUtils from '../../../../utils/commonUtils';
-import type { EducationItem, ExperienceItem, Tutor } from '../../../../types/api';
+import { useTranslation } from 'react-i18next';
+import ModalLayout from '../../../../components/ui/ModalLayout';
+import type { EducationItem, ExperienceItem, TutorOnboardingData } from '../../../../types/tutor';
 
 interface EducationExperienceStepProps {
-    data: Partial<Tutor>;
-    onChange: (data: Partial<Tutor>) => void;
+    data: Partial<TutorOnboardingData>;
+    onChange: (data: Partial<TutorOnboardingData>) => void;
 }
 
+// Delete Confirm Popup Component - tách riêng để quản lý state độc lập
+interface DeleteConfirmPopupProps {
+    onConfirm: () => void;
+    onCancel: () => void;
+    confirmText: string;
+    cancelText: string;
+    deleteText: string;
+}
+
+const DeleteConfirmPopup: React.FC<DeleteConfirmPopupProps> = ({
+    onConfirm,
+    onCancel,
+    confirmText,
+    cancelText,
+    deleteText,
+}) => {
+    const popupRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+                onCancel();
+            }
+        };
+
+        // Delay để tránh close ngay khi click button mở
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onCancel]);
+
+    return (
+        <div
+            ref={popupRef}
+            className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 min-w-[200px]"
+        >
+            <p className="text-sm text-gray-700 mb-3">{confirmText}</p>
+            <div className="flex gap-2 justify-end">
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onCancel();
+                    }}
+                    className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition"
+                >
+                    {cancelText}
+                </button>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onConfirm();
+                    }}
+                    className="px-2 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700 transition"
+                >
+                    {deleteText}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// Item Card Component với state popup riêng
+interface ItemCardProps {
+    item: EducationItem | ExperienceItem;
+    onEdit: () => void;
+    onDelete: () => void;
+}
+
+const ItemCard: React.FC<ItemCardProps> = ({ item, onEdit, onDelete }) => {
+    const { t } = useTranslation();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowDeleteConfirm(true);
+    };
+
+    const handleConfirmDelete = () => {
+        setShowDeleteConfirm(false);
+        onDelete();
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteConfirm(false);
+    };
+
+    return (
+        <div className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
+            <div className="flex justify-between items-start gap-4">
+                <div className="flex-grow min-w-0">
+                    <h4 className="text-base font-semibold text-gray-800">{item.title}</h4>
+                    <p className="text-sm text-gray-600 mt-0.5">{item.institution}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                        {new Date(item.startDate).getFullYear()} - {item.endDate ? new Date(item.endDate).getFullYear() : t('onboarding.educationExperience.present')}
+                        {item.location && ` • ${item.location}`}
+                    </p>
+                    {item.description && (
+                        <p className="text-sm text-gray-600 mt-2">{item.description}</p>
+                    )}
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                        type="button"
+                        onClick={onEdit}
+                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
+                        title={t('onboarding.educationExperience.edit')}
+                    >
+                        <HiPencil className="w-4 h-4" />
+                    </button>
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={handleDeleteClick}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                            title={t('onboarding.educationExperience.delete')}
+                        >
+                            <HiTrash className="w-4 h-4" />
+                        </button>
+                        {showDeleteConfirm && (
+                            <DeleteConfirmPopup
+                                onConfirm={handleConfirmDelete}
+                                onCancel={handleCancelDelete}
+                                confirmText={t('onboarding.educationExperience.confirmDelete')}
+                                cancelText={t('onboarding.educationExperience.modal.cancel')}
+                                deleteText={t('onboarding.educationExperience.delete')}
+                            />
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data, onChange }) => {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState<'education' | 'experience'>('education');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<EducationItem | ExperienceItem | null>(null);
@@ -29,22 +171,22 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
 
     const handleDelete = (id: string, type: 'education' | 'experience') => {
         if (type === 'education') {
-            onChange({ educations: (data.educations || []).filter(e => e.id !== id) });
+            onChange({ educations: (data.educations || []).filter((e: EducationItem) => e.id !== id) });
         } else {
-            onChange({ experiences: (data.experiences || []).filter(e => e.id !== id) });
+            onChange({ experiences: (data.experiences || []).filter((e: ExperienceItem) => e.id !== id) });
         }
     };
 
-    const handleSave = (item: any) => {
+    const handleSave = (item: EducationItem | ExperienceItem) => {
         if (editingType === 'education') {
             if (item.id) {
-                onChange({ educations: (data.educations || []).map(e => e.id === item.id ? item : e) });
+                onChange({ educations: (data.educations || []).map((e: EducationItem) => e.id === item.id ? item : e) });
             } else {
                 onChange({ educations: [...(data.educations || []), { ...item, id: `edu-${Date.now()}` }] });
             }
         } else {
             if (item.id) {
-                onChange({ experiences: (data.experiences || []).map(e => e.id === item.id ? item : e) });
+                onChange({ experiences: (data.experiences || []).map((e: ExperienceItem) => e.id === item.id ? item : e) });
             } else {
                 onChange({ experiences: [...(data.experiences || []), { ...item, id: `exp-${Date.now()}` }] });
             }
@@ -52,16 +194,10 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
         setIsModalOpen(false);
     };
 
-    const inputStyles = 'w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition';
+    const inputStyles = 'w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-gray-800 placeholder:text-gray-400 placeholder:font-thin hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out';
 
     return (
         <div className="space-y-6">
-            <div>
-                <h3 className="text-xl font-bold text-gray-800">Education & Experience</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                    Add your educational background and work experience (optional)
-                </p>
-            </div>
 
             {/* Tabs */}
             <div className="flex items-center gap-4 border-b border-gray-200">
@@ -74,7 +210,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                 >
                     <div className="flex items-center gap-2">
                         <HiAcademicCap className="w-5 h-5" />
-                        Education ({(data.educations || []).length})
+                        {t('onboarding.educationExperience.education')} ({(data.educations || []).length})
                     </div>
                 </button>
                 <button
@@ -86,7 +222,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                 >
                     <div className="flex items-center gap-2">
                         <HiBriefcase className="w-5 h-5" />
-                        Experience ({(data.experiences || []).length})
+                        {t('onboarding.educationExperience.experience')} ({(data.experiences || []).length})
                     </div>
                 </button>
             </div>
@@ -95,42 +231,17 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
             <div className="space-y-4">
                 {activeTab === 'education' ? (
                     <>
-                        {(data.educations || []).map(edu => (
-                            <div key={edu.id} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
-                                <div className="flex justify-between items-start gap-4">
-                                    <div className="flex-grow min-w-0">
-                                        <h4 className="text-base font-semibold text-gray-800">{edu.title}</h4>
-                                        <p className="text-sm text-gray-600 mt-0.5">{edu.institution}</p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {new Date(edu.startDate).getFullYear()} - {edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present'}
-                                            {edu.location && ` • ${edu.location}`}
-                                        </p>
-                                        {edu.description && (
-                                            <p className="text-sm text-gray-600 mt-2">{edu.description}</p>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                        <button
-                                            onClick={() => handleEdit(edu, 'education')}
-                                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                            title="Edit"
-                                        >
-                                            <HiPencil className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(edu.id, 'education')}
-                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                                            title="Delete"
-                                        >
-                                            <HiTrash className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        {(data.educations || []).map((edu: EducationItem) => (
+                            <ItemCard
+                                key={edu.id}
+                                item={edu}
+                                onEdit={() => handleEdit(edu, 'education')}
+                                onDelete={() => handleDelete(edu.id, 'education')}
+                            />
                         ))}
                         {(data.educations || []).length === 0 && (
                             <div className="text-center py-6 text-gray-400 text-sm">
-                                No education added yet
+                                {t('onboarding.educationExperience.noEducation')}
                             </div>
                         )}
                         <button
@@ -138,47 +249,22 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-gray-300 text-gray-700 rounded-lg hover:border-[#0b6459] hover:text-[#0b6459] transition font-medium text-sm"
                         >
                             <HiPlus className="w-4 h-4" />
-                            Add Education
+                            {t('onboarding.educationExperience.addEducation')}
                         </button>
                     </>
                 ) : (
                     <>
-                        {(data.experiences || []).map(exp => (
-                            <div key={exp.id} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
-                                <div className="flex justify-between items-start gap-4">
-                                    <div className="flex-grow min-w-0">
-                                        <h4 className="text-base font-semibold text-gray-800">{exp.title}</h4>
-                                        <p className="text-sm text-gray-600 mt-0.5">{exp.institution}</p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {new Date(exp.startDate).getFullYear()} - {exp.endDate ? new Date(exp.endDate).getFullYear() : 'Present'}
-                                            {exp.location && ` • ${exp.location}`}
-                                        </p>
-                                        {exp.description && (
-                                            <p className="text-sm text-gray-600 mt-2">{exp.description}</p>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                        <button
-                                            onClick={() => handleEdit(exp, 'experience')}
-                                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
-                                            title="Edit"
-                                        >
-                                            <HiPencil className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(exp.id, 'experience')}
-                                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
-                                            title="Delete"
-                                        >
-                                            <HiTrash className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                        {(data.experiences || []).map((exp: ExperienceItem) => (
+                            <ItemCard
+                                key={exp.id}
+                                item={exp}
+                                onEdit={() => handleEdit(exp, 'experience')}
+                                onDelete={() => handleDelete(exp.id, 'experience')}
+                            />
                         ))}
                         {(data.experiences || []).length === 0 && (
                             <div className="text-center py-6 text-gray-400 text-sm">
-                                No experience added yet
+                                {t('onboarding.educationExperience.noExperience')}
                             </div>
                         )}
                         <button
@@ -186,22 +272,21 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-gray-300 text-gray-700 rounded-lg hover:border-[#0b6459] hover:text-[#0b6459] transition font-medium text-sm"
                         >
                             <HiPlus className="w-4 h-4" />
-                            Add Experience
+                            {t('onboarding.educationExperience.addExperience')}
                         </button>
                     </>
                 )}
             </div>
 
             {/* Modal */}
-            {isModalOpen && (
-                <ItemModal
-                    type={editingType}
-                    item={editingItem}
-                    onSave={handleSave}
-                    onClose={() => setIsModalOpen(false)}
-                    inputStyles={inputStyles}
-                />
-            )}
+            <ItemModal
+                type={editingType}
+                item={editingItem}
+                isOpen={isModalOpen}
+                onSave={handleSave}
+                onClose={() => setIsModalOpen(false)}
+                inputStyles={inputStyles}
+            />
         </div>
     );
 };
@@ -209,41 +294,69 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
 // Modal Component
 const ItemModal: React.FC<{
     type: 'education' | 'experience';
-    item: any;
-    onSave: (item: any) => void;
+    item: EducationItem | ExperienceItem | null;
+    isOpen: boolean;
+    onSave: (item: EducationItem | ExperienceItem) => void;
     onClose: () => void;
     inputStyles: string;
-}> = ({ type, item, onSave, onClose, inputStyles }) => {
-    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const [formData, setFormData] = useState(item || {
+}> = ({ type, item, isOpen, onSave, onClose, inputStyles }) => {
+    const { t } = useTranslation();
+    const [formData, setFormData] = useState({
         title: '',
         institution: '',
         startDate: '',
         endDate: '',
         location: '',
-        timezone: '',
         description: '',
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSave({ ...formData, id: item?.id });
+    // Update formData when item changes (when editing)
+    useEffect(() => {
+        if (item) {
+            setFormData({
+                title: item.title || '',
+                institution: item.institution || '',
+                startDate: item.startDate || '',
+                endDate: item.endDate || '',
+                location: item.location || '',
+                description: item.description || '',
+            });
+        } else {
+            // Reset form when adding new item
+            setFormData({
+                title: '',
+                institution: '',
+                startDate: '',
+                endDate: '',
+                location: '',
+                description: '',
+            });
+        }
+    }, [item, isOpen]);
+
+    const handleSubmit = (e?: React.FormEvent) => {
+        if (e) {
+            e.preventDefault();
+        }
+        onSave({ ...formData, id: item?.id || '' } as EducationItem | ExperienceItem);
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-                <div className="p-6 border-b border-gray-200 flex-shrink-0">
+        <ModalLayout isOpen={isOpen} onClose={onClose} maxWidth="2xl" showCloseButton={true}>
+            <div className="max-h-[90vh] flex flex-col overflow-hidden">
+                {/* Header - Fixed */}
+                <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
                     <h3 className="text-xl font-bold text-gray-800">
-                        {item ? 'Edit' : 'Add'} {type === 'education' ? 'Education' : 'Experience'}
+                        {item ? (type === 'education' ? t('onboarding.educationExperience.modal.editEducation') : t('onboarding.educationExperience.modal.editExperience')) : (type === 'education' ? t('onboarding.educationExperience.modal.addEducation') : t('onboarding.educationExperience.modal.addExperience'))}
                     </h3>
                 </div>
 
+                {/* Content - Scrollable */}
                 <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-                    <div className="p-6 space-y-4">
+                    <div className="px-6 py-4 space-y-3">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {type === 'education' ? 'Degree / Field of Study' : 'Job Title'} <span className="text-red-500">*</span>
+                            {type === 'education' ? t('onboarding.educationExperience.modal.degreeField') : t('onboarding.educationExperience.modal.jobTitle')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -251,13 +364,13 @@ const ItemModal: React.FC<{
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className={inputStyles}
-                            placeholder={type === 'education' ? 'e.g., Bachelor of Science in Mathematics' : 'e.g., Senior Math Teacher'}
+                            placeholder={type === 'education' ? t('onboarding.educationExperience.modal.degreePlaceholder') : t('onboarding.educationExperience.modal.jobTitlePlaceholder')}
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {type === 'education' ? 'School / University' : 'Company / Organization'} <span className="text-red-500">*</span>
+                            {type === 'education' ? t('onboarding.educationExperience.modal.schoolUniversity') : t('onboarding.educationExperience.modal.companyOrganization')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -265,14 +378,14 @@ const ItemModal: React.FC<{
                             value={formData.institution}
                             onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
                             className={inputStyles}
-                            placeholder={type === 'education' ? 'e.g., Harvard University' : 'e.g., ABC High School'}
+                            placeholder={type === 'education' ? t('onboarding.educationExperience.modal.schoolPlaceholder') : t('onboarding.educationExperience.modal.companyPlaceholder')}
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Start Date <span className="text-red-500">*</span>
+                                {t('onboarding.educationExperience.modal.startDate')} <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="date"
@@ -283,8 +396,19 @@ const ItemModal: React.FC<{
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                End Date
+                            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+                                {t('onboarding.educationExperience.modal.endDate')}
+                                <div className="relative group">
+                                    <svg className="w-4 h-4 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
+                                        {t('onboarding.educationExperience.modal.endDateHint')}
+                                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                            <div className="border-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </label>
                             <input
                                 type="date"
@@ -292,72 +416,55 @@ const ItemModal: React.FC<{
                                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                                 className={inputStyles}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Leave empty if current</p>
                         </div>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Location
+                            {t('onboarding.educationExperience.modal.location')}
                         </label>
                         <input
                             type="text"
                             value={formData.location || ''}
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             className={inputStyles}
-                            placeholder="e.g., Boston, MA"
+                            placeholder={t('onboarding.educationExperience.modal.locationPlaceholder')}
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Timezone
-                        </label>
-                        <CustomDropdown
-                            options={commonUtils.getAllTimezones().map(tz => tz.name)}
-                            selectedValue={formData.timezone || ''}
-                            placeholder="Select timezone"
-                            onSelect={(value) => setFormData({ ...formData, timezone: value })}
-                            dropdownId="timezone"
-                            openDropdown={openDropdown}
-                            setOpenDropdown={setOpenDropdown}
-                            hasSearch={true}
-                            searchPlaceholder="Search timezone..."
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Description
+                            {t('onboarding.educationExperience.modal.description')}
                         </label>
                         <textarea
-                            rows={4}
+                            rows={3}
                             value={formData.description || ''}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className={inputStyles}
-                            placeholder="Describe your achievements, responsibilities, or coursework..."
+                            className={`${inputStyles} resize-none`}
+                            placeholder={t('onboarding.educationExperience.modal.descriptionPlaceholder')}
                         />
                     </div>
-                    </div>
 
-                    <div className="flex items-center gap-3 pt-4 px-6 pb-6 border-t border-gray-200 flex-shrink-0">
+                    {/* Footer */}
+                    <div className="flex items-center gap-3 pt-3 border-t border-gray-200">
                         <button
                             type="button"
                             onClick={onClose}
                             className="flex-1 py-2.5 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold"
                         >
-                            Cancel
+                            {t('onboarding.educationExperience.modal.cancel')}
                         </button>
                         <button
                             type="submit"
                             className="flex-1 py-2.5 px-4 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition font-semibold"
                         >
-                            Save
+                            {t('onboarding.educationExperience.modal.save')}
                         </button>
+                    </div>
                     </div>
                 </form>
             </div>
-        </div>
+        </ModalLayout>
     );
 };
 
