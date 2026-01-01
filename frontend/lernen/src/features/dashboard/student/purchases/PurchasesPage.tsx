@@ -57,52 +57,52 @@ const PurchasesPage: React.FC = () => {
                 const mockPurchases: PurchaseData[] = [
                     {
                         id: '1',
-                        courseTitle: 'Advanced Mathematics',
+                        courseTitle: 'Toán học Nâng cao',
                         type: 'ON_ONE_ONE',
                         amount: 500000,
                         status: 'COMPLETED',
                         purchaseDate: '2024-01-15T10:30:00Z',
-                        paymentMethod: 'Credit Card',
+                        paymentMethod: 'Thẻ tín dụng',
                         invoiceNumber: 'INV-2024-001'
                     },
                     {
                         id: '2',
-                        courseTitle: 'English Conversation',
+                        courseTitle: 'Tiếng Anh Giao tiếp',
                         type: 'GROUP',
                         amount: 300000,
                         status: 'PENDING',
                         purchaseDate: '2024-01-20T14:20:00Z',
-                        paymentMethod: 'Bank Transfer',
+                        paymentMethod: 'Chuyển khoản ngân hàng',
                         invoiceNumber: 'INV-2024-002'
                     },
                     {
                         id: '3',
-                        courseTitle: 'Physics Fundamentals',
+                        courseTitle: 'Vật lý Cơ bản',
                         type: 'GROUP',
                         amount: 800000,
                         status: 'COMPLETED',
                         purchaseDate: '2024-01-10T09:15:00Z',
-                        paymentMethod: 'E-Wallet',
+                        paymentMethod: 'Ví điện tử',
                         invoiceNumber: 'INV-2024-003'
                     },
                     {
                         id: '4',
-                        courseTitle: 'History of Art',
+                        courseTitle: 'Lịch sử Nghệ thuật',
                         type: 'ON_ONE_ONE',
                         amount: 450000,
                         status: 'CANCELLED',
                         purchaseDate: '2024-01-05T16:45:00Z',
-                        paymentMethod: 'Credit Card',
+                        paymentMethod: 'Thẻ tín dụng',
                         invoiceNumber: 'INV-2024-004'
                     },
                     {
                         id: '5',
-                        courseTitle: 'Chemistry Basics',
+                        courseTitle: 'Hóa học Cơ bản',
                         type: 'GROUP',
                         amount: 350000,
                         status: 'REFUNDED',
                         purchaseDate: '2024-01-12T11:30:00Z',
-                        paymentMethod: 'Bank Transfer',
+                        paymentMethod: 'Chuyển khoản ngân hàng',
                         invoiceNumber: 'INV-2024-005'
                     }
                 ];

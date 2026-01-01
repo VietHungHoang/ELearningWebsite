@@ -39,27 +39,27 @@ export interface StudentInfo {
     id: string;
     name: string;
     avatar: string;
+    email?: string;
 }
 
 // Mock data for class detail page fallback
 const mockClassDetailData: ClassData = {
-    id: "class-1",
-    classTitle: "English Conversation Advanced",
+    id: "mock-1",
+    classTitle: "Lập trình JavaScript Nâng Cao - Nhóm",
     students: [
-        { id: "student-1", name: "John Doe", avatar: "https://via.placeholder.com/40" },
-        { id: "student-2", name: "Jane Smith", avatar: "https://via.placeholder.com/40" },
-        { id: "student-3", name: "Bob Johnson", avatar: "https://via.placeholder.com/40" }
+        { id: "student-1", name: "Nguyễn Nam Sơn", avatar: "https://via.placeholder.com/40", email: "nguyen.nam.son@example.com" },
+        { id: "student-2", name: "Trần Thị Mai", avatar: "https://via.placeholder.com/40", email: "tran.thi.mai@example.com" },
+        { id: "student-3", name: "Lê Minh Đức", avatar: "https://via.placeholder.com/40", email: "le.minh.duc@example.com" }
     ],
     type: "Group",
     status: "Ongoing",
     schedules: [
-        { day: "Monday", time: "14:00" },
-        { day: "Wednesday", time: "14:00" },
-        { day: "Friday", time: "14:00" }
+        { day: "Thứ Ba", time: "19:00" },
+        { day: "Thứ Năm", time: "19:00" }
     ],
-    startDate: "2024-01-15",
+    startDate: "2025-01-15",
     completedSessions: 8,
-    totalSessions: 24,
+    totalSessions: 20,
     quizzes: [],
     materials: []
 };
@@ -70,9 +70,9 @@ const mockClassData: ClassTable[] = [
         id: 'mock-1',
         title: 'Lập trình JavaScript Nâng Cao - Nhóm',
         students: [
-            { id: 'student-1', fullName: 'Nguyễn Văn A', avatarUrl: '' },
-            { id: 'student-2', fullName: 'Trần Thị B', avatarUrl: '' },
-            { id: 'student-3', fullName: 'Lê Văn C', avatarUrl: '' }
+            { id: 'student-1', fullName: 'Nguyễn Nam Sơn', avatarUrl: '' },
+            { id: 'student-2', fullName: 'Trần Thị Mai', avatarUrl: '' },
+            { id: 'student-3', fullName: 'Lê Minh Đức', avatarUrl: '' }
         ],
         type: 'GROUP',
         status: 'ONGOING',
@@ -88,7 +88,7 @@ const mockClassData: ClassTable[] = [
         id: 'mock-2',
         title: 'Lập trình Python Cơ Bản - 1-1',
         students: [
-            { id: 'student-4', fullName: 'Phạm Thị D', avatarUrl: '' }
+            { id: 'student-4', fullName: 'Phạm Thị Hương', avatarUrl: '' }
         ],
         type: 'ONE_ON_ONE',
         status: 'ONGOING',
@@ -528,7 +528,26 @@ export const classService = {
             return data;
         } catch (error) {
             console.warn('API fetch failed, using mock data:', error);
-            // Return mock data as fallback
+            // Return mock data as fallback - match classId if possible
+            if (classId === 'mock-1') {
+                return {
+                    ...mockClassDetailData,
+                    id: 'mock-1',
+                    classTitle: 'Lập trình JavaScript Nâng Cao - Nhóm',
+                    students: [
+                        { id: "student-1", name: "Nguyễn Nam Sơn", avatar: "https://via.placeholder.com/40", email: "nguyen.nam.son@example.com" },
+                        { id: "student-2", name: "Trần Thị Mai", avatar: "https://via.placeholder.com/40", email: "tran.thi.mai@example.com" },
+                        { id: "student-3", name: "Lê Minh Đức", avatar: "https://via.placeholder.com/40", email: "le.minh.duc@example.com" }
+                    ],
+                    schedules: [
+                        { day: "Thứ Ba", time: "19:00" },
+                        { day: "Thứ Năm", time: "19:00" }
+                    ],
+                    startDate: "2025-01-15",
+                    completedSessions: 8,
+                    totalSessions: 20
+                };
+            }
             return mockClassDetailData;
         }
     },

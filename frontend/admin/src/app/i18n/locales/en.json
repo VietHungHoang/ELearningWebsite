@@ -11,7 +11,7 @@
     "overview": {
       "table": {
         "learner": "Learner",
-        "instructor": "Instructor",
+        "instructor": "Tutor",
         "subject": "Subject",
         "schedule": "Schedule",
         "type": "Type",
@@ -63,13 +63,13 @@
         "completed": "Completed"
       },
       "totalSales": {
-        "title": "Total Sales",
+        "title": "Total Revenue",
         "weekly": "Weekly",
         "monthly": "Monthly",
         "yearly": "Yearly"
       },
       "topInstructors": {
-        "title": "Top Instructors",
+        "title": "Top Tutors",
         "rank": "Rank",
         "name": "Name",
         "rating": "Rating",
@@ -131,8 +131,8 @@
       "classList": "Class List",
       "review": "Review",
       "user": "User",
-      "instructors": "Instructors",
-      "instructorApproval": "Instructor Approval",
+      "instructors": "Tutors",
+      "instructorApproval": "Tutor Approval",
       "learners": "Learners",
       "finance": "Finance",
       "revenueDashboard": "Revenue Dashboard",
@@ -250,7 +250,7 @@
     "table": {
       "stt": "STT",
       "className": "Class Name",
-      "instructor": "Instructor",
+      "instructor": "Tutor",
       "startDate": "Start Date",
       "duration": "Duration",
       "enrollment": "Enrollment",
@@ -285,7 +285,7 @@
       "classInformation": {
         "title": "Class Information",
         "className": "Class Name",
-        "instructor": "Instructor",
+        "instructor": "Tutor",
         "startDate": "Start Date",
         "duration": "Duration",
         "enrollment": "Enrollment",
@@ -304,7 +304,7 @@
         "priceTimesEnrollment": "Price × Enrollment",
         "platformFee": "Platform Fee",
         "ofRevenue": "% of revenue",
-        "instructorPayout": "Instructor Payout",
+        "instructorPayout": "Tutor Payout",
         "revenueMinusFee": "Revenue - Fee",
         "revenuePerHour": "Revenue Per Hour",
         "basedOnDuration": "Based on duration"
@@ -403,12 +403,12 @@
     }
   },
   "instructorList": {
-    "title": "Instructors List",
+    "title": "Tutors List",
     "breadcrumb": {
       "userManagement": "User Management",
-      "instructorsList": "Instructors List"
+      "instructorsList": "Tutors List"
     },
-    "searchPlaceholder": "Search instructors by name.....",
+    "searchPlaceholder": "Search tutors by name.....",
     "table": {
       "stt": "STT",
       "name": "Name",
@@ -419,27 +419,27 @@
       "action": "Action"
     },
     "pagination": {
-      "showing": "Showing {{start}} to {{end}} of {{total}} instructors"
+      "showing": "Showing {{start}} to {{end}} of {{total}} tutors"
     },
     "emptyState": {
-      "noInstructorsFound": "No instructors found"
+      "noInstructorsFound": "No tutors found"
     },
     "confirm": {
-      "deleteTitle": "Delete Instructor",
-      "deleteMessage": "Are you sure you want to delete instructor {{name}}?",
+      "deleteTitle": "Delete Tutor",
+      "deleteMessage": "Are you sure you want to delete tutor {{name}}?",
       "delete": "Delete"
     }
   },
   "instructorApproval": {
-    "title": "Instructor Approval",
+    "title": "Tutor Approval",
     "subtitle": "You have {{count}} pending applications.",
     "breadcrumb": {
       "userManagement": "User Management",
-      "instructorApproval": "Instructor Approval"
+      "instructorApproval": "Tutor Approval"
     },
-    "searchPlaceholder": "Search instructors...",
+    "searchPlaceholder": "Search tutors...",
     "selected": "selected",
-    "selectInstructors": "Select instructors to perform actions",
+    "selectInstructors": "Select tutors to perform actions",
     "filters": {
       "category": "Filter by Category",
       "status": "Filter by Status",
@@ -464,7 +464,7 @@
     },
     "table": {
       "stt": "STT",
-      "instructorName": "Instructor Name",
+      "instructorName": "Tutor Name",
       "subject": "Subject",
       "certifications": "Certifications",
       "submittedDate": "Submitted Date",
@@ -479,8 +479,8 @@
       "showing": "Showing {{start}} to {{end}} of {{total}} results"
     },
     "emptyState": {
-      "noPendingRequests": "No pending instructor requests found",
-      "noEditRequests": "No requests awaiting instructor edits",
+      "noPendingRequests": "No pending tutor requests found",
+      "noEditRequests": "No requests awaiting tutor edits",
       "noHistory": "No approved or rejected applications"
     },
     "actions": {
@@ -494,11 +494,11 @@
     }
   },
   "instructorApprovalDetail": {
-    "title": "Instructor Approval Detail",
+    "title": "Tutor Approval Detail",
     "breadcrumb": {
       "dashboard": "Dashboard",
       "userManagement": "User Management",
-      "instructorApproval": "Instructor Approval",
+      "instructorApproval": "Tutor Approval",
       "detail": "Detail"
     },
     "loading": "Loading...",
@@ -561,8 +561,8 @@
     },
     "dialogs": {
       "approve": {
-        "title": "Approve Instructor",
-        "subtitle": "Select instructor levels to approve:",
+        "title": "Approve Tutor",
+        "subtitle": "Select tutor levels to approve:",
         "selectLevel": "Please select at least one level",
         "approving": "Approving...",
         "approve": "Approve"
@@ -668,11 +668,11 @@
     }
   },
   "instructorDetail": {
-    "title": "Instructor Detail",
+    "title": "Tutor Detail",
     "breadcrumb": {
       "dashboard": "Dashboard",
       "userManagement": "User Management",
-      "instructors": "Instructors",
+      "instructors": "Tutors",
       "detail": "Detail"
     },
     "loading": "Loading...",
@@ -779,7 +779,7 @@
       },
       "payout": {
         "label": "Payout",
-        "title": "To Instructors",
+        "title": "To Tutors",
         "description": "Fixed: {{date}}th monthly",
         "descriptionShort": "Fixed monthly"
       },
@@ -801,7 +801,7 @@
       "payouts": {
         "label": "Payouts",
         "title": "Total Count",
-        "description": "Instructor payments"
+        "description": "Tutor payments"
       },
       "vsPrevious": "vs previous"
     }
@@ -817,11 +817,11 @@
       "pending": {
         "label": "Pending",
         "title": "Total Amount",
-        "description": "instructors waiting"
+        "description": "tutors waiting"
       },
       "instructors": {
         "label": "Count",
-        "title": "Instructors",
+        "title": "Tutors",
         "description": "Pending payment"
       },
       "orders": {
@@ -835,7 +835,7 @@
       "paymentHistory": "Payment History"
     },
     "search": {
-      "placeholder": "Search instructor name or batch number..."
+      "placeholder": "Search tutor name or batch number..."
     },
     "export": {
       "excel": "Export Excel"
@@ -848,12 +848,12 @@
     },
     "table": {
       "stt": "STT",
-      "instructorBank": "Instructor & Bank",
+      "instructorBank": "Tutor & Bank",
       "method": "Method",
       "totalAmount": "Total Amount",
       "orders": "Orders",
       "actions": "Actions",
-      "instructorName": "Instructor Name",
+      "instructorName": "Tutor Name",
       "amount": "Amount",
       "paymentDate": "Payment Date",
       "approvedBy": "Approved By",
@@ -921,7 +921,7 @@
       },
       "bulkConfirm": {
         "title": "Confirm Bulk Payment",
-        "selectedInstructors": "Selected Instructors",
+        "selectedInstructors": "Selected Tutors",
         "totalAmount": "Total Amount",
         "notes": "Notes (Optional)",
         "notesPlaceholder": "Add payment notes...",
@@ -1029,7 +1029,7 @@
         "classId": "Class ID",
         "name": "Name",
         "type": "Type",
-        "instructor": "Instructor",
+        "instructor": "Tutor",
         "classType": {
           "oneOnOne": "1-on-1",
           "group": "Group"
@@ -1176,7 +1176,7 @@
       "creator": "Creator",
       "all": "All",
       "createdByAdmin": "Admin",
-      "createdByInstructor": "Instructor",
+      "createdByInstructor": "Tutor",
       "allStatus": "All Status",
       "allTypes": "All Types",
       "percentageDiscount": "Percentage Discount",

@@ -59,10 +59,6 @@ const ClassDetailPage: React.FC = () => {
         console.log('View past session:', session);
     };
 
-    const handleAssignQuiz = () => {
-        console.log('Open assign quiz modal');
-    };
-
     const handleViewQuizResult = (quizId: number) => {
         console.log('View quiz result for quiz:', quizId);
     };
@@ -72,7 +68,7 @@ const ClassDetailPage: React.FC = () => {
         {
             id: 'session-1',
             sessionDatetime: '2025-12-22T14:00:00',
-            sessionType: classData.type === '1-on-1' ? 'ON_ONE_ONE' : 'GROUP',
+            sessionType: classData.type === '1-on-1' ? 'ONE_ON_ONE' : 'GROUP',
             classInfo: {
                 id: classData.id,
                 title: classData.classTitle
@@ -84,17 +80,17 @@ const ClassDetailPage: React.FC = () => {
             })),
             tutor: {
                 id: 'tutor-1',
-                fullName: 'Tutor Name',
+                fullName: 'Tên Giảng viên',
                 avatarUrl: ''
             },
             createdAt: '2025-12-20T10:00:00',
             updatedAt: '2025-12-20T10:00:00',
-            notes: 'Review homework and practice speaking'
+            notes: 'Ôn tập bài tập về nhà và luyện tập thực hành'
         },
         {
             id: 'session-2',
             sessionDatetime: '2025-12-24T14:00:00',
-            sessionType: classData.type === '1-on-1' ? 'ON_ONE_ONE' : 'GROUP',
+            sessionType: classData.type === '1-on-1' ? 'ONE_ON_ONE' : 'GROUP',
             classInfo: {
                 id: classData.id,
                 title: classData.classTitle
@@ -122,17 +118,17 @@ const ClassDetailPage: React.FC = () => {
             actualStartTime: "14:05",
             actualEndTime: "15:35",
             duration: "1h 30m",
-            topic: "Getting Started with React",
+            topic: "Bắt đầu với React",
             status: "completed",
             recording: true,
             participantsCount: 5,
-            notes: "Students showed good understanding of React basics. Need to review component lifecycle in next session.",
+            notes: "Học viên thể hiện sự hiểu biết tốt về React cơ bản. Cần ôn tập vòng đời component trong buổi học tiếp theo.",
             attendanceHistory: [
-                { studentId: "1", studentName: "Alice Johnson", joinTime: "14:05", leaveTime: "15:35", status: "present" },
-                { studentId: "2", studentName: "Bob Smith", joinTime: "14:10", leaveTime: "15:30", status: "present" },
-                { studentId: "3", studentName: "Charlie Brown", joinTime: "14:00", leaveTime: "15:35", status: "present" },
-                { studentId: "4", studentName: "Diana Wilson", joinTime: "14:15", leaveTime: "15:20", status: "present" },
-                { studentId: "5", studentName: "Eve Davis", joinTime: "14:08", leaveTime: "15:35", status: "present" }
+                { studentId: "1", studentName: "Nguyễn Nam Sơn", joinTime: "14:05", leaveTime: "15:35", status: "present" },
+                { studentId: "2", studentName: "Trần Thị Mai", joinTime: "14:10", leaveTime: "15:30", status: "present" },
+                { studentId: "3", studentName: "Lê Minh Đức", joinTime: "14:00", leaveTime: "15:35", status: "present" },
+                { studentId: "4", studentName: "Phạm Thị Hương", joinTime: "14:15", leaveTime: "15:20", status: "present" },
+                { studentId: "5", studentName: "Hoàng Văn Quang", joinTime: "14:08", leaveTime: "15:35", status: "present" }
             ],
             absentStudents: []
         },
@@ -143,20 +139,20 @@ const ClassDetailPage: React.FC = () => {
             actualStartTime: "10:02",
             actualEndTime: "11:28",
             duration: "1h 26m",
-            topic: "Advanced JavaScript Concepts",
+            topic: "Khái niệm JavaScript Nâng cao",
             status: "completed",
             recording: true,
             participantsCount: 4,
-            notes: "Covered closures and prototypes. One student had connection issues.",
+            notes: "Đã học về closures và prototypes. Một học viên gặp vấn đề về kết nối.",
             attendanceHistory: [
-                { studentId: "1", studentName: "Alice Johnson", joinTime: "10:02", leaveTime: "11:28", status: "present" },
-                { studentId: "2", studentName: "Bob Smith", joinTime: "10:05", leaveTime: "11:25", status: "present" },
-                { studentId: "3", studentName: "Charlie Brown", joinTime: "10:00", leaveTime: "11:28", status: "present" },
-                { studentId: "6", studentName: "Frank Miller", joinTime: "10:10", leaveTime: "11:28", status: "present" }
+                { studentId: "1", studentName: "Nguyễn Nam Sơn", joinTime: "10:02", leaveTime: "11:28", status: "present" },
+                { studentId: "2", studentName: "Trần Thị Mai", joinTime: "10:05", leaveTime: "11:25", status: "present" },
+                { studentId: "3", studentName: "Lê Minh Đức", joinTime: "10:00", leaveTime: "11:28", status: "present" },
+                { studentId: "6", studentName: "Vũ Văn Sơn", joinTime: "10:10", leaveTime: "11:28", status: "present" }
             ],
             absentStudents: [
-                { studentId: "4", studentName: "Diana Wilson", reason: "Sick" },
-                { studentId: "5", studentName: "Eve Davis", reason: "Family emergency" }
+                { studentId: "4", studentName: "Phạm Thị Hương", reason: "Ốm" },
+                { studentId: "5", studentName: "Hoàng Văn Quang", reason: "Việc khẩn cấp gia đình" }
             ]
         }
     ];
@@ -282,7 +278,7 @@ const ClassDetailPage: React.FC = () => {
                                         <StudentsTab classData={classData} />
                                     )}
                                     {activeTab === "Quizzes" && (
-                                        <QuizzesTab classData={classData} onAssignQuiz={handleAssignQuiz} onViewQuizResult={handleViewQuizResult} />
+                                        <QuizzesTab onViewQuizResult={handleViewQuizResult} />
                                     )}
                                     {activeTab === "Materials" && (
                                         <MaterialsTab classData={classData} />

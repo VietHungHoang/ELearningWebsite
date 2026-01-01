@@ -5,109 +5,109 @@ import type { Booking } from '../features/dashboard/student/types';
 const mockStudents: StudentListItem[] = [
     {
         id: '550e8400-e29b-41d4-a716-446655440000',
-        fullName: 'Sarah Chapman',
+        fullName: 'Nguyễn Thị Lan',
         avatarUrl: 'https://picsum.photos/seed/sarah/48/48',
-        registeredDate: 'Oct 15, 2025',
-        email: 'sarah.c@example.com',
+        registeredDate: '15 Thg 10, 2025',
+        email: 'nguyen.lan@example.com',
         enrollmentTypes: ['1-on-1', 'Trial'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440001',
-        fullName: 'Ann Coleman',
+        fullName: 'Trần Thị Mai',
         avatarUrl: 'https://picsum.photos/seed/ann/48/48',
-        registeredDate: 'Oct 12, 2025',
-        email: 'ann.co@example.com',
+        registeredDate: '12 Thg 10, 2025',
+        email: 'tran.mai@example.com',
         enrollmentTypes: ['Group'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440002',
-        fullName: 'Judy Dixon',
+        fullName: 'Lê Văn Đức',
         avatarUrl: 'https://picsum.photos/seed/judy/48/48',
-        registeredDate: 'Oct 10, 2025',
-        email: 'judy.d@example.com',
+        registeredDate: '10 Thg 10, 2025',
+        email: 'le.duc@example.com',
         enrollmentTypes: ['Trial'],
         status: 'Completed'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440003',
-        fullName: 'Michael Brown',
+        fullName: 'Phạm Minh Quang',
         avatarUrl: 'https://picsum.photos/seed/michael/48/48',
-        registeredDate: 'Oct 08, 2025',
-        email: 'michael.b@example.com',
+        registeredDate: '08 Thg 10, 2025',
+        email: 'pham.quang@example.com',
         enrollmentTypes: ['Group', '1-on-1'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440004',
-        fullName: 'Jessica Miller',
+        fullName: 'Hoàng Thị Hương',
         avatarUrl: 'https://picsum.photos/seed/jessica/48/48',
-        registeredDate: 'Oct 05, 2025',
-        email: 'jessica.m@example.com',
+        registeredDate: '05 Thg 10, 2025',
+        email: 'hoang.huong@example.com',
         enrollmentTypes: ['Trial'],
         status: 'Completed'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440005',
-        fullName: 'David Wilson',
+        fullName: 'Vũ Văn Sơn',
         avatarUrl: 'https://picsum.photos/seed/david/48/48',
-        registeredDate: 'Oct 01, 2025',
-        email: 'david.w@example.com',
+        registeredDate: '01 Thg 10, 2025',
+        email: 'vu.son@example.com',
         enrollmentTypes: ['1-on-1'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440006',
-        fullName: 'Emma Davis',
+        fullName: 'Đỗ Thị Linh',
         avatarUrl: 'https://picsum.photos/seed/emma/48/48',
-        registeredDate: 'Sep 28, 2025',
-        email: 'emma.d@example.com',
+        registeredDate: '28 Thg 9, 2025',
+        email: 'do.linh@example.com',
         enrollmentTypes: ['Group', 'Trial'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440007',
-        fullName: 'James Garcia',
+        fullName: 'Bùi Văn Khánh',
         avatarUrl: 'https://picsum.photos/seed/james/48/48',
-        registeredDate: 'Sep 25, 2025',
-        email: 'james.g@example.com',
+        registeredDate: '25 Thg 9, 2025',
+        email: 'bui.khanh@example.com',
         enrollmentTypes: ['1-on-1'],
         status: 'Completed'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440008',
-        fullName: 'Olivia Martinez',
+        fullName: 'Cao Thị Thảo',
         avatarUrl: 'https://picsum.photos/seed/olivia/48/48',
-        registeredDate: 'Sep 22, 2025',
-        email: 'olivia.m@example.com',
+        registeredDate: '22 Thg 9, 2025',
+        email: 'cao.thao@example.com',
         enrollmentTypes: ['Trial'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440009',
-        fullName: 'William Rodriguez',
+        fullName: 'Trịnh Văn Tuấn',
         avatarUrl: 'https://picsum.photos/seed/william/48/48',
-        registeredDate: 'Sep 20, 2025',
-        email: 'william.r@example.com',
+        registeredDate: '20 Thg 9, 2025',
+        email: 'trinh.tuan@example.com',
         enrollmentTypes: ['Group'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440010',
-        fullName: 'Sophia Lopez',
+        fullName: 'Tạ Thị Ngọc',
         avatarUrl: 'https://picsum.photos/seed/sophia/48/48',
-        registeredDate: 'Sep 18, 2025',
-        email: 'sophia.l@example.com',
+        registeredDate: '18 Thg 9, 2025',
+        email: 'ta.ngoc@example.com',
         enrollmentTypes: ['1-on-1', 'Group'],
         status: 'Ongoing'
     },
     {
         id: '550e8400-e29b-41d4-a716-446655440011',
-        fullName: 'Benjamin Gonzalez',
+        fullName: 'Đinh Văn Minh',
         avatarUrl: 'https://picsum.photos/seed/benjamin/48/48',
-        registeredDate: 'Sep 15, 2025',
-        email: 'benjamin.g@example.com',
+        registeredDate: '15 Thg 9, 2025',
+        email: 'dinh.minh@example.com',
         enrollmentTypes: ['Trial'],
         status: 'Completed'
     },
@@ -167,7 +167,7 @@ export const studentService = {
 
             // Pagination logic
             const pageNumber = (filters?.page || 1) - 1;
-            const pageSize = filters?.limit || 10;
+            const pageSize = filters?.size || 10;
             const totalElements = filtered.length;
             const totalPages = Math.ceil(totalElements / pageSize);
             const offset = pageNumber * pageSize;
@@ -269,101 +269,101 @@ export const studentService = {
                     joinedDate: student.registeredDate,
                 },
                 class: {
-                    name: 'Math Advanced A1',
-                    instructor: 'You',
-                    schedule: 'Mon, Wed, Fri - 3:00 PM',
+                    name: 'Toán Nâng cao A1',
+                    instructor: 'Bạn',
+                    schedule: 'Thứ Hai, Thứ Tư, Thứ Sáu - 15:00',
                 },
                 payment: {
-                    status: 'Paid',
+                    status: 'Đã thanh toán',
                     nextDueDate: '2025-12-01',
-                    totalPaid: '$240',
+                    totalPaid: '5.760.000 VND',
                 },
                 upcomingSessions: [
                     {
                         id: '550e8400-e29b-41d4-a716-446655440020',
                         date: '2025-11-22',
                         time: '15:00',
-                        duration: '60 min',
-                        topic: 'Calculus Introduction'
+                        duration: '60 phút',
+                        topic: 'Giới thiệu Giải tích'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440021',
                         date: '2025-11-24',
                         time: '15:00',
-                        duration: '60 min',
-                        topic: 'Derivatives Practice'
+                        duration: '60 phút',
+                        topic: 'Luyện tập Đạo hàm'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440022',
                         date: '2025-11-26',
                         time: '15:00',
-                        duration: '60 min',
-                        topic: 'Integration Basics'
+                        duration: '60 phút',
+                        topic: 'Cơ bản về Tích phân'
                     },
                 ],
                 sessionHistory: [
                     {
                         id: '550e8400-e29b-41d4-a716-446655440030',
                         date: '2025-11-18',
-                        duration: '60 min',
-                        attendance: 'Present',
-                        topic: 'Quadratic Equations'
+                        duration: '60 phút',
+                        attendance: 'Có mặt',
+                        topic: 'Phương trình bậc hai'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440031',
                         date: '2025-11-15',
-                        duration: '60 min',
-                        attendance: 'Present',
-                        topic: 'Linear Functions'
+                        duration: '60 phút',
+                        attendance: 'Có mặt',
+                        topic: 'Hàm số tuyến tính'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440032',
                         date: '2025-11-13',
-                        duration: '60 min',
-                        attendance: 'Late (10 min)',
-                        topic: 'Polynomials'
+                        duration: '60 phút',
+                        attendance: 'Muộn (10 phút)',
+                        topic: 'Đa thức'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440033',
                         date: '2025-11-11',
-                        duration: '60 min',
-                        attendance: 'Present',
-                        topic: 'Factoring Review'
+                        duration: '60 phút',
+                        attendance: 'Có mặt',
+                        topic: 'Ôn tập Phân tích nhân tử'
                     },
                 ],
                 courses: [
-                    {title: 'Advanced Mathematics', progress: 75, type: '1-on-1'},
-                    {title: 'Physics Workshop', progress: 60, type: 'Group'},
-                    {title: 'Chemistry Fundamentals', progress: 90, type: 'Trial'},
+                    {title: 'Toán học Nâng cao', progress: 75, type: '1-on-1'},
+                    {title: 'Hội thảo Vật lý', progress: 60, type: 'Group'},
+                    {title: 'Hóa học Cơ bản', progress: 90, type: 'Trial'},
                 ],
                 performance: {
                     testScores: [85, 92, 88, 95, 90],
                     homeworkCompletion: 95,
                     averageScore: 90,
                 },
-                strengths: ['Problem Solving', 'Quick Learner', 'Consistent Attendance'],
-                weaknesses: ['Needs more practice with word problems'],
+                strengths: ['Giải quyết vấn đề', 'Học nhanh', 'Tham gia đều đặn'],
+                weaknesses: ['Cần luyện tập thêm với bài toán có lời văn'],
                 communications: [
                     {
                         id: '550e8400-e29b-41d4-a716-446655440040',
                         date: '2025-11-19',
-                        type: 'Message',
-                        content: 'Discussed upcoming exam preparation'
+                        type: 'Tin nhắn',
+                        content: 'Thảo luận về chuẩn bị kỳ thi sắp tới'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440041',
                         date: '2025-11-10',
                         type: 'Email',
-                        content: 'Sent homework assignment guidelines'
+                        content: 'Gửi hướng dẫn bài tập về nhà'
                     },
                     {
                         id: '550e8400-e29b-41d4-a716-446655440042',
                         date: '2025-11-05',
-                        type: 'Message',
-                        content: 'Scheduled extra tutoring session'
+                        type: 'Tin nhắn',
+                        content: 'Lên lịch buổi học thêm'
                     },
                 ],
-                tutorNotes: 'Great progress this month! Very engaged in class discussions.'
+                tutorNotes: 'Tiến bộ rất tốt trong tháng này! Rất tích cực trong các cuộc thảo luận trên lớp.'
             };
 
             return {

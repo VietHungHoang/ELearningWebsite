@@ -30,16 +30,16 @@ const RequestsPage: React.FC = () => {
             type: 'Reschedule' as const,
             student: {
                 id: 's1',
-                name: 'Nguyễn Văn A',
+                name: 'Nguyễn Nam Sơn',
                 avatar: 'https://i.pravatar.cc/150?img=1'
             },
-            courseTitle: 'Advanced Mathematics',
-            originalSchedule: 'Monday, 19:00',
+            courseTitle: 'Toán học Nâng cao',
+            originalSchedule: 'Thứ Hai, 19:00',
             proposedSchedules: [
-                { day: 'Wednesday', time: '20:00' }
+                { day: 'Thứ Tư', time: '20:00' }
             ],
-            reason: 'I have a family event on Monday evening. Could we please reschedule to Wednesday?',
-            timestamp: '2 hours ago',
+            reason: 'Tôi có sự kiện gia đình vào tối thứ Hai. Chúng ta có thể đổi lịch sang thứ Tư được không?',
+            timestamp: '2 giờ trước',
             date: new Date(),
             status: 'PENDING' as const
         },
@@ -48,17 +48,17 @@ const RequestsPage: React.FC = () => {
             type: 'Reschedule' as const,
             student: {
                 id: 's2',
-                name: 'Trần Thị B',
+                name: 'Trần Thị Mai',
                 avatar: 'https://i.pravatar.cc/150?img=2'
             },
-            courseTitle: 'English Conversation',
-            originalSchedule: 'Every Friday, 18:00',
+            courseTitle: 'Tiếng Anh Giao tiếp',
+            originalSchedule: 'Mỗi Thứ Sáu, 18:00',
             proposedSchedules: [
-                { day: 'Friday', time: '19:00' },
-                { day: 'Saturday', time: '10:00' }
+                { day: 'Thứ Sáu', time: '19:00' },
+                { day: 'Thứ Bảy', time: '10:00' }
             ],
-            reason: 'I would like to change the time to later in the evening or Saturday morning if possible.',
-            timestamp: '5 hours ago',
+            reason: 'Tôi muốn đổi giờ học sang muộn hơn vào buổi tối hoặc sáng thứ Bảy nếu có thể.',
+            timestamp: '5 giờ trước',
             date: new Date(),
             status: 'PENDING' as const
         },
@@ -67,16 +67,16 @@ const RequestsPage: React.FC = () => {
             type: 'Reschedule' as const,
             student: {
                 id: 's3',
-                name: 'Lê Văn C',
+                name: 'Lê Minh Đức',
                 avatar: 'https://i.pravatar.cc/150?img=5'
             },
-            courseTitle: 'Physics Fundamentals',
-            originalSchedule: 'Tuesday, 17:00',
+            courseTitle: 'Vật lý Cơ bản',
+            originalSchedule: 'Thứ Ba, 17:00',
             proposedSchedules: [
-                { day: 'Thursday', time: '17:00' }
+                { day: 'Thứ Năm', time: '17:00' }
             ],
-            reason: 'I have a conflict with another class on Tuesday. Can we move to Thursday?',
-            timestamp: '1 day ago',
+            reason: 'Tôi có lịch trùng với lớp học khác vào thứ Ba. Chúng ta có thể chuyển sang thứ Năm được không?',
+            timestamp: '1 ngày trước',
             date: new Date(),
             status: 'PENDING' as const
         }
@@ -88,16 +88,16 @@ const RequestsPage: React.FC = () => {
             id: 's1',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Dr. Smith',
+                name: 'TS. Nguyễn Văn Hùng',
                 avatar: 'https://i.pravatar.cc/150?img=10'
             },
-            courseTitle: 'Advanced Mathematics',
-            originalSchedule: 'Monday, 19:00',
+            courseTitle: 'Toán học Nâng cao',
+            originalSchedule: 'Thứ Hai, 19:00',
             proposedSchedules: [
-                { day: 'Wednesday', time: '20:00' }
+                { day: 'Thứ Tư', time: '20:00' }
             ],
-            reason: 'I have a family event on Monday evening. Could we please reschedule to Wednesday?',
-            timestamp: '2 hours ago',
+            reason: 'Tôi có sự kiện gia đình vào tối thứ Hai. Chúng ta có thể đổi lịch sang thứ Tư được không?',
+            timestamp: '2 giờ trước',
             date: new Date(),
             status: 'PENDING' as const
         },
@@ -105,16 +105,16 @@ const RequestsPage: React.FC = () => {
             id: 's2',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Ms. Johnson',
+                name: 'Cô Trần Thị Lan',
                 avatar: 'https://i.pravatar.cc/150?img=11'
             },
-            courseTitle: 'English Conversation',
-            originalSchedule: 'Every Friday, 18:00',
+            courseTitle: 'Tiếng Anh Giao tiếp',
+            originalSchedule: 'Mỗi Thứ Sáu, 18:00',
             proposedSchedules: [
-                { day: 'Friday', time: '19:00' }
+                { day: 'Thứ Sáu', time: '19:00' }
             ],
-            reason: 'I would like to change the time to later in the evening if possible.',
-            timestamp: '1 day ago',
+            reason: 'Tôi muốn đổi giờ học sang muộn hơn vào buổi tối nếu có thể.',
+            timestamp: '1 ngày trước',
             date: new Date(),
             status: 'APPROVED' as const
         },
@@ -122,16 +122,16 @@ const RequestsPage: React.FC = () => {
             id: 's3',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Prof. Brown',
+                name: 'GS. Phạm Văn Bình',
                 avatar: 'https://i.pravatar.cc/150?img=15'
             },
-            courseTitle: 'History of Art',
-            originalSchedule: 'Thursday, 16:00',
+            courseTitle: 'Lịch sử Nghệ thuật',
+            originalSchedule: 'Thứ Năm, 16:00',
             proposedSchedules: [
-                { day: 'Thursday', time: '17:30' }
+                { day: 'Thứ Năm', time: '17:30' }
             ],
-            reason: 'I need to adjust the time due to my other commitments.',
-            timestamp: '2 days ago',
+            reason: 'Tôi cần điều chỉnh giờ học do các cam kết khác của tôi.',
+            timestamp: '2 ngày trước',
             date: new Date(),
             status: 'DECLINED' as const
         },
@@ -139,16 +139,16 @@ const RequestsPage: React.FC = () => {
             id: 's4',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Dr. Wilson',
+                name: 'TS. Lê Minh Tuấn',
                 avatar: 'https://i.pravatar.cc/150?img=16'
             },
-            courseTitle: 'Computer Science',
-            originalSchedule: 'Tuesday, 19:00',
+            courseTitle: 'Khoa học Máy tính',
+            originalSchedule: 'Thứ Ba, 19:00',
             proposedSchedules: [
-                { day: 'Wednesday', time: '19:00' }
+                { day: 'Thứ Tư', time: '19:00' }
             ],
-            reason: 'I have a conflict on Tuesday. Can we move to Wednesday?',
-            timestamp: '4 hours ago',
+            reason: 'Tôi có lịch trùng vào thứ Ba. Chúng ta có thể chuyển sang thứ Tư được không?',
+            timestamp: '4 giờ trước',
             date: new Date(),
             status: 'PENDING' as const
         },
@@ -156,16 +156,16 @@ const RequestsPage: React.FC = () => {
             id: 's5',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Dr. Smith',
+                name: 'TS. Nguyễn Văn Hùng',
                 avatar: 'https://i.pravatar.cc/150?img=10'
             },
-            courseTitle: 'Chemistry Basics',
-            originalSchedule: 'Wednesday, 15:00',
+            courseTitle: 'Hóa học Cơ bản',
+            originalSchedule: 'Thứ Tư, 15:00',
             proposedSchedules: [
-                { day: 'Wednesday', time: '16:00' }
+                { day: 'Thứ Tư', time: '16:00' }
             ],
-            reason: 'I need to move the class 1 hour later due to my work schedule.',
-            timestamp: '3 days ago',
+            reason: 'Tôi cần dời lớp học muộn hơn 1 giờ do lịch làm việc của tôi.',
+            timestamp: '3 ngày trước',
             date: new Date(),
             status: 'APPROVED' as const
         },
@@ -173,16 +173,16 @@ const RequestsPage: React.FC = () => {
             id: 's6',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Ms. Johnson',
+                name: 'Cô Trần Thị Lan',
                 avatar: 'https://i.pravatar.cc/150?img=11'
             },
-            courseTitle: 'Mathematics Advanced',
-            originalSchedule: 'Every Monday, 18:00',
+            courseTitle: 'Toán học Nâng cao',
+            originalSchedule: 'Mỗi Thứ Hai, 18:00',
             proposedSchedules: [
-                { day: 'Monday', time: '19:00' }
+                { day: 'Thứ Hai', time: '19:00' }
             ],
-            reason: 'I would prefer a later time slot.',
-            timestamp: '5 days ago',
+            reason: 'Tôi muốn một khung giờ muộn hơn.',
+            timestamp: '5 ngày trước',
             date: new Date(),
             status: 'DECLINED' as const
         },
@@ -190,16 +190,16 @@ const RequestsPage: React.FC = () => {
             id: 's7',
             type: 'Reschedule' as const,
             tutor: {
-                name: 'Prof. Brown',
+                name: 'GS. Phạm Văn Bình',
                 avatar: 'https://i.pravatar.cc/150?img=15'
             },
-            courseTitle: 'Biology Introduction',
-            originalSchedule: 'Friday, 14:00',
+            courseTitle: 'Sinh học Nhập môn',
+            originalSchedule: 'Thứ Sáu, 14:00',
             proposedSchedules: [
-                { day: 'Saturday', time: '10:00' }
+                { day: 'Thứ Bảy', time: '10:00' }
             ],
-            reason: 'I have an exam on Friday afternoon. Can we reschedule to Saturday morning?',
-            timestamp: '6 hours ago',
+            reason: 'Tôi có bài thi vào chiều thứ Sáu. Chúng ta có thể đổi lịch sang sáng thứ Bảy được không?',
+            timestamp: '6 giờ trước',
             date: new Date(),
             status: 'PENDING' as const
         }
@@ -211,11 +211,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session1',
             student: {
                 id: 's4',
-                fullName: 'Phạm Thị D',
+                fullName: 'Phạm Thị Hương',
                 avatarUrl: 'https://i.pravatar.cc/150?img=4'
             },
             sessionDateTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
-            message: 'I am interested in learning physics. I have some basic knowledge but want to improve my understanding of fundamental concepts. Looking forward to our trial session!',
+            message: 'Tôi quan tâm đến việc học vật lý. Tôi có một số kiến thức cơ bản nhưng muốn cải thiện hiểu biết về các khái niệm cơ bản. Mong chờ buổi học thử của chúng ta!',
             status: 'PENDING' as const,
             createdAt: new Date().toISOString()
         },
@@ -224,11 +224,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session2',
             student: {
                 id: 's5',
-                fullName: 'Hoàng Văn E',
+                fullName: 'Hoàng Văn Quang',
                 avatarUrl: 'https://i.pravatar.cc/150?img=6'
             },
             sessionDateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
-            message: 'Hello! I would like to try a trial session for chemistry. I am a beginner and want to see if your teaching style fits my learning needs.',
+            message: 'Xin chào! Tôi muốn thử một buổi học thử về hóa học. Tôi là người mới bắt đầu và muốn xem phong cách giảng dạy của bạn có phù hợp với nhu cầu học tập của tôi không.',
             status: 'PENDING' as const,
             createdAt: new Date().toISOString()
         },
@@ -237,11 +237,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session3',
             student: {
                 id: 's6',
-                fullName: 'Nguyễn Thị F',
+                fullName: 'Nguyễn Thị Linh',
                 avatarUrl: 'https://i.pravatar.cc/150?img=7'
             },
             sessionDateTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days from now
-            message: 'I am looking for a tutor to help me with biology. Would love to have a trial session to see if we are a good match.',
+            message: 'Tôi đang tìm một gia sư để giúp tôi với môn sinh học. Rất muốn có một buổi học thử để xem chúng ta có phù hợp không.',
             status: 'PENDING' as const,
             createdAt: new Date().toISOString()
         },
@@ -250,11 +250,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session4',
             student: {
                 id: 's7',
-                fullName: 'Trần Văn G',
+                fullName: 'Trần Văn Khánh',
                 avatarUrl: 'https://i.pravatar.cc/150?img=8'
             },
             sessionDateTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-            message: 'Interested in learning computer science. Can we schedule a trial session?',
+            message: 'Tôi quan tâm đến việc học khoa học máy tính. Chúng ta có thể lên lịch một buổi học thử không?',
             status: 'PENDING' as const,
             createdAt: new Date().toISOString()
         }
@@ -267,11 +267,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session1',
             tutor: {
                 id: 't1',
-                fullName: 'Dr. Smith',
+                fullName: 'TS. Nguyễn Văn Hùng',
                 avatarUrl: 'https://i.pravatar.cc/150?img=10'
             },
             sessionDateTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'I am interested in learning physics. I have some basic knowledge but want to improve my understanding of fundamental concepts.',
+            message: 'Tôi quan tâm đến việc học vật lý. Tôi có một số kiến thức cơ bản nhưng muốn cải thiện hiểu biết về các khái niệm cơ bản.',
             status: 'PENDING' as const,
             createdAt: new Date().toISOString()
         },
@@ -280,11 +280,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session2',
             tutor: {
                 id: 't2',
-                fullName: 'Ms. Johnson',
+                fullName: 'Cô Trần Thị Lan',
                 avatarUrl: 'https://i.pravatar.cc/150?img=11'
             },
             sessionDateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'Hello! I would like to try a trial session for chemistry. I am a beginner.',
+            message: 'Xin chào! Tôi muốn thử một buổi học thử về hóa học. Tôi là người mới bắt đầu.',
             status: 'APPROVED' as const,
             createdAt: new Date().toISOString()
         },
@@ -293,11 +293,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session3',
             tutor: {
                 id: 't3',
-                fullName: 'Prof. Brown',
+                fullName: 'GS. Phạm Văn Bình',
                 avatarUrl: 'https://i.pravatar.cc/150?img=15'
             },
             sessionDateTime: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'I am looking for help with history. Would love to have a trial session.',
+            message: 'Tôi đang tìm sự giúp đỡ về môn lịch sử. Rất muốn có một buổi học thử.',
             status: 'DECLINED' as const,
             createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
         },
@@ -306,11 +306,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session4',
             tutor: {
                 id: 't4',
-                fullName: 'Dr. Wilson',
+                fullName: 'TS. Lê Minh Tuấn',
                 avatarUrl: 'https://i.pravatar.cc/150?img=16'
             },
             sessionDateTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'Interested in learning computer science. Can we schedule a trial session?',
+            message: 'Tôi quan tâm đến việc học khoa học máy tính. Chúng ta có thể lên lịch một buổi học thử không?',
             status: 'PENDING' as const,
             createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
         },
@@ -319,11 +319,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session5',
             tutor: {
                 id: 't5',
-                fullName: 'Dr. Smith',
+                fullName: 'TS. Nguyễn Văn Hùng',
                 avatarUrl: 'https://i.pravatar.cc/150?img=10'
             },
             sessionDateTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'I need help with advanced mathematics. Looking forward to our session.',
+            message: 'Tôi cần sự giúp đỡ về toán học nâng cao. Mong chờ buổi học của chúng ta.',
             status: 'PENDING' as const,
             createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
         },
@@ -332,11 +332,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session6',
             tutor: {
                 id: 't6',
-                fullName: 'Ms. Johnson',
+                fullName: 'Cô Trần Thị Lan',
                 avatarUrl: 'https://i.pravatar.cc/150?img=11'
             },
             sessionDateTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'I would like to try a trial session for mathematics. I am preparing for an exam.',
+            message: 'Tôi muốn thử một buổi học thử về toán học. Tôi đang chuẩn bị cho kỳ thi.',
             status: 'APPROVED' as const,
             createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
         },
@@ -345,11 +345,11 @@ const RequestsPage: React.FC = () => {
             sessionId: 'session7',
             tutor: {
                 id: 't7',
-                fullName: 'Prof. Brown',
+                fullName: 'GS. Phạm Văn Bình',
                 avatarUrl: 'https://i.pravatar.cc/150?img=15'
             },
             sessionDateTime: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString(),
-            message: 'Looking for a tutor to help with English conversation practice.',
+            message: 'Đang tìm một gia sư để giúp luyện tập tiếng Anh giao tiếp.',
             status: 'DECLINED' as const,
             createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
         }

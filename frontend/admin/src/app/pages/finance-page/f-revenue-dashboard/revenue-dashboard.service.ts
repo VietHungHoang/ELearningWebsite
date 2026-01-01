@@ -7,7 +7,7 @@ import { ApiService } from '../../../services/api.service';
  * Revenue Dashboard Data Interface
  * API Endpoint: GET /api/v1/admin/revenue-dashboard
  * Query Params:
- *   - dateRange (today|7days|30days|thisMonth) - Date range filter for KPI cards
+ *   - dateRange (today|7days|30days) - Date range filter for KPI cards
  *   - timeframe (Daily|Weekly|Monthly) - Timeframe for Revenue Trend chart
  *   - timeFilter (day|week|month) - Time filter for Top Instructors chart
  */
@@ -82,7 +82,7 @@ export class RevenueDashboardService {
 
     /**
      * Get revenue dashboard data
-     * @param dateRange Date range filter: today, 7days, 30days, thisMonth (for KPI cards)
+     * @param dateRange Date range filter: today, 7days, 30days (for KPI cards)
      * @param timeframe Timeframe: Daily, Weekly, Monthly (for Revenue Trend chart)
      * @param timeFilter Time filter: day, week, month (for Top Instructors chart)
      * @returns Observable of RevenueDashboardData
@@ -156,20 +156,6 @@ export class RevenueDashboardService {
                 balanceTrend: 22.5,
                 peakTrend: 4.2,
                 transactionsTrend: 18.3,
-                payoutsTrend: 0
-            },
-            thisMonth: {
-                adminAccountIncome: 250000000,
-                adminAccountPayout: 200000000,
-                peakTransactionAmount: 4800000,
-                payoutFixedDate: 1,
-                totalTransactions: 155,
-                totalPayouts: 1,
-                incomeTrend: 12.3,
-                payoutTrend: 10.5,
-                balanceTrend: 16.8,
-                peakTrend: 3.7,
-                transactionsTrend: 15.2,
                 payoutsTrend: 0
             }
         };
