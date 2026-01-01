@@ -1,0 +1,45 @@
+spring:
+  # Elasticsearch service available in docker-compose at host 'elasticsearch'
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://elasticsearch:9200}
+    connection-timeout: 5s
+    socket-timeout: 60s
+  
+  # Disable auto index creation - we handle it manually with custom analyzers
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+  jpa:
+    open-in-view: false
+
+  # Kafka configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: search-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    listener:
+      ack-mode: manual
+
+app:
+  elastic:
+    index:
+      tutors: tutors_v1
+
+services:
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL:http://tutor-service:8080}
+
+logging:
+  level:
+    root: INFO
+    "com.elearning.searchservice": DEBUG
+    org.springframework.data.elasticsearch: DEBUG
+    co.elastic.clients: DEBUG

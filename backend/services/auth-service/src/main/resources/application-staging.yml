@@ -1,18 +1,16 @@
 spring:
   data:
     redis:
-      url: ${REDIS_URL}
+      url: redis://redis:6379
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    # producer:
-    #   key-serializer: org.apache.kafka.common.serialization.StringSerializer
-    #   value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
       group-id: auth-service-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 notification-service:
   url: ${NOTIFICATION_SERVICE_URL}
@@ -26,4 +24,4 @@ keycloak:
   public-url: ${KEYCLOAK_PUBLIC_URL:http://localhost:8080}
   realm: ${KEYCLOAK_REALM}
   resource: ${KEYCLOAK_RESOURCE}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  client-secret: YyfwTayJUBYIxT0rLMbynjqg6pSG7KiZ

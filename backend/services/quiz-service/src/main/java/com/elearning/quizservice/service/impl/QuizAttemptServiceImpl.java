@@ -4,12 +4,14 @@ import com.elearning.quizservice.dto.request.SubmitAnswerRequest;
 import com.elearning.quizservice.dto.request.SubmitQuizRequest;
 import com.elearning.quizservice.dto.response.QuizAttemptResponse;
 import com.elearning.quizservice.dto.response.QuizResultResponse;
+import com.elearning.quizservice.entity.Question;
 import com.elearning.quizservice.entity.Quiz;
 import com.elearning.quizservice.entity.QuizAttempt;
 import com.elearning.quizservice.entity.StudentAnswer;
 import com.elearning.quizservice.exception.InvalidOperationException;
 import com.elearning.quizservice.exception.ResourceNotFoundException;
 import com.elearning.quizservice.mapper.QuizMapper;
+import com.elearning.quizservice.repository.QuestionRepository;
 import com.elearning.quizservice.repository.QuizAttemptRepository;
 import com.elearning.quizservice.repository.StudentAnswerRepository;
 import com.elearning.quizservice.service.GradingService;
@@ -36,6 +38,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     
     private final QuizAttemptRepository attemptRepository;
     private final StudentAnswerRepository answerRepository;
+    private final QuestionRepository questionRepository;
     private final QuizService quizService;
     private final GradingService gradingService;
     private final QuizMapper quizMapper;
@@ -55,7 +58,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         }
         
         // Check for existing in-progress attempt
-        Optional<QuizAttempt> existingAttempt = attemptRepository.findByStudentIdAndQuizIdAndStatus(
+        Optional<QuizAttempt> existingAttempt = attemptRepository.findByStudentIdAndQuiz_IdAndStatus(
                 studentId, quizId, QuizAttempt.AttemptStatus.IN_PROGRESS);
         
         if (existingAttempt.isPresent()) {
@@ -67,13 +70,13 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         Long attemptCount = getAttemptCount(quizId, studentId);
         
         // Create new attempt
+        Quiz quiz = quizService.getQuizById(quizId);
         QuizAttempt attempt = QuizAttempt.builder()
-                .quizId(quizId)
+                .quiz(quiz)
                 .studentId(studentId)
                 .attemptNumber(attemptCount.intValue() + 1)
                 .status(QuizAttempt.AttemptStatus.IN_PROGRESS)
                 .startedAt(LocalDateTime.now())
-                .answersCount(0)
                 .passed(false)
                 .build();
         
@@ -91,7 +94,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     
     @Override
     public QuizAttemptResponse getCurrentAttempt(UUID quizId, UUID studentId) {
-        QuizAttempt attempt = attemptRepository.findByStudentIdAndQuizIdAndStatus(
+        QuizAttempt attempt = attemptRepository.findByStudentIdAndQuiz_IdAndStatus(
                 studentId, quizId, QuizAttempt.AttemptStatus.IN_PROGRESS)
                 .orElseThrow(() -> new ResourceNotFoundException("No in-progress attempt found"));
         
@@ -120,7 +123,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         }
         
         // Check if answer already exists
-        Optional<StudentAnswer> existingAnswer = answerRepository.findByAttemptIdAndQuestionId(
+        Optional<StudentAnswer> existingAnswer = answerRepository.findByAttempt_IdAndQuestion_Id(
                 attemptId, request.getQuestionId());
         
         if (existingAnswer.isPresent()) {
@@ -132,19 +135,18 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             log.info("Updated existing answer");
         } else {
             // Create new answer
+            Question question = questionRepository.findByIdAndIsActiveTrue(request.getQuestionId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+            
             StudentAnswer answer = StudentAnswer.builder()
-                    .attemptId(attemptId)
-                    .questionId(request.getQuestionId())
+                    .attempt(attempt)
+                    .question(question)
                     .selectedOptionIds(selectedOptionIdsJson)
                     .answeredAt(LocalDateTime.now())
                     .isCorrect(false)
                     .build();
             
             answerRepository.save(answer);
-            
-            // Update answers count
-            attempt.setAnswersCount(attempt.getAnswersCount() + 1);
-            attemptRepository.save(attempt);
             
             log.info("Created new answer");
         }
@@ -205,7 +207,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     
     @Override
     public List<QuizAttemptResponse> getAttemptsByQuiz(UUID quizId) {
-        List<QuizAttempt> attempts = attemptRepository.findByQuizIdOrderBySubmittedAtDesc(quizId);
+        List<QuizAttempt> attempts = attemptRepository.findByQuiz_IdOrderBySubmittedAtDesc(quizId);
         return attempts.stream()
                 .map(quizMapper::toAttemptResponse)
                 .toList();
@@ -213,7 +215,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     
     @Override
     public List<QuizAttemptResponse> getStudentAttemptHistory(UUID quizId, UUID studentId) {
-        List<QuizAttempt> attempts = attemptRepository.findByStudentIdAndQuizIdOrderByAttemptNumberDesc(
+        List<QuizAttempt> attempts = attemptRepository.findByStudentIdAndQuiz_IdOrderByAttemptNumberDesc(
                 studentId, quizId);
         return attempts.stream()
                 .map(quizMapper::toAttemptResponse)
@@ -238,6 +240,6 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     
     @Override
     public Long getAttemptCount(UUID quizId, UUID studentId) {
-        return attemptRepository.countByStudentIdAndQuizId(studentId, quizId);
+        return attemptRepository.countByStudentIdAndQuiz_Id(studentId, quizId);
     }
 }

@@ -27,7 +27,7 @@ public class GeminiModerationServiceImpl implements GeminiModerationService {
     @Value("${gemini.api-key}")
     private String apiKey;
 
-    @Value("${gemini.api-url:https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent}")
+    @Value("${gemini.api-url:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent}")
     private String apiUrl;
 
     @Override

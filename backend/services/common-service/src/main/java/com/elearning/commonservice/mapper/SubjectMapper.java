@@ -10,7 +10,8 @@ public class SubjectMapper {
     public SubjectResponse toResponse(Subject subject) {
         return SubjectResponse.builder()
                 .id(subject.getId())
-                .name(subject.getName())
+                .nameVi(subject.getNameVi())
+                .nameEn(subject.getNameEn())
                 .categoryId(subject.getCategory() != null ? subject.getCategory().getId() : null)
                 .createdAt(subject.getCreatedAt())
                 .updatedAt(subject.getUpdatedAt())

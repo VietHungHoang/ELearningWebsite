@@ -1,4 +1,4 @@
-viì package com.elearning.quizservice.dto.request;
+package com.elearning.quizservice.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

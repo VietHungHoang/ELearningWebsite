@@ -48,6 +48,15 @@ public class QuizMapper {
     }
     
     /**
+     * Map Quiz entity to QuizSummaryResponse with full statistics
+     */
+    public QuizSummaryResponse toSummaryResponse(Quiz quiz, Long totalAttempts, Double avgPercentage, Double highestScore) {
+        QuizSummaryResponse response = toSummaryResponse(quiz, totalAttempts, avgPercentage);
+        response.setHighestScore(highestScore);
+        return response;
+    }
+    
+    /**
      * Map Quiz entity to QuizDetailResponse
      */
     public QuizDetailResponse toDetailResponse(Quiz quiz) {

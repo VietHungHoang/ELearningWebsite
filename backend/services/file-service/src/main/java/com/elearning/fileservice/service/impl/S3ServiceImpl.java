@@ -1,6 +1,7 @@
 package com.elearning.fileservice.service.impl;
 
 import com.elearning.fileservice.config.StorageInfo;
+import com.elearning.fileservice.config.StorageProperties;
 import com.elearning.fileservice.dto.response.PresignedUrlResponse;
 
 import com.elearning.fileservice.service.S3Service;
@@ -14,10 +15,13 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +35,7 @@ import java.util.List;
 public class S3ServiceImpl implements S3Service {
     
     private final MediaStrategyFactory mediaStrategyFactory;
+    private final StorageProperties storageProperties;
     
     @Override
     public String generateObjectKey(String contentType) {
@@ -50,30 +55,59 @@ public class S3ServiceImpl implements S3Service {
     
     @Override
     public PresignedUrlResponse generatePresignedUrl(String contentType) {
-        return null;
-//        log.info("Generating presigned URL for content type: {}", contentType);
-//
-//        // Use strategy to get media-specific logic
-//        MediaProcessingStrategy strategy = mediaStrategyFactory.getStrategyByContentType(contentType);
-//        MediaType mediaType = strategy.getMediaType();
-//
-//        String objectKey = strategy.generateObjectKey(contentType);
-//
-//        String presignedUrl = generateS3PresignedUrl(objectKey, contentType, mediaType, strategy.getPresignedUrlExpiryMinutes());
-//
-//        String finalUrl = generateFinalUrl(objectKey, mediaType);
-//
-//        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(strategy.getPresignedUrlExpiryMinutes());
-//
-//        PresignedUrlResponse response = PresignedUrlResponse.builder()
-//                .objectKey(objectKey)
-//                .presignedUrl(presignedUrl)
-//                .finalUrl(finalUrl)
-//                .expiresAt(expiresAt)
-//                .build();
-//
-//        log.info("Generated presigned URL successfully for {} with key: {}", mediaType, objectKey);
-//        return response;
+        log.info("Generating presigned URL for content type: {}", contentType);
+
+        // Use strategy to get media-specific logic
+        MediaProcessingStrategy strategy = mediaStrategyFactory.getStrategyByContentType(contentType);
+        
+        // Generate object key with date-based path
+        String objectKey = strategy.generateObjectKey(contentType);
+        
+        // Generate presigned URL
+        String presignedUrl = generateS3PresignedUrl(objectKey, contentType, strategy.getPresignedUrlExpiryMinutes());
+        
+        // Generate final URL (public URL after upload)
+        String finalUrl = storageProperties.getBaseUrl() + objectKey;
+        
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(strategy.getPresignedUrlExpiryMinutes());
+
+        PresignedUrlResponse response = PresignedUrlResponse.builder()
+                .objectKey(objectKey)
+                .presignedUrl(presignedUrl)
+                .finalUrl(finalUrl)
+                .expiresAt(expiresAt)
+                .build();
+
+        log.info("Generated presigned URL successfully for {} with key: {}", strategy.getMediaType(), objectKey);
+        return response;
+    }
+    
+    /**
+     * Generate actual S3 presigned URL using AWS SDK
+     */
+    private String generateS3PresignedUrl(String objectKey, String contentType, long expiryMinutes) {
+        try (S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(storageProperties.getRegion()))
+                .build()) {
+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(storageProperties.getBucketName())
+                    .key(objectKey)
+                    .contentType(contentType)
+                    .build();
+
+            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(Duration.ofMinutes(expiryMinutes))
+                    .putObjectRequest(putObjectRequest)
+                    .build();
+
+            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
+            return presignedRequest.url().toString();
+
+        } catch (Exception e) {
+            log.error("Failed to generate S3 presigned URL for key: {}", objectKey, e);
+            throw new RuntimeException("Failed to generate presigned URL", e);
+        }
     }
 
     public String getUploadIDForMultipartUpload(StorageInfo storageInfo, String videoKey) {
@@ -181,7 +215,7 @@ public class S3ServiceImpl implements S3Service {
             CompleteMultipartUploadRequest completeRequest = CompleteMultipartUploadRequest.builder()
                     .bucket(storageInfo.getBucketName())
                     .key(videoKey)
-                    .uploadId(uploadId)  // Use the actual AWS Upload ID
+                    .uploadId(uploadId)
                     .multipartUpload(CompletedMultipartUpload.builder()
                             .parts(completedParts)
                             .build())
@@ -195,49 +229,4 @@ public class S3ServiceImpl implements S3Service {
             throw new RuntimeException("Failed to complete multipart upload", e);
         }
     }
-    
-    /**
-     * Generate actual S3 presigned URL using AWS SDK
-     */
-//    private String generateS3PresignedUrl(String objectKey, String contentType, MediaType mediaType, long expiryMinutes) {
-//        StorageProperties bucketConfig = getBucketConfig(mediaType);
-//
-//        try (S3Presigner presigner = S3Presigner.builder()
-//                .region(Region.of(bucketConfig.getRegion()))
-//                .build()) {
-//
-//            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-//                    .bucket(bucketConfig.getName())
-//                    .key(objectKey)
-//                    .contentType(contentType)
-//                    .build();
-//
-//            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-//                    .signatureDuration(Duration.ofMinutes(expiryMinutes))
-//                    .putObjectRequest(putObjectRequest)
-//                    .build();
-//
-//            PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
-//            return presignedRequest.url().toString();
-//
-//        } catch (Exception e) {
-//            log.error("Failed to generate S3 presigned URL for {}: {}", mediaType, objectKey, e);
-//            throw new RuntimeException("Failed to generate presigned URL for " + mediaType, e);
-//        }
-//    }
-    
-    /**
-     * Generate final URL that client can use after successful upload
-     */
-//    private String generateFinalUrl(String objectKey, MediaType mediaType) {
-//        StorageProperties.BucketConfig bucketConfig = getBucketConfig(mediaType);
-//        return bucketConfig.getBaseUrl() + objectKey;
-//    }
-//
-//    /**
-//     * Get S3 bucket configuration for media type
-//     */
-//    private StorageProperties.BucketConfig getBucketConfig(MediaType mediaType) {
-//        return storageProperties.getBucketConfig(mediaType);
-//    }
 }

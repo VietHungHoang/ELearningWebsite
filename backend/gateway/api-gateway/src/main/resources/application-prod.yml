@@ -3,28 +3,28 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${ISSUER_URI:http://localhost:8080}
-  cloud:
-    gateway:
-      server:
-        webflux:
-          routes:
-            - id: bff-route
-              uri: ${BFF_SERVICE_URI:http://localhost:8081}
-              predicates:
-                - Path=/api/v1/common/**
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
 
-            - id: auth-service-route
-              uri: ${AUTH_SERVICE_URI:http://localhost:8082}
-              predicates:
-                - Path=/api/auth/**
-
-            - id: user-service-route
-              uri: ${USER_SERVICE_URI:http://localhost:8083}
-              predicates:
-                - Path=/api/users/**
-
-            - id: course-service-route
-              uri: ${COURSE_SERVICE_URI:http://localhost:8084}
-              predicates:
-                - Path=/api/courses/**
+services:
+  bff-service:
+    url: ${BFF_SERVICE_URL}
+  auth-service:
+    url: ${AUTH_SERVICE_URL}
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL}
+  class-service:
+    url: ${CLASS_SERVICE_URL}
+  student-service:
+    url: ${STUDENT_SERVICE_URL}
+  search-service:
+    url: ${SEARCH_SERVICE_URL}
+  chat-service:
+    url: ${CHAT_SERVICE_URL}
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL}
+  payment-service:
+    url: ${PAYMENT_SERVICE_URL}
+  booking-service:
+    url: ${BOOKING_SERVICE_URL}

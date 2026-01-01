@@ -33,9 +33,9 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: ${DB_URL}
-      KC_DB_USERNAME: ${DB_USERNAME}
-      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_DB_URL: jdbc:postgresql://3.25.255.238/lernen_db
+      KC_DB_USERNAME: lernen
+      KC_DB_PASSWORD: lernen
       KC_DB_SCHEMA: keycloak
     ports:
       - "8080:8080"
@@ -327,6 +327,23 @@ services:
     depends_on:
       - db
       - kafka
+
+  quiz-service:
+    build:
+      context: ./backend/services/quiz-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: quiz-service
+    ports:
+      - "8093:8093"
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/quiz-service/src:/app/src
+      - ./backend/services/quiz-service/pom.xml:/app/pom.xml
+    depends_on:
+      - db
 
   booking-service:
     build:

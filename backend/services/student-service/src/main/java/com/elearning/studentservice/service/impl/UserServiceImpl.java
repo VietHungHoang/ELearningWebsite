@@ -4,7 +4,6 @@ import com.elearning.studentservice.dto.response.UserInfoResponse;
 import com.elearning.studentservice.entity.Student;
 import com.elearning.studentservice.mapper.StudentMapper;
 import com.elearning.studentservice.repository.StudentRepository;
-import com.elearning.studentservice.service.StudentService;
 import com.elearning.studentservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

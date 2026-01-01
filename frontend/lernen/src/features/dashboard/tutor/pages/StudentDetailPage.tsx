@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { HiArrowLeft, HiChat, HiCalendar, HiCheckCircle, HiClock, HiAcademicCap, HiTrendingUp, HiAnnotation, HiPhone } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import StudentStatusBadge from '../components/StudentStatusBadge';
+import BirdLoading from '../../../../components/ui/BirdLoading';
 import EnrollmentTypeBadge from '../components/EnrollmentTypeBadge';
 import type { StudentDetail } from '../../../../types/api';
 import { studentService } from '../../../../services/studentService';
@@ -83,7 +84,7 @@ const StudentDetailPage: React.FC = () => {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0b6459]"></div>
+                <BirdLoading title="Loading student details..." size="md" />
             </div>
         );
     }
@@ -334,7 +335,7 @@ const StudentDetailPage: React.FC = () => {
                                                                     ? 'bg-green-100 text-green-700'
                                                                     : 'bg-yellow-100 text-yellow-700'
                                                                     }`}>
-                                                                    {session.attendance === 'Present' 
+                                                                    {session.attendance === 'Present'
                                                                         ? t('dashboard.tutor.studentDetail.schedule.history.present')
                                                                         : t('dashboard.tutor.studentDetail.schedule.history.absent')}
                                                                 </span>

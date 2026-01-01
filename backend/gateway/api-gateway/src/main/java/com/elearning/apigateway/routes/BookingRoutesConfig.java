@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BookingRoutesConfig {
 
-    private String bookingServiceUrl = "http://booking-service:8092";
+    @Value("${services.booking-service.url}")
+    private String bookingServiceUrl;
 
     @Bean
     public RouteLocator bookingServiceRoutes(RouteLocatorBuilder builder) {

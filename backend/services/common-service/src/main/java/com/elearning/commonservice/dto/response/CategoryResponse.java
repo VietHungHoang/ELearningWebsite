@@ -10,7 +10,8 @@ import java.util.UUID;
 @Builder
 public class CategoryResponse {
     private UUID id;
-    private String name;
+    private String nameVi;
+    private String nameEn;
     private String description;
     private UUID parentId;
     private LocalDateTime createdAt;

@@ -10,7 +10,8 @@ import java.util.UUID;
 @Builder
 public class SubjectResponse {
     private UUID id;
-    private String name;
+    private String nameVi;
+    private String nameEn;
     private UUID categoryId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

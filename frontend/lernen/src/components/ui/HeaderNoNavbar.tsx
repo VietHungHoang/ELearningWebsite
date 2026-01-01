@@ -19,8 +19,8 @@ const HeaderNoNavbar: React.FC = () => {
             </NavLink>
           </div>
           <div className="flex items-center">
-            <button 
-              onClick={() => navigate('/login')}
+            <button
+              onClick={() => navigate('/login?role=student')}
               className="flex items-center gap-2 px-4 py-1 text-gray-700 border border-gray-300 rounded-lg hover:text-gray-800 hover:bg-gray-100 transition-colors"
             >
               <FiLogOut />

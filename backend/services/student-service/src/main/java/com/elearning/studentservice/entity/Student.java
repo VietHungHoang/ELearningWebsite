@@ -24,23 +24,11 @@ public class Student extends BaseEntity {
     @Column(name = "full_name", nullable = false)
     private String fullName;
     
-    @Column(name = "phone_number")
-    private String phone;
-    
     @Column(name = "avatar_url")
     private String avatarUrl;
     
-    @Column(name = "bio")
-    private String bio;
-    
     @Column(name = "date_of_birth")
     private LocalDateTime dateOfBirth;
-    
-    @Column(name = "address")
-    private String address;
-    
-    @Column(name = "city")
-    private String city;
     
     @Column(name = "country")
     private String country;

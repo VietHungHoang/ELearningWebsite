@@ -24,14 +24,19 @@ public class TutorRoutesConfig {
                 .route("tutor-availability", r -> r
                         .path(
                                 prefix + "{tutorId}/availabilities",
-                                prefix + "{tutorId}/onboarding",
+                                prefix + "{tutorId}/onboarding/**",
                                 prefix + "me/dashboard/stats",
                                 prefix + "me/earnings/**",
-                                "/api/v1/public/tutors/{tutorId}"
+                                "/api/v1/public/tutors/{tutorId}",
+                                "/api/v1/admin/tutors/approve/{tutorId}"
                                 )
                         .filters(f -> f
                                 .rewritePath(
                                         "/api/v1/public/(?<rest>.*)",
+                                        "/api/v1/${rest}"
+                                )
+                                .rewritePath(
+                                        "/api/v1/admin/(?<rest>.*)",
                                         "/api/v1/${rest}"
                                 )
                         )

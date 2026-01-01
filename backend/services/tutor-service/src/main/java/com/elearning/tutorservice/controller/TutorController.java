@@ -2,14 +2,12 @@ package com.elearning.tutorservice.controller;
 
 import com.elearning.tutorservice.dto.response.ApiResponse;
 import com.elearning.tutorservice.dto.response.TutorResponse;
+import com.elearning.tutorservice.service.TutorOnboardingService;
 import com.elearning.tutorservice.service.TutorService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,9 +15,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/tutors")
 @RequiredArgsConstructor
+@Slf4j
 public class TutorController {
 
     private final TutorService tutorService;
+    private final TutorOnboardingService tutorOnboardingService;
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TutorResponse>> getTutorInfo(@PathVariable UUID id) {
@@ -31,5 +31,12 @@ public class TutorController {
     public ResponseEntity<ApiResponse<List<TutorResponse>>> getTutorsBatch(@RequestParam List<UUID> ids) {
         List<TutorResponse> tutors = tutorService.getTutorsByIds(ids);
         return ResponseEntity.ok(ApiResponse.success(tutors, "Tutors retrieved successfully"));
+    }
+
+    @PostMapping("/approve/{tutorId}")
+    public ResponseEntity<ApiResponse<Void>> approveTutor(@PathVariable UUID tutorId) {
+        log.info("Received tutor approval request for: {}", tutorId);
+        tutorOnboardingService.approveTutor(tutorId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Tutor approved successfully"));
     }
 }

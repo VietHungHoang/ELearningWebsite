@@ -1,8 +1,10 @@
 server:
-  port: 8085
+  port: 8093
   
 spring:
   application:
     name: quiz-service
   profiles:
     active: dev
+  main:
+    allow-circular-references: true

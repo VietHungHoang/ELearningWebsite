@@ -1,7 +1,6 @@
 package com.elearning.studentservice.service.impl;
 
 import com.elearning.studentservice.dto.event.AccountCreatedEvent;
-import com.elearning.studentservice.dto.request.StudentRequest;
 import com.elearning.studentservice.dto.response.StudentResponse;
 import com.elearning.studentservice.entity.Student;
 import com.elearning.studentservice.repository.StudentRepository;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service

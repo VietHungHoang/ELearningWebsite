@@ -1,13 +1,25 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
 services:
-  common-service:
-    url: ${COMMON_SERVICE_URL:http://localhost:8082}
-  cart-service:
-    url: ${CART_SERVICE_URL:http://localhost:8082}
-  course-service:
-    url: ${COURSE_SERVICE_URL:http://localhost:8081}
-  notification-service:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8082}
   class-service:
-    url: ${CLASS_SERVICE_URL:http://localhost:8088}
+    url: ${CLASS_SERVICE_URL}
   payment-service:
-    url: ${PAYMENT_SERVICE_URL:http://localhost:8091}
+    url: ${PAYMENT_SERVICE_URL}
+
+logging:
+  level:
+    root: INFO
+    "[com.elearning.bookingservice]": INFO

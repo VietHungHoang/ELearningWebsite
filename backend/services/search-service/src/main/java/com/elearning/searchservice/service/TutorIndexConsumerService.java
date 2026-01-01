@@ -65,7 +65,7 @@ public class TutorIndexConsumerService {
             TutorDocument saved = tutorSearchRepository.save(document);
             
             log.info("Successfully indexed tutor: id={}, name={}", 
-                    saved.getId(), saved.getNameEn());
+                    saved.getId(), saved.getFullNameEn());
             
         } catch (Exception e) {
             log.error("Failed to index tutor: tutorId={}", event.getTutorId(), e);

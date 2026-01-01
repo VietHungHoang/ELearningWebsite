@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://3.25.255.238/lernen_db
+    username: lernen
+    password: lernen
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -15,7 +15,7 @@ spring:
 
 gemini:
   api-key: AIzaSyDRUFCJA2ZtNYRjOniJdAnGhgUTOa1uHcI
-  api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+  api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
 
 services:
   auth-service:

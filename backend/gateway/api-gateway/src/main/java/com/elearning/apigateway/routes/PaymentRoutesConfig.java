@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PaymentRoutesConfig {
 
-//    @Value("${services.payment-service.url}")
-    private String paymentServiceUrl = "http://payment-service:8091";
+    @Value("${services.payment-service.url}")
+    private String paymentServiceUrl;
 
     @Value("${services.bff-service.url}")
     private String bffServiceUrl;

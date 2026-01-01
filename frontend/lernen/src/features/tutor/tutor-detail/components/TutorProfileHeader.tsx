@@ -307,7 +307,9 @@ const TutorProfileHeader: React.FC<{
                                     <div>
                                         <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
                                             {tutor.subjects &&
-                                                tutor.subjects.map((subject: any) => subject.name).join(", ")}
+                                                tutor.subjects.map((subject: any) =>
+                                                    t('locale') === 'vi' ? subject.nameVi : subject.nameEn
+                                                ).join(", ")}
                                         </span>
                                     </div>
                                 }

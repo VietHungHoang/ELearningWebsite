@@ -1,6 +1,7 @@
 package com.elearning.tutorservice.service.impl;
 
 import com.elearning.tutorservice.dto.event.AccountCreatedEvent;
+import com.elearning.tutorservice.dto.event.RoleAssignRequestEvent;
 import com.elearning.tutorservice.dto.event.TutorApprovedEvent;
 import com.elearning.tutorservice.dto.event.TutorIndexEvent;
 import com.elearning.tutorservice.dto.onboarding.TutorOnboardingDto;
@@ -13,6 +14,7 @@ import com.elearning.tutorservice.mapper.TutorIndexEventMapper;
 import com.elearning.tutorservice.mapper.TutorMapper;
 import com.elearning.tutorservice.repository.*;
 import com.elearning.tutorservice.service.AvailabilityService;
+import com.elearning.tutorservice.service.GeminiService;
 import com.elearning.tutorservice.service.TutorOnboardingService;
 import com.elearning.tutorservice.service.producer.KafkaProducer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +47,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
     private final TutorAvailabilityRepository availabilityRepository;
     private final TutorSocialRepository tutorSocialRepository;
     private final CertificationRepository certificationRepository;
+    private final GeminiService geminiService;
 
     private final EntityManager entityManager;
 
@@ -112,6 +115,32 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
 
     @Override
     @Transactional
+    public void processResumeSubmission(UUID tutorId, String resumeText) {
+        log.info("Processing resume submission for tutor: {}", tutorId);
+
+        TutorOnboarding onboarding = onboardingRepository.findById(tutorId)
+                .orElseThrow(() -> new RuntimeException("Onboarding not found for tutor: " + tutorId));
+
+        try {
+            // Get existing JSON data (contains id, email, fullName)
+            String existingJsonData = onboarding.getJsonData();
+            
+            // Call Gemini to parse resume and get structured JSON
+            String parsedJson = geminiService.parseResumeToJson(resumeText, existingJsonData);
+            
+            // Update onboarding with parsed data
+            onboarding.setJsonData(parsedJson);
+            onboardingRepository.save(onboarding);
+
+            log.info("Successfully processed resume submission for tutor: {}", tutorId);
+        } catch (Exception e) {
+            log.error("Failed to process resume submission for tutor: {}", tutorId, e);
+            throw new RuntimeException("Failed to process resume submission: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
     public void approveTutor(UUID tutorId) {
         log.info("Approving tutor: {}", tutorId);
 
@@ -136,6 +165,14 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             onboarding.setStatus(OnboardingStatus.APPROVED);
             onboardingRepository.save(onboarding);
             log.info("Updated onboarding status to APPROVED for: {}", tutorId);
+
+            // Send role assignment request to Auth Service via Kafka
+            RoleAssignRequestEvent roleEvent = RoleAssignRequestEvent.builder()
+                    .userId(tutorId)
+                    .role("TUTOR")
+                    .build();
+            kafkaProducer.sendRoleAssignRequest(roleEvent);
+            log.info("Sent role assignment request for tutor: {}", tutorId);
 
             // Send notification event
             TutorApprovedEvent event = TutorApprovedEvent.builder()
