@@ -185,7 +185,7 @@ const MyClassPage: React.FC = () => {
     }, [classes, activeTab, searchTerm]);
 
     return (
-        <div className="p-4">
+        <div className="p-6">
             {/* Page Header */}
             <div className="mb-4">
                 <div className="flex justify-between items-center">

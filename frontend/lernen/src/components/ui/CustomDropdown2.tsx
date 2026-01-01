@@ -47,16 +47,16 @@ const CustomDropdown2: React.FC<CustomDropdown2Props> = ({ label, options, selec
     };
 
     const filteredOptions = options.filter(option =>
-        option.toLowerCase().includes(searchTerm.toLowerCase())
+        option && option.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                 if(isOpen) {
+                if (isOpen) {
                     setOpenDropdown(null);
                     setSearchTerm("");
-                 }
+                }
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -104,7 +104,7 @@ const CustomDropdown2: React.FC<CustomDropdown2Props> = ({ label, options, selec
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                 `} style={{ maxHeight: `${maxHeight}px` }}>
                     {hasSearch && (
-                         <div className="p-1 mb-1">
+                        <div className="p-1 mb-1">
                             <input
                                 ref={searchInputRef}
                                 type="text"

@@ -533,7 +533,7 @@ const MyQuizzesPage: React.FC = () => {
     };
 
     return (
-        <div className="p-4">
+        <div className="p-6">
             {/* Page Header */}
             <div className="mb-6">
                 <div className="flex justify-between items-center">
