@@ -10,6 +10,7 @@ export interface UserInfo {
 }
 
 export interface TutorResponse extends UserInfo {
+    email?: string;
     isVerified: boolean;
     headline: string;
     videoUrl: string; 
@@ -21,12 +22,19 @@ export interface TutorResponse extends UserInfo {
     bookedSessionsCount: number;
     studentCount: number;
     countryCode: string;
+    gender?: Gender | null;
+    timezone?: string | null;
     languageCodes: TutorLanguageResponse[];
     subjectIds: string[];
-    socialLinks: TutorSocial[];
+    socialLinks?: TutorSocial[];
+    hasTrialSession?: boolean;
 }
 
+// Alias for profile header - uses same structure as TutorResponse
+export type TutorProfileHeaderResponse = TutorResponse;
+
 export interface Tutor extends UserInfo {
+    email?: string;
     isVerified: boolean;
     headline: string;
     introduction: string;
@@ -38,9 +46,12 @@ export interface Tutor extends UserInfo {
     bookedSessionsCount: number;
     studentCount: number;
     country: Country;
+    gender?: Gender | null;
+    timezone?: string | null;
     languages: TutorLanguage[];
     subjects: Subject[];
-    socialLinks: TutorSocial[];
+    socialLinks?: TutorSocial[];
+    hasTrialSession?: boolean;
 }
 
 export interface TutorReview {

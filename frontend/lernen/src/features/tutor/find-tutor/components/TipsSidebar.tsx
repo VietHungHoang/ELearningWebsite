@@ -1,16 +1,18 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AiOutlinePlayCircle } from 'react-icons/ai';
 import { FiCheck } from 'react-icons/fi';
 
-const tips = [
-    'Filter your requirements',
-    'Check qualifications and experience',
-    'Read reviews and ratings',
-    'Evaluate communication skills',
-    'Check availability and flexibility',
-];
-
 const TipsSidebar: React.FC = () => {
+    const { t } = useTranslation();
+    
+    const tips = [
+        t('findTutors.tipsSidebar.tips.filterRequirements'),
+        t('findTutors.tipsSidebar.tips.checkQualifications'),
+        t('findTutors.tipsSidebar.tips.readReviews'),
+        t('findTutors.tipsSidebar.tips.evaluateCommunication'),
+        t('findTutors.tipsSidebar.tips.checkAvailability'),
+    ];
     return (
         <div className="bg-[#f9f3eb] border border-[rgba(219,132,1,0.1)] rounded-2xl shadow-sm p-6 sticky top-8">
             <div className="relative rounded-lg overflow-hidden aspect-video">
@@ -22,9 +24,9 @@ const TipsSidebar: React.FC = () => {
                 </div>
             </div>
 
-            <h3 className="text-lg font-bold text-gray-800 mt-6">Tips to find the best Tutor</h3>
+            <h3 className="text-lg font-bold text-gray-800 mt-6">{t('findTutors.tipsSidebar.title')}</h3>
             <p className="text-sm text-gray-600 mt-2">
-                Choosing the right tutor online requires careful consideration. Here are tips to help you make an informed decision.
+                {t('findTutors.tipsSidebar.description')}
             </p>
 
             <ul className="mt-4 space-y-3">

@@ -137,7 +137,7 @@
       "finance": "Tài chính",
       "revenueDashboard": "Bảng doanh thu",
       "transactions": "Giao dịch",
-      "payoutManagement": "Quản lý thanh toán",
+      "payoutManagement": "Thanh toán",
       "promotion": "Khuyến mãi",
       "vouchers": "Phiếu giảm giá",
       "profile": "Hồ sơ",
@@ -761,11 +761,11 @@
     }
   },
   "revenueDashboard": {
-    "title": "Bảng điều khiển Doanh thu",
+    "title": "Doanh thu",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "finance": "Tài chính",
-      "revenueDashboard": "Bảng điều khiển Doanh thu"
+      "revenueDashboard": "Doanh thu"
     },
     "dateRange": {
       "today": "Hôm nay",
@@ -774,6 +774,30 @@
       "thisMonth": "Tháng này"
     },
     "kpi": {
+      "totalRevenue": {
+        "title": "Tổng doanh thu",
+        "description": "Từ tất cả giao dịch học viên"
+      },
+      "platformFee": {
+        "title": "Hoa hồng",
+        "description": "Hoa hồng 30% từ doanh thu"
+      },
+      "instructorPayout": {
+        "title": "Chi trả giảng viên",
+        "description": "Tổng tiền trả cho giảng viên"
+      },
+      "successRate": {
+        "title": "Tỷ lệ thành công",
+        "description": "% giao dịch thành công"
+      },
+      "transactions": {
+        "title": "Số giao dịch",
+        "description": "Tổng số giao dịch"
+      },
+      "aov": {
+        "title": "Giá trị đơn trung bình",
+        "description": "Doanh thu / Số giao dịch"
+      },
       "income": {
         "label": "Thu nhập",
         "title": "Tài khoản Admin",
@@ -795,41 +819,68 @@
         "title": "Giao dịch",
         "description": "Thanh toán cao nhất"
       },
-      "transactions": {
-        "label": "Giao dịch",
-        "title": "Tổng số",
-        "description": "Thanh toán đã hoàn thành"
-      },
       "payouts": {
         "label": "Thanh toán",
         "title": "Tổng số",
         "description": "Thanh toán cho gia sư"
       },
       "vsPrevious": "so với trước"
+    },
+    "charts": {
+      "revenueTrend": {
+        "title": "Xu hướng doanh thu",
+        "timeframe": {
+          "daily": "Theo ngày",
+          "weekly": "Theo tuần",
+          "monthly": "Theo tháng"
+        }
+      },
+      "paymentMethods": {
+        "title": "Phương thức thanh toán"
+      },
+      "topInstructors": {
+        "title": "Top 5 gia sư có doanh thu cao nhất",
+        "view": {
+          "chart": "Biểu đồ",
+          "table": "Bảng"
+        },
+        "timeFilter": {
+          "daily": "Theo ngày",
+          "weekly": "Theo tuần",
+          "monthly": "Theo tháng"
+        },
+        "table": {
+          "rank": "Hạng",
+          "instructor": "Gia sư",
+          "sessions": "Buổi học",
+          "totalEarnings": "Tổng thu nhập",
+          "avgPerSession": "TB/Buổi"
+        }
+      }
     }
   },
   "payout": {
-    "title": "Quản lý Thanh toán",
+    "title": "Thanh toán",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "finance": "Tài chính",
-      "payoutManagement": "Quản lý Thanh toán"
+      "payoutManagement": "Thanh toán"
     },
     "kpi": {
-      "pending": {
-        "label": "Đang chờ",
+      "totalPaid": {
+        "label": "Đã trả",
         "title": "Tổng số tiền",
-        "description": "gia sư đang chờ"
+        "description": "Tổng số tiền đã trả gia sư"
+      },
+      "pendingAmount": {
+        "label": "Chờ trả",
+        "title": "Số tiền chờ trả",
+        "description": "Tổng số tiền đang chờ thanh toán"
       },
       "instructors": {
         "label": "Số lượng",
         "title": "Gia sư",
-        "description": "Đang chờ thanh toán"
-      },
-      "orders": {
-        "label": "Đơn hàng",
-        "title": "Tổng số",
-        "description": "Đơn hàng chờ thanh toán"
+        "description": "Đang chờ trả tiền"
       }
     },
     "tabs": {
@@ -847,20 +898,6 @@
       "total": "Tổng",
       "clear": "Xóa",
       "confirmAll": "Xác nhận tất cả"
-    },
-    "table": {
-      "stt": "STT",
-      "instructorBank": "Gia sư & Ngân hàng",
-      "method": "Phương thức",
-      "totalAmount": "Tổng tiền",
-      "orders": "Đơn hàng",
-      "actions": "Thao tác",
-      "instructorName": "Tên Gia sư",
-      "amount": "Số tiền",
-      "paymentDate": "Ngày thanh toán",
-      "approvedBy": "Người duyệt",
-      "status": "Trạng thái",
-      "ordersCount": "đơn hàng"
     },
     "empty": {
       "noPendingPayouts": "Không có thanh toán đang chờ",
@@ -884,6 +921,53 @@
       "last30Days": "30 ngày qua",
       "thisMonth": "Tháng này"
     },
+    "cycleFilter": {
+      "current": "Kỳ hiện tại",
+      "next": "Kỳ kế tiếp",
+      "overdue": "Quá hạn",
+      "all": "Tất cả"
+    },
+    "paymentMethodFilter": {
+      "all": "Tất cả phương thức"
+    },
+    "kpiFilter": {
+      "label": "Thống kê",
+      "currentCycle": "Chu kỳ hiện tại",
+      "nextCycle": "Chu kỳ kế tiếp",
+      "allCycles": "Tất cả chu kỳ",
+      "last7Days": "7 ngày qua",
+      "last30Days": "30 ngày qua",
+      "thisMonth": "Tháng này",
+      "allTime": "Tất cả"
+    },
+    "tableFilter": {
+      "label": "Lọc danh sách"
+    },
+    "cycleInfo": {
+      "title": "Chu kỳ",
+      "cutoff": "Chốt công",
+      "payout": "Trả lương",
+      "daysLeft": "Còn",
+      "days": "ngày",
+      "total": "Tổng",
+      "tutors": "gia sư",
+      "groupByDate": "Nhóm theo ngày trả"
+    },
+    "table": {
+      "stt": "STT",
+      "instructorBank": "Gia sư & Ngân hàng",
+      "method": "Phương thức",
+      "totalAmount": "Tổng tiền",
+      "orders": "Đơn hàng",
+      "actions": "Thao tác",
+      "instructorName": "Tên Gia sư",
+      "amount": "Số tiền",
+      "paymentDate": "Ngày thanh toán",
+      "payoutDate": "Trả vào",
+      "approvedBy": "Người duyệt",
+      "status": "Trạng thái",
+      "ordersCount": "đơn hàng"
+    },
     "status": {
       "complete": "Hoàn thành",
       "failed": "Thất bại"
@@ -895,13 +979,6 @@
     },
     "modals": {
       "orderList": {
-        "title": "Danh sách Order",
-        "subtitle": "Danh sách Order",
-        "total": "Tổng",
-        "noOrders": "Không có đơn hàng",
-        "close": "Đóng"
-      },
-      "qrPayment": {
         "title": "QR Thanh toán",
         "subtitle": "Mã QR Thanh toán",
         "bank": "Ngân hàng",
@@ -939,6 +1016,51 @@
       "showing": "Hiển thị",
       "to": "đến",
       "of": "của"
+    },
+    "modals": {
+      "orderList": {
+        "subtitle": "Danh sách đơn hàng",
+        "total": "Tổng",
+        "noOrders": "Không có đơn hàng nào",
+        "close": "Đóng"
+      },
+      "qrPayment": {
+        "subtitle": "Quét mã QR để thanh toán",
+        "bank": "Ngân hàng",
+        "accountNumber": "Số tài khoản",
+        "accountHolder": "Chủ tài khoản",
+        "totalAmount": "Tổng số tiền",
+        "download": "Tải xuống",
+        "close": "Đóng",
+        "confirmPayment": "Xác nhận Đã thanh toán"
+      },
+      "confirmPayment": {
+        "title": "Xác nhận Thanh toán",
+        "message": "Bạn có chắc chắn muốn đánh dấu đã thanh toán?",
+        "to": "cho",
+        "notes": "Ghi chú (Tùy chọn)",
+        "notesPlaceholder": "Thêm ghi chú thanh toán...",
+        "cancel": "Hủy",
+        "confirm": "Xác nhận",
+        "processing": "Đang xử lý..."
+      },
+      "bulkConfirm": {
+        "title": "Xác nhận Thanh toán Hàng loạt",
+        "selectedInstructors": "Gia sư đã chọn",
+        "totalAmount": "Tổng số tiền",
+        "notes": "Ghi chú (Tùy chọn)",
+        "notesPlaceholder": "Thêm ghi chú thanh toán...",
+        "cancel": "Hủy",
+        "confirmPayment": "Xác nhận Thanh toán"
+      },
+      "success": {
+        "title": "Thanh toán thành công!",
+        "message": "Giao dịch thanh toán đã được xác nhận",
+        "instructor": "Gia sư",
+        "amount": "Số tiền",
+        "date": "Ngày thanh toán",
+        "viewHistory": "Xem lịch sử"
+      }
     }
   },
   "transactions": {
@@ -950,10 +1072,15 @@
     },
     "kpi": {
       "title": "Thống kê",
-      "totalRevenue": "Tổng doanh thu",
+      "totalRevenue": "Tổng Doanh Thu",
+      "averageOrderValue": "Giá Trị Trung Bình",
+      "successRate": "Tỷ Lệ Thành Công",
       "completed": "Đã hoàn thành",
       "failed": "Thất bại",
       "orders": "đơn hàng",
+      "completedTransactions": "giao dịch thành công",
+      "transactions": "giao dịch",
+      "perTransaction": "Trung bình mỗi giao dịch",
       "successfulTransactions": "Giao dịch thành công",
       "transactionErrors": "Lỗi giao dịch"
     },

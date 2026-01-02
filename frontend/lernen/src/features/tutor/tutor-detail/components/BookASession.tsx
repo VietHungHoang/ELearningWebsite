@@ -5,6 +5,7 @@ import { FiCalendar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import DatePickerModal from "./DatePickerModal";
 import BookSessionModal from "./BookSessionModal";
 import BookTrialModal from "./BookTrialModal";
+import Toast from "../../../../components/ui/Toast";
 import type { Timezone } from "../../../../types/common";
 import { useAuth } from "../../../../context/AuthContext";
 import commonUtils from "../../../../utils/commonUtils";
@@ -51,6 +52,7 @@ const BookASession: React.FC<BookASessionProps> = ({
     const [tutorSessions, setTutorSessions] = useState<Session[]>([]);
     const [hasTrialSession, setHasTrialSession] = useState(true); // Default to true (can book trial)
     const [conflictedSlots, setConflictedSlots] = useState<string[]>([]); // Slots that conflict with student's existing classes
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Initialize timezones and set default to machine timezone
     useEffect(() => {
@@ -217,6 +219,10 @@ const BookASession: React.FC<BookASessionProps> = ({
             const startHour = Number(avail.startTime.split(':')[0]);
             const endHour = Number(avail.endTime.split(':')[0]);
 
+            // Parse effective dates
+            const effectiveStartDate = avail.effectiveStartDate ? new Date(avail.effectiveStartDate) : null;
+            const effectiveEndDate = avail.effectiveEndDate ? new Date(avail.effectiveEndDate) : null;
+
             // Normalize dayOfWeek: API uses 1=Monday,7=Sunday, JS uses 0=Sunday,1=Monday
             const normalizedDayOfWeek = avail.dayOfWeek === 7 ? 0 : avail.dayOfWeek;
 
@@ -224,7 +230,31 @@ const BookASession: React.FC<BookASessionProps> = ({
             let currentDate = new Date(weekStart);
             while (currentDate <= weekEnd) {
                 if (currentDate.getUTCDay() === normalizedDayOfWeek) {
-                    // Generate hourly slots for this date
+                    // Check if current date is within effective date range
+                    const currentDateOnly = new Date(currentDate);
+                    currentDateOnly.setUTCHours(0, 0, 0, 0);
+                    
+                    // Skip if before effectiveStartDate
+                    if (effectiveStartDate) {
+                        const effectiveStartDateOnly = new Date(effectiveStartDate);
+                        effectiveStartDateOnly.setUTCHours(0, 0, 0, 0);
+                        if (currentDateOnly < effectiveStartDateOnly) {
+                            currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+                            continue;
+                        }
+                    }
+                    
+                    // Skip if after effectiveEndDate (if it exists)
+                    if (effectiveEndDate) {
+                        const effectiveEndDateOnly = new Date(effectiveEndDate);
+                        effectiveEndDateOnly.setUTCHours(23, 59, 59, 999);
+                        if (currentDateOnly > effectiveEndDateOnly) {
+                            currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+                            continue;
+                        }
+                    }
+                    
+                    // Generate hourly slots for this date (only if within effective date range)
                     for (let hour = startHour; hour < endHour; hour++) {
                         const slotDate = new Date(Date.UTC(
                             currentDate.getUTCFullYear(),
@@ -480,7 +510,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                 setIsModalOpen(true);
             }
         } else {
-            alert(t("tutorDetail.booking.selectTimeSlot"));
+            setToast({ message: t("tutorDetail.booking.selectTimeSlot"), type: 'error' });
         }
     };
 
@@ -519,7 +549,6 @@ const BookASession: React.FC<BookASessionProps> = ({
 
     const handleConfirmReschedule = async () => {
         if (selectedTimes.length === 0) {
-            alert(t("tutorDetail.booking.selectNewTimeSlot"));
             return;
         }
 
@@ -962,6 +991,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                     setBookedTrialSlots(prev => [...prev, selectedTimes[0]]);
                 }}
             />
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

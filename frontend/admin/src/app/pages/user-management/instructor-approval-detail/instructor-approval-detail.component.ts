@@ -11,11 +11,12 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { I18nService } from '../../../i18n/i18n.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 
 @Component({
     selector: 'app-instructor-approval-detail',
     standalone: true,
-    imports: [RouterLink, CommonModule, FormsModule, FilterByCareerTypePipe, TranslatePipe],
+    imports: [RouterLink, CommonModule, FormsModule, FilterByCareerTypePipe, TranslatePipe, CurrencyFormatPipe],
     templateUrl: './instructor-approval-detail.component.html',
     styleUrl: './instructor-approval-detail.component.scss'
 })

@@ -48,7 +48,7 @@
             <!-- Avatar Section -->
             <div class="relative flex-shrink-0">
                 <div class="relative">
-                    <img [src]="instructor.avatarUrl" [alt]="instructor.name" 
+                    <img [src]="instructor.avatarUrl" [alt]="instructor.name"
                          class="w-[100px] h-[100px] md:w-[120px] md:h-[120px] rounded-full object-cover border-4 border-gray-100 dark:border-[#15203c] shadow-md">
                     <!-- Status Badge -->
                     <div class="absolute -bottom-1 -right-1">
@@ -112,7 +112,7 @@
                             <i class="material-symbols-outlined !text-lg">edit</i>
                             {{ 'instructorApprovalDetail.actions.requestEdit' | translate }}
                         </button>
-                        
+
                         <!-- Reject Button -->
                         <button
                             type="button"
@@ -306,7 +306,7 @@
             <!-- Initial Price Card -->
             <div class="bg-white dark:bg-[#0c1427] rounded-lg p-[16px]">
                 <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-[2px]">{{ 'instructorApprovalDetail.info.initialPrice' | translate }}</p>
-                <p class="text-sm text-black dark:text-white font-medium">{{ instructor.initialPrice ? (instructor.initialPrice + '/h') : 'N/A' }}</p>
+                <p class="text-sm text-black dark:text-white font-medium">{{ instructor.initialPrice ? ((instructor.initialPrice | currencyFormat:'VND') + '/h') : 'N/A' }}</p>
             </div>
 
             <!-- Timezone Card -->
@@ -536,7 +536,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Content -->
             <div class="p-[24px]">
                 <div class="space-y-[12px]">
@@ -559,7 +559,7 @@
                     </div>
                 }
             </div>
-            
+
             <!-- Footer -->
             <div class="flex items-center justify-end gap-[12px] p-[24px] bg-gray-50 dark:bg-[#15203c] border-t border-gray-200 dark:border-[#172036]">
                 <button type="button" (click)="closeApproveDialog()" class="px-[20px] py-[10px] bg-white dark:bg-[#0c1427] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-[#172036] transition-all text-sm font-medium border border-gray-300 dark:border-[#172036]" [disabled]="isApproving">
@@ -595,7 +595,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Content -->
             <div class="p-[24px]">
                 <div class="mb-[20px]">
@@ -626,7 +626,7 @@
                     </div>
                 }
             </div>
-            
+
             <!-- Footer -->
             <div class="flex items-center justify-end gap-[12px] p-[24px] bg-gray-50 dark:bg-[#15203c] border-t border-gray-200 dark:border-[#172036]">
                 <button type="button" (click)="closeRejectDialog()" class="px-[20px] py-[10px] bg-white dark:bg-[#0c1427] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-[#172036] transition-all text-sm font-medium border border-gray-300 dark:border-[#172036]" [disabled]="isRejecting">
@@ -662,7 +662,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- Content -->
             <div class="p-[24px]">
                 <div class="mb-[20px]">
@@ -693,7 +693,7 @@
                     </div>
                 }
             </div>
-            
+
             <!-- Footer -->
             <div class="flex items-center justify-end gap-[12px] p-[24px] bg-gray-50 dark:bg-[#15203c] border-t border-gray-200 dark:border-[#172036]">
                 <button type="button" (click)="closeEditRequestDialog()" class="px-[20px] py-[10px] bg-white dark:bg-[#0c1427] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-[#172036] transition-all text-sm font-medium border border-gray-300 dark:border-[#172036]" [disabled]="isRequestingEdit">

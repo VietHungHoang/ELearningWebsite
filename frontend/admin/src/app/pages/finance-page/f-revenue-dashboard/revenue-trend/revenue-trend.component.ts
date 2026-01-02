@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit, PLATFORM_ID, HostListener, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { TranslatePipe } from '../../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-revenue-trend',
@@ -7,13 +8,13 @@ import { isPlatformBrowser } from '@angular/common';
         <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-md">
             <div class="trezo-card-header mb-[12px] flex items-center justify-between">
                 <div class="trezo-card-title">
-                    <h5 class="!mb-0">Revenue Trend</h5>
+                    <h5 class="!mb-0">{{ 'revenueDashboard.charts.revenueTrend.title' | translate }}</h5>
                 </div>
                 <div class="trezo-card-subtitle">
                     <div class="trezo-card-dropdown relative">
                         <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[5px] md:py-[6.5px] px-[12px] md:px-[19px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19]" (click)="toggleTimeframeMenu()">
                             <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                                {{ selectedTimeframe }}
+                                {{ 'revenueDashboard.charts.revenueTrend.timeframe.' + selectedTimeframe.toLowerCase() | translate }}
                                 <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                             </span>
                         </button>
@@ -21,17 +22,17 @@ import { isPlatformBrowser } from '@angular/common';
                             <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[4] dark:bg-dark dark:shadow-none">
                                 <li>
                                     <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Daily')">
-                                        Daily
+                                        {{ 'revenueDashboard.charts.revenueTrend.timeframe.daily' | translate }}
                                     </button>
                                 </li>
                                 <li>
                                     <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Weekly')">
-                                        Weekly
+                                        {{ 'revenueDashboard.charts.revenueTrend.timeframe.weekly' | translate }}
                                     </button>
                                 </li>
                                 <li>
                                     <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Monthly')">
-                                        Monthly
+                                        {{ 'revenueDashboard.charts.revenueTrend.timeframe.monthly' | translate }}
                                     </button>
                                 </li>
                             </ul>
@@ -46,7 +47,8 @@ import { isPlatformBrowser } from '@angular/common';
             </div>
         </div>
     `,
-    styleUrl: './revenue-trend.component.scss'
+    styleUrl: './revenue-trend.component.scss',
+    imports: [TranslatePipe]
 })
 export class RevenueTrendComponent implements OnInit, OnChanges {
     private isBrowser: boolean;

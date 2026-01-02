@@ -137,7 +137,7 @@
                                 {{ 'classManagement.classDetails.financialReport.pricePerStudent' | translate }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.price_per_student) }}</strong>
+                                <strong class="text-gray-900 dark:text-white">{{ financialReport.price_per_student | currencyFormat:'VND' }}</strong>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ 'classManagement.classDetails.financialReport.baseTicketPrice' | translate }}
@@ -159,7 +159,7 @@
                                 {{ 'classManagement.classDetails.financialReport.totalRevenue' | translate }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.total_revenue) }}</strong>
+                                <strong class="text-gray-900 dark:text-white">{{ financialReport.total_revenue | currencyFormat:'VND' }}</strong>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ 'classManagement.classDetails.financialReport.priceTimesEnrollment' | translate }}
@@ -170,7 +170,7 @@
                                 {{ 'classManagement.classDetails.financialReport.platformFee' | translate }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.platform_fee) }}</strong>
+                                <strong class="text-gray-900 dark:text-white">{{ financialReport.platform_fee | currencyFormat:'VND' }}</strong>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ groupClass.platform_fee_percentage }}{{ 'classManagement.classDetails.financialReport.ofRevenue' | translate }}
@@ -181,7 +181,7 @@
                                 {{ 'classManagement.classDetails.financialReport.instructorPayout' | translate }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.instructor_payout) }}</strong>
+                                <strong class="text-gray-900 dark:text-white">{{ financialReport.instructor_payout | currencyFormat:'VND' }}</strong>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ 'classManagement.classDetails.financialReport.revenueMinusFee' | translate }}
@@ -192,7 +192,7 @@
                                 {{ 'classManagement.classDetails.financialReport.revenuePerHour' | translate }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                <strong class="text-gray-900 dark:text-white">{{ formatCurrency(financialReport.revenue_per_hour) }}</strong>
+                                <strong class="text-gray-900 dark:text-white">{{ financialReport.revenue_per_hour | currencyFormat:'VND' }}</strong>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ 'classManagement.classDetails.financialReport.basedOnDuration' | translate }} {{ formatDuration(groupClass.duration_in_minutes) }}

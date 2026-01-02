@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ModalLayout from '../../../../../components/ui/ModalLayout';
 import CustomDropdown2 from '../../../../../components/ui/CustomDropdown2';
 import ConfirmModal from '../../../../../components/ui/ConfirmModal';
+import Toast from '../../../../../components/ui/Toast';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../../../../context/CurrencyContext';
 import commonUtils from '../../../../../utils/commonUtils';
@@ -22,7 +23,7 @@ interface CreateClassModalProps {
 
 export interface ClassFormData {
     classTitle: string;
-    subject: string;
+    subject: string; // Will store subject ID
     category: string;
     tuitionFee: number;
     maxStudents: number;
@@ -75,16 +76,11 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [loadingSubjects, setLoadingSubjects] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Transform form data to API request format
     const transformFormDataToApiRequest = (formData: ClassFormData): CreateClassRequest => {
-        // Get name based on language
-        const getLocalizedName = (item: { nameVi: string; nameEn: string }) =>
-            i18n.language === 'vi' ? item.nameVi : item.nameEn;
-
-        // Find the selected subject ID
-        const selectedSubject = subjects.find(sub => getLocalizedName(sub) === formData.subject);
+        // formData.subject now stores the subject ID directly
 
         // Map day names to numbers (Monday = 1, Tuesday = 2, etc.)
         const dayNameToNumber = (dayName: string): number => {
@@ -100,17 +96,43 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             return dayMap[dayName] || 1; // Default to Monday if not found
         };
 
+        // Convert time from "10:00 AM" format to "10:00" (24h format)
+        const convertTimeTo24Hour = (timeStr: string): string => {
+            if (!timeStr) return '';
+            
+            // If already in 24h format (HH:mm), return as is
+            if (/^\d{1,2}:\d{2}$/.test(timeStr)) {
+                return timeStr;
+            }
+            
+            // Parse "10:00 AM" or "1:00 PM" format
+            const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            if (!match) return timeStr; // Return original if can't parse
+            
+            let hours = parseInt(match[1], 10);
+            const minutes = match[2];
+            const period = match[3].toUpperCase();
+            
+            if (period === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes}`;
+        };
+
         return {
             title: formData.classTitle,
-            subjectId: selectedSubject?.id || '',
+            subjectId: formData.subject || '',
             tuitionFee: formData.tuitionFee,
             maxStudents: formData.maxStudents,
             description: formData.description,
             schedules: formData.schedules
                 .filter(schedule => schedule.day && schedule.time)
                 .map(schedule => ({
-                    dayOfWeek: dayNameToNumber(schedule.day),
-                    time: schedule.time
+                    dayOfWeek: Number(dayNameToNumber(schedule.day)), // Ensure it's a number, not string
+                    time: convertTimeTo24Hour(schedule.time)
                 }))
         };
     };
@@ -173,7 +195,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
         if (!isFormValid()) return;
 
         setIsSubmitting(true);
-        setSubmitError(null);
+        setToast(null);
 
         try {
             const apiRequest = transformFormDataToApiRequest(formData);
@@ -194,13 +216,16 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                     schedules: [{ day: '', time: '' }]
                 });
 
-                onClose();
+                setToast({ message: t('dashboard.tutor.myClass.createModal.success') || 'Class created successfully', type: 'success' });
+                setTimeout(() => {
+                    onClose();
+                }, 1000);
             } else {
-                setSubmitError(response.message || 'Failed to create class');
+                setToast({ message: response.message || t('dashboard.tutor.myClass.createModal.error') || 'Failed to create class', type: 'error' });
             }
         } catch (error: any) {
             console.error('Error creating class:', error);
-            setSubmitError(error.response?.data?.message || 'Failed to create class. Please try again.');
+            setToast({ message: error.response?.data?.message || t('dashboard.tutor.myClass.createModal.error') || 'Failed to create class. Please try again.', type: 'error' });
         } finally {
             setIsSubmitting(false);
         }
@@ -313,29 +338,65 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                 <CustomDropdown2
                                     label={t('dashboard.tutor.myClass.createModal.category')}
                                     options={categories.map(cat => i18n.language === 'vi' ? cat.nameVi : cat.nameEn)}
-                                    selectedValue={formData.category}
+                                    selectedValue={formData.category 
+                                        ? (categories.find(cat => cat.id === formData.category) 
+                                            ? (i18n.language === 'vi' 
+                                                ? categories.find(cat => cat.id === formData.category)!.nameVi 
+                                                : categories.find(cat => cat.id === formData.category)!.nameEn)
+                                            : '')
+                                        : ''}
                                     placeholder={loadingCategories ? t('common.loading') : t('dashboard.tutor.myClass.createModal.categoryPlaceholder')}
-                                    onSelect={(value: string) => setFormData(prev => ({ ...prev, category: value }))}
+                                    onSelect={(value: string) => {
+                                        const selectedCategory = categories.find(cat => 
+                                            (i18n.language === 'vi' ? cat.nameVi : cat.nameEn) === value
+                                        );
+                                        setFormData(prev => ({ 
+                                            ...prev, 
+                                            category: selectedCategory?.id || '',
+                                            subject: '' // Reset subject when category changes
+                                        }));
+                                    }}
                                     dropdownId="category-dropdown"
                                     openDropdown={openDropdown}
                                     setOpenDropdown={setOpenDropdown}
                                     hasSearch={true}
                                     searchPlaceholder={t('dashboard.tutor.myClass.createModal.searchCategories')}
+                                    maxVisibleItems={4}
                                 />
                             </div>
                             <div>
                                 <CustomDropdown2
                                     label={<>{t('dashboard.tutor.myClass.createModal.subject')} <span className="text-red-500">*</span></>}
-                                    options={subjects.map(sub => i18n.language === 'vi' ? sub.nameVi : sub.nameEn)}
-                                    selectedValue={formData.subject}
+                                    options={(() => {
+                                        // Filter subjects by selected category
+                                        const filteredSubjects = formData.category 
+                                            ? subjects.filter(sub => sub.categoryId === formData.category)
+                                            : subjects;
+                                        return filteredSubjects.map(sub => i18n.language === 'vi' ? sub.nameVi : sub.nameEn);
+                                    })()}
+                                    selectedValue={formData.subject 
+                                        ? (subjects.find(sub => sub.id === formData.subject) 
+                                            ? (i18n.language === 'vi' 
+                                                ? subjects.find(sub => sub.id === formData.subject)!.nameVi 
+                                                : subjects.find(sub => sub.id === formData.subject)!.nameEn)
+                                            : '')
+                                        : ''}
                                     placeholder={loadingSubjects ? t('common.loading') : t('dashboard.tutor.myClass.createModal.subjectPlaceholder')}
-                                    onSelect={(value: string) => setFormData(prev => ({ ...prev, subject: value }))}
+                                    onSelect={(value: string) => {
+                                        const filteredSubjects = formData.category 
+                                            ? subjects.filter(sub => sub.categoryId === formData.category)
+                                            : subjects;
+                                        const selectedSubject = filteredSubjects.find(sub => 
+                                            (i18n.language === 'vi' ? sub.nameVi : sub.nameEn) === value
+                                        );
+                                        setFormData(prev => ({ ...prev, subject: selectedSubject?.id || '' }));
+                                    }}
                                     dropdownId="subject-dropdown"
                                     openDropdown={openDropdown}
                                     setOpenDropdown={setOpenDropdown}
                                     hasSearch={true}
                                     searchPlaceholder={t('dashboard.tutor.myClass.createModal.searchSubjects')}
-                                    maxVisibleItems={6}
+                                    maxVisibleItems={4}
                                 />
                             </div>
                             <div>
@@ -345,9 +406,15 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                 <input
                                     type="number"
                                     min="0"
-                                    step="0.01"
-                                    value={formData.tuitionFee}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, tuitionFee: parseFloat(e.target.value) || 0 }))}
+                                    step="10000"
+                                    value={formData.tuitionFee || ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setFormData(prev => ({ 
+                                            ...prev, 
+                                            tuitionFee: value === '' ? 0 : parseInt(value) || 0 
+                                        }));
+                                    }}
                                     className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out placeholder:text-gray-300"
                                     placeholder={t('dashboard.tutor.myClass.createModal.tuitionFeePlaceholder')}
                                     required
@@ -435,11 +502,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                         </div>
                     </form>
                 </div>
-                {submitError && (
-                    <div className="px-6 py-3 bg-red-50 border border-red-200 rounded-lg mx-6 mb-4">
-                        <p className="text-sm text-red-600">{submitError}</p>
-                    </div>
-                )}
+                {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
                 <div className="flex justify-end gap-3 p-4 mr-5 border-t border-gray-200 bg-white rounded-b-2xl">
                     <button
                         type="button"

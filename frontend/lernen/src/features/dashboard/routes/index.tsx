@@ -9,6 +9,7 @@ import StudentDetailPage from '../tutor/pages/StudentDetailPage';
 import MyCoursesPage from '../tutor/pages/MyCoursesContentTutorPage';
 import MyClassPage from '../tutor/my-class/MyClassPage';
 import ClassDetailPage from '../tutor/components/class-detail/ClassDetailPage';
+import ClassInfoPage from '../tutor/my-class/components/ClassInfoPage';
 import ScheduleManagementPage from '../tutor/schedule/ScheduleManagementPage';
 import PayoutsPage from '../tutor/payout/PayoutsPage';
 import DealsAndCouponsPage from '../tutor/pages/DealsAndCouponsPage';
@@ -66,6 +67,10 @@ const dashboardRoutes: RouteObject[] = [
       {
         path: 'my-class/:classId',
         element: <ClassDetailPage />,
+      },
+      {
+        path: 'my-class/:classId/edit',
+        element: <ClassInfoPage />,
       },
       {
         path: 'schedule',

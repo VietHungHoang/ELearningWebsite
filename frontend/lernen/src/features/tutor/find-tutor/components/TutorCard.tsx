@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom'; // Temporarily commented - using window.open instead
 import { FaPlay, FaHeart } from 'react-icons/fa';
 import { FiCalendar, FiMessageSquare } from 'react-icons/fi';
 import { VscVerified } from 'react-icons/vsc';
 import { PiStar, PiStudentLight, PiCalendar, PiBookOpenTextLight } from 'react-icons/pi';
 import { HiOutlineLanguage } from 'react-icons/hi2';
 import Avatar from 'react-avatar';
+import { useTranslation } from 'react-i18next';
 import type { Tutor } from '../../../../types/tutor';
 import type { Subject } from '../../../../types/common';
 import { getCountryFlag } from '../../../../lib/countryUtils';
@@ -31,21 +32,37 @@ export const FlagIcon: React.FC<{ countryCode: string; className?: string }> = (
 
 interface TutorCardProps {
   tutor: Tutor;
-  onBookTrial: (tutor: Tutor) => void;
+  onBookTrial?: (tutor: Tutor) => void; // Temporarily optional - commented out
 }
 
-const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
+const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial }) => {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Temporarily commented - using window.open instead
   const { selectedCurrency } = useCurrency();
 
   const toggleBio = () => setShowFullBio(!showFullBio);
 
+  // Helper function to format VND as "200k" instead of "200,000"
+  const formatVNDWithK = (amount: number): string => {
+    const roundedAmount = Math.round(amount);
+    if (roundedAmount >= 1000) {
+      const thousands = roundedAmount / 1000;
+      // If it's a whole number, show without decimals, otherwise show 1 decimal
+      const formatted = thousands % 1 === 0 ? thousands.toString() : thousands.toFixed(1);
+      return `₫${formatted}k`;
+    }
+    return `₫${roundedAmount}`;
+  };
+
   // Convert price from VND (DB currency) to selected currency
   const convertedPrice = convertFromVND(tutor.currentSessionFee || 0, selectedCurrency);
-  const formattedPrice = formatCurrency(convertedPrice, selectedCurrency);
+  // Use custom format for VND, otherwise use standard formatCurrency
+  const formattedPrice = selectedCurrency === 'VND' 
+    ? formatVNDWithK(convertedPrice)
+    : formatCurrency(convertedPrice, selectedCurrency);
 
   const handlePlayClick = () => {  
     if (videoRef.current) {
@@ -55,7 +72,9 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
   };
 
   const handleTutorClick = () => {
-    navigate(`/tutors/${tutor.id}`, { state: { tutor } });
+    // Open tutor detail page in new tab
+    const detailUrl = `/tutors/${tutor.id}`;
+    window.open(detailUrl, '_blank');
   };
 
   const truncatedBio = tutor.introduction && tutor.introduction.length > 250 ? tutor.introduction.substring(0, 250) + '...' : (tutor.introduction || '');
@@ -68,7 +87,16 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
   );
 
   return (
-    <div className="bg-white rounded-2xl p-5 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow duration-200">
+    <div 
+      className="bg-white rounded-2xl p-5 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      onClick={(e) => {
+        // Only navigate if clicking on the card itself, not on buttons or interactive elements
+        const target = e.target as HTMLElement;
+        if (!target.closest('button') && !target.closest('video') && !target.closest('a')) {
+          handleTutorClick();
+        }
+      }}
+    >
       {/* Left side: Video and actions */}
       <div className="flex-shrink-0 w-full md:w-[300px] flex flex-col">
         <div className="relative aspect-[18/10] rounded-2xl overflow-hidden group shadow-lg p-2 bg-white mb-3">
@@ -97,15 +125,23 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
           )}
         </div>
         <div className="space-y-2 flex-grow">
-          <button 
+          {/* Temporarily commented: Book trial session button */}
+          {/* <button 
           onClick={() => onBookTrial(tutor)}
           className="w-full flex items-center justify-center bg-[#295C51] hover:bg-[#27574c] text-white font-bold py-2.25 px-4 rounded-lg">
-            <span className="mr-2 text-sm font-medium">Book a session</span>
+            <span className="mr-2 text-sm font-medium">{t('findTutors.tutorCard.bookSession')}</span>
+            <FiCalendar  />
+          </button> */}
+          {/* Replace with "View Details" button that opens in new tab */}
+          <button 
+            onClick={handleTutorClick}
+            className="w-full flex items-center justify-center bg-[#295C51] hover:bg-[#27574c] text-white font-bold py-2.25 px-4 rounded-lg">
+            <span className="mr-2 text-sm font-medium">{t('findTutors.tutorCard.viewDetails')}</span>
             <FiCalendar  />
           </button>
           <div className="flex items-center gap-2">
             <button className="w-full flex items-center justify-center bg-gray-100 text-[#585858] font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
-              <span className="mr-2  text-sm font-medium">Send message</span>
+              <span className="mr-2  text-sm font-medium">{t('findTutors.tutorCard.sendMessage')}</span>
               <FiMessageSquare />
             </button>
             <button className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 hover:text-red-500 transition-colors">
@@ -129,7 +165,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
             <div>
               <div className="flex items-center gap-1">
                 <h3 className="text-lg font-semibold text-gray-800 cursor-pointer hover:text-[#295C51] transition-colors" onClick={handleTutorClick}>{tutor.fullName}</h3>
-                {tutor.isVerified && <VscVerified style={{ color: 'rgb(51, 204, 94)', fontSize: '18px' }} title="Verified tutor" />}
+                {tutor.isVerified && <VscVerified style={{ color: 'rgb(51, 204, 94)', fontSize: '18px' }} title={t('findTutors.tutorCard.verifiedTutor')} />}
                 <FlagIcon countryCode={tutor.country.code} className="ml-1" />
               </div>
               <p className="text-sm text-gray-500 mt-1">{tutor.headline}</p>
@@ -137,9 +173,9 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
           </div>
           <div className="text-right flex-shrink-0 ml-4">
             <div className="flex items-center justify-end gap-2">
-              <p className="text-xs text-gray-500">Session fee</p>
+              <p className="text-xs text-gray-500">{t('findTutors.tutorCard.sessionFee')}</p>
             </div>
-            <p className="text-2xl font-bold text-gray-800">{formattedPrice}<span className="text-sm font-normal text-gray-500">/50 min</span></p>
+            <p className="text-2xl font-bold text-gray-800">{formattedPrice}<span className="text-sm font-normal text-gray-500">{t('findTutors.tutorCard.per1Hour')}</span></p>
           </div>
         </div>
 
@@ -148,32 +184,32 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
           <div className="space-y-2">
             <StatItem
               icon={<PiStar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{((tutor as any).averageRating || 0).toFixed(1)}/5.0</span> ({(tutor as any).reviewCount || 0} review{(tutor as any).reviewCount !== 1 ? 's' : ''})</>}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{((tutor as any).averageRating || 0).toFixed(1)}/5.0</span> ({(tutor as any).reviewCount || 0} {((tutor as any).reviewCount !== 1 ? t('findTutors.tutorCard.reviews') : t('findTutors.tutorCard.review'))})</>}
             />
             <StatItem
               icon={<PiCalendar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.bookedSessionsCount}</span> Booked sessions</>}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.bookedSessionsCount}</span> {t('findTutors.tutorCard.bookedSessions')}</>}
             />
             <StatItem
               icon={<PiStudentLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.studentCount}</span> Students</>}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{tutor.studentCount}</span> {t('findTutors.tutorCard.students')}</>}
             />
           </div>
           {/* Right stats column */}
           <div className="space-y-2">
             <StatItem
               icon={<HiOutlineLanguage style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>Languages:</span> {tutor.languages?.map((lang, index) => (
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{t('findTutors.tutorCard.languages')}</span> {tutor.languages?.map((lang, index) => (
                 <React.Fragment key={lang.language.code}>
                   {lang.language.name}
-                  {lang.isNative && <span className="ml-1 px-1 py-0.5 bg-gray-100 text-xs font-medium rounded">(Native)</span>}
+                  {lang.isNative && <span className="ml-1 px-1 py-0.5 bg-gray-100 text-xs font-medium rounded">{t('findTutors.tutorCard.native')}</span>}
                   {index < tutor.languages.length - 1 && ', '}
                 </React.Fragment>
-              )) || 'N/A'}</>}
+              )) || t('findTutors.tutorCard.notAvailable')}</>}
             />
             <StatItem
               icon={<PiBookOpenTextLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>I can teach:</span> {tutor.subjects?.map((s: Subject) => s.name).join(', ') || 'N/A'}</>}
+              text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{t('findTutors.tutorCard.iCanTeach')}</span> {tutor.subjects?.map((s: Subject) => t('locale') === 'vi' ? s.nameVi : s.nameEn).join(', ') || t('findTutors.tutorCard.notAvailable')}</>}
             />
           </div>
         </div>
@@ -188,7 +224,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial }) => {
                 onClick={toggleBio}
                 className="text-[#295C51] hover:text-[#27574c] font-medium ml-1"
               >
-                {showFullBio ? 'Show less' : 'Learn more'}
+                {showFullBio ? t('findTutors.tutorCard.showLess') : t('findTutors.tutorCard.learnMore')}
               </button>
             )}
           </p>

@@ -1,31 +1,31 @@
 <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-md">
     <div class="trezo-card-header mb-[12px] flex items-center justify-between">
         <div class="trezo-card-title">
-            <h5 class="!mb-0 text-base">Top 5 Instructors by Earnings</h5>
+            <h5 class="!mb-0 text-base">{{ 'revenueDashboard.charts.topInstructors.title' | translate }}</h5>
         </div>
         <div class="trezo-card-subtitle flex items-center gap-[10px]">
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[5px] md:py-[6.5px] px-[12px] md:px-[19px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19]" (click)="toggleTimeFilterDropdown()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ selectedTimeFilter === 'day' ? 'Daily' : selectedTimeFilter === 'week' ? 'Weekly' : 'Monthly' }}
+                        {{ getTimeFilterLabel() | translate }}
                         <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                     </span>
                 </button>
                 @if (isTimeFilterDropdownOpen) {
-                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[140px] z-[4] dark:bg-dark dark:shadow-none">
+                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[140px] z-[4] dark:bg-[#0c1427] dark:shadow-none">
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setTimeFilter('day')">
-                                Daily
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('day')">
+                                {{ 'revenueDashboard.charts.topInstructors.timeFilter.daily' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setTimeFilter('week')">
-                                Weekly
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('week')">
+                                {{ 'revenueDashboard.charts.topInstructors.timeFilter.weekly' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setTimeFilter('month')">
-                                Monthly
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('month')">
+                                {{ 'revenueDashboard.charts.topInstructors.timeFilter.monthly' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -34,20 +34,20 @@
             <div class="trezo-card-dropdown relative">
                 <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[5px] md:py-[6.5px] px-[12px] md:px-[19px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19]" (click)="toggleViewDropdown()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ selectedView === 'chart' ? 'Chart' : 'Table' }}
+                        {{ 'revenueDashboard.charts.topInstructors.view.' + selectedView | translate }}
                         <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                     </span>
                 </button>
                 @if (isViewDropdownOpen) {
-                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[120px] z-[4] dark:bg-dark dark:shadow-none">
+                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[120px] z-[4] dark:bg-[#0c1427] dark:shadow-none">
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setView('chart')">
-                                Chart
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setView('chart')">
+                                {{ 'revenueDashboard.charts.topInstructors.view.chart' | translate }}
                             </button>
                         </li>
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setView('table')">
-                                Table
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setView('table')">
+                                {{ 'revenueDashboard.charts.topInstructors.view.table' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -65,11 +65,11 @@
                 <table class="w-full">
                     <thead>
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">Rank</th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">Instructor</th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">Sessions</th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">Total Earnings</th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">Avg/Session</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">{{ 'revenueDashboard.charts.topInstructors.table.rank' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">{{ 'revenueDashboard.charts.topInstructors.table.instructor' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">{{ 'revenueDashboard.charts.topInstructors.table.sessions' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">{{ 'revenueDashboard.charts.topInstructors.table.totalEarnings' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[8px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap text-xs">{{ 'revenueDashboard.charts.topInstructors.table.avgPerSession' | translate }}</th>
                         </tr>
                     </thead>
                     <tbody class="text-black dark:text-white">
@@ -86,8 +86,8 @@
                                         {{ instructor.totalSessions }}
                                     </span>
                                 </td>
-                                <td class="px-[12px] py-[10px] text-xs font-bold text-primary-500">{{ formatCurrency(instructor.totalEarnings) }}</td>
-                                <td class="px-[12px] py-[10px] text-xs text-gray-600 dark:text-gray-400">{{ formatCurrency(instructor.avgEarningsPerSession) }}</td>
+                                <td class="px-[12px] py-[10px] text-xs font-bold text-primary-500">{{ instructor.totalEarnings | currencyFormat:'VND' }}</td>
+                                <td class="px-[12px] py-[10px] text-xs text-gray-600 dark:text-gray-400">{{ instructor.avgEarningsPerSession | currencyFormat:'VND' }}</td>
                             </tr>
                         }
                     </tbody>

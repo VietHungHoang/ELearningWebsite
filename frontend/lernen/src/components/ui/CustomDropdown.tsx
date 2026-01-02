@@ -47,7 +47,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
     };
 
     const filteredOptions = options.filter(option =>
-        option.toLowerCase().includes(searchTerm.toLowerCase())
+        option && typeof option === 'string' && option.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
     useEffect(() => {
@@ -82,7 +82,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ label, options, selecte
     // Search bar adds ~48px if present
     // space-y-1 adds 4px gaps between items
     const itemHeight = 40;
-    const gapHeight = 4; // space-y-1 = 4px
     const searchBarHeight = hasSearch ? 48 : 0;
     const maxHeight = (maxVisibleItems * itemHeight) + searchBarHeight + 16; // +16 for padding
 

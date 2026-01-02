@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { NotFoundBookIcon } from './NotFoundBookIcon';
 
 interface SearchNotFoundProps {
@@ -7,15 +8,18 @@ interface SearchNotFoundProps {
 }
 
 const SearchNotFound: React.FC<SearchNotFoundProps> = ({
-  title = "Search Not Found!",
-  message = "We couldn't find any results for your search. Please try different keywords."
+  title,
+  message
 }) => {
+  const { t } = useTranslation();
+  const defaultTitle = title || t('findTutors.searchNotFound.title');
+  const defaultMessage = message || t('findTutors.searchNotFound.message');
   return (
     <div className="bg-[#fdfaf6] rounded-2xl p-8 flex flex-col items-center justify-center text-center h-full min-h-[400px]">
       <NotFoundBookIcon />
-      <h2 className="text-2xl font-bold text-gray-800 mt-4">{title}</h2>
+      <h2 className="text-2xl font-bold text-gray-800 mt-4">{defaultTitle}</h2>
       <p className="text-gray-500 mt-2 max-w-sm">
-        {message}
+        {defaultMessage}
       </p>
     </div>
   );

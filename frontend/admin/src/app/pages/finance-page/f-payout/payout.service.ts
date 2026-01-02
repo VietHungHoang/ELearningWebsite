@@ -6,8 +6,8 @@ import { InstructorPayout, PayoutHistory } from './f-payout.component';
 
 export interface PayoutSummary {
     totalPending: number;
+    pendingAmount: number;
     totalInstructors: number;
-    totalOrders: number;
 }
 
 export interface PayoutApiResponse {
@@ -101,8 +101,8 @@ export class PayoutService {
 
         const summary: PayoutSummary = {
             totalPending: filteredPendingPayouts.reduce((sum, p) => sum + p.totalOwed, 0),
-            totalInstructors: filteredPendingPayouts.length,
-            totalOrders: filteredPendingPayouts.reduce((sum, p) => sum + p.orderCount, 0)
+            pendingAmount: filteredPendingPayouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.totalOwed, 0),
+            totalInstructors: filteredPendingPayouts.length
         };
 
         return {
@@ -141,14 +141,14 @@ export class PayoutService {
                 bankName: 'Vietcombank',
                 accountHolderName: 'ĐẶNG MINH TUẤN',
                 paymentMethod: 'vnpay',
-                totalOwed: 1368000,
-                baseAmount: 1200000,
-                platformFee: 120000,
-                tax: 48000,
-                totalAmount: 1368000,
-                orderCount: 3,
-                orders: mockOrders.slice(0, 3),
-                createdDate: new Date(2025, 10, 5).toISOString(),
+                totalOwed: 5250000,
+                baseAmount: 7500000,
+                platformFee: 2250000,
+                tax: 0,
+                totalAmount: 5250000,
+                orderCount: 8,
+                orders: mockOrders.slice(0, 8),
+                createdDate: new Date(2025, 11, 20).toISOString(), // Dec 20, 2025 - trong chu kỳ hiện tại
                 status: 'pending'
             },
             {
@@ -159,14 +159,14 @@ export class PayoutService {
                 bankName: 'Techcombank',
                 accountHolderName: 'NGUYỄN THỊ HƯƠNG',
                 paymentMethod: 'momo',
-                totalOwed: 1024000,
-                baseAmount: 900000,
-                platformFee: 90000,
-                tax: 34000,
-                totalAmount: 1024000,
-                orderCount: 2,
-                orders: mockOrders.slice(3, 5),
-                createdDate: new Date(2025, 10, 2).toISOString(),
+                totalOwed: 3850000,
+                baseAmount: 5500000,
+                platformFee: 1650000,
+                tax: 0,
+                totalAmount: 3850000,
+                orderCount: 5,
+                orders: mockOrders.slice(8, 13),
+                createdDate: new Date(2025, 11, 25).toISOString(), // Dec 25, 2025 - trong chu kỳ hiện tại
                 status: 'pending'
             },
             {
@@ -177,14 +177,14 @@ export class PayoutService {
                 bankName: 'BIDV',
                 accountHolderName: 'TRẦN QUỐC BẢO',
                 paymentMethod: 'sepay',
-                totalOwed: 2456000,
-                baseAmount: 2200000,
-                platformFee: 220000,
-                tax: 36000,
-                totalAmount: 2456000,
-                orderCount: 5,
-                orders: mockOrders.slice(5, 10),
-                createdDate: new Date(2025, 10, 4).toISOString(),
+                totalOwed: 4200000,
+                baseAmount: 6000000,
+                platformFee: 1800000,
+                tax: 0,
+                totalAmount: 4200000,
+                orderCount: 6,
+                orders: mockOrders.slice(13, 19),
+                createdDate: new Date(2026, 0, 5).toISOString(), // Jan 5, 2026 - trong chu kỳ hiện tại
                 status: 'pending'
             },
             {
@@ -195,50 +195,14 @@ export class PayoutService {
                 bankName: 'Vietinbank',
                 accountHolderName: 'LÊ THỊ MAI',
                 paymentMethod: 'vnpay',
-                totalOwed: 1892000,
-                baseAmount: 1700000,
-                platformFee: 170000,
-                tax: 22000,
-                totalAmount: 1892000,
+                totalOwed: 2800000,
+                baseAmount: 4000000,
+                platformFee: 1200000,
+                tax: 0,
+                totalAmount: 2800000,
                 orderCount: 4,
-                orders: mockOrders.slice(10, 14),
-                createdDate: new Date(2025, 10, 3).toISOString(),
-                status: 'pending'
-            },
-            {
-                id: 'payout-5',
-                instructorId: 'ins5',
-                instructorName: 'Phạm Văn Đức',
-                bankAccount: '9988776655',
-                bankName: 'ACB',
-                accountHolderName: 'PHẠM VĂN ĐỨC',
-                paymentMethod: 'momo',
-                totalOwed: 3128000,
-                baseAmount: 2800000,
-                platformFee: 280000,
-                tax: 48000,
-                totalAmount: 3128000,
-                orderCount: 6,
-                orders: mockOrders.slice(14, 20),
-                createdDate: new Date(2025, 10, 1).toISOString(),
-                status: 'pending'
-            },
-            {
-                id: 'payout-6',
-                instructorId: 'ins6',
-                instructorName: 'Võ Thị Lan',
-                bankAccount: '4433221100',
-                bankName: 'Sacombank',
-                accountHolderName: 'VÕ THỊ LAN',
-                paymentMethod: 'sepay',
-                totalOwed: 1564000,
-                baseAmount: 1400000,
-                platformFee: 140000,
-                tax: 24000,
-                totalAmount: 1564000,
-                orderCount: 3,
-                orders: mockOrders.slice(20, 23),
-                createdDate: new Date(2025, 10, 6).toISOString(),
+                orders: mockOrders.slice(19, 23),
+                createdDate: new Date(2026, 0, 10).toISOString(), // Jan 10, 2026 - trong chu kỳ hiện tại
                 status: 'pending'
             }
         ];
@@ -247,41 +211,28 @@ export class PayoutService {
         this.mockPayoutHistory = [
             {
                 id: 'payout-hist-1',
-                batchNumber: 'PAYOUT-2025-10',
-                instructorId: 'ins3',
-                instructorName: 'Trần Quốc Bảo',
+                batchNumber: 'PAYOUT-2025-12',
+                instructorId: 'ins5',
+                instructorName: 'Phạm Văn Đức',
                 paymentMethod: 'vnpay',
-                paidAmount: 5000000,
-                paidDate: new Date(2025, 9, 1).toISOString(),
+                paidAmount: 8500000,
+                paidDate: new Date(2025, 11, 20).toISOString(), // Dec 20, 2025
                 approvedBy: 'Admin - Ngô Thanh',
-                notes: 'Thanh toán hàng tháng - Tháng 9/2025',
-                orderCount: 12,
+                notes: 'Thanh toán chu kỳ 16/11 - 15/12/2025',
+                orderCount: 15,
                 status: 'complete'
             },
             {
                 id: 'payout-hist-2',
-                batchNumber: 'PAYOUT-2025-09',
-                instructorId: 'ins4',
-                instructorName: 'Ngô Thanh Tâm',
+                batchNumber: 'PAYOUT-2025-11',
+                instructorId: 'ins6',
+                instructorName: 'Võ Thị Lan',
                 paymentMethod: 'momo',
-                paidAmount: 4500000,
-                paidDate: new Date(2025, 8, 1).toISOString(),
-                approvedBy: 'Admin - Ngô Thanh',
-                notes: 'Thanh toán hàng tháng - Tháng 8/2025',
-                orderCount: 10,
-                status: 'complete'
-            },
-            {
-                id: 'payout-hist-3',
-                batchNumber: 'PAYOUT-2025-08',
-                instructorId: 'ins5',
-                instructorName: 'Vũ Hà Linh',
-                paymentMethod: 'sepay',
-                paidAmount: 3800000,
-                paidDate: new Date(2025, 7, 1).toISOString(),
+                paidAmount: 6200000,
+                paidDate: new Date(2025, 10, 20).toISOString(), // Nov 20, 2025
                 approvedBy: 'Admin - Vũ Hà',
-                notes: 'Thanh toán hàng tháng - Tháng 7/2025',
-                orderCount: 8,
+                notes: 'Thanh toán chu kỳ 16/10 - 15/11/2025',
+                orderCount: 12,
                 status: 'complete'
             }
         ];

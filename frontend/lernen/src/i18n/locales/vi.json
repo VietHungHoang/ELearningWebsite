@@ -188,6 +188,8 @@
       "manualDescription": "Nhập hoặc dán nội dung hồ sơ của bạn",
       "manualNote": "Sao chép và dán từ hồ sơ hiện có của bạn",
       "processing": "Đang xử lý...",
+      "pleaseWait": "Vui lòng không đóng cửa sổ này.",
+      "cancel": "Hủy",
       "invalidFileType": "Vui lòng chọn tệp PDF hoặc hình ảnh hợp lệ (JPG, PNG, TIFF, v.v.)",
       "fileTooLarge": "Kích thước tệp phải nhỏ hơn 10MB",
       "noTextExtracted": "Không thể trích xuất văn bản từ tệp. Vui lòng thử nhập thủ công.",
@@ -280,6 +282,52 @@
         "oldestFirst": "Cũ nhất trước"
       },
       "loading": "Đang tải..."
+    },
+    "tutorCard": {
+      "sessionFee": "Phí buổi học",
+      "per1Hour": "/1 giờ",
+      "bookSession": "Đặt buổi học",
+      "viewDetails": "Xem chi tiết",
+      "sendMessage": "Gửi tin nhắn",
+      "verifiedTutor": "Gia sư đã xác minh",
+      "bookedSessions": "Buổi học đã đặt",
+      "students": "Học viên",
+      "languages": "Ngôn ngữ:",
+      "native": "(Bản ngữ)",
+      "iCanTeach": "Tôi có thể dạy:",
+      "notAvailable": "Không có",
+      "showLess": "Thu gọn",
+      "learnMore": "Tìm hiểu thêm",
+      "review": "đánh giá",
+      "reviews": "đánh giá"
+    },
+    "tipsSidebar": {
+      "title": "Mẹo để tìm gia sư tốt nhất",
+      "description": "Chọn gia sư trực tuyến phù hợp cần cân nhắc kỹ lưỡng. Dưới đây là những mẹo giúp bạn đưa ra quyết định sáng suốt.",
+      "tips": {
+        "filterRequirements": "Lọc theo yêu cầu của bạn",
+        "checkQualifications": "Kiểm tra trình độ và kinh nghiệm",
+        "readReviews": "Đọc đánh giá và xếp hạng",
+        "evaluateCommunication": "Đánh giá kỹ năng giao tiếp",
+        "checkAvailability": "Kiểm tra thời gian có sẵn và tính linh hoạt"
+      }
+    },
+    "searchNotFound": {
+      "title": "Không tìm thấy kết quả!",
+      "message": "Chúng tôi không tìm thấy kết quả nào cho tìm kiếm của bạn. Vui lòng thử các từ khóa khác."
+    },
+    "bookingModal": {
+      "bookTrialLesson": "Đặt buổi học thử",
+      "with": "với",
+      "trialLessonBooked": "Đã đặt buổi học thử!",
+      "trialLessonBookedMessage": "Buổi học thử của bạn với {tutorName} đã được xác nhận vào {date} lúc {time}.",
+      "done": "Hoàn tất",
+      "time": "Thời gian:",
+      "selectTimeSlot": "Vui lòng chọn khung giờ để tiếp tục.",
+      "confirmBooking": "Xác nhận đặt lịch"
+    },
+    "errorMessages": {
+      "failedToSearchTutors": "Không thể tìm kiếm gia sư"
     }
   },
   "whyChooseUs": {
@@ -657,7 +705,7 @@
       },
       "requests": {
         "title": "Yêu cầu của tôi",
-        "subtitle": "Theo dõi các yêu cầu đổi lịch và học thử của bạn.",
+        "subtitle": "Xem và quản lý các yêu cầu học thử và đổi lịch của bạn",
         "filters": {
           "reschedule": "Yêu cầu đổi lịch",
           "trial": "Yêu cầu học thử"
@@ -722,7 +770,7 @@
       "sessionTypes": {
         "oneOnOne": "1 kèm 1",
         "group": "Nhóm",
-        "trial": "Thử nghiệm"
+        "trial": "Học thử"
       },
       "totalEarnings": "Tổng thu nhập",
       "totalStudents": "Tổng số học sinh",
@@ -938,6 +986,13 @@
         "noClassesFound": "Không tìm thấy lớp học",
         "noClassesDescription": "Không có lớp học nào phù hợp với bộ lọc hiện tại của bạn.",
         "confirmDelete": "Bạn có chắc chắn muốn xóa \"{{classTitle}}\"?",
+        "deleteClass": "Xóa lớp học",
+        "deleteModalTitle": "Xóa lớp học",
+        "deleteConfirm": "Xóa",
+        "deleteCancel": "Hủy",
+        "deleting": "Đang xóa...",
+        "deleteSuccess": "Đã xóa lớp học \"{{classTitle}}\" thành công",
+        "deleteError": "Không thể xóa lớp học. Vui lòng thử lại.",
         "createModal": {
           "title": "Mở lớp học mới",
           "classTitle": "Tên lớp học",
@@ -960,6 +1015,8 @@
           "cannotRemoveLastSchedule": "Không thể xóa lịch cuối cùng",
           "removeSchedule": "Xóa lịch",
           "createClass": "Mở lớp",
+          "success": "Đã tạo lớp học thành công",
+          "error": "Không thể tạo lớp học. Vui lòng thử lại.",
           "confirmClose": {
             "title": "Hủy thay đổi?",
             "message": "Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn đóng mà không lưu?",
@@ -984,6 +1041,39 @@
           },
           "searchCategories": "Tìm kiếm danh mục...",
           "searchSubjects": "Tìm kiếm môn học..."
+        },
+        "infoPage": {
+          "backToClasses": "Quay lại lớp học",
+          "edit": "Chỉnh sửa",
+          "cancel": "Hủy",
+          "save": "Lưu",
+          "classInformation": "Thông tin lớp học",
+          "schedule": "Lịch dạy",
+          "noSchedule": "Chưa có lịch dạy",
+          "enrolledStudents": "Học viên ({{count}})",
+          "addStudent": "Thêm học viên",
+          "noStudents": "Chưa có học viên",
+          "addFirstStudent": "Thêm học viên đầu tiên để bắt đầu",
+          "student": "Học viên {{id}}",
+          "sendMessage": "Gửi tin nhắn",
+          "removeStudent": "Xóa học viên",
+          "classDetails": "Chi tiết lớp học",
+          "created": "Ngày tạo",
+          "createdWithColon": "Ngày tạo:",
+          "searchStudent": "Tìm kiếm học viên...",
+          "searchFeatureComing": "Tính năng tìm kiếm sẽ được triển khai",
+          "searchingFor": "Đang tìm kiếm: \"{{term}}\"",
+          "enterToSearch": "Nhập để tìm kiếm học viên",
+          "addSelected": "Thêm đã chọn",
+          "loadingClassDetails": "Đang tải thông tin lớp học...",
+          "saveSuccess": "Đã cập nhật thông tin lớp học thành công",
+          "saveError": "Không thể cập nhật thông tin lớp học. Vui lòng thử lại.",
+          "invalidSubject": "Môn học không hợp lệ",
+          "saving": "Đang lưu...",
+          "category": "Danh mục",
+          "categoryPlaceholder": "Chọn danh mục",
+          "subject": "Môn học",
+          "subjectPlaceholder": "Chọn môn học"
         }
       },
       "dealsCoupons": {
@@ -1102,7 +1192,7 @@
       },
       "requests": {
         "title": "Yêu cầu",
-        "subtitle": "Quản lý các yêu cầu đổi lịch và học thử từ học sinh.",
+        "subtitle": "Quản lý và xử lý các yêu cầu học thử và đổi lịch từ học viên",
         "filters": {
           "reschedule": "Yêu cầu đổi lịch",
           "trial": "Yêu cầu học thử"
@@ -1119,6 +1209,7 @@
         "trial": {
           "badge": "Yêu cầu học thử",
           "sessionTime": "Thời gian buổi học",
+          "loading": "Đang tải yêu cầu...",
           "accept": "Chấp nhận",
           "accepting": "Đang chấp nhận...",
           "decline": "Từ chối",
@@ -1133,7 +1224,14 @@
           "declineError": "Đã xảy ra lỗi khi từ chối yêu cầu",
           "unknownStudent": "Học sinh không xác định",
           "unknownTutor": "Gia sư không xác định",
-          "sentTo": "Gửi đến:"
+          "sentTo": "Gửi đến:",
+          "justNow": "Vừa xong",
+          "minutesAgo": "{{count}} phút trước",
+          "minutesAgo_plural": "{{count}} phút trước",
+          "hoursAgo": "{{count}} giờ trước",
+          "hoursAgo_plural": "{{count}} giờ trước",
+          "daysAgo": "{{count}} ngày trước",
+          "daysAgo_plural": "{{count}} ngày trước"
         },
         "reschedule": {
           "recurringTitle": "Thay đổi lịch định kỳ",
@@ -1596,7 +1694,7 @@
       "sendMessage": "Gửi tin nhắn",
       "videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
       "sessionFee": "Phí buổi học",
-      "perMin": "/50 phút"
+      "perMin": "/1 giờ"
     },
     "booking": {
       "selectTimeSlot": "Vui lòng chọn khung giờ trước khi yêu cầu buổi học.",
@@ -1705,6 +1803,7 @@
       "benefit2": "Đánh giá mức độ kỹ năng hiện tại của bạn.",
       "benefit3": "Thảo luận về kế hoạch học tập cá nhân hóa của bạn.",
       "selectedTimes": "Thời gian đã chọn:",
+      "at": "lúc",
       "addMessage": "Thêm tin nhắn (Tùy chọn)",
       "messagePlaceholder": "Hãy cho gia sư biết mục tiêu học tập của bạn...",
       "footerText": "100% miễn phí, không yêu cầu thông tin thanh toán.",

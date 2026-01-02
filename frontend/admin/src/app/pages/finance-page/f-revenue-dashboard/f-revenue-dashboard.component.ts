@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 import { RevenueTrendComponent } from './revenue-trend/revenue-trend.component';
 import { PaymentMethodChartComponent } from './payment-method-chart/payment-method-chart.component';
 import { TopInstructorsChartComponent } from './top-instructors-chart/top-instructors-chart.component';
@@ -15,6 +16,7 @@ import { RevenueDashboardService, RevenueDashboardData } from './revenue-dashboa
         FormsModule,
         RouterLink,
         TranslatePipe,
+        CurrencyFormatPipe,
         RevenueTrendComponent,
         PaymentMethodChartComponent,
         TopInstructorsChartComponent
@@ -29,19 +31,21 @@ export class FRevenueDashboardComponent implements OnInit {
     isDateRangeDropdownOpen: boolean = false;
 
     kpis = {
-        adminAccountIncome: 0,        // Tiền vào từ transaction
-        adminAccountPayout: 0,         // Tiền ra cho giảng viên
-        peakTransactionAmount: 0,      // Lần thanh toán cao nhất
-        payoutFixedDate: 1,            // Ngày cố định hàng tháng (e.g., 1, 15, 25)
-        totalTransactions: 0,          // Tổng số giao dịch
-        totalPayouts: 0,                // Tổng số lần thanh toán cho giảng viên
-        // Trend data (so sánh với period trước)
-        incomeTrend: 0,                 // % thay đổi income
-        payoutTrend: 0,                 // % thay đổi payout
-        balanceTrend: 0,                // % thay đổi balance
-        peakTrend: 0,                   // % thay đổi peak
-        transactionsTrend: 0,           // % thay đổi transactions
-        payoutsTrend: 0                 // % thay đổi payouts
+        // Main Metrics
+        totalRevenue: 0,              // Tổng doanh thu từ tất cả giao dịch
+        platformFeeEarned: 0,         // Phí nền tảng thu được (15% của revenue)
+        instructorPayouts: 0,         // Tổng tiền trả cho giảng viên
+        successRate: 0,               // % tỷ lệ thành công (completed / total * 100)
+        totalTransactions: 0,         // Tổng số giao dịch
+        averageOrderValue: 0,         // Giá trị trung bình mỗi đơn (Revenue / Transactions)
+
+        // Trend data (% so sánh với kỳ trước)
+        revenueTrend: 0,              // % thay đổi revenue
+        platformFeeTrend: 0,          // % thay đổi platform fee
+        payoutTrend: 0,               // % thay đổi payout
+        successRateTrend: 0,          // % thay đổi success rate
+        transactionsTrend: 0,         // % thay đổi transactions
+        aovTrend: 0                   // % thay đổi AOV
     };
 
     dashboardData: RevenueDashboardData | null = null;

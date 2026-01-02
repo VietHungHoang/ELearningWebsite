@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { PaginatedResponse } from '../types/pagination';
+import { CurrencyService } from './currency.service';
 
 export type ClassStatus = 'upcoming' | 'ongoing' | 'completed';
 export type ClassType = '1-on-1' | '1-on-n';
@@ -65,7 +66,10 @@ export class ClassService {
 
   private mockClasses: GroupClass[] = [];
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    private currencyService: CurrencyService
+  ) {
     this.initializeMockData();
   }
 
@@ -505,10 +509,8 @@ export class ClassService {
   }
 
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount);
+    // Assuming prices are stored in VND by default
+    return this.currencyService.format(amount, 'VND');
   }
 
   updateClassStatus(classId: string, newStatus: ClassStatus): void {
