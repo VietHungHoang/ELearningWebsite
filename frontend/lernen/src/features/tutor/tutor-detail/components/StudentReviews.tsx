@@ -1,50 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FiStar, FiCheckCircle } from 'react-icons/fi';
-import type { TutorDetail, TutorReview } from '../../../../types/tutor';
+import type { TutorReview } from '../../../../types/tutor';
 import Toast from '../../../../components/ui/Toast';
 import { tutorService } from '../../../../services/tutorService';
 import { useAuth } from '../../../../context/AuthContext';
 import { useTranslation } from "react-i18next";
 
-const StudentReviews: React.FC<{ tutorId: string }> = ({ tutorId }) => {
+interface StudentReviewsProps {
+    reviews: TutorReview[];
+    tutorId: string;
+    hasTrialSession?: boolean;
+}
+
+const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTrialSession = false }) => {
     const [visibleCount, setVisibleCount] = useState(3);
     const [selectedRating, setSelectedRating] = useState(0);
     const [newComment, setNewComment] = useState('');
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const { state } = useAuth();
     const { t } = useTranslation();
-    const [tutor, setTutor] = useState<TutorDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchTutor = async () => {
-            try {
-                setLoading(true);
-                const response = await tutorService.getTutorDetail(tutorId);
-                setTutor(response.data);
-            } catch (err) {
-                setError('Failed to load tutor details');
-                console.error('Error fetching tutor:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (tutorId) {
-            fetchTutor();
-        }
-    }, [tutorId]);
-
-    if (loading || !tutor) {
-        return <div>Lỗicmnr</div>;
-    }
-
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
-
-    const reviews = tutor.reviews;
 
     const totalReviews = reviews.length;
     const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
@@ -137,7 +111,7 @@ const StudentReviews: React.FC<{ tutorId: string }> = ({ tutorId }) => {
                     <RatingSummary />
 
                     {/* Write a Review Section - only show if tutor doesn't have trial session */}
-                    {!tutor.hasTrialSession && (
+                    {!hasTrialSession && (
                         <div className="bg-[#f9f3eb] rounded-2xl p-6">
                             <h3 className="text-lg font-bold text-gray-800 mb-4">{t('tutorDetail.reviews.writeReview')}</h3>
 
@@ -168,7 +142,7 @@ const StudentReviews: React.FC<{ tutorId: string }> = ({ tutorId }) => {
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder={t('tutorDetail.reviews.placeholder')}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b6459] resize-none text-sm"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b6459] resize-none text-sm placeholder:text-gray-400"
                                 />
                             </div>
 
@@ -182,7 +156,7 @@ const StudentReviews: React.FC<{ tutorId: string }> = ({ tutorId }) => {
                                     }
 
                                     try {
-                                        await tutorService.submitReview(tutor.id, {
+                                        await tutorService.submitReview(tutorId, {
                                             studentId: state.user.id,
                                             rating: selectedRating,
                                             comment: newComment,

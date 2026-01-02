@@ -1,16 +1,21 @@
 
 import React, { useRef, useState, useEffect } from 'react';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight, FiMessageCircle } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import type { GroupClass } from '../../../../types/tutor';
 import type { ClassSchedule } from '../../../../types/class';
 import { useTranslation } from "react-i18next";
+import ModalLayout from '../../../../components/ui/ModalLayout';
 import { classService } from '../../../../services/classService';
+import { useAuth } from '../../../../context/AuthContext';
 
 interface GroupClassSectionProps {
-  tutorId: string;
+  groupClasses: GroupClass[];
 }
 
-const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
+const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) => {
+    const navigate = useNavigate();
+    const { state } = useAuth();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -20,10 +25,14 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showLeaveSuccessModal, setShowLeaveSuccessModal] = useState(false);
     const [joinedClasses, setJoinedClasses] = useState<Set<string>>(new Set());
-    const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [localGroupClasses, setLocalGroupClasses] = useState<GroupClass[]>(groupClasses);
+    const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
+
+    // Update local state when groupClasses prop changes
+    useEffect(() => {
+        setLocalGroupClasses(groupClasses);
+    }, [groupClasses]);
 
     // Helper function to format schedule display
     const formatSchedule = (schedule: ClassSchedule[], duration: number): string => {
@@ -54,19 +63,34 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
 
     // Helper function to calculate end time from start time and duration
     const calculateEndTime = (startTime: string, durationMinutes: number): string => {
-        // Parse start time (assuming format like "3:00 PM" or "10:00 AM")
-        const timeRegex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
-        const match = startTime.match(timeRegex);
+        // Try to parse 12-hour format first (e.g., "3:00 PM" or "10:00 AM")
+        const time12Regex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
+        const match12 = startTime.match(time12Regex);
 
-        if (!match) return startTime; // Return as is if can't parse
+        let hours: number;
+        let minutes: number;
 
-        let hours = parseInt(match[1]);
-        const minutes = parseInt(match[2]);
-        const ampm = match[3].toUpperCase();
+        if (match12) {
+            // 12-hour format
+            hours = parseInt(match12[1]);
+            minutes = parseInt(match12[2]);
+            const ampm = match12[3].toUpperCase();
 
-        // Convert to 24-hour format
-        if (ampm === 'PM' && hours !== 12) hours += 12;
-        if (ampm === 'AM' && hours === 12) hours = 0;
+            // Convert to 24-hour format
+            if (ampm === 'PM' && hours !== 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+        } else {
+            // Try to parse 24-hour format (e.g., "15:00" or "15:00:00")
+            const time24Regex = /(\d{1,2}):(\d{2})(?::\d{2})?/;
+            const match24 = startTime.match(time24Regex);
+
+            if (match24) {
+                hours = parseInt(match24[1]);
+                minutes = parseInt(match24[2]);
+            } else {
+                return startTime; // Return as is if can't parse
+            }
+        }
 
         // Add duration
         const totalMinutes = hours * 60 + minutes + durationMinutes;
@@ -97,32 +121,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
             el?.removeEventListener('scroll', checkScrollability);
             window.removeEventListener('resize', checkScrollability);
         };
-    }, []);
-
-    // Fetch group classes data
-    useEffect(() => {
-        const fetchGroupClasses = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await classService.getGroupClassesForTutor(tutorId);
-                if (response.success) {
-                    setGroupClasses(response.data || []);
-                } else {
-                    setError(response.message || 'Failed to fetch group classes');
-                }
-            } catch (err) {
-                console.error('Error fetching group classes:', err);
-                setError('Failed to fetch group classes');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (tutorId) {
-            fetchGroupClasses();
-        }
-    }, [tutorId]);
+    }, [groupClasses]);
 
     const scroll = (direction: 'left' | 'right') => {
         if (scrollContainerRef.current) {
@@ -133,8 +132,6 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
             });
         }
     };
-
-    const classes = groupClasses;
 
     return (
         <div className="py-8">
@@ -159,64 +156,118 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
             </div>
 
             <div ref={scrollContainerRef} className="flex space-x-6 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-                {loading ? (
-                    <div className="flex items-center justify-center w-full py-12">
-                        <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto mb-4"></div>
-                            <p className="text-gray-500">{t('common.loading')}</p>
-                        </div>
-                    </div>
-                ) : error ? (
-                    <div className="flex items-center justify-center w-full py-12">
-                        <div className="text-center">
-                            <svg className="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p className="text-red-600 mb-2">{t('common.error')}</p>
-                            <p className="text-gray-500 text-sm">{error}</p>
-                        </div>
-                    </div>
-                ) : classes.length === 0 ? (
-                    <div className="flex items-center justify-center w-full py-12">
-                        <div className="text-center">
-                            <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                            <p className="text-gray-500">{t('tutorDetail.groupClass.noClasses')}</p>
-                        </div>
-                    </div>
-                ) : (
-                    classes.map(gc => (
+                {localGroupClasses.map(gc => (
                     <div key={gc.id} className="flex-shrink-0 w-96">
                         <div className="bg-white rounded-2xl shadow-md overflow-hidden h-full border border-gray-100 hover:shadow-lg transition-shadow">
-                            {/* Header - Minimalist style */}
-                            <div className="p-5 border-b border-gray-200">
-                                <div className="space-y-1">
-                                    {/* Dòng 1: Title và chữ Price */}
-                                    <div className="flex items-start justify-between gap-3">
-                                        <h3 className="text-xl font-bold text-gray-900 line-clamp-2 flex-1">{gc.title}</h3>
-                                        <div className="text-right flex-shrink-0 self-end">
-                                            <div className="text-xs text-gray-500 mb-0.5">{t('tutorDetail.groupClass.price')}</div>
-                                        </div>
+                            {/* 
+                                DESIGN OPTIONS - Uncomment the one you prefer:
+                                
+                                OPTION 1: Side-by-side with price badge (CURRENT)
+                                OPTION 2: Stacked with price at bottom
+                                OPTION 3: Compact with price in corner
+                                OPTION 4: Card-style with colored background
+                            */}
+                            
+                            {/* OPTION 1: Side-by-side layout with price badge */}
+                            <div className="p-6 border-b border-gray-200">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight pr-2">
+                                            {gc.title}
+                                        </h3>
                                     </div>
-                                    {/* Dòng 2: Level và số tiền/sessions */}
-                                    <div className="flex items-center justify-between gap-3">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            {/* Level field removed from interface */}
-                                            {/* {gc.level && (
-                                                <span className="px-3 py-1 bg-[#f9f3eb] text-gray-700 text-xs rounded-full font-semibold border border-[#e9bb71]/30">
-                                                    {gc.level}
-                                                </span>
-                                            )} */}
-                                        </div>
-                                        <div className="text-2xl font-bold text-[#0b6459] flex-shrink-0">
-                                            {t('common.currency')}{gc.pricePerHour}
-                                            {/* Sessions field removed from interface */}
-                                            {/* {gc.sessions && <span className="text-sm text-gray-600 font-medium"> / {gc.sessions} {t('tutorDetail.groupClass.sessions')}</span>} */}
+                                    <div className="flex-shrink-0 text-right">
+                                        <div className="flex items-baseline justify-end gap-1.5">
+                                            <span className="text-2xl font-bold text-[#0b6459] leading-none">
+                                                {new Intl.NumberFormat('vi-VN').format(gc.pricePerHour)}
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-700">
+                                                {t('common.currency')}
+                                            </span>
+                                            <span className="text-sm text-gray-500 font-medium">
+                                                /hour
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* OPTION 2: Stacked layout with price at bottom - Uncomment to use
+                            <div className="p-6 border-b border-gray-200">
+                                <h3 className="text-xl font-bold text-gray-900 line-clamp-2 mb-5 leading-tight">
+                                    {gc.title}
+                                </h3>
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                    <span className="text-sm font-medium text-gray-600">
+                                        {t('tutorDetail.groupClass.price')}
+                                    </span>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-3xl font-bold text-[#0b6459]">
+                                            {new Intl.NumberFormat('vi-VN').format(gc.pricePerHour)}
+                                        </span>
+                                        <span className="text-lg font-semibold text-gray-700">
+                                            {t('common.currency')}
+                                        </span>
+                                        <span className="text-sm text-gray-500 ml-1">
+                                            /hour
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            */}
+
+                            {/* OPTION 3: Compact with price in top-right corner - Uncomment to use
+                            <div className="p-6 border-b border-gray-200 relative">
+                                <div className="absolute top-4 right-4 bg-[#0b6459]/10 rounded-lg px-3 py-1.5 border border-[#0b6459]/20">
+                                    <div className="text-right">
+                                        <div className="text-xs text-gray-600 mb-0.5">
+                                            {t('tutorDetail.groupClass.price')}
+                                        </div>
+                                        <div className="flex items-baseline justify-end gap-1">
+                                            <span className="text-xl font-bold text-[#0b6459]">
+                                                {new Intl.NumberFormat('vi-VN').format(gc.pricePerHour)}
+                                            </span>
+                                            <span className="text-sm font-semibold text-gray-700">
+                                                {t('common.currency')}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight pr-24">
+                                    {gc.title}
+                                </h3>
+                            </div>
+                            */}
+
+                            {/* OPTION 4: Card-style with colored price section - Uncomment to use
+                            <div className="p-6 border-b border-gray-200">
+                                <h3 className="text-lg font-bold text-gray-900 line-clamp-2 mb-4 leading-tight">
+                                    {gc.title}
+                                </h3>
+                                <div className="bg-gradient-to-r from-[#0b6459] to-[#084c43] rounded-lg p-4 text-white">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xs font-medium opacity-90 mb-1">
+                                                {t('tutorDetail.groupClass.price')}
+                                            </div>
+                                            <div className="flex items-baseline gap-1.5">
+                                                <span className="text-3xl font-bold">
+                                                    {new Intl.NumberFormat('vi-VN').format(gc.pricePerHour)}
+                                                </span>
+                                                <span className="text-base font-semibold opacity-95">
+                                                    {t('common.currency')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-xs opacity-80">
+                                                per hour
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            */}
 
                             <div className="p-5 space-y-3">
                                 {/* Description */}
@@ -266,34 +317,25 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
 
                                 {/* Students enrolled */}
                                 <div className="pt-3 border-t border-gray-100">
-                                    <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center justify-between">
                                         <span className="text-xs font-semibold text-gray-500">{t('tutorDetail.groupClass.studentsEnrolled')}</span>
                                         <span className="text-sm font-bold text-[#0b6459]">
-                                            {gc.students?.length ?? 0}/{gc.maxStudents ?? '∞'}
+                                            {gc.enrolledStudents ?? gc.students?.length ?? 0}/{gc.maxStudents ?? '∞'}
                                         </span>
                                     </div>
-                                    {gc.students && gc.students.length > 0 && (
-                                        <p className="text-xs text-gray-600">
-                                            {gc.students.slice(0, 3).map((s: any, idx: number) => (
-                                                <span key={s.id}>
-                                                    {idx > 0 && <span className="mx-1 text-gray-400">•</span>}
-                                                    {s.fullName}
-                                                </span>
-                                            ))}
-                                            {gc.students.length > 3 && (
-                                                <span className="text-[#0b6459] font-medium"> +{gc.students.length - 3}</span>
-                                            )}
-                                        </p>
-                                    )}
                                 </div>
 
                                 {/* Action buttons */}
                                 <div className="flex gap-3 pt-2">
                                     <button 
-                                        onClick={() => setSelectedClass(gc)}
-                                        className="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-sm"
+                                        onClick={() => {
+                                            // Navigate to inbox/chat for this group class
+                                            navigate(`/dashboard/inbox?classId=${gc.id}&type=group`);
+                                        }}
+                                        className="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-sm flex items-center justify-center gap-2"
                                     >
-                                        {t('tutorDetail.groupClass.details')}
+                                        <FiMessageCircle className="w-4 h-4" />
+                                        {t('tutorDetail.groupClass.message')}
                                     </button>
                                     {joinedClasses.has(gc.id) ? (
                                         <button 
@@ -320,124 +362,20 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
                             </div>
                         </div>
                     </div>
-                )))}
+                ))}
             </div>
 
-            {/* Modal for class details */}
-            {selectedClass && !showConfirmModal && !showSuccessModal && !showLeaveModal && !showLeaveSuccessModal && (
-                <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-                    onClick={() => setSelectedClass(null)}
-                >
-                    <div 
-                        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="p-6 border-b border-gray-200">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-3 flex-1">
-                                    <h2 className="text-2xl font-bold text-gray-800">{selectedClass.title}</h2>
-                                    <button 
-                                        className="text-gray-500 hover:text-[#0b6459] p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                                        title="Group Chat"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <button 
-                                    onClick={() => setSelectedClass(null)}
-                                    className="text-gray-400 hover:text-gray-600 text-2xl leading-none ml-4"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                            <div className="flex items-center justify-between mt-3">
-                                <div className="flex items-center gap-2">
-                                    {/* Level field removed from interface */}
-                                    {/* {selectedClass.level && (
-                                        <span className="inline-block px-3 py-1 bg-[#f9f3eb] text-gray-700 text-sm rounded-full font-semibold border border-[#e9bb71]/30">
-                                            {selectedClass.level}
-                                        </span>
-                                    )} */}
-                                </div>
-                                <span className="font-bold text-[#0b6459] text-2xl">{t('common.currency')}{selectedClass.pricePerHour}</span>
-                            </div>
-                        </div>
-
-                        <div className="p-6 space-y-6">
-                            {selectedClass.classDescription && (
-                                <div>
-                                    <h3 className="text-sm font-semibold text-gray-700 mb-2">{t('tutorDetail.groupClass.description')}</h3>
-                                    <p className="text-gray-600">{selectedClass.classDescription}</p>
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-4">
-                                {selectedClass.schedule && (
-                                    <div className="col-span-2">
-                                        <h3 className="text-sm font-semibold text-gray-700 mb-2">{t('tutorDetail.groupClass.schedule')}</h3>
-                                        <p className="text-gray-600">{formatSchedule(selectedClass.schedule, 60)}</p>
-                                    </div>
-                                )}
-                                {selectedClass.startDate && (
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-gray-700 mb-2">{t('tutorDetail.groupClass.startDate')}</h3>
-                                        <p className="text-gray-600">{selectedClass.startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-                                    </div>
-                                )}
-                                {/* Language field removed from interface */}
-                                {/* {selectedClass.language && (
-                                    <div>
-                                        <h3 className="text-sm font-semibold text-gray-700 mb-2">{t('tutorDetail.groupClass.language')}</h3>
-                                        <p className="text-gray-600">{selectedClass.language.name}</p>
-                                    </div>
-                                )} */}
-                                <div>
-                                    <h3 className="text-sm font-semibold text-gray-700 mb-2">{t('tutorDetail.groupClass.maxStudents')}</h3>
-                                    <p className="text-gray-600">{selectedClass.maxStudents ?? 'Unlimited'}</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-semibold text-gray-700 mb-2">{t('tutorDetail.groupClass.enrolled')}</h3>
-                                    <p className="text-gray-600">
-                                        {selectedClass.students && selectedClass.students.length > 0 ? (
-                                            <>
-                                                {selectedClass.students.slice(0, 2).map((s: any) => s.fullName).join(', ')}
-                                                {selectedClass.students.length > 2 && (
-                                                    <span className="ml-1 text-[#0b6459] font-semibold">+{selectedClass.students.length - 2}</span>
-                                                )}
-                                            </>
-                                        ) : (
-                                            t('tutorDetail.groupClass.noStudentsYet')
-                                        )}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-6 border-t border-gray-200 flex gap-3">
-                            <button 
-                                onClick={() => setSelectedClass(null)}
-                                className="flex-1 bg-white border border-gray-300 text-gray-700 py-2.5 px-4 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
-                            >
-                                {t('tutorDetail.groupClass.close')}
-                            </button>
-                            <button 
-                                onClick={() => setShowConfirmModal(true)}
-                                className="flex-1 bg-[#0b6459] text-white py-2.5 px-4 rounded-xl hover:bg-[#084c43] transition-colors font-semibold"
-                            >
-                                {t('tutorDetail.groupClass.joinThisClass')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Confirm Modal */}
-            {showConfirmModal && selectedClass && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-xl max-w-lg w-full shadow-2xl">
+            <ModalLayout
+                isOpen={showConfirmModal && selectedClass !== null}
+                onClose={() => {
+                    setShowConfirmModal(false);
+                    setSelectedClass(null);
+                }}
+                maxWidth="lg"
+            >
+                {selectedClass && (
+                    <div>
                         {/* Header */}
                         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
                             <h3 className="text-xl font-bold text-gray-900">{t('tutorDetail.groupClass.joinGroupClass')}</h3>
@@ -483,35 +421,39 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
                                 </div>
                             </div>
 
-                            {/* Notice */}
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                            {/* Important Information */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
                                 <div className="flex gap-3">
-                                    <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                     </svg>
-                                    <div>
-                                        <p className="text-sm font-semibold text-amber-900 mb-1">{t('tutorDetail.groupClass.importantNotice')}</p>
-                                        <p className="text-sm text-amber-800">
-                                            {(selectedClass as any).startDate 
-                                                ? t('tutorDetail.groupClass.classWillStartOnDate', { startDate: (selectedClass as any).startDate })
-                                                : t('tutorDetail.groupClass.classWillStartWhenFull')
-                                            }
-                                        </p>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-semibold text-blue-900 mb-1">{t('tutorDetail.groupClass.importantInformation')}</p>
+                                        <ul className="space-y-2 text-sm text-blue-800">
+                                            <li className="flex items-start gap-2">
+                                                <span className="text-blue-600 mt-0.5">•</span>
+                                                <span>{t('tutorDetail.groupClass.classOpensWhenFull')}</span>
+                                            </li>
+                                            <li className="flex items-start gap-2">
+                                                <span className="text-blue-600 mt-0.5">•</span>
+                                                <span>{t('tutorDetail.groupClass.paymentWhenClassStarts')}</span>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Info */}
                             <div className="space-y-2.5 pt-3 border-t border-gray-100">
-                                {(selectedClass as any).schedule && (
+                                {selectedClass.schedule && selectedClass.schedule.length > 0 && (
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">{t('tutorDetail.groupClass.schedule')}</span>
-                                        <span className="text-gray-900 font-medium text-right">{(selectedClass as any).schedule}</span>
+                                        <span className="text-gray-900 font-medium text-right">{formatSchedule(selectedClass.schedule, 60)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">{t('tutorDetail.groupClass.studentsEnrolledLabel')}</span>
-                                    <span className="text-gray-900 font-medium">{selectedClass.students?.length || 0} / {selectedClass.maxStudents}</span>
+                                    <span className="text-gray-900 font-medium">{selectedClass.enrolledStudents ?? selectedClass.students?.length ?? 0} / {selectedClass.maxStudents}</span>
                                 </div>
                             </div>
                         </div>
@@ -528,26 +470,51 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
                                 {t('tutorDetail.groupClass.cancel')}
                             </button>
                             <button 
-                                onClick={() => {
-                                    setShowConfirmModal(false);
-                                    setShowSuccessModal(true);
-                                    if (selectedClass) {
-                                        setJoinedClasses(prev => new Set(prev).add(selectedClass.id));
+                                onClick={async () => {
+                                    if (!selectedClass || !state.user?.id) return;
+                                    
+                                    setIsLoading(true);
+                                    try {
+                                        const response = await classService.addStudentToClass(selectedClass.id, state.user.id);
+                                        if (response.success) {
+                                            setShowConfirmModal(false);
+                                            setShowSuccessModal(true);
+                                            setJoinedClasses(prev => new Set(prev).add(selectedClass.id));
+                                            // Update enrolled students count
+                                            setLocalGroupClasses(prev => prev.map(gc => 
+                                                gc.id === selectedClass.id 
+                                                    ? { ...gc, enrolledStudents: (gc.enrolledStudents ?? 0) + 1 }
+                                                    : gc
+                                            ));
+                                        } else {
+                                            alert(response.message || t('tutorDetail.groupClass.joinError'));
+                                        }
+                                    } catch (error) {
+                                        console.error('Error joining class:', error);
+                                        alert(t('tutorDetail.groupClass.joinError'));
+                                    } finally {
+                                        setIsLoading(false);
                                     }
                                 }}
-                                className="flex-1 px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] text-sm font-semibold transition-colors"
+                                disabled={isLoading}
+                                className="flex-1 px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {t('tutorDetail.groupClass.confirmJoin')}
+                                {isLoading ? t('common.loading') : t('tutorDetail.groupClass.confirmJoin')}
                             </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </ModalLayout>
 
             {/* Success Modal */}
-            {showSuccessModal && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
+            <ModalLayout
+                isOpen={showSuccessModal}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    setSelectedClass(null);
+                }}
+                maxWidth="md"
+            >
                         <div className="px-6 pt-6 pb-5 text-center">
                             {/* Success Icon */}
                             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -580,14 +547,19 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
                                 {t('tutorDetail.groupClass.gotIt')}
                             </button>
                         </div>
-                    </div>
-                </div>
-            )}
+            </ModalLayout>
 
             {/* Leave Confirmation Modal */}
-            {showLeaveModal && selectedClass && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-xl max-w-lg w-full shadow-2xl">
+            <ModalLayout
+                isOpen={showLeaveModal && selectedClass !== null}
+                onClose={() => {
+                    setShowLeaveModal(false);
+                    setSelectedClass(null);
+                }}
+                maxWidth="lg"
+            >
+                {selectedClass && (
+                    <div>
                         {/* Header */}
                         <div className="px-6 pt-6 pb-4 border-b border-gray-100">
                             <h3 className="text-xl font-bold text-gray-900">{t('tutorDetail.groupClass.leaveGroupClass')}</h3>
@@ -633,30 +605,55 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
                                 {t('tutorDetail.groupClass.cancel')}
                             </button>
                             <button 
-                                onClick={() => {
-                                    setShowLeaveModal(false);
-                                    setShowLeaveSuccessModal(true);
-                                    if (selectedClass) {
-                                        setJoinedClasses(prev => {
-                                            const newSet = new Set(prev);
-                                            newSet.delete(selectedClass.id);
-                                            return newSet;
-                                        });
+                                onClick={async () => {
+                                    if (!selectedClass || !state.user?.id) return;
+                                    
+                                    setIsLoading(true);
+                                    try {
+                                        const response = await classService.removeStudentFromClass(selectedClass.id, state.user.id);
+                                        if (response.success) {
+                                            setShowLeaveModal(false);
+                                            setShowLeaveSuccessModal(true);
+                                            setJoinedClasses(prev => {
+                                                const newSet = new Set(prev);
+                                                newSet.delete(selectedClass.id);
+                                                return newSet;
+                                            });
+                                            // Update enrolled students count
+                                            setLocalGroupClasses(prev => prev.map(gc => 
+                                                gc.id === selectedClass.id 
+                                                    ? { ...gc, enrolledStudents: Math.max(0, (gc.enrolledStudents ?? 0) - 1) }
+                                                    : gc
+                                            ));
+                                        } else {
+                                            alert(response.message || t('tutorDetail.groupClass.leaveError'));
+                                        }
+                                    } catch (error) {
+                                        console.error('Error leaving class:', error);
+                                        alert(t('tutorDetail.groupClass.leaveError'));
+                                    } finally {
+                                        setIsLoading(false);
                                     }
                                 }}
-                                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold transition-colors"
+                                disabled={isLoading}
+                                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {t('tutorDetail.groupClass.leaveClass')}
                             </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </ModalLayout>
 
             {/* Leave Success Modal */}
-            {showLeaveSuccessModal && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full shadow-2xl">
+            <ModalLayout
+                isOpen={showLeaveSuccessModal}
+                onClose={() => {
+                    setShowLeaveSuccessModal(false);
+                    setSelectedClass(null);
+                }}
+                maxWidth="md"
+            >
                         <div className="px-6 pt-6 pb-5 text-center">
                             {/* Success Icon */}
                             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -686,9 +683,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ tutorId }) => {
                                 {t('tutorDetail.groupClass.gotIt')}
                             </button>
                         </div>
-                    </div>
-                </div>
-            )}
+            </ModalLayout>
         </div>
     );
 };
