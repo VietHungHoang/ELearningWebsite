@@ -12,6 +12,7 @@ import type { Subject } from '../../../../types/common';
 import { getCountryFlag } from '../../../../lib/countryUtils';
 import { flagComponents } from '../../../../lib/flagMapping';
 import { useCurrency } from '../../../../context/CurrencyContext';
+import { useChat } from '../../../../context/ChatContext';
 import { convertFromVND, formatCurrency } from '../../../../utils/currencyHelper';
 import useVideoThumbnail from '../../../../hooks/useVideoThumbnail';
 import VideoModal from './VideoModal';
@@ -43,6 +44,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
   const [showFullBio, setShowFullBio] = useState(false);
   // const navigate = useNavigate(); // Temporarily commented - using window.open instead
   const { selectedCurrency } = useCurrency();
+  const { openChatWithTutor } = useChat();
 
   // Auto-generate thumbnail from video
   const videoThumbnail = useVideoThumbnail(tutor.videoUrl);
@@ -76,6 +78,10 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
     // Open tutor detail page in new tab
     const detailUrl = `/tutors/${tutor.id}`;
     window.open(detailUrl, '_blank');
+  };
+
+  const handleSendMessage = () => {
+    openChatWithTutor(tutor.id, tutor.fullName);
   };
 
   const truncatedBio = tutor.introduction && tutor.introduction.length > 250 ? tutor.introduction.substring(0, 250) + '...' : (tutor.introduction || '');
@@ -135,7 +141,10 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
               <FiCalendar />
             </button>
             <div className="flex items-center gap-2">
-              <button className="w-full flex items-center justify-center bg-gray-100 text-[#585858] font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">
+              <button
+                onClick={handleSendMessage}
+                className="w-full flex items-center justify-center bg-gray-100 text-[#585858] font-bold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+              >
                 <span className="mr-2  text-sm font-medium">{t('findTutors.tutorCard.sendMessage')}</span>
                 <FiMessageSquare />
               </button>

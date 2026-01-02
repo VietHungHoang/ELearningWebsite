@@ -52,10 +52,6 @@ export interface Tutor extends UserInfo {
     subjects: Subject[];
     socialLinks?: TutorSocial[];
     hasTrialSession?: boolean;
-    // Resume data
-    educations?: EducationItem[];
-    experiences?: ExperienceItem[];
-    certifications?: CertificationItem[];
 }
 
 export interface TutorReview {

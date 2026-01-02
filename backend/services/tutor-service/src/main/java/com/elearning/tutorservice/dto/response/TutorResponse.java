@@ -27,7 +27,7 @@ public class TutorResponse extends UserInfoResponse {
     private BigDecimal currentSessionFee;
     private BigDecimal originalSessionFee;
     private Double averageRating;
-    private Integer reviewCount;
+    private List<TutorReviewResponse> reviews;
     private Integer bookedSessionsCount;
     private Integer studentCount;
     private String countryCode;

@@ -1,5 +1,6 @@
 package com.elearning.classservice.service.impl;
 
+import com.elearning.classservice.dto.response.OpeningClassResponse;
 import com.elearning.classservice.dto.response.ScheduleInfo;
 import com.elearning.classservice.dto.request.CreateClassRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
@@ -20,6 +21,7 @@ import com.elearning.classservice.entity.enums.ScheduleStatus;
 import com.elearning.classservice.repository.ClassEnrollmentRepository;
 import com.elearning.classservice.repository.ClassRepository;
 import com.elearning.classservice.repository.SessionRepository;
+import com.elearning.classservice.repository.UserRepository;
 import com.elearning.classservice.service.ClassService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,6 +48,7 @@ public class ClassServiceImpl implements ClassService {
     private final ClassRepository classRepository;
     private final ClassEnrollmentRepository classEnrollmentRepository;
     private final SessionRepository sessionRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -489,5 +493,143 @@ public class ClassServiceImpl implements ClassService {
         
         classRepository.delete(classEntity);
         log.info("Class deleted successfully: {}", classId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OpeningClassResponse> getOpeningClasses(UUID tutorId) {
+        log.info("Getting opening classes for tutor: {}", tutorId);
+        
+        List<ClassEntity> classes = classRepository.findByTutorIdAndStatus(tutorId, ClassStatus.OPENING);
+        
+        return classes.stream()
+                .map(this::mapToOpeningClassResponse)
+                .collect(Collectors.toList());
+    }
+
+    private OpeningClassResponse mapToOpeningClassResponse(ClassEntity classEntity) {
+        // Count enrolled students (ON_GOING status means actively enrolled)
+        int enrolledStudents = classEntity.getEnrollments() != null 
+                ? (int) classEntity.getEnrollments().stream()
+                    .filter(e -> e.getStatus() == EnrollmentStatus.ON_GOING)
+                    .count()
+                : 0;
+        
+        // Map schedules
+        List<ScheduleInfo> schedules = classEntity.getSchedules() != null
+                ? classEntity.getSchedules().stream()
+                    .map(schedule -> ScheduleInfo.builder()
+                            .dayOfWeek(schedule.getDayOfWeek())
+                            .time(schedule.getStartTime().toString())
+                            .build())
+                    .collect(Collectors.toList())
+                : null;
+        
+        return OpeningClassResponse.builder()
+                .id(classEntity.getId())
+                .title(classEntity.getTitle())
+                .description(classEntity.getDescription())
+                .subjectId(classEntity.getSubjectId())
+                .classType(classEntity.getClassType().name())
+                .maxStudents(classEntity.getMaxStudents())
+                .enrolledStudents(enrolledStudents)
+                .pricePerHour(classEntity.getPricePerHour())
+                .schedules(schedules)
+                .tutor(OpeningClassResponse.TutorBasicInfo.builder()
+                        .id(classEntity.getTutor().getId())
+                        .fullName(classEntity.getTutor().getFullName())
+                        .email(null) // Email not available in User entity
+                        .avatarUrl(classEntity.getTutor().getAvatarUrl())
+                        .build())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void addStudentToClass(UUID classId, UUID studentId, UUID tutorId) {
+        log.info("Adding student {} to class {}", studentId, classId);
+        
+        // Verify class exists
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+        
+        // If class is NOT OPENING, verify tutor ownership
+        if (classEntity.getStatus() != ClassStatus.OPENING) {
+            if (tutorId == null) {
+                throw new RuntimeException("Unauthorized: Tutor ID is required for non-opening classes");
+            }
+            if (!classEntity.getTutor().getId().equals(tutorId)) {
+                throw new RuntimeException("Unauthorized: You are not the tutor of this class");
+            }
+        }
+        
+        // If class is OPENING, anyone can enroll without authorization
+        
+        // Check if student already enrolled
+        Optional<ClassEnrollment> existingEnrollment = 
+                classEnrollmentRepository.findByClassEntityIdAndStudentId(classId, studentId);
+        if (existingEnrollment.isPresent()) {
+            throw new RuntimeException("Student is already enrolled in this class");
+        }
+        
+        // Check if class is full
+        long currentEnrollments = classEnrollmentRepository.countByClassEntityIdAndStatus(
+                classId, EnrollmentStatus.ON_GOING);
+        if (classEntity.getMaxStudents() != null && currentEnrollments >= classEntity.getMaxStudents()) {
+            throw new RuntimeException("Class is full");
+        }
+        
+        // Get or create student user
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        
+        // Create enrollment
+        ClassEnrollment enrollment = ClassEnrollment.builder()
+                .classEntity(classEntity)
+                .student(student)
+                .status(EnrollmentStatus.ON_GOING)
+                .build();
+        
+        classEnrollmentRepository.save(enrollment);
+        log.info("Student {} added to class {} successfully", studentId, classId);
+    }
+
+    @Override
+    @Transactional
+    public void removeStudentFromClass(UUID classId, UUID studentId, UUID tutorId) {
+        log.info("Removing student {} from class {}", studentId, classId);
+        
+        // Verify class exists
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+        
+        // If class is NOT OPENING, only tutor can remove students
+        if (classEntity.getStatus() != ClassStatus.OPENING) {
+            if (tutorId == null) {
+                throw new RuntimeException("Unauthorized: Tutor ID is required for non-opening classes");
+            }
+            if (!classEntity.getTutor().getId().equals(tutorId)) {
+                throw new RuntimeException("Unauthorized: You are not the tutor of this class");
+            }
+        }
+        
+        // If class is OPENING, students can leave freely without authorization
+        
+        // Find enrollment
+        ClassEnrollment enrollment = classEnrollmentRepository
+                .findByClassEntityIdAndStudentId(classId, studentId)
+                .orElseThrow(() -> new RuntimeException("Student is not enrolled in this class"));
+        
+        // Check if class has started
+        if (classEntity.getStatus() == ClassStatus.IN_PROGRESS) {
+            // Change status to CANCELLED instead of deleting
+            enrollment.setStatus(EnrollmentStatus.CANCELLED);
+            classEnrollmentRepository.save(enrollment);
+            log.info("Student {} enrollment cancelled from class {}", studentId, classId);
+        } else {
+            // Delete enrollment if class hasn't started
+            classEnrollmentRepository.delete(enrollment);
+            log.info("Student {} removed from class {}", studentId, classId);
+        }
     }
 }
