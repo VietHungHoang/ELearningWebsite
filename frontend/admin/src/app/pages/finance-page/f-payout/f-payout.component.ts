@@ -138,7 +138,7 @@ export class FPayoutComponent implements OnInit {
         const today = new Date();
         const currentMonth = today.getMonth();
         const currentYear = today.getFullYear();
-        
+
         // Chu kỳ: 16 tháng trước - 15 tháng này
         if (today.getDate() <= 15) {
             // Đang trong chu kỳ tháng trước
@@ -206,7 +206,7 @@ export class FPayoutComponent implements OnInit {
 
     switchTab(tab: 'pending' | 'history'): void {
         this.activeTab = tab;
-        
+
         // Auto-switch KPI filter when changing tabs
         if (tab === 'pending') {
             this.kpiFilter = 'current-cycle';
@@ -215,7 +215,7 @@ export class FPayoutComponent implements OnInit {
             this.kpiFilter = '30days';
             this.calculatePaginationHistory();
         }
-        
+
         this.loadPayoutData();
     }
 
@@ -483,10 +483,10 @@ export class FPayoutComponent implements OnInit {
 
     confirmQRPayment(): void {
         if (!this.selectedPayout) return;
-        
+
         // Close QR modal
         this.closeQRModal();
-        
+
         // Mark as paid (same logic as confirm payment modal)
         this.markAsPaid();
     }
