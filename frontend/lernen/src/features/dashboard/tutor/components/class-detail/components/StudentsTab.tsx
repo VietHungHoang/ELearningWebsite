@@ -25,7 +25,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                        Học viên ({classData.students.length})
+                        học viên ({classData.students.length})
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
                         Quản lý học viên trong lớp học
@@ -51,16 +51,16 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
                 ) : (
                     classData.students.map((student: any) => {
                         // Đảm bảo luôn có tên hợp lệ
-                        const studentName = student.name || student.fullName || `Học viên ${student.id}`;
-                        const studentEmail = student.email || 
-                            (studentName 
-                                ? `${studentName.toLowerCase().replace(/\s+/g, '.').normalize('NFD').replace(/[\u0300-\u036f]/g, '')}@example.com` 
+                        const studentName = student.name || student.fullName || `học viên ${student.id}`;
+                        const studentEmail = student.email ||
+                            (studentName
+                                ? `${studentName.toLowerCase().replace(/\s+/g, '.').normalize('NFD').replace(/[\u0300-\u036f]/g, '')}@example.com`
                                 : `${student.id}@example.com`);
-                        
+
                         // Component to handle avatar with fallback
                         const StudentAvatar: React.FC<{ avatar: string; name: string }> = ({ avatar, name }) => {
                             const [imgError, setImgError] = useState(false);
-                            
+
                             if (avatar && !imgError) {
                                 return (
                                     <img
@@ -71,7 +71,7 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
                                     />
                                 );
                             }
-                            
+
                             return (
                                 <Avatar
                                     name={name}
@@ -81,31 +81,31 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
                                 />
                             );
                         };
-                        
+
                         return (
-                        <div key={student.id} className="p-4 hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <StudentAvatar avatar={student.avatar || ''} name={studentName} />
-                                    <div>
-                                        <p className="font-medium text-gray-900">
-                                            {studentName}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            {studentEmail}
-                                        </p>
+                            <div key={student.id} className="p-4 hover:bg-gray-50 transition-colors">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <StudentAvatar avatar={student.avatar || ''} name={studentName} />
+                                        <div>
+                                            <p className="font-medium text-gray-900">
+                                                {studentName}
+                                            </p>
+                                            <p className="text-sm text-gray-600">
+                                                {studentEmail}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Gửi tin nhắn">
+                                            <FiMessageCircle className="w-4 h-4" />
+                                        </button>
+                                        <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa học viên">
+                                            <FiTrash2 className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="flex items-center">
-                                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Gửi tin nhắn">
-                                        <FiMessageCircle className="w-4 h-4" />
-                                    </button>
-                                    <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Xóa học viên">
-                                        <FiTrash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
                             </div>
-                        </div>
                         );
                     })
                 )}

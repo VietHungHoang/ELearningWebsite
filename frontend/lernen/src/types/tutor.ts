@@ -13,7 +13,7 @@ export interface TutorResponse extends UserInfo {
     email?: string;
     isVerified: boolean;
     headline: string;
-    videoUrl: string; 
+    videoUrl: string;
     introduction: string;
     currentSessionFee: number;
     originalSessionFee?: number;
@@ -52,6 +52,10 @@ export interface Tutor extends UserInfo {
     subjects: Subject[];
     socialLinks?: TutorSocial[];
     hasTrialSession?: boolean;
+    // Resume data
+    educations?: EducationItem[];
+    experiences?: ExperienceItem[];
+    certifications?: CertificationItem[];
 }
 
 export interface TutorReview {

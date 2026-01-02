@@ -64,7 +64,7 @@ const TutorDetailPage: React.FC = () => {
 
     const handleNavigateToApp = (page: string, data?: any) => {
         if (page === 'checkout' && data) {
-            navigate(`/${page}`, { 
+            navigate(`/${page}`, {
                 state: data
             });
         } else {
@@ -117,7 +117,7 @@ const TutorDetailPage: React.FC = () => {
                         <GroupClassSection tutorId={tutorId!} />
                     </div> */}
                     <div id="resume-highlights" className="pt-16 -mt-16">
-                        <ResumeHighlights tutorId={tutorId!} />
+                        <ResumeHighlights tutor={tutorData} />
                     </div>
                     <div id="reviews" className="pt-16 -mt-16">
                         <StudentReviews tutorId={tutorId!} />

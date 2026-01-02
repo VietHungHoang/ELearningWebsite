@@ -227,22 +227,22 @@
     }
   },
   "findTutors": {
-    "pageTitle": "Khám phá gia sư trực tuyến chuyên nghiệp cho học tập của bạn",
+    "pageTitle": "Khám phá các gia sư nhiều kinh nghiệm của chúng tôi",
     "pageDescription": "Nắm vững kiến thức với sự dạy kèm trực tuyến cá nhân hóa từ các giáo viên chuyên nghiệp. Gia sư giàu kinh nghiệm của chúng tôi luôn sẵn sàng giúp bạn xây dựng nền tảng vững chắc và đạt được mục tiêu học tập.",
     "connectionError": "Lỗi kết nối",
     "connectionErrorMessage": "Chúng tôi đang gặp sự cố khi kết nối với máy chủ. Vui lòng kiểm tra kết nối internet của bạn và thử lại.",
     "filters": {
       "tabs": {
-        "allSessions": "Tất cả buổi học",
-        "privateSessions": "Buổi học riêng",
-        "groupSessions": "Buổi học nhóm"
+        "allSessions": "Tất cả",
+        "privateSessions": "Dạy kèm 1 - 1",
+        "groupSessions": "Dạy theo nhóm"
       },
       "labels": {
         "category": "Danh mục",
-        "subject": "Chọn môn học",
-        "feePerSession": "Phí mỗi buổi",
-        "tutorLanguages": "Ngôn ngữ gia sư",
-        "availability": "Thời gian có sẵn"
+        "subject": "Môn học",
+        "feePerSession": "Học phí",
+        "tutorLanguages": "Ngôn ngữ",
+        "availability": "Thời gian học"
       },
       "placeholders": {
         "chooseCategory": "Chọn danh mục",
@@ -284,14 +284,14 @@
       "loading": "Đang tải..."
     },
     "tutorCard": {
-      "sessionFee": "Phí buổi học",
+      "sessionFee": "Học phí",
       "per1Hour": "/1 giờ",
       "bookSession": "Đặt buổi học",
       "viewDetails": "Xem chi tiết",
       "sendMessage": "Gửi tin nhắn",
       "verifiedTutor": "Gia sư đã xác minh",
-      "bookedSessions": "Buổi học đã đặt",
-      "students": "Học viên",
+      "bookedSessions": "phiên học đã dạy",
+      "students": "học viên",
       "languages": "Ngôn ngữ:",
       "native": "(Bản ngữ)",
       "iCanTeach": "Tôi có thể dạy:",
@@ -451,7 +451,7 @@
     "viewAllTutors": "Xem tất cả gia sư",
     "perHour": "/giờ",
     "reviews": "đánh giá",
-    "activeStudents": "Học viên đang học",
+    "activeStudents": "học viên đang học",
     "viewProfile": "Xem hồ sơ"
   },
   "cart": {
@@ -802,7 +802,7 @@
         "students": "Học sinh"
       },
       "myStudents": {
-        "title": "Học viên của tôi",
+        "title": "học viên của tôi",
         "tabs": {
           "all": "Tất cả học viên",
           "ongoing": "Đang học",
@@ -839,7 +839,7 @@
       "studentDetail": {
         "breadcrumb": {
           "dashboard": "Trang quản trị",
-          "myStudents": "Học viên của tôi"
+          "myStudents": "học viên của tôi"
         },
         "notFound": {
           "title": "Không tìm thấy học viên",
@@ -1050,11 +1050,11 @@
           "classInformation": "Thông tin lớp học",
           "schedule": "Lịch dạy",
           "noSchedule": "Chưa có lịch dạy",
-          "enrolledStudents": "Học viên ({{count}})",
+          "enrolledStudents": "học viên ({{count}})",
           "addStudent": "Thêm học viên",
           "noStudents": "Chưa có học viên",
           "addFirstStudent": "Thêm học viên đầu tiên để bắt đầu",
-          "student": "Học viên {{id}}",
+          "student": "học viên {{id}}",
           "sendMessage": "Gửi tin nhắn",
           "removeStudent": "Xóa học viên",
           "classDetails": "Chi tiết lớp học",
@@ -1286,7 +1286,7 @@
         },
         "errors": {
           "loadAvailability": "Không thể tải lịch dạy",
-          "loadSessions": "Không thể tải các buổi học đã đặt",
+          "loadSessions": "Không thể tải các phiên học đã dạy",
           "save": "Không thể lưu lịch dạy"
         },
         "availabilityDetails": {
@@ -1683,7 +1683,7 @@
   },
   "tutorDetail": {
     "profile": {
-      "bookedSessions": "Buổi học đã đặt",
+      "bookedSessions": "phiên học đã dạy",
       "students": "Học sinh",
       "socialProfiles": "Hồ sơ mạng xã hội",
       "canTeach": "Tôi có thể dạy",
@@ -1693,7 +1693,7 @@
       "bookSession": "Đặt lịch học",
       "sendMessage": "Gửi tin nhắn",
       "videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
-      "sessionFee": "Phí buổi học",
+      "sessionFee": "Học phí",
       "perMin": "/1 giờ"
     },
     "booking": {
@@ -2127,7 +2127,7 @@
       "headline": "Chuyên môn",
       "headlinePlaceholder": "VD: Gia sư Toán được chứng nhận với 5 năm kinh nghiệm",
       "headlineHint": "Sẽ được hiển thị dưới tên của bạn trên thẻ hồ sơ.",
-      "sessionFee": "Phí buổi học (mỗi giờ)",
+      "sessionFee": "Học phí (mỗi giờ)",
       "sessionFeeHint": "Đặt mức phí theo giờ cho các buổi học gia sư.",
       "subjectsITeach": "Môn học tôi dạy",
       "filterByCategory": "Lọc theo danh mục",

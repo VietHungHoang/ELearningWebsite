@@ -123,11 +123,10 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-colors ${
-                            activeTab === tab 
-                                ? 'bg-white text-gray-800 shadow-md' 
+                        className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-colors ${activeTab === tab
+                                ? 'bg-white text-gray-800 shadow-md'
                                 : 'bg-transparent text-gray-500 hover:bg-white/50'
-                        }`}
+                            }`}
                     >
                         {getTranslatedTab(tab)}
                     </button>

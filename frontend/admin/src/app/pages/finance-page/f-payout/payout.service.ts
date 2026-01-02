@@ -122,7 +122,7 @@ export class PayoutService {
             mockOrders.push({
                 orderId: crypto.randomUUID(),
                 orderNumber: `ORD-2025-${String(i + 1).padStart(5, '0')}`,
-                learnerName: `Học viên ${i + 1}`,
+                learnerName: `học viên ${i + 1}`,
                 sessionName: 'English Conversation',
                 sessionType: i % 2 === 0 ? '1 and 1' : '1 and n',
                 hourlyRate: 15 + (i % 5) * 2,

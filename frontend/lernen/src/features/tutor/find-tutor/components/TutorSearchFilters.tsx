@@ -10,28 +10,28 @@ import { convertCurrency, formatCurrency } from '../../../../utils/currencyHelpe
 
 // --- Type Definitions ---
 interface TutorSearchFiltersProps {
-  onFilterChange: (filters: TutorSearchFilter) => void;
-  onSearch: (keyword: string) => void;
+    onFilterChange: (filters: TutorSearchFilter) => void;
+    onSearch: (keyword: string) => void;
 }
 
 interface FuzzySearchSuggestion {
-  id: string;
-  text: string;
-  type: 'tutor' | 'subject' | 'category';
+    id: string;
+    text: string;
+    type: 'tutor' | 'subject' | 'category';
 }
 
-interface MultiSelectDropdownProps {
-    label: string;
-    options: string[];
-    selectedOptions: string[];
-    placeholder: string;
-    onToggleOption: (option: string) => void;
-    dropdownId: string;
-    openDropdown: string | null;
-    setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
-    loading?: boolean;
-    loadingText?: string;
-}
+// interface MultiSelectDropdownProps {
+//     label: string;
+//     options: string[];
+//     selectedOptions: string[];
+//     placeholder: string;
+//     onToggleOption: (option: string) => void;
+//     dropdownId: string;
+//     openDropdown: string | null;
+//     setOpenDropdown: React.Dispatch<React.SetStateAction<string | null>>;
+//     loading?: boolean;
+//     loadingText?: string;
+// }
 
 interface MultiSelectDropdownWithSearchProps {
     label: string;
@@ -49,94 +49,94 @@ interface MultiSelectDropdownWithSearchProps {
 
 // --- Reusable Multi-Select Dropdown Component (currently unused, kept for future use) ---
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false }) => {
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const tagsContainerRef = useRef<HTMLDivElement>(null);
-    const isOpen = openDropdown === dropdownId;
+// const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false }) => {
+//     const dropdownRef = useRef<HTMLDivElement>(null);
+//     const tagsContainerRef = useRef<HTMLDivElement>(null);
+//     const isOpen = openDropdown === dropdownId;
 
-    const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        setOpenDropdown(isOpen ? null : dropdownId);
-    };
+//     const handleToggle = (e: React.MouseEvent<HTMLDivElement>) => {
+//         e.stopPropagation();
+//         setOpenDropdown(isOpen ? null : dropdownId);
+//     };
 
-    const handleRemoveOption = (option: string, e: React.MouseEvent<HTMLButtonElement>) => {
-        e.stopPropagation(); // Ngăn dropdown mở/đóng khi xóa tag
-        onToggleOption(option);
-    };
-    
-    useEffect(() => {
-        if (tagsContainerRef.current) {
-            // Scroll to the end to show the latest added item
-            tagsContainerRef.current.scrollLeft = tagsContainerRef.current.scrollWidth;
-        }
-    }, [selectedOptions]);
+//     const handleRemoveOption = (option: string, e: React.MouseEvent<HTMLButtonElement>) => {
+//         e.stopPropagation(); // Ngăn dropdown mở/đóng khi xóa tag
+//         onToggleOption(option);
+//     };
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                if(isOpen) {
-                   setOpenDropdown(null);
-                }
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [isOpen, setOpenDropdown]);
+//     useEffect(() => {
+//         if (tagsContainerRef.current) {
+//             // Scroll to the end to show the latest added item
+//             tagsContainerRef.current.scrollLeft = tagsContainerRef.current.scrollWidth;
+//         }
+//     }, [selectedOptions]);
 
-    return (
-        <div className="relative" ref={dropdownRef}>
-            <div onClick={handleToggle} className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] cursor-pointer flex flex-col justify-center">
-                <label className="text-xs text-[#585858] block mb-1.5">{label}</label>
-                <div className="flex items-center justify-between">
-                    <div ref={tagsContainerRef} className="flex-1 min-w-0 flex flex-nowrap gap-1 items-center overflow-x-auto no-scrollbar">
-                        {selectedOptions.length === 0 ? (
-                            <span className="text-sm font-normal text-[rgba(88,88,88,0.4)]">{placeholder}</span>
-                        ) : (
-                            selectedOptions.map(option => (
-                                <div key={option} className="flex-shrink-0 bg-gray-100 text-gray-800 text-xs font-semibold pl-2.5 pr-1 py-1 rounded-full flex items-center gap-1.5">
-                                    <span>{option}</span>
-                                    <button onClick={(e) => handleRemoveOption(option, e)} className="bg-gray-300 hover:bg-gray-400 text-gray-600 hover:text-black rounded-full h-4 w-4 flex items-center justify-center focus:outline-none transition-colors">
-                                        <svg className="w-2.5 h-2.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M1 1l6 6m0 0l6 6M7 7L1 13m6-6l6-6"/></svg>
-                                    </button>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                    <svg className={`flex-shrink-0 ml-2 w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
-                </div>
-            </div>
-            {isOpen && (
-                <div className="dropdown-modal absolute z-20 mt-1 w-full bg-white rounded-xl shadow-lg border border-gray-200/80 p-2">
-                    <ul className="space-y-1 max-h-60 overflow-y-auto">
-                        {loading ? (
-                            <li className="p-2 text-sm text-gray-500 text-center">
-                                <div className="flex items-center justify-center">
-                                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Loading...
-                                </div>
-                            </li>
-                        ) : (
-                            options.map((option, index) => {
-                                const isSelected = selectedOptions.includes(option);
-                                return (
-                                    <li key={index} onClick={() => onToggleOption(option)} className={`dropdown-option p-2 text-sm font-medium rounded-lg cursor-pointer flex justify-between items-center ${isSelected ? 'bg-gray-100 font-semibold text-gray-900' : 'text-gray-800 hover:bg-gray-50'}`}>
-                                        <span>{option}</span>
-                                        {isSelected && (
-                                            <svg className="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                                        )}
-                                    </li>
-                                );
-                            })
-                        )}
-                    </ul>
-                </div>
-            )}
-        </div>
-    );
-};
+//     useEffect(() => {
+//         const handleClickOutside = (event: MouseEvent) => {
+//             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+//                 if (isOpen) {
+//                     setOpenDropdown(null);
+//                 }
+//             }
+//         };
+//         document.addEventListener("mousedown", handleClickOutside);
+//         return () => document.removeEventListener("mousedown", handleClickOutside);
+//     }, [isOpen, setOpenDropdown]);
+
+//     return (
+//         <div className="relative" ref={dropdownRef}>
+//             <div onClick={handleToggle} className="bg-white p-3 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] cursor-pointer flex flex-col justify-center">
+//                 <label className="text-xs text-[#585858] block mb-1.5">{label}</label>
+//                 <div className="flex items-center justify-between">
+//                     <div ref={tagsContainerRef} className="flex-1 min-w-0 flex flex-nowrap gap-1 items-center overflow-x-auto no-scrollbar">
+//                         {selectedOptions.length === 0 ? (
+//                             <span className="text-sm font-normal text-[rgba(88,88,88,0.4)]">{placeholder}</span>
+//                         ) : (
+//                             selectedOptions.map(option => (
+//                                 <div key={option} className="flex-shrink-0 bg-gray-100 text-gray-800 text-xs font-semibold pl-2.5 pr-1 py-1 rounded-full flex items-center gap-1.5">
+//                                     <span>{option}</span>
+//                                     <button onClick={(e) => handleRemoveOption(option, e)} className="bg-gray-300 hover:bg-gray-400 text-gray-600 hover:text-black rounded-full h-4 w-4 flex items-center justify-center focus:outline-none transition-colors">
+//                                         <svg className="w-2.5 h-2.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M1 1l6 6m0 0l6 6M7 7L1 13m6-6l6-6" /></svg>
+//                                     </button>
+//                                 </div>
+//                             ))
+//                         )}
+//                     </div>
+//                     <svg className={`flex-shrink-0 ml-2 w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
+//                 </div>
+//             </div>
+//             {isOpen && (
+//                 <div className="dropdown-modal absolute z-20 mt-1 w-full bg-white rounded-xl shadow-lg border border-gray-200/80 p-2">
+//                     <ul className="space-y-1 max-h-60 overflow-y-auto">
+//                         {loading ? (
+//                             <li className="p-2 text-sm text-gray-500 text-center">
+//                                 <div className="flex items-center justify-center">
+//                                     <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+//                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+//                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+//                                     </svg>
+//                                     Loading...
+//                                 </div>
+//                             </li>
+//                         ) : (
+//                             options.map((option, index) => {
+//                                 const isSelected = selectedOptions.includes(option);
+//                                 return (
+//                                     <li key={index} onClick={() => onToggleOption(option)} className={`dropdown-option p-2 text-sm font-medium rounded-lg cursor-pointer flex justify-between items-center ${isSelected ? 'bg-gray-100 font-semibold text-gray-900' : 'text-gray-800 hover:bg-gray-50'}`}>
+//                                         <span>{option}</span>
+//                                         {isSelected && (
+//                                             <svg className="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+//                                         )}
+//                                     </li>
+//                                 );
+//                             })
+//                         )}
+//                     </ul>
+//                 </div>
+//             )}
+//         </div>
+//     );
+// };
 
 // --- Reusable Multi-Select Dropdown with Search Component ---
 const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search...", loading = false }) => {
@@ -159,7 +159,7 @@ const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps
     const filteredOptions = options.filter(option =>
         option.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
     useEffect(() => {
         if (tagsContainerRef.current) {
             tagsContainerRef.current.scrollLeft = tagsContainerRef.current.scrollWidth;
@@ -230,7 +230,7 @@ const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    Loading...
+                                    Ủa j v...
                                 </div>
                             </li>
                         ) : (
@@ -311,7 +311,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                     { id: '1', text: `${searchTerm} tutor`, type: 'tutor' as const },
                     { id: '2', text: `${searchTerm} subject`, type: 'subject' as const },
                     { id: '3', text: `Advanced ${searchTerm}`, type: 'category' as const },
-                ].filter(suggestion => 
+                ].filter(suggestion =>
                     suggestion.text.toLowerCase().includes(searchTerm.toLowerCase())
                 );
                 setFuzzySuggestions(mockSuggestions);
@@ -368,9 +368,10 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     // Category cache states with loading flags
     const [categories, setCategories] = useState<Category[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [timezones, setTimezones] = useState<Timezone[]>([]);
+    // Initialize timezones immediately with static data
+    const [timezones, setTimezones] = useState<Timezone[]>(() => commonUtils.getAllTimezones());
     const [languages, setLanguages] = useState<Language[]>([]);
-    
+
     // Loading states for lazy loading
     const [loadingFilterData, setLoadingFilterData] = useState<boolean>(false);
 
@@ -381,12 +382,31 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         sortBy: t('findTutors.filters.placeholders.sortBy'),
         timezone: t('findTutors.filters.placeholders.selectTimezone'),
     };
-    
-    const [selectedValues, setSelectedValues] = useState({
-        category: placeholders.category,
-        subject: placeholders.subject,
-        sortBy: placeholders.sortBy,
-        timezone: placeholders.timezone,
+
+    const [selectedValues, setSelectedValues] = useState(() => {
+        // Auto-detect timezone synchronously during initialization
+        let initialTimezone = placeholders.timezone;
+        try {
+            const allTimezones = commonUtils.getAllTimezones(); // Use static data directly or existing state if avail (but state is init same time)
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const matchedTimezone = allTimezones.find(tz =>
+                tz.name.includes(userTimezone) ||
+                tz.code === userTimezone ||
+                userTimezone.includes(tz.code)
+            );
+            if (matchedTimezone) {
+                initialTimezone = matchedTimezone.name;
+            }
+        } catch (e) {
+            console.warn('Could not auto-detect timezone:', e);
+        }
+
+        return {
+            category: placeholders.category,
+            subject: placeholders.subject,
+            sortBy: placeholders.sortBy,
+            timezone: initialTimezone,
+        };
     });
     const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
@@ -422,8 +442,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                     setCategories(categoriesResponse || []);
                     setSubjects(subjectsResponse || []);
 
-                    // Set static data for timezones and languages (no API call needed)
-                    setTimezones(commonUtils.getAllTimezones());
+                    // Set static data for languages (timezones already set on init)
                     setLanguages(commonUtils.getAllLanguages());
 
                 } catch (error) {
@@ -431,7 +450,6 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                     // Set empty arrays on error
                     setCategories([]);
                     setSubjects([]);
-                    setTimezones([]);
                     setLanguages([]);
                 } finally {
                     setLoadingFilterData(false);
@@ -444,7 +462,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
     // Convert to string arrays for dropdowns
     const categoryOptions: string[] = categories.map(cat => getLocalizedName(cat));
-    const subjectOptions: string[] = selectedCategoryId 
+    const subjectOptions: string[] = selectedCategoryId
         ? subjects.filter(sub => sub.categoryId === selectedCategoryId).map(sub => getLocalizedName(sub))
         : subjects.map(sub => getLocalizedName(sub));
     const timezoneOptions: string[] = timezones.map(tz => tz.name);
@@ -472,7 +490,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
     const handleSelect = (dropdownId: keyof typeof selectedValues, value: string) => {
         setSelectedValues(prev => ({ ...prev, [dropdownId]: value }));
-        
+
         // When category is selected, set the category ID for filtering subjects
         if (dropdownId === 'category') {
             if (value !== placeholders.category) {
@@ -495,8 +513,8 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (availabilityRef.current && !availabilityRef.current.contains(event.target as Node)) {
-                if(openDropdown === 'availability') {
-                   setOpenDropdown(null);
+                if (openDropdown === 'availability') {
+                    setOpenDropdown(null);
                 }
             }
         };
@@ -514,7 +532,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                     const lang = languages.find(l => l.name === name);
                     return lang ? lang.code : name;
                 }) : undefined,
-                timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined,
+                // timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined, // Removed per user request: timezone is not for search filtering
                 sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
                 sessionType: activeTab === 'Private Sessions' ? '1-on-1' : activeTab === 'Group Sessions' ? 'Group' : undefined,
                 keyword: keyword.trim() || undefined,
@@ -550,7 +568,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
                     <div className="p-4 bg-[#FBF6EE] rounded-b-xl rounded-tr-xl">
                         <div className="grid w-full grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                            <CustomDropdown 
+                            <CustomDropdown
                                 label={t('findTutors.filters.labels.category')}
                                 options={categoryOptions}
                                 selectedValue={selectedValues.category}
@@ -561,6 +579,9 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 hasSearch={true}
                                 searchPlaceholder={t('findTutors.filters.placeholders.search')}
                                 loading={loadingFilterData}
+                                maxVisibleItems={5}
+                                allowClear={true}
+                                clearText={t('findTutors.filters.clearSelection', 'Xóa lựa chọn')}
                             />
                             <CustomDropdown
                                 label={t('findTutors.filters.labels.subject')}
@@ -574,6 +595,9 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 hasSearch={true}
                                 searchPlaceholder={t('findTutors.filters.placeholders.searchSubjects')}
                                 loading={loadingFilterData}
+                                maxVisibleItems={5}
+                                allowClear={true}
+                                clearText={t('findTutors.filters.clearSelection', 'Xóa lựa chọn')}
                             />
                             <div className="bg-white pt-2.5 px-3 pb-2.5 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] flex flex-col justify-center">
                                 <div className="flex justify-between items-center mb-1.5">
@@ -590,13 +614,13 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                                 }
                                                 return `₫${roundedAmount}`;
                                             };
-                                            
+
                                             // Convert feeRange from USD to selected currency
                                             const minFee = convertCurrency(feeRange[0], 'USD', selectedCurrency);
                                             const maxFee = convertCurrency(feeRange[1], 'USD', selectedCurrency);
-                                            
+
                                             // Use custom format for VND, otherwise use standard formatCurrency
-                                            const formattedMin = selectedCurrency === 'VND' 
+                                            const formattedMin = selectedCurrency === 'VND'
                                                 ? formatVNDWithK(minFee)
                                                 : formatCurrency(minFee, selectedCurrency);
                                             const formattedMax = selectedCurrency === 'VND'
@@ -608,7 +632,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 </div>
                                 <div className="relative h-5 flex items-center">
                                     <div className="relative w-full h-1 bg-gray-200 rounded-full">
-                                        <div 
+                                        <div
                                             className="absolute h-1 bg-[#0b6459] rounded-full z-0"
                                             style={{
                                                 left: `${(feeRange[0] / MAX_FEE) * 100}%`,
@@ -642,7 +666,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                     />
                                 </div>
                             </div>
-                            <MultiSelectDropdownWithSearch 
+                            <MultiSelectDropdownWithSearch
                                 label={t('findTutors.filters.labels.tutorLanguages')}
                                 options={languageOptions}
                                 selectedOptions={selectedLanguages}
@@ -673,7 +697,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                         <div className="grid grid-cols-4 gap-2 text-center">
                                             <div></div>
                                             {availabilityTimes.map(time => <div key={time} className="text-xs font-bold text-gray-500">{time}</div>)}
-                                            
+
                                             {availabilityDays.map(day => (
                                                 <React.Fragment key={day}>
                                                     <div className="text-xs font-bold text-gray-500 flex items-center justify-start">{day}</div>
@@ -700,14 +724,14 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                 </div>
 
                 {/* New Controls Section - Moved to a separate div */}
-                <div className="mt-6 flex items-center justify-between gap-4">
+                <div className="mt-4 flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-grow">
                         <div className="relative flex-grow max-w-xs">
                             <input
                                 ref={searchInputRef}
                                 type="text"
                                 placeholder={t('findTutors.filters.placeholders.searchByKeyword')}
-                                className="w-full bg-white p-2.5 pl-10 pr-12 text-sm font-medium text-gray-800 rounded-xl border border-gray-200/80 shadow-sm focus:border-[#065a46] focus:outline-none"
+                                className="w-full bg-white p-2.5 pl-10 pr-4 text-sm font-medium text-gray-800 rounded-xl border border-gray-200/80 shadow-sm placeholder:text-gray-300 placeholder:font-normal hover:shadow-md focus:border-transparent focus:ring-1 focus:ring-[#065a46] focus:outline-none transition-all duration-200"
                                 value={keyword}
                                 onChange={handleKeywordChange}
                                 onKeyDown={handleKeyPress}
@@ -716,22 +740,13 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                             />
                             <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                             {isSearching && (
-                                <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                     <svg className="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                 </div>
                             )}
-                            <button
-                                onClick={() => onSearch(keyword)}
-                                aria-label="Search"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
 
                             {/* Fuzzy Search Suggestions Dropdown */}
                             {showSuggestions && fuzzySuggestions.length > 0 && (
@@ -772,7 +787,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                                 </div>
                             )}
                         </div>
-                        <div className="w-48">
+                        <div className="w-36">
                             <CustomDropdown
                                 options={sortByOptions}
                                 selectedValue={selectedValues.sortBy}

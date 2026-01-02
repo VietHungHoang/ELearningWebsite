@@ -87,6 +87,9 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
     const languages = mapTutorLanguageResponseToTutorLanguage(profileHeaderResponse.languageCodes);
     const subjects = await mapSubjectIdsToSubjects(profileHeaderResponse.subjectIds);
 
+    // Cast to any to access fields that may exist in API response but not in type definition
+    const rawResponse = profileHeaderResponse as any;
+
     return {
         id: profileHeaderResponse.id,
         fullName: profileHeaderResponse.fullName,
@@ -104,5 +107,9 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
         languages,
         subjects,
         socialLinks: profileHeaderResponse.socialLinks,
+        // Resume data from API response
+        educations: rawResponse.educations || [],
+        experiences: rawResponse.experiences || [],
+        certifications: rawResponse.certifications || rawResponse.certificates || [],
     };
 };

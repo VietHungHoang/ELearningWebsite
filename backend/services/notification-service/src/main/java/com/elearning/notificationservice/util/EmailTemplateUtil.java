@@ -16,7 +16,7 @@ public class EmailTemplateUtil {
                     (String) metadata.getOrDefault("courseName", null));
             case "QUIZ_RESULT" -> quizResult(
                     (String) metadata.getOrDefault("title", "Kết quả Quiz"),
-                    (String) metadata.getOrDefault("learnerName", "Học viên"),
+                    (String) metadata.getOrDefault("learnerName", "học viên"),
                     (String) metadata.getOrDefault("courseName", "Khoá học"),
                     (int) metadata.getOrDefault("score", 0));
             default -> baseWrapper(

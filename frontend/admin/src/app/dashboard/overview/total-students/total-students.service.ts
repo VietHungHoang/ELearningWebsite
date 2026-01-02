@@ -53,7 +53,7 @@ export class TotalStudentsService {
 
     getNewStudentsData(startDate?: string, endDate?: string): Observable<NewStudentsData> {
         let params = new HttpParams();
-        
+
         // Default to current month (from 1st day to today)
         if (!startDate || !endDate) {
             const today = new Date();
@@ -61,7 +61,7 @@ export class TotalStudentsService {
             startDate = start.toISOString().split('T')[0];
             endDate = today.toISOString().split('T')[0];
         }
-        
+
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 
@@ -89,7 +89,7 @@ export class TotalStudentsService {
                 const options = {
                     series: [
                         {
-                            name: "Học viên mới",
+                            name: "học viên mới",
                             data: data.dailyData.map(d => d.count)
                         }
                     ],
@@ -152,13 +152,13 @@ export class TotalStudentsService {
                     },
                     tooltip: {
                         x: {
-                            formatter: function(val: any, opts: any) {
+                            formatter: function (val: any, opts: any) {
                                 const date = new Date(data.dailyData[opts.dataPointIndex]?.date);
                                 return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
                             }
                         },
                         y: {
-                            formatter: function(val: any) {
+                            formatter: function (val: any) {
                                 return val + " học viên";
                             }
                         }

@@ -55,7 +55,7 @@ export class StudentsInterestedTopicsComponent implements OnInit, OnDestroy, Aft
 
     private loadChartData(): void {
         // Transform subjects data to chart format
-        const series = [{ name: 'Học viên', data: this.subjectsData.map(s => s.studentCount) }];
+        const series = [{ name: 'học viên', data: this.subjectsData.map(s => s.studentCount) }];
         const categories = this.subjectsData.map(s => s.name);
 
         // Use the chart service to render/update chart

@@ -9,12 +9,12 @@ import type { Timezone } from '../../../../types/common';
 import type { Tutor } from '../../../../types/tutor';
 
 interface BookSessionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  tutorData?: any;
-  navigateToApp: (page: string, data?: any) => void;
-  selectedTimes?: string[];
-  timezone?: Timezone | null;
+    isOpen: boolean;
+    onClose: () => void;
+    tutorData?: any;
+    navigateToApp: (page: string, data?: any) => void;
+    selectedTimes?: string[];
+    timezone?: Timezone | null;
 }
 
 const packages = [
@@ -42,8 +42,11 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
         }
     }, [isOpen, tutorData]);
 
+    // Don't render anything if modal is not open
+    if (!isOpen) return null;
+
     if (loading || !tutor) {
-        return <div>Loading...</div>;
+        return null; // Return null instead of loading div when tutor data is not yet available
     }
 
     if (error) {
@@ -64,21 +67,21 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
         const pricePerSession = calculatePricePerSession(discount);
         return sessions * pricePerSession;
     };
-    
+
     const handleCheckout = () => {
         if (selectedPackageIndex === null) return;
         setIsProcessing(true);
         setTimeout(() => {
             setIsProcessing(false);
-            
+
             const selectedPackage = packages[selectedPackageIndex];
             const pricePerSession = calculatePricePerSession(selectedPackage.discount);
             const totalPrice = calculateTotalPrice(selectedPackage.sessions, selectedPackage.discount);
-            
+
             // Helper function to convert UTC ISO string to selected timezone for display
             const convertUTCToTimezoneTime = (utcISOString: string, timezone: Timezone | null): string => {
                 const utcDate = new Date(utcISOString);
-                
+
                 if (!timezone) {
                     // No timezone, just format UTC time
                     const hour = utcDate.getUTCHours();
@@ -87,14 +90,14 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                     const ampm = hour >= 12 ? 'PM' : 'AM';
                     return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
                 }
-                
+
                 // Get UTC components
                 const utcYear = utcDate.getUTCFullYear();
                 const utcMonth = utcDate.getUTCMonth();
                 const utcDay = utcDate.getUTCDate();
                 const utcHour = utcDate.getUTCHours();
                 const utcMinute = utcDate.getUTCMinutes();
-                
+
                 // Apply timezone offset
                 const offsetMatch = timezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
                 if (!offsetMatch) {
@@ -102,77 +105,77 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                     const ampm = utcHour >= 12 ? 'PM' : 'AM';
                     return `${hour12}:${utcMinute.toString().padStart(2, '0')} ${ampm}`;
                 }
-                
+
                 const sign = offsetMatch[1] === "+" ? 1 : -1;
                 const offsetHours = parseInt(offsetMatch[2]);
                 const offsetMinutes = parseInt(offsetMatch[3]);
-                
+
                 // Create local date with offset
                 const localDate = new Date(Date.UTC(
-                    utcYear, 
-                    utcMonth, 
-                    utcDay, 
-                    utcHour + sign * offsetHours, 
+                    utcYear,
+                    utcMonth,
+                    utcDay,
+                    utcHour + sign * offsetHours,
                     utcMinute + sign * offsetMinutes
                 ));
-                
+
                 const displayHour = localDate.getUTCHours();
                 const displayMinute = localDate.getUTCMinutes();
                 const hour12 = displayHour === 0 ? 12 : displayHour > 12 ? displayHour - 12 : displayHour;
                 const ampm = displayHour >= 12 ? 'PM' : 'AM';
-                
+
                 return `${hour12}:${displayMinute.toString().padStart(2, '0')} ${ampm}`;
             };
-            
+
             // Generate learning schedule based on selected times or fallback to weekly
             const generateSchedule = (totalSessions: number, selectedTimes: string[], timezone: Timezone | null) => {
                 const schedule = [];
                 console.log(JSON.parse(JSON.stringify(selectedTimes)));
-                
+
                 // Use selected times if available, otherwise fall back to mock schedule
                 if (selectedTimes && selectedTimes.length > 0) {
                     // Calculate how many full cycles we need
                     const cycleLength = selectedTimes.length;
                     const fullCycles = Math.floor(totalSessions / cycleLength);
                     const remainingSessions = totalSessions % cycleLength;
-                    
+
                     let sessionCount = 0;
-                    
+
                     // Generate sessions for each cycle
                     for (let cycle = 0; cycle <= fullCycles; cycle++) {
                         for (let timeIndex = 0; timeIndex < cycleLength; timeIndex++) {
                             if (sessionCount >= totalSessions) break;
-                            
+
                             // Skip remaining sessions if we're in the last partial cycle
                             if (cycle === fullCycles && timeIndex >= remainingSessions) break;
-                            
+
                             const selectedTime = selectedTimes[timeIndex];
                             // selectedTime is already UTC ISO string
                             const baseDate = new Date(selectedTime);
-                            
+
                             // Add weeks for subsequent cycles (keeping in UTC)
                             const sessionDate = new Date(baseDate);
                             sessionDate.setUTCDate(baseDate.getUTCDate() + (cycle * 7));
-                            
+
                             // Convert to ISO string for the helper function
                             const sessionISOString = sessionDate.toISOString();
-                            
+
                             // For date display, use UTC components
                             const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            
+
                             const dayName = dayNames[sessionDate.getUTCDay()];
                             const monthName = monthNames[sessionDate.getUTCMonth()];
                             const day = sessionDate.getUTCDate();
                             const year = sessionDate.getUTCFullYear();
                             const timeString = convertUTCToTimezoneTime(sessionISOString, timezone);
-                            
+
                             schedule.push({
                                 sessionNumber: sessionCount + 1,
                                 date: `${dayName}, ${monthName} ${day}, ${year}`,
                                 time: timeString
                             });
-                            
+
                             sessionCount++;
                         }
                     }
@@ -185,19 +188,19 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                     if (nextMonday <= now) {
                         nextMonday.setDate(nextMonday.getDate() + 7);
                     }
-                    
+
                     for (let i = 0; i < Math.min(totalSessions, 5); i++) { // Show first 5 sessions
                         const sessionDate = new Date(nextMonday);
                         sessionDate.setDate(nextMonday.getDate() + (i * 7)); // Weekly
-                        
+
                         const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        
+
                         const dayName = dayNames[sessionDate.getDay()];
                         const monthName = monthNames[sessionDate.getMonth()];
                         const day = sessionDate.getDate();
                         const year = sessionDate.getFullYear();
-                        
+
                         schedule.push({
                             sessionNumber: i + 1,
                             date: `${dayName}, ${monthName} ${day}, ${year}`,
@@ -207,9 +210,9 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                 }
                 return schedule;
             };
-            
+
             const schedule = generateSchedule(selectedPackage.sessions, selectedTimes, timezone || null);
-            
+
             const bookingData = {
                 package: selectedPackage,
                 pricing: {
@@ -222,7 +225,7 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                 sessions: selectedPackage.sessions,
                 schedule: schedule
             };
-            
+
             navigateToApp('checkout', { bookingData, tutor: tutorData });
         }, 500); // Simulate API call
     };
@@ -258,7 +261,7 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                 <div className="p-6">
                     <h3 className="text-lg font-bold text-center text-gray-800">{t('tutorDetail.bookSessionModal.choosePackage')}</h3>
                     <p className="text-center text-gray-500 mt-1">{t('tutorDetail.bookSessionModal.commitMessage')}</p>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                         {packages.map((pkg, index) => {
                             const pricePerSession = calculatePricePerSession(pkg.discount);
@@ -269,25 +272,24 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                                 <button
                                     key={index}
                                     onClick={() => setSelectedPackageIndex(index)}
-                                    className={`relative text-left p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none ${
-                                        isSelected 
-                                        ? 'border-transparent bg-[#0b6459] text-white shadow-lg transform scale-105' 
+                                    className={`relative text-left p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none ${isSelected
+                                        ? 'border-transparent bg-[#0b6459] text-white shadow-lg transform scale-105'
                                         : 'bg-gray-50 border-gray-200 hover:border-[#0b6459]/50 hover:bg-white'
-                                    }`}
+                                        }`}
                                 >
                                     {pkg.isBestValue && (
                                         <div className={`absolute top-0 right-4 -translate-y-1/2 px-3 py-1 text-xs font-bold rounded-full border-2 ${isSelected ? 'bg-white text-[#0b6459] border-[#0b6459]' : 'bg-[#0b6459] text-white border-white'}`}>
                                             {t('tutorDetail.bookSessionModal.bestValue')}
                                         </div>
                                     )}
-                                    
+
                                     <h4 className="text-lg font-bold">{pkg.sessions} {t('tutorDetail.bookSessionModal.sessions')}</h4>
                                     <p className={`text-sm ${isSelected ? 'text-gray-200' : 'text-gray-500'}`}>{formatCurrency(pricePerSession, selectedCurrency)}{t('tutorDetail.bookSessionModal.perSession')}</p>
-                                    
+
                                     <div className="mt-4 flex items-baseline gap-2">
                                         <p className="text-xl font-extrabold">{formatCurrency(total, selectedCurrency)}</p>
                                         {pkg.discount > 0 && (
-                                             <span className={`font-semibold text-sm ${isSelected ? 'text-green-300' : 'text-green-600'}`}>{t('tutorDetail.bookSessionModal.savePercent', { percent: pkg.discount })}</span>
+                                            <span className={`font-semibold text-sm ${isSelected ? 'text-green-300' : 'text-green-600'}`}>{t('tutorDetail.bookSessionModal.savePercent', { percent: pkg.discount })}</span>
                                         )}
                                     </div>
 
@@ -304,7 +306,7 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
 
                 {/* Footer */}
                 <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                     <div className="flex items-center justify-center gap-2 mb-4">
+                    <div className="flex items-center justify-center gap-2 mb-4">
                         <p className="text-xs text-gray-500">{t('tutorDetail.bookSessionModal.securePayments')}</p>
                     </div>
                     <button
