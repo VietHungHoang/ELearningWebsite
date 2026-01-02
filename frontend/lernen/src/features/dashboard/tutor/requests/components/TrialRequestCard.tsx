@@ -15,7 +15,7 @@ interface TrialRequestCardProps {
 }
 
 const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, onChat, onCancel, onRequestProcessed }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [isAccepting, setIsAccepting] = useState(false);
     const [isDeclining, setIsDeclining] = useState(false);
@@ -116,47 +116,96 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
     };
 
     const formatDateTime = (dateString: string): string => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInHours = Math.floor((date.getTime() - now.getTime()) / (1000 * 60 * 60));
+        // Parse sessionDateTime from UTC format
+        const utcDate = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
         
-        if (diffInHours < 24) {
-            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        } else if (diffInHours < 48) {
-            return `Tomorrow, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-        } else {
-            return date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-            });
-        }
+        // Format according to current locale
+        const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+        
+        // Format: "Mon, Jan 5, 02:00 AM"
+        const formattedDate = utcDate.toLocaleDateString(locale, { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric'
+        });
+        
+        const formattedTime = utcDate.toLocaleTimeString(locale, { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        return `${formattedDate}, ${formattedTime}`;
     };
 
     const formatTimestamp = (dateString: string): string => {
-        const date = new Date(dateString);
+        // Parse createdAt from backend format: "2026-01-02T06:57:17.923084" (LocalDateTime, no timezone)
+        // Backend stores in UTC, so we treat it as UTC for accurate relative time calculation
+        
+        let utcDate: Date;
+        
+        // Check if string already has timezone indicator (Z, +HH:MM, or -HH:MM)
+        const hasTimezone = dateString.endsWith('Z') || 
+                           /[+-]\d{2}:\d{2}$/.test(dateString) ||
+                           /[+-]\d{4}$/.test(dateString);
+        
+        // Normalize the date string: handle microseconds (JavaScript Date only supports milliseconds)
+        // Format: "2026-01-02T06:57:17.923084" -> "2026-01-02T06:57:17.923Z"
+        let normalizedDateString = dateString;
+        if (normalizedDateString.includes('.')) {
+            const parts = normalizedDateString.split('.');
+            if (parts.length === 2) {
+                const fractionalPart = parts[1];
+                // Extract timezone if present (Z, +HH:MM, -HH:MM)
+                const tzMatch = fractionalPart.match(/^(\d+)([Z+-].*)?$/);
+                if (tzMatch) {
+                    const fractionalSeconds = tzMatch[1];
+                    const tzPart = tzMatch[2] || '';
+                    // Truncate microseconds to milliseconds (first 3 digits, pad if needed)
+                    const milliseconds = fractionalSeconds.substring(0, 3).padEnd(3, '0');
+                    normalizedDateString = `${parts[0]}.${milliseconds}${tzPart}`;
+                }
+            }
+        }
+        
+        if (hasTimezone) {
+            // Already has timezone info, parse directly
+            utcDate = new Date(normalizedDateString);
+        } else {
+            // No timezone info, treat as UTC (backend stores LocalDateTime in UTC)
+            // Add 'Z' to indicate UTC
+            utcDate = new Date(normalizedDateString + 'Z');
+        }
+        
+        // Validate parsed date
+        if (isNaN(utcDate.getTime())) {
+            // Fallback: try parsing without fractional seconds
+            const withoutFractional = normalizedDateString.split('.')[0];
+            utcDate = new Date(hasTimezone ? withoutFractional : withoutFractional + 'Z');
+        }
+        
+        // Get current time (JavaScript Date is always in UTC internally)
         const now = new Date();
-        const diffInMs = now.getTime() - date.getTime();
+        const diffInMs = now.getTime() - utcDate.getTime();
         const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
         const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
         const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
         if (diffInMinutes < 1) {
-            return 'just now';
+            return t('dashboard.tutor.requests.trial.justNow');
         } else if (diffInMinutes < 60) {
-            return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+            return t('dashboard.tutor.requests.trial.minutesAgo', { count: diffInMinutes });
         } else if (diffInHours < 24) {
-            return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+            return t('dashboard.tutor.requests.trial.hoursAgo', { count: diffInHours });
         } else if (diffInDays < 7) {
-            return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+            return t('dashboard.tutor.requests.trial.daysAgo', { count: diffInDays });
         } else {
-            return date.toLocaleDateString('en-US', { 
+            // Format date according to current locale and timezone
+            const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+            return utcDate.toLocaleDateString(locale, { 
                 month: 'short', 
                 day: 'numeric',
-                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+                year: utcDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
             });
         }
     };

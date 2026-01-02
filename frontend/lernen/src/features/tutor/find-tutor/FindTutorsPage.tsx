@@ -61,7 +61,7 @@ const FindTutorsPage: React.FC = () => {
                 setPagination(null);
             }
         } catch (err) {
-            setError("Failed to search tutors");
+            setError(t("findTutors.errorMessages.failedToSearchTutors"));
             console.error("Search error:", err);
             setTutors([]);
             setPagination(null);

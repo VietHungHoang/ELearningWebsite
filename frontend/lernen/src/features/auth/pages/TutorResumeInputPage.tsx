@@ -8,6 +8,7 @@ import { tutorService } from '../../../services/tutorService';
 import pdfParseService from '../../../lib/pdfParseService';
 import imageOcrService from '../../../lib/imageOcrService';
 import Toast from '../../../components/ui/Toast';
+import BirdLoading from '../../../components/ui/BirdLoading';
 
 const TutorResumeInputPage: React.FC = () => {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ const TutorResumeInputPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     console.log('TutorResumeInputPage mounted');
@@ -42,6 +44,9 @@ const TutorResumeInputPage: React.FC = () => {
 
     setToastMessage(null);
     setLoading(true);
+    
+    // Create AbortController for cancellation
+    abortControllerRef.current = new AbortController();
 
     try {
       // Auto-extract text from file
@@ -98,9 +103,30 @@ const TutorResumeInputPage: React.FC = () => {
         setLoading(false);
       }
     } catch (err) {
+      // Check if error is due to abort
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('🛑 [DEBUG] File processing cancelled by user');
+        return;
+      }
       console.error('❌ [DEBUG] Error processing file:', err);
       setToastMessage(err instanceof Error ? err.message : t('auth.resumeInput.failedToProcess'));
       setLoading(false);
+    } finally {
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleCancel = () => {
+    // Stop loading and reset state
+    setLoading(false);
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    // Abort ongoing operations if any
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
   };
 
@@ -203,15 +229,21 @@ const TutorResumeInputPage: React.FC = () => {
             className="hidden"
           />
 
-          {/* Loading overlay - centered on screen */}
+          {/* Loading overlay - same style as checkout page */}
           {loading && (
-            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-              <div className="bg-white rounded-lg shadow-2xl px-8 py-6 flex flex-col items-center border border-gray-200 pointer-events-auto">
-                <svg className="animate-spin h-12 w-12 text-[#0b6459] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p className="text-gray-700 font-medium">{t('auth.resumeInput.processing')}</p>
+            <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center">
+                <BirdLoading
+                  title={t('auth.resumeInput.processing')}
+                  description={t('auth.resumeInput.pleaseWait')}
+                  size="lg"
+                />
+                <button
+                  onClick={handleCancel}
+                  className="mt-8 px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  {t('auth.resumeInput.cancel')}
+                </button>
               </div>
             </div>
           )}

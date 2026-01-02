@@ -34,7 +34,7 @@ const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorI
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -146,71 +146,53 @@ const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorI
               <p className="font-semibold text-sm text-gray-800">{t('tutorDetail.bookTrialModal.selectedTimes')}</p>
               <div className="flex flex-wrap gap-2">
                   {selectedTimes.map((utcISOString, index) => {
-                      // Convert UTC to display timezone
+                      // selectedTimes is already in UTC+0, convert to user's selected timezone
                       const utcDate = new Date(utcISOString);
-                      
-                      console.log('🔍 BookTrialModal Debug:');
-                      console.log('  utcISOString:', utcISOString);
-                      console.log('  selectedTimezone:', selectedTimezone);
-                      console.log('  UTC hours:', utcDate.getUTCHours());
                       
                       if (!selectedTimezone) {
                           // No timezone, display UTC
-                          const formattedDate = `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][utcDate.getUTCDay()]}, ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][utcDate.getUTCMonth()]} ${utcDate.getUTCDate()}, ${utcDate.getUTCFullYear()}`;
-                          const hour = utcDate.getUTCHours();
-                          const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-                          const ampm = hour >= 12 ? 'PM' : 'AM';
-                          const formattedTime = `${hour12}:${utcDate.getUTCMinutes().toString().padStart(2, '0')} ${ampm}`;
+                          const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+                          const formattedDate = utcDate.toLocaleDateString(locale, {
+                              weekday: 'short',
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              timeZone: 'UTC'
+                          });
+                          const formattedTime = utcDate.toLocaleTimeString(locale, {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                              timeZone: 'UTC'
+                          });
                           
                           return (
                               <span key={index} className="text-sm font-medium text-gray-800">
-                                  {formattedDate} at {formattedTime}
+                                  {formattedDate} {t('tutorDetail.bookTrialModal.at')} {formattedTime}
                               </span>
                           );
                       }
                       
-                      // Get UTC components
-                      const utcYear = utcDate.getUTCFullYear();
-                      const utcMonth = utcDate.getUTCMonth();
-                      const utcDay = utcDate.getUTCDate();
-                      const utcHour = utcDate.getUTCHours();
-                      const utcMinute = utcDate.getUTCMinutes();
-                      
-                      console.log('  UTC components:', { utcYear, utcMonth, utcDay, utcHour, utcMinute });
-                      
-                      // Apply timezone offset
-                      const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
-                      if (!offsetMatch) return null;
-                      
-                      const sign = offsetMatch[1] === "+" ? 1 : -1;
-                      const offsetHours = parseInt(offsetMatch[2]);
-                      const offsetMinutes = parseInt(offsetMatch[3]);
-                      
-                      console.log('  Timezone offset parsed:', { sign, offsetHours, offsetMinutes });
-                      console.log('  Will add to UTC hour:', utcHour, '+', sign * offsetHours, '=', utcHour + sign * offsetHours);
-                      
-                      const localDate = new Date(Date.UTC(
-                          utcYear, 
-                          utcMonth, 
-                          utcDay, 
-                          utcHour + sign * offsetHours, 
-                          utcMinute + sign * offsetMinutes
-                      ));
-                      
-                      console.log('  Final display hour:', localDate.getUTCHours());
-                      
-                      const formattedDate = `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][localDate.getUTCDay()]}, ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][localDate.getUTCMonth()]} ${localDate.getUTCDate()}, ${localDate.getUTCFullYear()}`;
-                      const displayHour = localDate.getUTCHours();
-                      const hour12 = displayHour === 0 ? 12 : displayHour > 12 ? displayHour - 12 : displayHour;
-                      const ampm = displayHour >= 12 ? 'PM' : 'AM';
-                      const formattedTime = `${hour12}:${localDate.getUTCMinutes().toString().padStart(2, '0')} ${ampm}`;
-                      
-                      console.log('  Final formatted time:', formattedTime);
-                      console.log('---');
+                      // Convert UTC+0 to user's selected timezone using timeZone option
+                      // This ensures we only convert once, not twice
+                      const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+                      const formattedDate = utcDate.toLocaleDateString(locale, {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          timeZone: selectedTimezone.name // Use the timezone name (e.g., 'Asia/Ho_Chi_Minh')
+                      });
+                      const formattedTime = utcDate.toLocaleTimeString(locale, {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                          timeZone: selectedTimezone.name // Use the timezone name
+                      });
                       
                       return (
                           <span key={index} className="text-sm font-medium text-gray-800">
-                              {formattedDate} at {formattedTime}
+                              {formattedDate} {t('tutorDetail.bookTrialModal.at')} {formattedTime}
                           </span>
                       );
                   })}
@@ -220,7 +202,7 @@ const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorI
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
-                <label htmlFor="trial-message" className="text-sm font-medium text-gray-700 block mb-1">
+                <label htmlFor="trial-message" className="text-sm font-medium text-gray-700 block mb-2">
                   {t('tutorDetail.bookTrialModal.addMessage')}
                 </label>
                 <textarea 
@@ -229,7 +211,7 @@ const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorI
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   placeholder={t('tutorDetail.bookTrialModal.messagePlaceholder')}
-                  className="w-full bg-gray-100 border-transparent rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0b6459] resize-none"
+                  className="w-full bg-white border border-transparent rounded-lg px-4 py-2.5 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#0b6459] hover:border-gray-400 resize-none transition-all duration-100 ease-in-out hover:shadow-sm box-border"
                 ></textarea>
               </div>
                <p className="text-xs text-center text-gray-500">

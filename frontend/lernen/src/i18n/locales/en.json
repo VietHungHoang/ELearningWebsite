@@ -185,6 +185,8 @@
       "manualDescription": "Type or paste your resume content",
       "manualNote": "Copy and paste from your existing resume",
       "processing": "Waiting for process...",
+      "pleaseWait": "Please do not close this window.",
+      "cancel": "Cancel",
       "invalidFileType": "Please select a valid PDF or image file (JPG, PNG, TIFF, etc.)",
       "fileTooLarge": "File size must be less than 10MB",
       "noTextExtracted": "No text could be extracted from the file. Please try manual input.",
@@ -277,6 +279,52 @@
         "oldestFirst": "Oldest first"
       },
       "loading": "Loading..."
+    },
+    "tutorCard": {
+      "sessionFee": "Session fee",
+      "per1Hour": "/1 hour",
+      "bookSession": "Book a session",
+      "viewDetails": "View Details",
+      "sendMessage": "Send message",
+      "verifiedTutor": "Verified tutor",
+      "bookedSessions": "Booked sessions",
+      "students": "Students",
+      "languages": "Languages:",
+      "native": "(Native)",
+      "iCanTeach": "I can teach:",
+      "notAvailable": "N/A",
+      "showLess": "Show less",
+      "learnMore": "Learn more",
+      "review": "review",
+      "reviews": "reviews"
+    },
+    "tipsSidebar": {
+      "title": "Tips to find the best Tutor",
+      "description": "Choosing the right tutor online requires careful consideration. Here are tips to help you make an informed decision.",
+      "tips": {
+        "filterRequirements": "Filter your requirements",
+        "checkQualifications": "Check qualifications and experience",
+        "readReviews": "Read reviews and ratings",
+        "evaluateCommunication": "Evaluate communication skills",
+        "checkAvailability": "Check availability and flexibility"
+      }
+    },
+    "searchNotFound": {
+      "title": "Search Not Found!",
+      "message": "We couldn't find any results for your search. Please try different keywords."
+    },
+    "bookingModal": {
+      "bookTrialLesson": "Book a Trial Lesson",
+      "with": "with",
+      "trialLessonBooked": "Trial Lesson Booked!",
+      "trialLessonBookedMessage": "Your trial lesson with {tutorName} is confirmed for {date} at {time}.",
+      "done": "Done",
+      "time": "Time:",
+      "selectTimeSlot": "Please select a time slot to proceed.",
+      "confirmBooking": "Confirm Booking"
+    },
+    "errorMessages": {
+      "failedToSearchTutors": "Failed to search tutors"
     }
   },
   "whyChooseUs": {
@@ -655,6 +703,7 @@
       },
       "requests": {
         "title": "My Requests",
+        "subtitle": "View and manage your trial session and reschedule requests",
         "filters": {
           "reschedule": "Reschedule Requests",
           "trial": "Trial Requests"
@@ -936,6 +985,13 @@
         "noClassesFound": "No classes found",
         "noClassesDescription": "There are no classes that match your current filters.",
         "confirmDelete": "Are you sure you want to delete \"{{classTitle}}\"?",
+        "deleteClass": "Delete class",
+        "deleteModalTitle": "Delete class",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleting": "Deleting...",
+        "deleteSuccess": "Class \"{{classTitle}}\" deleted successfully",
+        "deleteError": "Failed to delete class. Please try again.",
         "createModal": {
           "title": "Create new class",
           "classTitle": "Class title",
@@ -958,6 +1014,8 @@
           "cannotRemoveLastSchedule": "Cannot remove last schedule",
           "removeSchedule": "Remove schedule",
           "createClass": "Create class",
+          "success": "Class created successfully",
+          "error": "Failed to create class. Please try again.",
           "confirmClose": {
             "title": "Discard changes?",
             "message": "You have unsaved changes. Are you sure you want to close without saving?",
@@ -982,6 +1040,39 @@
           },
           "searchCategories": "Search categories...",
           "searchSubjects": "Search subjects..."
+        },
+        "infoPage": {
+          "backToClasses": "Back to Classes",
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save",
+          "classInformation": "Class Information",
+          "schedule": "Schedule",
+          "noSchedule": "No schedule set",
+          "enrolledStudents": "Enrolled Students ({{count}})",
+          "addStudent": "Add Student",
+          "noStudents": "No students enrolled yet",
+          "addFirstStudent": "Start by adding students to your class",
+          "student": "Student {{id}}",
+          "sendMessage": "Send message",
+          "removeStudent": "Remove student",
+          "classDetails": "Class Details",
+          "created": "Created",
+          "createdWithColon": "Created:",
+          "searchStudent": "Search student...",
+          "searchFeatureComing": "Search feature will be implemented",
+          "searchingFor": "Searching for: \"{{term}}\"",
+          "enterToSearch": "Enter to search for students",
+          "addSelected": "Add Selected",
+          "loadingClassDetails": "Loading class details...",
+          "saveSuccess": "Class information updated successfully",
+          "saveError": "Failed to update class information. Please try again.",
+          "invalidSubject": "Invalid subject",
+          "saving": "Saving...",
+          "category": "Category",
+          "categoryPlaceholder": "Select category",
+          "subject": "Subject",
+          "subjectPlaceholder": "Select subject"
         }
       },
       "dealsCoupons": {
@@ -1087,6 +1178,7 @@
       },
       "requests": {
         "title": "Requests",
+        "subtitle": "Manage and process trial session and reschedule requests from students",
         "filters": {
           "reschedule": "Reschedule requests",
           "trial": "Trial requests"
@@ -1103,6 +1195,7 @@
         "trial": {
           "badge": "Trial session request",
           "sessionTime": "Session time",
+          "loading": "Loading requests...",
           "accept": "Accept",
           "accepting": "Accepting...",
           "decline": "Decline",
@@ -1117,7 +1210,14 @@
           "declineError": "An error occurred while declining the request",
           "unknownStudent": "Unknown student",
           "unknownTutor": "Unknown tutor",
-          "sentTo": "Sent to:"
+          "sentTo": "Sent to:",
+          "justNow": "Just now",
+          "minutesAgo": "{{count}} minute ago",
+          "minutesAgo_plural": "{{count}} minutes ago",
+          "hoursAgo": "{{count}} hour ago",
+          "hoursAgo_plural": "{{count}} hours ago",
+          "daysAgo": "{{count}} day ago",
+          "daysAgo_plural": "{{count}} days ago"
         },
         "reschedule": {
           "recurringTitle": "Change recurring schedule",
@@ -1587,7 +1687,7 @@
       "sendMessage": "Send message",
       "videoNotSupported": "Your browser does not support the video tag.",
       "sessionFee": "Session fee",
-      "perMin": "/50 min"
+      "perMin": "/1 hour"
     },
     "booking": {
       "selectTimeSlot": "Please select a time slot before requesting a session.",
@@ -1696,6 +1796,7 @@
       "benefit2": "An assessment of your current skill level.",
       "benefit3": "A discussion about your personalized learning plan.",
       "selectedTimes": "Selected Times:",
+      "at": "at",
       "addMessage": "Add a message (Optional)",
       "messagePlaceholder": "Let the tutor know your learning goals...",
       "footerText": "100% free, no payment information required.",

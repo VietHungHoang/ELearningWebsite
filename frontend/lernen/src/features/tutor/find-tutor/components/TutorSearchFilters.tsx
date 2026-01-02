@@ -5,6 +5,8 @@ import type { TutorSearchFilter } from '../../../../types/api';
 import type { Category, Language, Subject, Timezone } from '../../../../types/common';
 import { useTranslation } from 'react-i18next';
 import { tutorService } from '../../../../services/tutorService';
+import { useCurrency } from '../../../../context/CurrencyContext';
+import { convertCurrency, formatCurrency } from '../../../../utils/currencyHelper';
 
 // --- Type Definitions ---
 interface TutorSearchFiltersProps {
@@ -45,8 +47,9 @@ interface MultiSelectDropdownWithSearchProps {
     loadingText?: string;
 }
 
-// --- Reusable Multi-Select Dropdown Component ---
-const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false, loadingText = "Loading..." }) => {
+// --- Reusable Multi-Select Dropdown Component (currently unused, kept for future use) ---
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, loading = false }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const tagsContainerRef = useRef<HTMLDivElement>(null);
     const isOpen = openDropdown === dropdownId;
@@ -136,7 +139,7 @@ const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({ label, option
 };
 
 // --- Reusable Multi-Select Dropdown with Search Component ---
-const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search...", loading = false, loadingText = "Loading..." }) => {
+const MultiSelectDropdownWithSearch: React.FC<MultiSelectDropdownWithSearchProps> = ({ label, options, selectedOptions, placeholder, onToggleOption, dropdownId, openDropdown, setOpenDropdown, searchPlaceholder = "Search...", loading = false }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const tagsContainerRef = useRef<HTMLDivElement>(null);
@@ -258,10 +261,11 @@ interface TutorSearchFiltersProps {
 
 // --- Main Filters Component ---
 export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSearchFiltersProps): React.ReactElement {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const { selectedCurrency } = useCurrency();
     const [activeTab, setActiveTab] = useState<string>(t('findTutors.filters.tabs.allSessions'));
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const [feeRange, setFeeRange] = useState([0, 150]);
+    const [feeRange, setFeeRange] = useState([0, 100]);
     const [selectedAvailability, setSelectedAvailability] = useState<string[]>([]);
     const availabilityRef = useRef<HTMLDivElement>(null);
     const [keyword, setKeyword] = useState<string>('');
@@ -270,6 +274,12 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const [isSearching, setIsSearching] = useState<boolean>(false);
     const searchTimeoutRef = useRef<number | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+
+    // Helper function to get localized name
+    const getLocalizedName = (item: Category | Subject): string => {
+        const isVietnamese = i18n.language === 'vi';
+        return isVietnamese ? item.nameVi : item.nameEn;
+    };
 
     // Debounced fuzzy search function
     const debouncedFuzzySearch = useCallback((searchTerm: string) => {
@@ -352,7 +362,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
 
     const MIN_FEE = 0;
-    const MAX_FEE = 200;
+    const MAX_FEE = 100;
     const FEE_GAP = 10;
 
     // Category cache states with loading flags
@@ -433,10 +443,10 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     }, []); // Empty dependency array - only run once on mount
 
     // Convert to string arrays for dropdowns
-    const categoryOptions: string[] = categories.map(cat => cat.name);
+    const categoryOptions: string[] = categories.map(cat => getLocalizedName(cat));
     const subjectOptions: string[] = selectedCategoryId 
-        ? subjects.filter(sub => sub.categoryId === selectedCategoryId).map(sub => sub.name)
-        : subjects.map(sub => sub.name);
+        ? subjects.filter(sub => sub.categoryId === selectedCategoryId).map(sub => getLocalizedName(sub))
+        : subjects.map(sub => getLocalizedName(sub));
     const timezoneOptions: string[] = timezones.map(tz => tz.name);
     const sortByOptions: string[] = [
         t('findTutors.filters.sortOptions.relevance'),
@@ -466,7 +476,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         // When category is selected, set the category ID for filtering subjects
         if (dropdownId === 'category') {
             if (value !== placeholders.category) {
-                const selectedCategory = categories.find(cat => cat.name === value);
+                const selectedCategory = categories.find(cat => getLocalizedName(cat) === value);
                 setSelectedCategoryId(selectedCategory?.id || null);
             } else {
                 setSelectedCategoryId(null); // Reset when no category selected
@@ -568,7 +578,33 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                             <div className="bg-white pt-2.5 px-3 pb-2.5 rounded-xl border border-gray-200/80 shadow-sm min-h-[70px] flex flex-col justify-center">
                                 <div className="flex justify-between items-center mb-1.5">
                                     <label className="text-xs text-[#585858]">{t('findTutors.filters.labels.feePerSession')}</label>
-                                    <span className="text-sm font-semibold text-gray-800">${feeRange[0]} - ${feeRange[1]}</span>
+                                    <span className="text-sm font-semibold text-gray-800">
+                                        {(() => {
+                                            // Helper function to format VND as "200k" instead of "200,000"
+                                            const formatVNDWithK = (amount: number): string => {
+                                                const roundedAmount = Math.round(amount);
+                                                if (roundedAmount >= 1000) {
+                                                    const thousands = roundedAmount / 1000;
+                                                    const formatted = thousands % 1 === 0 ? thousands.toString() : thousands.toFixed(1);
+                                                    return `₫${formatted}k`;
+                                                }
+                                                return `₫${roundedAmount}`;
+                                            };
+                                            
+                                            // Convert feeRange from USD to selected currency
+                                            const minFee = convertCurrency(feeRange[0], 'USD', selectedCurrency);
+                                            const maxFee = convertCurrency(feeRange[1], 'USD', selectedCurrency);
+                                            
+                                            // Use custom format for VND, otherwise use standard formatCurrency
+                                            const formattedMin = selectedCurrency === 'VND' 
+                                                ? formatVNDWithK(minFee)
+                                                : formatCurrency(minFee, selectedCurrency);
+                                            const formattedMax = selectedCurrency === 'VND'
+                                                ? formatVNDWithK(maxFee)
+                                                : formatCurrency(maxFee, selectedCurrency);
+                                            return `${formattedMin} - ${formattedMax}`;
+                                        })()}
+                                    </span>
                                 </div>
                                 <div className="relative h-5 flex items-center">
                                     <div className="relative w-full h-1 bg-gray-200 rounded-full">
