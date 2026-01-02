@@ -111,7 +111,7 @@ export class VouchersComponent implements OnInit, OnDestroy {
   deleteVoucher(id: string): void {
     const voucher = this.filteredVouchers.find(v => v.id === id);
     const voucherCode = voucher?.code || 'this voucher';
-    
+
     if (confirm(`Are you sure you want to delete "${voucherCode}"? This action cannot be undone.`)) {
       this.subscription.add(
         this.voucherService.deleteVoucher(id).subscribe({

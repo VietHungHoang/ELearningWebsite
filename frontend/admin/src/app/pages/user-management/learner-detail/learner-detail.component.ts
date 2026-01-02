@@ -9,11 +9,12 @@ import { TruncatePipe } from '../../../shared/pipes/truncate.pipe';
 import { LocaleUtilsService } from '../../../shared/utils';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { I18nService } from '../../../i18n/i18n.service';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 
 @Component({
     selector: 'app-learner-detail',
     standalone: true,
-    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe, TranslatePipe],
+    imports: [RouterLink, CommonModule, FormsModule, TruncatePipe, TranslatePipe, CurrencyFormatPipe],
     providers: [UserService],
     templateUrl: './learner-detail.component.html',
     styleUrl: './learner-detail.component.scss'

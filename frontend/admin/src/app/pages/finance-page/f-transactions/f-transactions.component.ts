@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TransactionService, Payment, PaymentStatus, PaymentMethod, TransactionFilters } from '../../../services/transaction.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 import * as XLSX from 'xlsx';
 
 @Component({
     selector: 'app-f-transactions',
-    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe],
+    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe, CurrencyFormatPipe],
     templateUrl: './f-transactions.component.html',
     styleUrl: './f-transactions.component.scss'
 })
@@ -54,7 +55,12 @@ export class FTransactionsComponent implements OnInit {
     summary = {
         totalRevenue: 0,
         completedOrders: 0,
-        failedOrders: 0
+        failedOrders: 0,
+        averageOrderValue: 0,
+        successRate: 0,
+        revenueTrend: 0,
+        aovTrend: 0,
+        successRateTrend: 0
     };
 
     constructor(private transactionService: TransactionService, private router: Router) {}
@@ -65,7 +71,7 @@ export class FTransactionsComponent implements OnInit {
 
     loadOrders(): void {
         this.loading = true;
-        
+
         this.transactionService.getTransactions({
             page: this.currentPage,
             size: this.pageSize,
@@ -84,16 +90,21 @@ export class FTransactionsComponent implements OnInit {
                 this.totalPages = response.totalPages;
                 this.totalElements = response.totalElements;
                 this.currentPage = response.number + 1; // Convert from 0-based to 1-based
-                
+
                 // Update summary from API response
                 if (response.summary) {
                     this.summary = {
                         totalRevenue: response.summary.totalRevenue,
                         completedOrders: response.summary.completedPayments,
-                        failedOrders: response.summary.failedPayments
+                        failedOrders: response.summary.failedPayments,
+                        averageOrderValue: response.summary.averageOrderValue,
+                        successRate: response.summary.successRate,
+                        revenueTrend: response.summary.revenueTrend,
+                        aovTrend: response.summary.aovTrend,
+                        successRateTrend: response.summary.successRateTrend
                     };
                 }
-                
+
                 this.loading = false;
             },
             error: (error) => {
@@ -197,21 +208,21 @@ export class FTransactionsComponent implements OnInit {
 
         this.loadingApproval = true;
 
-        // TODO: Call API to approve payment manually
-        // For now, use local service method
+        // Manually approve pending payment (fallback if webhook fails)
+        // Normally payment gateway webhook auto-updates status
         const success = this.transactionService.approvePaymentManually(
             this.selectedOrder!.id,
             this.approvalNotes
         );
 
         if (success) {
-            alert('✓ Thanh toán đã được duyệt thủ công thành công!\nHệ thống sẽ bao gồm trong bảng thanh toán hàng tháng cho giảng viên.');
-            this.loadOrders(); // Reload transactions and summary from API
+            alert('✓ Giao dịch đã được duyệt thành công!\nThông thường webhook từ payment gateway sẽ tự động cập nhật.\nDùng chức năng này khi webhook bị lỗi.');
+            this.loadOrders();
             this.isApproveConfirmOpen = false;
             this.isDetailModalOpen = false;
             this.selectedOrder = null;
         } else {
-            alert('✗ Lỗi: Không thể duyệt thanh toán này (có thể đã hoàn thành hoặc không tồn tại)');
+            alert('✗ Lỗi: Không thể duyệt giao dịch này.\nChỉ có thể duyệt giao dịch đang chờ (Pending).');
         }
 
         this.loadingApproval = false;
@@ -327,7 +338,9 @@ export class FTransactionsComponent implements OnInit {
     }
 
     canApproveOrder(order: Payment): boolean {
-        return order.status === 'failed';
+        // Allow manual approval for pending payments (in case webhook fails)
+        // Normally payment gateway webhook auto-updates pending → completed/failed
+        return order.status === 'pending';
     }
 
     toggleFilterMenu(): void {
@@ -418,5 +431,35 @@ export class FTransactionsComponent implements OnInit {
 
     hasActiveFilters(): boolean {
         return !!(this.searchTerm || this.statusFilter || this.paymentMethodFilter || this.typeFilter || this.startDate || this.endDate);
+    }
+
+    // Helper methods for trend indicators
+    getTrendIcon(trend: number): string {
+        if (trend > 0) return 'trending_up';
+        if (trend < 0) return 'trending_down';
+        return 'trending_flat';
+    }
+
+    getTrendColor(trend: number): string {
+        if (trend > 0) return 'text-success';
+        if (trend < 0) return 'text-danger';
+        return 'text-gray-500';
+    }
+
+    formatTrend(trend: number): string {
+        const prefix = trend > 0 ? '+' : '';
+        return `${prefix}${trend.toFixed(1)}%`;
+    }
+
+    getSuccessRateColor(rate: number): string {
+        if (rate >= 95) return '#10b981'; // Green
+        if (rate >= 85) return '#f59e0b'; // Yellow/Orange
+        return '#ef4444'; // Red
+    }
+
+    getSuccessRateIcon(rate: number): string {
+        if (rate >= 95) return 'check_circle';
+        if (rate >= 85) return 'warning';
+        return 'error';
     }
 }

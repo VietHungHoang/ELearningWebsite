@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { CurrencyService } from './currency.service';
 
 export interface Voucher {
   id: string;
@@ -94,7 +95,10 @@ export class VoucherService {
 
   vouchers$ = this.vouchersSubject.asObservable();
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private currencyService: CurrencyService
+  ) {}
 
   /**
    * Get vouchers from API
@@ -363,10 +367,10 @@ export class VoucherService {
   private formatVoucherValue(data: Partial<Voucher>): string {
     if (data.discountType === 'percentage') {
       const value = data.discountValue ? `${data.discountValue}% off` : '';
-      const max = data.maxDiscount ? ` (Max ${data.maxDiscount})` : '';
+      const max = data.maxDiscount ? ` (Max ${this.currencyService.format(Number(data.maxDiscount), 'VND')})` : '';
       return value + max;
     } else {
-      return data.discountValue ? `${data.discountValue} VND off` : '';
+      return data.discountValue ? `${this.currencyService.format(Number(data.discountValue), 'VND')} off` : '';
     }
   }
 

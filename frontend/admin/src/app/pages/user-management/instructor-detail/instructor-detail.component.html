@@ -48,7 +48,7 @@
             <!-- Avatar Section -->
             <div class="relative flex-shrink-0">
                 <div class="relative">
-                    <img [src]="instructor.avatarUrl" [alt]="instructor.name" 
+                    <img [src]="instructor.avatarUrl" [alt]="instructor.name"
                          class="w-[100px] h-[100px] md:w-[120px] md:h-[120px] rounded-full object-cover border-4 border-gray-100 dark:border-[#15203c] shadow-md">
                     @if (isEditing) {
                         <label class="absolute bottom-0 right-0 cursor-pointer bg-white dark:bg-[#0c1427] rounded-full p-[6px] shadow-md hover:shadow-lg transition-shadow">
@@ -546,7 +546,7 @@
                         class="w-full px-[12px] py-[8px] border border-blue-400 rounded-lg text-sm text-black dark:bg-[#0c1427] dark:border-blue-500 dark:text-white"
                     >
                 } @else {
-                    <p class="text-sm text-black dark:text-white font-medium">{{ instructor.currentSessionFee || 'N/A' }}</p>
+                    <p class="text-sm text-black dark:text-white font-medium">{{ instructor.currentSessionFee ? (instructor.currentSessionFee | currencyFormat:'VND') : 'N/A' }}</p>
                 }
             </div>
 
@@ -561,7 +561,7 @@
                         class="w-full px-[12px] py-[8px] border border-blue-400 rounded-lg text-sm text-black dark:bg-[#0c1427] dark:border-blue-500 dark:text-white"
                     >
                 } @else {
-                    <p class="text-sm text-black dark:text-white font-medium">{{ instructor.initialPrice ? (instructor.initialPrice + '/h') : 'N/A' }}</p>
+                    <p class="text-sm text-black dark:text-white font-medium">{{ instructor.initialPrice ? ((instructor.initialPrice | currencyFormat:'VND') + '/h') : 'N/A' }}</p>
                 }
             </div>
 
@@ -933,7 +933,7 @@
                                 <td class="px-[16px] py-[12px] text-black dark:text-white text-xs">{{ cls.title }}</td>
                                 <td class="px-[16px] py-[12px] text-black dark:text-white text-xs">{{ cls.enrollmentCount }}</td>
                                 <td class="px-[16px] py-[12px] text-black dark:text-white text-xs">{{ cls.rating }}</td>
-                                <td class="px-[16px] py-[12px] text-black dark:text-white text-xs">${{ cls.pricePerHour || 'N/A' }}</td>
+                                <td class="px-[16px] py-[12px] text-black dark:text-white text-xs">{{ cls.pricePerHour ? (cls.pricePerHour | currencyFormat:'VND') : 'N/A' }}</td>
                                 <td class="px-[16px] py-[12px] text-black dark:text-white text-xs">{{ formatClassType(cls.classType) }}</td>
                             </tr>
                         }

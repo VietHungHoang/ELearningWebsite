@@ -137,7 +137,7 @@
       "finance": "Finance",
       "revenueDashboard": "Revenue Dashboard",
       "transactions": "Transactions",
-      "payoutManagement": "Payout Management",
+      "payoutManagement": "Payout",
       "promotion": "Promotion",
       "vouchers": "Vouchers",
       "profile": "Profile",
@@ -772,62 +772,55 @@
       "thisMonth": "This Month"
     },
     "kpi": {
-      "income": {
-        "label": "Income",
-        "title": "Admin Account",
-        "description": "From learner payments"
+      "totalRevenue": {
+        "title": "Total Revenue",
+        "description": "From all student transactions"
       },
-      "payout": {
-        "label": "Payout",
-        "title": "To Tutors",
-        "description": "Fixed: {{date}}th monthly",
-        "descriptionShort": "Fixed monthly"
+      "platformFee": {
+        "title": "Commission",
+        "description": "30% commission from revenue"
       },
-      "balance": {
-        "label": "Balance",
-        "title": "Net Profit",
-        "description": "Income - Payout"
+      "instructorPayout": {
+        "title": "Instructor Payouts",
+        "description": "Total paid to instructors"
       },
-      "peak": {
-        "label": "Peak",
-        "title": "Transaction",
-        "description": "Highest payment"
+      "profitMargin": {
+        "title": "Profit Margin",
+        "description": "Average commission rate"
       },
       "transactions": {
-        "label": "Transactions",
-        "title": "Total Count",
-        "description": "Completed payments"
+        "title": "Transactions",
+        "description": "Total number of orders"
       },
-      "payouts": {
-        "label": "Payouts",
-        "title": "Total Count",
-        "description": "Tutor payments"
+      "aov": {
+        "title": "Avg Order Value",
+        "description": "Revenue per transaction"
       },
       "vsPrevious": "vs previous"
     }
   },
   "payout": {
-    "title": "Payout Management",
+    "title": "Payout",
     "breadcrumb": {
       "dashboard": "Dashboard",
       "finance": "Finance",
-      "payoutManagement": "Payout Management"
+      "payoutManagement": "Payout"
     },
     "kpi": {
-      "pending": {
-        "label": "Pending",
+      "totalPaid": {
+        "label": "Paid",
         "title": "Total Amount",
-        "description": "tutors waiting"
+        "description": "Total amount paid to tutors"
+      },
+      "pendingAmount": {
+        "label": "Pending",
+        "title": "Pending Amount",
+        "description": "Total amount awaiting payment"
       },
       "instructors": {
         "label": "Count",
         "title": "Tutors",
-        "description": "Pending payment"
-      },
-      "orders": {
-        "label": "Orders",
-        "title": "Total Count",
-        "description": "Orders pending payout"
+        "description": "Awaiting payment"
       }
     },
     "tabs": {
@@ -845,20 +838,6 @@
       "total": "Total",
       "clear": "Clear",
       "confirmAll": "Confirm All"
-    },
-    "table": {
-      "stt": "STT",
-      "instructorBank": "Tutor & Bank",
-      "method": "Method",
-      "totalAmount": "Total Amount",
-      "orders": "Orders",
-      "actions": "Actions",
-      "instructorName": "Tutor Name",
-      "amount": "Amount",
-      "paymentDate": "Payment Date",
-      "approvedBy": "Approved By",
-      "status": "Status",
-      "ordersCount": "orders"
     },
     "empty": {
       "noPendingPayouts": "No pending payouts",
@@ -881,6 +860,53 @@
       "last7Days": "Last 7 Days",
       "last30Days": "Last 30 Days",
       "thisMonth": "This Month"
+    },
+    "cycleFilter": {
+      "current": "Current Cycle",
+      "next": "Next Cycle",
+      "overdue": "Overdue",
+      "all": "All"
+    },
+    "paymentMethodFilter": {
+      "all": "All Methods"
+    },
+    "kpiFilter": {
+      "label": "Statistics",
+      "currentCycle": "Current Cycle",
+      "nextCycle": "Next Cycle",
+      "allCycles": "All Cycles",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "thisMonth": "This Month",
+      "allTime": "All Time"
+    },
+    "tableFilter": {
+      "label": "Filter List"
+    },
+    "cycleInfo": {
+      "title": "Cycle",
+      "cutoff": "Cut-off",
+      "payout": "Payout",
+      "daysLeft": "Left",
+      "days": "days",
+      "total": "Total",
+      "tutors": "tutors",
+      "groupByDate": "Group by payout date"
+    },
+    "table": {
+      "stt": "No.",
+      "instructorBank": "Tutor & Bank",
+      "method": "Method",
+      "totalAmount": "Total Amount",
+      "orders": "Orders",
+      "actions": "Actions",
+      "instructorName": "Tutor Name",
+      "amount": "Amount",
+      "paymentDate": "Payment Date",
+      "payoutDate": "Payout on",
+      "approvedBy": "Approved By",
+      "status": "Status",
+      "ordersCount": "orders"
     },
     "status": {
       "complete": "Complete",
@@ -937,6 +963,51 @@
       "showing": "Showing",
       "to": "to",
       "of": "of"
+    },
+    "modals": {
+      "orderList": {
+        "subtitle": "Order List",
+        "total": "Total",
+        "noOrders": "No orders found",
+        "close": "Close"
+      },
+      "qrPayment": {
+        "subtitle": "Scan QR Code to Pay",
+        "bank": "Bank",
+        "accountNumber": "Account Number",
+        "accountHolder": "Account Holder",
+        "totalAmount": "Total Amount",
+        "download": "Download",
+        "close": "Close",
+        "confirmPayment": "Confirm Payment"
+      },
+      "confirmPayment": {
+        "title": "Confirm Payment",
+        "message": "Are you sure you want to mark this as paid?",
+        "to": "to",
+        "notes": "Notes (Optional)",
+        "notesPlaceholder": "Add payment notes...",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "processing": "Processing..."
+      },
+      "bulkConfirm": {
+        "title": "Confirm Bulk Payment",
+        "selectedInstructors": "Selected Tutors",
+        "totalAmount": "Total Amount",
+        "notes": "Notes (Optional)",
+        "notesPlaceholder": "Add payment notes...",
+        "cancel": "Cancel",
+        "confirmPayment": "Confirm Payment"
+      },
+      "success": {
+        "title": "Payment Successful!",
+        "message": "Payment transaction has been confirmed",
+        "instructor": "Tutor",
+        "amount": "Amount",
+        "date": "Payment Date",
+        "viewHistory": "View History"
+      }
     }
   },
   "transactions": {
@@ -949,9 +1020,14 @@
     "kpi": {
       "title": "Statistics",
       "totalRevenue": "Total Revenue",
+      "averageOrderValue": "Average Order Value",
+      "successRate": "Success Rate",
       "completed": "Completed",
       "failed": "Failed",
       "orders": "orders",
+      "completedTransactions": "completed transactions",
+      "transactions": "transactions",
+      "perTransaction": "Average per transaction",
       "successfulTransactions": "Successful transactions",
       "transactionErrors": "Transaction errors"
     },

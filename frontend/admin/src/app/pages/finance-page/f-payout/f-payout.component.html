@@ -4,35 +4,29 @@
         <h5 class="!mb-0 text-gray-900 dark:text-white">
             {{ 'payout.title' | translate }}
         </h5>
+        <!-- KPI Summary Filter -->
         <div class="trezo-card-dropdown relative">
-            <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[4px] px-[10px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19] whitespace-nowrap" (click)="toggleSummaryFilterMenu()">
-                <span class="inline-block relative text-sm ltr:pr-[16px] rtl:pl-[16px]">
-                    {{ getSummaryFilterText() | translate }}
-                    <i class="ri-arrow-down-s-line text-base absolute ltr:-right-[2px] rtl:-left-[2px] top-1/2 -translate-y-1/2"></i>
-                </span>
+            <button type="button" class="trezo-card-dropdown-btn inline-flex items-center gap-[6px] rounded-md border border-primary-200 dark:border-primary-800 py-[6px] px-[12px] transition-all hover:bg-primary-50 dark:hover:bg-primary-900/20 text-xs font-medium bg-primary-50/50 dark:bg-primary-900/10" (click)="toggleKpiFilterMenu()">
+                <i class="ri-bar-chart-box-line text-sm text-primary-600 dark:text-primary-400"></i>
+                <span class="text-primary-700 dark:text-primary-300">{{ getCurrentKpiFilterLabel() | translate }}</span>
+                <i class="ri-arrow-down-s-line text-base text-primary-600 dark:text-primary-400"></i>
             </button>
-            @if (isSummaryFilterMenuOpen) {
-                <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[120px] z-[4] dark:bg-dark dark:shadow-none">
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('all')">
-                            {{ 'payout.summaryFilter.all' | translate }}
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('today')">
-                            {{ 'payout.summaryFilter.today' | translate }}
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('7days')">
-                            {{ 'payout.summaryFilter.last7Days' | translate }}
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('30days')">
-                            {{ 'payout.summaryFilter.last30Days' | translate }}
-                        </button>
-                    </li>
+            @if (isKpiFilterMenuOpen) {
+                <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[180px] z-[4] dark:bg-[#0c1427] dark:shadow-none">
+                    @for (option of getKpiFilterOptions(); track option) {
+                        <li>
+                            <button type="button"
+                                class="block w-full transition-all text-black text-xs ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]"
+                                [class.bg-primary-50]="kpiFilter === option"
+                                [class.text-primary-600]="kpiFilter === option"
+                                (click)="setKpiFilter(option)">
+                                {{ getKpiFilterLabel(option) | translate }}
+                                @if (kpiFilter === option) {
+                                    <i class="ri-check-line absolute ltr:right-[12px] rtl:left-[12px] top-1/2 -translate-y-1/2 text-primary-500"></i>
+                                }
+                            </button>
+                        </li>
+                    }
                 </ul>
             }
         </div>
@@ -56,20 +50,33 @@
 </div>
 
 <!-- KPI Cards - Unified Modern Design -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-[12px] mb-[16px]">
-    <!-- Total Pending -->
+<div class="mb-[16px]">
+    <!-- KPI Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-[12px]">
+    <!-- 1. Total Paid Amount -->
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'payout.kpi.pending.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'payout.kpi.totalPaid.title' | translate }}</h6>
         </div>
         <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ formatCurrency(summary.totalPending) }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ summary.totalPending | currencyFormat:'VND' }}</span>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ summary.totalInstructors }} {{ 'payout.kpi.pending.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.kpi.totalPaid.description' | translate }}</p>
     </div>
 
-    <!-- Instructors -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- 2. Pending Amount (NEW) -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #f97316;">
+        <div class="mb-[12px]">
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'payout.kpi.pendingAmount.title' | translate }}</h6>
+        </div>
+        <div class="mb-[8px]">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ summary.pendingAmount | currencyFormat:'VND' }}</span>
+        </div>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.kpi.pendingAmount.description' | translate }}</p>
+    </div>
+
+    <!-- 3. Instructors -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #10b981;">
         <div class="mb-[12px]">
             <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'payout.kpi.instructors.title' | translate }}</h6>
         </div>
@@ -78,16 +85,6 @@
         </div>
         <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.kpi.instructors.description' | translate }}</p>
     </div>
-
-    <!-- Total Orders -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
-        <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'payout.kpi.orders.title' | translate }}</h6>
-        </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ summary.totalOrders }}</span>
-        </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.kpi.orders.description' | translate }}</p>
     </div>
 </div>
 
@@ -114,7 +111,7 @@
     <!-- Search, Filter and Export Section -->
     <div class="mb-[12px] p-[12px] bg-gray-50 dark:bg-[#15203c] rounded-lg border border-gray-200 dark:border-[#172036]">
         <div class="flex flex-wrap gap-[12px] items-end mb-[12px]">
-            <div class="flex-1 min-w-[500px]">
+            <div class="flex-1 min-w-[300px]">
                 <form class="relative" (ngSubmit)="onSearchChange()">
                     <label class="leading-none absolute ltr:left-[10px] rtl:right-[10px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
                         <i class="material-symbols-outlined !text-[18px]">search</i>
@@ -129,6 +126,45 @@
                     >
                 </form>
             </div>
+
+            @if (activeTab === 'pending') {
+                <!-- Table Cycle Filter -->
+                <div class="flex items-center gap-[8px]">
+                    <span class="text-xs text-gray-600 dark:text-gray-400 font-medium whitespace-nowrap">{{ 'payout.tableFilter.label' | translate }}:</span>
+                    <div class="trezo-card-dropdown relative">
+                        <button type="button" class="trezo-card-dropdown-btn inline-flex items-center gap-[6px] rounded-md border border-gray-200 dark:border-[#172036] py-[6px] px-[12px] transition-all hover:bg-gray-50 dark:hover:bg-[#0a0e19] text-xs font-medium" (click)="toggleCycleFilter()">
+                            <i class="ri-table-line text-sm"></i>
+                            <span>{{ getCycleFilterText() | translate }}</span>
+                            <i class="ri-arrow-down-s-line text-base"></i>
+                        </button>
+                    @if (isCycleFilterOpen) {
+                        <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[160px] z-[4] dark:bg-[#0c1427] dark:shadow-none">
+                            <li>
+                                <button type="button" class="block w-full transition-all text-black text-xs ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setCycleFilter('current')">
+                                    {{ 'payout.cycleFilter.current' | translate }}
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="block w-full transition-all text-black text-xs ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setCycleFilter('next')">
+                                    {{ 'payout.cycleFilter.next' | translate }}
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="block w-full transition-all text-black text-xs ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setCycleFilter('overdue')">
+                                    {{ 'payout.cycleFilter.overdue' | translate }}
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" class="block w-full transition-all text-black text-xs ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setCycleFilter('all')">
+                                    {{ 'payout.cycleFilter.all' | translate }}
+                                </button>
+                            </li>
+                        </ul>
+                    }
+                    </div>
+                </div>
+            }
+
             <div class="flex gap-[10px] flex-shrink-0">
                 <button type="button" class="inline-flex items-center gap-[8px] transition-all rounded-md font-medium py-[6px] px-[16px] bg-primary-500 text-white hover:bg-primary-400 text-xs whitespace-nowrap" (click)="exportToExcel()">
                     <i class="material-symbols-outlined text-sm">
@@ -141,6 +177,39 @@
     </div>
 
     @if (activeTab === 'pending') {
+        <!-- Cycle Info Banner -->
+        <div class="mb-[15px] p-[16px] bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div class="flex items-center justify-between flex-wrap gap-[12px]">
+                <div class="flex-1">
+                    <h6 class="text-sm font-bold text-blue-900 dark:text-blue-200 mb-[8px]">
+                        📅 {{ 'payout.cycleInfo.title' | translate }}: {{ formatCycleDate(currentCycleStart) }} - {{ formatCycleDate(currentCycleEnd) }}
+                    </h6>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-[8px] text-xs text-blue-800 dark:text-blue-300">
+                        <div>
+                            ⏰ {{ 'payout.cycleInfo.cutoff' | translate }}: {{ formatCycleDate(cutoffDate) }}
+                            @if (getDaysToCutoff() > 0) {
+                                <span class="font-semibold">({{ 'payout.cycleInfo.daysLeft' | translate }}: {{ getDaysToCutoff() }})</span>
+                            }
+                        </div>
+                        <div>
+                            💰 {{ 'payout.cycleInfo.payout' | translate }}: {{ formatCycleDate(payoutDate) }}
+                            @if (getDaysToPayout() > 0) {
+                                <span class="font-semibold">({{ 'payout.cycleInfo.daysLeft' | translate }}: {{ getDaysToPayout() }})</span>
+                            }
+                        </div>
+                        <div>
+                            👥 {{ 'payout.cycleInfo.total' | translate }}: {{ pendingPayouts.length }} {{ 'payout.cycleInfo.tutors' | translate }} - {{ summary.pendingAmount | currencyFormat:'VND' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-[8px] items-center">
+                    <label class="flex items-center gap-[6px] text-xs text-blue-800 dark:text-blue-300 cursor-pointer">
+                        <input type="checkbox" [(ngModel)]="groupByPayoutDate" (change)="toggleGroupByPayoutDate()" class="cursor-pointer">
+                        <span>{{ 'payout.cycleInfo.groupByDate' | translate }}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
         <div class="space-y-[15px]">
             <!-- Bulk confirmation toolbar -->
             @if (selectedPayouts.size > 0) {
@@ -149,7 +218,7 @@
                         <p class="text-sm font-medium text-blue-900 dark:text-blue-200">
                             {{ selectedPayouts.size }} {{ 'payout.bulk.selected' | translate }}
                             <span class="font-bold text-blue-600 dark:text-blue-400 ml-[8px]">
-                                {{ 'payout.bulk.total' | translate }}: {{ formatCurrency(getTotalSelectedAmount()) }}
+                                {{ 'payout.bulk.total' | translate }}: {{ getTotalSelectedAmount() | currencyFormat:'VND' }}
                             </span>
                         </p>
                     </div>
@@ -175,52 +244,62 @@
 
             @if (pendingPayouts.length > 0) {
                 <div class="overflow-x-auto">
-                    <table id="pending-payouts-table" class="w-full">
-                        <thead>
+                    <table id="pending-payouts-table" class="w-full bg-white dark:bg-[#0c1427]">
+                        <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                             <tr>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[40px]">
+                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs w-[40px]">
                                     <input type="checkbox"
                                         [checked]="isAllSelected()"
                                         (change)="toggleSelectAll()"
                                         class="cursor-pointer">
                                 </th>
-                                <th class="font-medium text-center px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[60px]">{{ 'payout.table.stt' | translate }}</th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[150px]">{{ 'payout.table.instructorName' | translate }}</th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[100px]">{{ 'payout.table.method' | translate }}</th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[120px]">{{ 'payout.table.totalAmount' | translate }}</th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[100px]">{{ 'payout.table.orders' | translate }}</th>
-                                <th class="font-medium text-center px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">{{ 'payout.table.actions' | translate }}</th>
+                                <th class="font-medium text-center px-[12px] py-[10px] text-xs w-[60px]">{{ 'payout.table.stt' | translate }}</th>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[180px]">{{ 'payout.table.instructorName' | translate }}</th>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[120px]">{{ 'payout.table.totalAmount' | translate }}</th>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[120px]">{{ 'payout.table.payoutDate' | translate }}</th>
+                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[100px]">{{ 'payout.table.orders' | translate }}</th>
+                                <th class="font-medium text-center px-[12px] py-[10px] text-xs w-[100px]">{{ 'payout.table.actions' | translate }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-black dark:text-white">
                             @for (payout of getPaginatedPendingPayouts(); track payout.id; let i = $index) {
-                                <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
-                                    <td class="px-[12px] py-[12px]">
+                                <tr [class]="'border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors ' + (isOverdue(payout) ? 'bg-red-50 dark:bg-red-900/10' : '')">
+                                    <td class="whitespace-nowrap px-[12px] py-[12px]">
                                         <input type="checkbox"
                                             [checked]="isPayoutSelected(payout.id)"
                                             (change)="togglePayoutSelection(payout.id)"
                                             class="cursor-pointer">
                                     </td>
-                                    <td class="px-[12px] py-[12px] text-center">
-                                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ (currentPage - 1) * pageSize + i + 1 }}</span>
-                                    </td>
-                                    <td class="px-[12px] py-[12px]">
-                                        <span class="font-semibold text-gray-900 dark:text-white">{{ payout.instructorName }}</span>
-                                    </td>
-                                    <td class="px-[12px] py-[12px]">
-                                        <span class="inline-block px-[8px] py-[4px] rounded text-xs font-medium {{ getPaymentMethodColor(payout.paymentMethod) }}">
-                                            {{ getPaymentMethodDisplay(payout.paymentMethod) | translate }}
+                                    <td class="text-center whitespace-nowrap px-[12px] py-[12px] text-xs">
+                                        <span class="text-gray-600 dark:text-gray-400 font-medium">
+                                            {{ (currentPage - 1) * pageSize + i + 1 }}
                                         </span>
                                     </td>
-                                    <td class="px-[12px] py-[12px]">
-                                        <span class="text-danger-500 font-bold text-base">{{ formatCurrency(payout.totalOwed) }}</span>
+                                    <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                        <span class="font-medium text-gray-900 dark:text-white">
+                                            {{ payout.instructorName }}
+                                        </span>
+                                        @if (isOverdue(payout)) {
+                                            <span class="inline-block ml-[6px] px-[6px] py-[2px] rounded text-[9px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">OVERDUE</span>
+                                        }
                                     </td>
-                                    <td class="px-[12px] py-[12px]">
-                                        <span class="inline-block px-[8px] py-[4px] bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded text-xs font-medium">
+                                    <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                        <span class="text-primary-500 font-semibold">
+                                            {{ payout.totalOwed | currencyFormat:'VND' }}
+                                        </span>
+                                    </td>
+                                    <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                        <span class="text-gray-600 dark:text-gray-400">
+                                            {{ formatCycleDate(payoutDate) }}<br>
+                                            <span class="text-[10px]">{{ formatCycleDate(currentCycleStart) }} - {{ formatCycleDate(currentCycleEnd) }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                        <span class="inline-block px-[8px] py-[4px] rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-[10px] font-medium">
                                             {{ payout.orderCount }} {{ 'payout.table.ordersCount' | translate }}
                                         </span>
                                     </td>
-                                    <td class="px-[12px] py-[12px]">
+                                    <td class="text-center whitespace-nowrap px-[12px] py-[12px]">
                                         <div class="flex items-center justify-center gap-[8px]">
                                             <button
                                                 type="button"
@@ -228,7 +307,7 @@
                                                 (click)="openDetailModal(payout)"
                                                 [title]="'payout.actions.viewDetails' | translate"
                                             >
-                                                <i class="material-symbols-outlined !text-lg">visibility</i>
+                                                <i class="material-symbols-outlined !text-base">visibility</i>
                                             </button>
                                             <button
                                                 type="button"
@@ -236,7 +315,7 @@
                                                 (click)="openQRPaymentModal(payout)"
                                                 [title]="'payout.actions.qrPayment' | translate"
                                             >
-                                                <i class="material-symbols-outlined !text-lg">qr_code_2</i>
+                                                <i class="material-symbols-outlined !text-base">qr_code_2</i>
                                             </button>
                                         </div>
                                     </td>
@@ -335,7 +414,6 @@
                             <tr>
                                 <th class="font-medium text-center px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[60px]">{{ 'payout.table.stt' | translate }}</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[150px]">{{ 'payout.table.instructorName' | translate }}</th>
-                                <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[90px]">{{ 'payout.table.method' | translate }}</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[120px]">{{ 'payout.table.amount' | translate }}</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[140px]">{{ 'payout.table.paymentDate' | translate }}</th>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap min-w-[120px]">{{ 'payout.table.approvedBy' | translate }}</th>
@@ -352,12 +430,7 @@
                                         <span class="font-medium text-sm">{{ history.instructorName }}</span>
                                     </td>
                                     <td class="px-[12px] py-[12px]">
-                                        <span class="inline-block px-[8px] py-[4px] rounded text-xs font-medium {{ getPaymentMethodColor(history.paymentMethod) }}">
-                                            {{ getPaymentMethodDisplay(history.paymentMethod) | translate }}
-                                        </span>
-                                    </td>
-                                    <td class="px-[12px] py-[12px]">
-                                        <span class="text-success-500 font-bold text-sm">{{ formatCurrency(history.paidAmount) }}</span>
+                                        <span class="text-success-500 font-bold text-sm">{{ history.paidAmount | currencyFormat:'VND' }}</span>
                                     </td>
                                     <td class="px-[12px] py-[12px]">
                                         <span class="text-gray-600 dark:text-gray-400 text-xs">{{ history.paidDate | date:'dd/MM/yyyy' }}<br><span class="text-[10px]">{{ history.paidDate | date:'HH:mm' }}</span></span>
@@ -448,7 +521,7 @@
                             {{ 'payout.modals.orderList.subtitle' | translate }} ({{ selectedPayout.orderCount }})
                         </h4>
                         <span class="text-xs font-semibold text-danger-500">
-                            {{ 'payout.modals.orderList.total' | translate }}: {{ formatCurrency(selectedPayout.totalOwed) }}
+                            {{ 'payout.modals.orderList.total' | translate }}: {{ selectedPayout.totalOwed | currencyFormat:'VND' }}
                         </span>
                     </div>
                     <div class="border border-gray-200 dark:border-[#172036] rounded-lg bg-white dark:bg-[#0c1427]">
@@ -458,10 +531,10 @@
                                     <div class="border border-gray-100 dark:border-[#172036] p-[12px] rounded-lg bg-gray-50 dark:bg-[#15203c] hover:bg-gray-100 dark:hover:bg-[#1a2a3c] transition-colors">
                                         <div class="flex justify-between items-start mb-[6px]">
                                             <span class="font-semibold text-sm text-gray-900 dark:text-white">{{ order.orderNumber }}</span>
-                                            <span class="font-bold text-sm text-primary-500">{{ formatCurrency(order.amount) }}</span>
+                                            <span class="font-bold text-sm text-primary-500">{{ order.amount | currencyFormat:'VND' }}</span>
                                         </div>
                                         <p class="text-xs text-gray-600 dark:text-gray-400 mb-[4px]">{{ order.learnerName }} - {{ order.sessionName }} ({{ order.sessionType === '1 and 1' ? '1-on-1' : 'Group' }})</p>
-                                        <p class="text-[10px] text-gray-500 dark:text-gray-500">{{ formatCurrency(order.hourlyRate) }}/h × {{ order.hours }}h | {{ order.date }}</p>
+                                        <p class="text-[10px] text-gray-500 dark:text-gray-500">{{ order.hourlyRate | currencyFormat:'VND' }}/h × {{ order.hours }}h | {{ order.date }}</p>
                                     </div>
                                 }
                             } @else {
@@ -490,7 +563,7 @@
 
                 <div class="bg-blue-50 dark:bg-[#15203c] p-[16px] rounded mb-[16px] border border-blue-100 dark:border-blue-900">
                     <p class="text-sm text-gray-700 dark:text-gray-300 mb-[8px]">{{ 'payout.modals.confirmPayment.message' | translate }}</p>
-                    <p class="text-[24px] font-bold text-primary-500">{{ formatCurrency(selectedPayout.totalOwed) }}</p>
+                    <p class="text-[24px] font-bold text-primary-500">{{ selectedPayout.totalOwed | currencyFormat:'VND' }}</p>
                     <p class="text-sm text-gray-600 dark:text-gray-400 mt-[8px]">{{ 'payout.modals.confirmPayment.to' | translate }} <strong>{{ selectedPayout.instructorName }}</strong></p>
                 </div>
 
@@ -556,19 +629,25 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-[12px] border border-blue-200 dark:border-blue-800 mb-[12px]">
                     <div class="flex justify-between items-center">
                         <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ 'payout.modals.qrPayment.totalAmount' | translate }}:</span>
-                        <span class="text-xl font-bold text-danger-500">{{ formatCurrency(selectedPayout.totalAmount) }}</span>
+                        <span class="text-xl font-bold text-danger-500">{{ selectedPayout.totalAmount | currencyFormat:'VND' }}</span>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex gap-[10px] justify-end pt-[12px] border-t border-gray-200 dark:border-[#172036]">
+                <div class="flex gap-[10px] justify-between pt-[12px] border-t border-gray-200 dark:border-[#172036]">
                     <button type="button" class="px-[16px] py-[8px] rounded-md bg-gray-200 text-black hover:bg-gray-300 dark:bg-[#172036] dark:text-white dark:hover:bg-[#1a2a3c] font-medium flex items-center gap-[4px] text-xs" (click)="downloadQRCode()">
                         <i class="material-symbols-outlined !text-base">download</i>
                         {{ 'payout.modals.qrPayment.download' | translate }}
                     </button>
-                    <button type="button" class="px-[16px] py-[8px] rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-[#172036] dark:text-gray-300 dark:hover:bg-[#15203c] text-xs font-medium" (click)="closeQRModal()">
-                        {{ 'payout.modals.qrPayment.close' | translate }}
-                    </button>
+                    <div class="flex gap-[10px]">
+                        <button type="button" class="px-[16px] py-[8px] rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-[#172036] dark:text-gray-300 dark:hover:bg-[#15203c] text-xs font-medium" (click)="closeQRModal()">
+                            {{ 'payout.modals.qrPayment.close' | translate }}
+                        </button>
+                        <button type="button" class="px-[16px] py-[8px] rounded-md bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 font-medium flex items-center gap-[4px] text-xs" (click)="confirmQRPayment()">
+                            <i class="material-symbols-outlined !text-base">check_circle</i>
+                            {{ 'payout.modals.qrPayment.confirmPayment' | translate }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -590,7 +669,7 @@
                         @for (payout of getSelectedPayoutsList(); track payout.id) {
                             <div class="flex justify-between items-center text-sm p-[8px] rounded bg-white dark:bg-[#1a2a3c]">
                                 <span class="text-gray-700 dark:text-gray-300">{{ payout.instructorName }}</span>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(payout.totalOwed) }}</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ payout.totalOwed | currencyFormat:'VND' }}</span>
                             </div>
                         }
                     </div>
@@ -600,7 +679,7 @@
                 <div class="mb-[20px] p-[16px] rounded-md border-l-4 border-red-500 bg-red-50 dark:bg-red-500/10">
                     <div class="flex justify-between items-center">
                         <span class="text-gray-700 dark:text-gray-300">{{ 'payout.modals.bulkConfirm.totalAmount' | translate }}:</span>
-                        <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ formatCurrency(getTotalSelectedAmount()) }}</span>
+                        <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ getTotalSelectedAmount() | currencyFormat:'VND' }}</span>
                     </div>
                 </div>
 
@@ -620,6 +699,58 @@
                     <button type="button" class="px-[20px] py-[10px] rounded-md bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 font-medium flex items-center gap-[6px]" (click)="processBulkPayment()">
                         <i class="material-symbols-outlined !text-[18px]">check_circle</i>
                         {{ 'payout.modals.bulkConfirm.confirmPayment' | translate }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Success Notification Modal -->
+@if (isSuccessModalOpen) {
+    <div class="modal-overlay fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4">
+        <div class="modal-content max-w-[450px] w-full bg-white dark:bg-[#0c1427] rounded-lg shadow-xl animate-scale-in" (click)="$event.stopPropagation()">
+            <div class="modal-body p-[24px]">
+                <!-- Success Icon -->
+                <div class="flex justify-center mb-[16px]">
+                    <div class="w-[60px] h-[60px] rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                        <i class="material-symbols-outlined text-green-600 dark:text-green-400 !text-[32px]">check_circle</i>
+                    </div>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-lg font-bold text-center text-gray-900 dark:text-white mb-[8px]">
+                    {{ 'payout.modals.success.title' | translate }}
+                </h3>
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400 mb-[20px]">
+                    {{ 'payout.modals.success.message' | translate }}
+                </p>
+
+                <!-- Payment Details -->
+                <div class="bg-gray-50 dark:bg-[#15203c] rounded-lg p-[16px] mb-[20px] border border-gray-200 dark:border-[#172036]">
+                    <div class="space-y-[10px]">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.modals.success.instructor' | translate }}:</span>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ successMessage.instructor }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.modals.success.amount' | translate }}:</span>
+                            <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ successMessage.amount }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ 'payout.modals.success.date' | translate }}:</span>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ successMessage.date }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="flex justify-center">
+                    <button
+                        type="button"
+                        class="px-[32px] py-[10px] rounded-md bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 font-medium text-sm"
+                        (click)="closeSuccessModal()">
+                        {{ 'payout.modals.success.viewHistory' | translate }}
                     </button>
                 </div>
             </div>

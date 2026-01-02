@@ -50,73 +50,97 @@
     </ol>
 </div>
 
-<!-- KPI Cards - Unified Modern Design -->
+<!-- KPI Cards - Enhanced Design with Trends -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[12px] mb-[16px]">
 
-    <!-- Admin Account Income -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- 1. Total Revenue -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #10b981;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.income.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.totalRevenue.title' | translate }}</h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ formatCurrency(kpis.adminAccountIncome) }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.totalRevenue | currencyFormat:'VND' }}</span>
+            <div class="flex items-center gap-[4px]">
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.revenueTrend)">{{ getTrendIcon(kpis.revenueTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.revenueTrend)">{{ formatTrend(kpis.revenueTrend) }}</span>
+            </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.income.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.totalRevenue.description' | translate }}</p>
     </div>
 
-    <!-- Admin Account Payout -->
+    <!-- 2. Platform Fee Earned -->
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.payout.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.platformFee.title' | translate }}</h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ formatCurrency(kpis.adminAccountPayout) }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.platformFeeEarned | currencyFormat:'VND' }}</span>
+            <div class="flex items-center gap-[4px]">
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.platformFeeTrend)">{{ getTrendIcon(kpis.platformFeeTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.platformFeeTrend)">{{ formatTrend(kpis.platformFeeTrend) }}</span>
+            </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.payout.description' | translate: {date: kpis.payoutFixedDate} }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.platformFee.description' | translate }}</p>
     </div>
 
-    <!-- Net Balance -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- 3. Instructor Payouts -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #f97316;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.balance.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.instructorPayout.title' | translate }}</h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ formatCurrency(kpis.adminAccountIncome - kpis.adminAccountPayout) }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.instructorPayouts | currencyFormat:'VND' }}</span>
+            <div class="flex items-center gap-[4px]">
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.payoutTrend)">{{ getTrendIcon(kpis.payoutTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.payoutTrend)">{{ formatTrend(kpis.payoutTrend) }}</span>
+            </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.balance.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.instructorPayout.description' | translate }}</p>
     </div>
 
-    <!-- Peak Transaction -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- 4. Success Rate % -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #3b82f6;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.peak.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.successRate.title' | translate }}</h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ formatCurrency(kpis.peakTransactionAmount) }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.successRate.toFixed(1) }}%</span>
+            <div class="flex items-center gap-[4px]">
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.successRateTrend)">{{ getTrendIcon(kpis.successRateTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.successRateTrend)">{{ formatTrend(kpis.successRateTrend) }}</span>
+            </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.peak.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.successRate.description' | translate }}</p>
     </div>
 
-    <!-- Total Transactions -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- 5. Total Transactions -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #a78bfa;">
         <div class="mb-[12px]">
             <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.transactions.title' | translate }}</h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ kpis.totalTransactions }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.totalTransactions.toLocaleString() }}</span>
+            <div class="flex items-center gap-[4px]">
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.transactionsTrend)">{{ getTrendIcon(kpis.transactionsTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.transactionsTrend)">{{ formatTrend(kpis.transactionsTrend) }}</span>
+            </div>
         </div>
         <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.transactions.description' | translate }}</p>
     </div>
 
-    <!-- Total Payouts -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- 6. Average Order Value -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #ec4899;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.payouts.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.aov.title' | translate }}</h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ kpis.totalPayouts }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.averageOrderValue | currencyFormat:'VND' }}</span>
+            <div class="flex items-center gap-[4px]">
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.aovTrend)">{{ getTrendIcon(kpis.aovTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.aovTrend)">{{ formatTrend(kpis.aovTrend) }}</span>
+            </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.payouts.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.aov.description' | translate }}</p>
     </div>
 
 </div>
@@ -124,8 +148,8 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-[12px] mb-[12px]">
     <div class="lg:col-span-2">
         @if (dashboardData) {
-            <app-revenue-trend 
-                [revenueTrendData]="dashboardData.revenueTrend" 
+            <app-revenue-trend
+                [revenueTrendData]="dashboardData.revenueTrend"
                 [selectedTimeframe]="selectedTimeframe"
                 (timeframeChange)="onTimeframeChange($event)" />
         }
@@ -140,8 +164,8 @@
 
 <div class="grid grid-cols-1 gap-[12px] mb-0">
     @if (dashboardData) {
-        <app-top-instructors-chart 
-            [topInstructorsData]="dashboardData.topInstructors" 
+        <app-top-instructors-chart
+            [topInstructorsData]="dashboardData.topInstructors"
             [selectedTimeFilter]="selectedTimeFilter"
             (timeFilterChange)="onTimeFilterChange($event)" />
     }

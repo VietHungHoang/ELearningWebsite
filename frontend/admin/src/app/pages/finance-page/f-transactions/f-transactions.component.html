@@ -54,39 +54,80 @@
     </ol>
 </div>
 
-<!-- KPI Cards - Unified Modern Design -->
+<!-- KPI Cards - New Design with Trends -->
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-[12px] mb-[16px]">
-    <!-- Total Revenue -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- Total Revenue with Trend -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #10b981;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'transactions.kpi.totalRevenue' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">
+                {{ 'transactions.kpi.totalRevenue' | translate }}
+            </h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ formatCurrency(summary.totalRevenue) }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">
+                {{ summary.totalRevenue | currencyFormat }}
+            </span>
+            @if (summary.revenueTrend !== 0) {
+                <div class="flex items-center gap-[4px]" [ngClass]="getTrendColor(summary.revenueTrend)">
+                    <i class="material-symbols-outlined !text-[18px]">{{ getTrendIcon(summary.revenueTrend) }}</i>
+                    <span class="text-sm font-semibold">{{ formatTrend(summary.revenueTrend) }}</span>
+                </div>
+            }
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ summary.completedOrders }} {{ 'transactions.kpi.orders' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">
+            {{ summary.completedOrders }} {{ 'transactions.kpi.completedTransactions' | translate }}
+        </p>
     </div>
 
-    <!-- Completed -->
+    <!-- Average Order Value with Trend -->
     <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'transactions.kpi.completed' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">
+                {{ 'transactions.kpi.averageOrderValue' | translate }}
+            </h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ summary.completedOrders }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">
+                {{ summary.averageOrderValue | currencyFormat }}
+            </span>
+            @if (summary.aovTrend !== 0) {
+                <div class="flex items-center gap-[4px]" [ngClass]="getTrendColor(summary.aovTrend)">
+                    <i class="material-symbols-outlined !text-[18px]">{{ getTrendIcon(summary.aovTrend) }}</i>
+                    <span class="text-sm font-semibold">{{ formatTrend(summary.aovTrend) }}</span>
+                </div>
+            }
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'transactions.kpi.successfulTransactions' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">
+            {{ 'transactions.kpi.perTransaction' | translate }}
+        </p>
     </div>
 
-    <!-- Failed -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <!-- Success Rate with Trend -->
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" [style.border-left-color]="getSuccessRateColor(summary.successRate)">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'transactions.kpi.failed' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">
+                {{ 'transactions.kpi.successRate' | translate }}
+            </h6>
         </div>
-        <div class="mb-[8px]">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">{{ summary.failedOrders }}</span>
+        <div class="mb-[8px] flex items-end justify-between">
+            <div class="flex items-baseline gap-[8px]">
+                <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">
+                    {{ summary.successRate.toFixed(1) }}%
+                </span>
+                <i class="material-symbols-outlined !text-[20px]" [style.color]="getSuccessRateColor(summary.successRate)">
+                    {{ getSuccessRateIcon(summary.successRate) }}
+                </i>
+            </div>
+            @if (summary.successRateTrend !== 0) {
+                <div class="flex items-center gap-[4px]" [ngClass]="getTrendColor(summary.successRateTrend)">
+                    <i class="material-symbols-outlined !text-[18px]">{{ getTrendIcon(summary.successRateTrend) }}</i>
+                    <span class="text-sm font-semibold">{{ formatTrend(summary.successRateTrend) }}</span>
+                </div>
+            }
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'transactions.kpi.transactionErrors' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">
+            {{ summary.completedOrders }}/{{ summary.completedOrders + summary.failedOrders }} {{ 'transactions.kpi.transactions' | translate }}
+        </p>
     </div>
 </div>
 
@@ -214,7 +255,7 @@
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
                                 <span class="text-primary-500 font-semibold">
-                                    {{ formatCurrency(order.totalAmount) }}
+                                    {{ order.totalAmount | currencyFormat:'VND' }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">

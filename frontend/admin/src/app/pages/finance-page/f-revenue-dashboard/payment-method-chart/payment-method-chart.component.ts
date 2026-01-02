@@ -1,5 +1,6 @@
 import { Component, Inject, OnInit, PLATFORM_ID, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { TranslatePipe } from '../../../../i18n/translate.pipe';
 
 @Component({
     selector: 'app-payment-method-chart',
@@ -7,7 +8,7 @@ import { isPlatformBrowser } from '@angular/common';
         <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-md">
             <div class="trezo-card-header mb-[12px]">
                 <div class="trezo-card-title">
-                    <h5 class="!mb-0 text-base">Payment Methods</h5>
+                    <h5 class="!mb-0 text-base">{{ 'revenueDashboard.charts.paymentMethods.title' | translate }}</h5>
                 </div>
             </div>
             <div class="trezo-card-content">
@@ -17,7 +18,8 @@ import { isPlatformBrowser } from '@angular/common';
             </div>
         </div>
     `,
-    styleUrl: './payment-method-chart.component.scss'
+    styleUrl: './payment-method-chart.component.scss',
+    imports: [TranslatePipe]
 })
 export class PaymentMethodChartComponent implements OnInit, OnChanges {
     private isBrowser: boolean;

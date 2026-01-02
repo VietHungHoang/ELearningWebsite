@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 import { PayoutService } from './payout.service';
 import * as XLSX from 'xlsx';
 
@@ -56,7 +57,7 @@ export interface PayoutHistory {
 @Component({
     selector: 'app-f-payout',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, CurrencyFormatPipe],
     templateUrl: './f-payout.component.html',
     styleUrl: './f-payout.component.scss'
 })
@@ -79,6 +80,17 @@ export class FPayoutComponent implements OnInit {
     fromDate: string = '';
     toDate: string = '';
 
+    // Pending Tab Filters
+    cycleFilter: 'current' | 'next' | 'overdue' | 'all' = 'current';
+    groupByPayoutDate: boolean = false;
+    isCycleFilterOpen: boolean = false;
+
+    // Current cycle info
+    currentCycleStart: Date = new Date();
+    currentCycleEnd: Date = new Date();
+    cutoffDate: Date = new Date();
+    payoutDate: Date = new Date();
+
     // Pagination
     currentPage: number = 1;
     pageSize: number = 10;
@@ -88,18 +100,27 @@ export class FPayoutComponent implements OnInit {
 
     summary = {
         totalPending: 0,
-        totalInstructors: 0,
-        totalOrders: 0
+        pendingAmount: 0,
+        totalInstructors: 0
     };
 
-    // Summary filter for KPI cards
-    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days'
-    isSummaryFilterMenuOpen: boolean = false;
+    // KPI filter - changes based on active tab
+    // For pending tab: 'current-cycle' | 'next-cycle' | 'all-cycles'
+    // For history tab: '7days' | '30days' | 'this-month' | 'all-time'
+    kpiFilter: string = 'current-cycle';
+    isKpiFilterMenuOpen: boolean = false;
 
     isDetailModalOpen = false;
     isConfirmPaymentOpen = false;
     isQRModalOpen = false;
     isBulkConfirmModalOpen = false;  // Modal for bulk confirmation
+    isSuccessModalOpen = false;  // Success notification modal
+    successMessage = {
+        title: '',
+        instructor: '',
+        amount: '',
+        date: ''
+    };
     selectedPayout: InstructorPayout | null = null;
     paymentNotes: string = '';
     bulkPaymentNotes: string = '';  // Notes for bulk confirmation
@@ -109,20 +130,134 @@ export class FPayoutComponent implements OnInit {
     constructor(private payoutService: PayoutService) {}
 
     ngOnInit(): void {
+        this.initializeCycleDates();
         this.loadPayoutData();
+    }
+
+    initializeCycleDates(): void {
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        // Chu kỳ: 16 tháng trước - 15 tháng này
+        if (today.getDate() <= 15) {
+            // Đang trong chu kỳ tháng trước
+            this.currentCycleStart = new Date(currentYear, currentMonth - 1, 16);
+            this.currentCycleEnd = new Date(currentYear, currentMonth, 15);
+            this.cutoffDate = new Date(currentYear, currentMonth, 15);
+            this.payoutDate = new Date(currentYear, currentMonth, 20);
+        } else {
+            // Đang trong chu kỳ tháng này
+            this.currentCycleStart = new Date(currentYear, currentMonth, 16);
+            this.currentCycleEnd = new Date(currentYear, currentMonth + 1, 15);
+            this.cutoffDate = new Date(currentYear, currentMonth + 1, 15);
+            this.payoutDate = new Date(currentYear, currentMonth + 1, 20);
+        }
+    }
+
+    getDaysToCutoff(): number {
+        const today = new Date();
+        const diff = this.cutoffDate.getTime() - today.getTime();
+        return Math.ceil(diff / (1000 * 3600 * 24));
+    }
+
+    getDaysToPayout(): number {
+        const today = new Date();
+        const diff = this.payoutDate.getTime() - today.getTime();
+        return Math.ceil(diff / (1000 * 3600 * 24));
+    }
+
+    formatCycleDate(date: Date): string {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    toggleCycleFilter(): void {
+        this.isCycleFilterOpen = !this.isCycleFilterOpen;
+    }
+
+    setCycleFilter(filter: 'current' | 'next' | 'overdue' | 'all'): void {
+        this.cycleFilter = filter;
+        this.isCycleFilterOpen = false;
+    }
+
+    getCycleFilterText(): string {
+        const map: Record<string, string> = {
+            'current': 'payout.cycleFilter.current',
+            'next': 'payout.cycleFilter.next',
+            'overdue': 'payout.cycleFilter.overdue',
+            'all': 'payout.cycleFilter.all'
+        };
+        return map[this.cycleFilter] || 'payout.cycleFilter.all';
+    }
+
+    toggleGroupByPayoutDate(): void {
+        this.groupByPayoutDate = !this.groupByPayoutDate;
+    }
+
+    isOverdue(payout: InstructorPayout): boolean {
+        // Check if payout date has passed
+        const today = new Date();
+        const payoutCreatedDate = new Date(payout.createdDate);
+        return today > this.payoutDate && payoutCreatedDate < this.payoutDate;
     }
 
     switchTab(tab: 'pending' | 'history'): void {
         this.activeTab = tab;
+        
+        // Auto-switch KPI filter when changing tabs
         if (tab === 'pending') {
+            this.kpiFilter = 'current-cycle';
             this.calculatePagination();
         } else {
+            this.kpiFilter = '30days';
             this.calculatePaginationHistory();
+        }
+        
+        this.loadPayoutData();
+    }
+
+    getKpiFilterOptions(): string[] {
+        if (this.activeTab === 'pending') {
+            return ['current-cycle', 'next-cycle', 'all-cycles'];
+        } else {
+            return ['7days', '30days', 'this-month', 'all-time'];
         }
     }
 
+    getKpiFilterLabel(option: string): string {
+        const labelMap: Record<string, string> = {
+            // Cycle filters (for pending tab)
+            'current-cycle': 'payout.kpiFilter.currentCycle',
+            'next-cycle': 'payout.kpiFilter.nextCycle',
+            'all-cycles': 'payout.kpiFilter.allCycles',
+            // Time filters (for history tab)
+            '7days': 'payout.kpiFilter.last7Days',
+            '30days': 'payout.kpiFilter.last30Days',
+            'this-month': 'payout.kpiFilter.thisMonth',
+            'all-time': 'payout.kpiFilter.allTime'
+        };
+        return labelMap[option] || option;
+    }
+
+    getCurrentKpiFilterLabel(): string {
+        return this.getKpiFilterLabel(this.kpiFilter);
+    }
+
+    toggleKpiFilterMenu(): void {
+        this.isKpiFilterMenuOpen = !this.isKpiFilterMenuOpen;
+    }
+
+    setKpiFilter(filter: string): void {
+        this.kpiFilter = filter;
+        this.isKpiFilterMenuOpen = false;
+        this.loadPayoutData();
+    }
+
     loadPayoutData(): void {
-        this.payoutService.getPayoutData(this.summaryFilter).subscribe({
+        this.payoutService.getPayoutData(this.kpiFilter).subscribe({
             next: (response) => {
                 this.pendingPayouts = response.pendingPayouts;
                 this.groupedPendingPayouts = response.pendingPayouts;
@@ -138,27 +273,6 @@ export class FPayoutComponent implements OnInit {
             }
         });
     }
-
-    onSummaryFilterChange(filter: string): void {
-        this.summaryFilter = filter;
-        this.isSummaryFilterMenuOpen = false;
-        this.loadPayoutData();
-    }
-
-    toggleSummaryFilterMenu(): void {
-        this.isSummaryFilterMenuOpen = !this.isSummaryFilterMenuOpen;
-    }
-
-    getSummaryFilterText(): string {
-        const filterMap: { [key: string]: string } = {
-            'all': 'payout.summaryFilter.all',
-            'today': 'payout.summaryFilter.today',
-            '7days': 'payout.summaryFilter.last7Days',
-            '30days': 'payout.summaryFilter.last30Days'
-        };
-        return filterMap[this.summaryFilter] || 'payout.summaryFilter.all';
-    }
-
 
     openDetailModal(payout: InstructorPayout): void {
         this.selectedPayout = payout;
@@ -305,7 +419,14 @@ export class FPayoutComponent implements OnInit {
             this.loadPayoutData(); // Reload to update summary
             this.calculatePagination();
 
-            alert(`✓ Xác nhận thanh toán thành công!\n\nGiảng viên: ${this.selectedPayout!.instructorName}\nSố tiền: ${this.formatCurrency(this.selectedPayout!.totalOwed)}\nNgày: ${historyRecord.paidDate}`);
+            // Show success modal instead of alert
+            this.successMessage = {
+                title: 'Xác nhận thanh toán thành công!',
+                instructor: this.selectedPayout!.instructorName,
+                amount: this.formatCurrency(this.selectedPayout!.totalOwed),
+                date: historyRecord.paidDate
+            };
+            this.isSuccessModalOpen = true;
 
             this.isConfirmPaymentOpen = false;
             this.isDetailModalOpen = false;
@@ -355,6 +476,21 @@ export class FPayoutComponent implements OnInit {
         this.qrCodeDataUrl = '';
     }
 
+    closeSuccessModal(): void {
+        this.isSuccessModalOpen = false;
+        this.switchTab('history'); // Auto switch to history tab to see the result
+    }
+
+    confirmQRPayment(): void {
+        if (!this.selectedPayout) return;
+        
+        // Close QR modal
+        this.closeQRModal();
+        
+        // Mark as paid (same logic as confirm payment modal)
+        this.markAsPaid();
+    }
+
     downloadQRCode(): void {
         if (!this.qrCodeDataUrl || !this.selectedPayout) return;
 
@@ -370,32 +506,6 @@ export class FPayoutComponent implements OnInit {
             currency: 'VND',
             maximumFractionDigits: 0
         }).format(amount);
-    }
-
-    getPaymentMethodDisplay(method: 'vnpay' | 'momo' | 'sepay'): string {
-        switch (method) {
-            case 'vnpay':
-                return 'payout.paymentMethod.vnpay';
-            case 'momo':
-                return 'payout.paymentMethod.momo';
-            case 'sepay':
-                return 'payout.paymentMethod.sepay';
-            default:
-                return method;
-        }
-    }
-
-    getPaymentMethodColor(method: 'vnpay' | 'momo' | 'sepay'): string {
-        switch (method) {
-            case 'vnpay':
-                return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300';
-            case 'momo':
-                return 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300';
-            case 'sepay':
-                return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
-            default:
-                return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300';
-        }
     }
 
     getCurrentDate(): string {
@@ -579,7 +689,6 @@ export class FPayoutComponent implements OnInit {
                     'Bank Name': p.bankName,
                     'Account Number': p.bankAccount,
                     'Account Holder': p.accountHolderName,
-                    'Payment Method': this.getPaymentMethodDisplay(p.paymentMethod),
                     'Base Amount': p.baseAmount,
                     'Platform Fee': p.platformFee,
                     'Tax': p.tax,
@@ -606,7 +715,6 @@ export class FPayoutComponent implements OnInit {
                 const data = this.filteredPayoutHistory.map(h => ({
                     'STT': this.filteredPayoutHistory.indexOf(h) + 1,
                     'Instructor Name': h.instructorName,
-                    'Payment Method': this.getPaymentMethodDisplay(h.paymentMethod),
                     'Amount': h.paidAmount,
                     'Payment Date': h.paidDate,
                     'Approved By': h.approvedBy,
@@ -640,7 +748,7 @@ export class FPayoutComponent implements OnInit {
 
         }
         if (!target.closest('.trezo-card-dropdown')) {
-            this.isSummaryFilterMenuOpen = false;
+            this.isKpiFilterMenuOpen = false;
         }
     }
 }
