@@ -1,5 +1,7 @@
 import { Component, Inject, OnInit, PLATFORM_ID, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+import { TranslatePipe } from '../../../../i18n/translate.pipe';
 
 export interface TopInstructor {
     instructorId: string;
@@ -12,7 +14,7 @@ export interface TopInstructor {
 @Component({
     selector: 'app-top-instructors-chart',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, CurrencyFormatPipe, TranslatePipe],
     templateUrl: './top-instructors-chart.component.html',
     styleUrl: './top-instructors-chart.component.scss'
 })
@@ -75,6 +77,15 @@ export class TopInstructorsChartComponent implements OnInit, OnChanges {
         if (view === 'chart') {
             setTimeout(() => this.loadChart(), 100);
         }
+    }
+
+    getTimeFilterLabel(): string {
+        const labelMap: Record<'day' | 'week' | 'month', string> = {
+            'day': 'revenueDashboard.charts.topInstructors.timeFilter.daily',
+            'week': 'revenueDashboard.charts.topInstructors.timeFilter.weekly',
+            'month': 'revenueDashboard.charts.topInstructors.timeFilter.monthly'
+        };
+        return labelMap[this.selectedTimeFilter];
     }
 
     setTimeFilter(filter: 'day' | 'week' | 'month'): void {

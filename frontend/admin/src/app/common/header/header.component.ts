@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { ToggleService } from './toggle.service';
 import { I18nService, SupportedLanguage } from '../../i18n/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
+import { CurrencyService, SupportedCurrency } from '../../services/currency.service';
 
 @Component({
     selector: 'app-header',
@@ -15,28 +16,41 @@ export class HeaderComponent implements OnInit {
 
     isSidebarVisible = true;
     currentLanguage: SupportedLanguage = 'en';
+    currentCurrency: SupportedCurrency = 'USD';
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
         public toggleService: ToggleService,
         private renderer: Renderer2,
-        private i18nService: I18nService
+        private i18nService: I18nService,
+        private currencyService: CurrencyService
     ) {
         // Watch for language changes
         effect(() => {
             this.currentLanguage = this.i18nService.currentLanguage$();
+        });
+        // Watch for currency changes
+        effect(() => {
+            this.currentCurrency = this.currencyService.currentCurrency$();
         });
     }
 
     ngOnInit(): void {
         this.toggleService.initializeTheme();
         this.currentLanguage = this.i18nService.getCurrentLanguage();
+        this.currentCurrency = this.currencyService.getCurrentCurrency();
     }
 
     async changeLanguage(lang: SupportedLanguage): Promise<void> {
         await this.i18nService.setLanguage(lang);
         this.currentLanguage = lang;
         this.toggleClass('languageMenuButton'); // Close dropdown after selection
+    }
+
+    changeCurrency(currency: SupportedCurrency): void {
+        this.currencyService.setCurrency(currency);
+        this.currentCurrency = currency;
+        this.toggleClass('currencyMenuButton'); // Close dropdown after selection
     }
 
     toggleTheme() {

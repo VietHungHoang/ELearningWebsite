@@ -5,9 +5,11 @@ import { ClassService } from './class.service';
 import { UserService } from './user.service';
 import { ApiService } from './api.service';
 import { PaginatedResponse } from '../types/pagination';
+import { CurrencyService } from './currency.service';
 
 // Payment statuses for learner payment
-export type PaymentStatus = 'pending' | 'completed' | 'failed' | 'refunded';
+// Pending: Waiting for payment gateway callback (VNPay/Momo webhook will auto-update to completed/failed)
+export type PaymentStatus = 'pending' | 'completed' | 'failed';
 export type PaymentMethod = 'momo' | 'vnpay' | 'banking';
 export type ClassType = '1 and 1' | '1 and n';
 
@@ -169,6 +171,13 @@ export interface TransactionsSummary {
     completedPayments: number;
     failedPayments: number;
     pendingPayments: number;
+    averageOrderValue: number;
+    successRate: number;  // Percentage 0-100
+
+    // Trend indicators (compared to previous period)
+    revenueTrend: number;  // Percentage change
+    aovTrend: number;
+    successRateTrend: number;
 }
 
 @Injectable({
@@ -189,7 +198,8 @@ export class TransactionService {
     constructor(
         private classService: ClassService,
         private userService: UserService,
-        private apiService: ApiService
+        private apiService: ApiService,
+        private currencyService: CurrencyService
     ) {
         this.loadMockData();
     }
@@ -850,11 +860,96 @@ export class TransactionService {
                 paymentMethod: 'vnpay',
                 status: 'pending',
                 createdDate: '2025-10-17',
-                completedDate: undefined,
-                transactionId: 'TXN-VNPAY-12364',
-                adminHoldAmount: 600000,
-                platformFeeAmount: 120000,
-                instructorEarnings: 480000
+                notes: 'Waiting for payment gateway callback',
+                transactionId: 'TXN-VNPAY-12364'
+            },
+            // Failed transactions for realistic success rate
+            {
+                id: 'pay_021',
+                paymentNumber: 'PAY-2025-NOV-021',
+                learnerName: 'Mike Wilson',
+                learnerEmail: 'mike.wilson@example.com',
+                learnerAvatar: 'images/users/user21.jpg',
+                sessionId: 'session_2025_nov_03_002',
+                session: {
+                    id: 'session_2025_nov_03_002',
+                    classId: 'class_005',
+                    className: 'Node.js Backend - 1-1',
+                    instructorId: 'tutor_002',
+                    instructorName: 'Nguyễn Thị C',
+                    learnerIds: ['learner_033'],
+                    classType: '1 and 1',
+                    startTime: '2025-11-03T14:00:00',
+                    endTime: '2025-11-03T16:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 450000,
+                    totalAmount: 900000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 900000,
+                currency: 'VND',
+                paymentMethod: 'vnpay',
+                status: 'failed',
+                createdDate: '2025-11-03',
+                notes: 'Payment timeout - VNPay gateway error'
+            },
+            {
+                id: 'pay_022',
+                paymentNumber: 'PAY-2025-NOV-022',
+                learnerName: 'Anna Lee',
+                learnerEmail: 'anna.lee@example.com',
+                learnerAvatar: 'images/users/user22.jpg',
+                sessionId: 'session_2025_nov_02_003',
+                session: {
+                    id: 'session_2025_nov_02_003',
+                    classId: 'class_003',
+                    className: 'Python AI - Group',
+                    instructorId: 'tutor_003',
+                    instructorName: 'Trần Văn A',
+                    learnerIds: ['learner_034', 'learner_035'],
+                    classType: '1 and n',
+                    startTime: '2025-11-02T10:00:00',
+                    endTime: '2025-11-02T11:30:00',
+                    durationMinutes: 90,
+                    ratePerHour: 350000,
+                    totalAmount: 525000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 525000,
+                currency: 'VND',
+                paymentMethod: 'momo',
+                status: 'failed',
+                createdDate: '2025-11-02',
+                notes: 'Insufficient balance'
+            },
+            {
+                id: 'pay_023',
+                paymentNumber: 'PAY-2025-OCT-023',
+                learnerName: 'David Chen',
+                learnerEmail: 'david.chen@example.com',
+                learnerAvatar: 'images/users/user23.jpg',
+                sessionId: 'session_2025_oct_25_004',
+                session: {
+                    id: 'session_2025_oct_25_004',
+                    classId: 'class_007',
+                    className: 'Java Spring Boot - 1-1',
+                    instructorId: 'tutor_004',
+                    instructorName: 'Lê Thị B',
+                    learnerIds: ['learner_036'],
+                    classType: '1 and 1',
+                    startTime: '2025-10-25T13:00:00',
+                    endTime: '2025-10-25T15:00:00',
+                    durationMinutes: 120,
+                    ratePerHour: 500000,
+                    totalAmount: 1000000,
+                    platformFeePercentage: 20
+                },
+                totalAmount: 1000000,
+                currency: 'VND',
+                paymentMethod: 'banking',
+                status: 'failed',
+                createdDate: '2025-10-25',
+                notes: 'Card declined'
             }
         ];
 
@@ -864,7 +959,7 @@ export class TransactionService {
     /**
      * Get transactions from API with pagination, filters, and summary
      * API Endpoint: GET /api/v1/admin/transactions
-     * Query Params: 
+     * Query Params:
      *   - page, size, status, paymentMethod, search, startDate, endDate, sortOrder, typeFilter (for table)
      *   - summaryFilter (for KPI cards: 'all' | 'today' | '7days' | '30days' | 'thisMonth')
      * @returns Observable of TransactionsApiResponse with summary
@@ -1041,8 +1136,32 @@ export class TransactionService {
                 .reduce((sum, p) => sum + p.totalAmount, 0),
             completedPayments: summaryPayments.filter(p => p.status === 'completed').length,
             failedPayments: summaryPayments.filter(p => p.status === 'failed').length,
-            pendingPayments: summaryPayments.filter(p => p.status === 'pending').length
+            pendingPayments: summaryPayments.filter(p => p.status === 'pending').length,
+            averageOrderValue: 0,
+            successRate: 0,
+            revenueTrend: 0,
+            aovTrend: 0,
+            successRateTrend: 0
         };
+
+        // Calculate AOV
+        if (summary.completedPayments > 0) {
+            summary.averageOrderValue = summary.totalRevenue / summary.completedPayments;
+        }
+
+        // Calculate Success Rate
+        const totalTransactions = summary.completedPayments + summary.failedPayments;
+        if (totalTransactions > 0) {
+            summary.successRate = (summary.completedPayments / totalTransactions) * 100;
+        } else {
+            // No transactions yet - show neutral 100% instead of 0% to avoid red icon
+            summary.successRate = 100;
+        }
+
+        // Calculate trend (mock data - compare to previous period)
+        summary.revenueTrend = this.calculateMockTrend(params?.summaryFilter || 'all', 'revenue');
+        summary.aovTrend = this.calculateMockTrend(params?.summaryFilter || 'all', 'aov');
+        summary.successRateTrend = this.calculateMockTrend(params?.summaryFilter || 'all', 'successRate');
 
         return {
             content: paginatedContent,
@@ -1111,13 +1230,14 @@ export class TransactionService {
         return this.paymentsSubject.value.find(payment => payment.id === id);
     }
 
-    // Manually approve a failed payment
+    // Manually approve a pending payment (fallback if webhook fails)
+    // Normally payment gateway webhook auto-updates pending → completed/failed
     approvePaymentManually(paymentId: string, notes?: string): boolean {
         const payments = this.paymentsSubject.value;
         const payment = payments.find(p => p.id === paymentId);
 
-        if (!payment || payment.status !== 'failed') {
-            console.error('Cannot approve payment: Payment not found or not failed');
+        if (!payment || payment.status !== 'pending') {
+            console.error('Cannot approve: Payment not found or not in pending status');
             return false;
         }
 
@@ -1127,8 +1247,15 @@ export class TransactionService {
             payment.notes = notes;
         }
 
-        if (!payment.transactionId) {
-            payment.transactionId = `TXN-MANUAL-${paymentId}-${Date.now()}`;
+        // Calculate earnings if not set
+        if (!payment.adminHoldAmount) {
+            payment.adminHoldAmount = payment.totalAmount;
+        }
+        if (!payment.platformFeeAmount && payment.session) {
+            payment.platformFeeAmount = payment.totalAmount * (payment.session.platformFeePercentage / 100);
+        }
+        if (!payment.instructorEarnings) {
+            payment.instructorEarnings = payment.totalAmount - (payment.platformFeeAmount || 0);
         }
 
         this.paymentsSubject.next([...payments]);
@@ -1289,11 +1416,8 @@ export class TransactionService {
     }
 
     formatCurrency(amount: number): string {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND',
-            minimumFractionDigits: 0
-        }).format(amount);
+        // Assuming amounts are stored in VND by default
+        return this.currencyService.format(amount, 'VND');
     }
 
     private getCurrentDate(): string {
@@ -1332,6 +1456,21 @@ export class TransactionService {
         return Array.from(instructorMap.values())
             .sort((a, b) => b.totalEarnings - a.totalEarnings)
             .slice(0, limit);
+    }
+
+    /**
+     * Calculate mock trend for different time periods
+     */
+    private calculateMockTrend(period: string, metric: 'revenue' | 'aov' | 'successRate'): number {
+        // Mock trend data - in real app, this would compare to previous period from API
+        const trendData: { [key: string]: { revenue: number; aov: number; successRate: number } } = {
+            'all': { revenue: 0, aov: 0, successRate: 0 }, // No trend for all-time
+            'today': { revenue: 12.5, aov: 8.3, successRate: -2.1 },
+            '7days': { revenue: 18.2, aov: 5.6, successRate: 1.5 },
+            '30days': { revenue: 24.7, aov: 12.1, successRate: 3.2 }
+        };
+
+        return trendData[period]?.[metric] || 0;
     }
 
     // Get top classes by revenue

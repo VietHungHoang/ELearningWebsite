@@ -31,7 +31,7 @@
                     </span>
                     <ul>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" 
+                            <button type="button"
                                     class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
                                     [class.bg-primary-50]="currentLanguage === 'en'"
                                     (click)="changeLanguage('en')">
@@ -42,7 +42,7 @@
                             </button>
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" 
+                            <button type="button"
                                     class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
                                     [class.bg-primary-50]="currentLanguage === 'vi'"
                                     (click)="changeLanguage('vi')">
@@ -68,7 +68,10 @@
                     </span>
                     <ul>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                            <button type="button"
+                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                    [class.bg-primary-50]="currentCurrency === 'VND'"
+                                    (click)="changeCurrency('VND')">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">₫</span>
                                     {{ 'header.currency.vnd' | translate }}
@@ -76,7 +79,10 @@
                             </button>
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                            <button type="button"
+                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                    [class.bg-primary-50]="currentCurrency === 'USD'"
+                                    (click)="changeCurrency('USD')">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">$</span>
                                     {{ 'header.currency.usd' | translate }}
@@ -84,7 +90,10 @@
                             </button>
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
-                            <button type="button" class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium">
+                            <button type="button"
+                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                    [class.bg-primary-50]="currentCurrency === 'EUR'"
+                                    (click)="changeCurrency('EUR')">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">€</span>
                                     {{ 'header.currency.eur' | translate }}

@@ -14,19 +14,20 @@ import { ApiService } from '../../../services/api.service';
 export interface RevenueDashboardData {
     /** KPI data for the selected date range */
     kpis: {
-        adminAccountIncome: number;        // Tiền vào từ transaction
-        adminAccountPayout: number;          // Tiền ra cho giảng viên
-        peakTransactionAmount: number;       // Lần thanh toán cao nhất
-        payoutFixedDate: number;            // Ngày cố định hàng tháng (e.g., 1, 15, 25)
-        totalTransactions: number;          // Tổng số giao dịch
-        totalPayouts: number;                // Tổng số lần thanh toán cho giảng viên
-        // Trend data (so sánh với period trước)
-        incomeTrend: number;                 // % thay đổi income
-        payoutTrend: number;                 // % thay đổi payout
-        balanceTrend: number;               // % thay đổi balance
-        peakTrend: number;                  // % thay đổi peak
-        transactionsTrend: number;          // % thay đổi transactions
-        payoutsTrend: number;               // % thay đổi payouts
+        totalRevenue: number;              // Tổng doanh thu từ tất cả giao dịch
+        platformFeeEarned: number;         // Phí nền tảng thu được (30% của revenue)
+        instructorPayouts: number;         // Tổng tiền trả cho giảng viên
+        successRate: number;               // % tỷ lệ thành công (completed / total * 100)
+        totalTransactions: number;         // Tổng số giao dịch
+        averageOrderValue: number;         // Giá trị trung bình mỗi đơn (Revenue / Transactions)
+
+        // Trend data (% so sánh với kỳ trước)
+        revenueTrend: number;              // % thay đổi revenue
+        platformFeeTrend: number;          // % thay đổi platform fee
+        payoutTrend: number;               // % thay đổi payout
+        successRateTrend: number;          // % thay đổi success rate
+        transactionsTrend: number;         // % thay đổi transactions
+        aovTrend: number;                  // % thay đổi AOV
     };
     /** Revenue trend chart data */
     revenueTrend: {
@@ -93,7 +94,7 @@ export class RevenueDashboardService {
         timeFilter: string = 'month'
     ): Observable<RevenueDashboardData> {
         const queryParams = { dateRange, timeframe, timeFilter };
-        
+
         return this.apiService.get<RevenueDashboardData>('/revenue-dashboard', queryParams).pipe(
             map(response => {
                 if (response.success && response.data) {
@@ -117,46 +118,46 @@ export class RevenueDashboardService {
     private getMockData(dateRange: string, timeframe: string = 'Daily', timeFilter: string = 'month'): RevenueDashboardData {
         const kpisData: { [key: string]: any } = {
             today: {
-                adminAccountIncome: 15000000,
-                adminAccountPayout: 0,
-                peakTransactionAmount: 2000000,
-                payoutFixedDate: 1,
+                totalRevenue: 15000000,           // 15M VND
+                platformFeeEarned: 4500000,       // 30% of revenue
+                instructorPayouts: 10500000,      // 70% of revenue
+                successRate: 87.5,                // 7/8 = 87.5%
                 totalTransactions: 8,
-                totalPayouts: 0,
-                incomeTrend: 12.5,
-                payoutTrend: 0,
-                balanceTrend: 15.2,
-                peakTrend: 8.3,
+                averageOrderValue: 1875000,       // 15M / 8 = 1.875M
+                revenueTrend: 12.5,
+                platformFeeTrend: 12.5,
+                payoutTrend: 12.5,
+                successRateTrend: 2.8,
                 transactionsTrend: 14.3,
-                payoutsTrend: 0
+                aovTrend: -1.5
             },
             '7days': {
-                adminAccountIncome: 85000000,
-                adminAccountPayout: 0,
-                peakTransactionAmount: 3500000,
-                payoutFixedDate: 1,
+                totalRevenue: 85000000,           // 85M VND
+                platformFeeEarned: 25500000,      // 30% of revenue
+                instructorPayouts: 59500000,      // 70% of revenue
+                successRate: 85.7,                // 36/42 = 85.7%
                 totalTransactions: 42,
-                totalPayouts: 0,
-                incomeTrend: 8.7,
-                payoutTrend: 0,
-                balanceTrend: 10.5,
-                peakTrend: 5.2,
+                averageOrderValue: 2023810,       // 85M / 42
+                revenueTrend: 8.7,
+                platformFeeTrend: 8.7,
+                payoutTrend: 8.7,
+                successRateTrend: 1.5,
                 transactionsTrend: 9.1,
-                payoutsTrend: 0
+                aovTrend: -0.4
             },
             '30days': {
-                adminAccountIncome: 280000000,
-                adminAccountPayout: 224000000,
-                peakTransactionAmount: 5000000,
-                payoutFixedDate: 1,
+                totalRevenue: 280000000,          // 280M VND
+                platformFeeEarned: 84000000,      // 30% of revenue
+                instructorPayouts: 196000000,     // 70% of revenue
+                successRate: 84.5,                // 142/168 = 84.5%
                 totalTransactions: 168,
-                totalPayouts: 1,
-                incomeTrend: 15.8,
+                averageOrderValue: 1666667,       // 280M / 168
+                revenueTrend: 15.8,
+                platformFeeTrend: 15.8,
                 payoutTrend: 12.0,
-                balanceTrend: 22.5,
-                peakTrend: 4.2,
+                successRateTrend: -1.2,
                 transactionsTrend: 18.3,
-                payoutsTrend: 0
+                aovTrend: -2.1
             }
         };
 

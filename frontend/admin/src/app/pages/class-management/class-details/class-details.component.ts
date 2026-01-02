@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { ClassService, GroupClass, StudentEnrollment, ClassFinancialReport } from '../../../services/class.service';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 
 @Component({
   selector: 'app-class-details',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, RouterLink, TranslatePipe, CurrencyFormatPipe],
   templateUrl: './class-details.component.html',
   styleUrl: './class-details.component.scss'
 })
@@ -98,7 +99,7 @@ export class ClassDetailsComponent implements OnInit {
       const isSameDayOfWeek = day.getDay() === classDay;
       const isSameWeek = this.isSameWeek(day, classDate);
       const hasClass = isSameDayOfWeek && isSameWeek;
-      
+
       const time = hasClass ? new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
         minute: '2-digit',
@@ -138,18 +139,18 @@ export class ClassDetailsComponent implements OnInit {
   getCurrentWeekRange(): string {
     const weekEnd = new Date(this.currentWeekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
-    
+
     const startStr = new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric'
     }).format(this.currentWeekStart);
-    
+
     const endStr = new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     }).format(weekEnd);
-    
+
     return `${startStr} - ${endStr}`;
   }
 
