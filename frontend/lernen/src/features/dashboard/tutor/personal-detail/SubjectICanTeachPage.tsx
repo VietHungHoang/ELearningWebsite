@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ModalLayout from '../../../../components/ui/ModalLayout';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import commonUtils from '../../../../utils/commonUtils';
 import type { Category, Subject } from '../../../../types/common';
 
@@ -141,7 +141,7 @@ const SubjectICanTeachPage: React.FC = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 {t('dashboard.tutor.subjectsICanTeach.modal.category')}
                             </label>
-                            <CustomDropdown
+                            <CustomDropdownDashboard
                                 options={categories.map(c => t('locale') === 'vi' ? c.nameVi : c.nameEn)}
                                 selectedValue={selectedCategory ? (t('locale') === 'vi' ? selectedCategory.nameVi : selectedCategory.nameEn) : ''}
                                 placeholder={t('dashboard.tutor.subjectsICanTeach.modal.categoryPlaceholder')}
@@ -162,7 +162,7 @@ const SubjectICanTeachPage: React.FC = () => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 {t('dashboard.tutor.subjectsICanTeach.modal.subjects')} <span className="text-red-500">*</span>
                             </label>
-                            <CustomDropdown
+                            <CustomDropdownDashboard
                                 options={filteredSubjects
                                     .filter(subject => !selectedSubjects.some(s => s.id === subject.id))
                                     .map(subject => t('locale') === 'vi' ? subject.nameVi : subject.nameEn)}

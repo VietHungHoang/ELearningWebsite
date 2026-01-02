@@ -24,7 +24,7 @@ import type {
  * Get all quizzes created by a tutor
  */
 export const getQuizzesByCreator = async (creatorId: string): Promise<QuizSummary[]> => {
-    const response = await apiService.get<QuizSummary[]>(`/api/v1/quizzes/creator/${creatorId}`);
+    const response = await apiService.get<QuizSummary[]>(`/v1/quizzes/creator/${creatorId}`);
     return response.data;
 };
 
@@ -32,7 +32,7 @@ export const getQuizzesByCreator = async (creatorId: string): Promise<QuizSummar
  * Get all quizzes for a class
  */
 export const getQuizzesByClass = async (classId: string): Promise<QuizSummary[]> => {
-    const response = await apiService.get<QuizSummary[]>(`/api/v1/quizzes/class/${classId}`);
+    const response = await apiService.get<QuizSummary[]>(`/v1/quizzes/class/${classId}`);
     return response.data;
 };
 
@@ -40,7 +40,7 @@ export const getQuizzesByClass = async (classId: string): Promise<QuizSummary[]>
  * Search quizzes in a class
  */
 export const searchQuizzes = async (classId: string, query: string): Promise<QuizSummary[]> => {
-    const response = await apiService.get<QuizSummary[]>(`/api/v1/quizzes/class/${classId}/search`, { q: query });
+    const response = await apiService.get<QuizSummary[]>(`/v1/quizzes/class/${classId}/search`, { q: query });
     return response.data;
 };
 
@@ -48,7 +48,7 @@ export const searchQuizzes = async (classId: string, query: string): Promise<Qui
  * Get quiz details (for tutor, includes correct answers)
  */
 export const getQuizDetail = async (quizId: string, includeAnswers = true): Promise<QuizDetail> => {
-    const response = await apiService.get<QuizDetail>(`/api/v1/quizzes/${quizId}`, { includeAnswers });
+    const response = await apiService.get<QuizDetail>(`/v1/quizzes/${quizId}`, { includeAnswers });
     return response.data;
 };
 
@@ -56,7 +56,7 @@ export const getQuizDetail = async (quizId: string, includeAnswers = true): Prom
  * Create a new quiz
  */
 export const createQuiz = async (request: CreateQuizRequest): Promise<QuizDetail> => {
-    const response = await apiService.post<QuizDetail>('/api/v1/quizzes', request);
+    const response = await apiService.post<QuizDetail>('/v1/quizzes', request);
     return response.data;
 };
 
@@ -64,7 +64,7 @@ export const createQuiz = async (request: CreateQuizRequest): Promise<QuizDetail
  * Update a quiz
  */
 export const updateQuiz = async (quizId: string, request: UpdateQuizRequest): Promise<QuizDetail> => {
-    const response = await apiService.put<QuizDetail>(`/api/v1/quizzes/${quizId}`, request);
+    const response = await apiService.put<QuizDetail>(`/v1/quizzes/${quizId}`, request);
     return response.data;
 };
 
@@ -72,14 +72,14 @@ export const updateQuiz = async (quizId: string, request: UpdateQuizRequest): Pr
  * Delete a quiz (soft delete)
  */
 export const deleteQuiz = async (quizId: string): Promise<void> => {
-    await apiService.delete(`/api/v1/quizzes/${quizId}`);
+    await apiService.delete(`/v1/quizzes/${quizId}`);
 };
 
 /**
  * Publish a quiz
  */
 export const publishQuiz = async (quizId: string): Promise<QuizDetail> => {
-    const response = await apiService.post<QuizDetail>(`/api/v1/quizzes/${quizId}/publish`);
+    const response = await apiService.post<QuizDetail>(`/v1/quizzes/${quizId}/publish`);
     return response.data;
 };
 
@@ -87,14 +87,14 @@ export const publishQuiz = async (quizId: string): Promise<QuizDetail> => {
  * Archive a quiz
  */
 export const archiveQuiz = async (quizId: string): Promise<void> => {
-    await apiService.post(`/api/v1/quizzes/${quizId}/archive`);
+    await apiService.post(`/v1/quizzes/${quizId}/archive`);
 };
 
 /**
  * Get quiz statistics
  */
 export const getQuizStatistics = async (quizId: string): Promise<QuizStatistics> => {
-    const response = await apiService.get<QuizStatistics>(`/api/v1/quizzes/${quizId}/statistics`);
+    const response = await apiService.get<QuizStatistics>(`/v1/quizzes/${quizId}/statistics`);
     return response.data;
 };
 
@@ -105,7 +105,7 @@ export const getQuizStatistics = async (quizId: string): Promise<QuizStatistics>
  */
 export const getStudentQuizzes = async (status?: StudentQuizStatus): Promise<StudentQuizSummary[]> => {
     const params = status ? { status } : undefined;
-    const response = await apiService.get<StudentQuizSummary[]>('/api/student/quizzes', params);
+    const response = await apiService.get<StudentQuizSummary[]>('/v1/student/quizzes', params);
     return response.data;
 };
 

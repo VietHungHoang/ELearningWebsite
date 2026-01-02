@@ -17,7 +17,7 @@ import { useTutorProfile } from '../../../../../hooks/useTutorProfile';
 import { useAuth } from '../../../../../context/AuthContext';
 import type { Country, Language, Subject } from '../../../../../types/common';
 import type { Tutor, TutorSocial } from '../../../../../types/tutor';
-import CustomDropdown from '../../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../../components/ui/CustomDropdownDashboard';
 import ResumeHighlightsContent from './ResumeHighlightsContent';
 import AccountSettingsContent from './AccountSettingsContent';
 import IdentityVerificationContent from './IdentityVerificationContent';
@@ -420,7 +420,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                         <label className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.country')} <span className="text-red-500">*</span></label>
                     </div>
                     <div className="flex-1 pl-4">
-                        <CustomDropdown
+                        <CustomDropdownDashboard
                             options={countries.map(country => country.name)}
                             selectedValue={formData.country?.name || ""}
                             placeholder={t('dashboard.tutor.personalDetails.countryPlaceholder')}
@@ -445,7 +445,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                         <label className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.nativeLanguage')} <span className="text-red-500">*</span></label>
                     </div>
                     <div className="flex-1 pl-4">
-                        <CustomDropdown
+                        <CustomDropdownDashboard
                             options={allLanguages.map(lang => lang.name)}
                             selectedValue={formData.nativeLanguage?.name || ""}
                             placeholder={t('dashboard.tutor.personalDetails.nativeLanguagePlaceholder')}
@@ -474,7 +474,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                             <label className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.languagesKnown')} <span className="text-red-500">*</span></label>
                         </div>
                         <div className="flex-1 pl-4">
-                            <CustomDropdown
+                            <CustomDropdownDashboardDashboard
                                 options={allLanguages
                                     .filter(lang => lang.code !== formData.nativeLanguage?.code && !formData.languages.some(l => l.code === lang.code))
                                     .map(lang => lang.name)}

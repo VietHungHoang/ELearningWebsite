@@ -6,7 +6,7 @@ import BirdLoading from '../../../../components/ui/BirdLoading';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CreateClassModal, { type ClassFormData } from './components/CreateClassModal';
 import EditClassModal, { type ClassData } from './components/EditClassModal';
-import CustomDropdown from '../../../../components/ui/CustomDropdown';
+import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import Pagination from '../../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import { classService } from '../../../../services/classService';
@@ -132,7 +132,7 @@ const MyClassPage: React.FC = () => {
                 name: student.fullName,
                 avatar: student.avatarUrl || `https://picsum.photos/seed/${student.id}/48/48`
             })),
-            type: classData.type === 'ON_ONE_ONE' ? '1-on-1' : 'Group',
+            type: classData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
             status: classData.status === 'ONGOING' ? 'Ongoing' : classData.status === 'COMPLETED' ? 'Completed' : 'Opening',
             schedules: classData.schedules.map(schedule => ({
                 day: getDayName(schedule.dayOfWeek),
@@ -185,7 +185,7 @@ const MyClassPage: React.FC = () => {
     }, [classes, activeTab, searchTerm]);
 
     return (
-        <div className="p-4">
+        <div className="p-6">
             {/* Page Header */}
             <div className="mb-4">
                 <div className="flex justify-between items-center">
@@ -217,7 +217,7 @@ const MyClassPage: React.FC = () => {
                     />
                 </div>
                 <div className="w-32">
-                    <CustomDropdown
+                    <CustomDropdownDashboard
                         options={[
                             t('dashboard.tutor.myClass.filterOptions.allStatus'),
                             t('dashboard.tutor.myClass.filterOptions.ongoing'),
@@ -296,11 +296,11 @@ const MyClassPage: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${classData.type === 'ON_ONE_ONE'
+                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${classData.type === 'ONE_ON_ONE'
                                                 ? 'bg-blue-100 text-blue-800'
                                                 : 'bg-purple-100 text-purple-800'
                                                 }`}>
-                                                {classData.type === 'ON_ONE_ONE'
+                                                {classData.type === 'ONE_ON_ONE'
                                                     ? t('dashboard.tutor.myClass.classTypes.oneOnOne')
                                                     : t('dashboard.tutor.myClass.classTypes.group')
                                                 }

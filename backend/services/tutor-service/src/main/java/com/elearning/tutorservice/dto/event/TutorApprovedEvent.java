@@ -15,4 +15,5 @@ public class TutorApprovedEvent {
     private UUID tutorId;
     private String email;
     private String fullName;
+    private String avatarUrl;
 }

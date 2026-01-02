@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiSearch, HiPlus, HiPencil, HiEye, HiChartBar, HiPlay } from 'react-icons/hi';
+import { HiOutlineSearch, HiOutlinePlus, HiOutlinePencil, HiOutlineChartBar, HiOutlinePlay, HiOutlineTrash } from 'react-icons/hi';
 import { IoHelpCircleOutline, IoTimeOutline, IoPeopleOutline, IoCalendarOutline, IoEllipsisVertical, IoCheckmarkCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'react-i18next';
 import { useBreadcrumb } from '../dashboard/context/BreadcrumbContext';
 import { useAuth } from '../../context/AuthContext';
 import quizService from '../../services/quizService';
 import type { QuizSummary, StudentQuizSummary } from '../../types/quiz';
+import BirdLoading from '../../components/ui/BirdLoading';
 
 // Unified Quiz type for display (maps both tutor and student responses)
 interface Quiz {
@@ -83,6 +84,7 @@ const MyQuizzesPage: React.FC = () => {
     const { setBreadcrumb } = useBreadcrumb();
     const [searchTerm, setSearchTerm] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     // Determine role
     const isTutor = state.user?.role === 'tutor';
@@ -243,6 +245,7 @@ const MyQuizzesPage: React.FC = () => {
     // Quiz Card Component
     const QuizCard: React.FC<{ quiz: Quiz }> = ({ quiz }) => {
         const isMenuOpen = openMenuId === quiz.id;
+        const showDeleteConfirm = deleteConfirmId === quiz.id;
         const menuRef = useRef<HTMLDivElement>(null);
 
         useEffect(() => {
@@ -251,30 +254,34 @@ const MyQuizzesPage: React.FC = () => {
                     if (isMenuOpen) {
                         setOpenMenuId(null);
                     }
+                    if (showDeleteConfirm) {
+                        setDeleteConfirmId(null);
+                    }
                 }
             };
-            if (isMenuOpen) {
+            if (isMenuOpen || showDeleteConfirm) {
                 document.addEventListener('mousedown', handleClickOutside);
             }
             return () => {
                 document.removeEventListener('mousedown', handleClickOutside);
             };
-        }, [isMenuOpen]);
+        }, [isMenuOpen, showDeleteConfirm]);
 
         // Tutor menu items
+
         const renderTutorMenu = () => (
-            <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px] z-40">
+            <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[130px] z-40">
                 <button
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
-                        navigate('/quiz/take');
+                        navigate(`/dashboard/quizzes/${quiz.id}/edit`);
                         setOpenMenuId(null);
                     }}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-[#0b6459]/5 active:bg-[#0b6459]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
                 >
-                    <HiEye className="w-4 h-4 text-[#065A46] flex-shrink-0" />
-                    <span>{t('dashboard.tutor.myQuizzes.card.takeQuiz')}</span>
+                    <HiOutlinePencil className="w-4 h-4 text-[#0b6459] flex-shrink-0" />
+                    <span>{t('dashboard.tutor.myQuizzes.card.edit')}</span>
                 </button>
                 <div className="h-px bg-gray-100 my-0.5"></div>
                 <button
@@ -286,7 +293,7 @@ const MyQuizzesPage: React.FC = () => {
                     }}
                     className="w-full px-3 py-2 text-sm text-left hover:bg-[#64748b]/5 active:bg-[#64748b]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
                 >
-                    <HiChartBar className="w-4 h-4 text-[#64748b] flex-shrink-0" />
+                    <HiOutlineChartBar className="w-4 h-4 text-[#64748b] flex-shrink-0" />
                     <span>{t('dashboard.tutor.myQuizzes.card.stats')}</span>
                 </button>
                 <div className="h-px bg-gray-100 my-0.5"></div>
@@ -294,20 +301,52 @@ const MyQuizzesPage: React.FC = () => {
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
-                        navigate('/dashboard/quizzes/create');
+                        setDeleteConfirmId(quiz.id);
                         setOpenMenuId(null);
                     }}
-                    className="w-full px-3 py-2 text-sm text-left hover:bg-[#0b6459]/5 active:bg-[#0b6459]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                    className="w-full px-3 py-2 text-sm text-left hover:bg-red-50 active:bg-red-100 flex items-center gap-2 text-red-600 transition-colors duration-150"
                 >
-                    <HiPencil className="w-4 h-4 text-[#0b6459] flex-shrink-0" />
-                    <span>{t('dashboard.tutor.myQuizzes.card.edit')}</span>
+                    <HiOutlineTrash className="w-4 h-4 flex-shrink-0" />
+                    <span>{t('dashboard.tutor.myQuizzes.card.delete')}</span>
                 </button>
+            </div>
+        );
+
+        // Delete confirmation popover (small modal near the button)
+        const renderDeleteConfirm = () => (
+            <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 p-3 min-w-[180px] z-50">
+                <p className="text-sm text-gray-700 mb-3">{t('dashboard.tutor.myQuizzes.deleteConfirm.inline')}</p>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmId(null);
+                        }}
+                        className="flex-1 px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                        {t('dashboard.tutor.myQuizzes.deleteConfirm.cancel')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            quizService.deleteQuiz(quiz.id).then(() => {
+                                setQuizzes(prev => prev.filter(q => q.id !== quiz.id));
+                            });
+                            setDeleteConfirmId(null);
+                        }}
+                        className="flex-1 px-3 py-1.5 text-sm text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                        {t('dashboard.tutor.myQuizzes.deleteConfirm.confirm')}
+                    </button>
+                </div>
             </div>
         );
 
         // Student menu items
         const renderStudentMenu = () => (
-            <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px] z-40">
+            <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px] z-40">
                 {quiz.status === 'not_started' && (
                     <button
                         type="button"
@@ -318,7 +357,7 @@ const MyQuizzesPage: React.FC = () => {
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#475569]/5 active:bg-[#475569]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
                     >
-                        <HiPlay className="w-4 h-4 text-[#475569] flex-shrink-0" />
+                        <HiOutlinePlay className="w-4 h-4 text-[#475569] flex-shrink-0" />
                         <span>{t('dashboard.student.myQuizzes.actions.startQuiz')}</span>
                     </button>
                 )}
@@ -332,7 +371,7 @@ const MyQuizzesPage: React.FC = () => {
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#a16207]/5 active:bg-[#a16207]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 whitespace-nowrap"
                     >
-                        <HiPlay className="w-4 h-4 text-[#a16207] flex-shrink-0" />
+                        <HiOutlinePlay className="w-4 h-4 text-[#a16207] flex-shrink-0" />
                         <span>{t('dashboard.student.myQuizzes.actions.continueQuiz')}</span>
                     </button>
                 )}
@@ -346,7 +385,7 @@ const MyQuizzesPage: React.FC = () => {
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
                     >
-                        <HiPlay className="w-4 h-4 text-[#065A46] flex-shrink-0" />
+                        <HiOutlinePlay className="w-4 h-4 text-[#065A46] flex-shrink-0" />
                         <span>{t('dashboard.student.myQuizzes.actions.retake')}</span>
                     </button>
                 )}
@@ -354,10 +393,10 @@ const MyQuizzesPage: React.FC = () => {
         );
 
         return (
-            <div className="bg-white rounded-xl border border-[#eaeaea] px-3 pt-3 pb-2 hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] transition-shadow relative overflow-hidden flex flex-col h-full">
+            <div className="bg-white rounded-xl border border-[#eaeaea] px-3 pt-3 pb-2 hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] transition-shadow relative flex flex-col h-full">
                 {/* Status badge - Top left corner */}
                 <div className="absolute top-0 left-0 z-10">
-                    <div className={`${getStatusColor(quiz.status)} text-white text-[10px] font-semibold px-2.5 py-1 rounded-br-lg flex items-center gap-1 shadow-sm`}>
+                    <div className={`${getStatusColor(quiz.status)} text-white text-[10px] font-semibold px-2.5 py-1 rounded-tl-xl rounded-br-lg flex items-center gap-1 shadow-sm`}>
                         <div className="w-1 h-1 rounded-full bg-white/80"></div>
                         <span className="uppercase tracking-wide">{getStatusText(quiz.status)}</span>
                     </div>
@@ -373,7 +412,7 @@ const MyQuizzesPage: React.FC = () => {
                         </h3>
                         {/* Three dots menu button - only show for tutor OR student with completed quiz */}
                         {(isTutor || (isStudent && quiz.status === 'completed')) && (
-                            <div className="relative flex-shrink-0 -mr-2.5" ref={menuRef}>
+                            <div className="relative flex-shrink-0 -mr-2.5 overflow-visible" ref={menuRef}>
                                 <button
                                     type="button"
                                     onClick={(e) => {
@@ -389,6 +428,9 @@ const MyQuizzesPage: React.FC = () => {
 
                                 {/* Dropdown menu based on role */}
                                 {isMenuOpen && (isTutor ? renderTutorMenu() : renderStudentMenu())}
+
+                                {/* Delete confirmation popover */}
+                                {showDeleteConfirm && isTutor && renderDeleteConfirm()}
                             </div>
                         )}
                     </div>
@@ -491,7 +533,7 @@ const MyQuizzesPage: React.FC = () => {
     };
 
     return (
-        <div className="p-4">
+        <div className="p-6">
             {/* Page Header */}
             <div className="mb-6">
                 <div className="flex justify-between items-center">
@@ -509,7 +551,7 @@ const MyQuizzesPage: React.FC = () => {
                             onClick={() => navigate('/dashboard/quizzes/create')}
                             className="bg-[#0b6459] text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#084c43] transition-colors flex items-center gap-2"
                         >
-                            <HiPlus className="w-4 h-4" />
+                            <HiOutlinePlus className="w-4 h-4" />
                             {t('dashboard.tutor.myQuizzes.createButton')}
                         </button>
                     )}
@@ -520,7 +562,7 @@ const MyQuizzesPage: React.FC = () => {
                 <div className="flex gap-3">
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <HiSearch className="w-5 h-5 text-gray-400" />
+                            <HiOutlineSearch className="w-5 h-5 text-gray-400" />
                         </div>
                         <input
                             type="text"
@@ -554,9 +596,11 @@ const MyQuizzesPage: React.FC = () => {
 
             {/* Loading State */}
             {loading && (
-                <div className="flex justify-center items-center py-20">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459]"></div>
-                    <span className="ml-3 text-gray-500">Loading quizzes...</span>
+                <div className="py-20">
+                    <BirdLoading
+                        title="Loading quizzes..."
+                        size="md"
+                    />
                 </div>
             )}
 

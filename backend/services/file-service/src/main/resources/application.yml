@@ -38,14 +38,16 @@ server:
 
 # AWS S3 Configuration
 aws:
+  access-key-id: ${AWS_ACCESS_KEY_ID:AKIAQ3EGQSAWCIMT6NQH}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY: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}
   s3:
-    bucket-name: ${AWS_S3_BUCKET_NAME:lernen}
+    bucket-name: ${AWS_S3_BUCKET_NAME:lernen-elearning-website}
     region: ${AWS_S3_REGION:ap-southeast-2}
-    base-url: ${AWS_S3_BASE_URL:https://lernen.s3.ap-southeast-2.amazonaws.com/}
+    base-url: ${AWS_S3_BASE_URL:https://lernen-elearning-website.s3.ap-southeast-2.amazonaws.com/}
     folders:
-      images: lernen/images
-      videos: lernen/videos
-      documents: lernen/documents
+      images: images
+      videos: videos
+      documents: documents
 
 # Media Type Configurations
 media:

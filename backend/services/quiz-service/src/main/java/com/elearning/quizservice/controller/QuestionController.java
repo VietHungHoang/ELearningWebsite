@@ -14,12 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * REST controller for Question management endpoints
- */
 @Slf4j
 @RestController
-@RequestMapping("/api/quizzes/{quizId}/questions")
+@RequestMapping("/quizzes/{quizId}/questions")
 @RequiredArgsConstructor
 public class QuestionController {
     

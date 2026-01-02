@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -52,6 +53,18 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
      * Find sessions by tutor ID and start time greater than or equal
      */
     List<Session> findByTutorIdAndStartTimeGreaterThanEqual(UUID tutorId, LocalDateTime startTime);
+
+    /**
+     * Count completed sessions in date range (sessions that have ended and were booked/accepted)
+     */
+    @Query("SELECT COUNT(s) FROM Session s WHERE s.endTime < :currentTime AND s.status IN ('BOOKED', 'ACCEPTED') AND DATE(s.startTime) BETWEEN :startDate AND :endDate")
+    Long countCompletedSessionsInDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Get daily completed sessions count
+     */
+    @Query("SELECT DATE(s.startTime) as date, COUNT(s) as count FROM Session s WHERE s.endTime < :currentTime AND s.status IN ('BOOKED', 'ACCEPTED') AND DATE(s.startTime) BETWEEN :startDate AND :endDate GROUP BY DATE(s.startTime) ORDER BY DATE(s.startTime)")
+    List<Object[]> getDailyCompletedSessions(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("currentTime") LocalDateTime currentTime);
 }
 
 

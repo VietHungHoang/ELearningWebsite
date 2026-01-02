@@ -1,14 +1,15 @@
 import apiService from './apiService';
 
 export interface PreSignedUrlResponse {
-    uploadUrl: string;
-    fileUrl: string;
+    objectKey: string;
+    presignedUrl: string;
+    finalUrl: string;
+    expiresAt: string;
 }
 
 export const uploadService = {
-    getPreSignedUrl: async (fileName: string, contentType: string): Promise<PreSignedUrlResponse> => {
-        const response = await apiService.post<PreSignedUrlResponse>('/v1/common/upload/pre-signed-url', {
-            fileName,
+    getPreSignedUrl: async (contentType: string): Promise<PreSignedUrlResponse> => {
+        const response = await apiService.post<PreSignedUrlResponse>('/v1/file/documents/presigned-url', {
             contentType,
         });
         return response.data;
