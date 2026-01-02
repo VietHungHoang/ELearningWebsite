@@ -19,8 +19,7 @@ public class CategoryInfo {
     private UUID id;
     private Boolean isParent;
     
-    // Multi-language names
+    // Multi-language names (Vi, En only - matching common-service)
     private String nameVi;
     private String nameEn;
-    private String nameJa;
 }

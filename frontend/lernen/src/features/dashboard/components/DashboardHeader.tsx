@@ -69,7 +69,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
     return (
         <header className="flex-shrink-0 bg-[#f7f7f8]">
             <div className="flex items-center justify-between h-14 pr-6 pt-3">
-                {/* Left side - Logo, toggle button, and breadcrumb */}  
+                {/* Left side - Logo, toggle button, and breadcrumb */}
                 <div className="flex items-center gap-3">
                     <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
                         {isSidebarOpen && (
@@ -141,7 +141,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
                     {/* Profile Dropdown */}
                     <div ref={profileRef} className="relative">
                         <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center justify-center">
-                            <img src="https://picsum.photos/seed/avatar/32/32" alt="User Avatar" className="w-9 h-9 rounded-lg"  style={{ borderRadius: '10px' }} />
+                            <img src={userInfo.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userInfo.id || 'default'}`} alt="User Avatar" className="w-9 h-9 rounded-lg" style={{ borderRadius: '10px' }} />
                         </button>
                         {isProfileOpen && <ProfileDropdown />}
                     </div>

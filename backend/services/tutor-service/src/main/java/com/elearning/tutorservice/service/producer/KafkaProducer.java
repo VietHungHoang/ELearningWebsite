@@ -1,5 +1,6 @@
 package com.elearning.tutorservice.service.producer;
 
+import com.elearning.tutorservice.dto.event.AvatarUpdateEvent;
 import com.elearning.tutorservice.dto.event.RoleAssignRequestEvent;
 import com.elearning.tutorservice.dto.event.TutorApprovedEvent;
 import com.elearning.tutorservice.dto.event.TutorIndexEvent;
@@ -21,6 +22,7 @@ public class KafkaProducer {
     private final String tutorApprovedTopic = "tutor_approved";
     private final String tutorIndexSyncTopic = "tutor-index-sync";
     private final String roleAssignRequestTopic = "tutor_role_assign_request";
+    private final String avatarUpdateTopic = "user_avatar_update";
 
     public void sendTutorApprovedEvent(TutorApprovedEvent message) {
         try {
@@ -54,6 +56,17 @@ public class KafkaProducer {
         } catch (JsonProcessingException e) {
             log.error("Error converting RoleAssignRequestEvent to JSON: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to serialize RoleAssignRequestEvent", e);
+        }
+    }
+
+    public void sendAvatarUpdateEvent(AvatarUpdateEvent event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(avatarUpdateTopic, event.getUserId().toString(), jsonMessage);
+            log.info("Sent avatar update event to topic {}: userId={}", avatarUpdateTopic, event.getUserId());
+        } catch (JsonProcessingException e) {
+            log.error("Error converting AvatarUpdateEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize AvatarUpdateEvent", e);
         }
     }
 }

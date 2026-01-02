@@ -6,9 +6,11 @@ import com.elearning.tutorservice.dto.request.UpdateOnboardingRequest;
 import com.elearning.tutorservice.dto.response.ApiResponse;
 import com.elearning.tutorservice.dto.response.GenerateIntroductionResponse;
 import com.elearning.tutorservice.dto.response.OnboardingResponse;
+import com.elearning.tutorservice.dto.response.PendingTutorResponse;
 import com.elearning.tutorservice.service.TutorOnboardingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -66,5 +69,18 @@ public class TutorOnboardingController {
                 .build();
         
         return ResponseEntity.ok(ApiResponse.success(response, "Introduction generated successfully"));
+    }
+
+    /**
+     * GET /tutors/requests
+     * Get all pending tutor onboarding requests with pagination
+     */
+    @GetMapping("/requests")
+    public ResponseEntity<ApiResponse<Page<PendingTutorResponse>>> getPendingRequests(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        Page<PendingTutorResponse> pendingTutors = tutorOnboardingService.getPendingRequests(page, size);
+        return ResponseEntity.ok(ApiResponse.success(pendingTutors, "Pending tutor requests retrieved successfully"));
     }
 }

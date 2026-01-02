@@ -22,9 +22,6 @@ public class TutorSubject extends BaseEntity {
     @JoinColumn(name = "tutor_id", nullable = false)
     private Tutor tutor;
 
-    @Column(name = "category_id", nullable = false)
-    private UUID categoryId;
-
-    @Column(name = "subject_name", length = 200, nullable = false)
-    private String subjectName;
+    @Column(name = "subject_id", nullable = false)
+    private UUID subjectId;
 }

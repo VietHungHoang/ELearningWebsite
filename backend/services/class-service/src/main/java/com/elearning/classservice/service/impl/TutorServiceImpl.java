@@ -198,16 +198,15 @@ public class TutorServiceImpl implements TutorService {
         
         // Format schedules
         List<TutorClassResponse.ScheduleInfo> schedules = classEntity.getSchedules().stream()
-            .flatMap(schedule -> {
-                List<TutorClassResponse.ScheduleInfo> list = new ArrayList<>();
-                String[] days = schedule.getDayOfWeek().split(",");
-                for (String day : days) {
-                    list.add(TutorClassResponse.ScheduleInfo.builder()
-                        .day(capitalize(day.trim()))
-                        .time(schedule.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("h:mm a")))
-                        .build());
-                }
-                return list.stream();
+            .map(schedule -> {
+                // Convert integer (1-7) to day name
+                String dayName = java.time.DayOfWeek.of(schedule.getDayOfWeek())
+                    .getDisplayName(java.time.format.TextStyle.FULL, Locale.ENGLISH);
+                
+                return TutorClassResponse.ScheduleInfo.builder()
+                    .day(capitalize(dayName))
+                    .time(schedule.getStartTime().format(java.time.format.DateTimeFormatter.ofPattern("h:mm a")))
+                    .build();
             })
             .collect(Collectors.toList());
         

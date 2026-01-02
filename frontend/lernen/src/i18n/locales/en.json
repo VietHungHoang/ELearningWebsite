@@ -655,6 +655,7 @@
       },
       "requests": {
         "title": "My Requests",
+        "subtitle": "Track your reschedule and trial requests.",
         "filters": {
           "reschedule": "Reschedule Requests",
           "trial": "Trial Requests"
@@ -1044,7 +1045,20 @@
           "expiryDate": {
             "label": "Expiry date"
           }
-        }
+        },
+        "errors": {
+          "fetchFailed": "Failed to load discounts",
+          "saveFailed": "Failed to save discount",
+          "deleteFailed": "Failed to delete discount",
+          "toggleFailed": "Failed to toggle discount status"
+        },
+        "success": {
+          "created": "Discount created successfully",
+          "updated": "Discount updated successfully",
+          "deleted": "Discount deleted successfully"
+        },
+        "noCoupons": "No discounts yet",
+        "noCouponsHint": "Create your first discount code to attract more students!"
       },
       "myQuizzes": {
         "title": "My quizzes",
@@ -1087,6 +1101,7 @@
       },
       "requests": {
         "title": "Requests",
+        "subtitle": "Manage reschedule and trial requests from your students.",
         "filters": {
           "reschedule": "Reschedule requests",
           "trial": "Trial requests"

@@ -76,22 +76,6 @@ public class TutorController {
         return ResponseEntity.ok(ApiResponse.success(response, "Classes retrieved successfully"));
     }
     
-    /**
-     * GET /api/v1/tutors/{tutorId}/classes/{classId}
-     * <p>
-     * Get detailed information about a specific class
-     * @param tutorId ID of the tutor
-     * @param classId ID of the class
-     * @return Detailed class information
-     */
-    @GetMapping("/{tutorId}/classes/{classId}")
-    public ResponseEntity<ApiResponse<ClassDetailResponse>> getClassDetail(
-            @PathVariable UUID tutorId,
-            @PathVariable UUID classId) {
-        ClassDetailResponse response = tutorService.getClassDetail(tutorId, classId);
-        return ResponseEntity.ok(ApiResponse.success(response, "Class detail retrieved successfully"));
-    }
-    
     @GetMapping("/stats")
     public ResponseEntity<ApiResponse<List<TutorStatsResponse>>> getTutorStats(@ModelAttribute TutorStatsRequest request) {
         List<TutorStatsResponse> response = tutorService.getTutorStats(request.getTutorIds(), request.getStudentId());

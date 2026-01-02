@@ -34,7 +34,14 @@ public class LoggingAspect {
 
         logger.info("[REQUEST]: username: {}, api: {}, request: {}", username, api, requestBody);
 
-        return joinPoint.proceed();
+        try {
+            Object result = joinPoint.proceed();
+            logger.info("[RESPONSE]: api: {}, response: {}", api, objectMapper.writeValueAsString(result));
+            return result;
+        } catch (Exception e) {
+            logger.error("[ERROR]: api: {}, error: {}", api, e.getMessage(), e);
+            throw e;
+        }
     }
 
     private String getUsername(Object[] args) {

@@ -25,9 +25,9 @@ public class TrialSessionController {
         return ResponseEntity.ok(ApiResponse.success(null, "Trial session booked successfully"));
     }
 
-    @PostMapping("/accept")
-    public ResponseEntity<ApiResponse<Void>> acceptTrialSession(@RequestBody AcceptTrialSessionRequest request) {
-        trialSessionRequestService.acceptTrialSessionRequest(request.getRequestId());
+    @PostMapping("/{requestId}/accept")
+    public ResponseEntity<ApiResponse<Void>> acceptTrialSession(@PathVariable UUID requestId) {
+        trialSessionRequestService.acceptTrialSessionRequest(requestId);
         return ResponseEntity.ok(ApiResponse.success(null, "Trial session accepted successfully"));
     }
 

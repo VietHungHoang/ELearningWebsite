@@ -67,12 +67,12 @@ public class TutorIndexEventMapper {
                     tutor.getLanguages().stream()
                         .map(TutorLanguage::getCode)
                         .collect(Collectors.toList()) : List.of())
-                .categoryIds(tutor.getSubjects() != null ?
+                .categoryIds(List.of()) // Not used anymore
+                .subjectIds(tutor.getSubjects() != null ?
                     tutor.getSubjects().stream()
-                        .map(TutorSubject::getCategoryId)
+                        .map(TutorSubject::getSubjectId)
                         .distinct()
                         .collect(Collectors.toList()) : List.of())
-                .subjectIds(List.of()) // TODO: implement when subject entity available
                 .nationalityCode(tutor.getCountryCode())
 
                 // Numeric fields
@@ -113,11 +113,11 @@ public class TutorIndexEventMapper {
 
         return tutorSubjects.stream()
                 .map(ts -> SubjectInfo.builder()
-                        .id(null) // No subject entity, use categoryId as placeholder
-                        .nameVi(ts.getSubjectName())
-                        .nameEn(ts.getSubjectName())
-                        .nameJa(ts.getSubjectName())
-                        .categoryId(ts.getCategoryId())
+                        .id(ts.getSubjectId())
+                        .nameVi(null) // Will be fetched from common-service
+                        .nameEn(null)
+                        .nameJa(null)
+                        .categoryId(null) // Not used anymore
                         .build())
                 .collect(Collectors.toList());
     }

@@ -26,9 +26,11 @@ export interface SidebarOption {
 }
 
 export interface UserInfo {
+    id?: string;
     name: string;
     email: string;
     avatar?: string;
+    avatarUrl?: string;
     role: "tutor" | "student" | "admin";
     balance?: number;
 }

@@ -33,7 +33,7 @@ app:
 
 services:
   common-service:
-    url: ${COMMON_SERVICE_URL}
+    url: ${COMMON_SERVICE_URL:http://common-service:8080}
   tutor-service:
     url: ${TUTOR_SERVICE_URL:http://tutor-service:8080}
 

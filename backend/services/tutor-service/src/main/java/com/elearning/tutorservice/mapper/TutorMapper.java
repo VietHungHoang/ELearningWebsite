@@ -67,7 +67,7 @@ public class TutorMapper {
                 .originalSessionFee(tutor.getOriginalSessionFee())
                 .averageRating(calculateAverageRating(tutor))
                 .reviewCount(calculateReviewCount(tutor))
-                .bookedSessionCount(tutor.getTotalStudents()) // Assuming totalStudents represents booked sessions
+                .bookedSessionsCount(tutor.getBookedSessionCount())
                 .studentCount(tutor.getTotalStudents())
                 .languageCodes(mapLanguages(tutor))
                 .subjectIds(mapSubjectIds(tutor))
@@ -249,10 +249,10 @@ public class TutorMapper {
         return tutor.getSubjects().stream()
                 .map(subject -> TutorSubjectResponse.builder()
                         .id(subject.getId())
-                        .subjectId(subject.getId())
-                        .subjectName(subject.getSubjectName())
-                        .categoryId(subject.getCategoryId())
-                        .categoryName(null) // Not available in entity
+                        .subjectId(subject.getSubjectId())
+                        .subjectName(null) // Will be fetched from common-service if needed
+                        .categoryId(null) // Not used anymore
+                        .categoryName(null)
                         .build())
                 .collect(Collectors.toList());
     }

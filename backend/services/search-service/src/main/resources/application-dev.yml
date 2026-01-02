@@ -9,6 +9,10 @@ app:
     index:
       tutors: tutors_v1
 
+services:
+  common-service:
+    url: http://localhost:8084
+
 logging:
   level:
     org.springframework.data.elasticsearch: DEBUG

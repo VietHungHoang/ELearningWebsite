@@ -60,10 +60,10 @@ const ProfileDropdown: React.FC = () => {
         <div className="absolute top-full right-0 mt-3 w-72 bg-white rounded-xl shadow-lg z-50 border border-gray-100 p-4 animate-dropdown-in">
             {/* User Info */}
             <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                <img 
-                    src={user?.avatarUrl || "https://picsum.photos/seed/avatar/40/40"} 
-                    alt="User Avatar" 
-                    className="w-10 h-10 rounded-full" 
+                <img
+                    src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.id || 'default'}`}
+                    alt="User Avatar"
+                    className="w-10 h-10 rounded-full"
                 />
                 <div>
                     <p className="font-bold text-gray-800">{user?.name || 'User'}</p>

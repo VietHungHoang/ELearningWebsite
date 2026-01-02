@@ -22,12 +22,12 @@ const base64UrlEncode = (str: string): string => {
 const generateFakeJWT = (userId: string, email: string, name: string, role: UserRole): string => {
     const now = Math.floor(Date.now() / 1000);
     const exp = now + (24 * 60 * 60); // 24 hours from now
-    
+
     const header = {
         alg: "HS256",
         typ: "JWT"
     };
-    
+
     const payload = {
         sub: userId,
         email: email,
@@ -45,14 +45,14 @@ const generateFakeJWT = (userId: string, email: string, name: string, role: User
         resource_access: {},
         scope: "openid profile email"
     };
-    
+
     // Base64 URL encode header and payload
     const encodedHeader = base64UrlEncode(JSON.stringify(header));
     const encodedPayload = base64UrlEncode(JSON.stringify(payload));
-    
+
     // Fake signature (just for frontend bypass) - base64 encoded
     const fakeSignature = base64UrlEncode("fake_signature_for_bypass");
-    
+
     return `${encodedHeader}.${encodedPayload}.${fakeSignature}`;
 };
 
@@ -107,11 +107,12 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
             const decodedUser = decodeJwt(action.payload.accessToken);
             const user = decodedUser
                 ? {
-                      id: decodedUser.sub,
-                      name: decodedUser.name,
-                      email: decodedUser.email,
-                      role: extractUserRole(decodedUser),
-                  }
+                    id: decodedUser.sub,
+                    name: decodedUser.name,
+                    email: decodedUser.email,
+                    role: extractUserRole(decodedUser),
+                    avatarUrl: decodedUser.picture,
+                }
                 : null;
             localStorage.setItem("accessToken", action.payload.accessToken);
             localStorage.setItem("refreshToken", action.payload.refreshToken);
@@ -170,16 +171,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     bypassCheck.role === "tutor" ? "Fake Tutor User" : "Fake Student User",
                     bypassCheck.role
                 );
-                
+
                 const fakeResponse: LoginResponse = {
                     accessToken: fakeToken,
                     refreshToken: `fake-refresh-token-${Date.now()}`,
                     expiresIn: 86400, // 24 hours
                     refreshExpiresIn: 604800, // 7 days
                 };
-                
+
                 dispatch({ type: "LOGIN_SUCCESS", payload: fakeResponse });
-                
+
                 return {
                     id: `fake-user-${bypassCheck.role}-${Date.now()}`,
                     name: bypassCheck.role === "tutor" ? "Fake Tutor User" : "Fake Student User",
@@ -187,11 +188,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     role: bypassCheck.role,
                 };
             }
-            
+
             // Normal login flow
             const response = await authService.login(request);
             dispatch({ type: "LOGIN_SUCCESS", payload: response });
-            
+
             // Decode and return user info immediately
             const decodedUser = decodeJwt(response.accessToken);
             if (decodedUser) {
@@ -200,6 +201,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     name: decodedUser.name,
                     email: decodedUser.email,
                     role: extractUserRole(decodedUser),
+                    avatarUrl: decodedUser.picture,
                 };
             }
             return null;

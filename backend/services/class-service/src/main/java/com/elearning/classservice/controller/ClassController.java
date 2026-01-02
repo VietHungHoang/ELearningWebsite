@@ -2,7 +2,9 @@ package com.elearning.classservice.controller;
 
 import com.elearning.classservice.dto.request.CreateClassRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
+import com.elearning.classservice.dto.request.UpdateClassRequest;
 import com.elearning.classservice.dto.response.ApiResponse;
+import com.elearning.classservice.dto.response.ClassDetailResponse;
 import com.elearning.classservice.dto.response.ClassTableItem;
 import com.elearning.classservice.dto.response.CreateClassBookingResponse;
 import com.elearning.classservice.service.ClassService;
@@ -87,5 +89,53 @@ public class ClassController {
             @RequestBody CreateClassBookingRequest request) {
         CreateClassBookingResponse response = classService.createClassBooking(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Class booking created successfully"));
+    }
+
+    /**
+     * GET /api/v1/classes/{classId}
+     * <p>
+     * Get class detail by classId for current tutor
+     * @param tutorId Tutor ID from header
+     * @param classId Class ID from path
+     * @return ClassDetailResponse with full class information
+     */
+    @GetMapping("/{classId}")
+    public ResponseEntity<ApiResponse<ClassDetailResponse>> getClassDetail(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @PathVariable UUID classId) {
+        ClassDetailResponse classDetail = classService.getClassDetail(classId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(classDetail, "Class detail retrieved successfully"));
+    }
+
+    /**
+     * PUT /api/v1/classes/{classId}
+     * <p>
+     * Update class information
+     * @param tutorId Tutor ID from header
+     * @param classId Class ID from path
+     * @param request Update class request
+     */
+    @PutMapping("/{classId}")
+    public ResponseEntity<ApiResponse<Void>> updateClass(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @PathVariable UUID classId,
+            @RequestBody UpdateClassRequest request) {
+        classService.updateClass(classId, tutorId, request);
+        return ResponseEntity.ok(ApiResponse.success(null, "Class updated successfully"));
+    }
+
+    /**
+     * DELETE /api/v1/classes/{classId}
+     * <p>
+     * Delete class
+     * @param tutorId Tutor ID from header
+     * @param classId Class ID from path
+     */
+    @DeleteMapping("/{classId}")
+    public ResponseEntity<ApiResponse<Void>> deleteClass(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @PathVariable UUID classId) {
+        classService.deleteClass(classId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Class deleted successfully"));
     }
 }

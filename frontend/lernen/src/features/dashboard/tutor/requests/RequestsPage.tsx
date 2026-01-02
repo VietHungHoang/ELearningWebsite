@@ -18,11 +18,11 @@ const RequestsPage: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const { setBreadcrumb } = useBreadcrumb();
     const { setTotalRequestsCount } = useRequests();
-    
+
     const isTutor = state.user?.role === 'tutor';
     const isStudent = state.user?.role === 'student';
     const viewMode = isTutor ? 'tutor' : 'student';
-    
+
     // Mock data for tutor - matching the image
     const mockTutorRescheduleRequests = [
         {
@@ -358,13 +358,13 @@ const RequestsPage: React.FC = () => {
     // Initialize with appropriate mock data based on role
     const initialRescheduleRequests = isTutor ? mockTutorRescheduleRequests : mockStudentRescheduleRequests;
     const initialTrialRequests = isTutor ? mockTutorTrialRequests : mockStudentTrialRequests;
-    
+
     const [rescheduleRequests, setRescheduleRequests] = useState<any[]>(initialRescheduleRequests);
     const [trialRequests, setTrialRequests] = useState<any[]>(initialTrialRequests);
 
     useEffect(() => {
-        const titleKey = isTutor 
-            ? 'dashboard.tutor.requests.title' 
+        const titleKey = isTutor
+            ? 'dashboard.tutor.requests.title'
             : 'dashboard.student.requests.title';
         setBreadcrumb([
             { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
@@ -445,25 +445,35 @@ const RequestsPage: React.FC = () => {
 
     const FilterButton: React.FC<{ label: Filter; count: number; }> = ({ label, count }) => {
         const baseKey = isTutor ? 'dashboard.tutor.requests' : 'dashboard.student.requests';
-        const labelKey = label === 'Reschedule Requests' 
-            ? `${baseKey}.filters.reschedule` 
+        const labelKey = label === 'Reschedule Requests'
+            ? `${baseKey}.filters.reschedule`
             : `${baseKey}.filters.trial`;
         return (
             <button
                 onClick={() => setActiveFilter(label)}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                    activeFilter === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${activeFilter === label ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:bg-white/50'
+                    }`}
             >
                 {t(labelKey)}
                 {count > 0 && <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{count}</span>}
             </button>
         );
     };
-    
+
     return (
-        <div className="mx-auto">
+        <div className="p-6">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+                <div>
+                    <h1 className="text-xl font-bold text-gray-800">
+                        {t(isTutor ? 'dashboard.tutor.requests.title' : 'dashboard.student.requests.title')}
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                        {t(isTutor ? 'dashboard.tutor.requests.subtitle' : 'dashboard.student.requests.subtitle')}
+                    </p>
+                </div>
+            </div>
 
             <div className="mt-6">
                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center flex-wrap">

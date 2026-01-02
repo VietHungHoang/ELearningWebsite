@@ -71,7 +71,12 @@ public class Tutor {
     private LocalDateTime updatedAt;
     
     @Column(name = "total_students")
-    private Integer totalStudents;
+    @Builder.Default
+    private Integer totalStudents = 0;
+
+    @Column(name = "booked_session_count")
+    @Builder.Default
+    private Integer bookedSessionCount = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
@@ -111,6 +116,4 @@ public class Tutor {
 
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Certification> certifications;
-
-
 }

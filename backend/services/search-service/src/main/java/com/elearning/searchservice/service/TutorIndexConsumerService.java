@@ -1,5 +1,6 @@
 package com.elearning.searchservice.service;
 
+import com.elearning.searchservice.dto.event.TutorApprovedEvent;
 import com.elearning.searchservice.dto.event.TutorIndexEvent;
 import com.elearning.searchservice.entity.TutorDocument;
 import com.elearning.searchservice.mapper.TutorIndexMapper;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Kafka consumer service for syncing tutor data to Elasticsearch
@@ -22,8 +24,11 @@ public class TutorIndexConsumerService {
     private final ObjectMapper objectMapper;
     private final TutorIndexMapper tutorIndexMapper;
     private final TutorSearchRepository tutorSearchRepository;
+    private final RestTemplate restTemplate;
 
     private static final String TUTOR_INDEX_SYNC_TOPIC = "tutor-index-sync";
+    private static final String TUTOR_APPROVED_TOPIC = "tutor_approved";
+    private static final String TUTOR_SERVICE_URL = "http://tutor-service:8080";
 
     /**
      * Listen to tutor-index-sync topic and index/update/delete tutor documents
@@ -86,6 +91,35 @@ public class TutorIndexConsumerService {
         } catch (Exception e) {
             log.error("Failed to delete tutor: tutorId={}", event.getTutorId(), e);
             throw e;
+        }
+    }
+
+    /**
+     * Listen to tutor_approved topic and fetch full tutor data to index
+     */
+    @KafkaListener(topics = TUTOR_APPROVED_TOPIC, groupId = "search-service-group")
+    public void handleTutorApprovedEvent(String message) {
+        try {
+            log.debug("Received tutor approved event: {}", message);
+            
+            // Deserialize event
+            TutorApprovedEvent event = objectMapper.readValue(message, TutorApprovedEvent.class);
+            
+            log.info("Processing tutor approved event: tutorId={}, fullName={}", 
+                    event.getTutorId(), event.getFullName());
+            
+            // Fetch full tutor data from tutor-service
+            String url = TUTOR_SERVICE_URL + "/api/v1/tutors/" + event.getTutorId();
+            
+            // TODO: Call tutor-service API to get full tutor profile and index to Elasticsearch
+            // For now, just log the event
+            log.info("Tutor approved and ready to be indexed: tutorId={}, email={}", 
+                    event.getTutorId(), event.getEmail());
+            
+        } catch (JsonProcessingException e) {
+            log.error("Failed to deserialize tutor approved event: {}", message, e);
+        } catch (Exception e) {
+            log.error("Failed to process tutor approved event", e);
         }
     }
 }

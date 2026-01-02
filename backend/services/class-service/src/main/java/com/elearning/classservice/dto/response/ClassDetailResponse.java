@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,20 +20,50 @@ import java.util.UUID;
 public class ClassDetailResponse {
     
     private UUID id;
-    private String courseTitle;
+    private String title;
+    private String description;
+    private UUID subjectId;
+    private String type; // ONE_ON_ONE, GROUP
+    private String status; // CREATED, DRAFT, OPENING, PUBLISHED, IN_PROGRESS, COMPLETED, CANCELLED
+    private Integer maxStudents;
+    private Double pricePerHour;
+    private LocalDateTime createdAt;
+    
+    // Tutor info
+    private TutorInfo tutor;
+    
+    // Students
     private List<StudentInfo> students;
-    private String type;
-    private String status;
+    
+    // Schedules
     private List<ScheduleInfo> schedules;
-    private String startDate;
+    
+    // Sessions
+    private List<SessionInfo> sessions;
     private Integer completedSessions;
     private Integer totalSessions;
-    private List<QuizInfo> quizzes;
+    
+    // Materials
     private List<MaterialInfo> materials;
-    private StatsInfo stats;
-    private List<SessionDetailInfo> sessions;
+    
+    // Announcements
     private List<AnnouncementInfo> announcements;
+    
+    // Assignments
     private List<AssignmentInfo> assignments;
+    
+    // Stats
+    private StatsInfo stats;
+    
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TutorInfo {
+        private UUID id;
+        private String fullName;
+        private String avatarUrl;
+    }
     
     @Data
     @Builder
@@ -40,8 +71,9 @@ public class ClassDetailResponse {
     @AllArgsConstructor
     public static class StudentInfo {
         private UUID id;
-        private String name;
-        private String avatar;
+        private String fullName;
+        private String avatarUrl;
+        private String enrollmentStatus;
     }
     
     @Data
@@ -49,18 +81,24 @@ public class ClassDetailResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ScheduleInfo {
-        private String day;
-        private String time;
+        private Integer dayOfWeek; // 1=Monday, 7=Sunday
+        private String time; // HH:mm
+        private Integer durationMinutes;
     }
     
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class QuizInfo {
+    public static class SessionInfo {
         private UUID id;
+        private Integer sessionNumber;
         private String title;
+        private LocalDateTime startTime;
+        private LocalDateTime endTime;
+        private String meetingLink;
         private String status;
+        private Integer participantsCount;
     }
     
     @Data
@@ -71,7 +109,10 @@ public class ClassDetailResponse {
         private UUID id;
         private String name;
         private String type;
-        private LocalDate date;
+        private String s3Url;
+        private LocalDate uploadDate;
+        private Long fileSize;
+        private String description;
     }
     
     @Data
@@ -83,31 +124,7 @@ public class ClassDetailResponse {
         private Integer activeStudents;
         private Integer completedSessions;
         private Integer totalSessions;
-        private Double averageAttendance;
-        private Double averageProgress;
-    }
-    
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class SessionDetailInfo {
-        private UUID id;
-        private LocalDate date;
-        private String time;
-        private String duration;
-        private String topic;
-        private List<AttendanceInfo> attendance;
-        private List<MaterialInfo> materials;
-    }
-    
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class AttendanceInfo {
-        private UUID studentId;
-        private String status;
+        private Double completionRate;
     }
     
     @Data
@@ -131,6 +148,6 @@ public class ClassDetailResponse {
         private String title;
         private String description;
         private LocalDate dueDate;
-        private Integer submissions;
+        private Integer submissionsCount;
     }
 }

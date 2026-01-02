@@ -1,238 +1,56 @@
-import React, { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HiSearch, HiCog, HiPaperAirplane, HiUser, HiUsers, HiPlus, HiPhotograph, HiDocument, HiVideoCamera } from 'react-icons/hi';
 import { useBreadcrumb } from '../context/BreadcrumbContext';
 import { type BreadcrumbItem } from '../components/Breadcrumb';
 import { useAuth } from '../../../context/AuthContext';
+import chatService, { type MessageResponse } from '../../../services/chatService';
+import chatWebSocketService from '../../../services/chatWebSocketService';
+import userCacheService, { type UserInfo } from '../../../services/userCacheService';
+import BirdLoading from '../../../components/ui/BirdLoading';
+
+// ==================== INTERFACES ====================
 
 interface Message {
-    id: number;
+    id: string;
     text: string;
     timestamp: string;
     sender: 'me' | 'them';
-    senderName?: string; // For group chats
+    senderName?: string;
+    senderId: string;
 }
 
 interface Conversation {
-    id: number;
+    id: string;
     contactName: string;
     contactAvatar: string;
     onlineStatus: 'Online' | 'Offline';
     lastMessage: string;
     lastMessageTime: string;
     unreadCount: number;
-    messages: Message[];
     type: 'private' | 'group';
+    participantIds: string[];
 }
 
-// Mock conversations for tutor
-const mockTutorConversations: Conversation[] = [
-    {
-        id: 1,
-        contactName: 'Nguyễn Thị Lan',
-        contactAvatar: 'https://picsum.photos/seed/cynthia/48/48',
-        onlineStatus: 'Online',
-        lastMessage: "Tất nhiên! Tôi sẽ chuẩn bị cho bạn ngay.",
-        lastMessageTime: '10:30',
-        unreadCount: 2,
-        type: 'private',
-        messages: [
-            { id: 1, text: "Chào Lan, bạn khỏe không?", timestamp: '10:25', sender: 'me' },
-            { id: 2, text: "Chào bạn! Tôi khỏe, cảm ơn. Còn bạn thì sao?", timestamp: '10:26', sender: 'them' },
-            { id: 3, text: "Tôi ổn! Chỉ muốn kiểm tra xem bạn đã có cơ hội xem qua bản nháp bài luận của tôi chưa.", timestamp: '10:28', sender: 'me' },
-            { id: 4, text: "Tôi đã xem rồi! Tôi đã thêm một số nhận xét. Bạn có muốn tôi gửi lại không?", timestamp: '10:29', sender: 'them' },
-            { id: 5, text: "Có, làm ơn! Điều đó sẽ rất tuyệt.", timestamp: '10:29', sender: 'me' },
-            { id: 6, text: "Tất nhiên! Tôi sẽ chuẩn bị cho bạn ngay.", timestamp: '10:30', sender: 'them' },
-        ]
-    },
-    {
-        id: 2,
-        contactName: 'Trần Văn Minh',
-        contactAvatar: 'https://picsum.photos/seed/steven/48/48',
-        onlineStatus: 'Offline',
-        lastMessage: "Chúng ta sẽ thảo luận trong buổi học tiếp theo.",
-        lastMessageTime: 'Hôm qua',
-        unreadCount: 0,
-        type: 'private',
-        messages: [
-            { id: 1, text: "Chào Minh, tôi có câu hỏi về bài toán vật lý hôm qua.", timestamp: 'Hôm qua 15:15', sender: 'me' },
-            { id: 2, text: "Chắc chắn rồi, bạn muốn hỏi gì?", timestamp: 'Hôm qua 15:20', sender: 'them' },
-            { id: 3, text: "Tôi đang bị kẹt ở phần thứ hai. Chúng ta có thể xem lại được không?", timestamp: 'Hôm qua 15:21', sender: 'me' },
-            { id: 4, text: "Chúng ta sẽ thảo luận trong buổi học tiếp theo.", timestamp: 'Hôm qua 15:25', sender: 'them' },
-        ]
-    },
-    {
-        id: 3,
-        contactName: 'Lê Thị Hương',
-        contactAvatar: 'https://picsum.photos/seed/antonyC/48/48',
-        onlineStatus: 'Online',
-        lastMessage: "Không có gì!",
-        lastMessageTime: 'Hôm qua',
-        unreadCount: 0,
-        type: 'private',
-        messages: [
-            { id: 1, text: 'Cảm ơn bạn đã giúp đỡ với dự án!', timestamp: 'Hôm qua 13:00', sender: 'me' },
-            { id: 2, text: "Không có gì!", timestamp: 'Hôm qua 13:02', sender: 'them' },
-        ]
-    },
-    {
-        id: 4,
-        contactName: 'Nhóm Học Toán',
-        contactAvatar: 'https://picsum.photos/seed/mathgroup/48/48',
-        onlineStatus: 'Online',
-        lastMessage: "Đừng quên bài kiểm tra ngày mai!",
-        lastMessageTime: '2 giờ trước',
-        unreadCount: 1,
-        type: 'group',
-        messages: [
-            { id: 1, text: "Chào mọi người! Mọi người đang chuẩn bị cho kỳ thi giải tích như thế nào?", timestamp: 'Hôm qua 16:00', sender: 'them', senderName: 'Mai' },
-            { id: 2, text: "Tôi vẫn đang gặp khó khăn với tích phân từng phần. Có ai có mẹo không?", timestamp: 'Hôm qua 16:15', sender: 'me' },
-            { id: 3, text: "Hãy thử nhớ quy tắc ILATE cho tích phân từng phần!", timestamp: 'Hôm qua 16:20', sender: 'them', senderName: 'Nam' },
-            { id: 4, text: "ILATE có nghĩa là:", timestamp: 'Hôm qua 16:21', sender: 'them', senderName: 'Nam' },
-            { id: 5, text: "Inverse (Hàm ngược), Logarithmic (Logarit), Algebraic (Đại số), Trigonometric (Lượng giác), Exponential (Mũ)", timestamp: 'Hôm qua 16:22', sender: 'them', senderName: 'Nam' },
-            { id: 6, text: "Nó giúp bạn chọn hàm nào để đạo hàm trước", timestamp: 'Hôm qua 16:23', sender: 'them', senderName: 'Nam' },
-            { id: 7, text: "ILATE? Đó là gì vậy?", timestamp: 'Hôm qua 16:25', sender: 'them', senderName: 'Linh' },
-            { id: 8, text: "Ồ điều đó có lý! Cảm ơn Nam!", timestamp: 'Hôm qua 16:35', sender: 'them', senderName: 'Linh' },
-            { id: 9, text: "Không có gì! Có ai muốn làm một buổi ôn tập nhanh tối nay không?", timestamp: 'Hôm qua 16:40', sender: 'them', senderName: 'Mai' },
-            { id: 10, text: "Tôi tham gia! Mấy giờ thì phù hợp với mọi người?", timestamp: 'Hôm qua 16:45', sender: 'me' },
-            { id: 11, text: "Khoảng 8 giờ tối thì sao? Tôi có thể chia sẻ màn hình với các bài tập", timestamp: 'Hôm qua 16:50', sender: 'them', senderName: 'Nam' },
-            { id: 12, text: "Hoàn hảo! Hẹn gặp mọi người lúc đó 🎯", timestamp: 'Hôm qua 16:55', sender: 'them', senderName: 'Mai' },
-            { id: 13, text: "Này các bạn, tôi tìm thấy video hay giải thích về đạo hàm. Xem thử nhé: https://youtube.com/watch?v=...", timestamp: 'Hôm nay 10:00', sender: 'them', senderName: 'Nam' },
-            { id: 14, text: "Cảm ơn Nam! Điều đó thực sự giúp làm rõ một số khái niệm", timestamp: 'Hôm nay 10:15', sender: 'me' },
-            { id: 15, text: "Có ai có đáp án bài thi thử không? Tôi muốn kiểm tra bài làm của mình", timestamp: 'Hôm nay 11:30', sender: 'them', senderName: 'Linh' },
-            { id: 16, text: "Tôi nghĩ GS. Hùng đã đăng chúng lên cổng lớp học", timestamp: 'Hôm nay 11:35', sender: 'them', senderName: 'Mai' },
-            { id: 17, text: "Tìm thấy rồi! Với bài 3, tôi có 2x + C nhưng đáp án hiển thị x² + C", timestamp: 'Hôm nay 12:00', sender: 'them', senderName: 'Linh' },
-            { id: 18, text: "Đợi đã, điều đó có vẻ không đúng. Để tôi kiểm tra lại...", timestamp: 'Hôm nay 12:05', sender: 'me' },
-            { id: 19, text: "Ồ tôi hiểu rồi! Đó là tích phân của 2x dx, không phải x². Lỗi của tôi!", timestamp: 'Hôm nay 12:10', sender: 'them', senderName: 'Linh' },
-            { id: 20, text: "Phù! Tôi nghĩ mình sắp mất trí rồi 😂", timestamp: 'Hôm nay 12:15', sender: 'them', senderName: 'Mai' },
-            { id: 21, text: "Đừng quên bài kiểm tra ngày mai! Chúc mọi người may mắn! 📚", timestamp: '2 giờ trước', sender: 'them', senderName: 'Nam' },
-        ]
-    },
-    {
-        id: 5,
-        contactName: 'Câu lạc bộ Văn học Anh',
-        contactAvatar: 'https://picsum.photos/seed/englishclub/48/48',
-        onlineStatus: 'Offline',
-        lastMessage: "Cuộc họp tiếp theo là vào thứ Sáu lúc 15:00.",
-        lastMessageTime: '1 ngày trước',
-        unreadCount: 0,
-        type: 'group',
-        messages: [
-            { id: 1, text: "Chào mọi người! Chỉ là nhắc nhở về cuộc thảo luận sách tiếp theo của chúng ta.", timestamp: '3 ngày trước 14:00', sender: 'them', senderName: 'Hương' },
-            { id: 2, text: "Lần này chúng ta thảo luận cuốn sách nào?", timestamp: '3 ngày trước 14:05', sender: 'me' },
-            { id: 3, text: "Chúng ta sẽ thảo luận 'Giết con chim nhại' của Harper Lee", timestamp: '3 ngày trước 14:10', sender: 'them', senderName: 'Tuấn' },
-            { id: 4, text: "Ồ tôi yêu cuốn sách đó! Các chủ đề về phân biệt chủng tộc và công lý rất mạnh mẽ", timestamp: '3 ngày trước 14:15', sender: 'them', senderName: 'Lan' },
-            { id: 5, text: "Tôi đã đọc xong tối qua. Atticus Finch là một nhân vật tuyệt vời", timestamp: '3 ngày trước 14:20', sender: 'them', senderName: 'Hương' },
-            { id: 6, text: "Có ai nhận thấy cách góc nhìn của Scout thay đổi trong suốt câu chuyện không?", timestamp: '3 ngày trước 14:25', sender: 'me' },
-            { id: 7, text: "Chắc chắn rồi! Sự ngây thơ của cô ấy ở đầu so với sự hiểu biết ở cuối", timestamp: '3 ngày trước 14:30', sender: 'them', senderName: 'Tuấn' },
-            { id: 8, text: "Biểu tượng của con chim nhại thật đẹp. 'Chim nhại không làm gì ngoài việc tạo ra âm nhạc cho chúng ta thưởng thức'", timestamp: '3 ngày trước 14:35', sender: 'them', senderName: 'Lan' },
-            { id: 9, text: "Tôi tự hỏi liệu Boo Radley có đại diện cho những người bị hiểu lầm trong xã hội không", timestamp: '3 ngày trước 14:40', sender: 'them', senderName: 'Hương' },
-            { id: 10, text: "Ý kiến hay! Anh ấy bị sợ hãi nhưng thực ra là bảo vệ", timestamp: '3 ngày trước 14:45', sender: 'me' },
-            { id: 11, text: "Có ai mang đồ ăn nhẹ cho cuộc họp không? 🍪", timestamp: '2 ngày trước 10:00', sender: 'them', senderName: 'Tuấn' },
-            { id: 12, text: "Tôi sẽ mang một ít bánh quy! Cuộc họp bắt đầu lúc mấy giờ?", timestamp: '2 ngày trước 10:15', sender: 'them', senderName: 'Lan' },
-            { id: 13, text: "15:00 tại phòng hội nghị thư viện", timestamp: '2 ngày trước 10:20', sender: 'them', senderName: 'Hương' },
-            { id: 14, text: "Chúng ta có nên chuẩn bị câu hỏi thảo luận trước không?", timestamp: '2 ngày trước 10:25', sender: 'me' },
-            { id: 15, text: "Ý tưởng hay! Tôi sẽ lập danh sách và chia sẻ ở đây", timestamp: '2 ngày trước 10:30', sender: 'them', senderName: 'Tuấn' },
-            { id: 16, text: "1. Cuốn tiểu thuyết giải quyết bất công chủng tộc như thế nào?", timestamp: '2 ngày trước 11:00', sender: 'them', senderName: 'Tuấn' },
-            { id: 17, text: "2. Sự đồng cảm đóng vai trò gì trong câu chuyện?", timestamp: '2 ngày trước 11:05', sender: 'them', senderName: 'Tuấn' },
-            { id: 18, text: "3. Harper Lee sử dụng biểu tượng như thế nào trong suốt cuốn sách?", timestamp: '2 ngày trước 11:10', sender: 'them', senderName: 'Tuấn' },
-            { id: 19, text: "4. Chúng ta có thể học được gì từ cách nuôi dạy con của Atticus?", timestamp: '2 ngày trước 11:15', sender: 'them', senderName: 'Tuấn' },
-            { id: 20, text: "Đây là những câu hỏi tuyệt vời! Tôi rất hào hứng cho cuộc thảo luận", timestamp: '2 ngày trước 11:20', sender: 'me' },
-            { id: 21, text: "Tôi cũng vậy! Hẹn gặp mọi người ngày mai 📖", timestamp: '2 ngày trước 11:25', sender: 'them', senderName: 'Lan' },
-            { id: 22, text: "Chào mọi người! Chỉ là nhắc nhở về cuộc thảo luận sách tiếp theo của chúng ta.", timestamp: '1 ngày trước 14:00', sender: 'them', senderName: 'Hương' },
-            { id: 23, text: "Cuốn sách là 'Giết con chim nhại' của Harper Lee", timestamp: '1 ngày trước 14:01', sender: 'them', senderName: 'Hương' },
-            { id: 24, text: "Cuộc họp lúc 15:00 tại phòng hội nghị thư viện", timestamp: '1 ngày trước 14:02', sender: 'them', senderName: 'Hương' },
-            { id: 25, text: "Đừng quên mang theo câu hỏi thảo luận của bạn!", timestamp: '1 ngày trước 14:03', sender: 'them', senderName: 'Hương' },
-            { id: 26, text: "Cuộc họp tiếp theo là vào thứ Sáu lúc 15:00.", timestamp: '1 ngày trước 14:05', sender: 'them', senderName: 'Hương' },
-        ]
-    }
-];
+// ==================== HELPER FUNCTIONS ====================
 
-// Mock conversations for student
-const mockStudentConversations: Conversation[] = [
-    {
-        id: 1,
-        contactName: 'TS. Trần Thị Lan',
-        contactAvatar: 'https://picsum.photos/seed/sarah/48/48',
-        onlineStatus: 'Online',
-        lastMessage: "Tuyệt vời! Tôi sẽ gửi tài liệu cho bạn ngay.",
-        lastMessageTime: '10:30',
-        unreadCount: 1,
-        type: 'private',
-        messages: [
-            { id: 1, text: "Chào TS. Lan, tôi có câu hỏi về bài tập.", timestamp: '10:25', sender: 'me' },
-            { id: 2, text: "Chào bạn! Tất nhiên, câu hỏi của bạn là gì?", timestamp: '10:26', sender: 'them' },
-            { id: 3, text: "Tôi không chắc về định dạng cho bài luận. Nó nên là MLA hay APA?", timestamp: '10:28', sender: 'me' },
-            { id: 4, text: "Nó nên là định dạng MLA. Tôi sẽ gửi cho bạn hướng dẫn.", timestamp: '10:29', sender: 'them' },
-            { id: 5, text: "Cảm ơn bạn rất nhiều!", timestamp: '10:29', sender: 'me' },
-            { id: 6, text: "Tuyệt vời! Tôi sẽ gửi tài liệu cho bạn ngay.", timestamp: '10:30', sender: 'them' },
-        ]
-    },
-    {
-        id: 2,
-        contactName: 'GS. Nguyễn Văn Hùng',
-        contactAvatar: 'https://picsum.photos/seed/michael/48/48',
-        onlineStatus: 'Offline',
-        lastMessage: "Hẹn gặp bạn trong lớp ngày mai!",
-        lastMessageTime: 'Hôm qua',
-        unreadCount: 0,
-        type: 'private',
-        messages: [
-            { id: 1, text: "Chào Giáo sư, tôi sẽ không thể tham dự lớp ngày mai do có việc khẩn cấp gia đình.", timestamp: 'Hôm qua 15:15', sender: 'me' },
-            { id: 2, text: "Tôi hiểu. Vui lòng gửi cho tôi một ghi chú và tôi sẽ đánh dấu bạn được miễn.", timestamp: 'Hôm qua 15:20', sender: 'them' },
-            { id: 3, text: "Cảm ơn bạn! Tôi sẽ gửi ngay.", timestamp: 'Hôm qua 15:21', sender: 'me' },
-            { id: 4, text: "Hẹn gặp bạn trong lớp ngày mai!", timestamp: 'Hôm qua 15:25', sender: 'them' },
-        ]
-    },
-    {
-        id: 3,
-        contactName: 'Cô Phạm Thị Mai',
-        contactAvatar: 'https://picsum.photos/seed/emily/48/48',
-        onlineStatus: 'Online',
-        lastMessage: "Bạn đang làm rất tốt! Tiếp tục phát huy nhé.",
-        lastMessageTime: 'Hôm qua',
-        unreadCount: 0,
-        type: 'private',
-        messages: [
-            { id: 1, text: 'Cảm ơn bạn về phản hồi cho bài thuyết trình của tôi!', timestamp: 'Hôm qua 13:00', sender: 'me' },
-            { id: 2, text: "Bạn đang làm rất tốt! Tiếp tục phát huy nhé.", timestamp: 'Hôm qua 13:02', sender: 'them' },
-        ]
-    },
-    {
-        id: 4,
-        contactName: 'Lớp Toán Nâng cao',
-        contactAvatar: 'https://picsum.photos/seed/mathclass/48/48',
-        onlineStatus: 'Online',
-        lastMessage: "Đừng quên bài kiểm tra ngày mai!",
-        lastMessageTime: '2 giờ trước',
-        unreadCount: 2,
-        type: 'group',
-        messages: [
-            { id: 1, text: "Chào mọi người! Có ai hiểu bài 5 từ bài tập về nhà không?", timestamp: 'Hôm qua 16:00', sender: 'them', senderName: 'Nam' },
-            { id: 2, text: "Tôi cũng đang bị kẹt ở bài đó. Có ai giúp được không?", timestamp: 'Hôm qua 16:15', sender: 'me' },
-            { id: 3, text: "Tôi nghĩ bạn cần sử dụng công thức bậc hai!", timestamp: 'Hôm qua 16:20', sender: 'them', senderName: 'Mai' },
-            { id: 4, text: "Ồ đúng rồi! Cảm ơn Mai!", timestamp: 'Hôm qua 16:25', sender: 'me' },
-            { id: 5, text: "Không có gì! Chúc mọi người may mắn!", timestamp: 'Hôm qua 16:30', sender: 'them', senderName: 'Mai' },
-            { id: 6, text: "Đừng quên bài kiểm tra ngày mai!", timestamp: '2 giờ trước', sender: 'them', senderName: 'GS. Hùng' },
-        ]
-    },
-    {
-        id: 5,
-        contactName: 'Nhóm Học Vật lý',
-        contactAvatar: 'https://picsum.photos/seed/physics/48/48',
-        onlineStatus: 'Offline',
-        lastMessage: "Hãy gặp nhau tại thư viện lúc 15:00.",
-        lastMessageTime: '1 ngày trước',
-        unreadCount: 0,
-        type: 'group',
-        messages: [
-            { id: 1, text: "Chào mọi người! Khi nào chúng ta nên gặp nhau cho buổi học?", timestamp: '2 ngày trước 14:00', sender: 'them', senderName: 'Linh' },
-            { id: 2, text: "Chiều mai thì sao?", timestamp: '2 ngày trước 14:05', sender: 'me' },
-            { id: 3, text: "Điều đó phù hợp với tôi!", timestamp: '2 ngày trước 14:10', sender: 'them', senderName: 'Sơn' },
-            { id: 4, text: "Hãy gặp nhau tại thư viện lúc 15:00.", timestamp: '1 ngày trước 14:00', sender: 'them', senderName: 'Linh' },
-        ]
-    }
-];
+const formatTime = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+
+    if (diff < 60000) return 'Just now';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
+    if (diff < 86400000) return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    if (diff < 172800000) return 'Yesterday';
+    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+};
+
+const mapConversationType = (apiType: string): 'private' | 'group' => {
+    return apiType === 'ONE_ON_ONE' ? 'private' : 'group';
+};
+
+// ==================== COMPONENTS ====================
 
 const ContactListItem: React.FC<{ conv: Conversation; isActive: boolean; onClick: () => void; }> = ({ conv, isActive, onClick }) => (
     <div
@@ -240,7 +58,7 @@ const ContactListItem: React.FC<{ conv: Conversation; isActive: boolean; onClick
         className={`flex items-start gap-4 p-3 rounded-lg cursor-pointer transition-colors ${isActive ? 'bg-[#F9F3EB]' : 'hover:bg-gray-50'}`}
     >
         <div className="relative flex-shrink-0">
-            <img src={conv.contactAvatar} alt={conv.contactName} className="w-10 h-10 rounded-full" />
+            <img src={conv.contactAvatar} alt={conv.contactName} className="w-10 h-10 rounded-full object-cover" />
             {conv.onlineStatus === 'Online' && (
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             )}
@@ -267,50 +85,53 @@ const ContactListItem: React.FC<{ conv: Conversation; isActive: boolean; onClick
     </div>
 );
 
-const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: string }> = ({ conversation, i18nPrefix }) => {
+interface ChatWindowProps {
+    conversation: Conversation | null;
+    messages: Message[];
+    i18nPrefix: string;
+    onSendMessage: (text: string) => void;
+    isTyping: boolean;
+    currentUserId: string;
+}
+
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, isTyping }) => {
     const { t } = useTranslation();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const attachmentRef = useRef<HTMLDivElement>(null);
     const [newMessage, setNewMessage] = useState('');
     const [isAttachmentPanelOpen, setIsAttachmentPanelOpen] = useState(false);
-    const prevConversationIdRef = useRef<number | null>(null);
+    const prevConversationIdRef = useRef<string | null>(null);
     const prevMessagesLengthRef = useRef<number>(0);
     const isInitialMountRef = useRef(true);
 
-    // Scroll to bottom when conversation changes or new messages arrive
     useLayoutEffect(() => {
         if (!conversation || !messagesContainerRef.current) return;
 
         const conversationChanged = prevConversationIdRef.current !== conversation.id;
-        const newMessageAdded = !conversationChanged && conversation.messages.length > prevMessagesLengthRef.current;
-        
-        // Update refs
+        const newMessageAdded = !conversationChanged && messages.length > prevMessagesLengthRef.current;
+
         if (conversationChanged) {
             prevConversationIdRef.current = conversation.id;
-            prevMessagesLengthRef.current = conversation.messages.length;
+            prevMessagesLengthRef.current = messages.length;
         } else {
-            prevMessagesLengthRef.current = conversation.messages.length;
+            prevMessagesLengthRef.current = messages.length;
         }
 
-        // Use double requestAnimationFrame to ensure DOM is fully rendered and layout is stable
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 if (!messagesContainerRef.current) return;
 
                 if (conversationChanged || isInitialMountRef.current) {
-                    // When conversation changes or initial mount, scroll immediately without animation
                     messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
                     isInitialMountRef.current = false;
                 } else if (newMessageAdded) {
-                    // When new message added, smooth scroll
                     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         });
-    }, [conversation?.id, conversation?.messages.length]);
+    }, [conversation?.id, messages.length]);
 
-    // Close attachment panel when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (attachmentRef.current && !attachmentRef.current.contains(event.target as Node)) {
@@ -340,39 +161,36 @@ const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: stri
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (newMessage.trim() === '') return;
-        // This is where you would typically send the message to a backend.
-        // For this mock, we'll just log it.
-        console.log("Sending message:", newMessage);
+        onSendMessage(newMessage.trim());
         setNewMessage('');
-    }
+    };
 
     return (
         <div className="flex flex-col h-full min-h-0">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    <img src={conversation.contactAvatar} alt={conversation.contactName} className="w-10 h-10 rounded-full flex-shrink-0" />
+                    <img src={conversation.contactAvatar} alt={conversation.contactName} className="w-10 h-10 rounded-full flex-shrink-0 object-cover" />
                     <div>
                         <p className="font-bold text-gray-800">{conversation.contactName}</p>
                         <p className="text-xs text-gray-500 flex items-center gap-1">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <div className={`w-2 h-2 ${conversation.onlineStatus === 'Online' ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></div>
                             {conversation.onlineStatus === 'Online' ? t(`${i18nPrefix}.status.online`) : t(`${i18nPrefix}.status.offline`)}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
-                    >
+                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
                         <HiCog className="w-5 h-5" />
                     </button>
                 </div>
             </div>
+
             {/* Messages */}
             <div ref={messagesContainerRef} className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-gray-50 min-h-0" style={{ scrollBehavior: 'auto', overflowAnchor: 'none' }}>
                 <div className="">
-                    {conversation.messages.map((msg, index) => {
-                        const prevMsg = index > 0 ? conversation.messages[index - 1] : null;
+                    {messages.map((msg, index) => {
+                        const prevMsg = index > 0 ? messages[index - 1] : null;
                         const isSameSender = prevMsg && (
                             (msg.sender === 'me' && prevMsg.sender === 'me') ||
                             (msg.sender === 'them' && prevMsg.sender === 'them' &&
@@ -381,8 +199,8 @@ const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: stri
 
                         return (
                             <div key={msg.id} className={`flex items-end gap-3 ${msg.sender === 'me' ? 'justify-end' : 'justify-start'} mb-1 ${!isSameSender && index > 0 ? 'mt-4' : ''}`}>
-                                {msg.sender === 'them' && !isSameSender && <img src={conversation.contactAvatar} className="w-6 h-6 rounded-full" />}
-                                {msg.sender === 'them' && isSameSender && <div className="w-6" />} {/* Spacer for alignment */}
+                                {msg.sender === 'them' && !isSameSender && <img src={conversation.contactAvatar} className="w-6 h-6 rounded-full object-cover" />}
+                                {msg.sender === 'them' && isSameSender && <div className="w-6" />}
                                 <div className={`max-w-xs lg:max-w-md ${msg.sender === 'me' ? '' : 'min-w-0'}`}>
                                     {msg.sender === 'them' && conversation.type === 'group' && msg.senderName && !isSameSender && (
                                         <p className="text-xs text-gray-500 mb-1 ml-1">{msg.senderName}</p>
@@ -395,12 +213,22 @@ const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: stri
                             </div>
                         );
                     })}
+
+                    {/* Typing Indicator */}
+                    {isTyping && (
+                        <div className="flex items-end gap-3 justify-start mt-2">
+                            <img src={conversation.contactAvatar} className="w-6 h-6 rounded-full object-cover" />
+                            <div className="bg-gray-100 text-gray-500 px-4 py-3 rounded-2xl rounded-bl-lg">
+                                <span className="text-sm italic">Đang nhập...</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div ref={messagesEndRef} />
             </div>
+
             {/* Input */}
             <div className="p-3 border-t border-gray-200 relative flex-shrink-0" ref={attachmentRef}>
-                {/* Attachment Panel */}
                 {isAttachmentPanelOpen && (
                     <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 w-40">
                         <div className="flex flex-col gap-1">
@@ -416,16 +244,12 @@ const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: stri
                                 <HiDocument className="w-5 h-5 text-green-500" />
                                 <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.document`)}</span>
                             </button>
-                            <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                                <HiUser className="w-5 h-5 text-purple-500" />
-                                <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.contact`)}</span>
-                            </button>
                         </div>
                     </div>
                 )}
-                
+
                 <form onSubmit={handleSendMessage} className="relative">
-                    <button 
+                    <button
                         type="button"
                         onClick={() => setIsAttachmentPanelOpen(!isAttachmentPanelOpen)}
                         className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
@@ -448,38 +272,35 @@ const ChatWindow: React.FC<{ conversation: Conversation | null; i18nPrefix: stri
     );
 };
 
+// ==================== MAIN COMPONENT ====================
+
 interface InboxContentProps {
-    initialSelectedStudentId?: number | null;
+    initialSelectedStudentId?: string | null;
 }
 
 const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) => {
     const { state } = useAuth();
     const { t } = useTranslation();
     const { setBreadcrumb } = useBreadcrumb();
-    
-    // Determine role
+
     const isTutor = state.user?.role === 'tutor';
-    
-    // Use different i18n prefix based on role
     const i18nPrefix = isTutor ? 'dashboard.inbox' : 'dashboard.messages';
-    
-    // Use different mock data based on role
-    const [conversations, setConversations] = useState<Conversation[]>(
-        isTutor ? mockTutorConversations : mockStudentConversations
-    );
-    const initialConversations = isTutor ? mockTutorConversations : mockStudentConversations;
-    const [selectedConversationId, setSelectedConversationId] = useState<number | null>(
-        initialSelectedStudentId || (initialConversations.length > 0 ? initialConversations[0].id : null)
-    );
+    const currentUserId = state.user?.id || '';
+
+    // State
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [messageTypeFilter, setMessageTypeFilter] = useState<'all' | 'private' | 'group'>('all');
-    const [isSettingsSidebarOpen, setIsSettingsSidebarOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [wsConnected, setWsConnected] = useState(false);
+    const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+    const [userCache, setUserCache] = useState<Map<string, UserInfo>>(new Map()); // eslint-disable-line @typescript-eslint/no-unused-vars
 
-    useEffect(() => {
-        // Update conversations when role changes
-        setConversations(isTutor ? mockTutorConversations : mockStudentConversations);
-    }, [isTutor]);
-
+    // Breadcrumb
     useEffect(() => {
         const breadcrumbItems: BreadcrumbItem[] = [
             { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
@@ -488,16 +309,203 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
         setBreadcrumb(breadcrumbItems);
     }, [setBreadcrumb, t, i18nPrefix]);
 
-    useEffect(() => {
-        if (initialSelectedStudentId && initialSelectedStudentId !== selectedConversationId) {
-            // Check if a conversation with this student exists, if not, create a mock one.
-            const conversationExists = conversations.some(c => c.id === initialSelectedStudentId);
-            if (conversationExists) {
-                setSelectedConversationId(initialSelectedStudentId);
-            }
-        }
-    }, [initialSelectedStudentId, conversations, selectedConversationId]);
+    // Fetch conversations
+    const fetchConversations = useCallback(async () => {
+        if (!state.user) return;
 
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await chatService.getAllConversationsForUser();
+
+            // Prefetch all participant user info
+            const allParticipantIds = data.flatMap(conv => conv.participantIds).filter(id => id !== currentUserId);
+            const usersMap = await userCacheService.getUsersInfo(allParticipantIds);
+            setUserCache(prev => new Map([...prev, ...usersMap]));
+
+            const mappedConversations: Conversation[] = data.map(apiConv => {
+                // For 1-1 chats, get the other participant's name
+                const otherParticipantId = apiConv.participantIds.find(id => id !== currentUserId);
+                const otherUser = otherParticipantId ? usersMap.get(otherParticipantId) : null;
+                const contactName = apiConv.name || userCacheService.getDisplayName(otherUser ?? null) || `Conversation ${apiConv.id.slice(0, 8)}`;
+                const contactAvatar = userCacheService.getAvatarUrl(otherUser ?? null, apiConv.id);
+
+                return {
+                    id: apiConv.id,
+                    contactName,
+                    contactAvatar,
+                    onlineStatus: 'Offline' as const,
+                    lastMessage: apiConv.lastMessage?.content || 'No messages yet',
+                    lastMessageTime: apiConv.lastMessageAt ? formatTime(apiConv.lastMessageAt) : '',
+                    unreadCount: 0,
+                    type: mapConversationType(apiConv.type),
+                    participantIds: apiConv.participantIds,
+                };
+            });
+
+            setConversations(mappedConversations);
+
+            // Auto-select first conversation
+            if (mappedConversations.length > 0 && !selectedConversationId) {
+                setSelectedConversationId(initialSelectedStudentId || mappedConversations[0].id);
+            }
+        } catch (err) {
+            console.error('Failed to fetch conversations:', err);
+            setError('Failed to load conversations');
+        } finally {
+            setLoading(false);
+        }
+    }, [state.user, selectedConversationId, initialSelectedStudentId]);
+
+    useEffect(() => {
+        fetchConversations();
+    }, [fetchConversations]);
+
+    // Fetch messages for selected conversation
+    const fetchMessages = useCallback(async (conversationId: string) => {
+        if (!state.user) return;
+
+        setLoadingMessages(true);
+
+        try {
+            const data = await chatService.getConversationMessages(conversationId, 0, 50);
+
+            // Prefetch sender user info
+            const senderIds = [...new Set(data.map(msg => msg.senderId).filter(id => id !== currentUserId))];
+            const sendersMap = await userCacheService.getUsersInfo(senderIds);
+            setUserCache(prev => new Map([...prev, ...sendersMap]));
+
+            const mappedMessages: Message[] = data.map(msg => {
+                const senderUser = sendersMap.get(msg.senderId);
+                return {
+                    id: msg.id,
+                    text: msg.content,
+                    timestamp: formatTime(msg.createdAt),
+                    sender: msg.senderId === currentUserId ? 'me' : 'them',
+                    senderName: msg.senderId === currentUserId ? 'You' : userCacheService.getDisplayName(senderUser ?? null),
+                    senderId: msg.senderId,
+                };
+            });
+
+            setMessages(mappedMessages.reverse()); // API returns newest first
+        } catch (err) {
+            console.error('Failed to fetch messages:', err);
+        } finally {
+            setLoadingMessages(false);
+        }
+    }, [state.user, currentUserId]);
+
+    useEffect(() => {
+        if (selectedConversationId) {
+            fetchMessages(selectedConversationId);
+        }
+    }, [selectedConversationId, fetchMessages]);
+
+    // WebSocket connection
+    useEffect(() => {
+        if (!state.user || !state.isAuthenticated) return;
+
+        chatWebSocketService.connect(
+            state.user.id,
+            () => {
+                console.log('Chat WebSocket connected');
+                setWsConnected(true);
+            },
+            (error) => {
+                console.error('Chat WebSocket error:', error);
+                setWsConnected(false);
+            }
+        );
+
+        return () => {
+            chatWebSocketService.disconnect();
+            setWsConnected(false);
+        };
+    }, [state.user, state.isAuthenticated]);
+
+    // Subscribe to conversation messages
+    useEffect(() => {
+        if (!selectedConversationId || !wsConnected) return;
+
+        chatWebSocketService.subscribeToConversation(
+            selectedConversationId,
+            (message: MessageResponse) => {
+                const newMessage: Message = {
+                    id: message.id,
+                    text: message.content,
+                    timestamp: formatTime(message.createdAt),
+                    sender: message.senderId === currentUserId ? 'me' : 'them',
+                    senderName: message.senderId === currentUserId ? 'You' : `User ${message.senderId.slice(0, 8)}`,
+                    senderId: message.senderId,
+                };
+                setMessages(prev => [...prev, newMessage]);
+
+                // Update conversation last message
+                setConversations(prev =>
+                    prev.map(conv =>
+                        conv.id === selectedConversationId
+                            ? { ...conv, lastMessage: message.content, lastMessageTime: formatTime(message.createdAt) }
+                            : conv
+                    )
+                );
+            }
+        );
+
+        // Subscribe to typing indicators
+        chatWebSocketService.subscribeToTypingIndicators(
+            selectedConversationId,
+            (indicator) => {
+                if (indicator.userId !== currentUserId) {
+                    setTypingUsers(prev => {
+                        const updated = new Set(prev);
+                        if (indicator.isTyping) {
+                            updated.add(indicator.userId);
+                        } else {
+                            updated.delete(indicator.userId);
+                        }
+                        return updated;
+                    });
+                }
+            }
+        );
+
+        return () => {
+            chatWebSocketService.unsubscribeFromConversation(selectedConversationId);
+        };
+    }, [selectedConversationId, wsConnected, currentUserId]);
+
+    // Send message handler
+    const handleSendMessage = async (text: string) => {
+        if (!selectedConversationId || !state.user) return;
+
+        const messageRequest = {
+            conversationId: selectedConversationId,
+            type: 'TEXT' as const,
+            content: text,
+        };
+
+        try {
+            if (wsConnected) {
+                chatWebSocketService.sendMessage(messageRequest, state.user.id);
+            } else {
+                const sentMessage = await chatService.sendMessage(messageRequest);
+                const newMessage: Message = {
+                    id: sentMessage.id,
+                    text: sentMessage.content,
+                    timestamp: formatTime(sentMessage.createdAt),
+                    sender: 'me',
+                    senderName: 'You',
+                    senderId: sentMessage.senderId,
+                };
+                setMessages(prev => [...prev, newMessage]);
+            }
+        } catch (err) {
+            console.error('Failed to send message:', err);
+        }
+    };
+
+    // Filtered conversations
     const filteredConversations = useMemo(() => {
         return conversations.filter(conv => {
             const matchesSearch = conv.contactName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -509,6 +517,30 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
     const selectedConversation = useMemo(() => {
         return conversations.find(c => c.id === selectedConversationId) || null;
     }, [conversations, selectedConversationId]);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <BirdLoading title={t('common.loading')} />
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full">
+                <p className="text-red-500 mb-4">{error}</p>
+                <button
+                    onClick={fetchConversations}
+                    className="px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43]"
+                >
+                    {t('common.retry')}
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col h-full min-h-0">
@@ -561,124 +593,43 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                         </div>
                     </div>
                     <div className="flex-1 p-2 overflow-y-auto custom-scrollbar">
-                        <div className="space-y-1">
-                            {filteredConversations.map(conv => (
-                                <ContactListItem
-                                    key={conv.id}
-                                    conv={conv}
-                                    isActive={conv.id === selectedConversationId}
-                                    onClick={() => setSelectedConversationId(conv.id)}
-                                />
-                            ))}
-                        </div>
+                        {filteredConversations.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                                <HiUser className="w-12 h-12 text-gray-300 mb-3" />
+                                <p className="text-gray-500 text-sm">No conversations yet</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-1">
+                                {filteredConversations.map(conv => (
+                                    <ContactListItem
+                                        key={conv.id}
+                                        conv={conv}
+                                        isActive={conv.id === selectedConversationId}
+                                        onClick={() => setSelectedConversationId(conv.id)}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Right Pane: Chat Window */}
                 <div className="hidden md:flex w-3/5 xl:w-2/3 flex-col relative min-h-0">
-                    <ChatWindow
-                        key={selectedConversationId}
-                        conversation={selectedConversation}
-                        i18nPrefix={i18nPrefix}
-                    />
-
-                    {/* Settings Sidebar Overlay */}
-                    {isSettingsSidebarOpen && (
-                        <div
-                            className="absolute inset-0 bg-black bg-opacity-30 z-40 transition-opacity duration-300"
-                            onClick={() => setIsSettingsSidebarOpen(false)}
+                    {loadingMessages ? (
+                        <div className="flex items-center justify-center h-full">
+                            <BirdLoading title={t('common.loading')} size="sm" />
+                        </div>
+                    ) : (
+                        <ChatWindow
+                            key={selectedConversationId}
+                            conversation={selectedConversation}
+                            messages={messages}
+                            i18nPrefix={i18nPrefix}
+                            onSendMessage={handleSendMessage}
+                            isTyping={typingUsers.size > 0}
+                            currentUserId={currentUserId}
                         />
                     )}
-
-                    {/* Settings Sidebar */}
-                    <div
-                        className={`absolute top-0 right-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-300 ease-out z-50 ${isSettingsSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-                            }`}
-                    >
-                        {selectedConversation && (
-                            <div className="flex flex-col h-full">
-                                {/* Sidebar Header */}
-                                <div className="p-6 border-b border-gray-200">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-bold text-gray-800">{t(`${i18nPrefix}.settings.title`)}</h3>
-                                        <button
-                                            onClick={() => setIsSettingsSidebarOpen(false)}
-                                            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <img
-                                            src={selectedConversation.contactAvatar}
-                                            alt={selectedConversation.contactName}
-                                            className="w-12 h-12 rounded-full"
-                                        />
-                                        <div>
-                                            <p className="font-bold text-gray-800">{selectedConversation.contactName}</p>
-                                            <p className="text-sm text-gray-500">{selectedConversation.onlineStatus === 'Online' ? t(`${i18nPrefix}.status.online`) : t(`${i18nPrefix}.status.offline`)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Settings Options */}
-                                <div className="flex-1 p-6 overflow-y-auto">
-                                    <div className="space-y-6">
-                                        {/* Notifications */}
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t(`${i18nPrefix}.settings.notifications.title`)}</h4>
-                                            <div className="space-y-3">
-                                                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.notifications.enable`)}</span>
-                                                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
-                                                </label>
-                                                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.notifications.sound`)}</span>
-                                                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        {/* Privacy */}
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t(`${i18nPrefix}.settings.privacy.title`)}</h4>
-                                            <div className="space-y-3">
-                                                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.privacy.showStatus`)}</span>
-                                                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
-                                                </label>
-                                                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
-                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.privacy.readReceipts`)}</span>
-                                                    <input type="checkbox" defaultChecked className="w-4 h-4 text-[#0b6459] rounded focus:ring-[#0b6459]" />
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t(`${i18nPrefix}.settings.actions.title`)}</h4>
-                                            <div className="space-y-2">
-                                                <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.actions.mute`)}</span>
-                                                </button>
-                                                <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                                    <span className="text-sm text-gray-700">{t(`${i18nPrefix}.settings.actions.archive`)}</span>
-                                                </button>
-                                                <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                                    <span className="text-sm text-red-600 font-medium">{t(`${i18nPrefix}.settings.actions.block`)}</span>
-                                                </button>
-                                                <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                                    <span className="text-sm text-red-600 font-medium">{t(`${i18nPrefix}.settings.actions.clearHistory`)}</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </div>
         </div>

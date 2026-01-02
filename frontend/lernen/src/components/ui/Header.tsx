@@ -237,7 +237,7 @@ const Header: React.FC = () => {
                                     className="cursor-pointer"
                                 >
                                     <img
-                                        src="https://picsum.photos/seed/avatar/40/40"
+                                        src={state.user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${state.user?.id || 'default'}`}
                                         alt="User Avatar"
                                         className="w-10 h-10 rounded-full"
                                     />

@@ -657,6 +657,7 @@
       },
       "requests": {
         "title": "Yêu cầu của tôi",
+        "subtitle": "Theo dõi các yêu cầu đổi lịch và học thử của bạn.",
         "filters": {
           "reschedule": "Yêu cầu đổi lịch",
           "trial": "Yêu cầu học thử"
@@ -1045,7 +1046,20 @@
           "expiryDate": {
             "label": "Ngày hết hạn"
           }
-        }
+        },
+        "errors": {
+          "fetchFailed": "Không thể tải danh sách mã giảm giá",
+          "saveFailed": "Không thể lưu mã giảm giá",
+          "deleteFailed": "Không thể xóa mã giảm giá",
+          "toggleFailed": "Không thể thay đổi trạng thái mã giảm giá"
+        },
+        "success": {
+          "created": "Tạo mã giảm giá thành công",
+          "updated": "Cập nhật mã giảm giá thành công",
+          "deleted": "Xóa mã giảm giá thành công"
+        },
+        "noCoupons": "Chưa có mã giảm giá",
+        "noCouponsHint": "Tạo mã giảm giá đầu tiên để thu hút thêm học sinh!"
       },
       "myQuizzes": {
         "title": "Quản lý bài kiểm tra",
@@ -1088,6 +1102,7 @@
       },
       "requests": {
         "title": "Yêu cầu",
+        "subtitle": "Quản lý các yêu cầu đổi lịch và học thử từ học sinh.",
         "filters": {
           "reschedule": "Yêu cầu đổi lịch",
           "trial": "Yêu cầu học thử"
