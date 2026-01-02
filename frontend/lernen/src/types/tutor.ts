@@ -125,12 +125,35 @@ export interface GroupClassStudent {
     name: string;
 }
 
+// API Response interface for GroupClass from backend
+export interface GroupClassApiResponse {
+    id: string;
+    title: string;
+    description: string;
+    subjectId: string;
+    classType: string;
+    maxStudents: number;
+    enrolledStudents: number;
+    pricePerHour: number;
+    schedules: Array<{
+        dayOfWeek: number;
+        time: string; // Format: "15:00:00"
+    }>;
+    tutor: {
+        id: string;
+        fullName: string;
+        email: string | null;
+        avatarUrl: string;
+    };
+}
+
 export interface GroupClass {
     id: string;
     title: string;
     classDescription?: string;
     maxStudents?: number;
-    students?: UserInfo[];
+    enrolledStudents?: number; // Number of enrolled students from API
+    students?: UserInfo[]; // Optional: detailed student list if available
     schedule: ClassSchedule[];
     startDate?: Date;
     pricePerHour: number;

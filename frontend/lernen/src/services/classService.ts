@@ -13,7 +13,7 @@ import type {
     RecentEarningsFilters,
 } from "../types/api";
 import type { ClassDetail, ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
-import type { GroupClass } from "../types/tutor";
+import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
 
 // ClassData interface for class detail page
 export interface ClassData {
@@ -714,13 +714,88 @@ export const classService = {
         }
     },
 
+    // Helper function to convert 24h time format to 12h format
+    convertTimeTo12Hour: (time24: string): string => {
+        // Handle format like "15:00:00" or "15:00"
+        const timeStr = time24.split(':').slice(0, 2).join(':');
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+        return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+    },
+
+    // Helper function to map API response to GroupClass format
+    mapGroupClassApiResponse: (apiData: GroupClassApiResponse): GroupClass => {
+        return {
+            id: apiData.id,
+            title: apiData.title,
+            classDescription: apiData.description,
+            maxStudents: apiData.maxStudents,
+            enrolledStudents: apiData.enrolledStudents, // Map enrolled students count
+            students: [], // API doesn't provide student list, only enrolledStudents count
+            schedule: apiData.schedules.map(schedule => ({
+                dayOfWeek: schedule.dayOfWeek,
+                time: classService.convertTimeTo12Hour(schedule.time)
+            })),
+            pricePerHour: apiData.pricePerHour,
+            // startDate is not provided in API response
+        };
+    },
+
     // Get group classes for a specific tutor
     getGroupClassesForTutor: async (tutorId: string): Promise<ApiResponse<GroupClass[]>> => {
         try {
-            return await apiService.get<GroupClass[]>(`/tutors/${tutorId}/group-classes`);
+            const response = await apiService.get<{ content: GroupClassApiResponse[] }>(`/v1/classes/tutors/${tutorId}/opening`);
+            
+            // Map API response to GroupClass format
+            const mappedData: GroupClass[] = (response.data?.content || []).map(item => 
+                classService.mapGroupClassApiResponse(item)
+            );
+
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: mappedData
+            };
         } catch (error: any) {
-            console.error("Failed to fetch group classes for tutor:", error);
-            throw error;
+            console.error("Failed to fetch group classes from API:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to fetch group classes",
+                data: []
+            };
+        }
+    },
+
+    // Add student to group class
+    addStudentToClass: async (classId: string, studentId: string): Promise<ApiResponse<void>> => {
+        try {
+            return await apiService.post<void>(`/v1/classes/${classId}/students/${studentId}`);
+        } catch (error: any) {
+            console.error("Failed to add student to class:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to add student to class",
+                data: undefined
+            };
+        }
+    },
+
+    // Remove student from group class
+    removeStudentFromClass: async (classId: string, studentId: string): Promise<ApiResponse<void>> => {
+        try {
+            return await apiService.delete<void>(`/v1/classes/${classId}/students/${studentId}`);
+        } catch (error: any) {
+            console.error("Failed to remove student from class:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to remove student from class",
+                data: undefined
+            };
         }
     },
 };

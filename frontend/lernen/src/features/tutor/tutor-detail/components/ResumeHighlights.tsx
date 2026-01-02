@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FiMapPin } from 'react-icons/fi';
 import { HiOutlineOfficeBuilding } from 'react-icons/hi';
 import type { TutorDetail } from '../../../../types/tutor';
@@ -69,38 +69,44 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
         return `${startYear} - ${endYear}`;
     };
 
-    const educationItems: ResumeItemData[] = tutor?.educations?.map(edu => ({
-        id: parseInt(edu.id),
-        period: formatPeriod(edu.startDate, edu.endDate),
-        title: edu.title,
-        institution: edu.institution,
-        location: edu.location || '',
-        description: edu.description || '',
-    })) || [];
+    const educationItems: ResumeItemData[] = useMemo(() => {
+        return tutor?.educations?.map(edu => ({
+            id: parseInt(edu.id),
+            period: formatPeriod(edu.startDate, edu.endDate),
+            title: edu.title,
+            institution: edu.institution,
+            location: edu.location || '',
+            description: edu.description || '',
+        })) || [];
+    }, [tutor?.educations]);
 
-    const experienceItems: ResumeItemData[] = tutor?.experiences?.map(exp => ({
-        id: parseInt(exp.id),
-        period: formatPeriod(exp.startDate, exp.endDate),
-        title: exp.title,
-        institution: exp.institution,
-        location: exp.location || '',
-        description: exp.description || '',
-    })) || [];
+    const experienceItems: ResumeItemData[] = useMemo(() => {
+        return tutor?.experiences?.map(exp => ({
+            id: parseInt(exp.id),
+            period: formatPeriod(exp.startDate, exp.endDate),
+            title: exp.title,
+            institution: exp.institution,
+            location: exp.location || '',
+            description: exp.description || '',
+        })) || [];
+    }, [tutor?.experiences]);
 
-    const certificationItems: ResumeItemData[] = tutor?.certifications?.map(cert => ({
-        id: parseInt(cert.id),
-        period: new Date(cert.issueDate).getFullYear().toString(),
-        title: cert.name,
-        institution: cert.issuingOrganization,
-        location: '',
-        description: cert.credentialId ? `Credential ID: ${cert.credentialId}` : '',
-    })) || [];
+    const certificationItems: ResumeItemData[] = useMemo(() => {
+        return tutor?.certifications?.map(cert => ({
+            id: parseInt(cert.id),
+            period: new Date(cert.issueDate).getFullYear().toString(),
+            title: cert.name,
+            institution: cert.issuingOrganization,
+            location: '',
+            description: cert.credentialId ? `Credential ID: ${cert.credentialId}` : '',
+        })) || [];
+    }, [tutor?.certifications]);
 
-    const dataMap = {
+    const dataMap = useMemo(() => ({
         'Education': educationItems,
         'Experience': experienceItems,
         'Certification & Awards': certificationItems,
-    };
+    }), [educationItems, experienceItems, certificationItems]);
 
     const renderContent = () => {
         const items = dataMap[activeTab];
@@ -109,8 +115,8 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
         }
         return (
             <div className="mt-6 space-y-8">
-                {items.map(item => (
-                    <ResumeItem key={item.id} item={item} />
+                {items.map((item, index) => (
+                    <ResumeItem key={`${activeTab}-${item.id}-${index}`} item={item} />
                 ))}
             </div>
         );
