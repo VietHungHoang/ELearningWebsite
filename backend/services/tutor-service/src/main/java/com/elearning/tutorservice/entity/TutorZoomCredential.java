@@ -1,4 +1,4 @@
-package com.elearning.classservice.entity;
+package com.elearning.tutorservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

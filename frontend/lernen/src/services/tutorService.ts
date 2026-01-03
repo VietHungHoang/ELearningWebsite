@@ -61,7 +61,7 @@ export const tutorService = {
             throw error;
         }
     },
-    
+
     getTutorDetail: async (tutorId: string, studentId?: string): Promise<ApiResponse<TutorDetail>> => {
         try {
             const params: Record<string, string> = {};
@@ -92,7 +92,7 @@ export const tutorService = {
             }
             const response = await apiService.get<TutorResponse>(`/v1/public/tutors/${tutorId}`, params);
             const profileHeaderData = await mapTutorProfileHeaderResponseToTutorProfileHeader(response.data);
-            
+
             return {
                 status: response.status,
                 success: response.success,
@@ -107,7 +107,7 @@ export const tutorService = {
 
     getTutorProfile: async (): Promise<ApiResponse<any>> => {
         try {
-            return await apiService.get<any>("/api/v1/tutors/profile");
+            return await apiService.get<any>("/v1/tutors/me/profile");
         } catch (error) {
             console.warn("Failed to fetch tutor profile from API:", error);
             return {

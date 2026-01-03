@@ -144,8 +144,11 @@ public class ClassServiceImpl implements ClassService {
     @Override
     @Transactional(readOnly = true)
     public Page<ClassTableItem> getMyClassesAsStudent(UUID studentId, String status, int page, int size) {
+        log.info("Getting classes for studentId: {}, status: {}, page: {}, size: {}", studentId, status, page, size);
+        
         // Convert 1-based page to 0-based page index
         int pageIndex = page > 0 ? page - 1 : 0;
+        log.info("Converted page {} to pageIndex {}", page, pageIndex);
         
         Pageable pageable = PageRequest.of(pageIndex, size);
 
@@ -154,48 +157,94 @@ public class ClassServiceImpl implements ClassService {
         if (status != null && !status.trim().isEmpty()) {
             EnrollmentStatus enrollmentStatus = EnrollmentStatus.valueOf(status.toUpperCase());
             enrollmentPage = classEnrollmentRepository.findByStudentIdAndStatus(studentId, enrollmentStatus, pageable);
+            log.info("Found {} enrollments with status {}", enrollmentPage.getTotalElements(), enrollmentStatus);
         } else {
             enrollmentPage = classEnrollmentRepository.findByStudentId(studentId, pageable);
+            log.info("Found {} total enrollments", enrollmentPage.getTotalElements());
         }
+
+        log.info("enrollmentPage.getContent() size: {}", enrollmentPage.getContent().size());
 
         List<ClassTableItem> items = enrollmentPage.getContent().stream()
                 .map(enrollment -> {
                     ClassEntity classEntity = enrollment.getClassEntity();
+                    log.info("=== Processing enrollment for class: {} ({})", classEntity.getId(), classEntity.getTitle());
 
-                    // Get tutor info
-                    List<UserInfoResponse> tutors = List.of(UserInfoResponse.builder()
-                            .id(classEntity.getTutor().getId().toString())
-                            .fullName(classEntity.getTutor().getFullName())
-                            .avatarUrl(classEntity.getTutor().getAvatarUrl())
-                            .build());
+                    try {
+                        // Get tutor info
+                        UserInfoResponse tutorInfo = UserInfoResponse.builder()
+                                .id(classEntity.getTutor().getId().toString())
+                                .fullName(classEntity.getTutor().getFullName())
+                                .avatarUrl(classEntity.getTutor().getAvatarUrl())
+                                .build();
+                        log.info("Mapped tutor: {}", tutorInfo.getFullName());
 
-                    // Get schedules
-                    List<ClassSchedule> schedules = classEntity.getSchedules();
-                    List<ScheduleInfo> scheduleInfos = schedules.stream()
-                            .map(schedule -> ScheduleInfo.builder()
-                                    .dayOfWeek(schedule.getDayOfWeek())
-                                    .time(schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")))
-                                    .build())
-                            .collect(Collectors.toList());
+                        log.info("classEntity: {} - {}", classEntity.getId(), classEntity.getTitle());
 
-                    // Get sessions count
-                    long completedSessions = sessionRepository.countByClassEntityIdAndStatus(classEntity.getId(), ScheduleStatus.ACCEPTED);
-                    long totalSessions = sessionRepository.countByClassEntityId(classEntity.getId());
+                        log.info("enroment of classEntitY: {}", classEntity.getEnrollments().size() );
 
-                    return ClassTableItem.builder()
-                            .id(classEntity.getId().toString())
-                            .title(classEntity.getTitle())
-                            .students(tutors) // For student view, show tutor info
-                            .type(classEntity.getClassType().name())
-                            .status(enrollment.getStatus().name()) // Use enrollment status
-                            .schedules(scheduleInfos)
-                            .startDate(classEntity.getCreatedAt().toLocalDate().toString())
-                            .completedSessions((int) completedSessions)
-                            .totalSessions((int) totalSessions)
-                            .build();
+                        log.info("Enroment: {} - {} (status: {})", 
+                                enrollment.getStudent().getId(), enrollment.getStudent().getFullName(), enrollment.getStatus());
+
+                        // Get students info (other students in the same class)
+                        List<UserInfoResponse> students = classEntity.getEnrollments().stream()
+                                .filter(e -> e.getStatus() != EnrollmentStatus.LEFT && e.getStatus() != EnrollmentStatus.CANCELLED)
+                                .map(e -> {
+                                    log.info("Mapping classmate: {} - {} (status: {})", 
+                                            e.getStudent().getId(), e.getStudent().getFullName(), e.getStatus());
+                                    return UserInfoResponse.builder()
+                                            .id(e.getStudent().getId().toString())
+                                            .fullName(e.getStudent().getFullName())
+                                            .avatarUrl(e.getStudent().getAvatarUrl())
+                                            .enrollmentStatus(e.getStatus().name())
+                                            .build();
+                                })
+                                .collect(Collectors.toList());
+                        log.info("Mapped {} classmates", students.size());
+
+                        // Get schedules
+                        List<ClassSchedule> schedules = classEntity.getSchedules();
+                        log.info("Class {} has {} schedules (raw)", classEntity.getId(), schedules != null ? schedules.size() : "null");
+                        
+                        List<ScheduleInfo> scheduleInfos = schedules.stream()
+                                .map(schedule -> {
+                                    log.info("Mapping schedule: dayOfWeek={}, startTime={}", schedule.getDayOfWeek(), schedule.getStartTime());
+                                    return ScheduleInfo.builder()
+                                            .dayOfWeek(schedule.getDayOfWeek())
+                                            .time(schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")))
+                                            .build();
+                                })
+                                .collect(Collectors.toList());
+                        log.info("Mapped {} schedules", scheduleInfos.size());
+
+                        // Get sessions count
+                        long completedSessions = sessionRepository.countByClassEntityIdAndStatus(classEntity.getId(), ScheduleStatus.ACCEPTED);
+                        long totalSessions = sessionRepository.countByClassEntityId(classEntity.getId());
+                        log.info("Class {} has {}/{} completed sessions", classEntity.getId(), completedSessions, totalSessions);
+
+                        ClassTableItem item = ClassTableItem.builder()
+                                .id(classEntity.getId().toString())
+                                .title(classEntity.getTitle())
+                                .students(students) // Other students in the class
+                                .type(classEntity.getClassType().name())
+                                .status(classEntity.getStatus().name()) // Use class status
+                                .schedules(scheduleInfos)
+                                .startDate(classEntity.getCreatedAt().toLocalDate().toString())
+                                .completedSessions((int) completedSessions)
+                                .totalSessions((int) totalSessions)
+                                .build();
+                        
+                        log.info("Successfully built ClassTableItem: {}", item.getId());
+                        return item;
+                    } catch (Exception e) {
+                        log.error("ERROR processing enrollment for class {}: {}", classEntity.getId(), e.getMessage(), e);
+                        throw new RuntimeException("Failed to process enrollment for class: " + classEntity.getId(), e);
+                    }
                 })
                 .collect(Collectors.toList());
 
+        log.info("Stream collected {} items", items.size());
+        log.info("Returning {} class items out of {} total enrollments", items.size(), enrollmentPage.getTotalElements());
         return new PageImpl<>(items, pageable, enrollmentPage.getTotalElements());
     }
 
@@ -511,7 +560,7 @@ public class ClassServiceImpl implements ClassService {
         // Count enrolled students (ON_GOING status means actively enrolled)
         int enrolledStudents = classEntity.getEnrollments() != null 
                 ? (int) classEntity.getEnrollments().stream()
-                    .filter(e -> e.getStatus() == EnrollmentStatus.ON_GOING)
+                    .filter(e -> e.getStatus() != EnrollmentStatus.LEFT && e.getStatus() != EnrollmentStatus.CANCELLED)
                     .count()
                 : 0;
         
@@ -572,9 +621,10 @@ public class ClassServiceImpl implements ClassService {
             throw new RuntimeException("Student is already enrolled in this class");
         }
         
-        // Check if class is full
-        long currentEnrollments = classEnrollmentRepository.countByClassEntityIdAndStatus(
-                classId, EnrollmentStatus.ON_GOING);
+        // Check if class is full - count students that are not LEFT or CANCELLED
+        long currentEnrollments = classEntity.getEnrollments().stream()
+                .filter(e -> e.getStatus() != EnrollmentStatus.LEFT && e.getStatus() != EnrollmentStatus.CANCELLED)
+                .count();
         if (classEntity.getMaxStudents() != null && currentEnrollments >= classEntity.getMaxStudents()) {
             throw new RuntimeException("Class is full");
         }
@@ -587,7 +637,7 @@ public class ClassServiceImpl implements ClassService {
         ClassEnrollment enrollment = ClassEnrollment.builder()
                 .classEntity(classEntity)
                 .student(student)
-                .status(EnrollmentStatus.ON_GOING)
+                .status(EnrollmentStatus.JOINED)
                 .build();
         
         classEnrollmentRepository.save(enrollment);

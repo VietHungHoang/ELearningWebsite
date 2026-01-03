@@ -15,4 +15,5 @@ public class UserInfoResponse {
     private String id;
     private String fullName;
     private String avatarUrl;
+    private String enrollmentStatus; // Enrollment status for students in a class
 }

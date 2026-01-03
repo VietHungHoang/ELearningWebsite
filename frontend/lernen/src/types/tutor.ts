@@ -54,6 +54,36 @@ export interface Tutor extends UserInfo {
     hasTrialSession?: boolean;
 }
 
+// Extended tutor data for Profile Settings pages
+export interface TutorDetail extends UserInfo {
+    email?: string;
+    isVerified: boolean;
+    headline: string;
+    introduction: string;
+    videoUrl: string;
+    currentSessionFee: number;
+    originalSessionFee?: number;
+    averageRating: number;
+    reviewCount: number;
+    bookedSessionsCount: number;
+    studentCount: number;
+    country: Country;
+    gender?: Gender | null;
+    timezone?: string | null;
+    languages: TutorLanguage[];
+    subjects: Subject[];
+    socialLinks?: TutorSocial[];
+    hasTrialSession?: boolean;
+    zoomConnected?: boolean;
+    // Extended fields for Profile Settings
+    reviews: TutorReview[];
+    availabilities: TutorAvailability[];
+    educations: EducationItem[];
+    experiences: ExperienceItem[];
+    certifications: CertificationItem[];
+    groupClasses?: GroupClass;
+}
+
 export interface TutorReview {
     id: string;
     studentId: string;

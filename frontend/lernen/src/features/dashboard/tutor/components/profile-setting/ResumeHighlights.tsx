@@ -1,12 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HiAcademicCap, HiLocationMarker, HiPencil, HiTrash, HiPlus } from 'react-icons/hi';
-import ConfirmationModal from '../ConfirmationModal';
 import ResumeItemModal from './ResumeItemModal';
 import type { EducationItem, ExperienceItem, CertificationItem } from '../../../../../types/api';
 
 
 // --- TYPE DEFINITIONS ---
 export type ResumeItemData = EducationItem | ExperienceItem | CertificationItem;
+
+// --- DELETE CONFIRM POPUP COMPONENT (from TutorOnboarding) ---
+interface DeleteConfirmPopupProps {
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const DeleteConfirmPopup: React.FC<DeleteConfirmPopupProps> = ({ onConfirm, onCancel }) => {
+    const { t } = useTranslation();
+    const popupRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+                onCancel();
+            }
+        };
+
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onCancel]);
+
+    return (
+        <div
+            ref={popupRef}
+            className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 min-w-[200px]"
+        >
+            <p className="text-sm text-gray-700 mb-3">{t('onboarding.educationExperience.confirmDelete')}</p>
+            <div className="flex gap-2 justify-end">
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onCancel();
+                    }}
+                    className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition"
+                >
+                    {t('onboarding.educationExperience.modal.cancel')}
+                </button>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onConfirm();
+                    }}
+                    className="px-2 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700 transition"
+                >
+                    {t('onboarding.educationExperience.delete')}
+                </button>
+            </div>
+        </div>
+    );
+};
 
 // Helper to format dates for display
 const formatDateRange = (startDate: string, endDate: string | null | undefined): string => {
@@ -25,9 +84,10 @@ const getItemInstitution = (item: ResumeItemData): string => {
     return 'issuingOrganization' in item ? item.issuingOrganization : item.institution;
 };
 
-// --- RESUME ITEM COMPONENT ---
+// --- RESUME ITEM COMPONENT (with inline delete popup) ---
 const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete: () => void; }> = ({ item, onEdit, onDelete }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const description = ('description' in item ? item.description : undefined) || '';
     const canTruncate = description.length > 100;
     const truncatedDescription = `${description.substring(0, 100)}...`;
@@ -39,6 +99,20 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
     const title = getItemTitle(item);
     const institution = getItemInstitution(item);
     const location = ('location' in item ? item.location : undefined) || 'N/A';
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowDeleteConfirm(true);
+    };
+
+    const handleConfirmDelete = () => {
+        setShowDeleteConfirm(false);
+        onDelete();
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteConfirm(false);
+    };
 
     return (
         <div className="flex gap-6 group relative">
@@ -65,9 +139,27 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
                     </>
                 )}
             </div>
-            <div className="absolute top-0 right-0 flex items-center gap-2">
-                <button onClick={onEdit} className="p-1.5 text-gray-500 hover:text-blue-600 rounded-md hover:bg-blue-100"><HiPencil className="w-4 h-4" /></button>
-                <button onClick={onDelete} className="p-1.5 text-gray-500 hover:text-red-600 rounded-md hover:bg-red-100"><HiTrash className="w-4 h-4" /></button>
+            <div className="absolute top-0 right-0 flex items-center gap-1">
+                <button
+                    onClick={onEdit}
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
+                >
+                    <HiPencil className="w-4 h-4" />
+                </button>
+                <div className="relative">
+                    <button
+                        onClick={handleDeleteClick}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                    >
+                        <HiTrash className="w-4 h-4" />
+                    </button>
+                    {showDeleteConfirm && (
+                        <DeleteConfirmPopup
+                            onConfirm={handleConfirmDelete}
+                            onCancel={handleCancelDelete}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -99,8 +191,6 @@ const ResumeHighlights: React.FC<ResumeHighlightsProps> = ({
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<ResumeItemData | null>(null);
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<ResumeItemData | null>(null);
 
     const dataMap: {
         [K in Tab]: {
@@ -136,20 +226,11 @@ const ResumeHighlights: React.FC<ResumeHighlightsProps> = ({
         setIsModalOpen(false);
     };
 
-    const handleDeleteRequest = (item: ResumeItemData) => {
-        setItemToDelete(item);
-        setIsConfirmModalOpen(true);
-    };
-
-    const handleDeleteConfirm = () => {
-        if (!itemToDelete) return;
+    const handleDeleteItem = (itemToDelete: ResumeItemData) => {
         const { items, setItems } = dataMap[activeTab];
         const updatedItems = items.filter((item: ResumeItemData) => item.id !== itemToDelete.id);
         setItems(updatedItems);
-        setIsConfirmModalOpen(false);
-        setItemToDelete(null);
     };
-
 
     const renderContent = () => {
         const { items } = dataMap[activeTab];
@@ -160,7 +241,7 @@ const ResumeHighlights: React.FC<ResumeHighlightsProps> = ({
                         key={item.id}
                         item={item}
                         onEdit={() => handleOpenModal(item)}
-                        onDelete={() => handleDeleteRequest(item)}
+                        onDelete={() => handleDeleteItem(item)}
                     />
                 )}
             </div>
@@ -176,13 +257,6 @@ const ResumeHighlights: React.FC<ResumeHighlightsProps> = ({
                 itemToEdit={editingItem}
                 sectionTitle={activeTab}
             />
-            <ConfirmationModal
-                isOpen={isConfirmModalOpen}
-                onClose={() => setIsConfirmModalOpen(false)}
-                onConfirm={handleDeleteConfirm}
-                title={`Delete ${activeTab} Entry`}
-                message={`Are you sure you want to delete this entry? This action cannot be undone.`}
-            />
 
             <div>
                 <h2 className="text-2xl font-bold text-gray-800">Resume Highlights</h2>
@@ -196,8 +270,8 @@ const ResumeHighlights: React.FC<ResumeHighlightsProps> = ({
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-colors ${activeTab === tab
-                                    ? 'bg-white text-gray-800 shadow-md'
-                                    : 'bg-transparent text-gray-500 hover:bg-white/50'
+                                ? 'bg-white text-gray-800 shadow-md'
+                                : 'bg-transparent text-gray-500 hover:bg-white/50'
                                 }`}
                         >
                             {tab}

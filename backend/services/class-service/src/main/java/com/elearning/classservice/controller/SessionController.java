@@ -6,7 +6,9 @@ import com.elearning.classservice.dto.response.ApiResponse;
 import com.elearning.classservice.dto.response.CreateClassBookingResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
 import com.elearning.classservice.service.ClassService;
+import com.elearning.classservice.service.RescheduleRequestService;
 import com.elearning.classservice.service.SessionService;
+import com.elearning.classservice.dto.request.RescheduleRequestRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class SessionController {
 
     private final SessionService sessionService;
     private final ClassService classService;
+    private final RescheduleRequestService rescheduleRequestService;
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<SessionResponse>>> getBookedSessionsForUser(
@@ -80,5 +83,16 @@ public class SessionController {
         log.info("Request to create class booking for student {} with tutor {}", request.getStudentId(), request.getTutorId());
         CreateClassBookingResponse response = classService.createClassBooking(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Class booking created successfully"));
+    }
+
+    @PostMapping("/{sessionId}/reschedule")
+    public ResponseEntity<ApiResponse<Void>> requestSessionReschedule(
+            @PathVariable UUID sessionId,
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestBody RescheduleRequestRequest request) {
+
+        log.info("User {} requests reschedule for session {} -> newSchedule={}", userId, sessionId, request.getNewSchedule());
+        rescheduleRequestService.createForSession(sessionId, userId, request);
+        return ResponseEntity.status(201).body(ApiResponse.success(null, "Reschedule request created"));
     }
 }

@@ -1,11 +1,13 @@
 package com.elearning.quizservice.controller;
 
+import com.elearning.quizservice.dto.GenerateQuizRequest;
 import com.elearning.quizservice.dto.request.CreateQuizRequest;
 import com.elearning.quizservice.dto.request.UpdateQuizRequest;
 import com.elearning.quizservice.dto.response.ApiResponse;
 import com.elearning.quizservice.dto.response.QuizDetailResponse;
 import com.elearning.quizservice.dto.response.QuizStatisticsResponse;
 import com.elearning.quizservice.dto.response.QuizSummaryResponse;
+import com.elearning.quizservice.service.GeminiQuizService;
 import com.elearning.quizservice.service.GradingService;
 import com.elearning.quizservice.service.QuizService;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ public class QuizController {
     
     private final QuizService quizService;
     private final GradingService gradingService;
+    private final GeminiQuizService geminiQuizService;
     
     /**
      * Create a new quiz
@@ -43,6 +46,20 @@ public class QuizController {
         
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "Quiz created successfully"));
+    }
+    
+    /**
+     * Generate quiz using AI (Gemini) - does NOT save to database
+     */
+    @PostMapping("/generate")
+    public ResponseEntity<ApiResponse<String>> generateQuiz(
+            @Valid @RequestBody GenerateQuizRequest request) {
+        log.info("Generating quiz with AI. Prompt length: {}", request.getPrompt().length());
+        
+        String quizJson = geminiQuizService.generateQuiz(request.getPrompt());
+        
+        return ResponseEntity.ok(
+                ApiResponse.success(quizJson, "Quiz generated successfully. This is a preview and not saved."));
     }
     
     /**

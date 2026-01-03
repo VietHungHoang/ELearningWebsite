@@ -1,50 +1,39 @@
 import React from 'react';
 import ProfileSettingsLayout from './ProfileSettingsLayout';
 import PersonalDetailsContent from './components/PersonalDetailsContent';
-import { useTutorDetail } from '../../../../hooks/useTutorDetail';
+import { useProfileSettings, emptyTutorDetail } from './context/ProfileSettingsContext';
 
 const PersonalDetailsPage: React.FC = () => {
-    // Fetch tutor detail data
-    const { tutor, error: tutorError } = useTutorDetail();
+    // Fetch tutor detail data from shared context
+    const { tutorData, error: tutorError, loading } = useProfileSettings();
 
-    // If there's an error fetching tutor data, use empty tutor detail object
-    const emptyTutorDetail: any = {
-        id: "",
-        fullName: "",
-        avatarUrl: "",
-        email: "",
-        isVerified: false,
-        introduction: "",
-        headline: "",
-        gender: "Not specified",
-        timezone: "",
-        videoUrl: "",
-        currentSessionFee: 0,
-        originalSessionFee: undefined,
-        averageRating: 0,
-        reviewCount: 0,
-        bookedSessionsCount: 0,
-        studentCount: 0,
-        hasTrialSession: false,
-        country: { code: "", name: "", flag: "" },
-        languages: [],
-        subjects: [],
-        reviews: [],
-        availabilities: [],
-        socialLinks: [],
-        educations: [],
-        experiences: [],
-        certifications: [],
-        groupClasses: undefined,
-    };
+    const tutorToDisplay = tutorError ? emptyTutorDetail : tutorData;
 
-    const tutorData = tutorError ? emptyTutorDetail : tutor;
+    if (loading) {
+        return (
+            <ProfileSettingsLayout activeTab="Personal Details">
+                <div className="space-y-6 animate-pulse">
+                    <div>
+                        <div className="h-8 bg-gray-300 rounded w-1/4 mb-2"></div>
+                        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="h-10 bg-gray-300 rounded w-32"></div>
+                        <div className="h-10 bg-gray-300 rounded w-32"></div>
+                        <div className="h-10 bg-gray-300 rounded w-32"></div>
+                        <div className="h-10 bg-gray-300 rounded w-32"></div>
+                    </div>
+                </div>
+            </ProfileSettingsLayout>
+        );
+    }
 
     return (
         <ProfileSettingsLayout activeTab="Personal Details">
-            <PersonalDetailsContent tutor={tutorData} />
+            <PersonalDetailsContent tutor={tutorToDisplay} />
         </ProfileSettingsLayout>
     );
 };
 
 export default PersonalDetailsPage;
+
