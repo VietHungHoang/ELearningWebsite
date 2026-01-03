@@ -252,12 +252,12 @@
                             </a>
                         </li>
                         <li>
-                            <a routerLink="/authentication/logout" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
+                            <button type="button" (click)="logout()" class="block w-full text-left relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
                                 <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     logout
                                 </i>
                                 {{ 'header.profile.logout' | translate }}
-                            </a>
+                            </button>
                         </li>
                     </ul>
                 </div>

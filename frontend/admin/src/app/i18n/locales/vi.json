@@ -342,10 +342,9 @@
     "selected": "đã chọn",
     "selectAll": "Chọn tất cả",
     "selectReviews": "Chọn đánh giá để thực hiện thao tác",
-    "student": "học viên",
+    "student": "Học viên",
     "tutor": "Gia sư",
     "class": "Lớp học",
-    "learner": "học viên",
     "id": "ID",
     "stars": "Sao",
     "reason": "Lý do",
@@ -362,7 +361,8 @@
       "allRatings": "Tất cả đánh giá",
       "inappropriateLanguage": "Ngôn từ thô tục / không phù hợp",
       "spam": "Spam/Quảng cáo",
-      "aiContentIssue": "Nội dung bạo lực / đe dọa"
+      "aiContentIssue": "Nội dung bạo lực / đe dọa",
+      "lowRating": "Đánh giá thấp"
     },
     "status": {
       "visible": "Hiển thị",
@@ -384,7 +384,7 @@
     "table": {
       "id": "ID",
       "stt": "STT",
-      "learner": "học viên",
+      "student": "Học viên",
       "tutor": "Gia sư",
       "rating": "Đánh giá",
       "content": "Nội dung",

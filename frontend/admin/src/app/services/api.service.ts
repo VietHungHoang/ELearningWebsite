@@ -12,6 +12,7 @@ export class ApiService {
 
     private apiUrl = `${environment.apiUrl}/v1/admin`;
     private publicCommonApiUrl = `${environment.apiUrl}/v1/public/common`;
+    private authApiUrl = `${environment.apiUrl}/v1/auth`;
     private readonly API_TIMEOUT = 30000; // Tăng lên 30s để debug
 
     private isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -149,6 +150,47 @@ export class ApiService {
     deleteCommon<T>(endpoint: string): Observable<ApiResponse<T>> {
         return this.handleRequest<T>(
             this.http.delete<ApiResponse<T>>(`${this.publicCommonApiUrl}${endpoint}`)
+        );
+    }
+
+    // Auth API methods (using Auth API)
+    getAuth<T>(endpoint: string, params?: any): Observable<ApiResponse<T>> {
+        let httpParams = new HttpParams();
+        if (params) {
+            Object.keys(params).forEach(key => {
+                if (params[key] !== null && params[key] !== undefined) {
+                    httpParams = httpParams.set(key, params[key].toString());
+                }
+            });
+        }
+        const url = `${this.authApiUrl}${endpoint}`;
+        console.log('🔐 [ApiService] GET auth request:', url, 'params:', httpParams.toString());
+        return this.handleRequest<T>(
+            this.http.get<ApiResponse<T>>(url, { params: httpParams })
+        );
+    }
+
+    postAuth<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+        return this.handleRequest<T>(
+            this.http.post<ApiResponse<T>>(`${this.authApiUrl}${endpoint}`, body)
+        );
+    }
+
+    putAuth<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+        return this.handleRequest<T>(
+            this.http.put<ApiResponse<T>>(`${this.authApiUrl}${endpoint}`, body)
+        );
+    }
+
+    patchAuth<T>(endpoint: string, body: any): Observable<ApiResponse<T>> {
+        return this.handleRequest<T>(
+            this.http.patch<ApiResponse<T>>(`${this.authApiUrl}${endpoint}`, body)
+        );
+    }
+
+    deleteAuth<T>(endpoint: string): Observable<ApiResponse<T>> {
+        return this.handleRequest<T>(
+            this.http.delete<ApiResponse<T>>(`${this.authApiUrl}${endpoint}`)
         );
     }
 

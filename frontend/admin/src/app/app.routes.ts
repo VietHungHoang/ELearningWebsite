@@ -77,11 +77,15 @@ import { PromotionManagementComponent } from './pages/promotion-management/promo
 import { VouchersComponent } from './pages/promotion-management/vouchers/vouchers.component';
 import { CreateVoucherComponent } from './pages/promotion-management/vouchers/create-voucher/create-voucher.component';
 import { EditVoucherComponent } from './pages/promotion-management/vouchers/edit-voucher/edit-voucher.component';
+import { authGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
-        { path: '', redirectTo: 'dashboard/overview', pathMatch: 'full' },
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
+    { path: 'login', component: SignInComponent },
     {
         path: 'dashboard',
         component: DashboardComponent,
+        canActivate: [authGuard],
         children: [
             {path: '', redirectTo: 'overview', pathMatch: 'full'},
             {path: 'overview', component: OverviewComponent},

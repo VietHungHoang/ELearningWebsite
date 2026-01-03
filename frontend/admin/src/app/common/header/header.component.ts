@@ -5,6 +5,7 @@ import { ToggleService } from './toggle.service';
 import { I18nService, SupportedLanguage } from '../../i18n/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { CurrencyService, SupportedCurrency } from '../../services/currency.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-header',
@@ -23,7 +24,8 @@ export class HeaderComponent implements OnInit {
         public toggleService: ToggleService,
         private renderer: Renderer2,
         private i18nService: I18nService,
-        private currencyService: CurrencyService
+        private currencyService: CurrencyService,
+        private authService: AuthService
     ) {
         // Watch for language changes
         effect(() => {
@@ -45,6 +47,10 @@ export class HeaderComponent implements OnInit {
         await this.i18nService.setLanguage(lang);
         this.currentLanguage = lang;
         this.toggleClass('languageMenuButton'); // Close dropdown after selection
+    }
+
+    logout(): void {
+        this.authService.logout();
     }
 
     changeCurrency(currency: SupportedCurrency): void {

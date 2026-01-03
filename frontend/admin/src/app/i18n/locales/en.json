@@ -344,7 +344,6 @@
     "student": "Student",
     "tutor": "Tutor",
     "class": "Class",
-    "learner": "Learner",
     "id": "ID",
     "stars": "Stars",
     "reason": "Reason",
@@ -383,7 +382,7 @@
     "table": {
       "id": "ID",
       "stt": "STT",
-      "learner": "Learner",
+      "student": "Student",
       "tutor": "Tutor",
       "rating": "Rating",
       "content": "Content",
