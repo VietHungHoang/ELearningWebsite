@@ -280,12 +280,15 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
 
     return (
         <>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4 relative">
                 {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                
+                {/* Status badge - Top left corner */}
+                <RequestStatusBadge status={request.status} />
                 
                 {viewMode === 'tutor' ? (
                     /* Tutor View: Original UI - Avatar + Name + Menu */
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                         {person && (
                             <div className="flex-shrink-0">
                                 <img 
@@ -304,6 +307,12 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                                     {formatTimestamp(request.createdAt)}
                                 </span>
                             )}
+                            {/* Badge: Học thử - bên phải dưới timestamp */}
+                            <div className="mr-4">
+                                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    {t('dashboard.tutor.requests.trial.badge')}
+                                </span>
+                            </div>
                             <div className="relative" ref={menuRef}>
                                 <button
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -382,7 +391,7 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                     </div>
                 ) : (
                     /* Student View: Clean Layout - 2 rows */
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 pb-3 border-b border-gray-100">
                         {/* Row 1: Avatar + Name + Timestamp */}
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0">
@@ -397,15 +406,20 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                                     {person?.fullName || person?.name || 'Unknown Tutor'}
                                 </h3>
                             </div>
-                            {request.createdAt && (
-                                <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
-                                    {formatTimestamp(request.createdAt)}
+                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                {request.createdAt && (
+                                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                                        {formatTimestamp(request.createdAt)}
+                                    </span>
+                                )}
+                                {/* Badge: Học thử - bên phải dưới timestamp */}
+                                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    {t('dashboard.tutor.requests.trial.badge')}
                                 </span>
-                            )}
+                            </div>
                         </div>
-                        {/* Row 2: Status Badge + Nút xóa */}
-                        <div className="flex items-center justify-between">
-                            <RequestStatusBadge status={request.status} />
+                        {/* Row 2: Nút xóa */}
+                        <div className="flex items-center justify-end">
                             {request.status === 'PENDING' && (
                                 <div className="relative">
                                     <button

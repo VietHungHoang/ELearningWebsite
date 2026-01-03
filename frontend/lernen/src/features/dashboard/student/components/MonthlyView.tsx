@@ -85,7 +85,10 @@ const MonthlyView: React.FC<MonthlyViewProps> = ({ currentDate, bookings, onSess
                                             onClick={(e) => onSessionClick(session, e)}
                                             className="text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer bg-[#0b6459] text-white"
                                         >
-                                            {session.classInfo?.title || 'Session'}
+                                            {session.sessionType === 'TRIAL' 
+                                                ? t('dashboard.common.sessionTypes.trial') 
+                                                : (session.classInfo?.title || 'Session')
+                                            }
                                         </div>
                                     ))}
                                 </div>

@@ -4,7 +4,7 @@ interface ModalLayoutProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
   showCloseButton?: boolean;
 }
 
@@ -63,7 +63,9 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
             maxWidth === 'lg' ? 'max-w-lg' :
               maxWidth === 'xl' ? 'max-w-xl' :
                 maxWidth === '2xl' ? 'max-w-2xl' :
-                  'max-w-xl'
+                  maxWidth === '3xl' ? 'max-w-3xl' :
+                    maxWidth === '4xl' ? 'max-w-4xl' :
+                      'max-w-xl'
           } relative z-10 transition-all duration-200 ease-out ${isAnimating ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
           }`}
         onClick={(e) => e.stopPropagation()}

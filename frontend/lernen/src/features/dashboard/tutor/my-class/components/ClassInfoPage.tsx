@@ -31,7 +31,12 @@ import { formatCurrency, convertCurrency, convertToVND } from '../../../../../ut
 import commonUtils from '../../../../../utils/commonUtils';
 import type { Category, Subject } from '../../../../../types/common';
 
-const ClassInfoPage: React.FC = () => {
+interface ClassInfoPageProps {
+    isViewMode?: boolean;
+    isStudentView?: boolean;
+}
+
+const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStudentView = false }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { classId } = useParams<{ classId: string }>();
@@ -40,6 +45,12 @@ const ClassInfoPage: React.FC = () => {
     const { selectedCurrency } = useCurrency();
 
     const initialClassData = location.state?.classData as ClassTable | undefined;
+    const viewModeFromState = location.state?.isViewMode as boolean | undefined;
+    const studentViewFromState = location.state?.isStudentView as boolean | undefined;
+    
+    // Use props if provided, otherwise use state from location
+    const isViewModeFinal = isViewMode || viewModeFromState || false;
+    const isStudentViewFinal = isStudentView || studentViewFromState || false;
 
     const [classData, setClassData] = useState<ClassData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -161,13 +172,11 @@ const ClassInfoPage: React.FC = () => {
             let localizedSubject = data.subject || '';
             let localizedCategory = data.category || '';
             
-            if (data.subject) {
-                // Find subject by name (could be English or Vietnamese)
-                const allSubjects = await commonUtils.getSubjects();
-                const allCategories = await commonUtils.getCategories();
-                
+            // Use subjects and categories from state (already loaded in useEffect)
+            // If not loaded yet, wait for them to be available
+            if (data.subject && subjects.length > 0 && categories.length > 0) {
                 // Try to find subject by matching name (could be English or Vietnamese)
-                const subject = allSubjects.find(s => {
+                const subject = subjects.find(s => {
                     const nameEn = s.nameEn?.toLowerCase().trim();
                     const nameVi = s.nameVi?.toLowerCase().trim();
                     const searchName = data.subject?.toLowerCase().trim();
@@ -178,7 +187,7 @@ const ClassInfoPage: React.FC = () => {
                     localizedSubject = getLocalizedName(subject);
                     
                     // Get category from subject
-                    const category = allCategories.find(c => c.id === subject.categoryId);
+                    const category = categories.find(c => c.id === subject.categoryId);
                     if (category) {
                         localizedCategory = getLocalizedName(category);
                     }
@@ -251,8 +260,10 @@ const ClassInfoPage: React.FC = () => {
     };
 
     useEffect(() => {
-        loadClassData();
-    }, [classId]);
+        if (classId) {
+            loadClassData();
+        }
+    }, [classId, subjects, categories]); // Reload when subjects/categories are available for proper localization
 
     // Helper to get localized name
     const getLocalizedName = (item: Category | Subject): string => {
@@ -283,6 +294,10 @@ const ClassInfoPage: React.FC = () => {
     };
 
     const handleEdit = () => {
+        // Don't allow edit mode if in view mode
+        if (isViewModeFinal || isStudentViewFinal) {
+            return;
+        }
         // Enter edit mode with current data (no API call)
         if (classData) {
             const initialFormData = {
@@ -326,10 +341,9 @@ const ClassInfoPage: React.FC = () => {
         try {
             setIsSaving(true);
 
-            // Get subjectId from subject name
+            // Get subjectId from subject name (use state instead of calling API)
             let subjectId = '';
-            const allSubjects = await commonUtils.getSubjects();
-            const selectedSubject = allSubjects.find(sub => {
+            const selectedSubject = subjects.find(sub => {
                 const name = getLocalizedName(sub);
                 return name === formData.subject;
             });
@@ -374,17 +388,13 @@ const ClassInfoPage: React.FC = () => {
                 return schedule;
             });
 
-            // Convert subject and category names to current language
+            // Convert subject and category names to current language (use state instead of calling API)
             let localizedSubject = updatedData.subject || '';
             let localizedCategory = updatedData.category || '';
             
-            if (updatedData.subject) {
-                // Find subject by name (could be English or Vietnamese)
-                const allSubjects = await commonUtils.getSubjects();
-                const allCategories = await commonUtils.getCategories();
-                
+            if (updatedData.subject && subjects.length > 0 && categories.length > 0) {
                 // Try to find subject by matching name (could be English or Vietnamese)
-                const subject = allSubjects.find(s => {
+                const subject = subjects.find(s => {
                     const nameEn = s.nameEn?.toLowerCase().trim();
                     const nameVi = s.nameVi?.toLowerCase().trim();
                     const searchName = updatedData.subject?.toLowerCase().trim();
@@ -395,7 +405,7 @@ const ClassInfoPage: React.FC = () => {
                     localizedSubject = getLocalizedName(subject);
                     
                     // Get category from subject
-                    const category = allCategories.find(c => c.id === subject.categoryId);
+                    const category = categories.find(c => c.id === subject.categoryId);
                     if (category) {
                         localizedCategory = getLocalizedName(category);
                     }
@@ -483,7 +493,7 @@ const ClassInfoPage: React.FC = () => {
                     <div className="flex-grow">
                         <div className="flex items-center justify-between gap-4">
                             <h1 className="text-2xl font-bold text-gray-800">{classData.classTitle}</h1>
-                            {!isEditMode ? (
+                            {!isViewModeFinal && !isEditMode ? (
                                 <button
                                     onClick={handleEdit}
                                     className="flex items-center justify-center gap-2 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors font-semibold text-sm"
@@ -491,7 +501,7 @@ const ClassInfoPage: React.FC = () => {
                                     <FiEdit2 className="w-4 h-4" />
                                     {t('dashboard.tutor.myClass.infoPage.edit')}
                                 </button>
-                            ) : (
+                            ) : !isViewModeFinal && isEditMode ? (
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={handleCancel}
@@ -509,7 +519,7 @@ const ClassInfoPage: React.FC = () => {
                                         {isSaving ? t('dashboard.tutor.myClass.infoPage.saving') : t('dashboard.tutor.myClass.infoPage.save')}
                                     </button>
                                 </div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </div>
@@ -677,13 +687,15 @@ const ClassInfoPage: React.FC = () => {
                                         {t('dashboard.tutor.myClass.infoPage.enrolledStudents', { count: classData.students.length })}
                                     </h2>
                                 </div>
-                                <button
-                                    onClick={openModal}
-                                    className="flex items-center gap-2 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors text-sm font-semibold"
-                                >
-                                    <FiUserPlus className="w-4 h-4" />
-                                    {t('dashboard.tutor.myClass.infoPage.addStudent')}
-                                </button>
+                                {!isViewModeFinal && !isStudentViewFinal && (
+                                    <button
+                                        onClick={openModal}
+                                        className="flex items-center gap-2 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors text-sm font-semibold"
+                                    >
+                                        <FiUserPlus className="w-4 h-4" />
+                                        {t('dashboard.tutor.myClass.infoPage.addStudent')}
+                                    </button>
+                                )}
                             </div>
 
                             {classData.students.length === 0 ? (

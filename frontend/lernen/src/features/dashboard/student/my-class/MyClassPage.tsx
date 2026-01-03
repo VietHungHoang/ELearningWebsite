@@ -7,7 +7,8 @@ import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import Pagination from '../../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import { classService } from '../../../../services/classService';
-import type { ClassTable, ClassStatus } from '../../../../types/class';
+import { useAuth } from '../../../../context/AuthContext';
+import type { ClassTable, EnrollmentStatus } from '../../../../types/class';
 
 type FilterTab = 'All Status' | 'Ongoing' | 'Completed';
 
@@ -15,6 +16,7 @@ type FilterTab = 'All Status' | 'Ongoing' | 'Completed';
 const MyClassPage: React.FC = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
+    const { state } = useAuth();
     const [classes, setClasses] = useState<ClassTable[]>([]);
     const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -25,6 +27,13 @@ const MyClassPage: React.FC = () => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const itemsPerPage = 10;
     const { setBreadcrumb } = useBreadcrumb();
+
+    // Helper function to get enrollment status for current student
+    const getEnrollmentStatus = (classData: ClassTable): EnrollmentStatus | null => {
+        if (!state.user?.id) return null;
+        const currentStudent = classData.students.find(s => s.id === state.user?.id);
+        return currentStudent?.enrollmentStatus || null;
+    };
 
     // Helper function to convert day of week number to name
     const getDayName = (dayOfWeek: number): string => {
@@ -95,27 +104,48 @@ const MyClassPage: React.FC = () => {
     }, [currentPage]);
 
     const handleViewDetails = (classData: ClassTable) => {
-        // Navigate to class detail page with class data in state
-        navigate(`/dashboard/my-class/${classData.id}`, { 
-            state: { classData } 
-        });
+        // Check enrollmentStatus of current student to determine navigation
+        const enrollmentStatus = getEnrollmentStatus(classData);
+        
+        // If enrollmentStatus is JOINED, PENDING_PAYMENT, or ON_GOING, show view-only page
+        // If enrollmentStatus is COMPLETED, navigate to detail page
+        if (enrollmentStatus === 'JOINED' || enrollmentStatus === 'PENDING_PAYMENT' || enrollmentStatus === 'ON_GOING') {
+            // Navigate to view-only page (reuse ClassInfoPage with view mode)
+            navigate(`/dashboard/my-class/${classData.id}/view`, { 
+                state: { classData, isViewMode: true, isStudentView: true } 
+            });
+        } else if (enrollmentStatus === 'COMPLETED') {
+            // Navigate to detail page for completed classes
+            navigate(`/dashboard/my-class/${classData.id}`, { 
+                state: { classData } 
+            });
+        } else {
+            // Default: navigate to view page
+            navigate(`/dashboard/my-class/${classData.id}/view`, { 
+                state: { classData, isViewMode: true, isStudentView: true } 
+            });
+        }
     };
 
     const filteredClasses = useMemo(() => {
-        let statusFilter: ClassStatus | null = null;
+        let enrollmentStatusFilter: EnrollmentStatus | null = null;
         if (activeTab === 'Ongoing') {
-            statusFilter = 'ONGOING';
+            enrollmentStatusFilter = 'ON_GOING';
         } else if (activeTab === 'Completed') {
-            statusFilter = 'COMPLETED';
+            enrollmentStatusFilter = 'COMPLETED';
         }
 
         return classes
-            .filter(c => !statusFilter || c.status === statusFilter)
+            .filter(c => {
+                if (!enrollmentStatusFilter) return true;
+                const enrollmentStatus = getEnrollmentStatus(c);
+                return enrollmentStatus === enrollmentStatusFilter;
+            })
             .filter(c =>
                 c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 c.students.some(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()))
             );
-    }, [classes, activeTab, searchTerm]);
+    }, [classes, activeTab, searchTerm, state.user?.id]);
 
     return (
         <div className="p-4">
@@ -218,11 +248,11 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                classData.type === 'ON_ONE_ONE'
+                                                classData.type === 'ONE_ON_ONE'
                                                     ? 'bg-blue-100 text-blue-800'
                                                     : 'bg-purple-100 text-purple-800'
                                             }`}>
-                                                {classData.type === 'ON_ONE_ONE' 
+                                                {classData.type === 'ONE_ON_ONE' 
                                                     ? t('dashboard.student.myClass.classTypes.oneOnOne') 
                                                     : t('dashboard.student.myClass.classTypes.group')
                                                 }
@@ -260,21 +290,35 @@ const MyClassPage: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
-                                                <span className={`w-1.5 h-1.5 rounded-full ${
-                                                    classData.status === 'ONGOING'
-                                                        ? 'bg-green-600'
-                                                        : classData.status === 'COMPLETED'
-                                                        ? 'bg-gray-600'
-                                                        : 'bg-yellow-600'
-                                                }`}></span>
-                                                {classData.status === 'ONGOING'
-                                                    ? t('dashboard.student.myClass.statusLabels.ongoing')
-                                                    : classData.status === 'COMPLETED'
-                                                    ? t('dashboard.student.myClass.statusLabels.completed')
-                                                    : t('dashboard.student.myClass.statusLabels.enrolled')
+                                            {(() => {
+                                                const enrollmentStatus = getEnrollmentStatus(classData);
+                                                let statusLabel = '';
+                                                let statusColor = 'bg-yellow-600';
+                                                
+                                                if (enrollmentStatus === 'JOINED') {
+                                                    statusLabel = t('dashboard.student.myClass.statusLabels.enrolled');
+                                                    statusColor = 'bg-blue-600';
+                                                } else if (enrollmentStatus === 'PENDING_PAYMENT') {
+                                                    statusLabel = t('dashboard.student.myClass.statusLabels.pendingPayment');
+                                                    statusColor = 'bg-yellow-600';
+                                                } else if (enrollmentStatus === 'ON_GOING') {
+                                                    statusLabel = t('dashboard.student.myClass.statusLabels.ongoing');
+                                                    statusColor = 'bg-green-600';
+                                                } else if (enrollmentStatus === 'COMPLETED') {
+                                                    statusLabel = t('dashboard.student.myClass.statusLabels.completed');
+                                                    statusColor = 'bg-gray-600';
+                                                } else {
+                                                    statusLabel = t('dashboard.student.myClass.statusLabels.enrolled');
+                                                    statusColor = 'bg-yellow-600';
                                                 }
-                                            </span>
+                                                
+                                                return (
+                                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${statusColor}`}></span>
+                                                        {statusLabel}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="p-4 text-center">
                                             <div className="flex items-center justify-center gap-0.5">

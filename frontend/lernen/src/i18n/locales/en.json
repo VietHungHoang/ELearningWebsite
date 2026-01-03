@@ -540,6 +540,11 @@
         "thu": "Thu",
         "fri": "Fri",
         "sat": "Sat"
+      },
+      "sessionTypes": {
+        "oneOnOne": "1-on-1",
+        "group": "Group",
+        "trial": "Trial"
       }
     },
     "inbox": {
@@ -693,7 +698,8 @@
         "statusLabels": {
           "ongoing": "Ongoing",
           "completed": "Completed",
-          "enrolled": "Enrolled"
+          "enrolled": "Enrolled",
+          "pendingPayment": "Pending Payment"
         },
         "loading": "Loading classes...",
         "errorTitle": "Failed to load classes",
@@ -752,6 +758,36 @@
           "view": "View details",
           "downloadInvoice": "Download invoice",
           "contactSupport": "Contact support"
+        },
+        "billDetail": {
+          "title": "Bill Details",
+          "invoiceNumber": "Invoice Number",
+          "transactionId": "Transaction ID",
+          "studentInformation": "Student Information",
+          "tutorInformation": "Tutor Information",
+          "name": "Name",
+          "email": "Email",
+          "courseInformation": "Course Information",
+          "courseTitle": "Course Title",
+          "classType": "Class Type",
+          "sessionsPurchased": "Sessions Purchased",
+          "sessions": "sessions",
+          "pricePerSession": "Price Per Session",
+          "schedule": "Schedule",
+          "paymentBreakdown": "Payment Breakdown",
+          "subtotal": "Subtotal",
+          "discount": "Discount",
+          "tax": "Tax",
+          "totalAmount": "Total Amount",
+          "paymentInformation": "Payment Information",
+          "amount": "Amount",
+          "paymentMethod": "Payment Method",
+          "purchaseDate": "Purchase Date",
+          "paymentDate": "Payment Date",
+          "status": "Status",
+          "notes": "Notes",
+          "payNow": "Pay Now",
+          "close": "Close"
         }
       }
     },
@@ -1250,7 +1286,9 @@
           "declineSuccess": "Reschedule request declined and student notified.",
           "declineError": "An error occurred while declining the request",
           "sentTo": "Sent to:",
-          "everyDayAt": "Every {{day}} at {{time}}"
+          "everyDayAt": "Every {{day}} at {{time}}",
+          "showMore": "Show more",
+          "showLess": "Show less"
         }
       },
       "schedule": {
@@ -1791,7 +1829,31 @@
       "successLeft": "Successfully Left the Class",
       "leaveSuccessMessage": "You have successfully left the group class. You can rejoin anytime if you change your mind.",
       "classWillStartOnDate": "This class will start on {{startDate}}, even if not all spots are filled.",
-      "classWillStartWhenFull": "This class will start immediately once all spots are filled."
+      "classWillStartWhenFull": "This class will start immediately once all spots are filled.",
+      "perHour": "/hour",
+      "lastStudent": {
+        "title": "You are the last student!",
+        "subtitle": "Congratulations! You will be the last student to complete this class.",
+        "specialNotice": "Special Notice",
+        "notice1": "You are the last student to reach the maximum capacity of the class.",
+        "notice2": "The class will be activated and start immediately after you join.",
+        "notice3": "You can pay now or pay later when the class starts.",
+        "info1": "The class will be opened immediately after you confirm your participation.",
+        "info2": "You will receive an email notification when the class starts.",
+        "confirmJoin": "Confirm & Join"
+      },
+      "paymentPrompt": {
+        "title": "Would you like to pay now?",
+        "description": "You have successfully joined the class! Would you like to pay now?",
+        "className": "Class",
+        "price": "Price",
+        "benefitsTitle": "Benefits of paying now:",
+        "benefit1": "Secure your spot in the class",
+        "benefit2": "Receive early notification when the class starts",
+        "benefit3": "Avoid forgetting to pay later",
+        "payNow": "Pay Now",
+        "payLater": "Pay Later"
+      }
     },
     "bookSessionModal": {
       "title": "Book a Session",
@@ -1986,6 +2048,19 @@
       "showCorrectAnswers": "Show correct answers after submission",
       "questionsTitle": "Questions ({{count}})",
       "addQuestion": "Add question",
+      "aiGenerate": {
+        "button": "Generate with AI",
+        "title": "Generate Questions with AI",
+        "description": "Enter a description or topic to let AI automatically generate a set of questions with answers for you.",
+        "promptLabel": "Description or topic",
+        "promptPlaceholder": "Example: Create 5 multiple choice questions about basic JavaScript, including concepts about variables, functions, and loops...",
+        "promptHint": "The more detailed your description, the more suitable questions AI will generate for your needs.",
+        "promptRequired": "Please enter a description or topic",
+        "generateButton": "Generate questions",
+        "generating": "Generating...",
+        "success": "Questions generated successfully!",
+        "error": "Failed to generate questions. Please try again."
+      },
       "confirmLeave": {
         "title": "Discard changes?",
         "message": "You have unsaved changes. Are you sure you want to leave without saving?",

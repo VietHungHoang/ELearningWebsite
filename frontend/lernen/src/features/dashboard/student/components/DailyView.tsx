@@ -54,7 +54,12 @@ const DailyView: React.FC<DailyViewProps> = ({ currentDate, bookings, onSessionC
                                     className="absolute px-3 py-1 rounded-lg cursor-pointer bg-[#0b6459] text-white"
                                     style={{ top: `${top}px`, height: `${height - 4}px`, left: '2px', right: '2px', width: 'calc(100% - 4px)' }}
                                 >
-                                    <p className="font-bold text-sm">{session.classInfo?.title || 'Session'}</p>
+                                    <p className="font-bold text-sm">
+                                        {session.sessionType === 'TRIAL' 
+                                            ? t('dashboard.common.sessionTypes.trial') 
+                                            : (session.classInfo?.title || 'Session')
+                                        }
+                                    </p>
                                     <p className="text-xs">{session.tutor?.fullName || 'Tutor'}</p>
                                 </div>
                             )

@@ -13,7 +13,7 @@ type Filter = 'Reschedule Requests' | 'Trial Requests';
 
 const RequestsPage: React.FC = () => {
     const { state } = useAuth();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [activeFilter, setActiveFilter] = useState<Filter>('Trial Requests');
     const [updatedRequestId, setUpdatedRequestId] = useState<string | null>(null);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -25,6 +25,7 @@ const RequestsPage: React.FC = () => {
     const viewMode = isTutor ? 'tutor' : 'student';
     
     const [loading, setLoading] = useState(true);
+    const [loadingReschedule, setLoadingReschedule] = useState(false);
     const [rescheduleRequests, setRescheduleRequests] = useState<any[]>([]);
     const [trialRequests, setTrialRequests] = useState<any[]>([]);
 
@@ -38,8 +39,9 @@ const RequestsPage: React.FC = () => {
         ]);
     }, [setBreadcrumb, t, isTutor]);
 
+    // Fetch trial requests on mount
     useEffect(() => {
-        const fetchRequests = async () => {
+        const fetchTrialRequests = async () => {
             if (!state.user) {
                 setLoading(false);
                 return;
@@ -55,8 +57,6 @@ const RequestsPage: React.FC = () => {
                     } else {
                         setTrialRequests([]);
                     }
-                    // Reschedule requests API not available yet
-                    setRescheduleRequests([]);
                 } else if (isStudent) {
                     // Fetch trial requests for student
                     const trialResponse = await classService.getTrialRequests('student', state.user.id);
@@ -65,19 +65,146 @@ const RequestsPage: React.FC = () => {
                     } else {
                         setTrialRequests([]);
                     }
-                    // Reschedule requests API not available yet
-                    setRescheduleRequests([]);
                 }
             } catch (error) {
-                console.error('Failed to fetch requests:', error);
+                console.error('Failed to fetch trial requests:', error);
                 setTrialRequests([]);
-                setRescheduleRequests([]);
             } finally {
                 setLoading(false);
             }
         };
-        fetchRequests();
+        fetchTrialRequests();
     }, [state.user, isTutor, isStudent]);
+
+    // Helper function to convert UTC datetime string to local Date
+    // Backend returns datetime in UTC format without timezone indicator (e.g., "2026-01-03T03:32:28.651878")
+    const convertUTCToLocal = (utcDateTimeString: string): Date => {
+        // Normalize the date string: handle microseconds (JavaScript Date only supports milliseconds)
+        let normalizedDateString = utcDateTimeString;
+        if (normalizedDateString.includes('.')) {
+            const parts = normalizedDateString.split('.');
+            if (parts.length === 2) {
+                const fractionalPart = parts[1];
+                // Extract timezone if present (Z, +HH:MM, -HH:MM)
+                const tzMatch = fractionalPart.match(/^(\d+)([Z+-].*)?$/);
+                if (tzMatch) {
+                    const fractionalSeconds = tzMatch[1];
+                    const tzPart = tzMatch[2] || '';
+                    // Truncate microseconds to milliseconds (first 3 digits, pad if needed)
+                    const milliseconds = fractionalSeconds.substring(0, 3).padEnd(3, '0');
+                    normalizedDateString = `${parts[0]}.${milliseconds}${tzPart}`;
+                }
+            }
+        }
+        
+        // Check if string already has timezone indicator
+        const hasTimezone = normalizedDateString.endsWith('Z') || 
+                           /[+-]\d{2}:\d{2}$/.test(normalizedDateString) ||
+                           /[+-]\d{4}$/.test(normalizedDateString);
+        
+        if (hasTimezone) {
+            // Already has timezone info, parse directly
+            return new Date(normalizedDateString);
+        } else {
+            // No timezone info, treat as UTC (backend stores LocalDateTime in UTC)
+            // Add 'Z' to indicate UTC
+            return new Date(normalizedDateString + 'Z');
+        }
+    };
+
+    // Fetch reschedule requests when switching to Reschedule Requests tab
+    useEffect(() => {
+        const fetchRescheduleRequests = async () => {
+            if (!state.user) {
+                return;
+            }
+
+            // Only fetch if switching to Reschedule Requests tab
+            if (activeFilter !== 'Reschedule Requests') {
+                return;
+            }
+
+            setLoadingReschedule(true);
+            try {
+                const userType = isTutor ? 'tutor' : 'student';
+                const response = await classService.getRescheduleRequestsByUser(userType);
+                
+                if (response.success && response.data) {
+                    // Get locale from i18n
+                    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+                    
+                    // Map RescheduleRequest to RescheduleRequestData format
+                    const mappedRequests = response.data.map((req) => {
+                        // Convert UTC to local time
+                        const oldDate = convertUTCToLocal(req.oldSchedule);
+                        const newDate = convertUTCToLocal(req.newSchedule);
+                        const createdAtDate = convertUTCToLocal(req.createdAt);
+                        
+                        return {
+                            id: req.id,
+                            type: 'Reschedule' as const,
+                            courseTitle: '', // Bỏ courseTitle, không hiển thị "Session"
+                            originalSchedule: {
+                                day: oldDate.toLocaleDateString(locale, {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                }),
+                                time: oldDate.toLocaleTimeString(locale, {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                            },
+                            proposedSchedules: [{
+                                day: newDate.toLocaleDateString(locale, {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                }),
+                                time: newDate.toLocaleTimeString(locale, {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })
+                            }],
+                            reason: req.reason,
+                            timestamp: createdAtDate.toLocaleString(locale, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            }),
+                            date: createdAtDate,
+                            status: req.status === 'APPROVED' ? 'APPROVED' : req.status === 'REJECTED' ? 'DECLINED' : 'PENDING' as const,
+                            ...(isTutor ? {
+                                student: {
+                                    name: req.requesterName,
+                                    avatar: '',
+                                    id: req.requesterId
+                                }
+                            } : {
+                                tutor: {
+                                    name: req.requesterName,
+                                    avatar: ''
+                                }
+                            })
+                        };
+                    });
+                    setRescheduleRequests(mappedRequests);
+                } else {
+                    setRescheduleRequests([]);
+                }
+            } catch (error) {
+                console.error('Failed to fetch reschedule requests:', error);
+                setRescheduleRequests([]);
+            } finally {
+                setLoadingReschedule(false);
+            }
+        };
+        fetchRescheduleRequests();
+    }, [activeFilter, state.user, isTutor, isStudent, i18n.language]);
 
     const currentRequests = useMemo(() => {
         switch (activeFilter) {
@@ -127,6 +254,7 @@ const RequestsPage: React.FC = () => {
         );
     };
     
+    // Show loading for initial page load
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[calc(100vh-200px)] w-full">
@@ -159,6 +287,15 @@ const RequestsPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Show loading when fetching reschedule requests */}
+            {loadingReschedule ? (
+                <div className="flex items-center justify-center min-h-[400px] w-full mt-8">
+                    <BirdLoading 
+                        title={t('dashboard.tutor.requests.trial.loading')}
+                        size="lg"
+                    />
+                </div>
+            ) : (
             <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {currentRequests.length > 0 ? (
                     currentRequests.map(request => {
@@ -202,6 +339,7 @@ const RequestsPage: React.FC = () => {
                     </div>
                 )}
             </div>
+            )}
         </div>
     );
 };
