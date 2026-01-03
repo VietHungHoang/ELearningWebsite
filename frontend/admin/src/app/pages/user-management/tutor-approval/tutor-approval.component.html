@@ -1,8 +1,8 @@
 <div class="mb-[25px] md:flex items-center justify-between">
     <div>
-        <h5 class="!mb-0">{{ 'instructorApproval.title' | translate }}</h5>
+        <h5 class="!mb-0">{{ 'tutorApproval.title' | translate }}</h5>
         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {{ 'instructorApproval.subtitle' | translate: { count: totalRequests } }}
+            {{ 'tutorApproval.subtitle' | translate: { count: totalRequests } }}
         </p>
     </div>
     <ol class="breadcrumb mt-[12px] md:mt-0">
@@ -13,10 +13,10 @@
             </a>
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            {{ 'instructorApproval.breadcrumb.userManagement' | translate }}
+            {{ 'tutorApproval.breadcrumb.userManagement' | translate }}
         </li>
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            {{ 'instructorApproval.breadcrumb.instructorApproval' | translate }}
+            {{ 'tutorApproval.breadcrumb.tutorApproval' | translate }}
         </li>
     </ol>
 </div>
@@ -26,13 +26,13 @@
     <div class="flex items-center justify-between gap-[12px] flex-wrap">
         <div class="flex items-center gap-[12px] flex-1">
             <span class="text-sm text-gray-600 dark:text-gray-400">
-                {{ selectedRequests.size > 0 ? (selectedRequests.size + ' ' + ('instructorApproval.selected' | translate)) : ('instructorApproval.selectInstructors' | translate) }}
+                {{ selectedRequests.size > 0 ? (selectedRequests.size + ' ' + ('tutorApproval.selected' | translate)) : ('tutorApproval.selectInstructors' | translate) }}
             </span>
         </div>
         <div class="flex items-center gap-[8px] flex-wrap">
-            <button 
-                type="button" 
-                (click)="bulkApproveRequests()" 
+            <button
+                type="button"
+                (click)="bulkApproveRequests()"
                 [disabled]="selectedRequests.size === 0"
                 class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
                     disabled:opacity-50 disabled:cursor-not-allowed
@@ -40,11 +40,11 @@
                     hover:bg-success-50 dark:hover:bg-success-900/20 hover:border-success-400 dark:hover:border-success-600
                     disabled:hover:bg-white disabled:hover:border-success-300">
                 <i class="material-symbols-outlined !text-lg">check_circle</i>
-                {{ 'instructorApproval.actions.approve' | translate }}
+                {{ 'tutorApproval.actions.approve' | translate }}
             </button>
-            <button 
-                type="button" 
-                (click)="bulkRequestEditRequests()" 
+            <button
+                type="button"
+                (click)="bulkRequestEditRequests()"
                 [disabled]="selectedRequests.size === 0"
                 class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
                     disabled:opacity-50 disabled:cursor-not-allowed
@@ -52,11 +52,11 @@
                     hover:bg-warning-50 dark:hover:bg-warning-900/20 hover:border-warning-400 dark:hover:border-warning-600
                     disabled:hover:bg-white disabled:hover:border-warning-300">
                 <i class="material-symbols-outlined !text-lg">edit</i>
-                {{ 'instructorApproval.actions.requestEdit' | translate }}
+                {{ 'tutorApproval.actions.requestEdit' | translate }}
             </button>
-            <button 
-                type="button" 
-                (click)="bulkRejectRequests()" 
+            <button
+                type="button"
+                (click)="bulkRejectRequests()"
                 [disabled]="selectedRequests.size === 0"
                 class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
                     disabled:opacity-50 disabled:cursor-not-allowed
@@ -64,7 +64,7 @@
                     hover:bg-danger-50 dark:hover:bg-danger-900/20 hover:border-danger-400 dark:hover:border-danger-600
                     disabled:hover:bg-white disabled:hover:border-danger-300">
                 <i class="material-symbols-outlined !text-lg">cancel</i>
-                {{ 'instructorApproval.actions.reject' | translate }}
+                {{ 'tutorApproval.actions.reject' | translate }}
             </button>
         </div>
     </div>
@@ -77,30 +77,30 @@
             <div class="flex flex-wrap gap-[12px] items-end flex-1">
                 <div class="flex-1 min-w-[120px]">
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
-                        {{ 'instructorApproval.filters.status' | translate }}
+                        {{ 'tutorApproval.filters.status' | translate }}
                     </label>
                     <select [(ngModel)]="selectedStatus" (ngModelChange)="onFilterChange()" class="filter-select w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-lg text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white focus:outline-none transition-all hover:border-gray-400 dark:hover:border-gray-600">
-                        <option value="all">{{ 'instructorApproval.filters.all' | translate }}</option>
-                        <option value="new">{{ 'instructorApproval.table.statusValue.new' | translate }}</option>
-                        <option value="edited">{{ 'instructorApproval.table.statusValue.edited' | translate }}</option>
+                        <option value="all">{{ 'tutorApproval.filters.all' | translate }}</option>
+                        <option value="new">{{ 'tutorApproval.table.statusValue.new' | translate }}</option>
+                        <option value="edited">{{ 'tutorApproval.table.statusValue.edited' | translate }}</option>
                     </select>
                 </div>
                 <div class="flex-1 min-w-[120px]">
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
-                        {{ 'instructorApproval.filters.subject' | translate }}
+                        {{ 'tutorApproval.filters.subject' | translate }}
                     </label>
                     <select [(ngModel)]="selectedSubject" (ngModelChange)="onFilterChange()" class="filter-select w-full px-[12px] py-[8px] border border-gray-300 dark:border-[#172036] rounded-lg text-sm bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white focus:outline-none transition-all hover:border-gray-400 dark:hover:border-gray-600">
-                        <option value="all">{{ 'instructorApproval.filters.all' | translate }}</option>
-                        <option value="data-science">{{ 'instructorApproval.filters.dataScience' | translate }}</option>
-                        <option value="english">{{ 'instructorApproval.filters.english' | translate }}</option>
-                        <option value="marketing">{{ 'instructorApproval.filters.marketing' | translate }}</option>
-                        <option value="python">{{ 'instructorApproval.filters.python' | translate }}</option>
+                        <option value="all">{{ 'tutorApproval.filters.all' | translate }}</option>
+                        <option value="data-science">{{ 'tutorApproval.filters.dataScience' | translate }}</option>
+                        <option value="english">{{ 'tutorApproval.filters.english' | translate }}</option>
+                        <option value="marketing">{{ 'tutorApproval.filters.marketing' | translate }}</option>
+                        <option value="python">{{ 'tutorApproval.filters.python' | translate }}</option>
                     </select>
                 </div>
                 <div class="flex gap-[8px] items-end">
                     <button (click)="clearFilters()" class="px-[14px] py-[8px] bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all flex items-center gap-[6px] whitespace-nowrap">
                         <i class="material-symbols-outlined !text-base">clear</i>
-                        {{ 'instructorApproval.filters.clear' | translate }}
+                        {{ 'tutorApproval.filters.clear' | translate }}
                     </button>
                 </div>
             </div>
@@ -130,27 +130,27 @@
                             </th>
                         }
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.stt' | translate }}
+                            {{ 'tutorApproval.table.stt' | translate }}
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.instructorName' | translate }}
+                            {{ 'tutorApproval.table.instructorName' | translate }}
                         </th>
                         <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.subject' | translate }}
+                            {{ 'tutorApproval.table.subject' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.submittedDate' | translate }}
+                            {{ 'tutorApproval.table.submittedDate' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.status' | translate }}
+                            {{ 'tutorApproval.table.status' | translate }}
                         </th>
                         @if (activeTab === 'history') {
                             <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                                {{ 'instructorApproval.table.status' | translate }}
+                                {{ 'tutorApproval.table.status' | translate }}
                             </th>
                         }
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorApproval.table.actions' | translate }}
+                            {{ 'tutorApproval.table.actions' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -174,11 +174,11 @@
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[12px] py-[15px]">
-                                @if (request.subjects && request.subjects.length > 0) {
+                                @if (getSubjectNames(request).length > 0) {
                                     <div class="flex flex-wrap gap-[6px]">
-                                        @for (subject of request.subjects; track subject.subjectName) {
+                                        @for (subjectName of getSubjectNames(request); track subjectName) {
                                             <span class="text-gray-700 dark:text-gray-300 text-sm inline-block px-[8px] py-[4px] bg-gray-100 dark:bg-[#15203c] rounded-md">
-                                                {{ subject.subjectName }}
+                                                {{ subjectName }}
                                             </span>
                                         }
                                     </div>
@@ -194,11 +194,11 @@
                             <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
                                 @if (request.requestStatus === 'PENDING') {
                                     <span class="inline-block px-[12px] py-[6px] rounded-full text-xs font-medium bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300">
-                                        {{ 'instructorApproval.table.statusValue.new' | translate }}
+                                        {{ 'tutorApproval.table.statusValue.new' | translate }}
                                     </span>
                                 } @else if (request.requestStatus === 'REQUEST_CHANGES') {
                                     <span class="inline-block px-[12px] py-[6px] rounded-full text-xs font-medium bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300">
-                                        {{ 'instructorApproval.table.statusValue.edited' | translate }}
+                                        {{ 'tutorApproval.table.statusValue.edited' | translate }}
                                     </span>
                                 }
                             </td>
@@ -206,11 +206,11 @@
                                 <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
                                     @if (request.requestStatus === 'APPROVED') {
                                         <span class="inline-block px-[12px] py-[6px] rounded-full text-xs font-medium bg-success-100 text-success-600 dark:bg-success-900/30 dark:text-success-300">
-                                            ✓ {{ 'instructorApproval.status.approved' | translate }}
+                                            ✓ {{ 'tutorApproval.status.approved' | translate }}
                                         </span>
                                     } @else if (request.requestStatus === 'REJECTED') {
                                         <span class="inline-block px-[12px] py-[6px] rounded-full text-xs font-medium bg-danger-100 text-danger-600 dark:bg-danger-900/30 dark:text-danger-300">
-                                            ✕ {{ 'instructorApproval.status.rejected' | translate }}
+                                            ✕ {{ 'tutorApproval.status.rejected' | translate }}
                                         </span>
                                     }
                                 </td>
@@ -219,7 +219,7 @@
                                 <button
                                     (click)="viewProfile(request)"
                                     class="text-primary-500 leading-none hover:text-primary-600 transition-colors"
-                                    [title]="'instructorApproval.actions.viewProfile' | translate">
+                                    [title]="'tutorApproval.actions.viewProfile' | translate">
                                     <i class="material-symbols-outlined !text-2xl">
                                         visibility
                                     </i>
@@ -232,13 +232,13 @@
                             <td [attr.colspan]="activeTab === 'pending' ? 8 : (activeTab === 'history' ? 7 : 7)" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
                                 @switch (activeTab) {
                                     @case ('pending') {
-                                        {{ 'instructorApproval.emptyState.noPendingRequests' | translate }}
+                                        {{ 'tutorApproval.emptyState.noPendingRequests' | translate }}
                                     }
                                     @case ('requestEdit') {
-                                        {{ 'instructorApproval.emptyState.noEditRequests' | translate }}
+                                        {{ 'tutorApproval.emptyState.noEditRequests' | translate }}
                                     }
                                     @case ('history') {
-                                        {{ 'instructorApproval.emptyState.noHistory' | translate }}
+                                        {{ 'tutorApproval.emptyState.noHistory' | translate }}
                                     }
                                 }
                             </td>
@@ -291,6 +291,8 @@
 </div>
 
 <!-- Level Selection Dialog -->
+<!-- TEMPORARY: Dialog commented out - Auto-approve without level selection -->
+<!--
 @if (showLevelDialog) {
     <div class="fixed inset-0 bg-black/50 dark:bg-black/70 z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-[#0c1427] rounded-lg shadow-xl max-w-md w-full">
@@ -325,6 +327,7 @@
         </div>
     </div>
 }
+-->
 
 <!-- Reject Confirmation Dialog -->
 @if (showRejectDialog) {
@@ -424,7 +427,7 @@
                         </div>
                         <div>
                             <span class="text-gray-600 dark:text-gray-400">Languages:</span>
-                            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ selectedInstructorForCerts.languages.length }}</span>
+                            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ (selectedInstructorForCerts?.languages?.length || 0) }}</span>
                         </div>
                     </div>
                 </div>

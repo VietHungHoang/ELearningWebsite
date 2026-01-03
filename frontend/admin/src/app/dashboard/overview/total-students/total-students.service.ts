@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Response data for New Students API
@@ -41,7 +42,7 @@ interface ApiResponse<T> {
 export class TotalStudentsService {
 
     private isBrowser: boolean;
-    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
     private chart: any = null;
 
     constructor(
@@ -53,7 +54,7 @@ export class TotalStudentsService {
 
     getNewStudentsData(startDate?: string, endDate?: string): Observable<NewStudentsData> {
         let params = new HttpParams();
-        
+
         // Default to current month (from 1st day to today)
         if (!startDate || !endDate) {
             const today = new Date();
@@ -61,7 +62,7 @@ export class TotalStudentsService {
             startDate = start.toISOString().split('T')[0];
             endDate = today.toISOString().split('T')[0];
         }
-        
+
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 

@@ -132,7 +132,7 @@
       "review": "Đánh giá",
       "user": "Người dùng",
       "instructors": "Gia sư",
-      "instructorApproval": "Phê duyệt gia sư",
+      "tutorApproval": "Phê duyệt gia sư",
       "learners": "Học viên",
       "finance": "Tài chính",
       "revenueDashboard": "Bảng doanh thu",
@@ -432,12 +432,12 @@
       "delete": "Xóa"
     }
   },
-  "instructorApproval": {
+  "tutorApproval": {
     "title": "Phê duyệt Gia sư",
     "subtitle": "Bạn có {{count}} đơn đang chờ phê duyệt.",
     "breadcrumb": {
       "userManagement": "Quản lý Người dùng",
-      "instructorApproval": "Phê duyệt Gia sư"
+      "tutorApproval": "Phê duyệt Gia sư"
     },
     "searchPlaceholder": "Tìm kiếm gia sư...",
     "selected": "đã chọn",
@@ -495,12 +495,12 @@
       "rejectSelected": "Từ chối đã chọn"
     }
   },
-  "instructorApprovalDetail": {
+  "tutorApprovalDetail": {
     "title": "Chi tiết Phê duyệt Gia sư",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "userManagement": "Quản lý Người dùng",
-      "instructorApproval": "Phê duyệt Gia sư",
+      "tutorApproval": "Phê duyệt Gia sư",
       "detail": "Chi tiết"
     },
     "loading": "Đang tải...",

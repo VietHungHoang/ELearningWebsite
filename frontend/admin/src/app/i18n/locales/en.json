@@ -132,7 +132,7 @@
       "review": "Review",
       "user": "User",
       "instructors": "Tutors",
-      "instructorApproval": "Tutor Approval",
+      "tutorApproval": "Tutor Approval",
       "learners": "Learners",
       "finance": "Finance",
       "revenueDashboard": "Revenue Dashboard",
@@ -430,12 +430,12 @@
       "delete": "Delete"
     }
   },
-  "instructorApproval": {
+  "tutorApproval": {
     "title": "Tutor Approval",
     "subtitle": "You have {{count}} pending applications.",
     "breadcrumb": {
       "userManagement": "User Management",
-      "instructorApproval": "Tutor Approval"
+      "tutorApproval": "Tutor Approval"
     },
     "searchPlaceholder": "Search tutors...",
     "selected": "selected",
@@ -493,12 +493,12 @@
       "rejectSelected": "Reject Selected"
     }
   },
-  "instructorApprovalDetail": {
+  "tutorApprovalDetail": {
     "title": "Tutor Approval Detail",
     "breadcrumb": {
       "dashboard": "Dashboard",
       "userManagement": "User Management",
-      "instructorApproval": "Tutor Approval",
+      "tutorApproval": "Tutor Approval",
       "detail": "Detail"
     },
     "loading": "Loading...",

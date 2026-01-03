@@ -4,11 +4,12 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { I18nService } from '../../../i18n/i18n.service';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Response data for Total Revenue API
  * API Endpoint: GET /api/v1/admin/dashboard/total-revenue
- * Query Params: 
+ * Query Params:
  *   - period (weekly|monthly|yearly) - Time period
  *   - startDate (YYYY-MM-DD) - Optional start date
  *   - endDate (YYYY-MM-DD) - Optional end date
@@ -58,7 +59,7 @@ interface ApiResponse<T> {
 export class TotalSalesService {
 
     private isBrowser: boolean;
-    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
     private chartInstance: any;
 
     constructor(
@@ -87,12 +88,12 @@ export class TotalSalesService {
                 totalRevenue: 1250000000,
                 growthPercentage: 8.3,
                 series: {
-                    currentPeriod: { 
-                        name: 'Tháng này', 
+                    currentPeriod: {
+                        name: 'Tháng này',
                         data: [35, 50, 55, 60, 50, 60, 55, 60, 78, 40, 95, 80, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150]
                     },
-                    previousPeriod: { 
-                        name: 'Tháng trước', 
+                    previousPeriod: {
+                        name: 'Tháng trước',
                         data: [70, 50, 40, 40, 62, 52, 80, 40, 60, 53, 70, 70, 65, 68, 72, 75, 78, 82, 85, 88, 92, 95, 98, 102, 105, 108, 112, 115, 118, 122]
                     }
                 },
@@ -120,11 +121,11 @@ export class TotalSalesService {
     getTotalRevenueData(period: string = 'monthly', startDate?: string, endDate?: string): Observable<TotalRevenueData> {
         // Get current language code
         const lang = this.i18nService.getCurrentLanguage();
-        
+
         let params = new HttpParams()
             .set('period', period)
             .set('lang', lang);
-        
+
         if (startDate) {
             params = params.set('startDate', startDate);
         }
@@ -151,7 +152,7 @@ export class TotalSalesService {
         if (this.isBrowser) {
             try {
                 const ApexCharts = (await import('apexcharts')).default;
-                
+
                 // Destroy existing chart if any
                 if (this.chartInstance) {
                     this.chartInstance.destroy();

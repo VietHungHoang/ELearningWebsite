@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Response data for Popular Subjects API
@@ -41,7 +42,7 @@ interface ApiResponse<T> {
 export class StudentsInterestedTopicsService {
 
     private isBrowser: boolean;
-    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
     private chartInstance: any;
 
     constructor(

@@ -7,12 +7,13 @@ import {
   RecentBooking,
   ApiResponse
 } from '../types/dashboard';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+  private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
 
   // BehaviorSubjects for real-time updates
   private dashboardSummary$ = new BehaviorSubject<DashboardSummary | null>(null);

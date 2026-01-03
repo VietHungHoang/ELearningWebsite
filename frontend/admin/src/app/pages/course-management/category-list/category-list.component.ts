@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
-import { CategoryService, Category, Subject } from '../../../services/category.service';
+import { CategoryService } from '../../../services/category.service';
+import { Category, Subject } from '../../../types/category';
 
 @Component({
     selector: 'app-category-list',
@@ -49,9 +50,19 @@ export class CategoryListComponent implements OnInit {
     constructor(private categoryService: CategoryService) {}
 
     ngOnInit(): void {
-        this.categoryService.getCategories().subscribe(categories => {
-            this.categories = categories;
-            this.applyFilters();
+        this.categoryService.fetchCategories().subscribe({
+            next: (categories) => {
+                this.categories = categories;
+                this.applyFilters();
+            },
+            error: (error) => {
+                console.error('[CategoryListComponent] Failed to load categories:', error);
+                // Fallback to existing data if available
+                this.categoryService.getCategories().subscribe(existingCategories => {
+                    this.categories = existingCategories;
+                    this.applyFilters();
+                });
+            }
         });
     }
 
@@ -145,25 +156,48 @@ export class CategoryListComponent implements OnInit {
                 return;
             }
 
-            const defaultSubject: Subject = {
-                id: Date.now().toString(),
-                name: this.defaultSubjectName.trim(),
-                description: '',
-                isActive: true
-            };
-
+            // First create the category
             this.categoryService.addCategory({
                 name: this.categoryFormData.name.trim(),
                 description: this.categoryFormData.description.trim(),
-                isActive: true,
-                tutorCount: 0,
-                subjects: [defaultSubject]
-            });
-            alert('Danh mục và subject mặc định đã được thêm');
-        }
+                isActive: true
+            }).subscribe({
+                next: (newCategory) => {
+                    if (!newCategory) {
+                        alert('Có lỗi khi tạo danh mục');
+                        return;
+                    }
 
-        this.closeAddCategoryModal();
-        this.applyFilters();
+                    // Then add the default subject
+                    const defaultSubject: Subject = {
+                        id: Date.now().toString(),
+                        name: this.defaultSubjectName.trim(),
+                        description: '',
+                        isActive: true
+                    };
+
+                    this.categoryService.addSubjectToCategory(newCategory.id, {
+                        name: defaultSubject.name,
+                        description: defaultSubject.description || '',
+                        isActive: defaultSubject.isActive
+                    }).subscribe({
+                        next: () => {
+                            alert('Danh mục và subject mặc định đã được thêm');
+                            this.closeAddCategoryModal();
+                            this.applyFilters();
+                        },
+                        error: (error) => {
+                            console.error('Error adding subject:', error);
+                            alert('Danh mục đã được tạo nhưng có lỗi khi thêm subject mặc định');
+                        }
+                    });
+                },
+                error: (error) => {
+                    console.error('Error creating category:', error);
+                    alert('Có lỗi khi tạo danh mục');
+                }
+            });
+        }
     }
 
     // Delete methods
@@ -196,8 +230,24 @@ export class CategoryListComponent implements OnInit {
 
     // Category Details Modal
     openCategoryDetailsModal(category: Category): void {
-        this.selectedCategoryForDetail = category;
-        this.showCategoryDetailsModal = true;
+        // Fetch detailed category data from API
+        this.categoryService.getCategoryById(category.id).subscribe({
+            next: (detailedCategory) => {
+                if (detailedCategory) {
+                    this.selectedCategoryForDetail = detailedCategory;
+                } else {
+                    // Fallback to existing data
+                    this.selectedCategoryForDetail = category;
+                }
+                this.showCategoryDetailsModal = true;
+            },
+            error: (error) => {
+                console.error('[CategoryListComponent] Failed to load category details:', error);
+                // Fallback to existing data
+                this.selectedCategoryForDetail = category;
+                this.showCategoryDetailsModal = true;
+            }
+        });
     }
 
     closeCategoryDetailsModal(): void {
@@ -222,7 +272,7 @@ export class CategoryListComponent implements OnInit {
         if (!category || !category.subjects) return 0;
 
         let totalTutors = 0;
-        category.subjects.forEach(subject => {
+        category.subjects.forEach((subject: Subject) => {
             if (subject.tutorCount) {
                 totalTutors += subject.tutorCount;
             }

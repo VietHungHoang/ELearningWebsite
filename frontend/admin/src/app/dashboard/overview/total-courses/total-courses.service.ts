@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Response data for Tutor Pending Approvals API
@@ -51,7 +52,7 @@ interface ApiResponse<T> {
 export class TotalCoursesService {
 
     private isBrowser: boolean;
-    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
     private chart: any = null;
 
     constructor(
@@ -63,7 +64,7 @@ export class TotalCoursesService {
 
     getTutorPendingApprovalsData(startDate?: string, endDate?: string): Observable<TutorPendingApprovalsData> {
         let params = new HttpParams();
-        
+
         // Default to this week if no dates provided
         if (!startDate || !endDate) {
             const end = new Date();
@@ -72,7 +73,7 @@ export class TotalCoursesService {
             startDate = start.toISOString().split('T')[0];
             endDate = end.toISOString().split('T')[0];
         }
-        
+
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 

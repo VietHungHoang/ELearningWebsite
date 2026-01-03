@@ -9,23 +9,24 @@ import { LocaleUtilsService } from '../../../shared/utils/locale.utils';
 import { I18nService } from '../../../i18n/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { PaginatedResponse } from '../../../types/pagination';
+import { SubjectHelperService } from '../../../services/subject-helper.service';
 
 
 @Component({
-    selector: 'app-instructor-approval',
+    selector: 'app-tutor-approval',
     standalone: true,
     imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TranslatePipe],
-    templateUrl: './instructor-approval.component.html',
-    styleUrl: './instructor-approval.component.scss'
+    templateUrl: './tutor-approval.component.html',
+    styleUrl: './tutor-approval.component.scss'
 })
-export class InstructorApprovalComponent implements OnInit {
+export class TutorApprovalComponent implements OnInit {
     // Tab management
     activeTab: 'pending' | 'requestEdit' | 'history' = 'pending';
-    
+
     // Data from API
     filteredRequests: InstructorRequest[] = [];
     searchTerm: string = '';
-    
+
     // Filter properties
     selectedStatus: string = 'all';
     selectedSubject: string = 'all';
@@ -54,13 +55,14 @@ export class InstructorApprovalComponent implements OnInit {
     searchPlaceholder = '';
 
     constructor(
-        public userService: UserService, 
-        private router: Router, 
+        public userService: UserService,
+        private router: Router,
         private localeUtils: LocaleUtilsService,
-        private i18nService: I18nService
+        private i18nService: I18nService,
+        private subjectHelper: SubjectHelperService
     ) {
         this.searchPlaceholder = this.i18nService.translate('instructorApproval.searchPlaceholder');
-        
+
         // Update placeholder when language changes
         effect(() => {
             this.i18nService.currentLanguage$();
@@ -118,7 +120,18 @@ export class InstructorApprovalComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.loadApprovalRequests();
+        // Load subjects first, then load approval requests
+        console.log('[TutorApproval] Loading subjects...');
+        this.subjectHelper.loadAndCacheSubjects().subscribe({
+            next: (subjects) => {
+                console.log('[TutorApproval] Subjects loaded:', subjects.length);
+                this.loadApprovalRequests();
+            },
+            error: (error) => {
+                console.error('[TutorApproval] Error loading subjects:', error);
+                this.loadApprovalRequests(); // Still load requests even if subjects fail
+            }
+        });
     }
 
     switchTab(tab: 'pending' | 'requestEdit' | 'history'): void {
@@ -199,8 +212,17 @@ export class InstructorApprovalComponent implements OnInit {
         this.loadApprovalRequests();
     }
 
+    getSubjectNames(request: InstructorRequest): string[] {
+        if (request.subjectIds && request.subjectIds.length > 0) {
+            const names = this.subjectHelper.getSubjectNamesByIds(request.subjectIds);
+            console.log('[TutorApproval] Subject names for request', request.id, ':', names);
+            return names;
+        }
+        return [];
+    }
+
     viewProfile(request: InstructorRequest): void {
-        this.router.navigate(['/dashboard/user-management/instructor-approval/profile', request.id]);
+        this.router.navigate(['/dashboard/user-management/tutor-approval/profile', request.id]);
     }
 
     clearSearch(): void {
@@ -246,6 +268,8 @@ export class InstructorApprovalComponent implements OnInit {
         this.selectedLevels = [];
     }
 
+    // COMMENTED: Level selection dialog methods
+    /*
     confirmApprove(): void {
         if (this.selectedRequest && this.selectedLevels.length > 0) {
             // Convert level IDs to codes before sending to backend
@@ -270,6 +294,7 @@ export class InstructorApprovalComponent implements OnInit {
             });
         }
     }
+    */
 
     openRejectDialog(request: InstructorRequest): void {
         this.requestToReject = request;
@@ -398,12 +423,11 @@ export class InstructorApprovalComponent implements OnInit {
         if (confirm(`Approve ${this.selectedRequests.size} instructor application(s)?`)) {
             const requestsToApprove = Array.from(this.selectedRequests);
 
-            // Call API for each approval (using default level - first level)
+            // Call API for each approval - NO LEVELS
             let completedCount = 0;
-            const defaultLevelCode = this.levelOptions.length > 0 ? this.levelOptions[0].code : 'BEGINNER';
 
             requestsToApprove.forEach(requestId => {
-                this.userService.approveInstructorRequest(requestId, [defaultLevelCode]).subscribe({
+                this.userService.approveInstructorRequest(requestId).subscribe({
                     next: (success) => {
                         completedCount++;
                         if (completedCount === requestsToApprove.length) {

@@ -91,7 +91,7 @@ export const routes: Routes = [
                 children: []
             },
             {
-                path: 'course-management',
+                path: 'category-subject-management',
                 loadChildren: () => import('./pages/course-management/course-routing.module').then(m => m.CourseRoutingModule)
             },
             {
@@ -106,7 +106,7 @@ export const routes: Routes = [
                     {path: 'instructors', redirectTo: 'instructor-list', pathMatch: 'full'},
                     {path: 'instructor-list', loadChildren: () => import('./pages/user-management/instructor-list/instructor-list.module').then(m => m.InstructorListModule)},
                     {path: 'instructor-detail/:id', loadChildren: () => import('./pages/user-management/instructor-detail/instructor-detail.module').then(m => m.InstructorDetailModule)},
-                    {path: 'instructor-approval', loadChildren: () => import('./pages/user-management/instructor-approval/instructor-approval.module').then(m => m.InstructorApprovalModule)},
+                    {path: 'tutor-approval', loadChildren: () => import('./pages/user-management/tutor-approval/tutor-approval.module').then(m => m.TutorApprovalModule)},
                     {path: 'learners', redirectTo: 'learner-list', pathMatch: 'full'},
                     {path: 'learner-list', loadChildren: () => import('./pages/user-management/learner-list/learner-list.module').then(m => m.LearnerListModule)},
                     {path: 'learner-detail/:id', loadChildren: () => import('./pages/user-management/learner-detail/learner-detail.module').then(m => m.LearnerDetailModule)}
@@ -232,5 +232,5 @@ export const routes: Routes = [
     },
     {path: 'coming-soon', component: ComingSoonComponent},
 
-    {path: '**', component: NotFoundComponent} 
+    {path: '**', component: NotFoundComponent}
 ];

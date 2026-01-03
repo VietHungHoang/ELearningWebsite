@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '../../i18n/translate.pipe';
+import { CategoryService } from '../../services/category.service';
 
 interface MenuItem {
     title: string;
@@ -15,9 +16,13 @@ interface MenuItem {
     templateUrl: './sidebar.component.html',
     styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
 
-    constructor(private router: Router) {}
+    constructor(private router: Router, private categoryService: CategoryService) {}
+
+    ngOnInit(): void {
+        // Không load subjects ở đây, để subject-list component tự load khi cần
+    }
 
     openSectionIndex: number = -1;
     openSectionIndex2: number = -1;
@@ -54,7 +59,7 @@ export class SidebarComponent {
     }
 
     navigateToCourseManagement(): void {
-        this.router.navigate(['/dashboard/course-management/subjects']);
+        this.router.navigate(['/dashboard/category-subject-management/subjects']);
     }
 
 }
