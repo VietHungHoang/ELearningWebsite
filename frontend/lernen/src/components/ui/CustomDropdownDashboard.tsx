@@ -49,14 +49,14 @@ const CustomDropdownDashboard: React.FC<CustomDropdownDashboardProps> = ({ label
     const filteredOptions = options.filter(option =>
         option.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                 if(isOpen) {
+                if (isOpen) {
                     setOpenDropdown(null);
                     setSearchTerm("");
-                 }
+                }
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -76,7 +76,7 @@ const CustomDropdownDashboard: React.FC<CustomDropdownDashboardProps> = ({ label
     }, [shouldRender, isOpen, hasSearch]);
 
     const isPlaceholder = selectedValue === placeholder;
-    
+
     // Calculate max height based on maxVisibleItems
     // Each item is approximately 40px (p-2 = 8px padding + ~32px content)
     // Search bar adds ~48px if present
@@ -84,19 +84,19 @@ const CustomDropdownDashboard: React.FC<CustomDropdownDashboardProps> = ({ label
     const itemHeight = 40;
     const gapHeight = 4; // space-y-1 = 4px
     const searchBarHeight = hasSearch ? 48 : 0;
-    const maxHeight = (maxVisibleItems * itemHeight) + searchBarHeight + 16; // +16 for padding
+    const maxHeight = (maxVisibleItems * itemHeight) + ((maxVisibleItems - 1) * gapHeight) + searchBarHeight + 16; // +16 for padding
 
     return (
         <div className="relative" ref={dropdownRef}>
             <div className={`
-                ${label ? 'bg-white rounded-lg border border-gray-200 shadow-sm p-3 min-h-[70px] flex flex-col justify-center' : 'bg-gray-100 border border-transparent rounded-lg'}
+                ${label ? 'bg-white rounded-lg border border-gray-200 shadow-sm p-3 min-h-[70px] flex flex-col justify-center' : 'bg-white border border-gray-200 rounded-lg shadow-sm'}
             `}>
                 {label && <label className="text-xs text-[#585858] block mb-1.5">{label}</label>}
-                <button 
+                <button
                     type="button"
                     onClick={handleToggle}
                     onMouseDown={(e) => e.preventDefault()}
-                    className={`dropdown-button w-full flex justify-between items-center text-left ${label ? '' : 'px-4 py-2.5 h-[38px] text-gray-800 hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out'}`}
+                    className={`dropdown-button w-full flex justify-between items-center text-left rounded-lg ${label ? '' : 'px-4 py-2.5 h-[38px] text-gray-800 hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out'}`}
                 >
                     <span className={`dropdown-label text-sm font-normal truncate ${isPlaceholder && label ? 'text-[rgba(88,88,88,0.4)]' : 'text-[#585858]'}`}>{selectedValue}</span>
                     <svg className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 10 13 14 9"></polyline></svg>
@@ -110,7 +110,7 @@ const CustomDropdownDashboard: React.FC<CustomDropdownDashboardProps> = ({ label
                     ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                 `} style={{ maxHeight: `${maxHeight}px` }}>
                     {hasSearch && (
-                         <div className="p-1 mb-1">
+                        <div className="p-1 mb-1">
                             <input
                                 ref={searchInputRef}
                                 type="text"

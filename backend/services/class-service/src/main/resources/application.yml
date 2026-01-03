@@ -6,3 +6,7 @@ spring:
     name: class-service
   profiles:
     active: staging
+
+services:
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL:http://tutor-service:8089}

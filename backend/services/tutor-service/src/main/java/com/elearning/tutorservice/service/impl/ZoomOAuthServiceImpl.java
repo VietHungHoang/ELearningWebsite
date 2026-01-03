@@ -1,11 +1,13 @@
-package com.elearning.classservice.service.impl;
+package com.elearning.tutorservice.service.impl;
 
-import com.elearning.classservice.config.ZoomProperties;
-import com.elearning.classservice.dto.zoom.response.ZoomOAuthTokenResponse;
-import com.elearning.classservice.entity.TutorZoomCredential;
-import com.elearning.classservice.exception.ZoomOAuthException;
-import com.elearning.classservice.repository.TutorZoomCredentialRepository;
-import com.elearning.classservice.service.ZoomOAuthService;
+import com.elearning.tutorservice.config.ZoomProperties;
+import com.elearning.tutorservice.dto.zoom.response.ZoomOAuthTokenResponse;
+import com.elearning.tutorservice.entity.TutorZoomCredential;
+import com.elearning.tutorservice.exception.ZoomOAuthException;
+import com.elearning.tutorservice.repository.TutorZoomCredentialRepository;
+import com.elearning.tutorservice.service.ZoomOAuthService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,9 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -40,6 +39,38 @@ public class ZoomOAuthServiceImpl implements ZoomOAuthService {
         String redirectUri = zoomProperties.getOauth().getRedirectUri();
         return String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&state=%s",
                 authorizeUrl, clientId, redirectUri, tutorId.toString());
+    }
+
+    @Override
+    @Transactional
+    public void processOAuthCallback(String code, String state) {
+        log.info("Processing Zoom OAuth callback for state: {}", state);
+        
+        try {
+            UUID tutorId = UUID.fromString(state);
+            
+            // Exchange code for token
+            ZoomOAuthTokenResponse tokenResponse = exchangeCodeForToken(code);
+            
+            // Save or update credentials
+            TutorZoomCredential credential = credentialRepository.findByTutorId(tutorId)
+                    .orElse(TutorZoomCredential.builder().tutorId(tutorId).build());
+            
+            credential.setAccessToken(tokenResponse.getAccessToken());
+            credential.setRefreshToken(tokenResponse.getRefreshToken());
+            credential.setExpiresAt(LocalDateTime.now().plusSeconds(tokenResponse.getExpiresIn()));
+            
+            credentialRepository.save(credential);
+            
+            log.info("Successfully connected/renewed Zoom credentials for tutor: {}", tutorId);
+            
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid state parameter in OAuth callback: {}", state);
+            throw new ZoomOAuthException("Invalid state parameter: " + state);
+        } catch (Exception e) {
+            log.error("Failed to process OAuth callback: {}", e.getMessage(), e);
+            throw new ZoomOAuthException("Failed to process OAuth callback", e);
+        }
     }
 
     @Override
@@ -89,43 +120,26 @@ public class ZoomOAuthServiceImpl implements ZoomOAuthService {
      */
     private ZoomOAuthTokenResponse exchangeCodeForToken(String code) {
         log.info("Exchanging authorization code for access token");
-        log.debug("Token URL: {}", zoomProperties.getOauth().getTokenUrl());
         
         String tokenUrl = zoomProperties.getOauth().getTokenUrl();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String authHeader = "Basic " + getBasicAuthHeader();
-        headers.set("Authorization", authHeader);
-        log.debug("Authorization header set (length: {})", authHeader.length());
+        headers.set("Authorization", "Basic " + getBasicAuthHeader());
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("code", code);
         body.add("redirect_uri", zoomProperties.getOauth().getRedirectUri());
-        
-        log.debug("Request body - grant_type: authorization_code, code: {}..., redirect_uri: {}", 
-                 code, 
-                 zoomProperties.getOauth().getRedirectUri());
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        log.info("Sending POST request to Zoom OAuth token endpoint");
         ResponseEntity<ZoomOAuthTokenResponse> response = restTemplate.postForEntity(
                 tokenUrl, request, ZoomOAuthTokenResponse.class);
 
-        log.info("Received response from Zoom OAuth - Status: {}", response.getStatusCode());
-        
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            ZoomOAuthTokenResponse tokenResponse = response.getBody();
-            log.info("Successfully exchanged code for token - Access token length: {}, Expires in: {} seconds", 
-                    tokenResponse.getAccessToken() != null ? tokenResponse.getAccessToken().length() : 0,
-                    tokenResponse.getExpiresIn());
-            log.debug("Token type: {}, Scope: {}", tokenResponse.getTokenType(), tokenResponse.getScope());
-            return tokenResponse;
+            return response.getBody();
         } else {
-            log.error("Failed to exchange code for token - Status: {}, Body: {}", 
-                     response.getStatusCode(), response.getBody());
             throw new ZoomOAuthException("Failed to exchange code for token: " + response.getStatusCode());
         }
     }

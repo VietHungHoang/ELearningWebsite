@@ -4,10 +4,14 @@ import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import commonUtils from '../../../../utils/commonUtils';
+import { useCurrency } from '../../../../context/CurrencyContext';
+import { CURRENCY_INFO } from '../../../../utils/currencyHelper';
 import type { Category, Subject } from '../../../../types/common';
 
 const SubjectICanTeachPage: React.FC = () => {
     const { t } = useTranslation();
+    const { selectedCurrency } = useCurrency();
+    const currencySymbol = CURRENCY_INFO[selectedCurrency]?.symbol || '$';
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>([]);
@@ -76,7 +80,7 @@ const SubjectICanTeachPage: React.FC = () => {
                             </div>
                             <div className="flex-1 pl-4">
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">{currencySymbol}</span>
                                     <input
                                         type="number"
                                         value={tuitionFee}
