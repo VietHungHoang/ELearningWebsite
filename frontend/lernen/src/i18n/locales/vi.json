@@ -1240,7 +1240,8 @@
         "status": {
           "pending": "Đang chờ",
           "approved": "Đã chấp nhận",
-          "declined": "Đã từ chối"
+          "declined": "Đã từ chối",
+          "rejected": "Đã từ chối"
         },
         "trial": {
           "badge": "Yêu cầu học thử",

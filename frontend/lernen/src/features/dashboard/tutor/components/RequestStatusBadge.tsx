@@ -18,6 +18,8 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
                 return 'bg-[#a16207]'; // Warm amber - working/pending state (same as draft/in_progress in quiz)
             case 'DECLINED':
                 return 'bg-[#475569]'; // Dark slate - inactive state (same as archived/not_started in quiz)
+            case 'REJECTED':
+                return 'bg-[#475569]'; // Dark slate - inactive state (same as declined)
             default:
                 return 'bg-[#64748b]';
         }
@@ -27,6 +29,7 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
         PENDING: t('dashboard.tutor.requests.status.pending'),
         APPROVED: t('dashboard.tutor.requests.status.approved'),
         DECLINED: t('dashboard.tutor.requests.status.declined'),
+        REJECTED: t('dashboard.tutor.requests.status.rejected'),
     };
 
     return (
