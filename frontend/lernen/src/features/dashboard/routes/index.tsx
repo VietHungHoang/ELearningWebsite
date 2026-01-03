@@ -73,6 +73,10 @@ const dashboardRoutes: RouteObject[] = [
         element: <ClassInfoPage />,
       },
       {
+        path: 'my-class/:classId/view',
+        element: <ClassInfoPage isViewMode={true} isStudentView={true} />,
+      },
+      {
         path: 'schedule',
         element: <ScheduleManagementPage />,
       },

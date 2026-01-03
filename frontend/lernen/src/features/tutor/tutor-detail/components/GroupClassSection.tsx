@@ -6,8 +6,12 @@ import type { GroupClass } from '../../../../types/tutor';
 import type { ClassSchedule } from '../../../../types/class';
 import { useTranslation } from "react-i18next";
 import ModalLayout from '../../../../components/ui/ModalLayout';
+import LastStudentModal from './LastStudentModal';
+import PaymentPromptModal from './PaymentPromptModal';
 import { classService } from '../../../../services/classService';
 import { useAuth } from '../../../../context/AuthContext';
+import { useCurrency } from '../../../../context/CurrencyContext';
+import { formatCurrency, convertFromVND } from '../../../../utils/currencyHelper';
 
 interface GroupClassSectionProps {
   groupClasses: GroupClass[];
@@ -16,11 +20,14 @@ interface GroupClassSectionProps {
 const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) => {
     const navigate = useNavigate();
     const { state } = useAuth();
+    const { selectedCurrency } = useCurrency();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
     const [selectedClass, setSelectedClass] = useState<GroupClass | null>(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showLastStudentModal, setShowLastStudentModal] = useState(false);
+    const [showPaymentPromptModal, setShowPaymentPromptModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
     const [showLeaveSuccessModal, setShowLeaveSuccessModal] = useState(false);
@@ -28,6 +35,12 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
     const [localGroupClasses, setLocalGroupClasses] = useState<GroupClass[]>(groupClasses);
     const [isLoading, setIsLoading] = useState(false);
     const { t } = useTranslation();
+
+    // Helper function to format price with currency conversion
+    const formatPrice = (priceInVND: number): string => {
+        const convertedPrice = convertFromVND(priceInVND, selectedCurrency);
+        return formatCurrency(convertedPrice, selectedCurrency);
+    };
 
     // Update local state when groupClasses prop changes
     useEffect(() => {
@@ -38,9 +51,12 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
     const formatSchedule = (schedule: ClassSchedule[], duration: number): string => {
         if (schedule.length === 0) return '';
 
+        // Map dayOfWeek (1-7, where 1 = Monday) to i18n keys
+        const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        
         const dayNames = schedule.map(item => {
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            return days[item.dayOfWeek - 1];
+            const dayKey = dayKeys[item.dayOfWeek - 1];
+            return t(`common.days.${dayKey}`);
         });
 
         // Check if all items have the same time
@@ -54,9 +70,10 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
         } else {
             // Different times - show each day with its time range
             return schedule.map(item => {
-                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const dayKey = dayKeys[item.dayOfWeek - 1];
+                const dayName = t(`common.days.${dayKey}`);
                 const endTime = calculateEndTime(item.time, duration);
-                return `${days[item.dayOfWeek - 1]} ${item.time} - ${endTime}`;
+                return `${dayName} ${item.time} - ${endTime}`;
             }).join(', ');
         }
     };
@@ -179,13 +196,10 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                     <div className="flex-shrink-0 text-right">
                                         <div className="flex items-baseline justify-end gap-1.5">
                                             <span className="text-2xl font-bold text-[#0b6459] leading-none">
-                                                {new Intl.NumberFormat('vi-VN').format(gc.pricePerHour)}
-                                            </span>
-                                            <span className="text-sm font-semibold text-gray-700">
-                                                {t('common.currency')}
+                                                {formatPrice(gc.pricePerHour)}
                                             </span>
                                             <span className="text-sm text-gray-500 font-medium">
-                                                /hour
+                                                {t('tutorDetail.groupClass.perHour')}
                                             </span>
                                         </div>
                                     </div>
@@ -351,7 +365,16 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                         <button 
                                             onClick={() => {
                                                 setSelectedClass(gc);
-                                                setShowConfirmModal(true);
+                                                // Check if this is the last student
+                                                const currentEnrolled = gc.enrolledStudents ?? gc.students?.length ?? 0;
+                                                const maxStudents = gc.maxStudents ?? Infinity;
+                                                const isLastStudent = currentEnrolled + 1 === maxStudents;
+                                                
+                                                if (isLastStudent) {
+                                                    setShowLastStudentModal(true);
+                                                } else {
+                                                    setShowConfirmModal(true);
+                                                }
                                             }}
                                             className="flex-1 bg-[#0b6459] text-white py-2.5 px-4 rounded-xl hover:bg-[#084c43] transition-colors font-semibold text-sm"
                                         >
@@ -364,6 +387,63 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                     </div>
                 ))}
             </div>
+
+            {/* Last Student Modal */}
+            <LastStudentModal
+                isOpen={showLastStudentModal && selectedClass !== null}
+                onClose={() => {
+                    setShowLastStudentModal(false);
+                    setSelectedClass(null);
+                }}
+                selectedClass={selectedClass}
+                onConfirm={async () => {
+                    if (!selectedClass || !state.user?.id) return;
+                    
+                    setIsLoading(true);
+                    try {
+                        const response = await classService.addStudentToClass(selectedClass.id, state.user.id);
+                        if (response.success) {
+                            setShowLastStudentModal(false);
+                            setShowPaymentPromptModal(true);
+                            setJoinedClasses(prev => new Set(prev).add(selectedClass.id));
+                            // Update enrolled students count
+                            setLocalGroupClasses(prev => prev.map(gc => 
+                                gc.id === selectedClass.id 
+                                    ? { ...gc, enrolledStudents: (gc.enrolledStudents ?? 0) + 1 }
+                                    : gc
+                            ));
+                        } else {
+                            alert(response.message || t('tutorDetail.groupClass.joinError'));
+                        }
+                    } catch (error) {
+                        console.error('Error joining class:', error);
+                        alert(t('tutorDetail.groupClass.joinError'));
+                    } finally {
+                        setIsLoading(false);
+                    }
+                }}
+            />
+
+            {/* Payment Prompt Modal */}
+            <PaymentPromptModal
+                isOpen={showPaymentPromptModal && selectedClass !== null}
+                onClose={() => {
+                    setShowPaymentPromptModal(false);
+                    setShowSuccessModal(true);
+                    setSelectedClass(null);
+                }}
+                selectedClass={selectedClass}
+                onPayNow={() => {
+                    setShowPaymentPromptModal(false);
+                    setSelectedClass(null);
+                    // Navigate to checkout page
+                    navigate(`/checkout?classId=${selectedClass?.id}&type=group`);
+                }}
+                onPayLater={() => {
+                    setShowPaymentPromptModal(false);
+                    setSelectedClass(null);
+                }}
+            />
 
             {/* Confirm Modal */}
             <ModalLayout

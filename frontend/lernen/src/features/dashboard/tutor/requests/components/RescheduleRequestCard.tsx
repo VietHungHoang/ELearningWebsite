@@ -18,7 +18,7 @@ export interface RescheduleRequestData {
     student?: StudentInfo;
     tutor?: { name: string, avatar: string };
     courseTitle: string;
-    originalSchedule?: string;
+    originalSchedule?: Schedule;
     proposedSchedules: Schedule[];
     reason: string;
     timestamp: string;
@@ -44,11 +44,6 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const messageRef = useRef<HTMLParagraphElement>(null);
-
-    // Get person info based on viewMode
-    const person = viewMode === 'tutor' 
-        ? (request.student || { name: 'Unknown Student', avatar: 'https://i.pravatar.cc/150?img=1' })
-        : (request.tutor || { name: 'Unknown Tutor', avatar: 'https://i.pravatar.cc/150?img=1' });
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -97,55 +92,19 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
     };
 
     const { title, badgeClass, isRecurring } = useMemo(() => {
-        const isRecurringReschedule = request.originalSchedule?.toLowerCase().includes('every');
+        // For reschedule requests, they are always one-time (not recurring)
         return {
-            title: isRecurringReschedule ? t('dashboard.tutor.requests.reschedule.recurringTitle') : t('dashboard.tutor.requests.reschedule.oneTimeTitle'),
-            badgeClass: isRecurringReschedule ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800',
-            isRecurring: isRecurringReschedule ?? false
+            title: t('dashboard.tutor.requests.reschedule.oneTimeTitle'),
+            badgeClass: 'bg-purple-100 text-purple-800',
+            isRecurring: false
         };
-    }, [request, t]);
+    }, [t]);
 
-    // Format original schedule with full date information (only for one-time schedules)
-    const formatOriginalSchedule = (schedule: string | undefined): string => {
+    // Format original schedule - format day and time like proposed schedule
+    const formatOriginalSchedule = (schedule: Schedule | undefined): string => {
         if (!schedule) return '';
-        
-        // If it's a recurring schedule, keep as is
-        if (schedule.toLowerCase().includes('every')) {
-            return schedule;
-        }
-        
-        // For one-time schedules, parse and format with full date
-        const parts = schedule.split(',');
-        if (parts.length >= 2) {
-            const dayName = parts[0].trim();
-            const time = parts[1].trim();
-            
-            // Try to get actual date from request.date
-            if (request.date) {
-                try {
-                    const date = new Date(request.date);
-                    if (!isNaN(date.getTime())) {
-                        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                        const actualDayName = dayNames[date.getDay()];
-                        const month = monthNames[date.getMonth()];
-                        const dayNum = date.getDate();
-                        const year = date.getFullYear();
-                        
-                        // Always use request.date to format, regardless of day name match
-                        // This assumes request.date contains the actual date of the original schedule
-                        return `${actualDayName}, ${month} ${dayNum}, ${year} at ${time}`;
-                    }
-                } catch (e) {
-                    console.error("Error parsing date for original schedule:", e);
-                    // Fall back to original format
-                }
-            }
-            
-            return `${dayName}, ${time}`;
-        }
-        
-        return schedule;
+        // Format like proposed schedule: "day at time"
+        return `${schedule.day} at ${schedule.time}`;
     };
 
     // Format proposed schedule with full date information (only for one-time schedules)
@@ -154,23 +113,9 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
             return t('dashboard.tutor.requests.reschedule.everyDayAt', { day: schedule.day, time: schedule.time });
         }
         
-        // For one-time schedules, format with full date
-        if (request.date) {
-            try {
-                const date = new Date(request.date);
-                if (!isNaN(date.getTime())) {
-                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                    const month = monthNames[date.getMonth()];
-                    const dayNum = date.getDate();
-                    const year = date.getFullYear();
-                    return `${schedule.day}, ${month} ${dayNum}, ${year} at ${schedule.time}`;
-                }
-            } catch (e) {
-                // Fall back to original format
-            }
-        }
-        
-        return `${schedule.day}, ${schedule.time}`;
+        // For one-time schedules, use the already formatted day and time
+        // schedule.day already contains the full formatted date from locale
+        return `${schedule.day} at ${schedule.time}`;
     };
 
     // Check if message needs truncation
@@ -212,30 +157,41 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
     }, [request.reason, isMessageExpanded]);
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4">
+        <div className="bg-white p-5 pt-8 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col gap-4 relative">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             
-            {viewMode === 'tutor' ? (
-                /* Tutor View: Original UI - Avatar + Name + Menu */
-                <>
-                    <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                            <img 
-                                src={person.avatar || 'https://i.pravatar.cc/150?img=1'} 
-                                alt={person.name} 
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-black" 
-                            />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 text-base leading-tight break-words">{person.name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{request.courseTitle}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2 flex-shrink-0 -mr-5">
-                            {request.timestamp && (
-                                <span className="text-xs text-gray-400 whitespace-nowrap mr-4">
-                                    {request.timestamp.startsWith('•') ? request.timestamp.replace('•', '').trim() : request.timestamp}
-                                </span>
-                            )}
+            {/* Status badge - Top left corner */}
+            <RequestStatusBadge status={request.status} />
+            
+            {/* Timestamp - Top right corner */}
+            {request.timestamp && (
+                <div className="absolute top-0 right-0 z-10 pt-2 pr-6">
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {request.timestamp.startsWith('•') ? request.timestamp.replace('•', '').trim() : request.timestamp}
+                    </span>
+                </div>
+            )}
+            
+            {/* Header: Badge, Actions */}
+            <div className="pb-3 border-b border-gray-100">
+                {/* Row 1: Badge + Cancel button (student) / Menu button (tutor) */}
+                <div className="flex items-center justify-end gap-3">
+                    {/* Badge: Loại đổi lịch - bên trái thùng rác/menu button */}
+                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${badgeClass}`}>
+                        {title}
+                    </span>
+                    {viewMode === 'student' && request.status === 'PENDING' && (
+                        <button
+                            onClick={() => setShowCancelConfirm(true)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            aria-label="Cancel request"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    )}
+                    {viewMode === 'tutor' && (
                             <div className="relative" ref={menuRef}>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -307,85 +263,30 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                                             </>
                                         )}
                                     </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    </div>
-                    {/* Badge "Đổi lịch một lần" for tutor */}
-                    <div className="flex items-center">
-                        <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-md ${badgeClass}`}>
-                            {title}
-                        </span>
-                    </div>
-                </>
-            ) : (
-                /* Student View: New Layout - 3 rows */
-                <div className="flex flex-col gap-2">
-                    {/* Row 1: Course Title + Status Badge */}
-                    <div className="flex items-center gap-3">
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 break-words">{request.courseTitle}</p>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                            <RequestStatusBadge status={request.status} />
-                        </div>
-                    </div>
-                    {/* Row 2: Badge "Đổi lịch một lần" + Thùng rác */}
-                    <div className="flex items-center justify-between">
-                        <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-md ${badgeClass}`}>
-                            {title}
-                        </span>
-                        {request.status === 'PENDING' && (
-                            <button
-                                onClick={() => setShowCancelConfirm(true)}
-                                className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                                aria-label="Cancel request"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
+                                    </div>
+                                )}
+                            </div>
                         )}
-                    </div>
-                    {/* Row 3: Avatar + Name + Timestamp */}
-                    <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                            <img 
-                                src={person.avatar || 'https://i.pravatar.cc/150?img=1'} 
-                                alt={person.name} 
-                                className="w-12 h-12 rounded-lg object-cover border-2 border-black" 
-                            />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 text-base leading-tight break-words">{person.name}</h3>
-                        </div>
-                        {request.timestamp && (
-                            <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
-                                {request.timestamp.startsWith('•') ? request.timestamp.replace('•', '').trim() : request.timestamp}
-                            </span>
-                        )}
-                    </div>
                 </div>
-            )}
+            </div>
 
-            {/* Schedule */}
-            <div className="space-y-3">
+            {/* Schedule Section */}
+            <div className="space-y-4">
                 {request.originalSchedule && (
-                    <div>
-                        <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <p className="text-xs font-semibold text-gray-600 mb-2">
                             {t('dashboard.tutor.requests.reschedule.original')}
                         </p>
-                        <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 text-gray-800 border border-gray-200">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-center gap-2 text-sm text-gray-800">
+                            <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span>{formatOriginalSchedule(request.originalSchedule)}</span>
+                            <span className="font-medium">{formatOriginalSchedule(request.originalSchedule)}</span>
                         </div>
                     </div>
                 )}
-                <div>
-                    <p className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+                <div className="bg-[#0b6459]/5 rounded-lg p-3 border border-[#0b6459]/20">
+                    <p className="text-xs font-semibold text-[#0b6459] mb-2">
                         {t('dashboard.tutor.requests.reschedule.proposed')}
                     </p>
                     {isRecurring ? (
@@ -393,7 +294,7 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                             {request.proposedSchedules.map((s, idx) => (
                                 <div 
                                     key={idx}
-                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#0b6459]/10 text-[#0b6459] border border-[#0b6459]/20"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-[#0b6459] border border-[#0b6459]/30"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -403,18 +304,18 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                             ))}
                         </div>
                     ) : (
-                        <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#0b6459]/10 text-[#0b6459] border border-[#0b6459]/20">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-center gap-2 text-sm text-[#0b6459]">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>{formatProposedSchedule(request.proposedSchedules[0], false)}</span>
+                            <span className="font-medium">{formatProposedSchedule(request.proposedSchedules[0], false)}</span>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Message */}
-            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+            {/* Message Section */}
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <p 
                     ref={messageRef}
                     className={`text-sm text-gray-700 leading-relaxed ${!isMessageExpanded && needsTruncation ? 'line-clamp-3' : ''}`}
@@ -429,14 +330,14 @@ const RescheduleRequestCard: React.FC<RescheduleRequestCardProps> = ({ request, 
                     >
                         {isMessageExpanded ? (
                             <>
-                                <span>Show less</span>
+                                <span>{t('dashboard.tutor.requests.reschedule.showLess')}</span>
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                                 </svg>
                             </>
                         ) : (
                             <>
-                                <span>Show more</span>
+                                <span>{t('dashboard.tutor.requests.reschedule.showMore')}</span>
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>

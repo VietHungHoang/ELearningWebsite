@@ -11,6 +11,7 @@ import type {
     RecentEarning,
     PayoutFilters,
     RecentEarningsFilters,
+    RescheduleRequest,
 } from "../types/api";
 import type { ClassDetail, ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
 import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
@@ -268,21 +269,16 @@ export const classService = {
         return await apiService.post<null>("/v1/classes/trial-session", request);
     },
 
-    acceptRescheduleRequest: async (requestId: string): Promise<ApiResponse<null>> => {
-        return await apiService.post<null>(`/v1/class/reschedule-requests/accept`, { requestId });
-    },
-
-    // Get list of reschedule requests for tutor or student
-    getRescheduleRequests: async (
-        role: "tutor" | "student",
-        userId: string
-    ): Promise<ApiResponse<any[]>> => {
+    // Get list of reschedule requests by user type (tutor or student)
+    // userId is automatically added in axios interceptor
+    getRescheduleRequestsByUser: async (
+        userType: 'tutor' | 'student'
+    ): Promise<ApiResponse<RescheduleRequest[]>> => {
         try {
-            const response = await apiService.get<any[]>(
-                `/v1/class/reschedule-requests/by-user`,
+            const response = await apiService.get<RescheduleRequest[]>(
+                `/v1/classes/reschedule-requests/by-user`,
                 {
-                    role,
-                    userId,
+                    userType
                 }
             );
             return {
@@ -298,6 +294,54 @@ export const classService = {
                 success: false,
                 message: error.response?.data?.message || "Failed to fetch reschedule requests",
                 data: [],
+            };
+        }
+    },
+
+    // Accept reschedule request
+    // userId is automatically added in axios interceptor
+    acceptRescheduleRequest: async (requestId: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await apiService.put<void>(
+                `/v1/classes/reschedule-requests/${requestId}/accept`
+            );
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: undefined,
+            };
+        } catch (error: any) {
+            console.error("Error accepting reschedule request:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to accept reschedule request",
+                data: undefined,
+            };
+        }
+    },
+
+    // Reject reschedule request
+    // userId is automatically added in axios interceptor
+    rejectRescheduleRequest: async (requestId: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await apiService.delete<void>(
+                `/v1/classes/reschedule-requests/${requestId}/reject`
+            );
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: undefined,
+            };
+        } catch (error: any) {
+            console.error("Error rejecting reschedule request:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to reject reschedule request",
+                data: undefined,
             };
         }
     },
@@ -745,12 +789,27 @@ export const classService = {
     // Get group classes for a specific tutor
     getGroupClassesForTutor: async (tutorId: string): Promise<ApiResponse<GroupClass[]>> => {
         try {
-            const response = await apiService.get<{ content: GroupClassApiResponse[] }>(`/v1/classes/tutors/${tutorId}/opening`);
+            const response = await apiService.get<GroupClassApiResponse[] | { content: GroupClassApiResponse[] }>(`/v1/classes/tutors/${tutorId}/opening`);
+            
+            // Handle both response formats: direct array or { content: [...] }
+            let apiData: GroupClassApiResponse[] = [];
+            if (Array.isArray(response.data)) {
+                // Direct array format
+                apiData = response.data;
+            } else if (response.data?.content && Array.isArray(response.data.content)) {
+                // Wrapped in content object
+                apiData = response.data.content;
+            }
+            
+            console.log('Group classes API response:', response);
+            console.log('Parsed API data:', apiData);
             
             // Map API response to GroupClass format
-            const mappedData: GroupClass[] = (response.data?.content || []).map(item => 
+            const mappedData: GroupClass[] = apiData.map(item => 
                 classService.mapGroupClassApiResponse(item)
             );
+
+            console.log('Mapped group classes:', mappedData);
 
             return {
                 status: response.status,
@@ -795,6 +854,57 @@ export const classService = {
                 success: false,
                 message: error.response?.data?.message || "Failed to remove student from class",
                 data: undefined
+            };
+        }
+    },
+
+    // Create reschedule request for a session
+    createRescheduleRequest: async (
+        sessionId: string,
+        oldSchedule: string,
+        newSchedule: string,
+        reason: string
+    ): Promise<ApiResponse<any>> => {
+        try {
+            // Convert newSchedule from local datetime to UTC ISO string
+            // newSchedule is from datetime-local input (e.g., "2026-01-15T14:00")
+            const newScheduleDate = new Date(newSchedule);
+            const newScheduleISO = newScheduleDate.toISOString();
+
+            // oldSchedule is UTC string from backend without timezone indicator (e.g., "2026-01-15T07:00:00")
+            // Backend stores datetime in UTC but without 'Z' suffix
+            // Need to parse it as UTC, not local time, to avoid double conversion
+            const hasTimezone = oldSchedule.endsWith('Z') || 
+                               /[+-]\d{2}:\d{2}$/.test(oldSchedule) ||
+                               /[+-]\d{4}$/.test(oldSchedule);
+            const oldScheduleUTCString = hasTimezone ? oldSchedule : `${oldSchedule}Z`;
+            const oldScheduleDate = new Date(oldScheduleUTCString);
+            const oldScheduleISO = oldScheduleDate.toISOString();
+
+            // Call API with sessionId in path
+            const response = await apiService.post<any>(
+                `/v1/classes/sessions/${sessionId}/reschedule`,
+                {
+                    oldSchedule: oldScheduleISO,
+                    newSchedule: newScheduleISO,
+                    reason
+                }
+            );
+
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data
+            };
+        } catch (error: any) {
+            console.error("Failed to create reschedule request:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Failed to create reschedule request";
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: errorMessage,
+                data: null
             };
         }
     },

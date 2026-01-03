@@ -474,7 +474,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                             <label className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.languagesKnown')} <span className="text-red-500">*</span></label>
                         </div>
                         <div className="flex-1 pl-4">
-                            <CustomDropdownDashboardDashboard
+                            <CustomDropdownDashboard
                                 options={allLanguages
                                     .filter(lang => lang.code !== formData.nativeLanguage?.code && !formData.languages.some(l => l.code === lang.code))
                                     .map(lang => lang.name)}

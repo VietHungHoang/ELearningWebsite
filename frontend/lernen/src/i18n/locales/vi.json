@@ -542,6 +542,11 @@
         "thu": "T5",
         "fri": "T6",
         "sat": "T7"
+      },
+      "sessionTypes": {
+        "oneOnOne": "1 kèm 1",
+        "group": "Nhóm",
+        "trial": "Học thử"
       }
     },
     "inbox": {
@@ -695,7 +700,8 @@
         "statusLabels": {
           "ongoing": "Đang học",
           "completed": "Đã hoàn thành",
-          "enrolled": "Đã đăng ký"
+          "enrolled": "Đã đăng ký",
+          "pendingPayment": "Chờ thanh toán"
         },
         "loading": "Đang tải lớp học...",
         "errorTitle": "Không thể tải lớp học",
@@ -754,6 +760,36 @@
           "view": "Xem chi tiết",
           "downloadInvoice": "Tải hóa đơn",
           "contactSupport": "Liên hệ hỗ trợ"
+        },
+        "billDetail": {
+          "title": "Chi tiết hóa đơn",
+          "invoiceNumber": "Số hóa đơn",
+          "transactionId": "Mã giao dịch",
+          "studentInformation": "Thông tin học viên",
+          "tutorInformation": "Thông tin giáo viên",
+          "name": "Họ tên",
+          "email": "Email",
+          "courseInformation": "Thông tin khóa học",
+          "courseTitle": "Tên khóa học",
+          "classType": "Loại lớp",
+          "sessionsPurchased": "Số buổi học",
+          "sessions": "buổi",
+          "pricePerSession": "Giá mỗi buổi",
+          "schedule": "Lịch học",
+          "paymentBreakdown": "Chi tiết thanh toán",
+          "subtotal": "Tổng tiền",
+          "discount": "Giảm giá",
+          "tax": "Thuế",
+          "totalAmount": "Tổng cộng",
+          "paymentInformation": "Thông tin thanh toán",
+          "amount": "Số tiền",
+          "paymentMethod": "Phương thức thanh toán",
+          "purchaseDate": "Ngày mua",
+          "paymentDate": "Ngày thanh toán",
+          "status": "Trạng thái",
+          "notes": "Ghi chú",
+          "payNow": "Thanh toán ngay",
+          "close": "Đóng"
         }
       }
     },
@@ -1251,7 +1287,9 @@
           "declineSuccess": "Yêu cầu đổi lịch đã bị từ chối và học sinh đã được thông báo.",
           "declineError": "Đã xảy ra lỗi khi từ chối yêu cầu",
           "sentTo": "Gửi đến:",
-          "everyDayAt": "Mỗi {{day}} lúc {{time}}"
+          "everyDayAt": "Mỗi {{day}} lúc {{time}}",
+          "showMore": "Xem thêm",
+          "showLess": "Thu gọn"
         }
       },
       "schedule": {
@@ -1785,7 +1823,31 @@
       "successLeft": "Đã rời lớp thành công",
       "leaveSuccessMessage": "Bạn đã rời lớp nhóm thành công. Bạn có thể tham gia lại bất cứ lúc nào nếu thay đổi ý định.",
       "classWillStartOnDate": "Lớp học này sẽ bắt đầu vào {{startDate}}, ngay cả khi chưa đủ học viên.",
-      "classWillStartWhenFull": "Lớp học này sẽ bắt đầu ngay khi đủ số lượng học viên."
+      "classWillStartWhenFull": "Lớp học này sẽ bắt đầu ngay khi đủ số lượng học viên.",
+      "perHour": "/giờ",
+      "lastStudent": {
+        "title": "Bạn là học viên cuối cùng!",
+        "subtitle": "Chúc mừng! Bạn sẽ là học viên cuối cùng để hoàn thành lớp học này.",
+        "specialNotice": "Thông báo đặc biệt",
+        "notice1": "Bạn là học viên cuối cùng để đủ số lượng tối đa của lớp học.",
+        "notice2": "Lớp học sẽ được kích hoạt và bắt đầu ngay sau khi bạn tham gia.",
+        "notice3": "Bạn có thể thanh toán ngay hoặc thanh toán sau khi lớp học bắt đầu.",
+        "info1": "Lớp học sẽ được mở ngay sau khi bạn xác nhận tham gia.",
+        "info2": "Bạn sẽ nhận được thông báo qua email khi lớp học bắt đầu.",
+        "confirmJoin": "Xác nhận & tham gia"
+      },
+      "paymentPrompt": {
+        "title": "Bạn có muốn thanh toán ngay không?",
+        "description": "Bạn đã tham gia lớp học thành công! Bạn có muốn thanh toán ngay bây giờ không?",
+        "className": "Lớp học",
+        "price": "Giá",
+        "benefitsTitle": "Lợi ích khi thanh toán ngay:",
+        "benefit1": "Đảm bảo vị trí của bạn trong lớp học",
+        "benefit2": "Nhận được thông báo sớm khi lớp học bắt đầu",
+        "benefit3": "Tránh quên thanh toán sau này",
+        "payNow": "Thanh toán ngay",
+        "payLater": "Thanh toán sau"
+      }
     },
     "bookSessionModal": {
       "title": "Đặt buổi học",
@@ -1930,6 +1992,19 @@
       "showCorrectAnswers": "Hiển thị đáp án đúng sau khi nộp bài",
       "questionsTitle": "Câu hỏi ({{count}})",
       "addQuestion": "Thêm câu hỏi",
+      "aiGenerate": {
+        "button": "Tạo bằng AI",
+        "title": "Tạo câu hỏi bằng AI",
+        "description": "Nhập mô tả hoặc chủ đề để AI tự động tạo bộ câu hỏi kèm đáp án cho bạn.",
+        "promptLabel": "Mô tả hoặc chủ đề",
+        "promptPlaceholder": "Ví dụ: Tạo 5 câu hỏi trắc nghiệm về JavaScript cơ bản, bao gồm các khái niệm về biến, hàm, và vòng lặp...",
+        "promptHint": "Mô tả càng chi tiết, AI sẽ tạo ra câu hỏi càng phù hợp với nhu cầu của bạn.",
+        "promptRequired": "Vui lòng nhập mô tả hoặc chủ đề",
+        "generateButton": "Tạo câu hỏi",
+        "generating": "Đang tạo...",
+        "success": "Câu hỏi đã được tạo thành công!",
+        "error": "Không thể tạo câu hỏi. Vui lòng thử lại."
+      },
       "confirmLeave": {
         "title": "Hủy thay đổi?",
         "message": "Bạn có thay đổi chưa lưu. Rời trang mà không lưu?",

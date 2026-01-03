@@ -67,10 +67,45 @@ const clearSubjectsCache = (): void => {
     console.log('Cleared subjects and categories cache');
 };
 
-// Get subjects - always fetch from API first, use cache only when API fails
+// Get subjects - use cache first, then fetch from API in background to update cache
 const getSubjects = async (): Promise<Subject[]> => {
+    // Check cache first
+    const cached = localStorage.getItem('subjects');
+    if (cached) {
+        try {
+            const parsedCache = JSON.parse(cached);
+            // Handle both old format (array) and new format ({ data, timestamp })
+            let data: Subject[] | null = null;
+            
+            if (Array.isArray(parsedCache)) {
+                // Old format: just an array
+                data = parsedCache;
+            } else if (parsedCache && parsedCache.data && Array.isArray(parsedCache.data)) {
+                // New format: { data, timestamp }
+                data = parsedCache.data;
+            }
+            
+            if (data && data.length > 0) {
+                console.log('Using cached subjects:', data.length, 'items');
+                // Fetch from API in background to update cache (don't wait for it)
+                apiService.get<Subject[]>('/v1/public/common/subjects')
+                    .then(response => {
+                        if (response.data && response.data.length > 0) {
+                            localStorage.setItem('subjects', JSON.stringify(response.data));
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('Background fetch subjects failed:', error);
+                    });
+                return data;
+            }
+        } catch (error) {
+            console.warn('Error parsing cached subjects:', error);
+        }
+    }
+    
+    // No cache available, fetch from API
     try {
-        // Always try to fetch from API first to get latest data
         const response = await apiService.get<Subject[]>('/v1/public/common/subjects');
         if (response.data && response.data.length > 0) {
             localStorage.setItem('subjects', JSON.stringify(response.data));
@@ -80,25 +115,50 @@ const getSubjects = async (): Promise<Subject[]> => {
         console.warn('Failed to fetch subjects from API:', error);
     }
     
-    // Fallback to cache if API fails
-    const cached = localStorage.getItem('subjects');
-    if (cached) {
-        const parsedCache = JSON.parse(cached);
-        if (parsedCache && parsedCache.length > 0) {
-            console.log('Using cached subjects:', parsedCache.length, 'items');
-            return parsedCache;
-        }
-    }
-    
-    // No cache and no API - return empty array (no mock data to avoid ID mismatch)
+    // No cache and no API - return empty array
     console.warn('No subjects available from API or cache');
     return [];
 };
 
-// Get categories - always fetch from API first, use cache only when API fails
+// Get categories - use cache first, then fetch from API in background to update cache
 const getCategories = async (): Promise<Category[]> => {
+    // Check cache first
+    const cached = localStorage.getItem('categories');
+    if (cached) {
+        try {
+            const parsedCache = JSON.parse(cached);
+            // Handle both old format (array) and new format ({ data, timestamp })
+            let data: Category[] | null = null;
+            
+            if (Array.isArray(parsedCache)) {
+                // Old format: just an array
+                data = parsedCache;
+            } else if (parsedCache && parsedCache.data && Array.isArray(parsedCache.data)) {
+                // New format: { data, timestamp }
+                data = parsedCache.data;
+            }
+            
+            if (data && data.length > 0) {
+                console.log('Using cached categories:', data.length, 'items');
+                // Fetch from API in background to update cache (don't wait for it)
+                apiService.get<Category[]>('/v1/public/common/categories')
+                    .then(response => {
+                        if (response.data && response.data.length > 0) {
+                            localStorage.setItem('categories', JSON.stringify(response.data));
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('Background fetch categories failed:', error);
+                    });
+                return data;
+            }
+        } catch (error) {
+            console.warn('Error parsing cached categories:', error);
+        }
+    }
+    
+    // No cache available, fetch from API
     try {
-        // Always try to fetch from API first to get latest data
         const response = await apiService.get<Category[]>('/v1/public/common/categories');
         if (response.data && response.data.length > 0) {
             localStorage.setItem('categories', JSON.stringify(response.data));
@@ -106,16 +166,6 @@ const getCategories = async (): Promise<Category[]> => {
         }
     } catch (error) {
         console.warn('Failed to fetch categories from API:', error);
-    }
-    
-    // Fallback to cache if API fails
-    const cached = localStorage.getItem('categories');
-    if (cached) {
-        const parsedCache = JSON.parse(cached);
-        if (parsedCache && parsedCache.length > 0) {
-            console.log('Using cached categories:', parsedCache.length, 'items');
-            return parsedCache;
-        }
     }
     
     // No cache and no API - return empty array

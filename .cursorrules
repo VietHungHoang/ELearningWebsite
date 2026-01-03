@@ -1,0 +1,26 @@
+# Cursor Rules for ELearning Website
+
+## Code Standards
+- Always write code in English
+- Use TypeScript for type safety
+- Follow React best practices
+- Use functional components with hooks
+- Use Tailwind CSS for styling
+
+## Project Structure
+- Components should be in appropriate feature folders
+- Reusable UI components in `components/ui`
+- Feature-specific components in feature folders
+
+## Naming Conventions
+- Components: PascalCase
+- Files: PascalCase for components, camelCase for utilities
+- Variables and functions: camelCase
+- Constants: UPPER_SNAKE_CASE
+
+## Code Quality
+- Write clean, readable code
+- Add proper error handling
+- Use TypeScript types/interfaces
+- Follow existing code patterns in the project
+

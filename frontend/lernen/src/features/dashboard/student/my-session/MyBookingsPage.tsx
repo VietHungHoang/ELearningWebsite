@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import SessionDetailModal from './components/SessionDetailModal';
+import RescheduleModal from './components/RescheduleModal';
 import DailyView from '../components/DailyView';
 import WeeklyView from '../components/WeeklyView';
 import MonthlyView from '../components/MonthlyView';
 import CalendarSkeleton from './components/CalendarSkeleton';
+import Toast from '../../../../components/ui/Toast';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import type { Session } from '../../../../types/class';
@@ -15,13 +17,16 @@ import { useBreadcrumb } from '../../context/BreadcrumbContext';
 const MyBookingsPage: React.FC = () => {
     const { t } = useTranslation();
     const { state } = useAuth();
-    const [view, setView] = useState<'Daily' | 'Weekly' | 'Monthly'>('Monthly');
+    const [view, setView] = useState<'Daily' | 'Weekly' | 'Monthly'>('Weekly');
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedBooking, setSelectedBooking] = useState<Session | null>(null);
     const [modalPosition, setModalPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
     const [isModalAbove, setIsModalAbove] = useState(false);
     const [bookings, setBookings] = useState<Session[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+    const [bookingToReschedule, setBookingToReschedule] = useState<Session | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const { setBreadcrumb } = useBreadcrumb();
 
     useEffect(() => {
@@ -235,6 +240,77 @@ const MyBookingsPage: React.FC = () => {
                     position={modalPosition}
                     onClose={() => setSelectedBooking(null)}
                     isAbove={isModalAbove}
+                    onReschedule={() => {
+                        setBookingToReschedule(selectedBooking);
+                        setSelectedBooking(null);
+                        setIsRescheduleModalOpen(true);
+                    }}
+                />
+            )}
+
+            <RescheduleModal
+                isOpen={isRescheduleModalOpen}
+                onClose={() => {
+                    setIsRescheduleModalOpen(false);
+                    setBookingToReschedule(null);
+                }}
+                booking={bookingToReschedule}
+                onSubmit={async (reason, newDateTime) => {
+                    // Handle reschedule request
+                    try {
+                        if (!bookingToReschedule?.id) {
+                            setToast({
+                                message: 'Không tìm thấy thông tin booking. Vui lòng thử lại.',
+                                type: 'error'
+                            });
+                            return;
+                        }
+
+                        // Call API to submit reschedule request
+                        const response = await classService.createRescheduleRequest(
+                            bookingToReschedule.id,
+                            bookingToReschedule.sessionDatetime,
+                            newDateTime,
+                            reason
+                        );
+
+                        if (response.success) {
+                            setToast({
+                                message: 'Yêu cầu đổi lịch đã được gửi thành công!',
+                                type: 'success'
+                            });
+                            // Close modal
+                            setIsRescheduleModalOpen(false);
+                            setBookingToReschedule(null);
+                            // Refresh bookings list
+                            const studentId = state.user?.id || 'current-student-id';
+                            const bookingsResponse = await classService.getStudentSessions(studentId);
+                            if (bookingsResponse.success && bookingsResponse.data) {
+                                setBookings(bookingsResponse.data);
+                            }
+                        } else {
+                            setToast({
+                                message: response.message || 'Có lỗi xảy ra khi gửi yêu cầu đổi lịch. Vui lòng thử lại.',
+                                type: 'error'
+                            });
+                        }
+                    } catch (error: any) {
+                        console.error('Failed to submit reschedule request:', error);
+                        const errorMessage = error.response?.data?.message || error.message || 'Có lỗi xảy ra khi gửi yêu cầu đổi lịch. Vui lòng thử lại.';
+                        setToast({
+                            message: errorMessage,
+                            type: 'error'
+                        });
+                    }
+                }}
+            />
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
                 />
             )}
         </div>

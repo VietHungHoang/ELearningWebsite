@@ -2,7 +2,10 @@ export interface UserBasicInfoResponse {
     id: string;
     fullName: string;
     avatarUrl?: string;
+    enrollmentStatus?: EnrollmentStatus;
 }
+
+export type EnrollmentStatus = 'JOINED' | 'PENDING_PAYMENT' | 'ON_GOING' | 'COMPLETED';
 
 export interface ClassBasicInfoResponse {
     id: string;

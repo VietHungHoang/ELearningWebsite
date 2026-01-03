@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { HiSearch } from 'react-icons/hi';
 import { FiEye } from 'react-icons/fi';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import Pagination from '../../../../components/ui/Pagination';
+import BillDetailModal from './components/BillDetailModal';
 import { useTranslation } from 'react-i18next';
 
 // Purchase data type
@@ -17,13 +17,28 @@ export interface PurchaseData {
     purchaseDate: string;
     paymentMethod?: string;
     invoiceNumber?: string;
+    // Additional bill details
+    studentName?: string;
+    studentEmail?: string;
+    tutorName?: string;
+    tutorEmail?: string;
+    sessionsPurchased?: number;
+    pricePerSession?: number;
+    discount?: number;
+    discountAmount?: number;
+    subtotal?: number;
+    tax?: number;
+    totalAmount?: number;
+    transactionId?: string;
+    paymentDate?: string;
+    notes?: string;
+    schedule?: Array<{ date: string; time: string }>;
 }
 
 type FilterTab = 'All Status' | 'Pending' | 'Completed' | 'Cancelled' | 'Refunded';
 
 // --- MAIN COMPONENT ---
 const PurchasesPage: React.FC = () => {
-    const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const [purchases, setPurchases] = useState<PurchaseData[]>([]);
     const [totalElements, setTotalElements] = useState(0);
@@ -33,6 +48,8 @@ const PurchasesPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [isBillModalOpen, setIsBillModalOpen] = useState(false);
+    const [selectedPurchase, setSelectedPurchase] = useState<PurchaseData | null>(null);
     const itemsPerPage = 10;
     const { setBreadcrumb } = useBreadcrumb();
 
@@ -63,7 +80,25 @@ const PurchasesPage: React.FC = () => {
                         status: 'COMPLETED',
                         purchaseDate: '2024-01-15T10:30:00Z',
                         paymentMethod: 'Thẻ tín dụng',
-                        invoiceNumber: 'INV-2024-001'
+                        invoiceNumber: 'INV-2024-001',
+                        studentName: 'Nguyễn Văn A',
+                        studentEmail: 'nguyenvana@example.com',
+                        tutorName: 'Trần Thị B',
+                        tutorEmail: 'tranthib@example.com',
+                        sessionsPurchased: 10,
+                        pricePerSession: 50000,
+                        discount: 10,
+                        discountAmount: 50000,
+                        subtotal: 500000,
+                        tax: 0,
+                        totalAmount: 500000,
+                        transactionId: 'TXN-2024-001',
+                        paymentDate: '2024-01-15T10:35:00Z',
+                        notes: 'Thanh toán thành công',
+                        schedule: [
+                            { date: '2024-01-20', time: '09:00' },
+                            { date: '2024-01-22', time: '09:00' }
+                        ]
                     },
                     {
                         id: '2',
@@ -73,7 +108,19 @@ const PurchasesPage: React.FC = () => {
                         status: 'PENDING',
                         purchaseDate: '2024-01-20T14:20:00Z',
                         paymentMethod: 'Chuyển khoản ngân hàng',
-                        invoiceNumber: 'INV-2024-002'
+                        invoiceNumber: 'INV-2024-002',
+                        studentName: 'Nguyễn Văn A',
+                        studentEmail: 'nguyenvana@example.com',
+                        tutorName: 'Lê Văn C',
+                        tutorEmail: 'levanc@example.com',
+                        sessionsPurchased: 8,
+                        pricePerSession: 40000,
+                        discount: 5,
+                        discountAmount: 16000,
+                        subtotal: 320000,
+                        tax: 0,
+                        totalAmount: 300000,
+                        notes: 'Đang chờ thanh toán'
                     },
                     {
                         id: '3',
@@ -124,10 +171,16 @@ const PurchasesPage: React.FC = () => {
     }, [currentPage]);
 
     const handleViewDetails = (purchase: PurchaseData) => {
-        // Navigate to purchase detail page
-        navigate(`/dashboard/purchases/${purchase.id}`, { 
-            state: { purchase } 
-        });
+        setSelectedPurchase(purchase);
+        setIsBillModalOpen(true);
+    };
+
+    const handlePay = (purchaseId: string) => {
+        // TODO: Implement payment logic
+        console.log('Pay for purchase:', purchaseId);
+        // Close modal after payment
+        setIsBillModalOpen(false);
+        setSelectedPurchase(null);
     };
 
     const filteredPurchases = useMemo(() => {
@@ -354,6 +407,17 @@ const PurchasesPage: React.FC = () => {
                     onPageChange={setCurrentPage}
                 />
             )}
+
+            {/* Bill Detail Modal */}
+            <BillDetailModal
+                isOpen={isBillModalOpen}
+                onClose={() => {
+                    setIsBillModalOpen(false);
+                    setSelectedPurchase(null);
+                }}
+                purchase={selectedPurchase}
+                onPay={handlePay}
+            />
         </div>
     );
 };

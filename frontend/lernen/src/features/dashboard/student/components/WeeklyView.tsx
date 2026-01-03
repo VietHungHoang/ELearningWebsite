@@ -58,7 +58,12 @@ const WeeklyView: React.FC<WeeklyViewProps> = ({ currentDate, bookings, onSessio
                                             onClick={(e) => onSessionClick(session, e)}
                                             className="text-xs font-semibold py-1 px-1.5 rounded-md text-left truncate cursor-pointer bg-[#0b6459] text-white"
                                         >
-                                            <p className="font-bold">{session.classInfo?.title || 'Session'}</p>
+                                            <p className="font-bold">
+                                                {session.sessionType === 'TRIAL' 
+                                                    ? t('dashboard.common.sessionTypes.trial') 
+                                                    : (session.classInfo?.title || 'Session')
+                                                }
+                                            </p>
                                             <p>{localSessionDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}</p>
                                         </div>
                                     );
