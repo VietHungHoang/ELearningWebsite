@@ -7,7 +7,7 @@ interface TutorDetailsTabsProps {
 }
 
 const TutorDetailsTabs: React.FC<TutorDetailsTabsProps> = ({ groupClassesCount, reviewsCount }) => {
-    const [activeTab, setActiveTab] = useState("introduction");
+    const [activeTab, setActiveTab] = useState("reviews");
     const navRef = useRef<HTMLElement>(null);
     const { t } = useTranslation();
 
@@ -32,13 +32,13 @@ const TutorDetailsTabs: React.FC<TutorDetailsTabsProps> = ({ groupClassesCount, 
     }
 
     const tabs = [
+        { name: t("tutorDetail.tabs.reviews"), id: "reviews", count: reviewsCount! },
         { name: t("tutorDetail.tabs.introduction"), id: "introduction", count: null },
         { name: t("tutorDetail.tabs.availability"), id: "availability", count: null },
         ...(groupClassesCount! > 0
             ? [{ name: t("tutorDetail.tabs.groupClass"), id: "group-class", count: groupClassesCount! }]
             : []),
         { name: t("tutorDetail.tabs.resumeHighlights"), id: "resume-highlights", count: null },
-        { name: t("tutorDetail.tabs.reviews"), id: "reviews", count: reviewsCount! },
     ];
 
     useEffect(() => {

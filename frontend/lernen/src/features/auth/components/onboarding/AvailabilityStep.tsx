@@ -161,7 +161,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
         const startX = e.clientX - gridRect.left;
         const startY = e.clientY - gridRect.top;
         setDragStartCoords({ x: startX, y: startY });
-        
+
         // Lưu scroll position tại thời điểm bắt đầu drag
         setDragStartScroll({
             scrollLeft: container.scrollLeft,
@@ -379,7 +379,7 @@ const AvailabilityStep: React.FC<AvailabilityStepProps> = ({ data, onChange }) =
                                                 className="absolute right-2 text-xs text-gray-500 bg-white px-0.5"
                                                 style={{ top: 0, transform: 'translateY(-50%)' }}
                                             >
-                                                {time}
+                                            {time}
                                             </span>
                                         </div>
 

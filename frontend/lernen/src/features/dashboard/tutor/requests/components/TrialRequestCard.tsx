@@ -4,7 +4,74 @@ import RequestStatusBadge from '../../components/RequestStatusBadge';
 import type { TrialSessionRequestResponse } from '../../../../../types/api';
 import { classService } from '../../../../../services/classService';
 import Toast from '../../../../../components/ui/Toast';
-import ConfirmModal from '../../../../../components/ui/ConfirmModal';
+
+// Delete Confirm Popup Component - Similar to Step 5
+interface DeleteConfirmPopupProps {
+    onConfirm: () => void;
+    onCancel: () => void;
+    confirmText: string;
+    cancelText: string;
+    deleteText: string;
+}
+
+const DeleteConfirmPopup: React.FC<DeleteConfirmPopupProps> = ({
+    onConfirm,
+    onCancel,
+    confirmText,
+    cancelText,
+    deleteText,
+}) => {
+    const popupRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+                onCancel();
+            }
+        };
+
+        // Delay để tránh close ngay khi click button mở
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onCancel]);
+
+    return (
+        <div
+            ref={popupRef}
+            className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 min-w-[200px]"
+        >
+            <p className="text-sm text-gray-700 mb-3">{confirmText}</p>
+            <div className="flex gap-2 justify-end">
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onCancel();
+                    }}
+                    className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition"
+                >
+                    {cancelText}
+                </button>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onConfirm();
+                    }}
+                    className="px-2 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700 transition"
+                >
+                    {deleteText}
+                </button>
+            </div>
+        </div>
+    );
+};
 
 interface TrialRequestCardProps {
     request: TrialSessionRequestResponse;
@@ -15,7 +82,7 @@ interface TrialRequestCardProps {
 }
 
 const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, onChat, onCancel, onRequestProcessed }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [isAccepting, setIsAccepting] = useState(false);
     const [isDeclining, setIsDeclining] = useState(false);
@@ -116,64 +183,112 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
     };
 
     const formatDateTime = (dateString: string): string => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInHours = Math.floor((date.getTime() - now.getTime()) / (1000 * 60 * 60));
+        // Parse sessionDateTime from UTC format
+        const utcDate = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
         
-        if (diffInHours < 24) {
-            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        } else if (diffInHours < 48) {
-            return `Tomorrow, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-        } else {
-            return date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric',
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true 
-            });
-        }
+        // Format according to current locale
+        const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+        
+        // Format: "Mon, Jan 5, 02:00 AM"
+        const formattedDate = utcDate.toLocaleDateString(locale, { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric'
+        });
+        
+        const formattedTime = utcDate.toLocaleTimeString(locale, { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
+        
+        return `${formattedDate}, ${formattedTime}`;
     };
 
     const formatTimestamp = (dateString: string): string => {
-        const date = new Date(dateString);
+        // Parse createdAt from backend format: "2026-01-02T06:57:17.923084" (LocalDateTime, no timezone)
+        // Backend stores in UTC, so we treat it as UTC for accurate relative time calculation
+        
+        let utcDate: Date;
+        
+        // Check if string already has timezone indicator (Z, +HH:MM, or -HH:MM)
+        const hasTimezone = dateString.endsWith('Z') || 
+                           /[+-]\d{2}:\d{2}$/.test(dateString) ||
+                           /[+-]\d{4}$/.test(dateString);
+        
+        // Normalize the date string: handle microseconds (JavaScript Date only supports milliseconds)
+        // Format: "2026-01-02T06:57:17.923084" -> "2026-01-02T06:57:17.923Z"
+        let normalizedDateString = dateString;
+        if (normalizedDateString.includes('.')) {
+            const parts = normalizedDateString.split('.');
+            if (parts.length === 2) {
+                const fractionalPart = parts[1];
+                // Extract timezone if present (Z, +HH:MM, -HH:MM)
+                const tzMatch = fractionalPart.match(/^(\d+)([Z+-].*)?$/);
+                if (tzMatch) {
+                    const fractionalSeconds = tzMatch[1];
+                    const tzPart = tzMatch[2] || '';
+                    // Truncate microseconds to milliseconds (first 3 digits, pad if needed)
+                    const milliseconds = fractionalSeconds.substring(0, 3).padEnd(3, '0');
+                    normalizedDateString = `${parts[0]}.${milliseconds}${tzPart}`;
+                }
+            }
+        }
+        
+        if (hasTimezone) {
+            // Already has timezone info, parse directly
+            utcDate = new Date(normalizedDateString);
+        } else {
+            // No timezone info, treat as UTC (backend stores LocalDateTime in UTC)
+            // Add 'Z' to indicate UTC
+            utcDate = new Date(normalizedDateString + 'Z');
+        }
+        
+        // Validate parsed date
+        if (isNaN(utcDate.getTime())) {
+            // Fallback: try parsing without fractional seconds
+            const withoutFractional = normalizedDateString.split('.')[0];
+            utcDate = new Date(hasTimezone ? withoutFractional : withoutFractional + 'Z');
+        }
+        
+        // Get current time (JavaScript Date is always in UTC internally)
         const now = new Date();
-        const diffInMs = now.getTime() - date.getTime();
+        const diffInMs = now.getTime() - utcDate.getTime();
         const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
         const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
         const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
         if (diffInMinutes < 1) {
-            return 'just now';
+            return t('dashboard.tutor.requests.trial.justNow');
         } else if (diffInMinutes < 60) {
-            return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+            return t('dashboard.tutor.requests.trial.minutesAgo', { count: diffInMinutes });
         } else if (diffInHours < 24) {
-            return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
+            return t('dashboard.tutor.requests.trial.hoursAgo', { count: diffInHours });
         } else if (diffInDays < 7) {
-            return `${diffInDays} ${diffInDays === 1 ? 'day' : 'days'} ago`;
+            return t('dashboard.tutor.requests.trial.daysAgo', { count: diffInDays });
         } else {
-            return date.toLocaleDateString('en-US', { 
+            // Format date according to current locale and timezone
+            const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+            return utcDate.toLocaleDateString(locale, { 
                 month: 'short', 
                 day: 'numeric',
-                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+                year: utcDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
             });
         }
     };
 
-    // Get course title or person name for display (only for student)
-    const courseTitle = viewMode === 'student' 
-        ? (person?.fullName || person?.name || 'Unknown Tutor')
-        : null;
 
     return (
         <>
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4 relative">
                 {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+                
+                {/* Status badge - Top left corner */}
+                <RequestStatusBadge status={request.status} />
                 
                 {viewMode === 'tutor' ? (
                     /* Tutor View: Original UI - Avatar + Name + Menu */
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                         {person && (
                             <div className="flex-shrink-0">
                                 <img 
@@ -192,6 +307,12 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                                     {formatTimestamp(request.createdAt)}
                                 </span>
                             )}
+                            {/* Badge: Học thử - bên phải dưới timestamp */}
+                            <div className="mr-4">
+                                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    {t('dashboard.tutor.requests.trial.badge')}
+                                </span>
+                            </div>
                             <div className="relative" ref={menuRef}>
                                 <button
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -269,35 +390,9 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                         </div>
                     </div>
                 ) : (
-                    /* Student View: New Layout - 3 rows like RescheduleRequestCard */
-                    <div className="flex flex-col gap-2">
-                        {/* Row 1: Course Title (Tutor Name) + Status Badge */}
-                        <div className="flex items-center gap-3">
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-900 break-words">{courseTitle}</p>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <RequestStatusBadge status={request.status} />
-                            </div>
-                        </div>
-                        {/* Row 2: Badge "Học thử" + Thùng rác */}
-                        <div className="flex items-center justify-between">
-                            <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-md bg-blue-100 text-blue-800">
-                                {t('dashboard.tutor.requests.trial.badge')}
-                            </span>
-                            {request.status === 'PENDING' && (
-                                <button
-                                    onClick={() => setShowCancelConfirm(true)}
-                                    className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                                    aria-label="Cancel request"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            )}
-                        </div>
-                        {/* Row 3: Avatar + Name + Timestamp */}
+                    /* Student View: Clean Layout - 2 rows */
+                    <div className="flex flex-col gap-2 pb-3 border-b border-gray-100">
+                        {/* Row 1: Avatar + Name + Timestamp */}
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0">
                                 <img 
@@ -311,10 +406,45 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                                     {person?.fullName || person?.name || 'Unknown Tutor'}
                                 </h3>
                             </div>
-                            {request.createdAt && (
-                                <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
-                                    {formatTimestamp(request.createdAt)}
+                            <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                                {request.createdAt && (
+                                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                                        {formatTimestamp(request.createdAt)}
+                                    </span>
+                                )}
+                                {/* Badge: Học thử - bên phải dưới timestamp */}
+                                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    {t('dashboard.tutor.requests.trial.badge')}
                                 </span>
+                            </div>
+                        </div>
+                        {/* Row 2: Nút xóa */}
+                        <div className="flex items-center justify-end">
+                            {request.status === 'PENDING' && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowCancelConfirm(true)}
+                                        className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                        aria-label="Cancel request"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    {/* Small Delete Confirmation Popup - Similar to Step 5 */}
+                                    {showCancelConfirm && (
+                                        <DeleteConfirmPopup
+                                            onConfirm={() => {
+                                                onCancel?.();
+                                                setShowCancelConfirm(false);
+                                            }}
+                                            onCancel={() => setShowCancelConfirm(false)}
+                                            confirmText={t('dashboard.tutor.requests.trial.cancelConfirmMessage')}
+                                            cancelText={t('common.cancel', { defaultValue: 'Cancel' })}
+                                            deleteText={t('dashboard.tutor.requests.trial.cancelRequest')}
+                                        />
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>
@@ -366,19 +496,6 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                     )}
                 </div>
 
-                <ConfirmModal
-                    isOpen={showCancelConfirm}
-                    title={t('dashboard.tutor.requests.trial.cancelRequest')}
-                    message={t('dashboard.tutor.requests.trial.cancelConfirmMessage')}
-                    confirmText={t('dashboard.tutor.requests.trial.cancelRequest')}
-                    cancelText={t('common.cancel', { defaultValue: 'Cancel' })}
-                    onConfirm={() => {
-                        onCancel?.();
-                        setShowCancelConfirm(false);
-                    }}
-                    onCancel={() => setShowCancelConfirm(false)}
-                    confirmButtonColor="red"
-                />
             </div>
         </>
     );

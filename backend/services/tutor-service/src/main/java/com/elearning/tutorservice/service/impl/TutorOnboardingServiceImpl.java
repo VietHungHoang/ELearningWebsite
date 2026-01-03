@@ -1,12 +1,14 @@
 package com.elearning.tutorservice.service.impl;
 
 import com.elearning.tutorservice.dto.event.AccountCreatedEvent;
+import com.elearning.tutorservice.dto.event.AvatarUpdateEvent;
 import com.elearning.tutorservice.dto.event.RoleAssignRequestEvent;
 import com.elearning.tutorservice.dto.event.TutorApprovedEvent;
 import com.elearning.tutorservice.dto.event.TutorIndexEvent;
 import com.elearning.tutorservice.dto.onboarding.TutorOnboardingDto;
 import com.elearning.tutorservice.dto.request.UpdateOnboardingRequest;
 import com.elearning.tutorservice.dto.response.OnboardingResponse;
+import com.elearning.tutorservice.dto.response.PendingTutorResponse;
 import com.elearning.tutorservice.dto.response.TutorResponse;
 import com.elearning.tutorservice.entity.*;
 import com.elearning.tutorservice.entity.enums.OnboardingStatus;
@@ -21,6 +23,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -198,6 +204,16 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             kafkaProducer.sendTutorApprovedEvent(approvedEvent);
             log.info("Published tutor approved event for tutor: {}", tutorId);
 
+            // Send avatar update event if avatarUrl exists
+            if (tutor.getAvatarUrl() != null && !tutor.getAvatarUrl().isEmpty()) {
+                AvatarUpdateEvent avatarEvent = AvatarUpdateEvent.builder()
+                        .userId(tutorId)
+                        .avatarUrl(tutor.getAvatarUrl())
+                        .build();
+                kafkaProducer.sendAvatarUpdateEvent(avatarEvent);
+                log.info("Sent avatar update event for tutor: {}", tutorId);
+            }
+
         } catch (Exception e) {
             log.error("Failed to approve tutor {}: {}", tutorId, e.getMessage(), e);
             throw new RuntimeException("Failed to approve tutor", e);
@@ -296,8 +312,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             List<TutorSubject> validSubjects = tutorData.getSubjectIds().stream()
                     .map(subjectId -> TutorSubject.builder()
                             .tutor(tutor)
-                            .categoryId(subjectId)
-                            .subjectName("Subject") // TODO: Look up actual subject name
+                            .subjectId(subjectId)
                             .build())
                     .toList();
 
@@ -430,6 +445,59 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
         } catch (Exception e) {
             log.error("Failed to parse Gemini response", e);
             throw new RuntimeException("Failed to parse Gemini response", e);
+        }
+    }
+
+    @Override
+    public Page<PendingTutorResponse> getPendingRequests(int page, int size) {
+        log.info("Getting pending tutor requests, page: {}, size: {}", page, size);
+        
+        // Convert to 0-based index if needed
+        int pageIndex = page > 0 ? page - 1 : 0;
+        
+        Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<TutorOnboarding> onboardingPage = onboardingRepository.findByStatus(OnboardingStatus.PENDING, pageable);
+        
+        return onboardingPage.map(onboarding -> {
+            // Parse jsonData to get email, avatarUrl, and subjectIds
+            String email = null;
+            String avatarUrl = null;
+            List<UUID> subjectIds = null;
+            String fullName = null;
+            
+            try {
+                if (onboarding.getJsonData() != null) {
+                    TutorOnboardingDto data = objectMapper.readValue(onboarding.getJsonData(), TutorOnboardingDto.class);
+                    email = data.getEmail();
+                    avatarUrl = data.getAvatarUrl();
+                    subjectIds = data.getSubjectIds();
+                    fullName = data.getFullName();
+                }
+            } catch (Exception e) {
+                log.warn("Failed to parse jsonData for tutor: {}", onboarding.getTutorId(), e);
+            }
+            
+            return PendingTutorResponse.builder()
+                    .tutorId(onboarding.getTutorId())
+                    .email(email)
+                    .fullName(fullName)
+                    .avatarUrl(avatarUrl)
+                    .subjectIds(subjectIds)
+                    .currentStep(onboarding.getCurrentStep())
+                    .status(onboarding.getStatus())
+                    .description(onboarding.getDescription())
+                    .createdAt(onboarding.getCreatedAt())
+                    .updatedAt(onboarding.getUpdatedAt())
+                    .build();
+        });
+    }
+    
+    private String extractFullName(String jsonData) {
+        try {
+            TutorOnboardingDto data = objectMapper.readValue(jsonData, TutorOnboardingDto.class);
+            return data.getFullName();
+        } catch (Exception e) {
+            return null;
         }
     }
 }

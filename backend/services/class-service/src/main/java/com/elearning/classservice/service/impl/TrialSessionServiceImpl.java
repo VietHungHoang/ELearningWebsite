@@ -30,6 +30,7 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
     private final SessionRepository sessionRepository;
     private final SessionParticipantRepository sessionParticipantRepository;
     private final TrialSessionRequestMapper trialSessionRequestMapper;
+    private final com.elearning.classservice.service.ZoomMeetingService zoomMeetingService;
 
     @Override
     @Transactional
@@ -80,17 +81,17 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
 
         // Create Zoom meeting
         try {
-//            ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(
-//                entity.getTutorId(), session
-//            );
-//            session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
-//            session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
-//            session.setZoomPassword(zoomMeeting.getPassword());
-//            sessionRepository.save(session);
-//            log.info("Zoom meeting created successfully with ID: {}", zoomMeeting.getId());
+            com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(
+                entity.getTutor().getId(), session.getId()
+            );
+            session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
+            session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
+            session.setZoomPassword(zoomMeeting.getPassword());
+            sessionRepository.save(session);
+            log.info("Zoom meeting created successfully with ID: {}", zoomMeeting.getId());
         } catch (Exception e) {
             log.error("Failed to create Zoom meeting for session {}", session.getId(), e);
-            // Meeting creation failed, but session is still valid
+            throw new com.elearning.classservice.exception.ZoomApiException(e.getMessage());
         }
 
         // Add participants: tutor and student

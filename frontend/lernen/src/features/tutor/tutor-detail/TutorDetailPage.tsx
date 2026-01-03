@@ -12,6 +12,8 @@ import TutorProfileHeader from "./components/TutorProfileHeader";
 import { tutorService } from "../../../services/tutorService";
 import { useAuth } from "../../../context/AuthContext";
 import { classService } from "../../../services/classService";
+import GroupClassSection from "./components/GroupClassSection";
+import type { GroupClass } from "../../../types/tutor";
 
 const TutorDetailPage: React.FC = () => {
     const navigate = useNavigate();
@@ -23,6 +25,8 @@ const TutorDetailPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [hasTrialSession, setHasTrialSession] = useState(false);
+    const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
+    const [groupClassesError, setGroupClassesError] = useState<string | null>(null);
 
     // Fetch tutor data
     useEffect(() => {
@@ -62,9 +66,33 @@ const TutorDetailPage: React.FC = () => {
         fetchTutorData();
     }, [tutorId, state.user?.id]);
 
+    // Fetch group classes data
+    useEffect(() => {
+        const fetchGroupClasses = async () => {
+            if (!tutorId) return;
+
+            try {
+                setGroupClassesError(null);
+                const response = await classService.getGroupClassesForTutor(tutorId);
+                if (response.success) {
+                    setGroupClasses(response.data || []);
+                } else {
+                    setGroupClassesError(response.message || 'Failed to fetch group classes');
+                    setGroupClasses([]);
+                }
+            } catch (err) {
+                console.error('Error fetching group classes:', err);
+                setGroupClassesError('Failed to fetch group classes');
+                setGroupClasses([]);
+            }
+        };
+
+        fetchGroupClasses();
+    }, [tutorId]);
+
     const handleNavigateToApp = (page: string, data?: any) => {
         if (page === 'checkout' && data) {
-            navigate(`/${page}`, { 
+            navigate(`/${page}`, {
                 state: data
             });
         } else {
@@ -95,7 +123,7 @@ const TutorDetailPage: React.FC = () => {
                 </div>
 
                 <div className="max-w-7xl mx-auto mt-10">
-                    <TutorDetailsTabs groupClassesCount={5} reviewsCount={10} />
+                    <TutorDetailsTabs groupClassesCount={groupClasses.length} reviewsCount={tutorData?.reviews?.length || 0} />
                 </div>
 
                 <div id="introduction" className="max-w-7xl mx-auto pt-1 px-8">
@@ -113,14 +141,20 @@ const TutorDetailPage: React.FC = () => {
                 </div>
 
                 <div className="container max-w-7xl mx-auto px-8 py-8">
-                    {/* <div id="group-class" className="pt-16 -mt-16">
-                        <GroupClassSection tutorId={tutorId!} />
-                    </div> */}
+                    {groupClasses.length > 0 && !groupClassesError && (
+                        <div id="group-class" className="pt-16 -mt-16">
+                            <GroupClassSection groupClasses={groupClasses} />
+                        </div>
+                    )}
                     <div id="resume-highlights" className="pt-16 -mt-16">
-                        <ResumeHighlights tutorId={tutorId!} />
+                        <ResumeHighlights tutor={tutorData} />
                     </div>
                     <div id="reviews" className="pt-16 -mt-16">
-                        <StudentReviews tutorId={tutorId!} />
+                        <StudentReviews 
+                            reviews={tutorData?.reviews || []} 
+                            tutorId={tutorId!} 
+                            hasTrialSession={hasTrialSession}
+                        />
                     </div>
 
                     <hr className="my-12 border-t border-gray-200" />

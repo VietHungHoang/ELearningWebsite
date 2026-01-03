@@ -289,7 +289,22 @@ export interface TrialSessionRequest {
     message?: string; // Optional message from student
 }
 
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED';
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED' | 'REJECTED';
+export type RequestTargetType = 'SESSION' | 'CLASS';
+
+export interface RescheduleRequest {
+    id: string;
+    sessionId: string;
+    classId: string;
+    targetType: RequestTargetType; // SESSION or CLASS
+    requesterId: string;
+    requesterName: string;
+    oldSchedule: string; // ISO date string
+    newSchedule: string; // ISO date string
+    reason: string;
+    status: RequestStatus; // PENDING, APPROVED, REJECTED
+    createdAt: string; // ISO date string
+}
 
 export interface TrialSessionRequestResponse {
     id: string;

@@ -15,6 +15,7 @@ import { useCurrency } from "../../../context/CurrencyContext";
 import { convertFromVND, formatCurrency } from "../../../utils/currencyHelper";
 import Avatar from "react-avatar";
 import bookingService from "../../../services/bookingService";
+import { useTranslation } from "react-i18next";
 
 interface Session {
   sessionNumber: number;
@@ -25,6 +26,7 @@ interface Session {
 const CheckoutPage: React.FC = () => {
   const location = useLocation();
   const { selectedCurrency } = useCurrency();
+  const { t } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState("momo");
   const [checkoutState, setCheckoutState] = useState<
     "selecting" | "processing" | "success"
@@ -42,7 +44,7 @@ const CheckoutPage: React.FC = () => {
   const tutor = tutorData ? {
     name: tutorData.fullName,
     avatar: tutorData.avatarUrl,
-    subjects: (tutorData.subjects as any)?.map((s: any) => s.name) || [],
+    subjects: (tutorData.subjects as any)?.map((s: any) => t('locale') === 'vi' ? (s.nameVi || s.name) : (s.nameEn || s.name)) || [],
     experience: tutorData.experienceYears || 0,
     lessons: tutorData.bookedSessionsCount || 5,
     students: tutorData.studentCount || 0,

@@ -188,6 +188,8 @@
       "manualDescription": "Nhập hoặc dán nội dung hồ sơ của bạn",
       "manualNote": "Sao chép và dán từ hồ sơ hiện có của bạn",
       "processing": "Đang xử lý...",
+      "pleaseWait": "Vui lòng không đóng cửa sổ này.",
+      "cancel": "Hủy",
       "invalidFileType": "Vui lòng chọn tệp PDF hoặc hình ảnh hợp lệ (JPG, PNG, TIFF, v.v.)",
       "fileTooLarge": "Kích thước tệp phải nhỏ hơn 10MB",
       "noTextExtracted": "Không thể trích xuất văn bản từ tệp. Vui lòng thử nhập thủ công.",
@@ -225,22 +227,22 @@
     }
   },
   "findTutors": {
-    "pageTitle": "Khám phá gia sư trực tuyến chuyên nghiệp cho học tập của bạn",
+    "pageTitle": "Khám phá các gia sư nhiều kinh nghiệm của chúng tôi",
     "pageDescription": "Nắm vững kiến thức với sự dạy kèm trực tuyến cá nhân hóa từ các giáo viên chuyên nghiệp. Gia sư giàu kinh nghiệm của chúng tôi luôn sẵn sàng giúp bạn xây dựng nền tảng vững chắc và đạt được mục tiêu học tập.",
     "connectionError": "Lỗi kết nối",
     "connectionErrorMessage": "Chúng tôi đang gặp sự cố khi kết nối với máy chủ. Vui lòng kiểm tra kết nối internet của bạn và thử lại.",
     "filters": {
       "tabs": {
-        "allSessions": "Tất cả buổi học",
-        "privateSessions": "Buổi học riêng",
-        "groupSessions": "Buổi học nhóm"
+        "allSessions": "Tất cả",
+        "privateSessions": "Dạy kèm 1 - 1",
+        "groupSessions": "Dạy theo nhóm"
       },
       "labels": {
         "category": "Danh mục",
-        "subject": "Chọn môn học",
-        "feePerSession": "Phí mỗi buổi",
-        "tutorLanguages": "Ngôn ngữ gia sư",
-        "availability": "Thời gian có sẵn"
+        "subject": "Môn học",
+        "feePerSession": "Học phí",
+        "tutorLanguages": "Ngôn ngữ",
+        "availability": "Thời gian học"
       },
       "placeholders": {
         "chooseCategory": "Chọn danh mục",
@@ -280,6 +282,52 @@
         "oldestFirst": "Cũ nhất trước"
       },
       "loading": "Đang tải..."
+    },
+    "tutorCard": {
+      "sessionFee": "Học phí",
+      "per1Hour": "/1 giờ",
+      "bookSession": "Đặt buổi học",
+      "viewDetails": "Xem chi tiết",
+      "sendMessage": "Gửi tin nhắn",
+      "verifiedTutor": "Gia sư đã xác minh",
+      "bookedSessions": "phiên học đã dạy",
+      "students": "học viên",
+      "languages": "Ngôn ngữ:",
+      "native": "(Bản ngữ)",
+      "iCanTeach": "Tôi có thể dạy:",
+      "notAvailable": "Không có",
+      "showLess": "Thu gọn",
+      "learnMore": "Tìm hiểu thêm",
+      "review": "đánh giá",
+      "reviews": "đánh giá"
+    },
+    "tipsSidebar": {
+      "title": "Mẹo để tìm gia sư tốt nhất",
+      "description": "Chọn gia sư trực tuyến phù hợp cần cân nhắc kỹ lưỡng. Dưới đây là những mẹo giúp bạn đưa ra quyết định sáng suốt.",
+      "tips": {
+        "filterRequirements": "Lọc theo yêu cầu của bạn",
+        "checkQualifications": "Kiểm tra trình độ và kinh nghiệm",
+        "readReviews": "Đọc đánh giá và xếp hạng",
+        "evaluateCommunication": "Đánh giá kỹ năng giao tiếp",
+        "checkAvailability": "Kiểm tra thời gian có sẵn và tính linh hoạt"
+      }
+    },
+    "searchNotFound": {
+      "title": "Không tìm thấy kết quả!",
+      "message": "Chúng tôi không tìm thấy kết quả nào cho tìm kiếm của bạn. Vui lòng thử các từ khóa khác."
+    },
+    "bookingModal": {
+      "bookTrialLesson": "Đặt buổi học thử",
+      "with": "với",
+      "trialLessonBooked": "Đã đặt buổi học thử!",
+      "trialLessonBookedMessage": "Buổi học thử của bạn với {tutorName} đã được xác nhận vào {date} lúc {time}.",
+      "done": "Hoàn tất",
+      "time": "Thời gian:",
+      "selectTimeSlot": "Vui lòng chọn khung giờ để tiếp tục.",
+      "confirmBooking": "Xác nhận đặt lịch"
+    },
+    "errorMessages": {
+      "failedToSearchTutors": "Không thể tìm kiếm gia sư"
     }
   },
   "whyChooseUs": {
@@ -403,7 +451,7 @@
     "viewAllTutors": "Xem tất cả gia sư",
     "perHour": "/giờ",
     "reviews": "đánh giá",
-    "activeStudents": "Học viên đang học",
+    "activeStudents": "học viên đang học",
     "viewProfile": "Xem hồ sơ"
   },
   "cart": {
@@ -494,6 +542,11 @@
         "thu": "T5",
         "fri": "T6",
         "sat": "T7"
+      },
+      "sessionTypes": {
+        "oneOnOne": "1 kèm 1",
+        "group": "Nhóm",
+        "trial": "Học thử"
       }
     },
     "inbox": {
@@ -647,7 +700,8 @@
         "statusLabels": {
           "ongoing": "Đang học",
           "completed": "Đã hoàn thành",
-          "enrolled": "Đã đăng ký"
+          "enrolled": "Đã đăng ký",
+          "pendingPayment": "Chờ thanh toán"
         },
         "loading": "Đang tải lớp học...",
         "errorTitle": "Không thể tải lớp học",
@@ -657,6 +711,7 @@
       },
       "requests": {
         "title": "Yêu cầu của tôi",
+        "subtitle": "Xem và quản lý các yêu cầu học thử và đổi lịch của bạn",
         "filters": {
           "reschedule": "Yêu cầu đổi lịch",
           "trial": "Yêu cầu học thử"
@@ -705,6 +760,36 @@
           "view": "Xem chi tiết",
           "downloadInvoice": "Tải hóa đơn",
           "contactSupport": "Liên hệ hỗ trợ"
+        },
+        "billDetail": {
+          "title": "Chi tiết hóa đơn",
+          "invoiceNumber": "Số hóa đơn",
+          "transactionId": "Mã giao dịch",
+          "studentInformation": "Thông tin học viên",
+          "tutorInformation": "Thông tin giáo viên",
+          "name": "Họ tên",
+          "email": "Email",
+          "courseInformation": "Thông tin khóa học",
+          "courseTitle": "Tên khóa học",
+          "classType": "Loại lớp",
+          "sessionsPurchased": "Số buổi học",
+          "sessions": "buổi",
+          "pricePerSession": "Giá mỗi buổi",
+          "schedule": "Lịch học",
+          "paymentBreakdown": "Chi tiết thanh toán",
+          "subtotal": "Tổng tiền",
+          "discount": "Giảm giá",
+          "tax": "Thuế",
+          "totalAmount": "Tổng cộng",
+          "paymentInformation": "Thông tin thanh toán",
+          "amount": "Số tiền",
+          "paymentMethod": "Phương thức thanh toán",
+          "purchaseDate": "Ngày mua",
+          "paymentDate": "Ngày thanh toán",
+          "status": "Trạng thái",
+          "notes": "Ghi chú",
+          "payNow": "Thanh toán ngay",
+          "close": "Đóng"
         }
       }
     },
@@ -721,7 +806,7 @@
       "sessionTypes": {
         "oneOnOne": "1 kèm 1",
         "group": "Nhóm",
-        "trial": "Thử nghiệm"
+        "trial": "Học thử"
       },
       "totalEarnings": "Tổng thu nhập",
       "totalStudents": "Tổng số học sinh",
@@ -753,7 +838,7 @@
         "students": "Học sinh"
       },
       "myStudents": {
-        "title": "Học viên của tôi",
+        "title": "học viên của tôi",
         "tabs": {
           "all": "Tất cả học viên",
           "ongoing": "Đang học",
@@ -790,7 +875,7 @@
       "studentDetail": {
         "breadcrumb": {
           "dashboard": "Trang quản trị",
-          "myStudents": "Học viên của tôi"
+          "myStudents": "học viên của tôi"
         },
         "notFound": {
           "title": "Không tìm thấy học viên",
@@ -937,6 +1022,13 @@
         "noClassesFound": "Không tìm thấy lớp học",
         "noClassesDescription": "Không có lớp học nào phù hợp với bộ lọc hiện tại của bạn.",
         "confirmDelete": "Bạn có chắc chắn muốn xóa \"{{classTitle}}\"?",
+        "deleteClass": "Xóa lớp học",
+        "deleteModalTitle": "Xóa lớp học",
+        "deleteConfirm": "Xóa",
+        "deleteCancel": "Hủy",
+        "deleting": "Đang xóa...",
+        "deleteSuccess": "Đã xóa lớp học \"{{classTitle}}\" thành công",
+        "deleteError": "Không thể xóa lớp học. Vui lòng thử lại.",
         "createModal": {
           "title": "Mở lớp học mới",
           "classTitle": "Tên lớp học",
@@ -959,6 +1051,8 @@
           "cannotRemoveLastSchedule": "Không thể xóa lịch cuối cùng",
           "removeSchedule": "Xóa lịch",
           "createClass": "Mở lớp",
+          "success": "Đã tạo lớp học thành công",
+          "error": "Không thể tạo lớp học. Vui lòng thử lại.",
           "confirmClose": {
             "title": "Hủy thay đổi?",
             "message": "Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn đóng mà không lưu?",
@@ -983,6 +1077,39 @@
           },
           "searchCategories": "Tìm kiếm danh mục...",
           "searchSubjects": "Tìm kiếm môn học..."
+        },
+        "infoPage": {
+          "backToClasses": "Quay lại lớp học",
+          "edit": "Chỉnh sửa",
+          "cancel": "Hủy",
+          "save": "Lưu",
+          "classInformation": "Thông tin lớp học",
+          "schedule": "Lịch dạy",
+          "noSchedule": "Chưa có lịch dạy",
+          "enrolledStudents": "học viên ({{count}})",
+          "addStudent": "Thêm học viên",
+          "noStudents": "Chưa có học viên",
+          "addFirstStudent": "Thêm học viên đầu tiên để bắt đầu",
+          "student": "học viên {{id}}",
+          "sendMessage": "Gửi tin nhắn",
+          "removeStudent": "Xóa học viên",
+          "classDetails": "Chi tiết lớp học",
+          "created": "Ngày tạo",
+          "createdWithColon": "Ngày tạo:",
+          "searchStudent": "Tìm kiếm học viên...",
+          "searchFeatureComing": "Tính năng tìm kiếm sẽ được triển khai",
+          "searchingFor": "Đang tìm kiếm: \"{{term}}\"",
+          "enterToSearch": "Nhập để tìm kiếm học viên",
+          "addSelected": "Thêm đã chọn",
+          "loadingClassDetails": "Đang tải thông tin lớp học...",
+          "saveSuccess": "Đã cập nhật thông tin lớp học thành công",
+          "saveError": "Không thể cập nhật thông tin lớp học. Vui lòng thử lại.",
+          "invalidSubject": "Môn học không hợp lệ",
+          "saving": "Đang lưu...",
+          "category": "Danh mục",
+          "categoryPlaceholder": "Chọn danh mục",
+          "subject": "Môn học",
+          "subjectPlaceholder": "Chọn môn học"
         }
       },
       "dealsCoupons": {
@@ -1045,7 +1172,20 @@
           "expiryDate": {
             "label": "Ngày hết hạn"
           }
-        }
+        },
+        "errors": {
+          "fetchFailed": "Không thể tải danh sách mã giảm giá",
+          "saveFailed": "Không thể lưu mã giảm giá",
+          "deleteFailed": "Không thể xóa mã giảm giá",
+          "toggleFailed": "Không thể thay đổi trạng thái mã giảm giá"
+        },
+        "success": {
+          "created": "Tạo mã giảm giá thành công",
+          "updated": "Cập nhật mã giảm giá thành công",
+          "deleted": "Xóa mã giảm giá thành công"
+        },
+        "noCoupons": "Chưa có mã giảm giá",
+        "noCouponsHint": "Tạo mã giảm giá đầu tiên để thu hút thêm học sinh!"
       },
       "myQuizzes": {
         "title": "Quản lý bài kiểm tra",
@@ -1088,6 +1228,7 @@
       },
       "requests": {
         "title": "Yêu cầu",
+        "subtitle": "Quản lý và xử lý các yêu cầu học thử và đổi lịch từ học viên",
         "filters": {
           "reschedule": "Yêu cầu đổi lịch",
           "trial": "Yêu cầu học thử"
@@ -1099,18 +1240,20 @@
         "status": {
           "pending": "Đang chờ",
           "approved": "Đã chấp nhận",
-          "declined": "Đã từ chối"
+          "declined": "Đã từ chối",
+          "rejected": "Đã từ chối"
         },
         "trial": {
           "badge": "Yêu cầu học thử",
           "sessionTime": "Thời gian buổi học",
+          "loading": "Đang tải yêu cầu...",
           "accept": "Chấp nhận",
           "accepting": "Đang chấp nhận...",
           "decline": "Từ chối",
           "declining": "Đang từ chối...",
           "chat": "Nhắn tin",
           "cancelRequest": "Hủy yêu cầu",
-          "cancelConfirmMessage": "Bạn có chắc chắn muốn hủy yêu cầu học thử này? Hành động này không thể hoàn tác.",
+          "cancelConfirmMessage": "Bạn có chắc chắn muốn hủy yêu cầu học thử này?",
           "acceptSuccess": "Yêu cầu học thử đã được chấp nhận thành công!",
           "acceptFailed": "Không thể chấp nhận yêu cầu",
           "acceptError": "Đã xảy ra lỗi khi chấp nhận yêu cầu",
@@ -1118,7 +1261,14 @@
           "declineError": "Đã xảy ra lỗi khi từ chối yêu cầu",
           "unknownStudent": "Học sinh không xác định",
           "unknownTutor": "Gia sư không xác định",
-          "sentTo": "Gửi đến:"
+          "sentTo": "Gửi đến:",
+          "justNow": "Vừa xong",
+          "minutesAgo": "{{count}} phút trước",
+          "minutesAgo_plural": "{{count}} phút trước",
+          "hoursAgo": "{{count}} giờ trước",
+          "hoursAgo_plural": "{{count}} giờ trước",
+          "daysAgo": "{{count}} ngày trước",
+          "daysAgo_plural": "{{count}} ngày trước"
         },
         "reschedule": {
           "recurringTitle": "Thay đổi lịch định kỳ",
@@ -1138,7 +1288,9 @@
           "declineSuccess": "Yêu cầu đổi lịch đã bị từ chối và học sinh đã được thông báo.",
           "declineError": "Đã xảy ra lỗi khi từ chối yêu cầu",
           "sentTo": "Gửi đến:",
-          "everyDayAt": "Mỗi {{day}} lúc {{time}}"
+          "everyDayAt": "Mỗi {{day}} lúc {{time}}",
+          "showMore": "Xem thêm",
+          "showLess": "Thu gọn"
         }
       },
       "schedule": {
@@ -1173,7 +1325,7 @@
         },
         "errors": {
           "loadAvailability": "Không thể tải lịch dạy",
-          "loadSessions": "Không thể tải các buổi học đã đặt",
+          "loadSessions": "Không thể tải các phiên học đã dạy",
           "save": "Không thể lưu lịch dạy"
         },
         "availabilityDetails": {
@@ -1570,7 +1722,7 @@
   },
   "tutorDetail": {
     "profile": {
-      "bookedSessions": "Buổi học đã đặt",
+      "bookedSessions": "phiên học đã dạy",
       "students": "Học sinh",
       "socialProfiles": "Hồ sơ mạng xã hội",
       "canTeach": "Tôi có thể dạy",
@@ -1580,8 +1732,8 @@
       "bookSession": "Đặt lịch học",
       "sendMessage": "Gửi tin nhắn",
       "videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
-      "sessionFee": "Phí buổi học",
-      "perMin": "/50 phút"
+      "sessionFee": "Học phí",
+      "perMin": "/1 giờ"
     },
     "booking": {
       "selectTimeSlot": "Vui lòng chọn khung giờ trước khi yêu cầu buổi học.",
@@ -1639,6 +1791,7 @@
       "language": "Ngôn ngữ",
       "studentsEnrolled": "HỌC SINH ĐÃ THAM GIA",
       "details": "Chi tiết",
+      "message": "Nhắn tin",
       "leaveClass": "Rời lớp",
       "joinClass": "Tham gia lớp",
       "description": "Mô tả",
@@ -1654,6 +1807,9 @@
       "payment": "Thanh toán",
       "start": "Bắt đầu",
       "importantNotice": "Lưu ý quan trọng",
+      "importantInformation": "Thông tin quan trọng",
+      "classOpensWhenFull": "Lớp học sẽ được mở khi đủ số lượng thành viên",
+      "paymentWhenClassStarts": "Thanh toán sẽ được thực hiện khi lớp học bắt đầu",
       "studentsEnrolledLabel": "Số học sinh đã tham gia",
       "cancel": "Hủy",
       "confirmJoin": "Xác nhận & tham gia",
@@ -1668,7 +1824,31 @@
       "successLeft": "Đã rời lớp thành công",
       "leaveSuccessMessage": "Bạn đã rời lớp nhóm thành công. Bạn có thể tham gia lại bất cứ lúc nào nếu thay đổi ý định.",
       "classWillStartOnDate": "Lớp học này sẽ bắt đầu vào {{startDate}}, ngay cả khi chưa đủ học viên.",
-      "classWillStartWhenFull": "Lớp học này sẽ bắt đầu ngay khi đủ số lượng học viên."
+      "classWillStartWhenFull": "Lớp học này sẽ bắt đầu ngay khi đủ số lượng học viên.",
+      "perHour": "/giờ",
+      "lastStudent": {
+        "title": "Bạn là học viên cuối cùng!",
+        "subtitle": "Chúc mừng! Bạn sẽ là học viên cuối cùng để hoàn thành lớp học này.",
+        "specialNotice": "Thông báo đặc biệt",
+        "notice1": "Bạn là học viên cuối cùng để đủ số lượng tối đa của lớp học.",
+        "notice2": "Lớp học sẽ được kích hoạt và bắt đầu ngay sau khi bạn tham gia.",
+        "notice3": "Bạn có thể thanh toán ngay hoặc thanh toán sau khi lớp học bắt đầu.",
+        "info1": "Lớp học sẽ được mở ngay sau khi bạn xác nhận tham gia.",
+        "info2": "Bạn sẽ nhận được thông báo qua email khi lớp học bắt đầu.",
+        "confirmJoin": "Xác nhận & tham gia"
+      },
+      "paymentPrompt": {
+        "title": "Bạn có muốn thanh toán ngay không?",
+        "description": "Bạn đã tham gia lớp học thành công! Bạn có muốn thanh toán ngay bây giờ không?",
+        "className": "Lớp học",
+        "price": "Giá",
+        "benefitsTitle": "Lợi ích khi thanh toán ngay:",
+        "benefit1": "Đảm bảo vị trí của bạn trong lớp học",
+        "benefit2": "Nhận được thông báo sớm khi lớp học bắt đầu",
+        "benefit3": "Tránh quên thanh toán sau này",
+        "payNow": "Thanh toán ngay",
+        "payLater": "Thanh toán sau"
+      }
     },
     "bookSessionModal": {
       "title": "Đặt buổi học",
@@ -1690,6 +1870,7 @@
       "benefit2": "Đánh giá mức độ kỹ năng hiện tại của bạn.",
       "benefit3": "Thảo luận về kế hoạch học tập cá nhân hóa của bạn.",
       "selectedTimes": "Thời gian đã chọn:",
+      "at": "lúc",
       "addMessage": "Thêm tin nhắn (Tùy chọn)",
       "messagePlaceholder": "Hãy cho gia sư biết mục tiêu học tập của bạn...",
       "footerText": "100% miễn phí, không yêu cầu thông tin thanh toán.",
@@ -1812,6 +1993,19 @@
       "showCorrectAnswers": "Hiển thị đáp án đúng sau khi nộp bài",
       "questionsTitle": "Câu hỏi ({{count}})",
       "addQuestion": "Thêm câu hỏi",
+      "aiGenerate": {
+        "button": "Tạo bằng AI",
+        "title": "Tạo câu hỏi bằng AI",
+        "description": "Nhập mô tả hoặc chủ đề để AI tự động tạo bộ câu hỏi kèm đáp án cho bạn.",
+        "promptLabel": "Mô tả hoặc chủ đề",
+        "promptPlaceholder": "Ví dụ: Tạo 5 câu hỏi trắc nghiệm về JavaScript cơ bản, bao gồm các khái niệm về biến, hàm, và vòng lặp...",
+        "promptHint": "Mô tả càng chi tiết, AI sẽ tạo ra câu hỏi càng phù hợp với nhu cầu của bạn.",
+        "promptRequired": "Vui lòng nhập mô tả hoặc chủ đề",
+        "generateButton": "Tạo câu hỏi",
+        "generating": "Đang tạo...",
+        "success": "Câu hỏi đã được tạo thành công!",
+        "error": "Không thể tạo câu hỏi. Vui lòng thử lại."
+      },
       "confirmLeave": {
         "title": "Hủy thay đổi?",
         "message": "Bạn có thay đổi chưa lưu. Rời trang mà không lưu?",
@@ -2013,7 +2207,7 @@
       "headline": "Chuyên môn",
       "headlinePlaceholder": "VD: Gia sư Toán được chứng nhận với 5 năm kinh nghiệm",
       "headlineHint": "Sẽ được hiển thị dưới tên của bạn trên thẻ hồ sơ.",
-      "sessionFee": "Phí buổi học (mỗi giờ)",
+      "sessionFee": "Học phí (mỗi giờ)",
       "sessionFeeHint": "Đặt mức phí theo giờ cho các buổi học gia sư.",
       "subjectsITeach": "Môn học tôi dạy",
       "filterByCategory": "Lọc theo danh mục",

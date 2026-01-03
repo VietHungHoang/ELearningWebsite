@@ -3,6 +3,7 @@ package com.elearning.tutorservice.dto.onboarding;
 import com.elearning.tutorservice.dto.response.*;
 import com.elearning.tutorservice.entity.CareerEntry;
 import com.elearning.tutorservice.entity.enums.Gender;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,7 @@ public class TutorOnboardingDto {
     private String timezone;
     private String videoUrl;
     private BigDecimal currentSessionFee;
+    @JsonProperty("languages")
     private List<TutorLanguageResponse> languageCodes;
     private List<UUID> subjectIds;
     private List<AvailabilityResponse> availabilities;

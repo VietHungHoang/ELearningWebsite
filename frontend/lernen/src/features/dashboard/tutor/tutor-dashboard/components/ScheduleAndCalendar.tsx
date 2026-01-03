@@ -9,23 +9,33 @@ import { HiChatAlt, HiVideoCamera } from "react-icons/hi";
 import { MdAccessTime, MdDateRange } from "react-icons/md";
 import type { Session } from "../../../../../types/class";
 import { classService } from "../../../../../services/classService";
+import BirdLoading from "../../../../../components/ui/BirdLoading";
 
 interface LoadingOverlayProps {
     sessionStarting: boolean;
     t: any;
+    onCancel?: () => void;
 }
 
-const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ sessionStarting, t }) => {
+const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ sessionStarting, t, onCancel }) => {
     if (!sessionStarting) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-black/50 flex items-center justify-center z-50">
-            <div className="flex items-center gap-3">
-                <div
-                    className="animate-spin rounded-full border-b-2 border-[#0b6459] flex-none"
-                    style={{ width: 32, height: 32 }}
-                ></div>
-                <span className="text-lg font-medium text-white">{t("dashboard.tutor.startingSession")}</span>
+        <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center">
+                <BirdLoading
+                    title={t("dashboard.tutor.startingSession")}
+                    description={t("auth.resumeInput.pleaseWait")}
+                    size="lg"
+                />
+                {onCancel && (
+                    <button
+                        onClick={onCancel}
+                        className="mt-8 px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                        {t("common.cancel", { defaultValue: "Hủy" })}
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -124,9 +134,14 @@ const ScheduleAndCalendar: React.FC = () => {
         }
     };
 
+    // Handle cancel starting session
+    const handleCancelStartSession = () => {
+        setSessionStarting(false);
+    };
+
     return (
         <div className="flex flex-col lg:flex-row gap-6 mb-8 relative">
-            <LoadingOverlay sessionStarting={sessionStarting} t={t} />
+            <LoadingOverlay sessionStarting={sessionStarting} t={t} onCancel={handleCancelStartSession} />
             {/* Upcoming Sessions - Takes remaining width */}
             <div className="flex-1">
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 h-[405px] overflow-y-auto">
@@ -302,14 +317,21 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, locale, language, t,
                 {/* Left: Session Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-semibold text-gray-800 text-base">{session.classInfo.title}</h4>
-                        <span
-                            className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
-                                session.sessionType
-                            )}`}
-                        >
-                            {getStatusText(session.sessionType)}
-                        </span>
+                        <h4 className="font-semibold text-gray-800 text-base">
+                            {session.sessionType === 'TRIAL' 
+                                ? getStatusText(session.sessionType)
+                                : (session.classInfo?.title || getStatusText(session.sessionType))
+                            }
+                        </h4>
+                        {session.sessionType !== 'TRIAL' && (
+                            <span
+                                className={`text-xs font-semibold px-2 py-1 rounded-full ${getStatusColor(
+                                    session.sessionType
+                                )}`}
+                            >
+                                {getStatusText(session.sessionType)}
+                            </span>
+                        )}
                     </div>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">

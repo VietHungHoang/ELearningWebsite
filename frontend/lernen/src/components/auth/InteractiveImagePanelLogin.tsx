@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 export const InteractiveImagePanelLogin: React.FC = () => {
     const { t } = useTranslation();
-    
+
     return (
         <div className="relative">
             <div className="relative rounded-2xl overflow-hidden shadow-lg aspect-[4/3] group">

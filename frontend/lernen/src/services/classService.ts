@@ -11,10 +11,10 @@ import type {
     RecentEarning,
     PayoutFilters,
     RecentEarningsFilters,
+    RescheduleRequest,
 } from "../types/api";
 import type { ClassDetail, ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
-import type { GroupClass } from "../types/tutor";
-import { th } from "date-fns/locale";
+import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
 
 // ClassData interface for class detail page
 export interface ClassData {
@@ -33,6 +33,7 @@ export interface ClassData {
     category?: string;
     tuitionFee?: number;
     description?: string;
+    maxStudents?: number;
 }
 
 export interface StudentInfo {
@@ -41,28 +42,6 @@ export interface StudentInfo {
     avatar: string;
     email?: string;
 }
-
-// Mock data for class detail page fallback
-const mockClassDetailData: ClassData = {
-    id: "mock-1",
-    classTitle: "Lập trình JavaScript Nâng Cao - Nhóm",
-    students: [
-        { id: "student-1", name: "Nguyễn Nam Sơn", avatar: "https://via.placeholder.com/40", email: "nguyen.nam.son@example.com" },
-        { id: "student-2", name: "Trần Thị Mai", avatar: "https://via.placeholder.com/40", email: "tran.thi.mai@example.com" },
-        { id: "student-3", name: "Lê Minh Đức", avatar: "https://via.placeholder.com/40", email: "le.minh.duc@example.com" }
-    ],
-    type: "Group",
-    status: "Ongoing",
-    schedules: [
-        { day: "Thứ Ba", time: "19:00" },
-        { day: "Thứ Năm", time: "19:00" }
-    ],
-    startDate: "2025-01-15",
-    completedSessions: 8,
-    totalSessions: 20,
-    quizzes: [],
-    materials: []
-};
 
 // Mock data for testing when API fails
 const mockClassData: ClassTable[] = [
@@ -235,7 +214,7 @@ export const classService = {
 
     createClass: async (classData: CreateClassRequest): Promise<ApiResponse<ClassTable>> => {
         try {
-            const response = await apiService.post<ClassTable>("/classes/tutors/me", classData);
+            const response = await apiService.post<ClassTable>("/v1/classes/tutors/me", classData);
             return {
                 status: response.status,
                 success: response.success,
@@ -244,6 +223,36 @@ export const classService = {
             };
         } catch (error) {
             console.error("Failed to create class:", error);
+            throw error;
+        }
+    },
+
+    updateClass: async (classId: string, classData: Partial<CreateClassRequest>): Promise<ApiResponse<ClassTable>> => {
+        try {
+            const response = await apiService.put<ClassTable>(`/v1/classes/${classId}`, classData);
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data,
+            };
+        } catch (error) {
+            console.error("Failed to update class:", error);
+            throw error;
+        }
+    },
+
+    deleteClass: async (classId: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await apiService.delete<void>(`/v1/classes/${classId}`);
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: undefined,
+            };
+        } catch (error) {
+            console.error("Failed to delete class:", error);
             throw error;
         }
     },
@@ -260,21 +269,16 @@ export const classService = {
         return await apiService.post<null>("/v1/classes/trial-session", request);
     },
 
-    acceptRescheduleRequest: async (requestId: string): Promise<ApiResponse<null>> => {
-        return await apiService.post<null>(`/v1/class/reschedule-requests/accept`, { requestId });
-    },
-
-    // Get list of reschedule requests for tutor or student
-    getRescheduleRequests: async (
-        role: "tutor" | "student",
-        userId: string
-    ): Promise<ApiResponse<any[]>> => {
+    // Get list of reschedule requests by user type (tutor or student)
+    // userId is automatically added in axios interceptor
+    getRescheduleRequestsByUser: async (
+        userType: 'tutor' | 'student'
+    ): Promise<ApiResponse<RescheduleRequest[]>> => {
         try {
-            const response = await apiService.get<any[]>(
-                `/v1/class/reschedule-requests/by-user`,
+            const response = await apiService.get<RescheduleRequest[]>(
+                `/v1/classes/reschedule-requests/by-user`,
                 {
-                    role,
-                    userId,
+                    userType
                 }
             );
             return {
@@ -294,9 +298,57 @@ export const classService = {
         }
     },
 
+    // Accept reschedule request
+    // userId is automatically added in axios interceptor
+    acceptRescheduleRequest: async (requestId: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await apiService.put<void>(
+                `/v1/classes/reschedule-requests/${requestId}/accept`
+            );
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: undefined,
+            };
+        } catch (error: any) {
+            console.error("Error accepting reschedule request:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to accept reschedule request",
+                data: undefined,
+            };
+        }
+    },
+
+    // Reject reschedule request
+    // userId is automatically added in axios interceptor
+    rejectRescheduleRequest: async (requestId: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await apiService.delete<void>(
+                `/v1/classes/reschedule-requests/${requestId}/reject`
+            );
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: undefined,
+            };
+        } catch (error: any) {
+            console.error("Error rejecting reschedule request:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to reject reschedule request",
+                data: undefined,
+            };
+        }
+    },
+
     acceptTrialRequest: async (requestId: string): Promise<ApiResponse<null>> => {
         try {
-            const response = await apiService.post<null>(`/v1/public/class/trial-session/${requestId}/accept`);
+            const response = await apiService.post<null>(`/v1/classes/trial-session/${requestId}/accept`);
             return {
                 status: response.status,
                 success: true,
@@ -399,7 +451,7 @@ export const classService = {
             const response = await apiService.get<TrialSessionRequestResponse[]>(
                 `/v1/classes/trial-session/by-user`,
                 {
-                    role,
+                    userType: role,
                     userId,
                 }
             );
@@ -516,39 +568,121 @@ export const classService = {
         return await apiService.get<Session[]>(url);
     },
 
-    // Get class details for detail page with fallback to mock data
+    // Get class details for detail page
     getClassDetailForPage: async (classId: string): Promise<ClassData> => {
         try {
-            // TODO: Replace with actual API call when backend is ready
-            const response = await fetch(`/api/classes/${classId}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch class details');
-            }
-            const data: any = await response.json();
-            return data;
-        } catch (error) {
-            console.warn('API fetch failed, using mock data:', error);
-            // Return mock data as fallback - match classId if possible
-            if (classId === 'mock-1') {
+            // Call API to get class detail
+            const url = `/v1/classes/${classId}`;
+            const response = await apiService.get<any>(url);
+            
+            if (response.data) {
+                const data = response.data;
+                
+                // Helper function to convert day of week number to name
+                // Backend returns dayOfWeek: 1-7 (ISO format: 1=Monday, 7=Sunday)
+                // Our array uses: 0=Sunday, 1=Monday, ..., 6=Saturday
+                const getDayName = (dayOfWeek: number, isVietnamese: boolean = false): string => {
+                    // Convert ISO format (1-7) to array index (0-6)
+                    // 1=Monday -> index 1, 2=Tuesday -> index 2, ..., 7=Sunday -> index 0
+                    let normalizedDay = dayOfWeek;
+                    if (dayOfWeek === 7) {
+                        normalizedDay = 0; // Sunday
+                    } else if (dayOfWeek >= 1 && dayOfWeek <= 6) {
+                        normalizedDay = dayOfWeek; // Monday to Saturday (1-6)
+                    } else if (dayOfWeek === 0) {
+                        normalizedDay = 0; // Sunday (if backend uses 0-6 format)
+                    }
+                    
+                    if (isVietnamese) {
+                        const vietnameseDays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                        return vietnameseDays[normalizedDay] || 'Unknown';
+                    } else {
+                        const englishDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                        return englishDays[normalizedDay] || 'Unknown';
+                    }
+                };
+                
+                // Get subject and category names from subjectId
+                let subjectName = '';
+                let categoryName = '';
+                
+                if (data.subjectId) {
+                    try {
+                        // Import commonUtils dynamically to avoid circular dependency
+                        const commonUtils = await import('../utils/commonUtils');
+                        const subjects = await commonUtils.default.getSubjects();
+                        const categories = await commonUtils.default.getCategories();
+                        
+                        const subject = subjects.find(s => s.id === data.subjectId);
+                        if (subject) {
+                            // For now, use English name. Can be made dynamic based on i18n later
+                            subjectName = subject.nameEn || subject.nameVi || '';
+                            
+                            // Get category from subject
+                            const category = categories.find(c => c.id === subject.categoryId);
+                            if (category) {
+                                categoryName = category.nameEn || category.nameVi || '';
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Failed to fetch subject/category details:', error);
+                    }
+                }
+                
+                // Map response to ClassData format
                 return {
-                    ...mockClassDetailData,
-                    id: 'mock-1',
-                    classTitle: 'Lập trình JavaScript Nâng Cao - Nhóm',
-                    students: [
-                        { id: "student-1", name: "Nguyễn Nam Sơn", avatar: "https://via.placeholder.com/40", email: "nguyen.nam.son@example.com" },
-                        { id: "student-2", name: "Trần Thị Mai", avatar: "https://via.placeholder.com/40", email: "tran.thi.mai@example.com" },
-                        { id: "student-3", name: "Lê Minh Đức", avatar: "https://via.placeholder.com/40", email: "le.minh.duc@example.com" }
-                    ],
-                    schedules: [
-                        { day: "Thứ Ba", time: "19:00" },
-                        { day: "Thứ Năm", time: "19:00" }
-                    ],
-                    startDate: "2025-01-15",
-                    completedSessions: 8,
-                    totalSessions: 20
+                    id: data.id || classId,
+                    classTitle: data.title || '',
+                    students: (data.students || []).map((student: any) => ({
+                        id: student.id,
+                        name: student.fullName || student.name || '',
+                        avatar: student.avatarUrl || student.avatar || `https://picsum.photos/seed/${student.id}/48/48`,
+                        email: student.email
+                    })),
+                    type: data.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
+                    status: data.status === 'ONGOING' ? 'Ongoing' : 
+                            data.status === 'COMPLETED' ? 'Completed' : 
+                            data.status === 'CANCELLED' ? 'Completed' : 'Opening',
+                    schedules: (data.schedules || []).map((schedule: any) => {
+                        // Backend returns dayOfWeek as number (0-6 or 1-7)
+                        // dayOfWeek: 0=Sunday, 1=Monday, ..., 6=Saturday
+                        // If backend returns 1-7, we need to convert: 1=Monday (index 1), 7=Sunday (index 0)
+                        if (typeof schedule.dayOfWeek === 'number') {
+                            // Handle both 0-6 and 1-7 formats
+                            let dayIndex = schedule.dayOfWeek;
+                            if (dayIndex === 7) {
+                                dayIndex = 0; // Sunday
+                            } else if (dayIndex > 0 && dayIndex < 7) {
+                                // If it's 1-6, keep as is (1=Monday, 6=Saturday)
+                                dayIndex = dayIndex;
+                            }
+                            return {
+                                day: getDayName(dayIndex, false), // Can be made dynamic based on i18n
+                                time: schedule.time || ''
+                            };
+                        }
+                        return {
+                            day: schedule.day || '',
+                            time: schedule.time || ''
+                        };
+                    }),
+                    startDate: data.createdAt ? data.createdAt.split('T')[0] : (data.startDate || ''),
+                    completedSessions: data.completedSessions ?? data.stats?.completedSessions ?? 0,
+                    totalSessions: data.totalSessions ?? data.stats?.totalSessions ?? 0,
+                    subject: subjectName || data.subject?.name || data.subjectName || data.subject || '',
+                    category: categoryName || data.category?.name || data.categoryName || data.category || '',
+                    tuitionFee: data.pricePerHour ?? data.tuitionFee ?? data.price ?? 0,
+                    description: data.description || '',
+                    maxStudents: data.maxStudents ?? (data.students?.length || 0),
+                    quizzes: data.quizzes || [],
+                    materials: data.materials || []
                 };
             }
-            return mockClassDetailData;
+            
+            throw new Error('No data in response');
+        } catch (error) {
+            console.error('Failed to fetch class details:', error);
+            throw error;
         }
     },
 
@@ -624,13 +758,154 @@ export const classService = {
         }
     },
 
+    // Helper function to convert 24h time format to 12h format
+    convertTimeTo12Hour: (time24: string): string => {
+        // Handle format like "15:00:00" or "15:00"
+        const timeStr = time24.split(':').slice(0, 2).join(':');
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+        return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+    },
+
+    // Helper function to map API response to GroupClass format
+    mapGroupClassApiResponse: (apiData: GroupClassApiResponse): GroupClass => {
+        return {
+            id: apiData.id,
+            title: apiData.title,
+            classDescription: apiData.description,
+            maxStudents: apiData.maxStudents,
+            enrolledStudents: apiData.enrolledStudents, // Map enrolled students count
+            students: [], // API doesn't provide student list, only enrolledStudents count
+            schedule: apiData.schedules.map(schedule => ({
+                dayOfWeek: schedule.dayOfWeek,
+                time: classService.convertTimeTo12Hour(schedule.time)
+            })),
+            pricePerHour: apiData.pricePerHour,
+            // startDate is not provided in API response
+        };
+    },
+
     // Get group classes for a specific tutor
     getGroupClassesForTutor: async (tutorId: string): Promise<ApiResponse<GroupClass[]>> => {
         try {
-            return await apiService.get<GroupClass[]>(`/tutors/${tutorId}/group-classes`);
+            const response = await apiService.get<GroupClassApiResponse[] | { content: GroupClassApiResponse[] }>(`/v1/classes/tutors/${tutorId}/opening`);
+            
+            // Handle both response formats: direct array or { content: [...] }
+            let apiData: GroupClassApiResponse[] = [];
+            if (Array.isArray(response.data)) {
+                // Direct array format
+                apiData = response.data;
+            } else if (response.data?.content && Array.isArray(response.data.content)) {
+                // Wrapped in content object
+                apiData = response.data.content;
+            }
+            
+            console.log('Group classes API response:', response);
+            console.log('Parsed API data:', apiData);
+            
+            // Map API response to GroupClass format
+            const mappedData: GroupClass[] = apiData.map(item => 
+                classService.mapGroupClassApiResponse(item)
+            );
+
+            console.log('Mapped group classes:', mappedData);
+
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: mappedData
+            };
         } catch (error: any) {
-            console.error("Failed to fetch group classes for tutor:", error);
-            throw error;
+            console.error("Failed to fetch group classes from API:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to fetch group classes",
+                data: []
+            };
+        }
+    },
+
+    // Add student to group class
+    addStudentToClass: async (classId: string, studentId: string): Promise<ApiResponse<void>> => {
+        try {
+            return await apiService.post<void>(`/v1/classes/${classId}/students/${studentId}`);
+        } catch (error: any) {
+            console.error("Failed to add student to class:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to add student to class",
+                data: undefined
+            };
+        }
+    },
+
+    // Remove student from group class
+    removeStudentFromClass: async (classId: string, studentId: string): Promise<ApiResponse<void>> => {
+        try {
+            return await apiService.delete<void>(`/v1/classes/${classId}/students/${studentId}`);
+        } catch (error: any) {
+            console.error("Failed to remove student from class:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to remove student from class",
+                data: undefined
+            };
+        }
+    },
+
+    // Create reschedule request for a session
+    createRescheduleRequest: async (
+        sessionId: string,
+        oldSchedule: string,
+        newSchedule: string,
+        reason: string
+    ): Promise<ApiResponse<any>> => {
+        try {
+            // Convert newSchedule from local datetime to UTC ISO string
+            // newSchedule is from datetime-local input (e.g., "2026-01-15T14:00")
+            const newScheduleDate = new Date(newSchedule);
+            const newScheduleISO = newScheduleDate.toISOString();
+
+            // oldSchedule is UTC string from backend without timezone indicator (e.g., "2026-01-15T07:00:00")
+            // Backend stores datetime in UTC but without 'Z' suffix
+            // Need to parse it as UTC, not local time, to avoid double conversion
+            const hasTimezone = oldSchedule.endsWith('Z') || 
+                               /[+-]\d{2}:\d{2}$/.test(oldSchedule) ||
+                               /[+-]\d{4}$/.test(oldSchedule);
+            const oldScheduleUTCString = hasTimezone ? oldSchedule : `${oldSchedule}Z`;
+            const oldScheduleDate = new Date(oldScheduleUTCString);
+            const oldScheduleISO = oldScheduleDate.toISOString();
+
+            // Call API with sessionId in path
+            const response = await apiService.post<any>(
+                `/v1/classes/sessions/${sessionId}/reschedule`,
+                {
+                    oldSchedule: oldScheduleISO,
+                    newSchedule: newScheduleISO,
+                    reason
+                }
+            );
+
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data
+            };
+        } catch (error: any) {
+            console.error("Failed to create reschedule request:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Failed to create reschedule request";
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: errorMessage,
+                data: null
+            };
         }
     },
 };

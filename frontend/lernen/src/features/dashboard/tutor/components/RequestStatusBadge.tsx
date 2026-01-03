@@ -9,25 +9,36 @@ interface RequestStatusBadgeProps {
 
 const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
     const { t } = useTranslation();
-    const statusStyles: Record<RequestStatus, { text: string, dot: string }> = {
-        PENDING: { text: 'text-gray-700', dot: 'bg-yellow-500' },
-        APPROVED: { text: 'text-gray-700', dot: 'bg-green-500' },
-        DECLINED: { text: 'text-gray-700', dot: 'bg-red-500' },
+    
+    const getStatusColor = (status: RequestStatus): string => {
+        switch (status) {
+            case 'APPROVED':
+                return 'bg-[#065A46]'; // Primary color - success state (same as active/completed in quiz)
+            case 'PENDING':
+                return 'bg-[#a16207]'; // Warm amber - working/pending state (same as draft/in_progress in quiz)
+            case 'DECLINED':
+                return 'bg-[#475569]'; // Dark slate - inactive state (same as archived/not_started in quiz)
+            case 'REJECTED':
+                return 'bg-[#475569]'; // Dark slate - inactive state (same as declined)
+            default:
+                return 'bg-[#64748b]';
+        }
     };
 
     const statusLabels: Record<RequestStatus, string> = {
         PENDING: t('dashboard.tutor.requests.status.pending'),
         APPROVED: t('dashboard.tutor.requests.status.approved'),
         DECLINED: t('dashboard.tutor.requests.status.declined'),
+        REJECTED: t('dashboard.tutor.requests.status.rejected'),
     };
 
-    const currentStatus = statusStyles[status] || statusStyles.PENDING;
-
     return (
-        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white border border-gray-200 ${currentStatus.text}`}>
-            <span className={`w-2 h-2 rounded-full ${currentStatus.dot}`}></span>
-            {statusLabels[status]}
-        </span>
+        <div className="absolute top-0 left-0 z-10">
+            <div className={`${getStatusColor(status)} text-white text-[10px] font-semibold px-2.5 py-1 rounded-tl-xl rounded-br-lg flex items-center gap-1 shadow-sm`}>
+                <div className="w-1 h-1 rounded-full bg-white/80"></div>
+                <span className="uppercase tracking-wide">{statusLabels[status]}</span>
+            </div>
+        </div>
     );
 };
 

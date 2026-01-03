@@ -15,6 +15,7 @@ import java.util.UUID;
 public interface ClassRepository extends JpaRepository<ClassEntity, UUID> {
     Page<ClassEntity> findByTutorId(UUID tutorId, Pageable pageable);
     List<ClassEntity> findByTutorId(UUID tutorId);
+    List<ClassEntity> findByStatus(ClassStatus status);
     Page<ClassEntity> findByStatus(ClassStatus status, Pageable pageable);
     Page<ClassEntity> findByClassType(ClassType classType, Pageable pageable);
     List<ClassEntity> findByTutorIdAndStatus(UUID tutorId, ClassStatus status);

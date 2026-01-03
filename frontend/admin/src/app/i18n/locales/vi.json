@@ -10,7 +10,7 @@
     },
     "overview": {
       "table": {
-        "learner": "Học viên",
+        "learner": "học viên",
         "instructor": "Gia sư",
         "subject": "Môn học",
         "schedule": "Lịch học",
@@ -36,7 +36,7 @@
         "vsLastMonth": "so với tháng trước"
       },
       "newStudents": {
-        "title": "Học viên mới",
+        "title": "học viên mới",
         "lastMonth": "Tháng này",
         "vsLastMonth": "so với tháng trước"
       },
@@ -132,7 +132,7 @@
       "review": "Đánh giá",
       "user": "Người dùng",
       "instructors": "Gia sư",
-      "tutorApproval": "Phê duyệt gia sư",
+      "instructorApproval": "Phê duyệt gia sư",
       "learners": "Học viên",
       "finance": "Tài chính",
       "revenueDashboard": "Bảng doanh thu",
@@ -341,10 +341,10 @@
     "selected": "đã chọn",
     "selectAll": "Chọn tất cả",
     "selectReviews": "Chọn đánh giá để thực hiện thao tác",
-    "student": "Học viên",
+    "student": "học viên",
     "tutor": "Gia sư",
     "class": "Lớp học",
-    "learner": "Học viên",
+    "learner": "học viên",
     "id": "ID",
     "stars": "Sao",
     "reason": "Lý do",
@@ -383,7 +383,7 @@
     "table": {
       "id": "ID",
       "stt": "STT",
-      "learner": "Học viên",
+      "learner": "học viên",
       "tutor": "Gia sư",
       "rating": "Đánh giá",
       "content": "Nội dung",
@@ -598,11 +598,11 @@
     }
   },
   "learnerList": {
-    "title": "Danh sách Học viên",
+    "title": "Danh sách học viên",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "userManagement": "Quản lý Người dùng",
-      "learnerList": "Danh sách Học viên"
+      "learnerList": "Danh sách học viên"
     },
     "searchPlaceholder": "Tìm kiếm học viên theo tên.....",
     "table": {
@@ -624,18 +624,18 @@
       "delete": "Xóa"
     },
     "confirm": {
-      "deleteTitle": "Xóa Học Viên",
+      "deleteTitle": "Xóa học viên",
       "deleteMessage": "Bạn có chắc chắn muốn xóa học viên {{name}}?",
       "cancel": "Hủy",
       "delete": "Xóa"
     }
   },
   "learnerDetail": {
-    "title": "Chi tiết Học viên",
+    "title": "Chi tiết học viên",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "userManagement": "Quản lý Người dùng",
-      "learners": "Danh sách Học viên",
+      "learners": "Danh sách học viên",
       "detail": "Chi tiết"
     },
     "loading": "Đang tải...",
@@ -710,7 +710,7 @@
       "totalStudents": "Tổng số học viên",
       "totalReviews": "Tổng số đánh giá",
       "totalHours": "Tổng số giờ",
-      "currentSessionFee": "Phí buổi học hiện tại",
+      "currentSessionFee": "Học phí hiện tại",
       "initialPrice": "Giá ban đầu",
       "timezone": "Múi giờ",
       "selectTimezone": "Chọn múi giờ",
@@ -754,7 +754,7 @@
       "empty": "Chưa có lớp học nào",
       "classId": "Mã lớp",
       "className": "Tên lớp",
-      "students": "Học viên",
+      "students": "học viên",
       "rating": "Đánh giá",
       "pricePerHour": "Giá/Giờ",
       "classType": "Loại lớp"
@@ -1103,7 +1103,7 @@
     },
     "table": {
       "stt": "STT",
-      "learner": "Học viên",
+      "learner": "học viên",
       "class": "Lớp học",
       "amount": "Số tiền",
       "method": "Phương thức",
@@ -1147,8 +1147,8 @@
       },
       "transactionId": "Mã Giao dịch",
       "learnerInformation": {
-        "title": "Thông tin Học viên",
-        "learnerId": "Mã Học viên",
+        "title": "Thông tin học viên",
+        "learnerId": "Mã học viên",
         "name": "Tên",
         "email": "Email",
         "phone": "Số điện thoại"
@@ -1336,7 +1336,7 @@
     "actor": {
       "allStudents": "Tất cả học viên",
       "topSpenders": "Người chi tiêu nhiều",
-      "newStudents": "Học viên mới",
+      "newStudents": "học viên mới",
       "noSpending1Month": "Không chi tiêu (1 tháng)"
     },
     "actions": {
@@ -1401,7 +1401,7 @@
       "studentSegments": {
         "allStudents": "Tất cả học viên",
         "topSpenders": "Người chi tiêu nhiều (Chi tiêu cao nhất trong tháng)",
-        "newStudents": "Học viên mới (Đăng ký < 30 ngày)",
+        "newStudents": "học viên mới (Đăng ký < 30 ngày)",
         "noSpending1Month": "Không chi tiêu (Không mua hàng trong 1 tháng)"
       }
     },
@@ -1454,7 +1454,7 @@
       "studentSegments": {
         "allStudents": "Tất cả học viên",
         "topSpenders": "Người chi tiêu nhiều (Chi tiêu cao nhất trong tháng)",
-        "newStudents": "Học viên mới (Đăng ký < 30 ngày)",
+        "newStudents": "học viên mới (Đăng ký < 30 ngày)",
         "noSpending1Month": "Không chi tiêu (Không mua hàng trong 1 tháng)"
       }
     }
@@ -1518,4 +1518,3 @@
     }
   }
 }
-

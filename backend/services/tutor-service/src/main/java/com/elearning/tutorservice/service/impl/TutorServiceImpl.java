@@ -20,6 +20,7 @@ import com.elearning.tutorservice.repository.TutorLanguageRepository;
 import com.elearning.tutorservice.repository.TutorSocialRepository;
 import com.elearning.tutorservice.repository.CareerEntryRepository;
 import com.elearning.tutorservice.repository.CertificationRepository;
+import com.elearning.tutorservice.repository.TutorZoomCredentialRepository;
 import com.elearning.tutorservice.service.TutorService;
 import com.elearning.tutorservice.service.AvailabilityService;
 import com.elearning.tutorservice.mapper.TutorIndexEventMapper;
@@ -47,6 +48,7 @@ public class TutorServiceImpl implements TutorService {
     private final TutorRepository tutorRepository;
     private final TutorReviewRepository tutorReviewRepository;
     private final TutorMapper tutorMapper;
+    private final TutorZoomCredentialRepository tutorZoomCredentialRepository;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -56,7 +58,13 @@ public class TutorServiceImpl implements TutorService {
         Tutor tutor = tutorRepository.findById(tutorId)
                 .orElseThrow(() -> new RuntimeException("Tutor not found"));
 
-        return tutorMapper.toTutorResponse(tutor);
+        TutorResponse response = tutorMapper.toTutorResponse(tutor);
+        
+        // Set additional fields not in mapper
+        response.setZoomConnected(tutorZoomCredentialRepository.existsByTutorId(tutorId));
+        response.setTimezone(tutor.getTimezone());
+        
+        return response;
     }
 
     @Override

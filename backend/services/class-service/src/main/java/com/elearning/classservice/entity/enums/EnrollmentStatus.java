@@ -5,4 +5,7 @@ public enum EnrollmentStatus {
     COMPLETED,
     CANCELLED,
     PENDING,
+    JOINED,           // Đã tham gia
+    PENDING_PAYMENT,  // Chờ thanh toán
+    LEFT              // Đã rời lớp
 }

@@ -93,7 +93,6 @@ public class TutorQueryBuilder {
         String suffix = switch (language.toLowerCase()) {
             case "vi", "vietnamese" -> "Vi";
             case "en", "english" -> "En";
-            case "ja", "japanese" -> "Ja";
             default -> "En"; // fallback to English
         };
         
@@ -104,6 +103,9 @@ public class TutorQueryBuilder {
                 
                 // Headline (high boost)
                 "headline" + suffix + "^3.0",
+                
+                // Categories (high-medium boost) - nested field
+                "categories.name" + suffix + "^2.5",
                 
                 // Subjects (medium boost) - nested field
                 "subjects.name" + suffix + "^2.0",

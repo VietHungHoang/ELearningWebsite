@@ -1,43 +1,91 @@
-
-import React, { useState } from 'react';
-import { HiPlus } from 'react-icons/hi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { HiPlus, HiOutlineTicket } from 'react-icons/hi';
 import { FiEdit, FiTrash } from 'react-icons/fi';
 import CreateCouponModal from '../components/CreateCouponModal';
 import ConfirmModal from '../../../../components/ui/ConfirmModal';
 import CouponStatusBadge from '../components/CouponStatusBadge';
 import ToggleSwitch from '../components/ToggleSwitch';
+import BirdLoading from '../../../../components/ui/BirdLoading';
+import Toast from '../../../../components/ui/Toast';
 import { useTranslation } from 'react-i18next';
+import discountService, { type Discount, type CreateDiscountRequest, type DiscountApplyTo } from '../../../../services/discountService';
 
 export type CouponStatus = 'Active' | 'Expired' | 'Inactive';
 export type CouponDiscountType = 'Percentage' | 'Fixed';
 
+// Legacy interface for modal compatibility
 export interface Coupon {
-    id: number;
+    id: string;
     code: string;
     discountType: CouponDiscountType;
     discountValue: number;
-    // Fix: Removed a stray 'g' character that was causing a syntax error.
-    applicableCourses: string[]; // Array of course titles, or ['All']
-    usageLimit: number | null; // null for unlimited
+    applicableCourses: string[];
+    usageLimit: number | null;
     timesUsed: number;
     expiryDate: string;
     isActive: boolean;
+    // New fields from API
+    startDate?: string;
+    maxDiscount?: number;
+    minOrderValue?: number;
+    applyTo?: DiscountApplyTo;
 }
 
-const mockCoupons: Coupon[] = [
-    { id: 1, code: 'SUMMER25', discountType: 'Percentage', discountValue: 25, applicableCourses: ['All'], usageLimit: 100, timesUsed: 42, expiryDate: '2025-08-31', isActive: true },
-    { id: 2, code: 'WELCOME10', discountType: 'Fixed', discountValue: 10, applicableCourses: ['Time Management Mastery: Boost Your Productivity'], usageLimit: 50, timesUsed: 50, expiryDate: '2025-12-31', isActive: false },
-    { id: 3, code: 'EARLYBIRD', discountType: 'Percentage', discountValue: 15, applicableCourses: ['All'], usageLimit: null, timesUsed: 112, expiryDate: '2024-01-01', isActive: false },
-    { id: 4, code: 'PYTHON50', discountType: 'Fixed', discountValue: 50, applicableCourses: ["Beginner's Guide to Python Programming"], usageLimit: 20, timesUsed: 5, expiryDate: '2025-11-30', isActive: true },
-];
+// Convert API Discount to Coupon for UI
+const discountToCoupon = (discount: Discount): Coupon => ({
+    id: discount.id,
+    code: discount.code,
+    discountType: discount.type === 'PERCENTAGE' ? 'Percentage' : 'Fixed',
+    discountValue: discount.discountValue,
+    applicableCourses: discount.applicableClasses || ['All'],
+    usageLimit: discount.maxUses ?? null,
+    timesUsed: discount.currentUses,
+    expiryDate: discount.endDate.split('T')[0],
+    isActive: discount.isActive,
+    startDate: discount.startDate,
+    maxDiscount: discount.maxDiscount,
+    minOrderValue: discount.minOrderValue,
+    applyTo: discount.applyTo,
+});
 
+// Convert Coupon to API request
+const couponToCreateRequest = (coupon: Omit<Coupon, 'id' | 'timesUsed'>): CreateDiscountRequest => ({
+    code: coupon.code,
+    type: coupon.discountType === 'Percentage' ? 'PERCENTAGE' : 'FIXED_AMOUNT',
+    discountValue: coupon.discountValue,
+    maxUses: coupon.usageLimit ?? undefined,
+    maxUsesPerUser: 1,
+    applyTo: coupon.applyTo || 'BOTH',
+    startDate: coupon.startDate || new Date().toISOString(),
+    endDate: `${coupon.expiryDate}T23:59:59`,
+    applicableClasses: coupon.applicableCourses,
+});
 
 const DealsAndCouponsContent: React.FC = () => {
     const { t } = useTranslation();
-    const [coupons, setCoupons] = useState<Coupon[]>(mockCoupons);
+    const [coupons, setCoupons] = useState<Coupon[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
     const [itemToDelete, setItemToDelete] = useState<Coupon | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+    const fetchDiscounts = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await discountService.getTutorDiscounts(0, 50);
+            setCoupons(response.content.map(discountToCoupon));
+        } catch (error) {
+            console.error('Failed to fetch discounts:', error);
+            setToast({ message: t('dashboard.tutor.dealsCoupons.errors.fetchFailed'), type: 'error' });
+        } finally {
+            setLoading(false);
+        }
+    }, [t]);
+
+    useEffect(() => {
+        fetchDiscounts();
+    }, [fetchDiscounts]);
 
     const getCouponStatus = (coupon: Coupon): CouponStatus => {
         if (new Date(coupon.expiryDate) < new Date() && coupon.isActive) {
@@ -51,35 +99,63 @@ const DealsAndCouponsContent: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveCoupon = (couponData: Omit<Coupon, 'id' | 'timesUsed'>) => {
-        if (editingCoupon) {
-            // Update existing coupon
-            setCoupons(prev => prev.map(c => c.id === editingCoupon.id ? { ...editingCoupon, ...couponData } : c));
-        } else {
-            // Add new coupon
-            const newCoupon: Coupon = {
-                id: Date.now(),
-                timesUsed: 0,
-                ...couponData,
-            };
-            setCoupons(prev => [newCoupon, ...prev]);
+    const handleSaveCoupon = async (couponData: Omit<Coupon, 'id' | 'timesUsed'>) => {
+        try {
+            if (editingCoupon) {
+                await discountService.updateDiscount(editingCoupon.id, {
+                    code: couponData.code,
+                    type: couponData.discountType === 'Percentage' ? 'PERCENTAGE' : 'FIXED_AMOUNT',
+                    discountValue: couponData.discountValue,
+                    maxUses: couponData.usageLimit ?? undefined,
+                    endDate: `${couponData.expiryDate}T23:59:59`,
+                    isActive: couponData.isActive,
+                });
+                setToast({ message: t('dashboard.tutor.dealsCoupons.success.updated'), type: 'success' });
+            } else {
+                await discountService.createDiscount(couponToCreateRequest(couponData));
+                setToast({ message: t('dashboard.tutor.dealsCoupons.success.created'), type: 'success' });
+            }
+            fetchDiscounts();
+        } catch (error) {
+            console.error('Failed to save discount:', error);
+            setToast({ message: t('dashboard.tutor.dealsCoupons.errors.saveFailed'), type: 'error' });
         }
         setIsModalOpen(false);
         setEditingCoupon(null);
     };
-    
-    const handleDelete = (coupon: Coupon) => {
-        setCoupons(prev => prev.filter(c => c.id !== coupon.id));
+
+    const handleDelete = async (coupon: Coupon) => {
+        try {
+            await discountService.deleteDiscount(coupon.id);
+            setToast({ message: t('dashboard.tutor.dealsCoupons.success.deleted'), type: 'success' });
+            fetchDiscounts();
+        } catch (error) {
+            console.error('Failed to delete discount:', error);
+            setToast({ message: t('dashboard.tutor.dealsCoupons.errors.deleteFailed'), type: 'error' });
+        }
         setItemToDelete(null);
     };
-    
-    const handleToggleActive = (couponId: number, isActive: boolean) => {
-        setCoupons(prev => prev.map(c => c.id === couponId ? {...c, isActive} : c));
+
+    const handleToggleActive = async (couponId: string) => {
+        try {
+            await discountService.toggleDiscount(couponId);
+            fetchDiscounts();
+        } catch (error) {
+            console.error('Failed to toggle discount:', error);
+            setToast({ message: t('dashboard.tutor.dealsCoupons.errors.toggleFailed'), type: 'error' });
+        }
     };
 
     return (
-        <div className="p-4">
-             <CreateCouponModal
+        <div className="p-6">
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            <CreateCouponModal
                 isOpen={isModalOpen}
                 onClose={() => { setIsModalOpen(false); setEditingCoupon(null); }}
                 onSave={handleSaveCoupon}
@@ -101,7 +177,7 @@ const DealsAndCouponsContent: React.FC = () => {
                     <h1 className="text-xl font-bold text-gray-800">{t('dashboard.tutor.dealsCoupons.title')}</h1>
                     <p className="text-gray-600 mt-1">{t('dashboard.tutor.dealsCoupons.subtitle')}</p>
                 </div>
-                <button 
+                <button
                     onClick={() => handleOpenModal(null)}
                     className="px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] transition-colors font-medium text-sm flex items-center gap-2"
                 >
@@ -110,47 +186,67 @@ const DealsAndCouponsContent: React.FC = () => {
                 </button>
             </div>
 
-            <div className="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-600 font-semibold">
-                            <tr>
-                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.code')}</th>
-                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.discount')}</th>
-                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.appliesTo')}</th>
-                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.usage')}</th>
-                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.expiryDate')}</th>
-                                <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.status')}</th>
-                                <th className="p-4 text-center">{t('dashboard.tutor.dealsCoupons.tableHeaders.active')}</th>
-                                <th className="p-4 text-center">{t('dashboard.tutor.dealsCoupons.tableHeaders.actions')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {coupons.map(coupon => (
-                                <tr key={coupon.id} className="hover:bg-gray-50">
-                                    <td className="p-4 font-bold text-gray-800">{coupon.code}</td>
-                                    <td className="p-4 text-gray-700 font-semibold">
-                                        {coupon.discountValue}{coupon.discountType === 'Percentage' ? '%' : t('dashboard.tutor.dealsCoupons.currencySymbol')}
-                                    </td>
-                                    <td className="p-4 text-gray-600">{coupon.applicableCourses.includes('All') ? t('dashboard.tutor.dealsCoupons.allCourses') : coupon.applicableCourses.join(', ')}</td>
-                                    <td className="p-4 text-gray-600">{coupon.timesUsed} / {coupon.usageLimit ?? '∞'}</td>
-                                    <td className="p-4 text-gray-600">{coupon.expiryDate}</td>
-                                    <td className="p-4"><CouponStatusBadge status={getCouponStatus(coupon)} /></td>
-                                    <td className="p-4 text-center">
-                                        <ToggleSwitch enabled={coupon.isActive} onChange={(checked) => handleToggleActive(coupon.id, checked)} />
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex items-center justify-center gap-0.5">
-                                            <button onClick={() => handleOpenModal(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.edit')}><FiEdit className="w-3.5 h-3.5" /></button>
-                                            <button onClick={() => setItemToDelete(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.delete')}><FiTrash className="w-3.5 h-3.5" /></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {loading ? (
+                <div className="mt-8 bg-white rounded-2xl shadow-sm p-16 flex justify-center items-center">
+                    <BirdLoading title={t('common.loading')} size="sm" />
                 </div>
-            </div>
+            ) : (
+                <div className="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-gray-50 text-gray-600 font-semibold">
+                                <tr>
+                                    <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.code')}</th>
+                                    <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.discount')}</th>
+                                    <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.appliesTo')}</th>
+                                    <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.usage')}</th>
+                                    <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.expiryDate')}</th>
+                                    <th className="p-4">{t('dashboard.tutor.dealsCoupons.tableHeaders.status')}</th>
+                                    <th className="p-4 text-center">{t('dashboard.tutor.dealsCoupons.tableHeaders.active')}</th>
+                                    <th className="p-4 text-center">{t('dashboard.tutor.dealsCoupons.tableHeaders.actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {coupons.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="p-16">
+                                            <div className="flex flex-col items-center justify-center text-center">
+                                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                    <HiOutlineTicket className="w-8 h-8 text-gray-400" />
+                                                </div>
+                                                <p className="text-gray-500 font-medium">{t('dashboard.tutor.dealsCoupons.noCoupons')}</p>
+                                                <p className="text-gray-400 text-sm mt-1">{t('dashboard.tutor.dealsCoupons.noCouponsHint')}</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    coupons.map(coupon => (
+                                        <tr key={coupon.id} className="hover:bg-gray-50">
+                                            <td className="p-4 font-bold text-gray-800">{coupon.code}</td>
+                                            <td className="p-4 text-gray-700 font-semibold">
+                                                {coupon.discountValue}{coupon.discountType === 'Percentage' ? '%' : t('dashboard.tutor.dealsCoupons.currencySymbol')}
+                                            </td>
+                                            <td className="p-4 text-gray-600">{coupon.applicableCourses.includes('All') ? t('dashboard.tutor.dealsCoupons.allCourses') : coupon.applicableCourses.join(', ')}</td>
+                                            <td className="p-4 text-gray-600">{coupon.timesUsed} / {coupon.usageLimit ?? '∞'}</td>
+                                            <td className="p-4 text-gray-600">{coupon.expiryDate}</td>
+                                            <td className="p-4"><CouponStatusBadge status={getCouponStatus(coupon)} /></td>
+                                            <td className="p-4 text-center">
+                                                <ToggleSwitch enabled={coupon.isActive} onChange={() => handleToggleActive(coupon.id)} />
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex items-center justify-center gap-0.5">
+                                                    <button onClick={() => handleOpenModal(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.edit')}><FiEdit className="w-3.5 h-3.5" /></button>
+                                                    <button onClick={() => setItemToDelete(coupon)} className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors" title={t('dashboard.tutor.dealsCoupons.actions.delete')}><FiTrash className="w-3.5 h-3.5" /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

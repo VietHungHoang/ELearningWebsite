@@ -1,6 +1,7 @@
 package com.elearning.searchservice.controller;
 
 import com.elearning.searchservice.dto.ApiResponse;
+import com.elearning.searchservice.schedule.CategorySubjectSyncScheduler;
 import com.elearning.searchservice.service.BulkReindexService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminSearchController {
 
     private final BulkReindexService bulkReindexService;
+    private final CategorySubjectSyncScheduler categorySubjectSyncScheduler;
 
     /**
      * Trigger bulk reindex of all tutors
@@ -47,4 +49,18 @@ public class AdminSearchController {
         
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
+    /**
+     * Trigger manual sync of category and subject data
+     * POST /v1/admin/search/sync-categories-subjects
+     */
+    @PostMapping("/sync-categories-subjects")
+    public ResponseEntity<ApiResponse<String>> syncCategoriesAndSubjects() {
+        log.info("Admin triggered manual sync of categories and subjects");
+        
+        categorySubjectSyncScheduler.triggerManualSync();
+        
+        return ResponseEntity.ok(ApiResponse.success("Sync completed successfully"));
+    }
 }
+

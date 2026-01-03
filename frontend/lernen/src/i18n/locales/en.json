@@ -185,6 +185,8 @@
       "manualDescription": "Type or paste your resume content",
       "manualNote": "Copy and paste from your existing resume",
       "processing": "Waiting for process...",
+      "pleaseWait": "Please do not close this window.",
+      "cancel": "Cancel",
       "invalidFileType": "Please select a valid PDF or image file (JPG, PNG, TIFF, etc.)",
       "fileTooLarge": "File size must be less than 10MB",
       "noTextExtracted": "No text could be extracted from the file. Please try manual input.",
@@ -277,6 +279,52 @@
         "oldestFirst": "Oldest first"
       },
       "loading": "Loading..."
+    },
+    "tutorCard": {
+      "sessionFee": "Session fee",
+      "per1Hour": "/1 hour",
+      "bookSession": "Book a session",
+      "viewDetails": "View Details",
+      "sendMessage": "Send message",
+      "verifiedTutor": "Verified tutor",
+      "bookedSessions": "Booked sessions",
+      "students": "Students",
+      "languages": "Languages:",
+      "native": "(Native)",
+      "iCanTeach": "I can teach:",
+      "notAvailable": "N/A",
+      "showLess": "Show less",
+      "learnMore": "Learn more",
+      "review": "review",
+      "reviews": "reviews"
+    },
+    "tipsSidebar": {
+      "title": "Tips to find the best Tutor",
+      "description": "Choosing the right tutor online requires careful consideration. Here are tips to help you make an informed decision.",
+      "tips": {
+        "filterRequirements": "Filter your requirements",
+        "checkQualifications": "Check qualifications and experience",
+        "readReviews": "Read reviews and ratings",
+        "evaluateCommunication": "Evaluate communication skills",
+        "checkAvailability": "Check availability and flexibility"
+      }
+    },
+    "searchNotFound": {
+      "title": "Search Not Found!",
+      "message": "We couldn't find any results for your search. Please try different keywords."
+    },
+    "bookingModal": {
+      "bookTrialLesson": "Book a Trial Lesson",
+      "with": "with",
+      "trialLessonBooked": "Trial Lesson Booked!",
+      "trialLessonBookedMessage": "Your trial lesson with {tutorName} is confirmed for {date} at {time}.",
+      "done": "Done",
+      "time": "Time:",
+      "selectTimeSlot": "Please select a time slot to proceed.",
+      "confirmBooking": "Confirm Booking"
+    },
+    "errorMessages": {
+      "failedToSearchTutors": "Failed to search tutors"
     }
   },
   "whyChooseUs": {
@@ -492,6 +540,11 @@
         "thu": "Thu",
         "fri": "Fri",
         "sat": "Sat"
+      },
+      "sessionTypes": {
+        "oneOnOne": "1-on-1",
+        "group": "Group",
+        "trial": "Trial"
       }
     },
     "inbox": {
@@ -645,7 +698,8 @@
         "statusLabels": {
           "ongoing": "Ongoing",
           "completed": "Completed",
-          "enrolled": "Enrolled"
+          "enrolled": "Enrolled",
+          "pendingPayment": "Pending Payment"
         },
         "loading": "Loading classes...",
         "errorTitle": "Failed to load classes",
@@ -655,6 +709,7 @@
       },
       "requests": {
         "title": "My Requests",
+        "subtitle": "View and manage your trial session and reschedule requests",
         "filters": {
           "reschedule": "Reschedule Requests",
           "trial": "Trial Requests"
@@ -703,6 +758,36 @@
           "view": "View details",
           "downloadInvoice": "Download invoice",
           "contactSupport": "Contact support"
+        },
+        "billDetail": {
+          "title": "Bill Details",
+          "invoiceNumber": "Invoice Number",
+          "transactionId": "Transaction ID",
+          "studentInformation": "Student Information",
+          "tutorInformation": "Tutor Information",
+          "name": "Name",
+          "email": "Email",
+          "courseInformation": "Course Information",
+          "courseTitle": "Course Title",
+          "classType": "Class Type",
+          "sessionsPurchased": "Sessions Purchased",
+          "sessions": "sessions",
+          "pricePerSession": "Price Per Session",
+          "schedule": "Schedule",
+          "paymentBreakdown": "Payment Breakdown",
+          "subtotal": "Subtotal",
+          "discount": "Discount",
+          "tax": "Tax",
+          "totalAmount": "Total Amount",
+          "paymentInformation": "Payment Information",
+          "amount": "Amount",
+          "paymentMethod": "Payment Method",
+          "purchaseDate": "Purchase Date",
+          "paymentDate": "Payment Date",
+          "status": "Status",
+          "notes": "Notes",
+          "payNow": "Pay Now",
+          "close": "Close"
         }
       }
     },
@@ -936,6 +1021,13 @@
         "noClassesFound": "No classes found",
         "noClassesDescription": "There are no classes that match your current filters.",
         "confirmDelete": "Are you sure you want to delete \"{{classTitle}}\"?",
+        "deleteClass": "Delete class",
+        "deleteModalTitle": "Delete class",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleting": "Deleting...",
+        "deleteSuccess": "Class \"{{classTitle}}\" deleted successfully",
+        "deleteError": "Failed to delete class. Please try again.",
         "createModal": {
           "title": "Create new class",
           "classTitle": "Class title",
@@ -958,6 +1050,8 @@
           "cannotRemoveLastSchedule": "Cannot remove last schedule",
           "removeSchedule": "Remove schedule",
           "createClass": "Create class",
+          "success": "Class created successfully",
+          "error": "Failed to create class. Please try again.",
           "confirmClose": {
             "title": "Discard changes?",
             "message": "You have unsaved changes. Are you sure you want to close without saving?",
@@ -982,6 +1076,39 @@
           },
           "searchCategories": "Search categories...",
           "searchSubjects": "Search subjects..."
+        },
+        "infoPage": {
+          "backToClasses": "Back to Classes",
+          "edit": "Edit",
+          "cancel": "Cancel",
+          "save": "Save",
+          "classInformation": "Class Information",
+          "schedule": "Schedule",
+          "noSchedule": "No schedule set",
+          "enrolledStudents": "Enrolled Students ({{count}})",
+          "addStudent": "Add Student",
+          "noStudents": "No students enrolled yet",
+          "addFirstStudent": "Start by adding students to your class",
+          "student": "Student {{id}}",
+          "sendMessage": "Send message",
+          "removeStudent": "Remove student",
+          "classDetails": "Class Details",
+          "created": "Created",
+          "createdWithColon": "Created:",
+          "searchStudent": "Search student...",
+          "searchFeatureComing": "Search feature will be implemented",
+          "searchingFor": "Searching for: \"{{term}}\"",
+          "enterToSearch": "Enter to search for students",
+          "addSelected": "Add Selected",
+          "loadingClassDetails": "Loading class details...",
+          "saveSuccess": "Class information updated successfully",
+          "saveError": "Failed to update class information. Please try again.",
+          "invalidSubject": "Invalid subject",
+          "saving": "Saving...",
+          "category": "Category",
+          "categoryPlaceholder": "Select category",
+          "subject": "Subject",
+          "subjectPlaceholder": "Select subject"
         }
       },
       "dealsCoupons": {
@@ -1044,7 +1171,20 @@
           "expiryDate": {
             "label": "Expiry date"
           }
-        }
+        },
+        "errors": {
+          "fetchFailed": "Failed to load discounts",
+          "saveFailed": "Failed to save discount",
+          "deleteFailed": "Failed to delete discount",
+          "toggleFailed": "Failed to toggle discount status"
+        },
+        "success": {
+          "created": "Discount created successfully",
+          "updated": "Discount updated successfully",
+          "deleted": "Discount deleted successfully"
+        },
+        "noCoupons": "No discounts yet",
+        "noCouponsHint": "Create your first discount code to attract more students!"
       },
       "myQuizzes": {
         "title": "My quizzes",
@@ -1087,6 +1227,7 @@
       },
       "requests": {
         "title": "Requests",
+        "subtitle": "Manage and process trial session and reschedule requests from students",
         "filters": {
           "reschedule": "Reschedule requests",
           "trial": "Trial requests"
@@ -1098,18 +1239,20 @@
         "status": {
           "pending": "Pending",
           "approved": "Approved",
-          "declined": "Declined"
+          "declined": "Declined",
+          "rejected": "Rejected"
         },
         "trial": {
           "badge": "Trial session request",
           "sessionTime": "Session time",
+          "loading": "Loading requests...",
           "accept": "Accept",
           "accepting": "Accepting...",
           "decline": "Decline",
           "declining": "Declining...",
           "chat": "Chat",
           "cancelRequest": "Cancel request",
-          "cancelConfirmMessage": "Are you sure you want to cancel this trial request? This action cannot be undone.",
+          "cancelConfirmMessage": "Are you sure you want to cancel this trial request?",
           "acceptSuccess": "Trial session request accepted successfully!",
           "acceptFailed": "Failed to accept request",
           "acceptError": "An error occurred while accepting the request",
@@ -1117,7 +1260,14 @@
           "declineError": "An error occurred while declining the request",
           "unknownStudent": "Unknown student",
           "unknownTutor": "Unknown tutor",
-          "sentTo": "Sent to:"
+          "sentTo": "Sent to:",
+          "justNow": "Just now",
+          "minutesAgo": "{{count}} minute ago",
+          "minutesAgo_plural": "{{count}} minutes ago",
+          "hoursAgo": "{{count}} hour ago",
+          "hoursAgo_plural": "{{count}} hours ago",
+          "daysAgo": "{{count}} day ago",
+          "daysAgo_plural": "{{count}} days ago"
         },
         "reschedule": {
           "recurringTitle": "Change recurring schedule",
@@ -1137,7 +1287,9 @@
           "declineSuccess": "Reschedule request declined and student notified.",
           "declineError": "An error occurred while declining the request",
           "sentTo": "Sent to:",
-          "everyDayAt": "Every {{day}} at {{time}}"
+          "everyDayAt": "Every {{day}} at {{time}}",
+          "showMore": "Show more",
+          "showLess": "Show less"
         }
       },
       "schedule": {
@@ -1587,7 +1739,7 @@
       "sendMessage": "Send message",
       "videoNotSupported": "Your browser does not support the video tag.",
       "sessionFee": "Session fee",
-      "perMin": "/50 min"
+      "perMin": "/1 hour"
     },
     "booking": {
       "selectTimeSlot": "Please select a time slot before requesting a session.",
@@ -1645,6 +1797,7 @@
       "language": "Language",
       "studentsEnrolled": "STUDENTS ENROLLED",
       "details": "Details",
+      "message": "Message",
       "leaveClass": "Leave Class",
       "joinClass": "Join Class",
       "description": "Description",
@@ -1660,6 +1813,9 @@
       "payment": "Payment",
       "start": "Start",
       "importantNotice": "Important Notice",
+      "importantInformation": "Important Information",
+      "classOpensWhenFull": "The class will open once all available spots are filled",
+      "paymentWhenClassStarts": "Payment will be processed when the class begins",
       "studentsEnrolledLabel": "Students Enrolled",
       "cancel": "Cancel",
       "confirmJoin": "Confirm & Join",
@@ -1674,7 +1830,31 @@
       "successLeft": "Successfully Left the Class",
       "leaveSuccessMessage": "You have successfully left the group class. You can rejoin anytime if you change your mind.",
       "classWillStartOnDate": "This class will start on {{startDate}}, even if not all spots are filled.",
-      "classWillStartWhenFull": "This class will start immediately once all spots are filled."
+      "classWillStartWhenFull": "This class will start immediately once all spots are filled.",
+      "perHour": "/hour",
+      "lastStudent": {
+        "title": "You are the last student!",
+        "subtitle": "Congratulations! You will be the last student to complete this class.",
+        "specialNotice": "Special Notice",
+        "notice1": "You are the last student to reach the maximum capacity of the class.",
+        "notice2": "The class will be activated and start immediately after you join.",
+        "notice3": "You can pay now or pay later when the class starts.",
+        "info1": "The class will be opened immediately after you confirm your participation.",
+        "info2": "You will receive an email notification when the class starts.",
+        "confirmJoin": "Confirm & Join"
+      },
+      "paymentPrompt": {
+        "title": "Would you like to pay now?",
+        "description": "You have successfully joined the class! Would you like to pay now?",
+        "className": "Class",
+        "price": "Price",
+        "benefitsTitle": "Benefits of paying now:",
+        "benefit1": "Secure your spot in the class",
+        "benefit2": "Receive early notification when the class starts",
+        "benefit3": "Avoid forgetting to pay later",
+        "payNow": "Pay Now",
+        "payLater": "Pay Later"
+      }
     },
     "bookSessionModal": {
       "title": "Book a Session",
@@ -1696,6 +1876,7 @@
       "benefit2": "An assessment of your current skill level.",
       "benefit3": "A discussion about your personalized learning plan.",
       "selectedTimes": "Selected Times:",
+      "at": "at",
       "addMessage": "Add a message (Optional)",
       "messagePlaceholder": "Let the tutor know your learning goals...",
       "footerText": "100% free, no payment information required.",
@@ -1868,6 +2049,19 @@
       "showCorrectAnswers": "Show correct answers after submission",
       "questionsTitle": "Questions ({{count}})",
       "addQuestion": "Add question",
+      "aiGenerate": {
+        "button": "Generate with AI",
+        "title": "Generate Questions with AI",
+        "description": "Enter a description or topic to let AI automatically generate a set of questions with answers for you.",
+        "promptLabel": "Description or topic",
+        "promptPlaceholder": "Example: Create 5 multiple choice questions about basic JavaScript, including concepts about variables, functions, and loops...",
+        "promptHint": "The more detailed your description, the more suitable questions AI will generate for your needs.",
+        "promptRequired": "Please enter a description or topic",
+        "generateButton": "Generate questions",
+        "generating": "Generating...",
+        "success": "Questions generated successfully!",
+        "error": "Failed to generate questions. Please try again."
+      },
       "confirmLeave": {
         "title": "Discard changes?",
         "message": "You have unsaved changes. Are you sure you want to leave without saving?",

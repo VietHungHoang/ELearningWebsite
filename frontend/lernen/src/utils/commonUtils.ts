@@ -60,65 +60,117 @@ const getTimezoneByName = (name: string) => {
     return getAllTimezones().find((timezone) => timezone.name === name);
 };
 
-// Mock data for subjects (fallback when API fails)
-const MOCK_SUBJECTS: Subject[] = [
-    { id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d', nameVi: 'Toán học', nameEn: 'Mathematics', categoryId: '11111111-1111-1111-1111-111111111111' },
-    { id: 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e', nameVi: 'Vật lý', nameEn: 'Physics', categoryId: '11111111-1111-1111-1111-111111111111' },
-    { id: 'c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f', nameVi: 'Hóa học', nameEn: 'Chemistry', categoryId: '11111111-1111-1111-1111-111111111111' },
-    { id: 'd4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a', nameVi: 'Sinh học', nameEn: 'Biology', categoryId: '11111111-1111-1111-1111-111111111111' },
-    { id: 'e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b', nameVi: 'Văn học', nameEn: 'Literature', categoryId: '22222222-2222-2222-2222-222222222222' },
-    { id: 'f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c', nameVi: 'Lịch sử', nameEn: 'History', categoryId: '22222222-2222-2222-2222-222222222222' },
-    { id: 'a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d', nameVi: 'Địa lý', nameEn: 'Geography', categoryId: '22222222-2222-2222-2222-222222222222' },
-    { id: 'b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e', nameVi: 'Tiếng Anh', nameEn: 'English', categoryId: '33333333-3333-3333-3333-333333333333' },
-    { id: 'c9d0e1f2-a3b4-4c5d-6e7f-8a9b0c1d2e3f', nameVi: 'Tiếng Nhật', nameEn: 'Japanese', categoryId: '33333333-3333-3333-3333-333333333333' },
-    { id: 'd0e1f2a3-b4c5-4d6e-7f8a-9b0c1d2e3f4a', nameVi: 'Tiếng Trung', nameEn: 'Chinese', categoryId: '33333333-3333-3333-3333-333333333333' },
-    { id: 'e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b', nameVi: 'Lập trình', nameEn: 'Programming', categoryId: '44444444-4444-4444-4444-444444444444' },
-    { id: 'f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c', nameVi: 'Thiết kế đồ họa', nameEn: 'Graphic Design', categoryId: '44444444-4444-4444-4444-444444444444' },
-];
-
-// Get subjects from localStorage or API
-const getSubjects = async (): Promise<Subject[]> => {
-    const cached = localStorage.getItem('subjects');
-    if (cached) {
-        return JSON.parse(cached);
-    }
-    try {
-        const response = await apiService.get<Subject[]>('/v1/public/common/subjects');
-        localStorage.setItem('subjects', JSON.stringify(response.data));
-        return response.data;
-    } catch (error) {
-        console.warn('Failed to fetch subjects from API, using mock data:', error);
-        // Return mock data as fallback
-        localStorage.setItem('subjects', JSON.stringify(MOCK_SUBJECTS));
-        return MOCK_SUBJECTS;
-    }
+// Clear subjects and categories cache - call this when data might be stale
+const clearSubjectsCache = (): void => {
+    localStorage.removeItem('subjects');
+    localStorage.removeItem('categories');
+    console.log('Cleared subjects and categories cache');
 };
 
-// Mock data for categories (fallback when API fails)
-const MOCK_CATEGORIES: Category[] = [
-    { id: '1', nameVi: 'Khoa học tự nhiên', nameEn: 'Natural Sciences' },
-    { id: '2', nameVi: 'Khoa học xã hội', nameEn: 'Social Sciences' },
-    { id: '3', nameVi: 'Ngoại ngữ', nameEn: 'Foreign Languages' },
-    { id: '4', nameVi: 'Công nghệ', nameEn: 'Technology' },
-    { id: '5', nameVi: 'Nghệ thuật', nameEn: 'Arts' },
-];
+// Get subjects - use cache first, then fetch from API in background to update cache
+const getSubjects = async (): Promise<Subject[]> => {
+    // Check cache first
+    const cached = localStorage.getItem('subjects');
+    if (cached) {
+        try {
+            const parsedCache = JSON.parse(cached);
+            // Handle both old format (array) and new format ({ data, timestamp })
+            let data: Subject[] | null = null;
+            
+            if (Array.isArray(parsedCache)) {
+                // Old format: just an array
+                data = parsedCache;
+            } else if (parsedCache && parsedCache.data && Array.isArray(parsedCache.data)) {
+                // New format: { data, timestamp }
+                data = parsedCache.data;
+            }
+            
+            if (data && data.length > 0) {
+                console.log('Using cached subjects:', data.length, 'items');
+                // Fetch from API in background to update cache (don't wait for it)
+                apiService.get<Subject[]>('/v1/public/common/subjects')
+                    .then(response => {
+                        if (response.data && response.data.length > 0) {
+                            localStorage.setItem('subjects', JSON.stringify(response.data));
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('Background fetch subjects failed:', error);
+                    });
+                return data;
+            }
+        } catch (error) {
+            console.warn('Error parsing cached subjects:', error);
+        }
+    }
+    
+    // No cache available, fetch from API
+    try {
+        const response = await apiService.get<Subject[]>('/v1/public/common/subjects');
+        if (response.data && response.data.length > 0) {
+            localStorage.setItem('subjects', JSON.stringify(response.data));
+            return response.data;
+        }
+    } catch (error) {
+        console.warn('Failed to fetch subjects from API:', error);
+    }
+    
+    // No cache and no API - return empty array
+    console.warn('No subjects available from API or cache');
+    return [];
+};
 
-// Get categories from localStorage or API
+// Get categories - use cache first, then fetch from API in background to update cache
 const getCategories = async (): Promise<Category[]> => {
+    // Check cache first
     const cached = localStorage.getItem('categories');
     if (cached) {
-        return JSON.parse(cached);
+        try {
+            const parsedCache = JSON.parse(cached);
+            // Handle both old format (array) and new format ({ data, timestamp })
+            let data: Category[] | null = null;
+            
+            if (Array.isArray(parsedCache)) {
+                // Old format: just an array
+                data = parsedCache;
+            } else if (parsedCache && parsedCache.data && Array.isArray(parsedCache.data)) {
+                // New format: { data, timestamp }
+                data = parsedCache.data;
+            }
+            
+            if (data && data.length > 0) {
+                console.log('Using cached categories:', data.length, 'items');
+                // Fetch from API in background to update cache (don't wait for it)
+                apiService.get<Category[]>('/v1/public/common/categories')
+                    .then(response => {
+                        if (response.data && response.data.length > 0) {
+                            localStorage.setItem('categories', JSON.stringify(response.data));
+                        }
+                    })
+                    .catch(error => {
+                        console.warn('Background fetch categories failed:', error);
+                    });
+                return data;
+            }
+        } catch (error) {
+            console.warn('Error parsing cached categories:', error);
+        }
     }
+    
+    // No cache available, fetch from API
     try {
         const response = await apiService.get<Category[]>('/v1/public/common/categories');
-        localStorage.setItem('categories', JSON.stringify(response.data));
-        return response.data;
+        if (response.data && response.data.length > 0) {
+            localStorage.setItem('categories', JSON.stringify(response.data));
+            return response.data;
+        }
     } catch (error) {
-        console.warn('Failed to fetch categories from API, using mock data:', error);
-        // Return mock data as fallback
-        localStorage.setItem('categories', JSON.stringify(MOCK_CATEGORIES));
-        return MOCK_CATEGORIES;
+        console.warn('Failed to fetch categories from API:', error);
     }
+    
+    // No cache and no API - return empty array
+    console.warn('No categories available from API or cache');
+    return [];
 };
 
 // Convert date and time from UTC to selected timezone datetime string
@@ -253,6 +305,7 @@ export default {
     getTimezoneByName,
     getSubjects,
     getCategories,
+    clearSubjectsCache,
     convertToLocalDateTime,
     convertTimeSlotToTimezone,
     convertUTCToLocalDate,

@@ -23,10 +23,6 @@ public class TutorMapper {
                 .orElse(0.0);
     }
 
-    private Integer calculateReviewCount(Tutor tutor) {
-        return tutor.getReviews() != null ? tutor.getReviews().size() : 0;
-    }
-
     private List<TutorLanguageResponse> mapLanguages(Tutor tutor) {
         if (tutor.getLanguages() == null) {
             return null;
@@ -48,6 +44,21 @@ public class TutorMapper {
                 .collect(Collectors.toList());
     }
 
+    private List<TutorReviewResponse> mapReviews(Tutor tutor) {
+        if (tutor.getReviews() == null) {
+            return null;
+        }
+        return tutor.getReviews().stream()
+                .map(review -> TutorReviewResponse.builder()
+                        .id(review.getId())
+                        .studentId(review.getStudentId())
+                        .rating(review.getRating())
+                        .comment(review.getComment())
+                        .createdAt(review.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     public TutorResponse toTutorResponse(Tutor tutor) {
         if (tutor == null) {
             return null;
@@ -66,8 +77,8 @@ public class TutorMapper {
                 .currentSessionFee(tutor.getCurrentSessionFee())
                 .originalSessionFee(tutor.getOriginalSessionFee())
                 .averageRating(calculateAverageRating(tutor))
-                .reviewCount(calculateReviewCount(tutor))
-                .bookedSessionCount(tutor.getTotalStudents()) // Assuming totalStudents represents booked sessions
+                .reviews(mapReviews(tutor))
+                .bookedSessionsCount(tutor.getBookedSessionCount())
                 .studentCount(tutor.getTotalStudents())
                 .languageCodes(mapLanguages(tutor))
                 .subjectIds(mapSubjectIds(tutor))
@@ -76,21 +87,6 @@ public class TutorMapper {
                 .experiences(mapExperiences(tutor))
                 .certificates(mapCertifications(tutor))
                 .build();
-    }
-
-    private List<TutorReviewResponse> mapReviews(Tutor tutor) {
-        if (tutor.getReviews() == null) {
-            return null;
-        }
-        return tutor.getReviews().stream()
-                .map(review -> TutorReviewResponse.builder()
-                        .id(review.getId())
-                        .studentId(review.getStudentId())
-                        .rating(review.getRating())
-                        .comment(review.getComment())
-                        .createdAt(review.getCreatedAt())
-                        .build())
-                .collect(Collectors.toList());
     }
 
     public AvailabilityResponse toAvailabilityResponse(TutorAvailability availability) {
@@ -249,10 +245,10 @@ public class TutorMapper {
         return tutor.getSubjects().stream()
                 .map(subject -> TutorSubjectResponse.builder()
                         .id(subject.getId())
-                        .subjectId(subject.getId())
-                        .subjectName(subject.getSubjectName())
-                        .categoryId(subject.getCategoryId())
-                        .categoryName(null) // Not available in entity
+                        .subjectId(subject.getSubjectId())
+                        .subjectName(null) // Will be fetched from common-service if needed
+                        .categoryId(null) // Not used anymore
+                        .categoryName(null)
                         .build())
                 .collect(Collectors.toList());
     }

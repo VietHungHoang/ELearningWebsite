@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.TextStyle;
-import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * Entity to store recurring class schedule pattern
@@ -31,7 +29,7 @@ public class ClassSchedule extends BaseEntity {
     private ClassEntity classEntity;
     
     @Column(name = "day_of_week", nullable = false)
-    private String dayOfWeek; // Comma-separated: "MONDAY,WEDNESDAY,FRIDAY"
+    private Integer dayOfWeek; // 1=Monday, 2=Tuesday, ..., 7=Sunday
     
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime; // e.g., 15:00
@@ -41,28 +39,22 @@ public class ClassSchedule extends BaseEntity {
     
     /**
      * Format schedule to human-readable string
-     * Example: "Mon, Wed, Fri - 3:00 PM"
+     * Example: "Mon - 3:00 PM"
      */
     public String formatSchedule() {
-        if (dayOfWeek == null || dayOfWeek.isBlank()) {
+        if (dayOfWeek == null) {
             return "";
         }
         
-        // Parse days
-        List<DayOfWeek> days = List.of(dayOfWeek.split(",")).stream()
-            .map(String::trim)
-            .map(d -> DayOfWeek.valueOf(d.toUpperCase()))
-            .sorted()
-            .collect(Collectors.toList());
+        // Convert integer to DayOfWeek
+        DayOfWeek day = DayOfWeek.of(dayOfWeek);
         
-        // Format days: "Mon, Wed, Fri"
-        String daysStr = days.stream()
-            .map(day -> day.getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
-            .collect(Collectors.joining(", "));
+        // Format day: "Mon"
+        String dayStr = day.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
         
         // Format time: "3:00 PM"
         String timeStr = startTime.format(java.time.format.DateTimeFormatter.ofPattern("h:mm a"));
         
-        return daysStr + " - " + timeStr;
+        return dayStr + " - " + timeStr;
     }
 }

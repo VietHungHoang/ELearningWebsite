@@ -52,10 +52,12 @@ public class SearchServiceImpl implements SearchService {
 
         List<TutorBffResponse> orderedResults = createOrderedTutorBffResults(tutorDetails, tutorIds);
 
+        // Convert page from 1-based (frontend) to 0-based (Spring PageRequest)
+        int zeroBasedPage = Math.max(0, request.getPage() - 1);
+        
         Page<TutorBffResponse> result = new PageImpl<>(
                 orderedResults,
-
-                PageRequest.of(request.getPage(), request.getSize()),
+                PageRequest.of(zeroBasedPage, request.getSize()),
                 searchResults.getTotalElements());
         log.info("Returning page {} of {} with {} tutors", request.getPage(), result.getTotalPages(),
                 orderedResults.size());

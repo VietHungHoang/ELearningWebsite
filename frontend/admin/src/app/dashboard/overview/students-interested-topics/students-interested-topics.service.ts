@@ -159,7 +159,7 @@ export class StudentsInterestedTopicsService {
                     },
                     tooltip: {
                         y: {
-                            formatter: function(val: any) {
+                            formatter: function (val: any) {
                                 return val + ' học viên';
                             }
                         }

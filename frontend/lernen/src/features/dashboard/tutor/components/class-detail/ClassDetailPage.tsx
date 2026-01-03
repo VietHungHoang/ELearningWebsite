@@ -122,7 +122,7 @@ const ClassDetailPage: React.FC = () => {
             status: "completed",
             recording: true,
             participantsCount: 5,
-            notes: "Học viên thể hiện sự hiểu biết tốt về React cơ bản. Cần ôn tập vòng đời component trong buổi học tiếp theo.",
+            notes: "học viên thể hiện sự hiểu biết tốt về React cơ bản. Cần ôn tập vòng đời component trong buổi học tiếp theo.",
             attendanceHistory: [
                 { studentId: "1", studentName: "Nguyễn Nam Sơn", joinTime: "14:05", leaveTime: "15:35", status: "present" },
                 { studentId: "2", studentName: "Trần Thị Mai", joinTime: "14:10", leaveTime: "15:30", status: "present" },
@@ -191,8 +191,8 @@ const ClassDetailPage: React.FC = () => {
         <button
             onClick={() => setActiveTab(label)}
             className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${activeTab === label
-                    ? 'bg-[#0b6459] text-white shadow-md'
-                    : 'hover:bg-gray-100 text-gray-600'
+                ? 'bg-[#0b6459] text-white shadow-md'
+                : 'hover:bg-gray-100 text-gray-600'
                 }`}
         >
             <div className={`w-6 h-6 flex-shrink-0 flex items-center justify-center ${activeTab === label ? 'text-white' : 'text-gray-500'}`}>

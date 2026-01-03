@@ -1,17 +1,17 @@
 package com.elearning.classservice.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
+import com.elearning.classservice.client.TutorServiceClient;
 import com.elearning.classservice.config.ZoomProperties;
 import com.elearning.classservice.dto.zoom.CreateZoomMeetingRequest;
 import com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse;
 import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.exception.ZoomApiException;
 import com.elearning.classservice.repository.SessionRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class ZoomMeetingServiceImpl implements ZoomMeetingService {
 
     private final ZoomProperties zoomProperties;
-    private final ZoomOAuthService oauthService;
+    private final TutorServiceClient tutorServiceClient; // Changed from ZoomOAuthService
     private final RestTemplate restTemplate;
     private final SessionRepository sessionRepository;
 
@@ -34,8 +34,8 @@ public class ZoomMeetingServiceImpl implements ZoomMeetingService {
         log.info("Creating Zoom meeting for session {} by tutor {}", sessionId, tutorId);
         
         try {
-            // Get valid access token
-            String accessToken = oauthService.getValidAccessToken(tutorId);
+            // Get valid access token from Tutor Service
+            String accessToken = tutorServiceClient.getZoomAccessToken(tutorId);
             
             // Prepare request
             CreateZoomMeetingRequest request = buildMeetingRequest(sessionId);
@@ -71,7 +71,7 @@ public class ZoomMeetingServiceImpl implements ZoomMeetingService {
         log.info("Getting Zoom meeting details for meeting {} by tutor {}", meetingId, tutorId);
         
         try {
-            String accessToken = oauthService.getValidAccessToken(tutorId);
+            String accessToken = tutorServiceClient.getZoomAccessToken(tutorId);
             
             String apiUrl = zoomProperties.getApi().getBaseUrl() + "/meetings/" + meetingId;
             
@@ -100,11 +100,11 @@ public class ZoomMeetingServiceImpl implements ZoomMeetingService {
         log.info("Deleting Zoom meeting {} by tutor {}", meetingId, tutorId);
         
         try {
-            String accessToken = oauthService.getValidAccessToken(tutorId);
+            String accessToken = tutorServiceClient.getZoomAccessToken(tutorId);
             
             String apiUrl = zoomProperties.getApi().getBaseUrl() + "/meetings/" + meetingId;
             
-           HttpHeaders headers = new HttpHeaders();
+            HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             
             HttpEntity<Void> entity = new HttpEntity<>(headers);

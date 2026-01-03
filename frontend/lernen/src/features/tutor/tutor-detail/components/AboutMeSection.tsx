@@ -23,8 +23,8 @@ const AboutMeSection: React.FC<AboutMeSectionProps> = ({ introduction }) => {
     }
 
     // Create truncated version if text is long
-    const shouldTruncate = introduction.length > 300;
-    const truncatedText = shouldTruncate ? introduction.substring(0, 300) + "..." : introduction;
+    const shouldTruncate = introduction.length > 500;
+    const truncatedText = shouldTruncate ? introduction.substring(0, 500) + "..." : introduction;
 
     const textToShow = isExpanded ? introduction : truncatedText;
 

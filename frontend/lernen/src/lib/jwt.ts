@@ -7,6 +7,7 @@ export interface DecodedUser {
   preferred_username: string;
   given_name?: string;
   email_verified: boolean;
+  picture?: string; // Avatar URL from Keycloak
   exp: number;
   iat: number;
   iss: string;

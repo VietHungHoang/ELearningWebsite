@@ -10,9 +10,10 @@ export interface UserInfo {
 }
 
 export interface TutorResponse extends UserInfo {
+    email?: string;
     isVerified: boolean;
     headline: string;
-    videoUrl: string; 
+    videoUrl: string;
     introduction: string;
     currentSessionFee: number;
     originalSessionFee?: number;
@@ -21,12 +22,19 @@ export interface TutorResponse extends UserInfo {
     bookedSessionsCount: number;
     studentCount: number;
     countryCode: string;
+    gender?: Gender | null;
+    timezone?: string | null;
     languageCodes: TutorLanguageResponse[];
     subjectIds: string[];
-    socialLinks: TutorSocial[];
+    socialLinks?: TutorSocial[];
+    hasTrialSession?: boolean;
 }
 
+// Alias for profile header - uses same structure as TutorResponse
+export type TutorProfileHeaderResponse = TutorResponse;
+
 export interface Tutor extends UserInfo {
+    email?: string;
     isVerified: boolean;
     headline: string;
     introduction: string;
@@ -38,9 +46,42 @@ export interface Tutor extends UserInfo {
     bookedSessionsCount: number;
     studentCount: number;
     country: Country;
+    gender?: Gender | null;
+    timezone?: string | null;
     languages: TutorLanguage[];
     subjects: Subject[];
-    socialLinks: TutorSocial[];
+    socialLinks?: TutorSocial[];
+    hasTrialSession?: boolean;
+}
+
+// Extended tutor data for Profile Settings pages
+export interface TutorDetail extends UserInfo {
+    email?: string;
+    isVerified: boolean;
+    headline: string;
+    introduction: string;
+    videoUrl: string;
+    currentSessionFee: number;
+    originalSessionFee?: number;
+    averageRating: number;
+    reviewCount: number;
+    bookedSessionsCount: number;
+    studentCount: number;
+    country: Country;
+    gender?: Gender | null;
+    timezone?: string | null;
+    languages: TutorLanguage[];
+    subjects: Subject[];
+    socialLinks?: TutorSocial[];
+    hasTrialSession?: boolean;
+    zoomConnected?: boolean;
+    // Extended fields for Profile Settings
+    reviews: TutorReview[];
+    availabilities: TutorAvailability[];
+    educations: EducationItem[];
+    experiences: ExperienceItem[];
+    certifications: CertificationItem[];
+    groupClasses?: GroupClass;
 }
 
 export interface TutorReview {
@@ -110,12 +151,35 @@ export interface GroupClassStudent {
     name: string;
 }
 
+// API Response interface for GroupClass from backend
+export interface GroupClassApiResponse {
+    id: string;
+    title: string;
+    description: string;
+    subjectId: string;
+    classType: string;
+    maxStudents: number;
+    enrolledStudents: number;
+    pricePerHour: number;
+    schedules: Array<{
+        dayOfWeek: number;
+        time: string; // Format: "15:00:00"
+    }>;
+    tutor: {
+        id: string;
+        fullName: string;
+        email: string | null;
+        avatarUrl: string;
+    };
+}
+
 export interface GroupClass {
     id: string;
     title: string;
     classDescription?: string;
     maxStudents?: number;
-    students?: UserInfo[];
+    enrolledStudents?: number; // Number of enrolled students from API
+    students?: UserInfo[]; // Optional: detailed student list if available
     schedule: ClassSchedule[];
     startDate?: Date;
     pricePerHour: number;

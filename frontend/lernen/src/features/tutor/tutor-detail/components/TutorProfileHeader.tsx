@@ -241,7 +241,7 @@ const TutorProfileHeader: React.FC<{
                                         <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
                                             {(tutor.averageRating || 0).toFixed(1)}/5.0
                                         </span>{" "}
-                                        ({tutor.reviewCount} review{tutor.reviewCount !== 1 ? "s" : ""})
+                                        ({(tutor.reviews?.length || 0)} review{(tutor.reviews?.length || 0) !== 1 ? "s" : ""})
                                     </>
                                 }
                             />

@@ -61,7 +61,7 @@ const FindTutorsPage: React.FC = () => {
                 setPagination(null);
             }
         } catch (err) {
-            setError("Failed to search tutors");
+            setError(t("findTutors.errorMessages.failedToSearchTutors"));
             console.error("Search error:", err);
             setTutors([]);
             setPagination(null);
@@ -106,7 +106,7 @@ const FindTutorsPage: React.FC = () => {
                     <h1 className="text-4xl font-bold text-gray-800 mt-2">
                         {t("findTutors.pageTitle")}
                     </h1>
-                    <p className="mt-4 text-gray-600 max-w-4xl">
+                    <p className="mt-2 text-gray-600 max-w-4xl">
                         {t("findTutors.pageDescription")}
                     </p>
                 </div>

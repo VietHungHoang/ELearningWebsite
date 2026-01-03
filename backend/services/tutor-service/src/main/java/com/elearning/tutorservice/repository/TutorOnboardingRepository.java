@@ -2,6 +2,8 @@ package com.elearning.tutorservice.repository;
 
 import com.elearning.tutorservice.entity.TutorOnboarding;
 import com.elearning.tutorservice.entity.enums.OnboardingStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,4 +42,9 @@ public interface TutorOnboardingRepository extends JpaRepository<TutorOnboarding
            "GROUP BY DATE(t.createdAt) " +
            "ORDER BY DATE(t.createdAt)")
     List<Object[]> findDailyNewTutors(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    /**
+     * Find all onboarding records by status with pagination
+     */
+    Page<TutorOnboarding> findByStatus(OnboardingStatus status, Pageable pageable);
 }

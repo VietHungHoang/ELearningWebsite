@@ -22,11 +22,17 @@ public class ClassRoutesConfig {
 
                 .route("save-trial-session", r -> r
                         .path("/api/v1/classes/trial-session/**",
+                                "/api/v1/classes/{classId}",
                                 "/api/v1/classes/tutors/me",
+                                "/api/v1/classes/students/me/**",
                                 "/api/v1/classes/sessions/tutors/{tutorId}",
                                 "/api/v1/classes/sessions/check-slot-conflicts",
                                 "/api/v1/classes/sessions/students/{studentId}",
-                                "/api/v1/classes/sessions/me/**")
+                                "/api/v1/classes/tutors/{tutorId}/opening",
+                                "/api/v1/classes/{classId}/students/{studentId}",
+                                "/api/v1/classes/sessions/me/**",
+                                "/api/v1/classes/sessions/{sessionId}/reschedule",
+                                "/api/v1/classes/reschedule-requests/**")
                         .uri(classServiceUrl))
 
                 .route("class-sessions", r -> r

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { HiSearch, HiPlus } from 'react-icons/hi';
 import { FiEye, FiMessageSquare, FiEdit, FiTrash } from 'react-icons/fi';
 import BirdLoading from '../../../../components/ui/BirdLoading';
+import ConfirmModal from '../../../../components/ui/ConfirmModal';
+import Toast from '../../../../components/ui/Toast';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CreateClassModal, { type ClassFormData } from './components/CreateClassModal';
 import EditClassModal, { type ClassData } from './components/EditClassModal';
@@ -13,20 +15,6 @@ import { classService } from '../../../../services/classService';
 import type { ClassTable, ClassStatus } from '../../../../types/class';
 
 type FilterTab = 'All Status' | 'Ongoing' | 'Opening' | 'Completed';
-
-// Helper function to format ISO date string to readable format
-const formatDate = (isoDate: string): string => {
-    try {
-        const date = new Date(isoDate);
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    } catch (error) {
-        return isoDate; // Return original if parsing fails
-    }
-};
 
 // --- MAIN COMPONENT ---
 const MyClassPage: React.FC = () => {
@@ -43,6 +31,10 @@ const MyClassPage: React.FC = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [classToEdit, setClassToEdit] = useState<ClassData | null>(null);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [classToDelete, setClassToDelete] = useState<ClassTable | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const itemsPerPage = 10;
     const { setBreadcrumb } = useBreadcrumb();
 
@@ -122,34 +114,10 @@ const MyClassPage: React.FC = () => {
     };
 
     const handleEditClass = (classData: ClassTable) => {
-        console.log('Editing class:', classData);
-        // Convert ClassTable to ClassData for the modal
-        const modalData: ClassData = {
-            id: classData.id,
-            classTitle: classData.title,
-            students: classData.students.map(student => ({
-                id: student.id,
-                name: student.fullName,
-                avatar: student.avatarUrl || `https://picsum.photos/seed/${student.id}/48/48`
-            })),
-            type: classData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
-            status: classData.status === 'ONGOING' ? 'Ongoing' : classData.status === 'COMPLETED' ? 'Completed' : 'Opening',
-            schedules: classData.schedules.map(schedule => ({
-                day: getDayName(schedule.dayOfWeek),
-                time: schedule.time
-            })),
-            startDate: formatDate(classData.startDate),
-            completedSessions: classData.completedSessions,
-            totalSessions: classData.totalSessions,
-            subject: '',
-            category: '',
-            tuitionFee: 0,
-            description: '',
-            quizzes: [],
-            materials: []
-        };
-        setClassToEdit(modalData);
-        setIsEditModalOpen(true);
+        // Navigate to class info/edit page
+        navigate(`/dashboard/my-class/${classData.id}/edit`, {
+            state: { classData }
+        });
     };
 
     const handleEditSubmit = (formData: ClassFormData) => {
@@ -160,6 +128,61 @@ const MyClassPage: React.FC = () => {
             setIsEditModalOpen(false);
             setClassToEdit(null);
         }
+    };
+
+    // Refetch classes after operations
+    const refetchClasses = async () => {
+        try {
+            setLoading(true);
+            const filters = {
+                page: currentPage,
+                size: itemsPerPage
+            };
+            const response = await classService.getClassesForTutor(filters);
+            if (response.success) {
+                setClasses(response.data.content);
+                setTotalElements(response.data.totalElements);
+            }
+        } catch (err) {
+            console.error('Error refetching classes:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteClick = (classData: ClassTable) => {
+        setClassToDelete(classData);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!classToDelete) return;
+
+        try {
+            setIsDeleting(true);
+            await classService.deleteClass(classToDelete.id);
+            setToast({ 
+                message: t('dashboard.tutor.myClass.deleteSuccess', { classTitle: classToDelete.title }), 
+                type: 'success' 
+            });
+            setIsDeleteModalOpen(false);
+            setClassToDelete(null);
+            // Refetch classes to update the list
+            await refetchClasses();
+        } catch (error) {
+            console.error('Failed to delete class:', error);
+            setToast({ 
+                message: t('dashboard.tutor.myClass.deleteError'), 
+                type: 'error' 
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setIsDeleteModalOpen(false);
+        setClassToDelete(null);
     };
 
     const handleCreateClass = (classData: ClassFormData) => {
@@ -375,28 +398,24 @@ const MyClassPage: React.FC = () => {
                                                         <FiEye className="w-3.5 h-3.5" />
                                                     </button>
                                                 )}
-                                                <button
-                                                    onClick={() => {
-                                                        // TODO: Implement chat functionality
-                                                        console.log('Chat with class:', classData.id);
-                                                    }}
-                                                    className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                                                    title="Chat"
-                                                >
-                                                    <FiMessageSquare className="w-3.5 h-3.5" />
-                                                </button>
-                                                {classData.status === 'OPENING' && (
+                                                {/* Ẩn nút nhắn tin nếu lớp đang chờ và chưa có học sinh */}
+                                                {!(classData.status === 'OPENING' && classData.students.length === 0) && (
                                                     <button
                                                         onClick={() => {
-                                                            // TODO: Implement delete class functionality
-                                                            console.log('Delete class:', classData.id);
-                                                            if (window.confirm(t('dashboard.tutor.myClass.confirmDelete', { classTitle: classData.title }))) {
-                                                                // Remove class from state
-                                                                setClasses(prev => prev.filter(c => c.id !== classData.id));
-                                                            }
+                                                            // TODO: Implement chat functionality
+                                                            console.log('Chat with class:', classData.id);
                                                         }}
                                                         className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
-                                                        title="Delete class"
+                                                        title="Chat"
+                                                    >
+                                                        <FiMessageSquare className="w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
+                                                {classData.status === 'OPENING' && (
+                                                    <button
+                                                        onClick={() => handleDeleteClick(classData)}
+                                                        className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                                                        title={t('dashboard.tutor.myClass.deleteClass')}
                                                     >
                                                         <FiTrash className="w-3.5 h-3.5" />
                                                     </button>
@@ -446,6 +465,27 @@ const MyClassPage: React.FC = () => {
                 onSubmit={handleEditSubmit}
                 classData={classToEdit}
             />
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                title={t('dashboard.tutor.myClass.deleteModalTitle')}
+                message={t('dashboard.tutor.myClass.confirmDelete', { classTitle: classToDelete?.title || '' })}
+                confirmText={isDeleting ? t('dashboard.tutor.myClass.deleting') : t('dashboard.tutor.myClass.deleteConfirm')}
+                cancelText={t('dashboard.tutor.myClass.deleteCancel')}
+                onConfirm={handleDeleteConfirm}
+                onCancel={handleDeleteCancel}
+                confirmButtonColor="red"
+            />
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 };

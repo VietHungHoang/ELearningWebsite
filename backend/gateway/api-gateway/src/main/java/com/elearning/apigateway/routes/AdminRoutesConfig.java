@@ -22,14 +22,17 @@ public class AdminRoutesConfig {
                         .path(
                                 "/api/v1/admin/dashboard/tutor-pending-approvals",
                                 "/api/v1/admin/dashboard/new-tutors",
-                                "/api/v1/admin/dashboard/new-students"
+                                "/api/v1/admin/dashboard/new-students",
+                                "/api/v1/admin/tutors/{tutorId}/approve",
+                                "/api/v1/admin/tutors/{tutorId}/reject",
+                                "/api/v1/admin/tutors/requests"
                                 )
-                        // .filters(f -> f
-                        //         .rewritePath(
-                        //                 "/api/v1/admin/dashboard/tutor-pending-approvals",
-                        //                 "/api/v1/tutors/pending-approvals"
-                        //         )
-                        // )
+                        .filters(f -> f
+                                .rewritePath(
+                                        "/api/v1/admin/tutors/(?<rest>.*)",
+                                        "/api/v1/tutors/${rest}"
+                                )
+                        )
                         .uri(tutorServiceUrl))
 
                 // Bff routes

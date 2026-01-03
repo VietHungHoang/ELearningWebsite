@@ -24,6 +24,11 @@ public class ChatRoutesConfig {
                                 "/api/v1/chat/messages/**")
                         .uri(chatServiceUrl))
 
+                // WebSocket route for real-time chat
+                .route("chat-websocket", r -> r
+                        .path("/ws/chat/**")
+                        .uri(chatServiceUrl.replace("http://", "ws://").replace("https://", "wss://")))
+
                 // Bff routes
 
 

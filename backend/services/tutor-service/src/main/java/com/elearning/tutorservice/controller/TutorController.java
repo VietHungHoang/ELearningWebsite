@@ -21,6 +21,18 @@ public class TutorController {
     private final TutorService tutorService;
     private final TutorOnboardingService tutorOnboardingService;
 
+    /**
+     * GET /tutors/me/profile
+     * Get current tutor's profile using X-User-Id header
+     */
+    @GetMapping("/me/profile")
+    public ResponseEntity<ApiResponse<TutorResponse>> getCurrentTutorProfile(
+            @RequestHeader("X-User-Id") UUID tutorId) {
+        log.info("Fetching profile for tutor: {}", tutorId);
+        TutorResponse profile = tutorService.getTutorById(tutorId);
+        return ResponseEntity.ok(ApiResponse.success(profile, "Tutor profile retrieved successfully"));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<TutorResponse>> getTutorInfo(@PathVariable UUID id) {
         TutorResponse detail = tutorService.getTutorById(id);

@@ -27,14 +27,16 @@ public class TutorResponse extends UserInfoResponse {
     private BigDecimal currentSessionFee;
     private BigDecimal originalSessionFee;
     private Double averageRating;
-    private Integer reviewCount;
-    private Integer bookedSessionCount;
+    private List<TutorReviewResponse> reviews;
+    private Integer bookedSessionsCount;
     private Integer studentCount;
     private String countryCode;
+    private String timezone;
     private List<TutorLanguageResponse> languageCodes;
     private List<UUID> subjectIds;
     private List<TutorSocialResponse> socialLinks;
     private List<CareerEntryResponse> educations;
     private List<CareerEntryResponse> experiences;
     private List<CertificationResponse> certificates;
+    private Boolean zoomConnected;
 }

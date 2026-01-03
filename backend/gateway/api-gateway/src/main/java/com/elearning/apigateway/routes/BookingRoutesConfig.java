@@ -17,7 +17,9 @@ public class BookingRoutesConfig {
         return builder.routes()
                 // Direct routes
                 .route("save-trial-seggggssion", r -> r
-                        .path("/api/v1/bookings/**")
+                        .path("/api/v1/bookings/**",
+                        "/api/v1/discount/**",
+                        "/api/v1/tutor/discount/**")
                         .uri(bookingServiceUrl)
                 )
 

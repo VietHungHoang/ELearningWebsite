@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { HiX, HiPaperAirplane, HiSearch, HiUserGroup, HiUser } from 'react-icons/hi';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import { HiX, HiPaperAirplane, HiSearch, HiUserGroup, HiUser, HiEmojiHappy, HiPaperClip, HiPhotograph, HiVideoCamera, HiDocument } from 'react-icons/hi';
 import { BsChatDotsFill } from 'react-icons/bs';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
@@ -28,6 +28,7 @@ interface Conversation {
 }
 
 const ChatWidget: React.FC = () => {
+    // ... states ...
     const { state } = useAuth();
     const { pendingTutorId, pendingTutorName, clearPendingTutor } = useChat();
     const [isOpen, setIsOpen] = useState(false);
@@ -39,18 +40,47 @@ const ChatWidget: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputMessage, setInputMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [showFileDropdown, setShowFileDropdown] = useState(false);
     const [wsConnected, setWsConnected] = useState(false);
     const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
     const typingTimeoutRef = useRef<number | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+    // Pagination states
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(false);
+    // Control scroll behavior: 'auto' (instant), 'smooth' (animate), or null (no scroll)
+    const shouldScrollToBottom = useRef<'auto' | 'smooth' | null>('auto');
+
+    // State to store previous scroll height for restoration
+    const prevScrollHeightRef = useRef<number>(0);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (shouldScrollToBottom.current && messagesContainerRef.current) {
+            if (shouldScrollToBottom.current === 'auto') {
+                // Instant scroll
+                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            } else {
+                // Smooth scroll
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         scrollToBottom();
-    }, [messages]);
+        // Hide initial loading overlay after scroll is done for "auto" scroll (initial load)
+        if (shouldScrollToBottom.current === 'auto' && isInitialLoading) {
+            // Artificial delay to ensure user sees transition and layout stabilizes
+            const timer = setTimeout(() => {
+                setIsInitialLoading(false);
+            }, 300); // 300ms delay
+            return () => clearTimeout(timer);
+        }
+    }, [messages, isInitialLoading]);
 
     // WebSocket connection
     useEffect(() => {
@@ -76,6 +106,20 @@ const ChatWidget: React.FC = () => {
         };
     }, [state.isAuthenticated, state.user, isOpen]);
 
+    // Close file dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (showFileDropdown && !(event.target as Element).closest('.file-dropdown-container')) {
+                setShowFileDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showFileDropdown]);
+
     // Subscribe to selected conversation
     useEffect(() => {
         if (selectedConversation && wsConnected) {
@@ -91,6 +135,9 @@ const ChatWidget: React.FC = () => {
                         timestamp: new Date(message.createdAt),
                         isOwn: message.senderId === state.user?.id,
                     };
+
+                    // Auto scroll smooth on new message
+                    shouldScrollToBottom.current = 'smooth';
                     setMessages(prev => [...prev, newMessage]);
 
                     // Update conversation last message
@@ -199,13 +246,29 @@ const ChatWidget: React.FC = () => {
     // Load messages when conversation is selected
     useEffect(() => {
         if (selectedConversation && state.user) {
-            loadMessages(selectedConversation.id);
+            // Reset pagination
+            setPage(0);
+            setHasMore(true);
+            setMessages([]);
+            shouldScrollToBottom.current = 'auto'; // Instant scroll on conversation change
+            setIsInitialLoading(true); // Start loading
+            fetchMessages(selectedConversation.id, 0);
         }
     }, [selectedConversation, state.user]);
 
-    const loadMessages = async (conversationId: string) => {
+    const fetchMessages = async (conversationId: string, pageNum: number) => {
         try {
-            const data = await chatService.getConversationMessages(conversationId, 0, 50);
+            if (pageNum > 0) {
+                setIsFetchingMore(true);
+                shouldScrollToBottom.current = null; // Don't scroll to bottom when loading history
+            }
+
+            const data = await chatService.getConversationMessages(conversationId, pageNum, 20);
+
+            if (data.length < 20) {
+                setHasMore(false);
+            }
+
             const mappedMessages: Message[] = data.map(msg => ({
                 id: msg.id,
                 senderId: msg.senderId,
@@ -214,14 +277,62 @@ const ChatWidget: React.FC = () => {
                 timestamp: new Date(msg.createdAt),
                 isOwn: msg.senderId === state.user?.id,
             }));
-            setMessages(mappedMessages);
+
+            setMessages(prev => {
+                if (pageNum === 0) return mappedMessages;
+                // Prepend older messages: merge and deduplicate just in case
+                const existingIds = new Set(prev.map(m => m.id));
+                const uniqueNewMessages = mappedMessages.filter(m => !existingIds.has(m.id));
+                return [...uniqueNewMessages, ...prev];
+            });
+
+            // If page 0 and no messages (empty conv), turn off loading
+            if (pageNum === 0 && mappedMessages.length === 0) {
+                setTimeout(() => setIsInitialLoading(false), 300);
+            }
+
         } catch (error) {
             console.error('Failed to load messages:', error);
+            if (pageNum === 0) setIsInitialLoading(false);
+        } finally {
+            setIsFetchingMore(false);
         }
     };
 
+
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, scrollHeight } = e.currentTarget;
+
+        if (scrollTop === 0 && hasMore && !isFetchingMore && selectedConversation) {
+            // User scrolled to top, load more
+            prevScrollHeightRef.current = scrollHeight; // Save current scroll height
+
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchMessages(selectedConversation.id, nextPage);
+        }
+    };
+
+    // Effect to restore scroll position when messages change (and not scrolling to bottom)
+    useLayoutEffect(() => {
+        if (!shouldScrollToBottom.current && messagesContainerRef.current && prevScrollHeightRef.current > 0) {
+            const container = messagesContainerRef.current;
+            const newScrollHeight = container.scrollHeight;
+            const diff = newScrollHeight - prevScrollHeightRef.current;
+
+            // Restore scroll position
+            container.scrollTop = diff;
+
+            // Reset ref
+            prevScrollHeightRef.current = 0;
+        }
+    }, [messages]);
+
     const findOrCreateConversationWithTutor = async (tutorId: string, tutorName: string) => {
         if (!state.user) return;
+
+        setIsInitialLoading(true); // Start loading immediately
 
         // First, check if conversation already exists
         const existingConversation = conversations.find(conv =>
@@ -333,9 +444,10 @@ const ChatWidget: React.FC = () => {
     };
 
     const handleSelectConversation = (conversation: Conversation) => {
+        setIsInitialLoading(true); // Start loading immediately
         setSelectedConversation(conversation);
         setShowConversationList(false);
-        
+
         // Mark as read
         setConversations(prev =>
             prev.map(conv =>
@@ -352,7 +464,7 @@ const ChatWidget: React.FC = () => {
     const formatTime = (date: Date) => {
         const now = new Date();
         const diff = now.getTime() - date.getTime();
-        
+
         if (diff < 60000) return 'Just now';
         if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
         if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -397,42 +509,46 @@ const ChatWidget: React.FC = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200">
+                <div className="fixed bottom-6 right-6 w-[340px] h-[480px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300">
                     {/* Header */}
-                    <div className="bg-[#0b6459] text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+                    <div className="bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white px-4 py-2.5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             {!showConversationList && selectedConversation && (
                                 <button
                                     onClick={handleBackToList}
-                                    className="hover:bg-white/20 rounded-full p-1 transition mr-1"
+                                    className="hover:bg-white/20 rounded-full p-1.5 transition-all duration-200"
                                     aria-label="Back to conversations"
                                 >
-                                    ←
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
                                 </button>
                             )}
-                            <BsChatDotsFill className="w-5 h-5" />
+                            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                                <BsChatDotsFill className="w-4 h-4" />
+                            </div>
                             <div>
-                                <h3 className="font-semibold text-sm">
-                                    {showConversationList ? 'Messages' : selectedConversation?.name}
+                                <h3 className="font-semibold text-sm leading-tight">
+                                    {showConversationList ? 'Tin nhắn' : selectedConversation?.name}
                                 </h3>
-                                <p className="text-xs opacity-90">
-                                    {showConversationList 
-                                        ? `${conversations.length} conversations` 
-                                        : selectedConversation?.type === 'class' 
-                                            ? 'Class Group'
+                                <p className="text-[10px] opacity-80">
+                                    {showConversationList
+                                        ? `${conversations.length} cuộc trò chuyện`
+                                        : selectedConversation?.type === 'class'
+                                            ? 'Nhóm lớp'
                                             : selectedConversation?.type === 'group'
-                                                ? 'Study Group'
-                                                : 'Direct Message'
+                                                ? 'Nhóm học tập'
+                                                : 'Tin nhắn trực tiếp'
                                     }
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="hover:bg-white/20 rounded-full p-1 transition"
+                            className="hover:bg-white/20 rounded-full p-1.5 transition-all duration-200"
                             aria-label="Close chat"
                         >
-                            <HiX className="w-5 h-5" />
+                            <HiX className="w-4 h-4" />
                         </button>
                     </div>
 
@@ -440,15 +556,15 @@ const ChatWidget: React.FC = () => {
                     {showConversationList && (
                         <>
                             {/* Search Bar */}
-                            <div className="p-3 border-b border-gray-200">
+                            <div className="p-2.5 border-b border-gray-100 bg-gray-50/50">
                                 <div className="relative">
-                                    <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
                                     <input
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder="Search conversations..."
-                                        className="w-full bg-gray-100 border border-gray-300 rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent"
+                                        placeholder="Tìm kiếm..."
+                                        className="w-full bg-white border border-gray-200 rounded-full pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#0b6459]/20 focus:border-[#0b6459] transition-all"
                                     />
                                 </div>
                             </div>
@@ -458,56 +574,58 @@ const ChatWidget: React.FC = () => {
                                 {loadingConversations ? (
                                     <div className="flex items-center justify-center h-full">
                                         <div className="text-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0b6459] mx-auto"></div>
-                                            <p className="mt-2 text-sm text-gray-500">Loading conversations...</p>
+                                            <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#0b6459] border-t-transparent mx-auto"></div>
+                                            <p className="mt-2 text-xs text-gray-500">Đang tải...</p>
                                         </div>
                                     </div>
                                 ) : conversationsError ? (
                                     <div className="flex items-center justify-center h-full p-4">
                                         <div className="text-center">
-                                            <p className="text-sm text-red-500 mb-2">Failed to load conversations</p>
+                                            <p className="text-xs text-red-500 mb-2">Không thể tải cuộc trò chuyện</p>
                                             <button
                                                 onClick={fetchConversations}
-                                                className="text-xs bg-[#0b6459] text-white px-3 py-1 rounded hover:bg-[#084c43]"
+                                                className="text-xs bg-[#0b6459] text-white px-3 py-1 rounded-full hover:bg-[#084c43] transition-colors"
                                             >
-                                                Retry
+                                                Thử lại
                                             </button>
                                         </div>
                                     </div>
                                 ) : filteredConversations.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                                        <BsChatDotsFill className="w-12 h-12 text-gray-300 mb-3" />
-                                        <p className="text-gray-500 text-sm">No conversations yet</p>
-                                        <p className="text-gray-400 text-xs mt-1">Start chatting with your tutors or classmates!</p>
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                            <BsChatDotsFill className="w-6 h-6 text-gray-400" />
+                                        </div>
+                                        <p className="text-gray-600 text-xs font-medium">Chưa có cuộc trò chuyện</p>
+                                        <p className="text-gray-400 text-[10px] mt-1">Bắt đầu trò chuyện với gia sư!</p>
                                     </div>
                                 ) : (
                                     filteredConversations.map((conversation) => (
                                         <button
                                             key={conversation.id}
                                             onClick={() => handleSelectConversation(conversation)}
-                                            className="w-full p-3 hover:bg-gray-50 border-b border-gray-100 transition text-left"
+                                            className="w-full p-2.5 hover:bg-gray-50 border-b border-gray-50 transition-colors text-left group"
                                         >
-                                            <div className="flex items-start gap-3">
-                                                <div className="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-[#0b6459] to-[#0d7a6c] rounded-full flex items-center justify-center text-white shadow-sm">
                                                     {getConversationIcon(conversation.type)}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <h4 className="font-semibold text-sm text-gray-800 truncate">
+                                                    <div className="flex items-center justify-between mb-0.5">
+                                                        <h4 className="font-medium text-xs text-gray-800 truncate group-hover:text-[#0b6459] transition-colors">
                                                             {conversation.name}
                                                         </h4>
                                                         {conversation.lastMessageTime && (
-                                                            <span className="text-xs text-gray-400">
+                                                            <span className="text-[10px] text-gray-400 ml-2 flex-shrink-0">
                                                                 {formatTime(conversation.lastMessageTime)}
                                                             </span>
                                                         )}
                                                     </div>
                                                     <div className="flex items-center justify-between">
-                                                        <p className="text-xs text-gray-500 truncate">
-                                                            {conversation.lastMessage || 'No messages yet'}
+                                                        <p className="text-[10px] text-gray-500 truncate">
+                                                            {conversation.lastMessage || 'Chưa có tin nhắn'}
                                                         </p>
                                                         {conversation.unreadCount > 0 && (
-                                                            <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 ml-2">
+                                                            <span className="bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center ml-2 flex-shrink-0 font-medium">
                                                                 {conversation.unreadCount}
                                                             </span>
                                                         )}
@@ -525,12 +643,31 @@ const ChatWidget: React.FC = () => {
                     {!showConversationList && selectedConversation && (
                         <>
                             {/* Messages Area */}
-                            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-3">
-                                {messages.length === 0 ? (
+                            <div
+                                ref={messagesContainerRef}
+                                onScroll={handleScroll}
+                                className="relative flex-1 overflow-y-auto p-3 bg-gradient-to-b from-gray-50 to-white space-y-2"
+                            >
+                                {/* Loading Overlay */}
+                                {isInitialLoading && (
+                                    <div className="absolute inset-0 bg-white z-10 flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#0b6459] border-t-transparent"></div>
+                                    </div>
+                                )}
+
+                                {isFetchingMore && !isInitialLoading && (
+                                    <div className="flex justify-center py-2">
+                                        <div className="w-5 h-5 border-2 border-[#0b6459] border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+
+                                {!isInitialLoading && messages.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-center">
-                                        <BsChatDotsFill className="w-12 h-12 text-gray-300 mb-3" />
-                                        <p className="text-gray-500 text-sm">No messages yet</p>
-                                        <p className="text-gray-400 text-xs mt-1">Start the conversation!</p>
+                                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                            <BsChatDotsFill className="w-6 h-6 text-gray-400" />
+                                        </div>
+                                        <p className="text-gray-600 text-xs font-medium">Chưa có tin nhắn</p>
+                                        <p className="text-gray-400 text-[10px] mt-1">Bắt đầu cuộc trò chuyện!</p>
                                     </div>
                                 ) : (
                                     <>
@@ -540,22 +677,20 @@ const ChatWidget: React.FC = () => {
                                                 className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
                                             >
                                                 <div
-                                                    className={`max-w-[75%] rounded-lg px-3 py-2 ${
-                                                        message.isOwn
-                                                            ? 'bg-[#0b6459] text-white'
-                                                            : 'bg-white border border-gray-200 text-gray-800'
-                                                    }`}
+                                                    className={`max-w-[80%] rounded-2xl px-3 py-2 shadow-sm ${message.isOwn
+                                                        ? 'bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white rounded-br-sm'
+                                                        : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'
+                                                        }`}
                                                 >
                                                     {!message.isOwn && (
-                                                        <p className="text-xs font-semibold mb-1 text-gray-600">
+                                                        <p className="text-[10px] font-semibold mb-0.5 text-[#0b6459]">
                                                             {message.senderName}
                                                         </p>
                                                     )}
-                                                    <p className="text-sm">{message.content}</p>
+                                                    <p className="text-xs leading-relaxed">{message.content}</p>
                                                     <p
-                                                        className={`text-xs mt-1 ${
-                                                            message.isOwn ? 'text-white/70' : 'text-gray-400'
-                                                        }`}
+                                                        className={`text-[9px] mt-1 ${message.isOwn ? 'text-white/70' : 'text-gray-400'
+                                                            }`}
                                                     >
                                                         {formatTime(message.timestamp)}
                                                     </p>
@@ -563,12 +698,16 @@ const ChatWidget: React.FC = () => {
                                             </div>
                                         ))}
                                         <div ref={messagesEndRef} />
-                                        
+
                                         {/* Typing Indicator */}
                                         {typingUsers.size > 0 && (
                                             <div className="flex justify-start">
-                                                <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-500 text-sm">
-                                                    <span className="italic">Someone is typing...</span>
+                                                <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm px-3 py-2 shadow-sm">
+                                                    <div className="flex items-center gap-1">
+                                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                                        <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
@@ -577,22 +716,80 @@ const ChatWidget: React.FC = () => {
                             </div>
 
                             {/* Input Area */}
-                            <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-200 bg-white rounded-b-lg">
+                            <form onSubmit={handleSendMessage} className="p-2.5 border-t border-gray-100 bg-white relative">
                                 <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        value={inputMessage}
-                                        onChange={handleInputChange}
-                                        placeholder="Type a message..."
-                                        className="flex-1 bg-gray-100 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent"
-                                    />
+                                    <div className="relative file-dropdown-container">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowFileDropdown(!showFileDropdown)}
+                                            className="text-gray-400 hover:text-[#0b6459] transition-colors p-1"
+                                            aria-label="Send file"
+                                        >
+                                            <HiPaperClip className="w-4 h-4" />
+                                        </button>
+
+                                        {/* File Type Dropdown */}
+                                        {showFileDropdown && (
+                                            <div className="absolute bottom-full left-0 mb-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
+                                                <button
+                                                    type="button"
+                                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    onClick={() => {
+                                                        // Handle image selection
+                                                        setShowFileDropdown(false);
+                                                    }}
+                                                >
+                                                    <HiPhotograph className="w-4 h-4 text-blue-500" />
+                                                    <span>Ảnh</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    onClick={() => {
+                                                        // Handle video selection
+                                                        setShowFileDropdown(false);
+                                                    }}
+                                                >
+                                                    <HiVideoCamera className="w-4 h-4 text-red-500" />
+                                                    <span>Video</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    onClick={() => {
+                                                        // Handle document selection
+                                                        setShowFileDropdown(false);
+                                                    }}
+                                                >
+                                                    <HiDocument className="w-4 h-4 text-green-500" />
+                                                    <span>Tài liệu</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 relative">
+                                        <input
+                                            type="text"
+                                            value={inputMessage}
+                                            onChange={handleInputChange}
+                                            placeholder="Nhập tin nhắn..."
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-full px-3 py-2 pr-8 text-xs focus:outline-none focus:ring-2 focus:ring-[#0b6459]/20 focus:border-[#0b6459] transition-all placeholder:text-gray-400"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#0b6459] transition-colors"
+                                            aria-label="Send emoji"
+                                        >
+                                            <HiEmojiHappy className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                     <button
                                         type="submit"
                                         disabled={!inputMessage.trim()}
-                                        className="bg-[#0b6459] text-white rounded-full p-2 hover:bg-[#084c43] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white rounded-full p-2 hover:shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
                                         aria-label="Send message"
                                     >
-                                        <HiPaperAirplane className="w-5 h-5" />
+                                        <HiPaperAirplane className="w-4 h-4" />
                                     </button>
                                 </div>
                             </form>

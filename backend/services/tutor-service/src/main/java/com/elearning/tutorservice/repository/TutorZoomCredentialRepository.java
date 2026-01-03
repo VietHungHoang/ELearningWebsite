@@ -1,6 +1,6 @@
-package com.elearning.classservice.repository;
+package com.elearning.tutorservice.repository;
 
-import com.elearning.classservice.entity.TutorZoomCredential;
+import com.elearning.tutorservice.entity.TutorZoomCredential;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

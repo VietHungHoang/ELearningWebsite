@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { HiGlobe } from 'react-icons/hi';
 
 interface AccountSettingsContentProps {
     onSave: () => void;
+    timezone?: string | null;
+    zoomConnected?: boolean;
 }
 
 // Fix: Changed the type of the `subtitle` prop from `string` to `React.ReactNode` to allow passing JSX elements.
@@ -32,16 +33,16 @@ const ActionRow: React.FC<{ buttonText: string; onSave: () => void }> = ({ butto
     );
 };
 
-const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave }) => {
+const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave, timezone, zoomConnected }) => {
     const { t } = useTranslation();
-    const inputStyles = "w-full bg-gray-100 border border-gray-200 rounded-lg px-4 py-2.5 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:border-[#0b6459] transition";
+    // Match input styles with PersonalDetailsContent - white background, no hover bg effect
+    const inputStyles = "w-full bg-white border border-gray-200 rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-400 placeholder:font-thin hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out";
+
+    // Default timezone if not provided
+    const selectedTimezone = timezone || 'Pacific/Tongatapu';
 
     return (
         <div className="space-y-8">
-            <div>
-                <h2 className="text-2xl font-bold text-gray-800">{t('dashboard.tutor.accountSettings.title')}</h2>
-                <p className="text-sm text-gray-500 mt-1">{t('dashboard.tutor.accountSettings.description')}</p>
-            </div>
 
             {/* Change Password */}
             <FormSection title={t('dashboard.tutor.accountSettings.changePassword.title')} subtitle={t('dashboard.tutor.accountSettings.changePassword.subtitle')}>
@@ -58,7 +59,7 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                             <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-gray-700">
                                 {t('dashboard.tutor.accountSettings.changePassword.newPassword')} <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -67,8 +68,8 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
                                 className={`mt-1 ${inputStyles}`}
                             />
                         </div>
-                       <div>
-                             <label className="block text-sm font-medium text-gray-700">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
                                 {t('dashboard.tutor.accountSettings.changePassword.retypePassword')} <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -76,7 +77,7 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
                                 placeholder={t('dashboard.tutor.accountSettings.changePassword.retypePasswordPlaceholder')}
                                 className={`mt-1 ${inputStyles}`}
                             />
-                       </div>
+                        </div>
                     </div>
                 </div>
                 <ActionRow buttonText={t('dashboard.tutor.accountSettings.changePassword.updatePassword')} onSave={onSave} />
@@ -84,10 +85,10 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
 
             {/* Update Time Zone */}
             <FormSection title={t('dashboard.tutor.accountSettings.timeZone.title')} subtitle={t('dashboard.tutor.accountSettings.timeZone.subtitle')}>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                     <label className="block text-sm font-medium text-gray-700">
                         {t('dashboard.tutor.accountSettings.timeZone.timeZone')} <span className="text-red-500">*</span>
-                        <select defaultValue="Pacific/Tongatapu" className={`mt-1 ${inputStyles}`}>
+                        <select defaultValue={selectedTimezone} className={`mt-1 ${inputStyles}`}>
                             <option>Pacific/Tongatapu</option>
                             <option>(GMT+07:00) Asia/Ho_Chi_Minh</option>
                         </select>
@@ -96,36 +97,20 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
                 <ActionRow buttonText={t('dashboard.tutor.accountSettings.timeZone.saveAndUpdate')} onSave={onSave} />
             </FormSection>
 
-            {/* Link Google Calendar */}
-            <FormSection title={t('dashboard.tutor.accountSettings.googleCalendar.title')} subtitle={t('dashboard.tutor.accountSettings.googleCalendar.subtitle')}>
-                <div className="flex items-center justify-between gap-4 p-2 border border-gray-200 rounded-lg">
-                    <span className="pl-2 text-sm text-gray-500">{t('dashboard.tutor.accountSettings.googleCalendar.noCalendarLinked')}</span>
-                    <button className="flex items-center gap-2 bg-white border border-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg text-sm hover:bg-gray-50 transition-colors">
-                        <HiGlobe className="w-4 h-4" />
-                        {t('dashboard.tutor.accountSettings.googleCalendar.connect')}
-                    </button>
-                </div>
-            </FormSection>
-
-            {/* Link Zoom Account */}
+            {/* Link Zoom Account - Only 1 button */}
             <FormSection title={t('dashboard.tutor.accountSettings.zoom.title')} subtitle={
                 <>{t('dashboard.tutor.accountSettings.zoom.subtitle')} <a href="#" className="font-semibold text-[#0b6459] underline">{t('dashboard.tutor.accountSettings.zoom.steps')}</a> {t('dashboard.tutor.accountSettings.zoom.toCreate')}</>
             } hideBorder>
-                 <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                        <label htmlFor="zoom-id" className="text-sm font-medium text-gray-700">{t('dashboard.tutor.accountSettings.zoom.zoomAccountId')} <span className="text-red-500">*</span></label>
-                        <input id="zoom-id" type="text" placeholder={t('dashboard.tutor.accountSettings.zoom.zoomAccountIdPlaceholder')} className={`sm:col-span-2 ${inputStyles}`} />
-                    </div>
-                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                        <label htmlFor="zoom-client-id" className="text-sm font-medium text-gray-700">{t('dashboard.tutor.accountSettings.zoom.zoomClientId')} <span className="text-red-500">*</span></label>
-                        <input id="zoom-client-id" type="text" placeholder={t('dashboard.tutor.accountSettings.zoom.zoomClientIdPlaceholder')} className={`sm:col-span-2 ${inputStyles}`} />
-                    </div>
-                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                        <label htmlFor="zoom-secret" className="text-sm font-medium text-gray-700">{t('dashboard.tutor.accountSettings.zoom.zoomClientSecret')} <span className="text-red-500">*</span></label>
-                        <input id="zoom-secret" type="password" placeholder={t('dashboard.tutor.accountSettings.zoom.zoomClientSecretPlaceholder')} className={`sm:col-span-2 ${inputStyles}`} />
-                    </div>
-                </div>
-                <ActionRow buttonText={t('dashboard.tutor.accountSettings.zoom.saveAndUpdate')} onSave={onSave} />
+                <button
+                    onClick={onSave}
+                    disabled={zoomConnected}
+                    className={`flex items-center gap-2 font-semibold py-2.5 px-5 rounded-lg text-sm transition-colors ${zoomConnected
+                            ? 'bg-green-100 text-green-700 cursor-default'
+                            : 'bg-[#0b6459] text-white hover:bg-[#084c43]'
+                        }`}
+                >
+                    {zoomConnected ? '✓ Đã liên kết Zoom' : 'Liên kết Zoom'}
+                </button>
             </FormSection>
         </div>
     );

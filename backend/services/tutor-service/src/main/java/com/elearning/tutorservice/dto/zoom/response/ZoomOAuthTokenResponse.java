@@ -1,4 +1,4 @@
-package com.elearning.classservice.dto.zoom.response;
+package com.elearning.tutorservice.dto.zoom.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -90,7 +90,7 @@ export class TotalStudentsService {
                 const options = {
                     series: [
                         {
-                            name: "Học viên mới",
+                            name: "học viên mới",
                             data: data.dailyData.map(d => d.count)
                         }
                     ],
@@ -153,13 +153,13 @@ export class TotalStudentsService {
                     },
                     tooltip: {
                         x: {
-                            formatter: function(val: any, opts: any) {
+                            formatter: function (val: any, opts: any) {
                                 const date = new Date(data.dailyData[opts.dataPointIndex]?.date);
                                 return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
                             }
                         },
                         y: {
-                            formatter: function(val: any) {
+                            formatter: function (val: any) {
                                 return val + " học viên";
                             }
                         }

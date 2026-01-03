@@ -71,7 +71,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
         currentSessionFee: 0,
     });
 
-    const [originalData, setOriginalData] = useState<typeof formData | null>(null);0
+    const [originalData, setOriginalData] = useState<typeof formData | null>(null); 0
 
     // State for dropdown options from API
     const [countryOptions, setCountryOptions] = useState<Country[]>([]);
@@ -349,25 +349,6 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                 </div>
                                 <span className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.female')}</span>
                             </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="Not specified"
-                                    checked={formData.gender === "Not specified"}
-                                    onChange={(e) =>
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            gender: e.target.value as "Male" | "Female" | "Not specified",
-                                        }))
-                                    }
-                                    className="sr-only"
-                                />
-                                <div className={`w-5 h-5 ${formData.gender === "Not specified" ? "border-4 border-[#0b6459]" : "border-2 border-gray-300"} rounded-full flex items-center justify-center transition-all`}>
-                                    <div className={`w-3 h-3 bg-white rounded-full ${formData.gender === "Not specified" ? "block" : "hidden"}`}></div>
-                                </div>
-                                <span className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.notSpecified')}</span>
-                            </label>
                         </div>
                     </div>
                 </div>
@@ -422,7 +403,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                     <div className="flex-1 pl-4">
                         <CustomDropdownDashboard
                             options={countries.map(country => country.name)}
-                            selectedValue={formData.country?.name || ""}
+                            selectedValue={formData.country?.name || t('dashboard.tutor.personalDetails.countryPlaceholder')}
                             placeholder={t('dashboard.tutor.personalDetails.countryPlaceholder')}
                             onSelect={(value: string) => {
                                 const selectedCountry = countries.find(c => c.name === value);
@@ -447,7 +428,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                     <div className="flex-1 pl-4">
                         <CustomDropdownDashboard
                             options={allLanguages.map(lang => lang.name)}
-                            selectedValue={formData.nativeLanguage?.name || ""}
+                            selectedValue={formData.nativeLanguage?.name || t('dashboard.tutor.personalDetails.nativeLanguagePlaceholder')}
                             placeholder={t('dashboard.tutor.personalDetails.nativeLanguagePlaceholder')}
                             onSelect={(value: string) => {
                                 const selectedLang = allLanguages.find(l => l.name === value);
@@ -474,11 +455,11 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                             <label className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.languagesKnown')} <span className="text-red-500">*</span></label>
                         </div>
                         <div className="flex-1 pl-4">
-                            <CustomDropdownDashboardDashboard
+                            <CustomDropdownDashboard
                                 options={allLanguages
                                     .filter(lang => lang.code !== formData.nativeLanguage?.code && !formData.languages.some(l => l.code === lang.code))
                                     .map(lang => lang.name)}
-                                selectedValue=""
+                                selectedValue={t('dashboard.tutor.personalDetails.addLanguage')}
                                 placeholder={t('dashboard.tutor.personalDetails.addLanguage')}
                                 onSelect={(value: string) => {
                                     const selectedLang = allLanguages.find(l => l.name === value);
@@ -564,7 +545,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                         </button>
                                     </div>
                                 ) : (
-                                    <div 
+                                    <div
                                         className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#0b6459] transition-colors bg-gray-50 hover:bg-gray-100/50 cursor-pointer"
                                         onClick={() => document.getElementById('profile-photo-input')?.click()}
                                     >
@@ -623,7 +604,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                         </button>
                                     </div>
                                 ) : (
-                                    <div 
+                                    <div
                                         className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-[#0b6459] transition-colors bg-gray-50 hover:bg-gray-100/50 cursor-pointer"
                                         onClick={() => document.getElementById('video-input')?.click()}
                                     >
@@ -673,7 +654,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                     setFormData((prev) => {
                                         const existingLinks = prev.socialLinks || [];
                                         const facebookIndex = existingLinks.findIndex(link => link.platform === 'facebook');
-                                        
+
                                         if (facebookIndex >= 0) {
                                             // Update existing Facebook link
                                             const updatedLinks = [...existingLinks];
@@ -681,9 +662,9 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                             return { ...prev, socialLinks: updatedLinks };
                                         } else if (url.trim()) {
                                             // Add new Facebook link
-                                            return { 
-                                                ...prev, 
-                                                socialLinks: [...existingLinks, { platform: 'facebook', url, id: `facebook-${Date.now()}` }] 
+                                            return {
+                                                ...prev,
+                                                socialLinks: [...existingLinks, { platform: 'facebook', url, id: `facebook-${Date.now()}` }]
                                             };
                                         }
                                         return prev;
@@ -709,7 +690,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                     setFormData((prev) => {
                                         const existingLinks = prev.socialLinks || [];
                                         const instagramIndex = existingLinks.findIndex(link => link.platform === 'instagram');
-                                        
+
                                         if (instagramIndex >= 0) {
                                             // Update existing Instagram link
                                             const updatedLinks = [...existingLinks];
@@ -717,9 +698,9 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                             return { ...prev, socialLinks: updatedLinks };
                                         } else if (url.trim()) {
                                             // Add new Instagram link
-                                            return { 
-                                                ...prev, 
-                                                socialLinks: [...existingLinks, { platform: 'instagram', url, id: `instagram-${Date.now()}` }] 
+                                            return {
+                                                ...prev,
+                                                socialLinks: [...existingLinks, { platform: 'instagram', url, id: `instagram-${Date.now()}` }]
                                             };
                                         }
                                         return prev;
@@ -745,7 +726,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                     setFormData((prev) => {
                                         const existingLinks = prev.socialLinks || [];
                                         const linkedinIndex = existingLinks.findIndex(link => link.platform === 'linkedin');
-                                        
+
                                         if (linkedinIndex >= 0) {
                                             // Update existing LinkedIn link
                                             const updatedLinks = [...existingLinks];
@@ -753,9 +734,9 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                             return { ...prev, socialLinks: updatedLinks };
                                         } else if (url.trim()) {
                                             // Add new LinkedIn link
-                                            return { 
-                                                ...prev, 
-                                                socialLinks: [...existingLinks, { platform: 'linkedin', url, id: `linkedin-${Date.now()}` }] 
+                                            return {
+                                                ...prev,
+                                                socialLinks: [...existingLinks, { platform: 'linkedin', url, id: `linkedin-${Date.now()}` }]
                                             };
                                         }
                                         return prev;
@@ -781,7 +762,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                     setFormData((prev) => {
                                         const existingLinks = prev.socialLinks || [];
                                         const twitterIndex = existingLinks.findIndex(link => link.platform === 'twitter');
-                                        
+
                                         if (twitterIndex >= 0) {
                                             // Update existing Twitter link
                                             const updatedLinks = [...existingLinks];
@@ -789,9 +770,9 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                             return { ...prev, socialLinks: updatedLinks };
                                         } else if (url.trim()) {
                                             // Add new Twitter link
-                                            return { 
-                                                ...prev, 
-                                                socialLinks: [...existingLinks, { platform: 'twitter', url, id: `twitter-${Date.now()}` }] 
+                                            return {
+                                                ...prev,
+                                                socialLinks: [...existingLinks, { platform: 'twitter', url, id: `twitter-${Date.now()}` }]
                                             };
                                         }
                                         return prev;

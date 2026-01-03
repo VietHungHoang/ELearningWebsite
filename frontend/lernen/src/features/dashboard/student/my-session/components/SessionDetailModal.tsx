@@ -9,10 +9,12 @@ interface SessionDetailModalProps {
   position: { top: number; left: number };
   onClose: () => void;
   isAbove?: boolean; // Modal hiển thị phía trên trigger element
+  onReschedule?: () => void; // Callback khi click vào button đổi lịch
 }
 
-const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, position, onClose, isAbove = false }) => {
-    const { t } = useTranslation();
+const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, position, onClose, isAbove = false, onReschedule }) => {
+    const { t, i18n } = useTranslation();
+    const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
     const modalRef = useRef<HTMLDivElement>(null);
     const [isLeft, setIsLeft] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -42,11 +44,11 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
 
     // Convert UTC datetime from backend to local timezone
     const localSessionDate = commonUtils.convertUTCToLocalDate(booking.sessionDatetime);
-    const formattedDate = localSessionDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    const startTime = localSessionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const formattedDate = localSessionDate.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const startTime = localSessionDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true });
     // Assuming 1 hour duration for now, as it's not provided in Session type
     const endDate = new Date(localSessionDate.getTime() + 60 * 60 * 1000);
-    const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const endTime = endDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true });
     const formattedTime = `${startTime} - ${endTime}`;
 
     return (
@@ -63,7 +65,12 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h3 className="font-bold text-lg text-gray-800">{booking.classInfo?.title || 'Session'}</h3>
+                    <h3 className="font-bold text-lg text-gray-800">
+                        {booking.sessionType === 'TRIAL' 
+                            ? t('dashboard.common.sessionTypes.trial') 
+                            : (booking.classInfo?.title || 'Session')
+                        }
+                    </h3>
                     <p className="text-sm text-gray-500">{formattedDate}</p>
                 </div>
                 <button onClick={onClose} className="p-1 -mr-2 -mt-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
@@ -87,7 +94,14 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
                     <FiVideo />
                     {t('profile.session.joinClass')}
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+                <button 
+                    onClick={() => {
+                        if (onReschedule) {
+                            onReschedule();
+                        }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                >
                     <FiCalendar />
                     {t('profile.session.reschedule')}
                 </button>

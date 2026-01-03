@@ -226,7 +226,7 @@ export class ReviewService {
 
         if (filters) {
             params.type = filters.type;
-            
+
             if (filters.type === 'flagged') {
                 if (filters.flagReason && filters.flagReason !== 'all') {
                     params.flagReason = filters.flagReason;
@@ -245,7 +245,7 @@ export class ReviewService {
         }
 
         console.log('[ReviewService] getReviews called:', { page, size, filters, params });
-        
+
         return this.apiService.get<PaginatedResponse<Review>>('/reviews', params).pipe(
             map(response => {
                 console.log('[ReviewService] API response:', response);
@@ -293,7 +293,7 @@ export class ReviewService {
     private getMockPaginatedResponse(page: number, size: number, filters?: ReviewFilters): PaginatedResponse<Review> {
         console.log('[ReviewService] getMockPaginatedResponse called:', { page, size, filters });
         console.log('[ReviewService] Mock reviews before filter:', this.mockReviews.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged })));
-        
+
         let filtered = [...this.mockReviews];
 
         // Apply filters
@@ -330,7 +330,7 @@ export class ReviewService {
                 }
             }
         }
-        
+
         console.log('[ReviewService] Filtered reviews after all filters:', filtered.length, filtered.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged })));
 
         // Paginate
@@ -457,7 +457,7 @@ export class ReviewService {
 
         console.log('[ReviewService] Hiding review:', id, reason ? `Reason: ${reason}` : '');
         const body = reason ? { reason } : {};
-        
+
         return this.apiService.patch<boolean>(`/reviews/${id}/hide`, body).pipe(
             map(response => {
                 if (response.success) {

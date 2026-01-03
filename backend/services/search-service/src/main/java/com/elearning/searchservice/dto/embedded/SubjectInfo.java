@@ -19,8 +19,7 @@ public class SubjectInfo {
     private UUID id;
     private UUID categoryId;
     
-    // Multi-language names
+    // Multi-language names (Vi, En only - matching common-service)
     private String nameVi;
     private String nameEn;
-    private String nameJa;
 }

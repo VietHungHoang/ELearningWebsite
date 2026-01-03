@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HiAcademicCap, HiLocationMarker, HiPencil, HiTrash, HiPlus, HiOutlineAcademicCap, HiOutlineBriefcase, HiOutlineStar } from 'react-icons/hi';
-import ConfirmationModal from '../../components/ConfirmationModal';
 import ResumeItemModal from '../../components/profile-setting/ResumeItemModal';
 import type { CertificationItem, EducationItem, ExperienceItem } from '../../../../../types/tutor';
 import { useTutorProfile } from '../../../../../hooks/useTutorProfile';
@@ -8,6 +8,65 @@ import { useTutorProfile } from '../../../../../hooks/useTutorProfile';
 // --- TYPE DEFINITIONS ---
 export type ResumeItemData = EducationItem | ExperienceItem | CertificationItem;
 export type Tab = 'Education' | 'Experience' | 'Certification & Awards';
+
+// --- DELETE CONFIRM POPUP COMPONENT (from TutorOnboarding) ---
+interface DeleteConfirmPopupProps {
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const DeleteConfirmPopup: React.FC<DeleteConfirmPopupProps> = ({ onConfirm, onCancel }) => {
+    const { t } = useTranslation();
+    const popupRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+                onCancel();
+            }
+        };
+
+        const timer = setTimeout(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [onCancel]);
+
+    return (
+        <div
+            ref={popupRef}
+            className="absolute right-0 top-full mt-1 z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 min-w-[200px]"
+        >
+            <p className="text-sm text-gray-700 mb-3">{t('onboarding.educationExperience.confirmDelete')}</p>
+            <div className="flex gap-2 justify-end">
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onCancel();
+                    }}
+                    className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition"
+                >
+                    {t('onboarding.educationExperience.modal.cancel')}
+                </button>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onConfirm();
+                    }}
+                    className="px-2 py-1 text-xs text-white bg-red-600 rounded hover:bg-red-700 transition"
+                >
+                    {t('onboarding.educationExperience.delete')}
+                </button>
+            </div>
+        </div>
+    );
+};
 
 // --- RESUME NAVIGATION COMPONENT ---
 interface ResumeNavProps {
@@ -23,13 +82,11 @@ const ResumeNavItem: React.FC<{
 }> = ({ label, icon, activeTab, onClick }) => (
     <button
         onClick={onClick}
-        className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${
-            activeTab === label ? "bg-[#045A46] text-white shadow-md" : "hover:bg-gray-100 text-gray-600"
-        }`}
+        className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 ${activeTab === label ? "bg-[#045A46] text-white shadow-md" : "hover:bg-gray-100 text-gray-600"
+            }`}
     >
-        <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center ${
-            activeTab === label ? "text-white" : "text-gray-500"
-        }`}>
+        <div className={`w-5 h-5 flex-shrink-0 flex items-center justify-center ${activeTab === label ? "text-white" : "text-gray-500"
+            }`}>
             {icon}
         </div>
         <p className={`font-medium text-sm ${activeTab === label ? "text-white" : "text-gray-800"}`}>{label}</p>
@@ -84,9 +141,10 @@ const getItemInstitution = (item: ResumeItemData): string => {
     return 'issuingOrganization' in item ? item.issuingOrganization : item.institution;
 };
 
-// --- RESUME ITEM COMPONENT ---
+// --- RESUME ITEM COMPONENT (with inline delete popup) ---
 const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete: () => void; }> = ({ item, onEdit, onDelete }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const description = ('description' in item ? item.description : undefined) || '';
     const canTruncate = description.length > 100;
     const truncatedDescription = `${description.substring(0, 100)}...`;
@@ -98,6 +156,20 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
     const title = getItemTitle(item);
     const institution = getItemInstitution(item);
     const location = ('location' in item ? item.location : undefined) || 'N/A';
+
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowDeleteConfirm(true);
+    };
+
+    const handleConfirmDelete = () => {
+        setShowDeleteConfirm(false);
+        onDelete();
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteConfirm(false);
+    };
 
     return (
         <div className="flex gap-6 group relative">
@@ -124,9 +196,27 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
                     </>
                 )}
             </div>
-            <div className="absolute top-0 right-0 flex items-center gap-2">
-                <button onClick={onEdit} className="p-1.5 text-gray-500 hover:text-blue-600 rounded-md hover:bg-blue-100"><HiPencil className="w-4 h-4" /></button>
-                <button onClick={onDelete} className="p-1.5 text-gray-500 hover:text-red-600 rounded-md hover:bg-red-100"><HiTrash className="w-4 h-4" /></button>
+            <div className="absolute top-0 right-0 flex items-center gap-1">
+                <button
+                    onClick={onEdit}
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
+                >
+                    <HiPencil className="w-4 h-4" />
+                </button>
+                <div className="relative">
+                    <button
+                        onClick={handleDeleteClick}
+                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                    >
+                        <HiTrash className="w-4 h-4" />
+                    </button>
+                    {showDeleteConfirm && (
+                        <DeleteConfirmPopup
+                            onConfirm={handleConfirmDelete}
+                            onCancel={handleCancelDelete}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -136,7 +226,7 @@ const ResumeItem: React.FC<{ item: ResumeItemData; onEdit: () => void; onDelete:
 interface ResumeHighlightsContentProps {
 }
 
-const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({}) => {
+const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({ }) => {
     const { profile, loading, updateResume } = useTutorProfile();
     const [activeTab, setActiveTab] = useState<Tab>('Education');
 
@@ -157,8 +247,6 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({}) => 
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<ResumeItemData | null>(null);
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<ResumeItemData | null>(null);
 
     const dataMap: {
         [K in Tab]: {
@@ -206,13 +294,7 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({}) => 
         setIsModalOpen(false);
     };
 
-    const handleDeleteRequest = (item: ResumeItemData) => {
-        setItemToDelete(item);
-        setIsConfirmModalOpen(true);
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (!itemToDelete) return;
+    const handleDeleteItem = async (itemToDelete: ResumeItemData) => {
         const { items, setItems } = dataMap[activeTab];
         const updatedItems = items.filter((item: ResumeItemData) => item.id !== itemToDelete.id);
         setItems(updatedItems);
@@ -227,9 +309,6 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({}) => 
         } catch (err) {
             console.error('Failed to delete resume item', err);
         }
-
-        setIsConfirmModalOpen(false);
-        setItemToDelete(null);
     };
 
     const renderContent = () => {
@@ -241,7 +320,7 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({}) => 
                         key={item.id}
                         item={item}
                         onEdit={() => handleOpenModal(item)}
-                        onDelete={() => handleDeleteRequest(item)}
+                        onDelete={() => handleDeleteItem(item)}
                     />
                 )}
             </div>
@@ -271,13 +350,6 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({}) => 
                 onSave={handleSaveItem}
                 itemToEdit={editingItem}
                 sectionTitle={activeTab}
-            />
-            <ConfirmationModal
-                isOpen={isConfirmModalOpen}
-                onClose={() => setIsConfirmModalOpen(false)}
-                onConfirm={handleDeleteConfirm}
-                title={`Delete ${activeTab} Entry`}
-                message={`Are you sure you want to delete this entry? This action cannot be undone.`}
             />
 
             <div className="flex gap-8">

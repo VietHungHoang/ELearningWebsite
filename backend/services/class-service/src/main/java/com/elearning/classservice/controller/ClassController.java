@@ -2,15 +2,19 @@ package com.elearning.classservice.controller;
 
 import com.elearning.classservice.dto.request.CreateClassRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
+import com.elearning.classservice.dto.request.UpdateClassRequest;
 import com.elearning.classservice.dto.response.ApiResponse;
+import com.elearning.classservice.dto.response.ClassDetailResponse;
 import com.elearning.classservice.dto.response.ClassTableItem;
 import com.elearning.classservice.dto.response.CreateClassBookingResponse;
+import com.elearning.classservice.dto.response.OpeningClassResponse;
 import com.elearning.classservice.service.ClassService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +23,20 @@ import java.util.UUID;
 public class ClassController {
 
     private final ClassService classService;
+
+    /**
+     * GET /api/v1/classes/tutors/{tutorId}/opening
+     * <p>
+     * Get all opening classes available for enrollment by specific tutor
+     * @param tutorId Tutor ID from path variable
+     * @return List of all opening classes for the tutor
+     */
+    @GetMapping("/tutors/{tutorId}/opening")
+    public ResponseEntity<ApiResponse<List<OpeningClassResponse>>> getOpeningClasses(
+            @PathVariable UUID tutorId) {
+        List<OpeningClassResponse> openingClasses = classService.getOpeningClasses(tutorId);
+        return ResponseEntity.ok(ApiResponse.success(openingClasses, "Opening classes retrieved successfully"));
+    }
 
     /**
      * GET /api/v1/classes/tutors/me?status={status}&page=0&size=10
@@ -87,5 +105,91 @@ public class ClassController {
             @RequestBody CreateClassBookingRequest request) {
         CreateClassBookingResponse response = classService.createClassBooking(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Class booking created successfully"));
+    }
+
+    /**
+     * GET /api/v1/classes/{classId}
+     * <p>
+     * Get class detail by classId for current tutor
+     * @param tutorId Tutor ID from header
+     * @param classId Class ID from path
+     * @return ClassDetailResponse with full class information
+     */
+    @GetMapping("/{classId}")
+    public ResponseEntity<ApiResponse<ClassDetailResponse>> getClassDetail(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @PathVariable UUID classId) {
+        ClassDetailResponse classDetail = classService.getClassDetail(classId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(classDetail, "Class detail retrieved successfully"));
+    }
+
+    /**
+     * PUT /api/v1/classes/{classId}
+     * <p>
+     * Update class information
+     * @param tutorId Tutor ID from header
+     * @param classId Class ID from path
+     * @param request Update class request
+     */
+    @PutMapping("/{classId}")
+    public ResponseEntity<ApiResponse<Void>> updateClass(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @PathVariable UUID classId,
+            @RequestBody UpdateClassRequest request) {
+        classService.updateClass(classId, tutorId, request);
+        return ResponseEntity.ok(ApiResponse.success(null, "Class updated successfully"));
+    }
+
+    /**
+     * DELETE /api/v1/classes/{classId}
+     * <p>
+     * Delete class
+     * @param tutorId Tutor ID from header
+     * @param classId Class ID from path
+     */
+    @DeleteMapping("/{classId}")
+    public ResponseEntity<ApiResponse<Void>> deleteClass(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @PathVariable UUID classId) {
+        classService.deleteClass(classId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Class deleted successfully"));
+    }
+
+    /**
+     * POST /api/v1/classes/{classId}/students/{studentId}
+     * <p>
+     * Add a student to class
+     * For OPENING classes: no authorization needed (public enrollment)
+     * For other statuses: requires tutor authorization
+     * @param tutorId Tutor ID from header (optional for OPENING classes)
+     * @param classId Class ID from path
+     * @param studentId Student ID from path
+     */
+    @PostMapping("/{classId}/students/{studentId}")
+    public ResponseEntity<ApiResponse<Void>> addStudentToClass(
+            @RequestHeader(value = "X-User-Id", required = false) UUID tutorId,
+            @PathVariable UUID classId,
+            @PathVariable UUID studentId) {
+        classService.addStudentToClass(classId, studentId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Student added to class successfully"));
+    }
+
+    /**
+     * DELETE /api/v1/classes/{classId}/students/{studentId}
+     * <p>
+     * Remove a student from class
+     * For OPENING classes: no authorization needed (students can leave freely)
+     * For other statuses: requires tutor authorization
+     * @param tutorId Tutor ID from header (optional for OPENING classes)
+     * @param classId Class ID from path
+     * @param studentId Student ID from path
+     */
+    @DeleteMapping("/{classId}/students/{studentId}")
+    public ResponseEntity<ApiResponse<Void>> removeStudentFromClass(
+            @RequestHeader(value = "X-User-Id", required = false) UUID tutorId,
+            @PathVariable UUID classId,
+            @PathVariable UUID studentId) {
+        classService.removeStudentFromClass(classId, studentId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Student removed from class successfully"));
     }
 }

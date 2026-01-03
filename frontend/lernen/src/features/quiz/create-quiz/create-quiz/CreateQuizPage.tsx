@@ -6,9 +6,12 @@ import CustomDropdown2 from '../../../../components/ui/CustomDropdown2';
 import ConfirmModal from '../../../../components/ui/ConfirmModal';
 import Toast from '../../../../components/ui/Toast';
 import BirdLoading from '../../../../components/ui/BirdLoading';
+import AIGenerateQuestionsModal from './components/AIGenerateQuestionsModal';
 import { useTranslation } from 'react-i18next';
 import quizService from '../../../../services/quizService';
+import { classService } from '../../../../services/classService';
 import type { CreateQuizRequest, CreateQuestionRequest, UpdateQuizRequest } from '../../../../types/quiz';
+import type { ClassTable } from '../../../../types/class';
 
 interface QuizQuestion {
     id: string;
@@ -32,6 +35,10 @@ const CreateQuizPage: React.FC = () => {
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+    const [classes, setClasses] = useState<ClassTable[]>([]);
+    const [isLoadingClasses, setIsLoadingClasses] = useState(false);
     const lastQuestionRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +60,31 @@ const CreateQuizPage: React.FC = () => {
             selectedOptions: []
         }
     ]);
+
+    // Load classes for dropdown
+    useEffect(() => {
+        const fetchClasses = async () => {
+            setIsLoadingClasses(true);
+            try {
+                const response = await classService.getClassesForTutor({
+                    page: 0,
+                    size: 100 // Get all classes, adjust if needed
+                });
+                
+                if (response.success && response.data) {
+                    setClasses(response.data.content || []);
+                } else {
+                    console.error('Failed to fetch classes:', response.message);
+                }
+            } catch (error) {
+                console.error('Error fetching classes:', error);
+            } finally {
+                setIsLoadingClasses(false);
+            }
+        };
+
+        fetchClasses();
+    }, []);
 
     // Load quiz data when in edit mode
     useEffect(() => {
@@ -151,6 +183,32 @@ const CreateQuizPage: React.FC = () => {
         ));
     };
 
+    const handleAIGenerate = async (prompt: string) => {
+        setIsGeneratingAI(true);
+        try {
+            // TODO: Call AI API to generate questions
+            // For now, this is a placeholder - will be implemented when API is ready
+            console.log('Generating questions with prompt:', prompt);
+            
+            // Simulate API call - replace with actual API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Example: Add generated questions (this will be replaced with actual AI response)
+            // const generatedQuestions = await quizService.generateQuestionsWithAI(prompt);
+            // setQuestions([...questions, ...generatedQuestions]);
+            
+            setIsAIModalOpen(false);
+            setSuccessMessage(t('quiz.create.aiGenerate.success') || 'Câu hỏi đã được tạo thành công!');
+            // Clear success message after 3 seconds
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (error) {
+            console.error('Failed to generate questions:', error);
+            setError(t('quiz.create.aiGenerate.error') || 'Không thể tạo câu hỏi. Vui lòng thử lại.');
+        } finally {
+            setIsGeneratingAI(false);
+        }
+    };
+
     const handleOptionSelect = (questionId: string, optionIndex: number) => {
         setQuestions(prevQuestions =>
             prevQuestions.map(q => {
@@ -178,17 +236,12 @@ const CreateQuizPage: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [isPublishing, setIsPublishing] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    // Map class name to class ID (TODO: get from actual class list API)
-    const classIdMap: Record<string, string> = {
-        "Physics 101": "11111111-1111-1111-1111-111111111111",
-        "Advanced Mathematics": "22222222-2222-2222-2222-222222222222",
-        "Chemistry Basics": "33333333-3333-3333-3333-333333333333",
-    };
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     // Build CreateQuizRequest from form data
     const buildQuizRequest = (): CreateQuizRequest => {
-        const classId = classIdMap[selectedClass] || selectedClass;
+        // selectedClass is now the class ID directly
+        const classId = selectedClass;
 
         const quizQuestions: CreateQuestionRequest[] = questions.map((q) => ({
             questionText: q.question,
@@ -424,10 +477,18 @@ const CreateQuizPage: React.FC = () => {
                             <div>
                                 <CustomDropdown2
                                     label={<>{t('quiz.create.assignClass')} <span className="text-red-500">*</span></>}
-                                    options={["Physics 101", "Advanced Mathematics", "Chemistry Basics"]}
-                                    selectedValue={selectedClass}
-                                    placeholder={t('quiz.create.classPlaceholder')}
-                                    onSelect={(value: string) => setSelectedClass(value)}
+                                    options={isLoadingClasses ? [] : classes.map(cls => cls.title)}
+                                    selectedValue={classes.find(cls => cls.id === selectedClass)?.title || selectedClass}
+                                    placeholder={isLoadingClasses ? t('common.loading', { defaultValue: 'Đang tải...' }) : t('quiz.create.classPlaceholder')}
+                                    onSelect={(value: string) => {
+                                        // Find class by title and set its ID
+                                        const selectedClassObj = classes.find(cls => cls.title === value);
+                                        if (selectedClassObj) {
+                                            setSelectedClass(selectedClassObj.id);
+                                        } else {
+                                            setSelectedClass(value);
+                                        }
+                                    }}
                                     dropdownId="class-dropdown"
                                     openDropdown={openDropdown}
                                     setOpenDropdown={setOpenDropdown}
@@ -561,10 +622,19 @@ const CreateQuizPage: React.FC = () => {
 
                 {/* Questions Section */}
                 <div className="mb-6">
-                    <div className="mb-4">
+                    <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xl font-bold text-gray-800">
                             {t('quiz.create.questionsTitle', { count: questions.length })}
                         </h2>
+                        <button
+                            onClick={() => setIsAIModalOpen(true)}
+                            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-sm"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            {t('quiz.create.aiGenerate.button')}
+                        </button>
                     </div>
 
                     {/* Quiz Cards */}
@@ -611,12 +681,29 @@ const CreateQuizPage: React.FC = () => {
                     confirmButtonColor="red"
                 />
 
+                {/* AI Generate Questions Modal */}
+                <AIGenerateQuestionsModal
+                    isOpen={isAIModalOpen}
+                    onClose={() => setIsAIModalOpen(false)}
+                    onSubmit={handleAIGenerate}
+                    isGenerating={isGeneratingAI}
+                />
+
                 {/* Error Toast */}
                 {error && (
                     <Toast
                         message={error}
                         type="error"
                         onClose={() => setError(null)}
+                    />
+                )}
+
+                {/* Success Toast */}
+                {successMessage && (
+                    <Toast
+                        message={successMessage}
+                        type="success"
+                        onClose={() => setSuccessMessage(null)}
                     />
                 )}
             </div>
