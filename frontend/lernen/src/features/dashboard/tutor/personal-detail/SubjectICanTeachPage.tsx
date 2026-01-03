@@ -6,6 +6,7 @@ import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDas
 import commonUtils from '../../../../utils/commonUtils';
 import { useCurrency } from '../../../../context/CurrencyContext';
 import { CURRENCY_INFO } from '../../../../utils/currencyHelper';
+import { useProfileSettings } from './context/ProfileSettingsContext';
 import type { Category, Subject } from '../../../../types/common';
 
 const SubjectICanTeachPage: React.FC = () => {
@@ -18,9 +19,19 @@ const SubjectICanTeachPage: React.FC = () => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [tuitionFee, setTuitionFee] = useState<string>('');
 
+    // Get tutor data from shared context
+    const { tutorData } = useProfileSettings();
+
     // Fetch from commonUtils instead of local mock
     const [categories, setCategories] = useState<Category[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
+
+    // Initialize tuition fee from context when data loads
+    useEffect(() => {
+        if (tutorData?.currentSessionFee && !tuitionFee) {
+            setTuitionFee(tutorData.currentSessionFee.toString());
+        }
+    }, [tutorData?.currentSessionFee, tuitionFee]);
 
     useEffect(() => {
         const fetchCategories = async () => {

@@ -28,6 +28,7 @@ public class TutorRoutesConfig {
                                 prefix + "me/dashboard/stats",
                                 prefix + "me/earnings/**",
                                 "/api/v1/public/tutors/{tutorId}",
+                                "/api/v1/tutors/me/profile",
                                 "/api/v1/admin/tutors/approve/{tutorId}"
                                 )
                         .filters(f -> f

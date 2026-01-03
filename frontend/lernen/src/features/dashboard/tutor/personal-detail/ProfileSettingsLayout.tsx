@@ -6,8 +6,6 @@ import WriteWithAIModal from "../pages/components/WriteWithAIModal";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import { useAuth } from "../../../../context/AuthContext";
 import { classService } from "../../../../services/classService";
-import { useTutorDetail } from "../../../../hooks/useTutorDetail";
-import type { TutorDetail } from "../../../../types/tutor";
 
 type ProfileTab = "Personal Details" | "Resume Highlights" | "Account Settings" | "Subjects I Can Teach";
 
@@ -30,41 +28,7 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const { setBreadcrumb } = useBreadcrumb();
 
-    // Fetch tutor detail data
-    const { tutor, error: tutorError } = useTutorDetail();
-
-    // If there's an error fetching tutor data, use empty tutor detail object
-    const emptyTutorDetail: TutorDetail = {
-        id: "",
-        fullName: "",
-        avatarUrl: "",
-        email: "",
-        isVerified: false,
-        introduction: "",
-        headline: "",
-        gender: "Not specified",
-        timezone: "",
-        videoUrl: "",
-        currentSessionFee: 0,
-        originalSessionFee: undefined,
-        averageRating: 0,
-        reviewCount: 0,
-        bookedSessionsCount: 0,
-        studentCount: 0,
-        hasTrialSession: false,
-        country: { code: "", name: "", flag: "" },
-        languages: [],
-        subjects: [],
-        reviews: [],
-        availabilities: [],
-        socialLinks: [],
-        educations: [],
-        experiences: [],
-        certifications: [],
-        groupClasses: undefined,
-    };
-
-    const tutorData = tutorError ? emptyTutorDetail : tutor;
+    // Note: Tutor data is now provided by ProfileSettingsContext at the route level
 
     useEffect(() => {
         const tabLabels: Record<ProfileTab, string> = {
@@ -150,11 +114,10 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
                                     <button
                                         key={tab}
                                         onClick={() => handleTabChange(tab)}
-                                        className={`flex-1 px-6 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
-                                            activeTab === tab
+                                        className={`flex-1 px-6 py-2.5 text-sm font-semibold rounded-xl transition-colors ${activeTab === tab
                                                 ? "bg-white text-gray-800 shadow-sm"
                                                 : "text-gray-500 hover:bg-white/50"
-                                        }`}
+                                            }`}
                                     >
                                         {tabLabels[tab]}
                                     </button>

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ResumeItemModal from '../components/profile-setting/ResumeItemModal';
+import { useProfileSettings } from './context/ProfileSettingsContext';
 import type { CertificationItem, EducationItem, ExperienceItem } from '../../../../types/tutor';
 
 // --- TYPE DEFINITIONS ---
@@ -240,76 +241,13 @@ const ResumeHighlightsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<ResumeItemData | null>(null);
 
-    // Removed profile data usage for mock demonstration
+    // Get tutor data from shared context
+    const { tutorData } = useProfileSettings();
 
-    // Mock data for demonstration
-    const mockEducationItems: EducationItem[] = [
-        {
-            id: '1',
-            title: 'Bachelor of Science in Computer Science',
-            institution: 'Harvard University',
-            startDate: '2016-09-01',
-            endDate: '2020-05-15',
-            location: 'Cambridge, MA',
-            description: 'Focused on software engineering, algorithms, and data structures. Completed senior project on machine learning applications.'
-        },
-        {
-            id: '2',
-            title: 'Master of Science in Artificial Intelligence',
-            institution: 'Stanford University',
-            startDate: '2020-09-01',
-            endDate: '2022-06-30',
-            location: 'Stanford, CA',
-            description: 'Specialized in deep learning, natural language processing, and computer vision. Published research on neural network optimization.'
-        }
-    ];
-
-    const mockExperienceItems: ExperienceItem[] = [
-        {
-            id: '3',
-            title: 'Senior Software Engineer',
-            institution: 'Google',
-            startDate: '2022-07-01',
-            endDate: undefined, // Current position
-            location: 'Mountain View, CA',
-            description: 'Leading development of AI-powered educational tools. Managing a team of 5 engineers and collaborating with product managers to deliver scalable solutions.'
-        },
-        {
-            id: '4',
-            title: 'Software Engineer',
-            institution: 'Microsoft',
-            startDate: '2020-06-01',
-            endDate: '2022-06-30',
-            location: 'Seattle, WA',
-            description: 'Developed cloud-based learning management systems. Implemented microservices architecture and improved system performance by 40%.'
-        }
-    ];
-
-    const mockCertificationItems: CertificationItem[] = [
-        {
-            id: '5',
-            name: 'AWS Certified Solutions Architect',
-            issuingOrganization: 'Amazon Web Services',
-            issueDate: '2023-03-15',
-            expirationDate: '2026-03-15',
-            credentialId: 'AWS-SAA-123456',
-            credentialUrl: 'https://aws.amazon.com/certification/'
-        },
-        {
-            id: '6',
-            name: 'Google Cloud Professional Developer',
-            issuingOrganization: 'Google Cloud',
-            issueDate: '2022-11-20',
-            expirationDate: '2025-11-20',
-            credentialId: 'GCP-PD-789012',
-            credentialUrl: 'https://cloud.google.com/certification/'
-        }
-    ];
-
-    // Use mock data instead of profile data
-    const educationItems = mockEducationItems;
-    const experienceItems = mockExperienceItems;
-    const certificationItems = mockCertificationItems;
+    // Use real data from context
+    const educationItems: EducationItem[] = tutorData?.educations || [];
+    const experienceItems: ExperienceItem[] = tutorData?.experiences || [];
+    const certificationItems: CertificationItem[] = tutorData?.certifications || [];
 
     // Simplified data access for rendering
     const getCurrentItems = () => {
@@ -338,7 +276,7 @@ const ResumeHighlightsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveItem = async (itemData: any) => {
+    const handleSaveItem = async (_itemData: any) => {
         // Mock save - just close modal for demonstration
         setIsModalOpen(false);
         setEditingItem(null);

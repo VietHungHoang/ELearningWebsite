@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 interface AccountSettingsContentProps {
     onSave: () => void;
+    timezone?: string | null;
+    zoomConnected?: boolean;
 }
 
 // Fix: Changed the type of the `subtitle` prop from `string` to `React.ReactNode` to allow passing JSX elements.
@@ -31,10 +33,13 @@ const ActionRow: React.FC<{ buttonText: string; onSave: () => void }> = ({ butto
     );
 };
 
-const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave }) => {
+const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave, timezone, zoomConnected }) => {
     const { t } = useTranslation();
     // Match input styles with PersonalDetailsContent - white background, no hover bg effect
     const inputStyles = "w-full bg-white border border-gray-200 rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-400 placeholder:font-thin hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out";
+
+    // Default timezone if not provided
+    const selectedTimezone = timezone || 'Pacific/Tongatapu';
 
     return (
         <div className="space-y-8">
@@ -83,7 +88,7 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
                     <label className="block text-sm font-medium text-gray-700">
                         {t('dashboard.tutor.accountSettings.timeZone.timeZone')} <span className="text-red-500">*</span>
-                        <select defaultValue="Pacific/Tongatapu" className={`mt-1 ${inputStyles}`}>
+                        <select defaultValue={selectedTimezone} className={`mt-1 ${inputStyles}`}>
                             <option>Pacific/Tongatapu</option>
                             <option>(GMT+07:00) Asia/Ho_Chi_Minh</option>
                         </select>
@@ -98,9 +103,13 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave 
             } hideBorder>
                 <button
                     onClick={onSave}
-                    className="flex items-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 px-5 rounded-lg text-sm hover:bg-[#084c43] transition-colors"
+                    disabled={zoomConnected}
+                    className={`flex items-center gap-2 font-semibold py-2.5 px-5 rounded-lg text-sm transition-colors ${zoomConnected
+                            ? 'bg-green-100 text-green-700 cursor-default'
+                            : 'bg-[#0b6459] text-white hover:bg-[#084c43]'
+                        }`}
                 >
-                    Liên kết Zoom
+                    {zoomConnected ? '✓ Đã liên kết Zoom' : 'Liên kết Zoom'}
                 </button>
             </FormSection>
         </div>
