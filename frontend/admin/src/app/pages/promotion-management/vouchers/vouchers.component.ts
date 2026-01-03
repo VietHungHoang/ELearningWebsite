@@ -5,11 +5,12 @@ import { RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { VoucherService, Voucher } from '../../../services/voucher.service';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 
 @Component({
   selector: 'app-vouchers',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, LoadingComponent],
   templateUrl: './vouchers.component.html',
   styleUrl: './vouchers.component.scss'
 })
@@ -22,6 +23,7 @@ export class VouchersComponent implements OnInit, OnDestroy {
   filteredVouchers: Voucher[] = [];
   isFilterMenuOpen = false;
   selectedVouchers: Set<string> = new Set();
+  isLoading = false;
   private subscription: Subscription = new Subscription();
 
   constructor(private voucherService: VoucherService) {}
@@ -32,6 +34,7 @@ export class VouchersComponent implements OnInit, OnDestroy {
 
   loadVouchers(): void {
     console.log('[VouchersComponent] Loading vouchers...');
+    this.isLoading = true;
     this.subscription.add(
       this.voucherService.getVouchers({
         search: this.searchTerm || undefined,
@@ -43,9 +46,11 @@ export class VouchersComponent implements OnInit, OnDestroy {
           console.log('[VouchersComponent] Received vouchers:', vouchers);
           this.vouchers = vouchers;
           this.filteredVouchers = vouchers; // API already filters, so use directly
+          this.isLoading = false;
         },
         error: (error) => {
           console.error('[VouchersComponent] Error loading vouchers:', error);
+          this.isLoading = false;
         }
       })
     );

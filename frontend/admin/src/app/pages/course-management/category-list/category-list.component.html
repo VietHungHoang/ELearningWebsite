@@ -20,6 +20,9 @@
     </ol>
 </div>
 
+@if (isLoading) {
+    <app-loading></app-loading>
+} @else {
 <!-- Tab Navigation -->
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="flex items-center gap-[20px] border-b border-gray-200 dark:border-[#172036]">
@@ -147,7 +150,7 @@
                                     <div class="flex items-center gap-1.5">
                                         <i class="material-symbols-outlined text-blue-500 dark:text-blue-400 !text-sm">book</i>
                                         <span class="inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                            {{ category.subjects.length || 0 }}
+                                            {{ (category.subjects && category.subjects.length) ? category.subjects.length : 0 }}
                                         </span>
                                     </div>
                                 </td>
@@ -361,7 +364,7 @@
                         <div class="flex items-center justify-between mb-[15px]">
                             <h6 class="font-semibold text-gray-900 dark:text-white">{{ 'categorySubjectManagement.categoryList.detailsModal.subjectsInCategory' | translate }}</h6>
                             <span class="inline-block px-[10px] py-[2px] rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                                {{ selectedCategoryForDetail.subjects.length || 0 }}
+                                {{ (selectedCategoryForDetail.subjects && selectedCategoryForDetail.subjects.length) ? selectedCategoryForDetail.subjects.length : 0 }}
                             </span>
                         </div>
 
@@ -402,6 +405,7 @@
         </div>
     </div>
 </div>
+}
 
 <!-- Delete Confirmation Modal -->
 @if (showDeleteConfirm) {

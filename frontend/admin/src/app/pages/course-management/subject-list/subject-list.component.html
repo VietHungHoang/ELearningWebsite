@@ -20,6 +20,9 @@
     </ol>
 </div>
 
+@if (isLoading) {
+    <app-loading></app-loading>
+} @else {
 <!-- Tab Navigation -->
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="flex items-center gap-[20px] border-b border-gray-200 dark:border-[#172036]">
@@ -102,7 +105,7 @@
                         </li>
                         @for (cat of categories; track cat.id) {
                             <li>
-                                <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByCategory(cat.name)">
+                                <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByCategory(cat.name || '')">
                                     {{ cat.name }}
                                 </button>
                             </li>
@@ -168,7 +171,7 @@
                                 </td>
                                 <td class="ltr:text-left rtl:text-right px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
                                     <span class="text-gray-900 dark:text-white font-semibold text-sm">
-                                        {{ item.subject.name }}
+                                        {{ getSubjectName(item.subject) }}
                                     </span>
                                 </td>
                                 <td class="ltr:text-left rtl:text-right px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036] max-w-[300px]">
@@ -178,7 +181,7 @@
                                 </td>
                                 <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
                                     <span class="inline-flex items-center px-[10px] py-[4px] text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800">
-                                        {{ item.category.name }}
+                                        {{ getCategoryName(item.category) }}
                                     </span>
                                 </td>
                                 <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
@@ -190,9 +193,9 @@
                                     </div>
                                 </td>
                                 <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
-                                    <span [class]="'inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium ' + getStatusColor(item.subject.isActive)">
-                                        <span [class]="'w-1.5 h-1.5 rounded-full mr-1.5 ' + (item.subject.isActive ? 'bg-success-600' : 'bg-danger-600')"></span>
-                                        {{ item.subject.isActive ? ('categorySubjectManagement.subjectList.status.active' | translate) : ('categorySubjectManagement.subjectList.status.inactive' | translate) }}
+                                    <span [class]="'inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium ' + getStatusColor(item.subject && item.subject.isActive ? item.subject.isActive : false)">
+                                        <span [class]="'w-1.5 h-1.5 rounded-full mr-1.5 ' + ((item.subject && item.subject.isActive) ? 'bg-success-600' : 'bg-danger-600')"></span>
+                                        {{ (item.subject && item.subject.isActive) ? ('categorySubjectManagement.subjectList.status.active' | translate) : ('categorySubjectManagement.subjectList.status.inactive' | translate) }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036] text-center">
@@ -356,4 +359,5 @@
         </div>
     </div>
 </div>
+}
 

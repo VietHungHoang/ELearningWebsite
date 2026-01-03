@@ -133,6 +133,7 @@
       "user": "Người dùng",
       "instructors": "Gia sư",
       "instructorApproval": "Phê duyệt gia sư",
+      "tutorApproval": "Phê duyệt gia sư",
       "learners": "Học viên",
       "finance": "Tài chính",
       "revenueDashboard": "Bảng doanh thu",
@@ -335,7 +336,7 @@
       "reviewManagement": "Quản lý đánh giá"
     },
     "tabs": {
-      "flaggedReviews": "🚩 Đánh giá bị báo cáo",
+      "flaggedReviews": "Các đánh giá cần xử lý",
       "allReviews": "🗂️ Tất cả đánh giá"
     },
     "selected": "đã chọn",
@@ -359,9 +360,9 @@
       "allReasons": "Tất cả lý do",
       "allStatus": "Tất cả trạng thái",
       "allRatings": "Tất cả đánh giá",
-      "lowRating": "1-2 Sao",
-      "inappropriateLanguage": "Ngôn ngữ không phù hợp",
-      "spam": "Spam/Quảng cáo"
+      "inappropriateLanguage": "Ngôn từ thô tục / không phù hợp",
+      "spam": "Spam/Quảng cáo",
+      "aiContentIssue": "Nội dung bạo lực / đe dọa"
     },
     "status": {
       "visible": "Hiển thị",
@@ -430,6 +431,12 @@
       "deleteTitle": "Xóa Gia sư",
       "deleteMessage": "Bạn có chắc chắn muốn xóa gia sư {{name}}?",
       "delete": "Xóa"
+    }
+  },
+  "instructorApproval": {
+    "searchPlaceholder": "Tìm kiếm gia sư...",
+    "pagination": {
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} kết quả"
     }
   },
   "tutorApproval": {
@@ -609,7 +616,7 @@
       "stt": "STT",
       "name": "Tên",
       "email": "Email",
-      "phone": "Số điện thoại",
+      "enrollmentCount": "Số lớp đang theo học",
       "joinDate": "Ngày tham gia",
       "action": "Thao tác"
     },
@@ -980,51 +987,13 @@
     "modals": {
       "orderList": {
         "title": "QR Thanh toán",
-        "subtitle": "Mã QR Thanh toán",
-        "bank": "Ngân hàng",
-        "accountNumber": "Số tài khoản",
-        "accountHolder": "Chủ tài khoản",
-        "totalAmount": "Tổng tiền",
-        "download": "Tải QR",
-        "close": "Đóng"
-      },
-      "confirmPayment": {
-        "title": "Xác nhận Thanh toán",
-        "message": "Bạn có chắc chắn chuyển số tiền:",
-        "to": "đến",
-        "notes": "Ghi chú (tùy chọn)",
-        "notesPlaceholder": "Ví dụ: Chuyển khoản ngân hàng, Mã giao dịch: 123456...",
-        "cancel": "Hủy",
-        "confirm": "Xác nhận",
-        "processing": "Đang xử lý..."
-      },
-      "bulkConfirm": {
-        "title": "Xác nhận Thanh toán Hàng loạt",
-        "selectedInstructors": "Gia sư đã chọn",
-        "totalAmount": "Tổng tiền",
-        "notes": "Ghi chú (Tùy chọn)",
-        "notesPlaceholder": "Thêm ghi chú thanh toán...",
-        "cancel": "Hủy",
-        "confirmPayment": "Xác nhận Thanh toán"
-      }
-    },
-    "actions": {
-      "viewDetails": "Xem chi tiết & Order List",
-      "qrPayment": "QR Thanh toán"
-    },
-    "pagination": {
-      "showing": "Hiển thị",
-      "to": "đến",
-      "of": "của"
-    },
-    "modals": {
-      "orderList": {
         "subtitle": "Danh sách đơn hàng",
         "total": "Tổng",
         "noOrders": "Không có đơn hàng nào",
         "close": "Đóng"
       },
       "qrPayment": {
+        "title": "QR Thanh toán",
         "subtitle": "Quét mã QR để thanh toán",
         "bank": "Ngân hàng",
         "accountNumber": "Số tài khoản",
@@ -1061,6 +1030,15 @@
         "date": "Ngày thanh toán",
         "viewHistory": "Xem lịch sử"
       }
+    },
+    "actions": {
+      "viewDetails": "Xem chi tiết & Order List",
+      "qrPayment": "QR Thanh toán"
+    },
+    "pagination": {
+      "showing": "Hiển thị",
+      "to": "đến",
+      "of": "của"
     }
   },
   "transactions": {

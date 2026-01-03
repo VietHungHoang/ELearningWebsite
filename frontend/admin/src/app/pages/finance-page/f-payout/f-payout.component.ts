@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { PayoutService } from './payout.service';
 import * as XLSX from 'xlsx';
 
@@ -57,7 +58,7 @@ export interface PayoutHistory {
 @Component({
     selector: 'app-f-payout',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, CurrencyFormatPipe],
+    imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, CurrencyFormatPipe, LoadingComponent],
     templateUrl: './f-payout.component.html',
     styleUrl: './f-payout.component.scss'
 })
@@ -125,6 +126,7 @@ export class FPayoutComponent implements OnInit {
     paymentNotes: string = '';
     bulkPaymentNotes: string = '';  // Notes for bulk confirmation
     loadingPayment = false;
+    isLoading = false;
     qrCodeDataUrl: string = '';
 
     constructor(private payoutService: PayoutService) {}
@@ -257,6 +259,7 @@ export class FPayoutComponent implements OnInit {
     }
 
     loadPayoutData(): void {
+        this.isLoading = true;
         this.payoutService.getPayoutData(this.kpiFilter).subscribe({
             next: (response) => {
                 this.pendingPayouts = response.pendingPayouts;
@@ -267,9 +270,11 @@ export class FPayoutComponent implements OnInit {
                 this.applyFiltersAndSearch();
                 this.calculatePagination();
                 this.calculatePaginationHistory();
+                this.isLoading = false;
             },
             error: (error) => {
                 console.error('Error loading payout data:', error);
+                this.isLoading = false;
             }
         });
     }

@@ -22,6 +22,9 @@
     </ol>
 </div>
 
+@if (loading) {
+    <app-loading></app-loading>
+} @else {
 <!-- Bulk Actions - Always Visible -->
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md border border-gray-200 dark:border-[#172036]">
     <div class="flex items-center justify-between gap-[12px] flex-wrap">
@@ -166,14 +169,18 @@
                             <!-- Info Grid -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-[12px] mb-[16px]">
                                 <div class="text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.student' | translate }}:</span>
-                                    <span class="font-medium ml-[6px] text-gray-800 dark:text-gray-200">{{ review.learnerName }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400 text-xs ml-[4px]">({{ 'reviewManagement.id' | translate }}: {{ review.learnerId }})</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-[2px]">{{ 'reviewManagement.id' | translate }}: {{ review.learnerId }}</span>
+                                        <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.student' | translate }}:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200 mt-[2px]">{{ review.learnerName }}</span>
+                                    </div>
                                 </div>
                                 <div class="text-sm">
-                                    <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.tutor' | translate }}:</span>
-                                    <span class="font-medium ml-[6px] text-gray-800 dark:text-gray-200">{{ review.tutorName }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400 text-xs ml-[4px]">({{ 'reviewManagement.id' | translate }}: {{ review.tutorId }})</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-[2px]">{{ 'reviewManagement.id' | translate }}: {{ review.tutorId }}</span>
+                                        <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.tutor' | translate }}:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200 mt-[2px]">{{ review.tutorName }}</span>
+                                    </div>
                                 </div>
                                 <div class="text-sm md:col-span-2">
                                     <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.class' | translate }}:</span>
@@ -451,6 +458,7 @@
         </div>
     </div>
 }
+}
 
 <!-- Review Detail Modal -->
 @if (selectedReviewForDetail) {
@@ -483,14 +491,18 @@
             <!-- Info Lines -->
             <div class="space-y-[8px] mb-[15px] text-sm">
                 <div>
-                    <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.learner' | translate }}:</span>
-                    <span class="font-medium ml-[4px]">{{ selectedReviewForDetail.learnerName }}</span>
-                    <span class="text-gray-500 dark:text-gray-400 text-xs">({{ 'reviewManagement.id' | translate }}: {{ selectedReviewForDetail.learnerId }})</span>
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-[2px]">{{ 'reviewManagement.id' | translate }}: {{ selectedReviewForDetail.learnerId }}</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.learner' | translate }}:</span>
+                        <span class="font-medium text-gray-800 dark:text-gray-200 mt-[2px]">{{ selectedReviewForDetail.learnerName }}</span>
+                    </div>
                 </div>
                 <div>
-                    <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.tutor' | translate }}:</span>
-                    <span class="font-medium ml-[4px]">{{ selectedReviewForDetail.tutorName }}</span>
-                    <span class="text-gray-500 dark:text-gray-400 text-xs">({{ 'reviewManagement.id' | translate }}: {{ selectedReviewForDetail.tutorId }})</span>
+                    <div class="flex flex-col">
+                        <span class="text-gray-500 dark:text-gray-400 text-xs mb-[2px]">{{ 'reviewManagement.id' | translate }}: {{ selectedReviewForDetail.tutorId }}</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.tutor' | translate }}:</span>
+                        <span class="font-medium text-gray-800 dark:text-gray-200 mt-[2px]">{{ selectedReviewForDetail.tutorName }}</span>
+                    </div>
                 </div>
                 <div>
                     <span class="text-gray-600 dark:text-gray-400">{{ 'reviewManagement.class' | translate }}:</span>

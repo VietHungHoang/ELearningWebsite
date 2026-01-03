@@ -49,7 +49,9 @@ export class CategoryService {
                     { id: '1.1', nameVi: 'Web Development', nameEn: 'Web Development', name: 'Web Development', description: 'HTML, CSS, JavaScript', isActive: true, tutorCount: 3 },
                     { id: '1.2', nameVi: 'Mobile Development', nameEn: 'Mobile Development', name: 'Mobile Development', description: 'iOS and Android development', isActive: true, tutorCount: 2 },
                     { id: '1.3', nameVi: 'Cybersecurity', nameEn: 'Cybersecurity', name: 'Cybersecurity', description: 'Security and network protection', isActive: true, tutorCount: 0 }
-                ]
+                ],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             },
             // ... other mock categories with updated structure
         ];
@@ -253,7 +255,7 @@ export class CategoryService {
                         if (c.id === categoryId) {
                             return {
                                 ...c,
-                                subjects: [...c.subjects, { ...newSubject, categoryId }]
+                                subjects: [...(c.subjects || []), { ...newSubject, categoryId }]
                             };
                         }
                         return c;
@@ -375,7 +377,7 @@ export class CategoryService {
             if (c.id === categoryId) {
                 return {
                     ...c,
-                    subjects: [...c.subjects, subject]
+                    subjects: [...(c.subjects || []), subject]
                 };
             }
             return c;
@@ -386,7 +388,7 @@ export class CategoryService {
     updateSubjectLocal(categoryId: string, subjectIndex: number, subject: Subject): void {
         const currentCategories = this.categoriesSubject.value;
         const updatedCategories = currentCategories.map(c => {
-            if (c.id === categoryId && c.subjects[subjectIndex]) {
+            if (c.id === categoryId && c.subjects && c.subjects[subjectIndex]) {
                 const updatedSubjects = [...c.subjects];
                 updatedSubjects[subjectIndex] = subject;
                 return {
@@ -417,7 +419,7 @@ export class CategoryService {
     toggleSubjectActiveLocal(categoryId: string, subjectIndex: number): void {
         const currentCategories = this.categoriesSubject.value;
         const updatedCategories = currentCategories.map(c => {
-            if (c.id === categoryId && c.subjects[subjectIndex]) {
+            if (c.id === categoryId && c.subjects && c.subjects[subjectIndex]) {
                 const updatedSubjects = [...c.subjects];
                 updatedSubjects[subjectIndex] = {
                     ...updatedSubjects[subjectIndex],
@@ -450,7 +452,28 @@ export class CategoryService {
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ primary subjects API
                 if (response.success && response.data && Array.isArray(response.data)) {
-                    return response.data;
+                    // Map API response to Subject format
+                    const mappedSubjects: Subject[] = response.data.map((apiSubject: any) => {
+                        // Determine name based on available fields (prefer nameVi for Vietnamese, nameEn for English)
+                        const name = apiSubject.nameVi || apiSubject.nameEn || apiSubject.name || '';
+                        
+                        return {
+                            id: apiSubject.id,
+                            categoryId: apiSubject.categoryId,
+                            nameVi: apiSubject.nameVi,
+                            nameEn: apiSubject.nameEn,
+                            name: name, // Computed property for UI
+                            description: apiSubject.description,
+                            isActive: apiSubject.isActive !== undefined ? apiSubject.isActive : true, // Default to true if not provided
+                            createdAt: apiSubject.createdAt,
+                            updatedAt: apiSubject.updatedAt,
+                            tutorCount: apiSubject.tutorCount || 0,
+                            displayOrder: apiSubject.displayOrder,
+                            image: apiSubject.image,
+                            slug: apiSubject.slug
+                        };
+                    });
+                    return mappedSubjects;
                 }
                 // ⚠️ FALLBACK: Extract subjects from existing categories
                 const allSubjects: Subject[] = [];
@@ -468,6 +491,7 @@ export class CategoryService {
                 return allSubjects;
             }),
             catchError(error => {
+                console.error('[CategoryService] Error fetching subjects:', error);
                 // ⚠️ FALLBACK: Extract subjects from existing categories
                 const allSubjects: Subject[] = [];
                 this.categoriesSubject.value.forEach(category => {

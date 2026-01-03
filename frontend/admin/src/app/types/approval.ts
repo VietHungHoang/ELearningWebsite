@@ -69,12 +69,20 @@ export interface InstructorRequestDetail extends InstructorRequest {
 
 // Mapper function to convert backend response to frontend format
 export function mapBackendToInstructorRequest(backend: InstructorRequestBackend): InstructorRequest {
+    // Handle subjectIds: can be null, empty array, or array of strings
+    let subjectIds: string[] = [];
+    if (backend.subjectIds) {
+        if (Array.isArray(backend.subjectIds)) {
+            subjectIds = backend.subjectIds;
+        }
+    }
+
     return {
         id: backend.tutorId,
-        name: backend.fullName,
-        email: backend.email,
+        name: backend.fullName || '',
+        email: backend.email || '',
         avatarUrl: backend.avatarUrl,
-        subjectIds: backend.subjectIds || [],
+        subjectIds: subjectIds,
         currentStep: backend.currentStep,
         description: backend.description,
         requestStatus: backend.status,

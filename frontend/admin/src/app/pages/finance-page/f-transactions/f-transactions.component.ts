@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { TransactionService, Payment, PaymentStatus, PaymentMethod, TransactionFilters } from '../../../services/transaction.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import * as XLSX from 'xlsx';
 
 @Component({
     selector: 'app-f-transactions',
-    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe, CurrencyFormatPipe],
+    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe, CurrencyFormatPipe, LoadingComponent],
     templateUrl: './f-transactions.component.html',
     styleUrl: './f-transactions.component.scss'
 })

@@ -6,6 +6,8 @@ import { Subject as RxjsSubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CategoryService } from '../../../services/category.service';
+import { LoadingComponent } from '../../../components/loading/loading.component';
+import { I18nService } from '../../../i18n/i18n.service';
 import { Category, Subject } from '../../../types/category';
 
 interface SubjectItem {
@@ -18,7 +20,7 @@ interface SubjectItem {
 @Component({
     selector: 'app-subject-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TranslatePipe, LoadingComponent],
     templateUrl: './subject-list.component.html',
     styleUrl: './subject-list.component.scss'
 })
@@ -56,50 +58,110 @@ export class SubjectListComponent implements OnInit, OnDestroy {
     isCategoryFilterDropdownOpen = false;
 
     showAddModal = false;
+    isLoading = false;
 
     // Expose Math for template
     Math = Math;
 
-    constructor(private categoryService: CategoryService) {
+    constructor(
+        private categoryService: CategoryService,
+        private i18nService: I18nService
+    ) {
         console.log('🎯 [SubjectListComponent] CONSTRUCTOR CALLED - Component created!');
     }
 
     ngOnInit(): void {
-        // Load all subjects using PRIMARY API
+        this.isLoading = true;
+        // Load categories first, then load subjects
+        this.categoryService.fetchCategories()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+                next: (categories: Category[]) => {
+                    this.categories = categories;
+                    // Then load all subjects using PRIMARY API
+                    this.loadSubjects();
+                },
+                error: (error: any) => {
+                    console.error('[SubjectListComponent] Failed to load categories:', error);
+                    // Still try to load subjects
+                    this.loadSubjects();
+                }
+            });
+    }
+
+    private loadSubjects(): void {
+        this.isLoading = true;
         this.categoryService.fetchAllSubjects()
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (subjects) => {
+                next: (subjects: Subject[]) => {
                     // Create subject items from subjects data
                     this.subjectItems = [];
+                    const currentLang = this.i18nService.getCurrentLanguage();
+                    
                     subjects.forEach(subject => {
-                        // Create a dummy category object since we don't have full category data
-                        const dummyCategory: Category = {
+                        // Find category by categoryId
+                        const category = this.categories.find(cat => cat.id === subject.categoryId);
+                        
+                        // Use found category or create a dummy one
+                        const categoryForSubject: Category = category || {
                             id: subject.categoryId || 'unknown',
-                            name: 'Unknown Category', // Placeholder name
+                            nameVi: 'Danh mục không xác định',
+                            nameEn: 'Unknown Category',
+                            name: currentLang === 'vi' ? 'Danh mục không xác định' : 'Unknown Category',
                             slug: '',
                             description: '',
                             displayOrder: 0,
                             isActive: true,
                             tutorCount: 0,
-                            subjects: []
+                            subjects: [],
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
                         };
+                        
+                        // Ensure subject has name based on current language
+                        if (!subject.name) {
+                            subject.name = currentLang === 'vi' 
+                                ? (subject.nameVi || subject.nameEn || '') 
+                                : (subject.nameEn || subject.nameVi || '');
+                        }
+                        
                         this.subjectItems.push({
-                            category: dummyCategory,
+                            category: categoryForSubject,
                             subject: subject,
                             subjectIndex: 0,
                             displayId: subject.id
                         });
                     });
                     this.applyFilters();
+                    this.isLoading = false;
                 },
-                error: (error) => {
+                error: (error: any) => {
                     console.error('[SubjectListComponent] Failed to load subjects:', error);
                     // Fallback: create subject items from categories
                     this.createSubjectItems();
                     this.applyFilters();
+                    this.isLoading = false;
                 }
             });
+    }
+    
+    getSubjectName(subject: Subject): string {
+        const currentLang = this.i18nService.getCurrentLanguage();
+        if (currentLang === 'vi') {
+            return subject.nameVi || subject.nameEn || subject.name || '';
+        } else {
+            return subject.nameEn || subject.nameVi || subject.name || '';
+        }
+    }
+    
+    getCategoryName(category: Category): string {
+        const currentLang = this.i18nService.getCurrentLanguage();
+        if (currentLang === 'vi') {
+            return category.nameVi || category.nameEn || category.name || '';
+        } else {
+            return category.nameEn || category.nameVi || category.name || '';
+        }
     }
 
     ngOnDestroy(): void {
@@ -220,7 +282,7 @@ export class SubjectListComponent implements OnInit, OnDestroy {
             // Add new subject using PRIMARY API
             this.categoryService.addSubjectPrimary({
                 categoryId: categoryId,
-                name: subject.name,
+                name: subject.name || '',
                 description: subject.description || '',
                 isActive: subject.isActive
             }).subscribe({
@@ -246,19 +308,21 @@ export class SubjectListComponent implements OnInit, OnDestroy {
         let filtered = this.subjectItems;
 
         if (this.searchTerm.trim()) {
-            filtered = filtered.filter(item =>
-                item.category.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-                (item.subject && item.subject.name.toLowerCase().includes(this.searchTerm.toLowerCase()))
-            );
+            const searchLower = this.searchTerm.toLowerCase();
+            filtered = filtered.filter(item => {
+                const categoryName = this.getCategoryName(item.category).toLowerCase();
+                const subjectName = this.getSubjectName(item.subject).toLowerCase();
+                return categoryName.includes(searchLower) || subjectName.includes(searchLower);
+            });
         }
 
         if (this.selectedStatus !== 'All') {
             const isActive = this.selectedStatus === 'Active';
-            filtered = filtered.filter(item => item.subject.isActive === isActive);
+            filtered = filtered.filter(item => item.subject && item.subject.isActive === isActive);
         }
 
         if (this.selectedCategoryFilter !== 'All') {
-            filtered = filtered.filter(item => item.category.name === this.selectedCategoryFilter);
+            filtered = filtered.filter(item => this.getCategoryName(item.category) === this.selectedCategoryFilter);
         }
 
         this.filteredSubjectItems = filtered;
@@ -304,7 +368,7 @@ export class SubjectListComponent implements OnInit, OnDestroy {
         this.selectedCategoryForSubject = item.category.id;
 
         this.formData = {
-            name: item.subject.name,
+            name: item.subject.name || '',
             description: item.subject.description || '',
             image: null,
             subjects: []

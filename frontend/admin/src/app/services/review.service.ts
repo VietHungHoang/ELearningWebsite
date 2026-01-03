@@ -24,7 +24,7 @@ export interface Review {
 
 export interface ReviewFilters {
     type: 'flagged' | 'all';
-    flagReason?: 'low_rating' | 'bad_words' | 'spam' | 'all';
+    flagReason?: 'bad_words' | 'spam' | 'ai_content' | 'all';
     visibility?: 'all' | 'visible' | 'hidden';
     rating?: number | 'all';
     search?: string;

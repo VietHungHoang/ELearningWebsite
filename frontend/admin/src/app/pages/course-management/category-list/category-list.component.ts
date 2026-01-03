@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CategoryService } from '../../../services/category.service';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { Category, Subject } from '../../../types/category';
 
 @Component({
     selector: 'app-category-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, TranslatePipe, LoadingComponent],
     templateUrl: './category-list.component.html',
     styleUrl: './category-list.component.scss'
 })
@@ -44,16 +45,20 @@ export class CategoryListComponent implements OnInit {
     showCategoryDetailsModal = false;
     selectedCategoryForDetail: Category | null = null;
 
+    isLoading = false;
+
     // Expose Math for template
     Math = Math;
 
     constructor(private categoryService: CategoryService) {}
 
     ngOnInit(): void {
+        this.isLoading = true;
         this.categoryService.fetchCategories().subscribe({
             next: (categories) => {
                 this.categories = categories;
                 this.applyFilters();
+                this.isLoading = false;
             },
             error: (error) => {
                 console.error('[CategoryListComponent] Failed to load categories:', error);
@@ -61,6 +66,7 @@ export class CategoryListComponent implements OnInit {
                 this.categoryService.getCategories().subscribe(existingCategories => {
                     this.categories = existingCategories;
                     this.applyFilters();
+                    this.isLoading = false;
                 });
             }
         });
@@ -73,7 +79,7 @@ export class CategoryListComponent implements OnInit {
         if (this.searchTerm.trim()) {
             const searchLower = this.searchTerm.toLowerCase();
             filtered = filtered.filter(category =>
-                category.name.toLowerCase().includes(searchLower) ||
+                (category.name && category.name.toLowerCase().includes(searchLower)) ||
                 (category.description && category.description.toLowerCase().includes(searchLower))
             );
         }
@@ -127,7 +133,7 @@ export class CategoryListComponent implements OnInit {
         this.isEditMode = true;
         this.editingId = category.id;
         this.categoryFormData = {
-            name: category.name,
+            name: category.name || '',
             description: category.description || ''
         };
         this.showAddCategoryModal = true;
@@ -177,7 +183,7 @@ export class CategoryListComponent implements OnInit {
                     };
 
                     this.categoryService.addSubjectToCategory(newCategory.id, {
-                        name: defaultSubject.name,
+                        name: defaultSubject.name || '',
                         description: defaultSubject.description || '',
                         isActive: defaultSubject.isActive
                     }).subscribe({
@@ -282,8 +288,8 @@ export class CategoryListComponent implements OnInit {
 
     getTutorCountForSubject(subjectId: string): number {
         const subject = this.categories
-            .flatMap(cat => cat.subjects)
-            .find(sub => sub.id === subjectId);
+            .flatMap(cat => cat.subjects || [])
+            .find(sub => sub && sub.id === subjectId);
         return subject?.tutorCount || 0;
     }
 

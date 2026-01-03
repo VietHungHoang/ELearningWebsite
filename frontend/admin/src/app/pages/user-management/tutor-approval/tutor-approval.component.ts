@@ -4,6 +4,9 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UserService, TutorDetail,Tutor, InstructorRequest } from '../../../services/user.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
+import { ToastComponent, ToastType } from '../../../components/toast/toast.component';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { CareerEntry } from '../../../types/instructor';
 import { LocaleUtilsService } from '../../../shared/utils/locale.utils';
 import { I18nService } from '../../../i18n/i18n.service';
@@ -15,7 +18,7 @@ import { SubjectHelperService } from '../../../services/subject-helper.service';
 @Component({
     selector: 'app-tutor-approval',
     standalone: true,
-    imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TranslatePipe],
+    imports: [CommonModule, RouterLink, FormsModule, SearchInputComponent, TranslatePipe, ConfirmDialogComponent, ToastComponent, LoadingComponent],
     templateUrl: './tutor-approval.component.html',
     styleUrl: './tutor-approval.component.scss'
 })
@@ -53,6 +56,7 @@ export class TutorApprovalComponent implements OnInit {
 
     selectedRequests: Set<string> = new Set();
     searchPlaceholder = '';
+    isLoading = false;
 
     constructor(
         public userService: UserService,
@@ -97,6 +101,20 @@ export class TutorApprovalComponent implements OnInit {
 
     showCertificationViewer = false;
     selectedInstructorForCerts: InstructorRequest | null = null;
+
+    // Confirmation dialog state
+    showConfirmDialog = false;
+    confirmDialogTitle = '';
+    confirmDialogMessage = '';
+    confirmDialogType: 'danger' | 'warning' | 'info' | 'success' = 'info';
+    confirmDialogConfirmText = '';
+    confirmDialogAction: (() => void) | null = null;
+
+    // Toast notification state
+    showToast = false;
+    toastType: ToastType = 'info';
+    toastTitle = '';
+    toastMessage = '';
 
     levelOptions = [
         { id: 'beginner', code: 'BEG', label: 'Beginner (Under 1 year)', icon: 'school' },
@@ -175,18 +193,21 @@ export class TutorApprovalComponent implements OnInit {
         }
 
         // Call API with params
+        this.isLoading = true;
         this.userService.getInstructorRequests(params).subscribe({
             next: (response: PaginatedResponse<InstructorRequest>) => {
                 this.filteredRequests = response.content;
                 this.totalRequests = response.totalElements;
                 this.totalPages = response.totalPages;
                 this.currentPage = response.number; // Update current page from backend
+                this.isLoading = false;
             },
             error: (error) => {
                 console.error('Error loading instructor requests:', error);
                 this.filteredRequests = [];
                 this.totalRequests = 0;
                 this.totalPages = 0;
+                this.isLoading = false;
             }
         });
     }
@@ -317,11 +338,15 @@ export class TutorApprovalComponent implements OnInit {
                     if (success) {
                         // Reload data from API
                         this.loadApprovalRequests();
+                        this.showToastNotification('success', 'Thành công', 'Đã từ chối đơn đăng ký gia sư thành công.');
+                    } else {
+                        this.showToastNotification('error', 'Thất bại', 'Không thể từ chối đơn đăng ký gia sư.');
                     }
                     this.closeRejectDialog();
                 },
                 error: (error) => {
                     console.error('Error rejecting instructor request:', error);
+                    this.showToastNotification('error', 'Lỗi', 'Có lỗi xảy ra khi từ chối đơn đăng ký.');
                     this.closeRejectDialog();
                 }
             });
@@ -349,11 +374,15 @@ export class TutorApprovalComponent implements OnInit {
                     if (success) {
                         // Reload data from API
                         this.loadApprovalRequests();
+                        this.showToastNotification('success', 'Thành công', 'Đã yêu cầu chỉnh sửa đơn đăng ký gia sư thành công.');
+                    } else {
+                        this.showToastNotification('error', 'Thất bại', 'Không thể yêu cầu chỉnh sửa đơn đăng ký gia sư.');
                     }
                     this.closeEditRequestDialog();
                 },
                 error: (error) => {
                     console.error('Error requesting edit for instructor:', error);
+                    this.showToastNotification('error', 'Lỗi', 'Có lỗi xảy ra khi yêu cầu chỉnh sửa đơn đăng ký.');
                     this.closeEditRequestDialog();
                 }
             });
@@ -420,99 +449,193 @@ export class TutorApprovalComponent implements OnInit {
     bulkApproveRequests(): void {
         if (this.selectedRequests.size === 0) return;
 
-        if (confirm(`Approve ${this.selectedRequests.size} instructor application(s)?`)) {
+        this.confirmDialogTitle = 'Xác Nhận Phê Duyệt';
+        this.confirmDialogMessage = `Bạn có chắc chắn muốn phê duyệt ${this.selectedRequests.size} đơn đăng ký gia sư?`;
+        this.confirmDialogType = 'info';
+        this.confirmDialogConfirmText = 'Phê Duyệt';
+        this.confirmDialogAction = () => {
             const requestsToApprove = Array.from(this.selectedRequests);
+            const totalCount = requestsToApprove.length;
 
             // Call API for each approval - NO LEVELS
             let completedCount = 0;
+            let successCount = 0;
+            let errorCount = 0;
 
             requestsToApprove.forEach(requestId => {
                 this.userService.approveInstructorRequest(requestId).subscribe({
                     next: (success) => {
                         completedCount++;
-                        if (completedCount === requestsToApprove.length) {
+                        if (success) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
+                        if (completedCount === totalCount) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
+                            // Show toast notification
+                            if (errorCount === 0) {
+                                this.showToastNotification('success', 'Thành công', `Đã phê duyệt ${successCount} đơn đăng ký gia sư thành công.`);
+                            } else if (successCount === 0) {
+                                this.showToastNotification('error', 'Thất bại', `Không thể phê duyệt ${errorCount} đơn đăng ký gia sư.`);
+                            } else {
+                                this.showToastNotification('warning', 'Một phần thành công', `Đã phê duyệt ${successCount} đơn, ${errorCount} đơn thất bại.`);
+                            }
                         }
                     },
                     error: (error) => {
                         console.error('Error approving instructor request:', error);
                         completedCount++;
-                        if (completedCount === requestsToApprove.length) {
+                        errorCount++;
+                        if (completedCount === totalCount) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
+                            this.showToastNotification('error', 'Lỗi', `Có lỗi xảy ra khi phê duyệt đơn đăng ký.`);
                         }
                     }
                 });
             });
-        }
+        };
+        this.showConfirmDialog = true;
     }
 
     bulkRequestEditRequests(): void {
         if (this.selectedRequests.size === 0) return;
 
-        if (confirm(`Request edit for ${this.selectedRequests.size} instructor application(s)?`)) {
+        this.confirmDialogTitle = 'Xác Nhận Yêu Cầu Chỉnh Sửa';
+        this.confirmDialogMessage = `Bạn có chắc chắn muốn yêu cầu chỉnh sửa ${this.selectedRequests.size} đơn đăng ký gia sư?`;
+        this.confirmDialogType = 'warning';
+        this.confirmDialogConfirmText = 'Yêu Cầu Chỉnh Sửa';
+        this.confirmDialogAction = () => {
             const requestsToEdit = Array.from(this.selectedRequests);
+            const totalCount = requestsToEdit.length;
 
             // Call API for each edit request
             let completedCount = 0;
+            let successCount = 0;
+            let errorCount = 0;
             const defaultReason = 'Yêu cầu chỉnh sửa thông tin';
 
             requestsToEdit.forEach(requestId => {
                 this.userService.requestEditInstructorRequest(requestId, defaultReason).subscribe({
                     next: (success) => {
                         completedCount++;
-                        if (completedCount === requestsToEdit.length) {
+                        if (success) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
+                        if (completedCount === totalCount) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
+                            // Show toast notification
+                            if (errorCount === 0) {
+                                this.showToastNotification('success', 'Thành công', `Đã yêu cầu chỉnh sửa ${successCount} đơn đăng ký gia sư thành công.`);
+                            } else if (successCount === 0) {
+                                this.showToastNotification('error', 'Thất bại', `Không thể yêu cầu chỉnh sửa ${errorCount} đơn đăng ký gia sư.`);
+                            } else {
+                                this.showToastNotification('warning', 'Một phần thành công', `Đã yêu cầu chỉnh sửa ${successCount} đơn, ${errorCount} đơn thất bại.`);
+                            }
                         }
                     },
                     error: (error) => {
                         console.error('Error requesting edit for instructor request:', error);
                         completedCount++;
-                        if (completedCount === requestsToEdit.length) {
+                        errorCount++;
+                        if (completedCount === totalCount) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
+                            this.showToastNotification('error', 'Lỗi', `Có lỗi xảy ra khi yêu cầu chỉnh sửa đơn đăng ký.`);
                         }
                     }
                 });
             });
-        }
+        };
+        this.showConfirmDialog = true;
     }
 
     bulkRejectRequests(): void {
         if (this.selectedRequests.size === 0) return;
 
-        if (confirm(`Reject ${this.selectedRequests.size} instructor application(s)?`)) {
+        this.confirmDialogTitle = 'Xác Nhận Từ Chối';
+        this.confirmDialogMessage = `Bạn có chắc chắn muốn từ chối ${this.selectedRequests.size} đơn đăng ký gia sư?`;
+        this.confirmDialogType = 'danger';
+        this.confirmDialogConfirmText = 'Từ Chối';
+        this.confirmDialogAction = () => {
             const requestsToReject = Array.from(this.selectedRequests);
+            const totalCount = requestsToReject.length;
 
             // Call API for each rejection
             let completedCount = 0;
+            let successCount = 0;
+            let errorCount = 0;
             requestsToReject.forEach(requestId => {
                 this.userService.rejectInstructorRequest(requestId, 'Bulk rejected').subscribe({
                     next: (success) => {
                         completedCount++;
-                        if (completedCount === requestsToReject.length) {
+                        if (success) {
+                            successCount++;
+                        } else {
+                            errorCount++;
+                        }
+                        if (completedCount === totalCount) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
+                            // Show toast notification
+                            if (errorCount === 0) {
+                                this.showToastNotification('success', 'Thành công', `Đã từ chối ${successCount} đơn đăng ký gia sư thành công.`);
+                            } else if (successCount === 0) {
+                                this.showToastNotification('error', 'Thất bại', `Không thể từ chối ${errorCount} đơn đăng ký gia sư.`);
+                            } else {
+                                this.showToastNotification('warning', 'Một phần thành công', `Đã từ chối ${successCount} đơn, ${errorCount} đơn thất bại.`);
+                            }
                         }
                     },
                     error: (error) => {
                         console.error('Error rejecting instructor request:', error);
                         completedCount++;
-                        if (completedCount === requestsToReject.length) {
+                        errorCount++;
+                        if (completedCount === totalCount) {
                             this.selectedRequests.clear();
                             this.loadApprovalRequests();
+                            this.showToastNotification('error', 'Lỗi', `Có lỗi xảy ra khi từ chối đơn đăng ký.`);
                         }
                     }
                 });
             });
+        };
+        this.showConfirmDialog = true;
+    }
+
+    onConfirmDialogConfirm(): void {
+        if (this.confirmDialogAction) {
+            this.confirmDialogAction();
         }
+        this.showConfirmDialog = false;
+        this.confirmDialogAction = null;
+    }
+
+    onConfirmDialogCancel(): void {
+        this.showConfirmDialog = false;
+        this.confirmDialogAction = null;
+    }
+
+    showToastNotification(type: ToastType, title: string, message: string): void {
+        this.toastType = type;
+        this.toastTitle = title;
+        this.toastMessage = message;
+        this.showToast = true;
+        
+        // Auto dismiss after 3 seconds
+        setTimeout(() => {
+            this.showToast = false;
+        }, 3000);
     }
 
     getSubjectsDisplay(instructor: TutorDetail): string {
         if (!instructor?.subjects || !Array.isArray(instructor.subjects) || instructor.subjects.length === 0) {
-            return 'N/A';
+            return 'Chưa có môn học';
         }
         return instructor.subjects.map(s => s.subjectName).join(', ');
     }

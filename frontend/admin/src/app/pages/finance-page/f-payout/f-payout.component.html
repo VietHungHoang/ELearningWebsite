@@ -242,9 +242,14 @@
                 </div>
             }
 
-            @if (pendingPayouts.length > 0) {
-                <div class="overflow-x-auto">
-                    <table id="pending-payouts-table" class="w-full bg-white dark:bg-[#0c1427]">
+            @if (isLoading) {
+                <div class="p-[50px] text-center">
+                    <app-loading></app-loading>
+                </div>
+            } @else {
+                @if (pendingPayouts.length > 0) {
+                    <div class="overflow-x-auto">
+                        <table id="pending-payouts-table" class="w-full bg-white dark:bg-[#0c1427]">
                         <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                             <tr>
                                 <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs w-[40px]">
@@ -371,6 +376,7 @@
                     <p class="mt-[12px]">{{ 'payout.empty.noPendingPayouts' | translate }}</p>
                 </div>
             }
+            }
         </div>
     }
 
@@ -407,9 +413,14 @@
                 </div>
             </div>
 
-            @if (filteredPayoutHistory.length > 0) {
-                <div class="overflow-x-auto">
-                    <table id="payouts-history-table" class="w-full">
+            @if (isLoading) {
+                <div class="p-[50px] text-center">
+                    <app-loading></app-loading>
+                </div>
+            } @else {
+                @if (filteredPayoutHistory.length > 0) {
+                    <div class="overflow-x-auto">
+                        <table id="payouts-history-table" class="w-full">
                         <thead>
                             <tr>
                                 <th class="font-medium text-center px-[12px] py-[10px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[60px]">{{ 'payout.table.stt' | translate }}</th>
@@ -496,6 +507,7 @@
                     <i class="ri-inbox-archive-line text-[48px] opacity-50"></i>
                     <p class="mt-[12px]">{{ 'payout.empty.noPaymentHistory' | translate }}</p>
                 </div>
+            }
             }
         </div>
     }

@@ -5,27 +5,55 @@ import { ApiService } from './api.service';
 import { PaginatedResponse } from '../types/pagination';
 import { CurrencyService } from './currency.service';
 
-export type ClassStatus = 'upcoming' | 'ongoing' | 'completed';
-export type ClassType = '1-on-1' | '1-on-n';
+export type ClassStatus = 'upcoming' | 'ongoing' | 'completed' | 'OPENING' | 'CLOSED' | 'CANCELLED' | 'COMPLETED';
+export type ClassType = '1-on-1' | '1-on-n' | 'GROUP' | 'ONE_ON_ONE';
+
+// API Response Interface
+export interface ClassApiResponse {
+  id: string;
+  title: string;
+  students: any[];
+  type: 'GROUP' | 'ONE_ON_ONE';
+  status: 'OPENING' | 'CLOSED' | 'CANCELLED' | 'COMPLETED';
+  schedules: Array<{
+    dayOfWeek: number;
+    time: string;
+  }>;
+  startDate: string;
+  completedSessions: number;
+  totalSessions: number;
+  instructorId?: string;
+  instructorName?: string;
+  courseId?: string;
+  courseName?: string;
+}
 
 export interface GroupClass {
   id: string;
   class_name: string;
-  class_description: string;
+  class_description?: string;
   class_type: ClassType;
-  instructor_id: string;
-  instructor_name: string;
-  course_id: string;
-  course_name: string;
+  instructor_id?: string;
+  instructor_name?: string;
+  course_id?: string;
+  course_name?: string;
   start_datetime: Date;
-  end_datetime: Date;
-  duration_in_minutes: number;
-  price_per_student: number;
+  end_datetime?: Date;
+  duration_in_minutes?: number;
+  price_per_student?: number;
   max_capacity: number;
   enrollment_count: number;
-  platform_fee_percentage: number;
+  platform_fee_percentage?: number;
   status: ClassStatus;
-  created_at: Date;
+  created_at?: Date;
+  // New fields from API
+  schedules?: Array<{
+    dayOfWeek: number;
+    time: string;
+  }>;
+  completedSessions?: number;
+  totalSessions?: number;
+  students?: any[]; // Students enrolled in this class
 }
 
 export interface StudentEnrollment {
@@ -301,16 +329,63 @@ export class ClassService {
       }
     }
 
-    return this.apiService.get<PaginatedResponse<GroupClass>>('/classes', params).pipe(
+    return this.apiService.get<PaginatedResponse<ClassApiResponse>>('/classes', params).pipe(
       map(response => {
         if (response.success && response.data) {
-          // Convert date strings to Date objects
-          const classes = response.data.content.map(c => ({
-            ...c,
-            start_datetime: new Date(c.start_datetime),
-            end_datetime: new Date(c.end_datetime),
-            created_at: new Date(c.created_at)
-          }));
+          // Map API response to GroupClass format
+          const classes: GroupClass[] = response.data.content.map((apiClass: ClassApiResponse) => {
+            // Map type
+            let classType: ClassType = '1-on-n';
+            if (apiClass.type === 'ONE_ON_ONE') {
+              classType = '1-on-1';
+            } else if (apiClass.type === 'GROUP') {
+              classType = '1-on-n';
+            }
+
+            // Map status
+            let status: ClassStatus = 'upcoming';
+            if (apiClass.status === 'OPENING') {
+              status = 'ongoing';
+            } else if (apiClass.status === 'CLOSED' || apiClass.status === 'COMPLETED') {
+              status = 'completed';
+            } else if (apiClass.status === 'CANCELLED') {
+              status = 'completed'; // or create new status
+            }
+
+            // Parse startDate
+            const startDate = apiClass.startDate ? new Date(apiClass.startDate) : new Date();
+            
+            // Calculate enrollment from students array
+            const enrollmentCount = apiClass.students ? apiClass.students.length : 0;
+            // For max_capacity, we might need to get from API or use a default
+            // For now, use enrollmentCount + some buffer or get from API if available
+            const maxCapacity = enrollmentCount > 0 ? enrollmentCount + 10 : 20; // Default fallback
+
+            return {
+              id: apiClass.id,
+              class_name: apiClass.title || '',
+              class_description: '',
+              class_type: classType,
+              instructor_id: apiClass.instructorId || '',
+              instructor_name: apiClass.instructorName || 'N/A',
+              course_id: apiClass.courseId || '',
+              course_name: apiClass.courseName || '',
+              start_datetime: startDate,
+              end_datetime: undefined,
+              duration_in_minutes: undefined,
+              price_per_student: undefined,
+              max_capacity: maxCapacity,
+              enrollment_count: enrollmentCount,
+              platform_fee_percentage: undefined,
+              status: status,
+              created_at: undefined,
+              schedules: apiClass.schedules,
+              completedSessions: apiClass.completedSessions,
+              totalSessions: apiClass.totalSessions,
+              students: apiClass.students || [] // Keep students array for enrollment counting
+            };
+          });
+
           return {
             ...response.data,
             content: classes
@@ -390,15 +465,19 @@ export class ClassService {
       });
     }
 
-    const totalRevenue = groupClass.price_per_student * groupClass.enrollment_count;
-    const platformFee = totalRevenue * (groupClass.platform_fee_percentage / 100);
+    const pricePerStudent = groupClass.price_per_student || 0;
+    const platformFeePercentage = groupClass.platform_fee_percentage || 0;
+    const durationInMinutes = groupClass.duration_in_minutes || 0;
+
+    const totalRevenue = pricePerStudent * groupClass.enrollment_count;
+    const platformFee = totalRevenue * (platformFeePercentage / 100);
     const instructorPayout = totalRevenue - platformFee;
-    const durationInHours = groupClass.duration_in_minutes / 60;
+    const durationInHours = durationInMinutes / 60;
     const revenuePerHour = durationInHours > 0 ? totalRevenue / durationInHours : 0;
 
     return of({
       class_id: classId,
-      price_per_student: groupClass.price_per_student,
+      price_per_student: pricePerStudent,
       enrollment_count: groupClass.enrollment_count,
       total_revenue: totalRevenue,
       platform_fee: platformFee,
@@ -426,8 +505,8 @@ export class ClassService {
         const lowerQuery = filters.search.toLowerCase();
         filtered = filtered.filter(c =>
           c.class_name.toLowerCase().includes(lowerQuery) ||
-          c.instructor_name.toLowerCase().includes(lowerQuery) ||
-          c.course_name.toLowerCase().includes(lowerQuery)
+          (c.instructor_name && c.instructor_name.toLowerCase().includes(lowerQuery)) ||
+          (c.course_name && c.course_name.toLowerCase().includes(lowerQuery))
         );
       }
       if (filters.startDate) {
@@ -480,10 +559,11 @@ export class ClassService {
 
   searchClasses(query: string): Observable<GroupClass[]> {
     const classes = this.classesSubject.value;
+    const lowerQuery = query.toLowerCase();
     const filtered = classes.filter(c =>
-      c.class_name.toLowerCase().includes(query.toLowerCase()) ||
-      c.course_name.toLowerCase().includes(query.toLowerCase()) ||
-      c.instructor_name.toLowerCase().includes(query.toLowerCase())
+      c.class_name.toLowerCase().includes(lowerQuery) ||
+      (c.course_name && c.course_name.toLowerCase().includes(lowerQuery)) ||
+      (c.instructor_name && c.instructor_name.toLowerCase().includes(lowerQuery))
     );
     return of(filtered);
   }

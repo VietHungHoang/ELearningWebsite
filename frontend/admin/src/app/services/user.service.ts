@@ -979,7 +979,7 @@ export class UserService {
     approveInstructorRequest(tutorId: string): Observable<boolean> {
         // Gọi API thực để approve instructor request - KHÔNG GỬI LEVELS
         // return this.apiService.post<boolean>(`/tutors/${tutorId}/approve`, { levels }).pipe(
-        return this.apiService.post<boolean>(`/tutors/${tutorId}/approve`, {}).pipe(
+        return this.apiService.post<boolean>(`/tutors/approve/${tutorId}`, {}).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success) {
