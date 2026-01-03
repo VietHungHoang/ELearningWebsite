@@ -89,7 +89,7 @@
                                 {{ formatDateTime(groupClass.start_datetime) }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                {{ formatDuration(groupClass.duration_in_minutes) }}
+                                {{ formatDuration(groupClass.duration_in_minutes || 0) }}
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
                                 {{ groupClass.enrollment_count }} / {{ groupClass.max_capacity }}
@@ -195,7 +195,7 @@
                                 <strong class="text-gray-900 dark:text-white">{{ financialReport.revenue_per_hour | currencyFormat:'VND' }}</strong>
                             </td>
                             <td class="ltr:text-left rtl:text-right px-[20px] py-[15px] md:ltr:first:pl-[25px] md:rtl:first:pr-[25px] ltr:first:pr-0 rtl:first:pl-0 border-b border-gray-100 dark:border-[#172036]">
-                                {{ 'classManagement.classDetails.financialReport.basedOnDuration' | translate }} {{ formatDuration(groupClass.duration_in_minutes) }}
+                                {{ 'classManagement.classDetails.financialReport.basedOnDuration' | translate }} {{ formatDuration(groupClass.duration_in_minutes || 0) }}
                             </td>
                         </tr>
                     </tbody>

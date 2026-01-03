@@ -1,13 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslatePipe } from '../../i18n/translate.pipe';
 
 export type ConfirmDialogType = 'danger' | 'warning' | 'info' | 'success';
 
 @Component({
     selector: 'app-confirm-dialog',
     standalone: true,
-    imports: [CommonModule, TranslatePipe],
+    imports: [CommonModule],
     template: `
         <!-- Confirmation Modal -->
         <div class="add-new-popup z-[999] fixed transition-all inset-0 overflow-x-hidden overflow-y-auto lg:py-[20px]" [class.active]="isOpen">
