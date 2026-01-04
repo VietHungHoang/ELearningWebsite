@@ -157,17 +157,35 @@ public class SepayServiceImpl implements SepayService {
             return null;
         }
 
-        // Pattern to match UUID format
-        Pattern uuidPattern = Pattern.compile(
+        // 1. Try standard UUID format (with hyphens)
+        Pattern standardUuidPattern = Pattern.compile(
             "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
         );
-        
-        Matcher matcher = uuidPattern.matcher(content);
-        if (matcher.find()) {
+        Matcher standardMatcher = standardUuidPattern.matcher(content);
+        if (standardMatcher.find()) {
             try {
-                return UUID.fromString(matcher.group(1));
+                return UUID.fromString(standardMatcher.group(1));
             } catch (Exception e) {
-                log.error("Failed to parse UUID from content: {}", content);
+                log.error("Failed to parse standard UUID from content: {}", content);
+            }
+        }
+
+        // 2. Try UUID format without hyphens (32 hex chars)
+        Pattern compactUuidPattern = Pattern.compile("\\b([0-9a-fA-F]{32})\\b");
+        Matcher compactMatcher = compactUuidPattern.matcher(content);
+        if (compactMatcher.find()) {
+            try {
+                String hex = compactMatcher.group(1);
+                // Insert hyphens: 8-4-4-4-12
+                String formattedUuid = String.format("%s-%s-%s-%s-%s",
+                        hex.substring(0, 8),
+                        hex.substring(8, 12),
+                        hex.substring(12, 16),
+                        hex.substring(16, 20),
+                        hex.substring(20, 32));
+                return UUID.fromString(formattedUuid);
+            } catch (Exception e) {
+                log.error("Failed to parse compact UUID from content: {}", content);
             }
         }
 
