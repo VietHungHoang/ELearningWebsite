@@ -62,7 +62,7 @@ const SepayQRModal: React.FC<SepayQRModalProps> = ({
             const checkStatus = async () => {
                 try {
                     const response = await paymentService.getPaymentStatus(orderId);
-                    if ((response.status as string) === 'COMPLETED' || response.status === 'completed') {
+                    if (response === 'COMPLETED' || response === 'completed') {
                         onComplete();
                     }
                 } catch (error) {

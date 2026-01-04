@@ -42,7 +42,7 @@ public class SepayController {
      * Webhook endpoint to receive payment notifications from SePay
      * POST /hooks/sepay-payment
      */
-    @PostMapping("/hooks/sepay-payment")
+    @PostMapping("/api/v1/payments/sepay/hooks")
     public ResponseEntity<Void> handleSepayWebhook(@RequestBody SepayWebhookRequest request) {
 
         log.info("Received SePay webhook: id={}, gateway={}, amount={}, content={}", 
