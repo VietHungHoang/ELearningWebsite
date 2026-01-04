@@ -33,7 +33,7 @@ const CreateQuizPage: React.FC = () => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [showConfirmBack, setShowConfirmBack] = useState(false);
     const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [, setIsScrolled] = useState(false);
     const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
     const [isAIModalOpen, setIsAIModalOpen] = useState(false);
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);

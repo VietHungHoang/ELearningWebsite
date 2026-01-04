@@ -298,7 +298,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
     const [error, setError] = useState<string | null>(null);
     const [wsConnected, setWsConnected] = useState(false);
     const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
-    const [userCache, setUserCache] = useState<Map<string, UserInfo>>(new Map()); // eslint-disable-line @typescript-eslint/no-unused-vars
+    const [, setUserCache] = useState<Map<string, UserInfo>>(new Map());
 
     // Breadcrumb
     useEffect(() => {

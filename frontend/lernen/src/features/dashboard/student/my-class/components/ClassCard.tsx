@@ -13,15 +13,6 @@ const getNextSessionDetail = (
 
     // Using a fixed "now" for predictable demo output: Monday, Oct 20, 2025 at 9:00 AM UTC
     const today = new Date("2025-10-20T09:00:00Z");
-    const dayMap: { [key: string]: number } = {
-        Sunday: 0,
-        Monday: 1,
-        Tuesday: 2,
-        Wednesday: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6,
-    };
     const upcomingSessions: Date[] = [];
 
     for (let i = 0; i < 14; i++) {
@@ -31,7 +22,9 @@ const getNextSessionDetail = (
         const checkDayIndex = checkDate.getUTCDay();
 
         for (const schedule of schedules) {
-            if (dayMap[schedule.day] === checkDayIndex) {
+            // schedule.dayOfWeek is 1-7 (Monday-Sunday), checkDayIndex is 0-6 (Sunday-Saturday)
+            const scheduleDayIndex = schedule.dayOfWeek === 7 ? 0 : schedule.dayOfWeek;
+            if (scheduleDayIndex === checkDayIndex) {
                 const [time, period] = schedule.time.split(" ");
                 let [hours, minutes] = time.split(":").map(Number);
                 if (period === "PM" && hours < 12) hours += 12;
@@ -102,21 +95,21 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onViewDetails }) => {
             <div className="mb-4">
                 <div className="flex justify-between items-start mb-2">
                     <span
-                        className={`text-xs font-bold px-2.5 py-1 rounded-full ${classData.type === "1-on-1"
+                        className={`text-xs font-bold px-2.5 py-1 rounded-full ${classData.type === "ONE_ON_ONE"
                                 ? "bg-blue-100 text-blue-800"
                                 : "bg-purple-100 text-purple-800"
                             }`}
                     >
                         {classData.type}
                     </span>
-                    {classData.status === "Completed" && (
+                    {classData.status === "COMPLETED" && (
                         <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-800">
                             Completed
                         </span>
                     )}
                 </div>
                 <h3 className="font-bold text-lg text-gray-800 line-clamp-2 h-14 group-hover:text-[#0b6459] transition-colors">
-                    {classData.courseTitle}
+                    {classData.title}
                 </h3>
             </div>
 
@@ -128,8 +121,8 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onViewDetails }) => {
                         <FiUsers size={14} />
                     </div>
                     <span className="font-medium truncate">
-                        {classData.type === "1-on-1"
-                            ? classData.students[0].name
+                        {classData.type === "ONE_ON_ONE"
+                            ? classData.students[0].fullName || classData.students[0].name
                             : `${classData.students.length} Students`}
                     </span>
                 </div>
@@ -163,7 +156,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onViewDetails }) => {
                         style={{ width: "calc(100% - 2rem)" }}
                     >
                         <div
-                            className={`h-1.5 rounded-full ${classData.status === "Completed" ? "bg-green-500" : "bg-[#0b6459]"
+                            className={`h-1.5 rounded-full ${classData.status === "COMPLETED" ? "bg-green-500" : "bg-[#0b6459]"
                                 }`}
                             style={{ width: `${progressPercentage}%` }}
                         ></div>
@@ -171,7 +164,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onViewDetails }) => {
                 </div>
 
                 {/* Row 4: Next Session (Highlighted) */}
-                {classData.status !== "Completed" && (
+                {classData.status !== "COMPLETED" && (
                     <div
                         className={`flex items-start gap-3 text-sm p-2 rounded-lg mt-2 ${isUrgent
                                 ? "bg-orange-50 border border-orange-100"

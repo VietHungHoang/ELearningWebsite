@@ -62,7 +62,7 @@ export const tutorService = {
         }
     },
 
-    getTutorDetail: async (tutorId: string, studentId?: string): Promise<ApiResponse<TutorDetail>> => {
+    getTutorDetail: async (tutorId: string, studentId?: string): Promise<ApiResponse<import('../types/api').TutorDetail>> => {
         try {
             const params: Record<string, string> = {};
             console.log("Fetching tutor detail with studentId:", studentId);
@@ -70,7 +70,7 @@ export const tutorService = {
                 console.log("Including studentId in request params", studentId);
                 params.studentId = studentId;
             }
-            const response = await apiService.get<TutorDetailResponse>(`/v1/public/tutors/${tutorId}`, params);
+            const response = await apiService.get<import('../types/api').TutorDetailResponse>(`/v1/public/tutors/${tutorId}`, params);
             // const tutor = await mapTutorDetailResponseToTutorDetail(response.data);
             return {
                 status: response.status,

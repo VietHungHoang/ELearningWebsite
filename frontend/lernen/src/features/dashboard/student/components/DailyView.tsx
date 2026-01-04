@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Session } from '../../../types/class';
+import type { Session } from '../../../../types/class';
 import commonUtils from '../../../../utils/commonUtils';
 
 interface DailyViewProps {

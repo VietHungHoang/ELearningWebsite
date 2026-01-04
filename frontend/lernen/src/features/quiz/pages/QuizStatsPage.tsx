@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
     HiArrowLeft,
@@ -275,7 +275,7 @@ const QuizStatsPage: React.FC = () => {
                                         }}
                                     />
                                     <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                                        {mockScoreDistribution.map((entry, index) => (
+                                        {mockScoreDistribution.map((_, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
                                     </Bar>

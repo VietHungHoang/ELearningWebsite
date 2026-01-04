@@ -138,9 +138,9 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({ student, onClos
             <div>
               <h2 className="font-bold text-xl text-gray-800">{student.name}</h2>
               <div className="flex items-center gap-2 mt-1">
-                <StudentStatusBadge status={student.status} />
+                <StudentStatusBadge status={(student.status || 'Active') as any} />
                 <div className="flex gap-1">
-                  {student.enrollmentTypes.map(type => (
+                  {(student.enrollmentTypes || []).map(type => (
                     <EnrollmentTypeBadge key={type} type={type} />
                   ))}
                 </div>

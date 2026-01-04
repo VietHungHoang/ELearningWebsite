@@ -79,6 +79,7 @@ export const useTutorProfile = () => {
                 // Update profile with new video URL
                 setProfile({
                     ...profile,
+                    videoUrl: response.data.fileUrl,
                     introductionVideoUrl: response.data.fileUrl,
                 });
                 return { success: true, message: response.message, fileUrl: response.data.fileUrl };

@@ -1,7 +1,9 @@
 import React from "react";
-import type { ClassData, Schedule } from "./MyClassPage";
+import type { ClassData } from "./components/EditClassModal";
 import { FiCalendar, FiUsers, FiCheckCircle, FiClock } from "react-icons/fi";
 import { BsChatDots } from "react-icons/bs";
+
+type Schedule = { day: string; time: string };
 
 // Helper to determine the next session date from a recurring schedule
 const getNextSessionDetail = (
@@ -13,16 +15,13 @@ const getNextSessionDetail = (
 
     // Using a fixed "now" for predictable demo output: Monday, Oct 20, 2025 at 9:00 AM UTC
     const today = new Date("2025-10-20T09:00:00Z");
-    const dayMap: { [key: string]: number } = {
-        Sunday: 0,
-        Monday: 1,
-        Tuesday: 2,
-        Wednesday: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6,
-    };
     const upcomingSessions: Date[] = [];
+
+    // Map day names to day indices (Sunday=0, Monday=1, etc.)
+    const dayMap: { [key: string]: number } = {
+        'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3,
+        'Thursday': 4, 'Friday': 5, 'Saturday': 6
+    };
 
     for (let i = 0; i < 14; i++) {
         // Check next 2 weeks
@@ -31,7 +30,8 @@ const getNextSessionDetail = (
         const checkDayIndex = checkDate.getUTCDay();
 
         for (const schedule of schedules) {
-            if (dayMap[schedule.day] === checkDayIndex) {
+            const scheduleDayIndex = dayMap[schedule.day];
+            if (scheduleDayIndex !== undefined && scheduleDayIndex === checkDayIndex) {
                 const [time, period] = schedule.time.split(" ");
                 let [hours, minutes] = time.split(":").map(Number);
                 if (period === "PM" && hours < 12) hours += 12;
@@ -116,7 +116,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classData, onViewDetails }) => {
                     )}
                 </div>
                 <h3 className="font-bold text-lg text-gray-800 line-clamp-2 h-14 group-hover:text-[#0b6459] transition-colors">
-                    {classData.courseTitle}
+                    {classData.classTitle}
                 </h3>
             </div>
 

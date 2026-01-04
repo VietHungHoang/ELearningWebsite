@@ -11,7 +11,7 @@ import {
     FiHelpCircle,
     FiBell,
     FiShoppingBag,
-    FiFileText,
+    // FiFileText,
     FiCode,
     FiStar,
 } from "react-icons/fi";

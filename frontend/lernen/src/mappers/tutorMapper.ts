@@ -90,7 +90,7 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
     // Cast to any to access fields that may exist in API response but not in type definition
     const rawResponse = profileHeaderResponse as any;
 
-    return {
+    const tutorDetail = {
         id: profileHeaderResponse.id,
         fullName: profileHeaderResponse.fullName,
         avatarUrl: profileHeaderResponse.avatarUrl,
@@ -107,9 +107,18 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
         languages,
         subjects,
         socialLinks: profileHeaderResponse.socialLinks,
-        // Resume data from API response
-        educations: rawResponse.educations || [],
-        experiences: rawResponse.experiences || [],
-        certifications: rawResponse.certifications || rawResponse.certificates || [],
-    };
+    } as import('../types/tutor').TutorDetail;
+    
+    // Add resume data separately if available
+    if (rawResponse.educations || rawResponse.experiences || rawResponse.certifications || rawResponse.certificates) {
+        const tutorWithResume: import('../types/tutor').TutorDetail = {
+            ...tutorDetail,
+            educations: rawResponse.educations || [],
+            experiences: rawResponse.experiences || [],
+            certifications: rawResponse.certifications || rawResponse.certificates || [],
+        };
+        return tutorWithResume;
+    }
+    
+    return tutorDetail;
 };

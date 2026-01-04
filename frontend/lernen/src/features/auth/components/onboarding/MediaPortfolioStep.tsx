@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { HiCloudUpload, HiOutlineTrash, HiOutlineCamera } from "react-icons/hi";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaYoutube } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import type { TutorSocial, Tutor } from "../../../../types/tutor";
+import type { TutorSocial, TutorOnboardingData } from "../../../../types/tutor";
 import { uploadService } from "../../../../services/uploadService";
 import apiService from "../../../../services/apiService";
 
 interface MediaPortfolioStepProps {
-    data: Partial<Tutor>;
-    onChange: (data: Partial<Tutor>) => void;
+    data: Partial<TutorOnboardingData>;
+    onChange: (data: Partial<TutorOnboardingData>) => void;
 }
 
 const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange }) => {
@@ -16,10 +16,10 @@ const MediaPortfolioStep: React.FC<MediaPortfolioStepProps> = ({ data, onChange 
     const [photoPreview, setPhotoPreview] = useState<string | null>(data.avatarUrl || null);
     const [videoPreview, setVideoPreview] = useState<string | null>(data.videoUrl || null);
     const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-    const [photoUploadError, setPhotoUploadError] = useState(false);
+    const [, setPhotoUploadError] = useState(false);
     const [photoUploadSuccess, setPhotoUploadSuccess] = useState(false);
     const [isUploadingVideo, setIsUploadingVideo] = useState(false);
-    const [videoUploadError, setVideoUploadError] = useState(false);
+    const [, setVideoUploadError] = useState(false);
     const [videoUploadSuccess, setVideoUploadSuccess] = useState(false);
     const [photoFileInfo, setPhotoFileInfo] = useState<{ name: string; size: number; type: string } | null>(null);
     const [videoFileInfo, setVideoFileInfo] = useState<{ name: string; size: number; type: string } | null>(null);

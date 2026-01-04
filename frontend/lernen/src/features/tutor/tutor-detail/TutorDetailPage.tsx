@@ -22,8 +22,8 @@ const TutorDetailPage: React.FC = () => {
 
     const [introduction, setIntroduction] = useState<string>("");
     const [tutorData, setTutorData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setLoading] = useState(true);
+    const [, setError] = useState<string | null>(null);
     const [hasTrialSession, setHasTrialSession] = useState(false);
     const [groupClasses, setGroupClasses] = useState<GroupClass[]>([]);
     const [groupClassesError, setGroupClassesError] = useState<string | null>(null);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { HiDocumentText, HiUserGroup, HiBookOpen, HiCalendar, HiCreditCard, HiAcademicCap, HiTrendingUp, HiUser, HiGlobe } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 
 interface ApiEndpoint {
@@ -26,7 +25,6 @@ interface ApiEndpoint {
 
 const ApiDocumentationPage: React.FC = () => {
     const [activeSection, setActiveSection] = useState('common');
-    const navigate = useNavigate();
     const { setBreadcrumb } = useBreadcrumb();
 
     useEffect(() => {

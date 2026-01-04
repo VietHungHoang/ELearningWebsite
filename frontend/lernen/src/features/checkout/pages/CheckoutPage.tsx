@@ -12,7 +12,7 @@ import {
 import HeaderNoNavbar from "../../../components/ui/HeaderNoNavbar";
 import { useLocation } from "react-router-dom";
 import { useCurrency } from "../../../context/CurrencyContext";
-import { convertFromVND, formatCurrency } from "../../../utils/currencyHelper";
+import { formatCurrency } from "../../../utils/currencyHelper";
 import Avatar from "react-avatar";
 import bookingService from "../../../services/bookingService";
 import { useTranslation } from "react-i18next";

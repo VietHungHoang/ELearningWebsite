@@ -110,7 +110,7 @@ const StudentDetailPage: React.FC = () => {
                 items={[
                     { label: t('dashboard.tutor.studentDetail.breadcrumb.dashboard'), onClick: () => navigate('/dashboard') },
                     { label: t('dashboard.tutor.studentDetail.breadcrumb.myStudents'), onClick: () => navigate('/dashboard/my-students') },
-                    { label: student.name, isActive: true }
+                    { label: student.name || 'Student', isActive: true }
                 ]}
                 className="mb-6"
             />

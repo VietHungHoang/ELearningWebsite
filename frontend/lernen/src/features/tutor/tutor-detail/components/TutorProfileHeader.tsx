@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaPinterest, FaYoutube } from "react-icons/fa";
 import { VscVerified } from "react-icons/vsc";
 import { PiStar, PiStudentLight, PiCalendar, PiBookOpenTextLight } from "react-icons/pi";
@@ -7,15 +7,15 @@ import { FaHeart, FaPlay } from "react-icons/fa";
 import { RiSpeakLine } from "react-icons/ri";
 import { AiOutlineGlobal } from "react-icons/ai";
 import Avatar from "react-avatar";
-import type { Tutor } from "../../../../types/tutor";
+// import type { Tutor } from "../../../../types/tutor";
 import { FlagIcon } from "../../find-tutor/components/TutorCard";
 import { useCurrency } from "../../../../context/CurrencyContext";
 import { useChat } from "../../../../context/ChatContext";
 import { convertFromVND, formatCurrency } from "../../../../utils/currencyHelper";
 import { useTranslation } from "react-i18next";
-import { tutorService } from "../../../../services/tutorService";
-import { useAuth } from "../../../../context/AuthContext";
-import { classService } from "../../../../services/classService";
+// import { tutorService } from "../../../../services/tutorService";
+// import { useAuth } from "../../../../context/AuthContext";
+// import { classService } from "../../../../services/classService";
 
 const TutorProfileHeader: React.FC<{
     tutor: any;

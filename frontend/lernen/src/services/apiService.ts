@@ -36,6 +36,17 @@ class ApiService {
     }
   }
 
+  // PATCH request
+  async patch<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
+    // eslint-disable-next-line no-useless-catch
+    try {
+      const response = await axiosInstance.patch(url, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // DELETE request
   async delete<T>(url: string): Promise<ApiResponse<T>> {
     // eslint-disable-next-line no-useless-catch

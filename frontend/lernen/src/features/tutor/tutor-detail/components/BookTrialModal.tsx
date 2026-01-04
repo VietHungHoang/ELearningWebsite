@@ -26,7 +26,7 @@ const TrialBenefit: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   </li>
 );
 
-const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorId, tutorData, selectedTimes, selectedTimezone, onSuccess }) => {
+const BookTrialModal: React.FC<BookTrialModalProps> = ({ isOpen, onClose, tutorData, selectedTimes, selectedTimezone, onSuccess }) => {
   const [tutor, setTutor] = useState<TutorResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

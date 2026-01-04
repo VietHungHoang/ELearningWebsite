@@ -369,7 +369,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const [categories, setCategories] = useState<Category[]>([]);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     // Initialize timezones immediately with static data
-    const [timezones, setTimezones] = useState<Timezone[]>(() => commonUtils.getAllTimezones());
+    const [timezones] = useState<Timezone[]>(() => commonUtils.getAllTimezones());
     const [languages, setLanguages] = useState<Language[]>([]);
 
     // Loading states for lazy loading

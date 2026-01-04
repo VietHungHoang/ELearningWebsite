@@ -8,6 +8,9 @@ import Toast from '../../../../components/ui/Toast';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CreateClassModal, { type ClassFormData } from './components/CreateClassModal';
 import EditClassModal, { type ClassData } from './components/EditClassModal';
+
+export type { ClassData };
+export type Schedule = import('../../../../types/class').ClassSchedule;
 import CustomDropdownDashboard from '../../../../components/ui/CustomDropdownDashboard';
 import Pagination from '../../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';

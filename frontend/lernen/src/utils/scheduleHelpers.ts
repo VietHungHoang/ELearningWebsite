@@ -121,18 +121,16 @@ export const overlayBookedSessions = (
 };
 
 /**
- * Get color class for a booked session based on status
+ * Get color class for a booked session based on session type
  */
-export const getSessionColorClass = (status: Session['status']): string => {
-  switch (status) {
-    case 'CONFIRMED':
+export const getSessionColorClass = (sessionType: string): string => {
+  switch (sessionType) {
+    case 'ONE_ON_ONE':
       return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'PENDING':
+    case 'GROUP':
       return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'COMPLETED':
+    case 'TRIAL':
       return 'bg-green-100 text-green-800 border-green-200';
-    case 'CANCELLED':
-      return 'bg-red-100 text-red-800 border-red-200';
     case 'NO_SHOW':
       return 'bg-gray-100 text-gray-800 border-gray-200';
     default:

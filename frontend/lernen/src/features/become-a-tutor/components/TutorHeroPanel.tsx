@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiDollarSign, FiTrendingUp, FiUsers, FiAward, FiCheckCircle } from 'react-icons/fi';
+import { FiDollarSign, FiTrendingUp, FiAward, FiCheckCircle } from 'react-icons/fi';
 import { AiFillStar } from 'react-icons/ai';
 import { useTranslation } from 'react-i18next';
 

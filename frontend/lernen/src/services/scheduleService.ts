@@ -81,6 +81,20 @@ export const scheduleService = {
 
     updateAvailability: async (tutorId: string, request: UpdateAvailabilityRequest): Promise<ApiResponse<null>> => {
         return await apiService.put<null>(`/v1/tutors/${tutorId}/availabilities`, request);
+    },
+
+    getBookedSessions: async (request: import('../types/class').GetBookedSessionsRequest): Promise<ApiResponse<import('../types/class').GetBookedSessionsResponse>> => {
+        const params = new URLSearchParams({
+            startDate: request.startDate,
+            endDate: request.endDate,
+        });
+        return await apiService.get<import('../types/class').GetBookedSessionsResponse>(
+            `/v1/tutors/${request.tutorId}/booked-sessions?${params.toString()}`
+        );
+    },
+
+    bulkUpdateAvailability: async (request: import('../types/tutor').UpdateAvailabilityRequest & { tutorId: string }): Promise<ApiResponse<null>> => {
+        return await apiService.put<null>(`/v1/tutors/${request.tutorId}/availabilities/bulk`, request);
     }
 };
 
