@@ -21,11 +21,6 @@ import { TranslatePipe } from '../../../../i18n/translate.pipe';
                         @if (isTimeframeMenuOpen) {
                             <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[4] dark:bg-dark dark:shadow-none">
                                 <li>
-                                    <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Daily')">
-                                        {{ 'revenueDashboard.charts.revenueTrend.timeframe.daily' | translate }}
-                                    </button>
-                                </li>
-                                <li>
                                     <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Weekly')">
                                         {{ 'revenueDashboard.charts.revenueTrend.timeframe.weekly' | translate }}
                                     </button>
@@ -33,6 +28,11 @@ import { TranslatePipe } from '../../../../i18n/translate.pipe';
                                 <li>
                                     <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Monthly')">
                                         {{ 'revenueDashboard.charts.revenueTrend.timeframe.monthly' | translate }}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="changeTimeframe('Yearly')">
+                                        {{ 'revenueDashboard.charts.revenueTrend.timeframe.yearly' | translate }}
                                     </button>
                                 </li>
                             </ul>
@@ -55,25 +55,16 @@ export class RevenueTrendComponent implements OnInit, OnChanges {
     private chartInstance: any;
 
     @Input() revenueTrendData: {
-        Daily: { series: Array<{ name: string; data: number[] }>; categories: string[] };
         Weekly: { series: Array<{ name: string; data: number[] }>; categories: string[] };
         Monthly: { series: Array<{ name: string; data: number[] }>; categories: string[] };
+        Yearly: { series: Array<{ name: string; data: number[] }>; categories: string[] };
     } | null = null;
-    @Input() selectedTimeframe: string = 'Daily';
+    @Input() selectedTimeframe: string = 'Weekly';
     @Output() timeframeChange = new EventEmitter<string>();
 
     isTimeframeMenuOpen = false;
 
     chartData: { [key: string]: { series: any[]; categories: string[] } } = {
-        Daily: {
-            series: [
-                {
-                    name: 'Revenue',
-                    data: [2500000, 2800000, 2600000, 3100000, 3500000, 3200000, 3800000]
-                }
-            ],
-            categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
         Weekly: {
             series: [
                 {
@@ -91,6 +82,15 @@ export class RevenueTrendComponent implements OnInit, OnChanges {
                 }
             ],
             categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+        },
+        Yearly: {
+            series: [
+                {
+                    name: 'Revenue',
+                    data: [850000000, 920000000, 980000000, 1050000000, 1120000000, 1200000000]
+                }
+            ],
+            categories: ['2019', '2020', '2021', '2022', '2023', '2024']
         }
     };
 

@@ -1,10 +1,4 @@
 
-<button type="button" class="light-dark-toggle leading-none inline-block transition-all text-orange-400 absolute top-[20px] md:top-[25px] ltr:right-[20px] rtl:left-[20px] ltr:md:right-[25px] rtl:md:left-[25px]" (click)="toggleTheme()">
-    <i class="material-symbols-outlined !text-[20px] md:!text-[22px]">
-        light_mode
-    </i>
-</button>
-
 <div class="bg-white dark:bg-[#0a0e19] min-h-screen flex items-center justify-center py-[60px] px-[12.5px]">
     <div class="w-full max-w-[450px]">
         <div class="text-center mb-[30px]">
@@ -38,7 +32,7 @@
                         name="email"
                         [disabled]="isLoading"
                         class="h-[50px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        placeholder="admin@example.com"
+                        placeholder="Enter your email"
                         required>
                 </div>
 
@@ -70,18 +64,14 @@
                     <span class="flex items-center justify-center gap-[8px]">
                         @if (isLoading) {
                             <i class="material-symbols-outlined animate-spin">refresh</i>
-                            �ang dang nh?p...
+                            Đang đăng nhập...
                         } @else {
                             <i class="material-symbols-outlined">login</i>
-                            �ang nh?p
+                            Đăng nhập
                         }
                     </span>
                 </button>
             </form>
         </div>
-
-        <p class="text-center mt-[20px] text-sm text-gray-500 dark:text-gray-400">
-             2026 Admin Dashboard. All rights reserved.
-        </p>
     </div>
 </div>

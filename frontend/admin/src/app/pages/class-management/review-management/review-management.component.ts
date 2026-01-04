@@ -88,7 +88,6 @@ export class ReviewManagementComponent implements OnInit {
         // Initialize flag reasons labels
         this.flagReasons = [
             { value: 'all', label: this.i18nService.translate('reviewManagement.filters.allReasons') },
-            { value: 'low_rating', label: this.i18nService.translate('reviewManagement.filters.lowRating') },
             { value: 'bad_words', label: this.i18nService.translate('reviewManagement.filters.inappropriateLanguage') },
             { value: 'spam', label: this.i18nService.translate('reviewManagement.filters.spam') },
             { value: 'ai_content', label: this.i18nService.translate('reviewManagement.filters.aiContentIssue') }

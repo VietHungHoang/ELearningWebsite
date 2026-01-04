@@ -515,38 +515,38 @@
 
 @if (isDetailModalOpen && selectedPayout) {
     <div class="modal-overlay fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center p-4" (click)="closeDetailModal()">
-        <div class="modal-content max-w-[700px] w-full bg-white dark:bg-[#0c1427] rounded-lg shadow-xl max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
-            <div class="modal-body p-[24px]">
-                <div class="flex items-center justify-between mb-[16px]">
-                    <h3 class="text-base font-semibold text-black dark:text-white">
+        <div class="modal-content max-w-[700px] w-full bg-white dark:bg-[#0c1427] rounded-lg shadow-xl max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+            <div class="modal-body p-[24px] flex flex-col flex-1 min-h-0">
+                <div class="flex items-center justify-between mb-[16px] flex-shrink-0">
+                    <h3 class="text-base font-semibold text-gray-900">
                         {{ selectedPayout.instructorName }}
                     </h3>
-                    <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" (click)="closeDetailModal()">
+                    <button type="button" class="text-gray-500 hover:text-gray-700" (click)="closeDetailModal()">
                         <i class="material-symbols-outlined !text-xl">close</i>
                     </button>
                 </div>
 
                 <!-- Order List Section -->
-                <div class="mb-[20px]">
-                    <div class="flex items-center justify-between mb-[12px]">
-                        <h4 class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                <div class="mb-[20px] flex-1 min-h-0 flex flex-col">
+                    <div class="flex items-center justify-between mb-[12px] flex-shrink-0">
+                        <h4 class="text-xs font-medium text-gray-600">
                             {{ 'payout.modals.orderList.subtitle' | translate }} ({{ selectedPayout.orderCount }})
                         </h4>
                         <span class="text-xs font-semibold text-danger-500">
                             {{ 'payout.modals.orderList.total' | translate }}: {{ selectedPayout.totalOwed | currencyFormat:'VND' }}
                         </span>
                     </div>
-                    <div class="border border-gray-200 dark:border-[#172036] rounded-lg bg-white dark:bg-[#0c1427]">
-                        <div class="max-h-[500px] overflow-y-auto p-[12px] space-y-[10px]">
+                    <div class="border border-gray-200 rounded-lg bg-white flex-1 min-h-0 flex flex-col">
+                        <div class="p-[12px] space-y-[10px] overflow-y-auto flex-1">
                             @if (selectedPayout.orders && selectedPayout.orders.length > 0) {
                                 @for (order of selectedPayout.orders; track order.orderId) {
-                                    <div class="border border-gray-100 dark:border-[#172036] p-[12px] rounded-lg bg-gray-50 dark:bg-[#15203c] hover:bg-gray-100 dark:hover:bg-[#1a2a3c] transition-colors">
+                                    <div class="border border-gray-100 p-[12px] rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors flex-shrink-0">
                                         <div class="flex justify-between items-start mb-[6px]">
-                                            <span class="font-semibold text-sm text-gray-900 dark:text-white">{{ order.orderNumber }}</span>
+                                            <span class="font-semibold text-sm text-gray-900">{{ order.orderNumber }}</span>
                                             <span class="font-bold text-sm text-primary-500">{{ order.amount | currencyFormat:'VND' }}</span>
                                         </div>
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-[4px]">{{ order.learnerName }} - {{ order.sessionName }} ({{ order.sessionType === '1 and 1' ? '1-on-1' : 'Group' }})</p>
-                                        <p class="text-[10px] text-gray-500 dark:text-gray-500">{{ order.hourlyRate | currencyFormat:'VND' }}/h × {{ order.hours }}h | {{ order.date }}</p>
+                                        <p class="text-xs text-gray-600 mb-[4px]">{{ order.learnerName }} - {{ order.sessionName }} ({{ order.sessionType === '1 and 1' ? '1-on-1' : 'Group' }})</p>
+                                        <p class="text-[10px] text-gray-500">{{ order.hourlyRate | currencyFormat:'VND' }}/h × {{ order.hours }}h | {{ order.date }}</p>
                                     </div>
                                 }
                             } @else {
@@ -557,8 +557,8 @@
                 </div>
 
                 <!-- Action Button -->
-                <div class="flex gap-[12px] justify-end pt-[16px] border-t border-gray-200 dark:border-[#172036]">
-                    <button type="button" class="px-[20px] py-[10px] rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-[#172036] dark:text-gray-300 dark:hover:bg-[#15203c] text-sm font-medium" (click)="closeDetailModal()">
+                <div class="flex gap-[12px] justify-end pt-[16px] border-t border-gray-200 flex-shrink-0">
+                    <button type="button" class="px-[20px] py-[10px] rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium" (click)="closeDetailModal()">
                         {{ 'payout.modals.orderList.close' | translate }}
                     </button>
                 </div>

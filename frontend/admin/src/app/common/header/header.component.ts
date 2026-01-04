@@ -1,11 +1,12 @@
-import { Component, Inject, PLATFORM_ID, Renderer2, OnInit, effect } from '@angular/core';
+import { Component, Inject, PLATFORM_ID, Renderer2, OnInit, OnDestroy, effect } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { ToggleService } from './toggle.service';
 import { I18nService, SupportedLanguage } from '../../i18n/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { CurrencyService, SupportedCurrency } from '../../services/currency.service';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, AdminUser } from '../../services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-header',
@@ -13,11 +14,13 @@ import { AuthService } from '../../services/auth.service';
     templateUrl: './header.component.html',
     styleUrl: './header.component.scss'
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
 
     isSidebarVisible = true;
     currentLanguage: SupportedLanguage = 'en';
     currentCurrency: SupportedCurrency = 'USD';
+    currentUser: AdminUser | null = null;
+    private userSubscription?: Subscription;
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
@@ -41,6 +44,20 @@ export class HeaderComponent implements OnInit {
         this.toggleService.initializeTheme();
         this.currentLanguage = this.i18nService.getCurrentLanguage();
         this.currentCurrency = this.currencyService.getCurrentCurrency();
+        
+        // Get current user from service
+        this.currentUser = this.authService.getCurrentUser();
+        
+        // Subscribe to user changes
+        this.userSubscription = this.authService.currentUser$.subscribe(user => {
+            this.currentUser = user;
+        });
+    }
+
+    ngOnDestroy(): void {
+        if (this.userSubscription) {
+            this.userSubscription.unsubscribe();
+        }
     }
 
     async changeLanguage(lang: SupportedLanguage): Promise<void> {
