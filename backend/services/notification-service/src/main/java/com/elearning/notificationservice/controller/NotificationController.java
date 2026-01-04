@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/notification")
+@RequestMapping("/api/v1/notifications")
 public class NotificationController {
 
     private final NotificationService notificationService;

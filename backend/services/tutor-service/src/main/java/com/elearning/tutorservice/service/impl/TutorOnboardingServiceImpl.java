@@ -34,6 +34,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -54,6 +55,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
     private final TutorSocialRepository tutorSocialRepository;
     private final CertificationRepository certificationRepository;
     private final GeminiService geminiService;
+    private final TutorZoomCredentialRepository tutorZoomCredentialRepository;
 
     private final EntityManager entityManager;
 
@@ -130,10 +132,10 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
         try {
             // Get existing JSON data (contains id, email, fullName)
             String existingJsonData = onboarding.getJsonData();
-            
+
             // Call Gemini to parse resume and get structured JSON
             String parsedJson = geminiService.parseResumeToJson(resumeText, existingJsonData);
-            
+
             // Update onboarding with parsed data
             onboarding.setJsonData(parsedJson);
             onboardingRepository.save(onboarding);
@@ -168,6 +170,9 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             saveExperiences(tutorData, tutor);
             saveCertifications(tutorData, tutor);
 
+            // Clone Zoom credentials from any existing tutor
+            cloneZoomCredential(tutorId);
+
             onboarding.setStatus(OnboardingStatus.APPROVED);
             onboardingRepository.save(onboarding);
             log.info("Updated onboarding status to APPROVED for: {}", tutorId);
@@ -194,7 +199,8 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             kafkaProducer.sendTutorIndexEvent(indexEvent);
             log.info("Published tutor index event for new tutor: {}", tutorId);
 
-            // Send tutor approved event for notifications and other services (quiz-service, etc.)
+            // Send tutor approved event for notifications and other services (quiz-service,
+            // etc.)
             TutorApprovedEvent approvedEvent = TutorApprovedEvent.builder()
                     .tutorId(tutorId)
                     .fullName(tutor.getFullName())
@@ -363,6 +369,45 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
         }
     }
 
+    /**
+     * Clone Zoom credentials from an existing tutor to the newly approved tutor
+     * Finds any tutor with non-null accessToken and creates a duplicate credential
+     * 
+     * @param newTutorId The ID of the newly approved tutor
+     */
+    private void cloneZoomCredential(UUID newTutorId) {
+        try {
+            // Find any existing Zoom credential with non-null accessToken
+            Optional<TutorZoomCredential> existingCredential = tutorZoomCredentialRepository
+                    .findFirstByAccessTokenIsNotNull();
+
+            if (existingCredential.isPresent()) {
+                TutorZoomCredential sourceCredential = existingCredential.get();
+
+                // Create new credential with all data from source, only change tutorId
+                TutorZoomCredential newCredential = TutorZoomCredential.builder()
+                        .tutorId(newTutorId)
+                        .accessToken(sourceCredential.getAccessToken())
+                        .refreshToken(sourceCredential.getRefreshToken())
+                        .expiresAt(sourceCredential.getExpiresAt())
+                        .zoomUserId(sourceCredential.getZoomUserId())
+                        .zoomEmail(sourceCredential.getZoomEmail())
+                        .build();
+
+                tutorZoomCredentialRepository.save(newCredential);
+                log.info("Successfully cloned Zoom credentials for new tutor: {} from tutor: {}",
+                        newTutorId, sourceCredential.getTutorId());
+            } else {
+                log.warn("No existing Zoom credentials found with non-null accessToken. " +
+                        "Skipping Zoom credential cloning for tutor: {}", newTutorId);
+            }
+        } catch (Exception e) {
+            // Don't fail the entire approval process if Zoom credential cloning fails
+            log.error("Failed to clone Zoom credentials for tutor: {}. Error: {}",
+                    newTutorId, e.getMessage(), e);
+        }
+    }
+
     @Override
     public String generateIntroduction(UUID tutorId, String prompt) {
         log.info("Generating introduction for tutor: {} with prompt: {}", tutorId, prompt);
@@ -389,15 +434,15 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
     private String buildIntroductionPrompt(String userPrompt, String jsonData) {
         return """
                 You are a professional writer helping tutors create compelling introductions for their profiles.
-                
+
                 Based on the following tutor information and user request, generate a professional introduction:
-                
+
                 Tutor Information (JSON):
                 %s
-                
+
                 User Request:
                 %s
-                
+
                 Instructions:
                 1. Write a professional, engaging introduction in the first person
                 2. Highlight the tutor's experience, qualifications, and teaching style
@@ -405,7 +450,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
                 4. Make it warm and approachable while maintaining professionalism
                 5. Focus on what makes this tutor unique and valuable to students
                 6. Only return the introduction text, no additional formatting or explanations
-                
+
                 Generate the introduction now:
                 """.formatted(jsonData, userPrompt);
     }
@@ -424,14 +469,14 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
         try {
             com.fasterxml.jackson.databind.JsonNode rootNode = objectMapper.readTree(response);
             com.fasterxml.jackson.databind.JsonNode candidates = rootNode.get("candidates");
-            
+
             if (candidates != null && candidates.isArray() && candidates.size() > 0) {
                 com.fasterxml.jackson.databind.JsonNode firstCandidate = candidates.get(0);
                 com.fasterxml.jackson.databind.JsonNode content = firstCandidate.get("content");
-                
+
                 if (content != null) {
                     com.fasterxml.jackson.databind.JsonNode parts = content.get("parts");
-                    
+
                     if (parts != null && parts.isArray() && parts.size() > 0) {
                         com.fasterxml.jackson.databind.JsonNode text = parts.get(0).get("text");
                         if (text != null) {
@@ -440,7 +485,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
                     }
                 }
             }
-            
+
             throw new RuntimeException("Could not extract text from Gemini response");
         } catch (Exception e) {
             log.error("Failed to parse Gemini response", e);
@@ -451,23 +496,24 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
     @Override
     public Page<PendingTutorResponse> getPendingRequests(int page, int size) {
         log.info("Getting pending tutor requests, page: {}, size: {}", page, size);
-        
+
         // Convert to 0-based index if needed
         int pageIndex = page > 0 ? page - 1 : 0;
-        
+
         Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<TutorOnboarding> onboardingPage = onboardingRepository.findByStatus(OnboardingStatus.PENDING, pageable);
-        
+
         return onboardingPage.map(onboarding -> {
             // Parse jsonData to get email, avatarUrl, and subjectIds
             String email = null;
             String avatarUrl = null;
             List<UUID> subjectIds = null;
             String fullName = null;
-            
+
             try {
                 if (onboarding.getJsonData() != null) {
-                    TutorOnboardingDto data = objectMapper.readValue(onboarding.getJsonData(), TutorOnboardingDto.class);
+                    TutorOnboardingDto data = objectMapper.readValue(onboarding.getJsonData(),
+                            TutorOnboardingDto.class);
                     email = data.getEmail();
                     avatarUrl = data.getAvatarUrl();
                     subjectIds = data.getSubjectIds();
@@ -476,7 +522,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             } catch (Exception e) {
                 log.warn("Failed to parse jsonData for tutor: {}", onboarding.getTutorId(), e);
             }
-            
+
             return PendingTutorResponse.builder()
                     .tutorId(onboarding.getTutorId())
                     .email(email)
@@ -491,7 +537,7 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
                     .build();
         });
     }
-    
+
     private String extractFullName(String jsonData) {
         try {
             TutorOnboardingDto data = objectMapper.readValue(jsonData, TutorOnboardingDto.class);

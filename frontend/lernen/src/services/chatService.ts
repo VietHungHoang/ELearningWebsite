@@ -86,7 +86,7 @@ export interface AddReactionRequest {
  * Note: userId sẽ được tự động thêm vào header X-User-Id qua interceptor
  */
 const createConversation = async (request: CreateConversationRequest): Promise<ConversationResponse> => {
-    const response = await apiService.post<ConversationResponse>("v1/chat/conversations", request);
+    const response = await apiService.post<ConversationResponse>("/v1/chat/conversations", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -97,7 +97,7 @@ const createConversation = async (request: CreateConversationRequest): Promise<C
  * Lấy hoặc tạo conversation 1-1
  */
 const getOrCreateOneToOneConversation = async (otherUserId: string): Promise<ConversationResponse> => {
-    const response = await apiService.get<ConversationResponse>(`conversations/one-to-one/${otherUserId}`);
+    const response = await apiService.get<ConversationResponse>(`/v1/chat/conversations/one-to-one/${otherUserId}`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -108,7 +108,7 @@ const getOrCreateOneToOneConversation = async (otherUserId: string): Promise<Con
  * Lấy thông tin conversation
  */
 const getConversation = async (conversationId: string): Promise<ConversationResponse> => {
-    const response = await apiService.get<ConversationResponse>(`conversations/${conversationId}`);
+    const response = await apiService.get<ConversationResponse>(`/v1/chat/conversations/${conversationId}`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -139,7 +139,7 @@ const getAllConversationsForUser = async (
  */
 const addParticipants = async (conversationId: string, participantIds: string[]): Promise<ConversationResponse> => {
     const response = await apiService.put<ConversationResponse>(
-        `conversations/${conversationId}/participants`,
+        `/v1/chat/conversations/${conversationId}/participants`,
         participantIds
     );
     if (!response.success) {
@@ -152,7 +152,7 @@ const addParticipants = async (conversationId: string, participantIds: string[])
  * Xóa participant khỏi conversation
  */
 const removeParticipant = async (conversationId: string, participantId: string): Promise<void> => {
-    const response = await apiService.delete<void>(`conversations/${conversationId}/participants/${participantId}`);
+    const response = await apiService.delete<void>(`/v1/chat/conversations/${conversationId}/participants/${participantId}`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -163,7 +163,7 @@ const removeParticipant = async (conversationId: string, participantId: string):
  */
 const updateConversation = async (conversationId: string, name: string): Promise<ConversationResponse> => {
     const response = await apiService.put<ConversationResponse>(
-        `conversations/${conversationId}?name=${encodeURIComponent(name)}`
+        `/v1/chat/conversations/${conversationId}?name=${encodeURIComponent(name)}`
     );
     if (!response.success) {
         throw new Error(response.message);
@@ -175,7 +175,7 @@ const updateConversation = async (conversationId: string, name: string): Promise
  * Xóa conversation
  */
 const deleteConversation = async (conversationId: string): Promise<void> => {
-    const response = await apiService.delete<void>(`conversations/${conversationId}`);
+    const response = await apiService.delete<void>(`/v1/chat/conversations/${conversationId}`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -197,7 +197,7 @@ const searchConversations = async (
         content: ConversationResponse[];
         totalElements: number;
         totalPages: number;
-    }>("/v1/conversations/search", { query, page, size });
+    }>("/v1/chat/conversations/search", { query, page, size });
 
     if (!response.success) {
         throw new Error(response.message);
@@ -232,7 +232,7 @@ const sendMessageWithFiles = async (
     files.forEach((file) => formData.append("files", file));
 
     try {
-        const response = await axiosInstance.post<MessageResponse>("messages/with-files", formData, {
+        const response = await axiosInstance.post<MessageResponse>("/v1/chat/messages/with-files", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
                 "X-User-Id": userId,
@@ -253,7 +253,7 @@ const getConversationMessages = async (
     size: number = 50
 ): Promise<MessageResponse[]> => {
     const response = await apiService.get<PaginatedResponse<MessageResponse>>(
-        `v1/chat/messages/conversations/${conversationId}`,
+        `/v1/chat/messages/conversations/${conversationId}`,
         { page, size }
     );
 
@@ -267,7 +267,7 @@ const getConversationMessages = async (
  * Sửa tin nhắn
  */
 const updateMessage = async (request: UpdateMessageRequest): Promise<MessageResponse> => {
-    const response = await apiService.put<MessageResponse>("messages", request);
+    const response = await apiService.put<MessageResponse>("/v1/chat/messages", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -278,7 +278,7 @@ const updateMessage = async (request: UpdateMessageRequest): Promise<MessageResp
  * Xóa tin nhắn
  */
 const deleteMessage = async (messageId: string): Promise<void> => {
-    const response = await apiService.delete<void>(`messages/${messageId}`);
+    const response = await apiService.delete<void>(`/v1/chat/messages/${messageId}`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -288,7 +288,7 @@ const deleteMessage = async (messageId: string): Promise<void> => {
  * Mark as read
  */
 const markAsRead = async (request: MarkAsReadRequest): Promise<void> => {
-    const response = await apiService.post<void>("messages/read", request);
+    const response = await apiService.post<void>("/v1/chat/messages/read", request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -298,7 +298,7 @@ const markAsRead = async (request: MarkAsReadRequest): Promise<void> => {
  * Thêm reaction
  */
 const addReaction = async (messageId: string, request: AddReactionRequest): Promise<MessageResponse> => {
-    const response = await apiService.post<MessageResponse>(`messages/${messageId}/reactions`, request);
+    const response = await apiService.post<MessageResponse>(`/v1/chat/messages/${messageId}/reactions`, request);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -309,7 +309,7 @@ const addReaction = async (messageId: string, request: AddReactionRequest): Prom
  * Xóa reaction
  */
 const removeReaction = async (messageId: string): Promise<MessageResponse> => {
-    const response = await apiService.delete<MessageResponse>(`messages/${messageId}/reactions`);
+    const response = await apiService.delete<MessageResponse>(`/v1/chat/messages/${messageId}/reactions`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -320,7 +320,7 @@ const removeReaction = async (messageId: string): Promise<MessageResponse> => {
  * Đếm số tin nhắn chưa đọc
  */
 const getUnreadCount = async (conversationId: string): Promise<number> => {
-    const response = await apiService.get<number>(`messages/conversation/${conversationId}/unread-count`);
+    const response = await apiService.get<number>(`/v1/chat/messages/conversation/${conversationId}/unread-count`);
     if (!response.success) {
         throw new Error(response.message);
     }
@@ -331,7 +331,7 @@ const getUnreadCount = async (conversationId: string): Promise<number> => {
  * Tìm kiếm tin nhắn
  */
 const searchMessages = async (conversationId: string, query: string): Promise<MessageResponse[]> => {
-    const response = await apiService.get<MessageResponse[]>(`messages/conversation/${conversationId}/search`, {
+    const response = await apiService.get<MessageResponse[]>(`/v1/chat/messages/conversation/${conversationId}/search`, {
         query,
     });
     if (!response.success) {

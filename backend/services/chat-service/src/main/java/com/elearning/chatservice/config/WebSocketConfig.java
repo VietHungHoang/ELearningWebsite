@@ -34,12 +34,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Register STOMP endpoint
-        registry.addEndpoint("/ws/chat")
+        registry.addEndpoint("/api/v1/chat/ws")
                 .setAllowedOrigins(allowedOrigins.split(","))
                 .withSockJS();  // Fallback for browsers that don't support WebSocket
         
         // Also register without SockJS for native WebSocket clients
-        registry.addEndpoint("/ws/chat")
+        registry.addEndpoint("/api/v1/chat/ws")
                 .setAllowedOrigins(allowedOrigins.split(","));
     }
 }

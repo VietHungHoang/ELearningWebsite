@@ -34,8 +34,8 @@ public class SepayServiceImpl implements SepayService {
     @Override
     @Transactional
     public void processIpn(String secretKey, SepayIpnRequest request) {
-        log.info("Processing SePay IPN notification: type={}, orderId={}", 
-                request.getNotificationType(), 
+        log.info("Processing SePay IPN notification: type={}, orderId={}",
+                request.getNotificationType(),
                 request.getOrder() != null ? request.getOrder().getOrderId() : null);
 
         // Validate request
@@ -49,12 +49,13 @@ public class SepayServiceImpl implements SepayService {
         String orderStatus = request.getOrder().getOrderStatus();
         String notificationType = request.getNotificationType();
 
-        log.info("IPN - OrderId: {}, TransactionId: {}, Type: {}, OrderStatus: {}", 
+        log.info("IPN - OrderId: {}, TransactionId: {}, Type: {}, OrderStatus: {}",
                 orderId, transactionId, notificationType, orderStatus);
 
         // Find payment transaction by provider transaction ID
-        Optional<PaymentTransaction> optionalTransaction = paymentTransactionRepository.findByProviderTransactionId(transactionId);
-        
+        Optional<PaymentTransaction> optionalTransaction = paymentTransactionRepository
+                .findByProviderTransactionId(transactionId);
+
         if (optionalTransaction.isEmpty()) {
             log.warn("Payment transaction not found for provider transaction ID: {}", transactionId);
             return;
@@ -69,18 +70,18 @@ public class SepayServiceImpl implements SepayService {
 
         // Handle based on notification type
         if ("ORDER_PAID".equals(notificationType) && "PAID".equals(orderStatus)) {
-            
+
             // Payment successful
             handlePaymentSuccess(paymentTransaction);
-            
+
         } else if ("TRANSACTION_VOID".equals(notificationType)) {
-            
+
             // Transaction cancelled/refunded
             handlePaymentFailed(paymentTransaction, "Transaction voided");
-            
+
         } else {
             // Other statuses
-            log.warn("Unhandled IPN status - Type: {}, OrderStatus: {}", 
+            log.warn("Unhandled IPN status - Type: {}, OrderStatus: {}",
                     notificationType, orderStatus);
         }
     }
@@ -88,7 +89,7 @@ public class SepayServiceImpl implements SepayService {
     @Override
     @Transactional
     public void processSepayWebhook(SepayWebhookRequest request) {
-        log.info("Processing SePay webhook: id={}, gateway={}, amount={}, content={}", 
+        log.info("Processing SePay webhook: id={}, gateway={}, amount={}, content={}",
                 request.getId(), request.getGateway(), request.getTransferAmount(), request.getContent());
 
         // Only process incoming transfers
@@ -99,7 +100,7 @@ public class SepayServiceImpl implements SepayService {
 
         // Extract order ID from content (assuming format contains UUID)
         UUID orderId = extractOrderIdFromContent(request.getContent());
-        
+
         if (orderId == null) {
             log.warn("Could not extract order ID from content: {}", request.getContent());
             return;
@@ -109,7 +110,7 @@ public class SepayServiceImpl implements SepayService {
 
         // Find payment transaction by orderId
         Optional<PaymentTransaction> optionalTransaction = paymentTransactionRepository.findByOrderId(orderId);
-        
+
         if (optionalTransaction.isEmpty()) {
             log.warn("Payment transaction not found for orderId: {}", orderId);
             return;
@@ -132,7 +133,7 @@ public class SepayServiceImpl implements SepayService {
         transaction.setOrderInfo(request.getContent());
         transaction.setResultCode("0"); // Success
         transaction.setResultMessage("Payment received via SePay webhook");
-        
+
         // Parse transaction date
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -143,7 +144,7 @@ public class SepayServiceImpl implements SepayService {
 
         // Mark as successful
         handlePaymentSuccess(transaction);
-        
+
         log.info("Successfully processed SePay webhook for orderId: {}", orderId);
     }
 
@@ -158,8 +159,7 @@ public class SepayServiceImpl implements SepayService {
 
         // 1. Try standard UUID format (with hyphens)
         Pattern standardUuidPattern = Pattern.compile(
-            "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
-        );
+                "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})");
         Matcher standardMatcher = standardUuidPattern.matcher(content);
         if (standardMatcher.find()) {
             try {
@@ -198,16 +198,11 @@ public class SepayServiceImpl implements SepayService {
         transaction.setPaidAt(LocalDateTime.now());
         paymentTransactionRepository.save(transaction);
 
-        // Send Kafka event
-        BookingPaymentSuccessEvent event = BookingPaymentSuccessEvent.builder()
-                .bookingId(transaction.getOrderId())
-                .classId(null)
-                .transactionId(transaction.getId())
-                .providerTransactionId(transaction.getProviderTransactionId())
-                .build();
-
-        kafkaProducer.sendBookingPaymentSuccessEvent(event);
-        log.info("Sent payment success event for bookingId: {}", transaction.getOrderId());
+        // NOTE: Kafka event is NOT sent here from webhook
+        // It will be sent when FE calls confirmPayment endpoint to avoid duplicate
+        // events
+        log.info("Payment status updated to COMPLETED for bookingId: {} (Kafka event will be sent on FE confirm)",
+                transaction.getOrderId());
     }
 
     private void handlePaymentFailed(PaymentTransaction transaction, String reason) {
@@ -217,15 +212,10 @@ public class SepayServiceImpl implements SepayService {
         transaction.setResultMessage(reason);
         paymentTransactionRepository.save(transaction);
 
-        // Send Kafka event
-        BookingPaymentFailedEvent event = BookingPaymentFailedEvent.builder()
-                .bookingId(transaction.getOrderId())
-                .classId(null)
-                .reason(reason)
-                .build();
-
-        kafkaProducer.sendBookingPaymentFailedEvent(event);
-        log.info("Sent payment failed event for bookingId: {}", transaction.getOrderId());
+        // NOTE: Kafka event is NOT sent here from webhook
+        // It will be sent when FE calls confirmPayment endpoint to avoid duplicate
+        // events
+        log.info("Payment status updated to FAILED for bookingId: {} (Kafka event will be sent on FE confirm)",
+                transaction.getOrderId());
     }
 }
-
