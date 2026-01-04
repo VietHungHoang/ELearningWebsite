@@ -611,7 +611,7 @@ const CheckoutPage: React.FC = () => {
         accountNumber="0982316213"
         transferContent={pendingOrderId ? `DH ${pendingOrderId}` : `DH${Date.now().toString().slice(-8)}`}
         orderId={pendingOrderId || undefined}
-        qrCodeUrl={`https://img.vietqr.io/image/MB-0982316213-compact.png?amount=${total}&addInfo=${pendingOrderId ? `DH%20${pendingOrderId}` : `DH${Date.now().toString().slice(-8)}`}&accountName=MAC%20VAN%20THANH`}
+        qrCodeUrl={`https://img.vietqr.io/image/MB-0982316213-compact.png?amount=5000&addInfo=${pendingOrderId ? `DH%20${pendingOrderId}` : `DH${Date.now().toString().slice(-8)}`}&accountName=MAC%20VAN%20THANH`}
       />
 
       {/* Toast Notification */}
