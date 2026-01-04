@@ -606,11 +606,11 @@ const CheckoutPage: React.FC = () => {
         }}
         amount={total}
         bankName="MB Bank"
-        accountName="HOANG VIET HUNG"
-        accountNumber="1099915082003"
+        accountName="MAC VAN THANH"
+        accountNumber="0982316213"
         transferContent={pendingOrderId ? `DH ${pendingOrderId}` : `DH${Date.now().toString().slice(-8)}`}
         orderId={pendingOrderId || undefined}
-        qrCodeUrl={`https://img.vietqr.io/image/MB-1099915082003-compact.png?amount=${total}&addInfo=${pendingOrderId ? `DH%20${pendingOrderId}` : `DH${Date.now().toString().slice(-8)}`}&accountName=HOANG%20VIET%20HUNG`}
+        qrCodeUrl={`https://img.vietqr.io/image/MB-0982316213-compact.png?amount=${total}&addInfo=${pendingOrderId ? `DH%20${pendingOrderId}` : `DH${Date.now().toString().slice(-8)}`}&accountName=MAC%20VAN%20THANH`}
       />
 
       {/* Toast Notification */}
