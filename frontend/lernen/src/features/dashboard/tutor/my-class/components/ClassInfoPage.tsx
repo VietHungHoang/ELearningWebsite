@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { 
     FiChevronLeft, 
@@ -120,16 +120,62 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
         return formatCurrency(convertedAmount, selectedCurrency);
     };
 
-    // Load categories and subjects
+    // Helper to get localized name
+    const getLocalizedName = (item: Category | Subject): string => {
+        const isVietnamese = i18n.language === 'vi';
+        return isVietnamese ? item.nameVi : item.nameEn;
+    };
+
+    // Load categories and subjects from localStorage first, then API if needed
+    // Use useRef to track if we've already loaded to prevent multiple calls
+    const optionsLoadedRef = useRef(false);
+    
     useEffect(() => {
+        // Only load once when component mounts
+        if (optionsLoadedRef.current) return;
+        
         const loadOptions = async () => {
+            // Check localStorage first before calling API
+            const cachedCategories = localStorage.getItem('categories');
+            const cachedSubjects = localStorage.getItem('subjects');
+            
+            // If we have cached data, use it immediately
+            if (cachedCategories && cachedSubjects) {
+                try {
+                    const parsedCategories = JSON.parse(cachedCategories);
+                    const parsedSubjects = JSON.parse(cachedSubjects);
+                    
+                    // Handle both old format (array) and new format ({ data, timestamp })
+                    const cats = Array.isArray(parsedCategories) 
+                        ? parsedCategories 
+                        : (parsedCategories?.data || []);
+                    const subs = Array.isArray(parsedSubjects) 
+                        ? parsedSubjects 
+                        : (parsedSubjects?.data || []);
+                    
+                    if (cats.length > 0 && subs.length > 0) {
+                        setCategories(cats);
+                        setSubjects(subs);
+                        optionsLoadedRef.current = true;
+                        console.log('Loaded categories and subjects from localStorage');
+                        // Don't call API here - let commonUtils handle background refresh if needed
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('Error parsing cached categories/subjects:', error);
+                }
+            }
+            
+            // No cache or invalid cache, fetch from API (this will use localStorage internally)
             const cats = await commonUtils.getCategories();
             const subs = await commonUtils.getSubjects();
             setCategories(cats);
             setSubjects(subs);
+            optionsLoadedRef.current = true;
         };
+        
         loadOptions();
-    }, []);
+    }, []); // Only run once on mount
 
     useEffect(() => {
         setBreadcrumb([
@@ -139,8 +185,40 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
         ]);
     }, [setBreadcrumb, t, classData]);
 
-    // Load class data from API
-    const loadClassData = async () => {
+    // Helper function to get subjects and categories from state or localStorage
+    const getSubjectsAndCategories = useCallback((): { subjects: Subject[]; categories: Category[] } => {
+        // Try to use state first
+        if (subjects.length > 0 && categories.length > 0) {
+            return { subjects, categories };
+        }
+        
+        // Fallback to localStorage
+        const cachedCategories = localStorage.getItem('categories');
+        const cachedSubjects = localStorage.getItem('subjects');
+        
+        if (cachedCategories && cachedSubjects) {
+            try {
+                const parsedCategories = JSON.parse(cachedCategories);
+                const parsedSubjects = JSON.parse(cachedSubjects);
+                
+                const cats = Array.isArray(parsedCategories) 
+                    ? parsedCategories 
+                    : (parsedCategories?.data || []);
+                const subs = Array.isArray(parsedSubjects) 
+                    ? parsedSubjects 
+                    : (parsedSubjects?.data || []);
+                
+                return { subjects: subs, categories: cats };
+            } catch (error) {
+                console.warn('Error parsing cached data:', error);
+            }
+        }
+        
+        return { subjects: [], categories: [] };
+    }, [subjects, categories]);
+
+    // Load class data from API - only depends on classId
+    const loadClassData = useCallback(async () => {
         if (!classId) {
             setIsLoading(false);
             return;
@@ -169,14 +247,16 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
             });
 
             // Convert subject and category names to current language
+            // Get subjects and categories from state or localStorage
+            const { subjects: currentSubjects, categories: currentCategories } = getSubjectsAndCategories();
+            
             let localizedSubject = data.subject || '';
             let localizedCategory = data.category || '';
             
-            // Use subjects and categories from state (already loaded in useEffect)
-            // If not loaded yet, wait for them to be available
-            if (data.subject && subjects.length > 0 && categories.length > 0) {
+            // Localize subject and category names
+            if (data.subject && currentSubjects.length > 0 && currentCategories.length > 0) {
                 // Try to find subject by matching name (could be English or Vietnamese)
-                const subject = subjects.find(s => {
+                const subject = currentSubjects.find(s => {
                     const nameEn = s.nameEn?.toLowerCase().trim();
                     const nameVi = s.nameVi?.toLowerCase().trim();
                     const searchName = data.subject?.toLowerCase().trim();
@@ -184,12 +264,13 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
                 });
                 
                 if (subject) {
-                    localizedSubject = getLocalizedName(subject);
+                    const isVietnamese = i18n.language === 'vi';
+                    localizedSubject = isVietnamese ? subject.nameVi : subject.nameEn;
                     
                     // Get category from subject
-                    const category = categories.find(c => c.id === subject.categoryId);
+                    const category = currentCategories.find(c => c.id === subject.categoryId);
                     if (category) {
-                        localizedCategory = getLocalizedName(category);
+                        localizedCategory = isVietnamese ? category.nameVi : category.nameEn;
                     }
                 }
             }
@@ -257,19 +338,53 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [classId, getSubjectsAndCategories, i18n.language]); // Only depend on classId and helper function
 
+    // Only reload class data when classId changes
     useEffect(() => {
         if (classId) {
             loadClassData();
         }
-    }, [classId, subjects, categories]); // Reload when subjects/categories are available for proper localization
+    }, [classId, loadClassData]); // Only depend on classId and loadClassData
 
-    // Helper to get localized name
-    const getLocalizedName = (item: Category | Subject): string => {
-        const isVietnamese = i18n.language === 'vi';
-        return isVietnamese ? item.nameVi : item.nameEn;
-    };
+    // Re-localize class data when subjects/categories or language changes (without calling API)
+    useEffect(() => {
+        if (!classData || subjects.length === 0 || categories.length === 0) return;
+        
+        // Only update localization, don't reload from API
+        const currentSubject = classData.subject;
+        const currentCategory = classData.category;
+        
+        if (currentSubject) {
+            const subject = subjects.find(s => {
+                const nameEn = s.nameEn?.toLowerCase().trim();
+                const nameVi = s.nameVi?.toLowerCase().trim();
+                const searchName = currentSubject.toLowerCase().trim();
+                return nameEn === searchName || nameVi === searchName;
+            });
+            
+            if (subject) {
+                const localizedSubject = getLocalizedName(subject);
+                const category = categories.find(c => c.id === subject.categoryId);
+                const localizedCategory = category ? getLocalizedName(category) : (currentCategory || '');
+                
+                // Only update if names changed
+                if (localizedSubject !== currentSubject || localizedCategory !== currentCategory) {
+                    setClassData(prev => prev ? {
+                        ...prev,
+                        subject: localizedSubject,
+                        category: localizedCategory
+                    } : null);
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        subject: localizedSubject,
+                        category: localizedCategory
+                    }));
+                }
+            }
+        }
+    }, [subjects, categories, i18n.language, classData, getLocalizedName]); // Re-localize when these change
 
     // Filter subjects when category changes
     useEffect(() => {

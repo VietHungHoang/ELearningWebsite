@@ -13,26 +13,35 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
     const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCert, setEditingCert] = useState<CertificationItem | null>(null);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const handleAdd = () => {
         setEditingCert(null);
+        setEditingIndex(null);
         setIsModalOpen(true);
     };
 
-    const handleEdit = (cert: CertificationItem) => {
+    const handleEdit = (cert: CertificationItem, index: number) => {
         setEditingCert(cert);
+        setEditingIndex(index);
         setIsModalOpen(true);
     };
 
-    const handleDelete = (id: string) => {
-        onChange({ certifications: (data.certifications || []).filter((c: CertificationItem) => c.id !== id) });
+    const handleDelete = (index: number) => {
+        const updatedCerts = [...(data.certifications || [])];
+        updatedCerts.splice(index, 1);
+        onChange({ certifications: updatedCerts });
     };
 
-    const handleSave = (cert: CertificationItem) => {
-        if (cert.id) {
-            onChange({ certifications: (data.certifications || []).map((c: CertificationItem) => c.id === cert.id ? cert : c) });
+    const handleSave = (cert: CertificationItem, editIndex: number | null) => {
+        if (editIndex !== null && editIndex >= 0) {
+            // Editing existing certification
+            const updatedCerts = [...(data.certifications || [])];
+            updatedCerts[editIndex] = { ...cert };
+            onChange({ certifications: updatedCerts });
         } else {
-            onChange({ certifications: [...(data.certifications || []), { ...cert, id: `cert-${Date.now()}` }] });
+            // Adding new certification - don't add id, let backend create it
+            onChange({ certifications: [...(data.certifications || []), { ...cert }] });
         }
         setIsModalOpen(false);
     };
@@ -41,8 +50,8 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
         <div className="space-y-6">
 
             <div className="space-y-3">
-                {(data.certifications || []).map((cert: CertificationItem) => (
-                    <div key={cert.id} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
+                {(data.certifications || []).map((cert: CertificationItem, index: number) => (
+                    <div key={index} className="bg-white rounded-lg p-4 border border-gray-200 group hover:shadow-sm transition">
                         <div className="flex justify-between items-start gap-4">
                             <div className="flex-grow min-w-0">
                                 <div className="flex items-start gap-2">
@@ -61,14 +70,14 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
                             </div>
                             <div className="flex items-center gap-1 flex-shrink-0">
                                 <button
-                                    onClick={() => handleEdit(cert)}
+                                    onClick={() => handleEdit(cert, index)}
                                     className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition"
                                     title={t('onboarding.educationExperience.edit')}
                                 >
                                     <HiPencil className="w-4 h-4" />
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(cert.id!)}
+                                    onClick={() => handleDelete(index)}
                                     className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
                                     title={t('onboarding.educationExperience.delete')}
                                 >
@@ -97,7 +106,7 @@ const CertificationsStep: React.FC<CertificationsStepProps> = ({ data, onChange 
             {isModalOpen && (
                 <CertModal
                     certification={editingCert}
-                    onSave={handleSave}
+                    onSave={(cert) => handleSave(cert, editingIndex)}
                     onClose={() => setIsModalOpen(false)}
                 />
             )}
@@ -113,13 +122,12 @@ const CertModal: React.FC<{
 }> = ({ certification, onSave, onClose }) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState<CertificationItem>(certification || {
-        id: '',
         name: '',
         issuingOrganization: '',
         issueDate: '',
         expirationDate: '',
         credentialUrl: '',
-    });
+    } as CertificationItem);
     const [uploading, setUploading] = useState(false);
     const [uploadedFile, setUploadedFile] = useState<{ name: string; size: number } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
