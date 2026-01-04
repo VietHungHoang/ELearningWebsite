@@ -18,6 +18,7 @@ public class NotificationMapper {
                 .title(event.getTitle())
                 .message(event.getMessage())
                 .actionUrl(event.getActionUrl())
+                .metadata(event.getMetadata())
                 .isRead(false)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -31,6 +32,7 @@ public class NotificationMapper {
                 .title(n.getTitle())
                 .message(n.getMessage())
                 .actionUrl(n.getActionUrl())
+                .metadata(n.getMetadata())
                 .read(n.isRead())
                 .createdAt(n.getCreatedAt())
                 .build();

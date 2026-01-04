@@ -11,8 +11,6 @@ import java.util.UUID;
 
 @Repository
 @Deprecated
-public interface ClassScheduleRepository extends JpaRepository<Session, UUID> {
-    List<Session> findByClassEntityIdOrderByStartTimeAsc(UUID classId);
-    List<Session> findByClassEntityIdAndStatus(UUID classId, ScheduleStatus status);
-    List<Session> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
+public interface ClassScheduleRepository extends JpaRepository<com.elearning.classservice.entity.ClassSchedule, UUID> {
+    List<com.elearning.classservice.entity.ClassSchedule> findByClassEntityId(UUID classId);
 }

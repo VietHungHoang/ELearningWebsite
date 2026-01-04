@@ -2,7 +2,17 @@ import apiService from './apiService';
 import type { Notification, ViewNotificationBFFResponse } from '../types/notifications';
 
 const getUserId = (): string => {
-  return "5gg";
+  // Get userId from localStorage (set by AuthContext on login)
+  try {
+    const authData = localStorage.getItem('auth');
+    if (authData) {
+      const parsed = JSON.parse(authData);
+      return parsed.user?.id || '';
+    }
+  } catch (e) {
+    console.error('Failed to get userId from localStorage:', e);
+  }
+  return '';
 };
 
 class NotificationsService {
@@ -13,7 +23,7 @@ class NotificationsService {
         page: 0,
         size: 3
       });
-      
+
       if (response.success === true && response.data) {
         // Extract notifications from BFF response
         const notifications = response.data.notifications || [];
@@ -34,7 +44,7 @@ class NotificationsService {
         page,
         size
       });
-      
+
       if (response.success === true && response.data) {
         // Extract notifications from BFF response
         const notifications = response.data.notifications || [];

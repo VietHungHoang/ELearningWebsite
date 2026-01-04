@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -38,4 +39,7 @@ public class ClassEnrollment extends BaseEntity {
     
     @Column(name = "notes")
     private String notes;
+
+    @Column(name = "enrolled_at")
+    private LocalDateTime enrolledAt;
 }

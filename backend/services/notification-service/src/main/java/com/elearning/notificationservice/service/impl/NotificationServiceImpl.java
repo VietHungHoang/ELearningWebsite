@@ -3,10 +3,8 @@ package com.elearning.notificationservice.service.impl;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Pageable;
-// import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.elearning.notificationservice.dto.event.NotificationEvent;
@@ -18,9 +16,11 @@ import com.elearning.notificationservice.mapper.NotificationMapper;
 import com.elearning.notificationservice.model.Notification;
 import com.elearning.notificationservice.repository.NotificationRepository;
 import com.elearning.notificationservice.service.NotificationService;
+import com.elearning.notificationservice.sse.SseEmitterManager;
 import com.elearning.notificationservice.util.EmailTemplateUtil;
 
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,17 +28,31 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final SseEmitterManager sseEmitterManager;
     private final JavaMailSender mailSender;
     private final NotificationMapper notificationMapper;
 
     @Override
     public void createNotification(NotificationEvent event) {
+        // 1. Save to MongoDB
         Notification notification = notificationMapper.toEntity(event);
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+        log.info("Saved notification to MongoDB: id={}, userId={}, type={}", 
+                notification.getId(), notification.getUserId(), notification.getType());
+
+        // 2. Push via SSE to connected client
+        NotificationResponse response = notificationMapper.mapToResponse(notification);
+        boolean sent = sseEmitterManager.sendToUser(event.getUserId(), response);
+        
+        if (sent) {
+            log.info("Pushed notification via SSE to user: {}", event.getUserId());
+        } else {
+            log.debug("User {} not connected via SSE, notification saved for later retrieval", event.getUserId());
+        }
     }
 
     @Override
@@ -62,16 +76,7 @@ public class NotificationServiceImpl implements NotificationService {
         notifications.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(notifications);
 
-        List<NotificationResponse> responses = notifications.stream()
-                .map(notificationMapper::mapToResponse)
-                .collect(Collectors.toList());
-
-        responses.forEach(resp -> {
-            String userTopic = "/topic/notifications/" + resp.getUserId().toString();
-            messagingTemplate.convertAndSend(userTopic, resp);
-            messagingTemplate.convertAndSend("/topic/notifications", resp);
-        });
-
+        log.info("Marked {} notifications as read for user: {}", notifications.size(), userId);
         return notifications.size();
     }
 
@@ -88,10 +93,7 @@ public class NotificationServiceImpl implements NotificationService {
         Notification saved = notificationRepository.save(notification);
 
         NotificationResponse response = notificationMapper.mapToResponse(saved);
-
-        String userTopic = "/topic/notifications/" + userId.toString();
-        messagingTemplate.convertAndSend(userTopic, response);
-        messagingTemplate.convertAndSend("/topic/notifications", response);
+        log.info("Marked notification {} as read for user: {}", notificationId, userId);
 
         return response;
     }

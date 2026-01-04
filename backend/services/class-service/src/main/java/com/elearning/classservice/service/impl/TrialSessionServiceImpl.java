@@ -11,11 +11,14 @@ import com.elearning.classservice.repository.SessionParticipantRepository;
 import com.elearning.classservice.repository.SessionRepository;
 import com.elearning.classservice.repository.TrialSessionRepository;
 import com.elearning.classservice.service.TrialSessionRequestService;
+import com.elearning.classservice.service.KafkaProducerService;
 import com.elearning.classservice.dto.TrialSessionRequestResponse;
 import com.elearning.classservice.mapper.TrialSessionRequestMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,9 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
     private final SessionParticipantRepository sessionParticipantRepository;
     private final TrialSessionRequestMapper trialSessionRequestMapper;
     private final com.elearning.classservice.service.ZoomMeetingService zoomMeetingService;
+    private final KafkaProducerService kafkaProducerService;
+
+    private static final String NOTIFICATION_TOPIC = "create-notification";
 
     @Override
     @Transactional
@@ -45,9 +51,40 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
                 .message(request.getMessage())
                 .build();
 
-        trialSessionRepository.save(trialSessionRequestEntity);
+        trialSessionRequestEntity = trialSessionRepository.save(trialSessionRequestEntity);
 
         log.info("Trial session request created successfully with ID: {}", trialSessionRequestEntity.getId());
+
+        // Send notification to tutor via Kafka
+        sendTrialRequestNotification(trialSessionRequestEntity);
+    }
+
+    /**
+     * Send notification to tutor about new trial request
+     */
+    private void sendTrialRequestNotification(TrialSessionRequestEntity request) {
+        try {
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("userId", request.getTutor().getId());
+            notification.put("type", "TRIAL_REQUEST");
+            notification.put("title", "Yêu cầu học thử mới");
+            notification.put("message", "Bạn có yêu cầu học thử mới vào lúc " + 
+                    request.getSessionDateTime().toLocalDate() + " " + 
+                    request.getSessionDateTime().toLocalTime());
+            
+            // Metadata for type-based routing
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("requestId", request.getId().toString());
+            metadata.put("studentId", request.getStudent().getId().toString());
+            metadata.put("sessionDateTime", request.getSessionDateTime().toString());
+            notification.put("metadata", metadata);
+
+            kafkaProducerService.sendMessage(NOTIFICATION_TOPIC, request.getTutor().getId().toString(), notification);
+            log.info("Sent trial request notification to tutor: {}", request.getTutor().getId());
+        } catch (Exception e) {
+            log.error("Failed to send trial request notification: {}", e.getMessage(), e);
+            // Don't throw - notification failure shouldn't fail the main transaction
+        }
     }
 
     @Override
