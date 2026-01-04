@@ -1,4 +1,4 @@
-import { Notification } from '../types/notifications';
+import type { Notification } from '../types/notifications';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
