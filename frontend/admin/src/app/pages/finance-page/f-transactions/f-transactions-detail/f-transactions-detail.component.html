@@ -26,98 +26,98 @@
     </ol>
 </div>
 
-<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
+<div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-content">
         <!-- Transaction ID & Date (Header) -->
         <div class="mb-[20px]">
-            <span class="block text-sm text-gray-500 dark:text-gray-400 mb-[4px]">{{ 'transactions.detail.transactionId' | translate }}:</span>
-            <span class="block text-lg font-bold text-black dark:text-white mb-[12px]">{{ transactionId }}</span>
+            <span class="block text-sm text-gray-500 mb-[4px]">{{ 'transactions.detail.transactionId' | translate }}:</span>
+            <span class="block text-lg font-bold text-gray-900 mb-[12px]">{{ transactionId }}</span>
         </div>
 
-        <!-- Main Content Grid: Learner (Left) vs Class (Right) -->
+        <!-- Main Content Grid: Student (Left) vs Class (Right) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-[20px] mb-[25px]">
-            <!-- Learner Information (Left) -->
+            <!-- Student Information (Left) -->
             <div>
-                <h6 class="text-base font-medium text-black dark:text-white mb-[12px]">{{ 'transactions.detail.learnerInformation.title' | translate }}</h6>
+                <h6 class="text-base font-medium text-gray-900 mb-[12px]">{{ 'transactions.detail.studentInformation.title' | translate }}</h6>
                 <div class="space-y-[8px]">
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.learnerInformation.learnerId' | translate }}:</span>
-                        <span class="text-xs text-gray-600 dark:text-gray-400 font-mono">{{ learnerId }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.studentId' | translate }}:</span>
+                        <span class="text-xs text-gray-600 font-mono">{{ studentId }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.learnerInformation.name' | translate }}:</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ learnerName }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.name' | translate }}:</span>
+                        <span class="text-sm text-gray-900">{{ studentName }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.learnerInformation.email' | translate }}:</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ learnerEmail }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.email' | translate }}:</span>
+                        <span class="text-sm text-gray-900">{{ studentEmail }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.learnerInformation.phone' | translate }}:</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ learnerPhone }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.phone' | translate }}:</span>
+                        <span class="text-sm text-gray-900">{{ studentPhone }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Class Information (Right) -->
             <div>
-                <h6 class="text-base font-medium text-black dark:text-white mb-[12px]">{{ 'transactions.detail.classInformation.title' | translate }}</h6>
+                <h6 class="text-base font-medium text-gray-900 mb-[12px]">{{ 'transactions.detail.classInformation.title' | translate }}</h6>
                 <div class="space-y-[8px]">
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.classInformation.classId' | translate }}:</span>
-                        <span class="text-xs text-gray-600 dark:text-gray-400 font-mono">{{ classId }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.classId' | translate }}:</span>
+                        <span class="text-xs text-gray-600 font-mono">{{ classId }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.classInformation.name' | translate }}:</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ className }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.name' | translate }}:</span>
+                        <span class="text-sm text-gray-900">{{ className }}</span>
                     </div>
                     <div class="flex items-center gap-[8px]">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.classInformation.type' | translate }}:</span>
-                        <span class="inline-block text-xs bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 px-[8px] py-[4px] rounded-full font-medium">{{ getClassTypeTranslationKey() | translate }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.type' | translate }}:</span>
+                        <span class="inline-block text-xs bg-blue-50 text-blue-600 px-[8px] py-[4px] rounded-full font-medium">{{ getClassTypeTranslationKey() | translate }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300 min-w-[80px]">{{ 'transactions.detail.classInformation.instructor' | translate }}:</span>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ instructorName }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.tutor' | translate }}:</span>
+                        <span class="text-sm text-gray-900">{{ tutorName }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Payment Information (Bottom) -->
-        <div class="border-t border-gray-200 dark:border-[#172036] pt-[20px]">
-            <h6 class="text-base font-medium text-black dark:text-white mb-[15px]">{{ 'transactions.detail.paymentInformation.title' | translate }}</h6>
+        <div class="border-t border-gray-200 pt-[20px]">
+            <h6 class="text-base font-medium text-gray-900 mb-[15px]">{{ 'transactions.detail.paymentInformation.title' | translate }}</h6>
             
             <div class="table-responsive overflow-x-auto mb-[20px]">
                 <table class="w-full">
-                    <thead class="text-black dark:text-white">
+                    <thead class="text-gray-900">
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:first:rounded-tl-md rtl:first:rounded-tr-md text-sm">
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap ltr:first:rounded-tl-md rtl:first:rounded-tr-md text-sm">
                                 {{ 'transactions.detail.paymentInformation.totalAmount' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap text-sm">
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap text-sm">
                                 {{ 'transactions.detail.paymentInformation.paymentTime' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap text-sm">
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap text-sm">
                                 {{ 'transactions.detail.paymentInformation.paymentMethod' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap ltr:last:rounded-tr-md rtl:last:rounded-tl-md text-sm">
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap ltr:last:rounded-tr-md rtl:last:rounded-tl-md text-sm">
                                 {{ 'transactions.detail.paymentInformation.status' | translate }}
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="text-black dark:text-white">
+                    <tbody class="text-gray-900">
                         <tr>
-                            <td class="font-bold ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm text-primary-500">
+                            <td class="font-bold ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm text-primary-500">
                                 ${{ totalAmount }}
                             </td>
-                            <td class="text-gray-600 dark:text-gray-300 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                            <td class="text-gray-700 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
                                 {{ paymentTime }}
                             </td>
-                            <td class="text-gray-600 dark:text-gray-300 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                            <td class="text-gray-700 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
                                 {{ getPaymentMethodTranslationKey() | translate }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 dark:border-[#172036] ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
-                                <span class="inline-block text-xs px-[8px] py-[4px] rounded-full bg-success-50 text-success-600 dark:bg-success-500/20 dark:text-success-400 font-medium">{{ getPaymentStatusTranslationKey() | translate }}</span>
+                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                                <span class="inline-block text-xs px-[8px] py-[4px] rounded-full bg-success-50 text-success-600 font-medium">{{ getPaymentStatusTranslationKey() | translate }}</span>
                             </td>
                         </tr>
                     </tbody>

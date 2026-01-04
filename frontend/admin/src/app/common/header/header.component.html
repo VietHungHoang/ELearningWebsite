@@ -184,7 +184,7 @@
             <li class="relative profile-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                 <button type="button" class="flex items-center relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white" id="profileMenuBtn" (click)="toggleClass('profileMenuBtn')" [class.active]="buttonStates['profileMenuBtn']">
                     <span class="block font-semibold text-base">
-                        Olivia
+                        {{ currentUser?.name || 'Admin' }}
                     </span>
                     <i class="ri-arrow-down-s-line text-[15px] absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2 mt-px"></i>
                 </button>
@@ -192,10 +192,10 @@
                     <div class="flex items-center border-b border-gray-100 dark:border-[#172036] pb-[12px] mx-[20px] mb-[10px]">
                         <div>
                             <span class="block text-black dark:text-white font-medium">
-                                Olivia John
+                                {{ currentUser?.name || 'Admin User' }}
                             </span>
                             <span class="block text-xs">
-                                {{ 'header.profile.role' | translate }}
+                                {{ currentUser?.role || ('header.profile.role' | translate) }}
                             </span>
                         </div>
                     </div>

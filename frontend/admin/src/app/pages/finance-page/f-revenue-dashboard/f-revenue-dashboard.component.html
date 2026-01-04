@@ -1,3 +1,6 @@
+@if (loading) {
+    <app-loading />
+} @else {
 <div class="mb-[16px] md:flex items-center justify-between">
     <div class="flex items-center gap-[20px]">
         <h5 class="!mb-0 text-gray-900 dark:text-white">
@@ -19,13 +22,13 @@
                         </button>
                     </li>
                     <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('7days')">
-                            {{ 'revenueDashboard.dateRange.last7Days' | translate }}
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('thisWeek')">
+                            {{ 'revenueDashboard.dateRange.thisWeek' | translate }}
                         </button>
                     </li>
                     <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('30days')">
-                            {{ 'revenueDashboard.dateRange.last30Days' | translate }}
+                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('thisMonth')">
+                            {{ 'revenueDashboard.dateRange.thisMonth' | translate }}
                         </button>
                     </li>
                 </ul>
@@ -89,7 +92,7 @@
             <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.instructorPayout.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.instructorPayouts | currencyFormat:'VND' }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.tutorPayouts | currencyFormat:'VND' }}</span>
             <div class="flex items-center gap-[4px]">
                 <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.payoutTrend)">{{ getTrendIcon(kpis.payoutTrend) }}</i>
                 <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.payoutTrend)">{{ formatTrend(kpis.payoutTrend) }}</span>
@@ -165,11 +168,9 @@
 <div class="grid grid-cols-1 gap-[12px] mb-0">
     @if (dashboardData) {
         <app-top-instructors-chart
-            [topInstructorsData]="dashboardData.topInstructors"
+            [topTutorsData]="dashboardData.topTutors"
             [selectedTimeFilter]="selectedTimeFilter"
             (timeFilterChange)="onTimeFilterChange($event)" />
     }
 </div>
-
-
-
+}

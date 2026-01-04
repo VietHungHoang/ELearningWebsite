@@ -7,7 +7,7 @@ import { ApiService } from './api.service';
 import { PaginatedResponse } from '../types/pagination';
 import { CurrencyService } from './currency.service';
 
-// Payment statuses for learner payment
+// Payment statuses for student payment
 // Pending: Waiting for payment gateway callback (VNPay/Momo webhook will auto-update to completed/failed)
 export type PaymentStatus = 'pending' | 'completed' | 'failed';
 export type PaymentMethod = 'momo' | 'vnpay' | 'banking';
@@ -37,45 +37,63 @@ export interface TutorWalletLedger {
     status: 'recorded';   // Always 'recorded' once payout is paid
 }
 
-// Session/Class booking that generates payment
+// Session/Class booking that generates payment (simplified for display)
 export interface TutoringSession {
+    className: string;
+    tutorName: string;
+}
+
+// Internal session data (for mock data only)
+interface InternalSession {
     id: string;
     classId: string;
     className: string;
-    instructorId: string;
-    instructorName: string;
-    learnerIds: string[];  // Can be 1 (1-1) or multiple (group)
+    tutorId: string;
+    tutorName: string;
+    studentIds: string[];
     classType: ClassType;
     startTime: string;
     endTime: string;
     durationMinutes: number;
-    ratePerHour: number;   // VND/hour from instructor
-    totalAmount: number;   // Calculated from duration + rate
-    platformFeePercentage: number;  // Admin's cut (20%, 30%, etc)
+    ratePerHour: number;
+    totalAmount: number;
+    platformFeePercentage: number;
 }
 
-// Payment record - Learner pays
+// Payment record - Student pays (simplified for display)
 export interface Payment {
     id: string;
     paymentNumber: string;
-    learnerName: string;
-    learnerEmail: string;
-    learnerAvatar?: string;
-    sessionId: string;
-    session?: TutoringSession;
-    totalAmount: number;  // Full amount learner pays
+    studentName: string;
+    studentEmail: string;
+    session?: TutoringSession;  // Only className and tutorName
+    totalAmount: number;  // Full amount student pays
     currency: string;  // VND
     paymentMethod: PaymentMethod;
     status: PaymentStatus;  // 'pending', 'completed', 'failed'
     createdDate: string;
-    completedDate?: string;
     transactionId?: string;  // Payment gateway transaction ID
-    notes?: string;
+}
 
-    // After payment completes, these are set
-    adminHoldAmount?: number;  // Amount held in admin account
-    platformFeeAmount?: number;  // Platform fee (percentage-based)
-    instructorEarnings?: number; // What instructor will get (totalAmount - platformFee)
+// Internal payment data (for mock data only)
+interface InternalPayment {
+    id: string;
+    paymentNumber: string;
+    studentName: string;
+    studentEmail: string;
+    sessionId: string;
+    session?: InternalSession;
+    totalAmount: number;
+    currency: string;
+    paymentMethod: PaymentMethod;
+    status: PaymentStatus;
+    createdDate: string;
+    completedDate?: string;
+    transactionId?: string;
+    notes?: string;
+    adminHoldAmount?: number;
+    platformFeeAmount?: number;
+    tutorEarnings?: number;
 }
 
 // Monthly payout - Admin pays tutor from held funds
@@ -87,7 +105,7 @@ export interface MonthlyPayout {
     tutorId: string;
     tutorName: string;
     payoutMonth: string;  // YYYY-MM format
-    totalEarnings: number;  // Sum of all instructor earnings from payments that month
+    totalEarnings: number;  // Sum of all tutor earnings from payments that month
     totalSessions: number;  // Count of completed sessions
     totalHours: number;  // Total hours delivered
     status: PayoutStatus;  // 'pending' → 'approved' → 'processing' → 'paid'
@@ -142,10 +160,30 @@ export interface TransactionListResponse {
 }
 
 /**
- * API Response for transactions with pagination and summary
+ * Simplified Payment for API response (display only)
+ */
+export interface PaymentResponse {
+    id: string;
+    paymentNumber: string;
+    studentName: string;
+    studentEmail: string;
+    session?: {
+        className: string;
+        tutorName: string;
+    };
+    totalAmount: number;
+    currency: string;
+    paymentMethod: PaymentMethod;
+    status: PaymentStatus;
+    createdDate: string;
+    transactionId?: string;
+}
+
+/**
+ * API Response for transactions with pagination
  */
 export interface TransactionsApiResponse {
-    content: Payment[];
+    content: PaymentResponse[];
     pageable: {
         pageNumber: number;
         pageSize: number;
@@ -160,7 +198,6 @@ export interface TransactionsApiResponse {
     size: number;
     number: number;
     empty: boolean;
-    summary: TransactionsSummary; // Summary based on summaryFilter params
 }
 
 /**
@@ -184,7 +221,7 @@ export interface TransactionsSummary {
     providedIn: 'root'
 })
 export class TransactionService {
-    private paymentsSubject = new BehaviorSubject<Payment[]>([]);
+    private paymentsSubject = new BehaviorSubject<InternalPayment[]>([]);
     public payments$ = this.paymentsSubject.asObservable();
 
     private payoutsSubject = new BehaviorSubject<MonthlyPayout[]>([]);
@@ -205,21 +242,20 @@ export class TransactionService {
     }
 
     private loadMockData(): void {
-        const mockPayments: Payment[] = [
+        const mockPayments: InternalPayment[] = [
             {
                 id: 'pay_001',
                 paymentNumber: 'PAY-2025-NOV-001',
-                learnerName: 'John Smith',
-                learnerEmail: 'john.smith@example.com',
-                learnerAvatar: 'images/users/user1.jpg',
+                studentName: 'John Smith',
+                studentEmail: 'john.smith@example.com',
                 sessionId: 'session_2025_nov_05_001',
                 session: {
                     id: 'session_2025_nov_05_001',
                     classId: 'class_001',
                     className: 'React Advanced - 1-1',
-                    instructorId: 'tutor_001',
-                    instructorName: 'Đặng Minh Tuấn',
-                    learnerIds: ['learner_001'],
+                    tutorId: 'tutor_001',
+                    tutorName: 'Đặng Minh Tuấn',
+                    studentIds: ['student_001'],
                     classType: '1 and 1',
                     startTime: '2025-11-05T09:00:00',
                     endTime: '2025-11-05T11:00:00',
@@ -237,22 +273,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12345',
                 adminHoldAmount: 1000000,
                 platformFeeAmount: 200000,
-                instructorEarnings: 800000
+                tutorEarnings: 800000
             },
             {
                 id: 'pay_002',
                 paymentNumber: 'PAY-2025-NOV-002',
-                learnerName: 'Sarah Johnson',
-                learnerEmail: 'sarah.johnson@example.com',
-                learnerAvatar: 'images/users/user2.jpg',
+                studentName: 'Sarah Johnson',
+                studentEmail: 'sarah.johnson@example.com',
                 sessionId: 'session_2025_nov_04_001',
                 session: {
                     id: 'session_2025_nov_04_001',
                     classId: 'class_002',
                     className: 'TypeScript Pro - 1-1',
-                    instructorId: 'tutor_001',
-                    instructorName: 'Đặng Minh Tuấn',
-                    learnerIds: ['learner_002'],
+                    tutorId: 'tutor_001',
+                    tutorName: 'Đặng Minh Tuấn',
+                    studentIds: ['learner_002'],
                     classType: '1 and 1',
                     startTime: '2025-11-04T14:00:00',
                     endTime: '2025-11-04T16:00:00',
@@ -270,22 +305,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12346',
                 adminHoldAmount: 1000000,
                 platformFeeAmount: 200000,
-                instructorEarnings: 800000
+                tutorEarnings: 800000
             },
             {
                 id: 'pay_003',
                 paymentNumber: 'PAY-2025-NOV-003',
-                learnerName: 'Michael Chen',
-                learnerEmail: 'michael.chen@example.com',
-                learnerAvatar: 'images/users/user3.jpg',
+                studentName: 'Michael Chen',
+                studentEmail: 'michael.chen@example.com',
                 sessionId: 'session_2025_nov_03_001',
                 session: {
                     id: 'session_2025_nov_03_001',
                     classId: 'class_003',
                     className: 'Python Fundamentals - Group',
-                    instructorId: 'tutor_002',
-                    instructorName: 'Nguyễn Thị Hương',
-                    learnerIds: ['learner_003', 'learner_004', 'learner_005'],
+                    tutorId: 'tutor_002',
+                    tutorName: 'Nguyễn Thị Hương',
+                    studentIds: ['learner_003', 'learner_004', 'learner_005'],
                     classType: '1 and n',
                     startTime: '2025-11-03T10:00:00',
                     endTime: '2025-11-03T12:00:00',
@@ -303,22 +337,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12347',
                 adminHoldAmount: 800000,
                 platformFeeAmount: 160000,
-                instructorEarnings: 640000
+                tutorEarnings: 640000
             },
             {
                 id: 'pay_004',
                 paymentNumber: 'PAY-2025-NOV-004',
-                learnerName: 'Emily Davis',
-                learnerEmail: 'emily.davis@example.com',
-                learnerAvatar: 'images/users/user4.jpg',
+                studentName: 'Emily Davis',
+                studentEmail: 'emily.davis@example.com',
                 sessionId: 'session_2025_nov_02_001',
                 session: {
                     id: 'session_2025_nov_02_001',
                     classId: 'class_004',
                     className: 'Vue.js Mastery - 1-1',
-                    instructorId: 'tutor_003',
-                    instructorName: 'Trần Văn A',
-                    learnerIds: ['learner_006'],
+                    tutorId: 'tutor_003',
+                    tutorName: 'Trần Văn A',
+                    studentIds: ['learner_006'],
                     classType: '1 and 1',
                     startTime: '2025-11-02T09:00:00',
                     endTime: '2025-11-02T10:00:00',
@@ -336,22 +369,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12348',
                 adminHoldAmount: 400000,
                 platformFeeAmount: 80000,
-                instructorEarnings: 320000
+                tutorEarnings: 320000
             },
             {
                 id: 'pay_005',
                 paymentNumber: 'PAY-2025-NOV-005',
-                learnerName: 'David Wilson',
-                learnerEmail: 'david.wilson@example.com',
-                learnerAvatar: 'images/users/user5.jpg',
+                studentName: 'David Wilson',
+                studentEmail: 'david.wilson@example.com',
                 sessionId: 'session_2025_nov_01_001',
                 session: {
                     id: 'session_2025_nov_01_001',
                     classId: 'class_001',
                     className: 'Angular Basics - 1-1',
-                    instructorId: 'tutor_001',
-                    instructorName: 'Đặng Minh Tuấn',
-                    learnerIds: ['learner_007'],
+                    tutorId: 'tutor_001',
+                    tutorName: 'Đặng Minh Tuấn',
+                    studentIds: ['learner_007'],
                     classType: '1 and 1',
                     startTime: '2025-11-01T15:00:00',
                     endTime: '2025-11-01T17:00:00',
@@ -369,22 +401,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12349',
                 adminHoldAmount: 700000,
                 platformFeeAmount: 140000,
-                instructorEarnings: 560000
+                tutorEarnings: 560000
             },
             {
                 id: 'pay_006',
                 paymentNumber: 'PAY-2025-OCT-006',
-                learnerName: 'Jessica Brown',
-                learnerEmail: 'jessica.brown@example.com',
-                learnerAvatar: 'images/users/user6.jpg',
+                studentName: 'Jessica Brown',
+                studentEmail: 'jessica.brown@example.com',
                 sessionId: 'session_2025_oct_31_001',
                 session: {
                     id: 'session_2025_oct_31_001',
                     classId: 'class_002',
                     className: 'JavaScript Essentials - Group',
-                    instructorId: 'tutor_004',
-                    instructorName: 'Lê Thị B',
-                    learnerIds: ['learner_008', 'learner_009'],
+                    tutorId: 'tutor_004',
+                    tutorName: 'Lê Thị B',
+                    studentIds: ['learner_008', 'learner_009'],
                     classType: '1 and n',
                     startTime: '2025-10-31T18:00:00',
                     endTime: '2025-10-31T20:00:00',
@@ -402,22 +433,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12350',
                 adminHoldAmount: 600000,
                 platformFeeAmount: 120000,
-                instructorEarnings: 480000
+                tutorEarnings: 480000
             },
             {
                 id: 'pay_007',
                 paymentNumber: 'PAY-2025-OCT-007',
-                learnerName: 'Robert Taylor',
-                learnerEmail: 'robert.taylor@example.com',
-                learnerAvatar: 'images/users/user7.jpg',
+                studentName: 'Robert Taylor',
+                studentEmail: 'robert.taylor@example.com',
                 sessionId: 'session_2025_oct_30_001',
                 session: {
                     id: 'session_2025_oct_30_001',
                     classId: 'class_005',
                     className: 'React Advanced - 1-1',
-                    instructorId: 'tutor_002',
-                    instructorName: 'Nguyễn Thị Hương',
-                    learnerIds: ['learner_010'],
+                    tutorId: 'tutor_002',
+                    tutorName: 'Nguyễn Thị Hương',
+                    studentIds: ['learner_010'],
                     classType: '1 and 1',
                     startTime: '2025-10-30T13:00:00',
                     endTime: '2025-10-30T14:30:00',
@@ -435,22 +465,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12351',
                 adminHoldAmount: 750000,
                 platformFeeAmount: 150000,
-                instructorEarnings: 600000
+                tutorEarnings: 600000
             },
             {
                 id: 'pay_008',
                 paymentNumber: 'PAY-2025-OCT-008',
-                learnerName: 'Lisa Anderson',
-                learnerEmail: 'lisa.anderson@example.com',
-                learnerAvatar: 'images/users/user8.jpg',
+                studentName: 'Lisa Anderson',
+                studentEmail: 'lisa.anderson@example.com',
                 sessionId: 'session_2025_oct_29_001',
                 session: {
                     id: 'session_2025_oct_29_001',
                     classId: 'class_006',
                     className: 'Node.js Backend - 1-1',
-                    instructorId: 'tutor_003',
-                    instructorName: 'Trần Văn A',
-                    learnerIds: ['learner_011'],
+                    tutorId: 'tutor_003',
+                    tutorName: 'Trần Văn A',
+                    studentIds: ['learner_011'],
                     classType: '1 and 1',
                     startTime: '2025-10-29T11:00:00',
                     endTime: '2025-10-29T13:00:00',
@@ -468,22 +497,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12352',
                 adminHoldAmount: 900000,
                 platformFeeAmount: 180000,
-                instructorEarnings: 720000
+                tutorEarnings: 720000
             },
             {
                 id: 'pay_009',
                 paymentNumber: 'PAY-2025-OCT-009',
-                learnerName: 'James Martinez',
-                learnerEmail: 'james.martinez@example.com',
-                learnerAvatar: 'images/users/user9.jpg',
+                studentName: 'James Martinez',
+                studentEmail: 'james.martinez@example.com',
                 sessionId: 'session_2025_oct_28_001',
                 session: {
                     id: 'session_2025_oct_28_001',
                     classId: 'class_003',
                     className: 'CSS Styling - Group',
-                    instructorId: 'tutor_001',
-                    instructorName: 'Đặng Minh Tuấn',
-                    learnerIds: ['learner_012', 'learner_013', 'learner_014', 'learner_015'],
+                    tutorId: 'tutor_001',
+                    tutorName: 'Đặng Minh Tuấn',
+                    studentIds: ['learner_012', 'learner_013', 'learner_014', 'learner_015'],
                     classType: '1 and n',
                     startTime: '2025-10-28T19:00:00',
                     endTime: '2025-10-28T21:00:00',
@@ -501,22 +529,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12353',
                 adminHoldAmount: 500000,
                 platformFeeAmount: 100000,
-                instructorEarnings: 400000
+                tutorEarnings: 400000
             },
             {
                 id: 'pay_010',
                 paymentNumber: 'PAY-2025-OCT-010',
-                learnerName: 'Nicole Garcia',
-                learnerEmail: 'nicole.garcia@example.com',
-                learnerAvatar: 'images/users/user10.jpg',
+                studentName: 'Nicole Garcia',
+                studentEmail: 'nicole.garcia@example.com',
                 sessionId: 'session_2025_oct_27_001',
                 session: {
                     id: 'session_2025_oct_27_001',
                     classId: 'class_004',
                     className: 'React Advanced - Group',
-                    instructorId: 'tutor_004',
-                    instructorName: 'Lê Thị B',
-                    learnerIds: ['learner_016', 'learner_017'],
+                    tutorId: 'tutor_004',
+                    tutorName: 'Lê Thị B',
+                    studentIds: ['learner_016', 'learner_017'],
                     classType: '1 and n',
                     startTime: '2025-10-27T10:00:00',
                     endTime: '2025-10-27T12:00:00',
@@ -534,22 +561,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12354',
                 adminHoldAmount: 700000,
                 platformFeeAmount: 140000,
-                instructorEarnings: 560000
+                tutorEarnings: 560000
             },
             {
                 id: 'pay_011',
                 paymentNumber: 'PAY-2025-OCT-011',
-                learnerName: 'Thomas Anderson',
-                learnerEmail: 'thomas.anderson@example.com',
-                learnerAvatar: 'images/users/user11.jpg',
+                studentName: 'Thomas Anderson',
+                studentEmail: 'thomas.anderson@example.com',
                 sessionId: 'session_2025_oct_26_001',
                 session: {
                     id: 'session_2025_oct_26_001',
                     classId: 'class_006',
                     className: 'Node.js Backend - 1-1',
-                    instructorId: 'tutor_002',
-                    instructorName: 'Nguyễn Thị Hương',
-                    learnerIds: ['learner_018'],
+                    tutorId: 'tutor_002',
+                    tutorName: 'Nguyễn Thị Hương',
+                    studentIds: ['learner_018'],
                     classType: '1 and 1',
                     startTime: '2025-10-26T16:00:00',
                     endTime: '2025-10-26T17:00:00',
@@ -567,22 +593,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12355',
                 adminHoldAmount: 500000,
                 platformFeeAmount: 100000,
-                instructorEarnings: 400000
+                tutorEarnings: 400000
             },
             {
                 id: 'pay_012',
                 paymentNumber: 'PAY-2025-OCT-012',
-                learnerName: 'Patricia White',
-                learnerEmail: 'patricia.white@example.com',
-                learnerAvatar: 'images/users/user12.jpg',
+                studentName: 'Patricia White',
+                studentEmail: 'patricia.white@example.com',
                 sessionId: 'session_2025_oct_25_001',
                 session: {
                     id: 'session_2025_oct_25_001',
                     classId: 'class_007',
                     className: 'Database Design - Group',
-                    instructorId: 'tutor_003',
-                    instructorName: 'Trần Văn A',
-                    learnerIds: ['learner_019', 'learner_020'],
+                    tutorId: 'tutor_003',
+                    tutorName: 'Trần Văn A',
+                    studentIds: ['learner_019', 'learner_020'],
                     classType: '1 and n',
                     startTime: '2025-10-25T14:00:00',
                     endTime: '2025-10-25T15:30:00',
@@ -600,22 +625,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12356',
                 adminHoldAmount: 600000,
                 platformFeeAmount: 120000,
-                instructorEarnings: 480000
+                tutorEarnings: 480000
             },
             {
                 id: 'pay_013',
                 paymentNumber: 'PAY-2025-OCT-013',
-                learnerName: 'Daniel Lee',
-                learnerEmail: 'daniel.lee@example.com',
-                learnerAvatar: 'images/users/user13.jpg',
+                studentName: 'Daniel Lee',
+                studentEmail: 'daniel.lee@example.com',
                 sessionId: 'session_2025_oct_24_001',
                 session: {
                     id: 'session_2025_oct_24_001',
                     classId: 'class_008',
                     className: 'Git & Version Control - 1-1',
-                    instructorId: 'tutor_001',
-                    instructorName: 'Đặng Minh Tuấn',
-                    learnerIds: ['learner_021'],
+                    tutorId: 'tutor_001',
+                    tutorName: 'Đặng Minh Tuấn',
+                    studentIds: ['learner_021'],
                     classType: '1 and 1',
                     startTime: '2025-10-24T12:00:00',
                     endTime: '2025-10-24T13:00:00',
@@ -633,22 +657,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12357',
                 adminHoldAmount: 300000,
                 platformFeeAmount: 60000,
-                instructorEarnings: 240000
+                tutorEarnings: 240000
             },
             {
                 id: 'pay_014',
                 paymentNumber: 'PAY-2025-OCT-014',
-                learnerName: 'Susan Harris',
-                learnerEmail: 'susan.harris@example.com',
-                learnerAvatar: 'images/users/user14.jpg',
+                studentName: 'Susan Harris',
+                studentEmail: 'susan.harris@example.com',
                 sessionId: 'session_2025_oct_23_001',
                 session: {
                     id: 'session_2025_oct_23_001',
                     classId: 'class_005',
                     className: 'Database Design - 1-1',
-                    instructorId: 'tutor_004',
-                    instructorName: 'Lê Thị B',
-                    learnerIds: ['learner_022'],
+                    tutorId: 'tutor_004',
+                    tutorName: 'Lê Thị B',
+                    studentIds: ['learner_022'],
                     classType: '1 and 1',
                     startTime: '2025-10-23T09:00:00',
                     endTime: '2025-10-23T11:00:00',
@@ -666,22 +689,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12358',
                 adminHoldAmount: 900000,
                 platformFeeAmount: 180000,
-                instructorEarnings: 720000
+                tutorEarnings: 720000
             },
             {
                 id: 'pay_015',
                 paymentNumber: 'PAY-2025-OCT-015',
-                learnerName: 'Christopher Martin',
-                learnerEmail: 'christopher.martin@example.com',
-                learnerAvatar: 'images/users/user15.jpg',
+                studentName: 'Christopher Martin',
+                studentEmail: 'christopher.martin@example.com',
                 sessionId: 'session_2025_oct_22_001',
                 session: {
                     id: 'session_2025_oct_22_001',
                     classId: 'class_002',
                     className: 'Git & Version Control - Group',
-                    instructorId: 'tutor_002',
-                    instructorName: 'Nguyễn Thị Hương',
-                    learnerIds: ['learner_023', 'learner_024', 'learner_025'],
+                    tutorId: 'tutor_002',
+                    tutorName: 'Nguyễn Thị Hương',
+                    studentIds: ['learner_023', 'learner_024', 'learner_025'],
                     classType: '1 and n',
                     startTime: '2025-10-22T17:00:00',
                     endTime: '2025-10-22T18:30:00',
@@ -699,22 +721,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12359',
                 adminHoldAmount: 450000,
                 platformFeeAmount: 90000,
-                instructorEarnings: 360000
+                tutorEarnings: 360000
             },
             {
                 id: 'pay_016',
                 paymentNumber: 'PAY-2025-OCT-016',
-                learnerName: 'Linda Thompson',
-                learnerEmail: 'linda.thompson@example.com',
-                learnerAvatar: 'images/users/user16.jpg',
+                studentName: 'Linda Thompson',
+                studentEmail: 'linda.thompson@example.com',
                 sessionId: 'session_2025_oct_21_001',
                 session: {
                     id: 'session_2025_oct_21_001',
                     classId: 'class_001',
                     className: 'TypeScript Pro - Group',
-                    instructorId: 'tutor_003',
-                    instructorName: 'Trần Văn A',
-                    learnerIds: ['learner_026', 'learner_027'],
+                    tutorId: 'tutor_003',
+                    tutorName: 'Trần Văn A',
+                    studentIds: ['learner_026', 'learner_027'],
                     classType: '1 and n',
                     startTime: '2025-10-21T15:00:00',
                     endTime: '2025-10-21T16:30:00',
@@ -732,22 +753,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12360',
                 adminHoldAmount: 525000,
                 platformFeeAmount: 105000,
-                instructorEarnings: 420000
+                tutorEarnings: 420000
             },
             {
                 id: 'pay_017',
                 paymentNumber: 'PAY-2025-OCT-017',
-                learnerName: 'Betty Jackson',
-                learnerEmail: 'betty.jackson@example.com',
-                learnerAvatar: 'images/users/user17.jpg',
+                studentName: 'Betty Jackson',
+                studentEmail: 'betty.jackson@example.com',
                 sessionId: 'session_2025_oct_20_001',
                 session: {
                     id: 'session_2025_oct_20_001',
                     classId: 'class_009',
                     className: 'Python Fundamentals - 1-1',
-                    instructorId: 'tutor_001',
-                    instructorName: 'Đặng Minh Tuấn',
-                    learnerIds: ['learner_028'],
+                    tutorId: 'tutor_001',
+                    tutorName: 'Đặng Minh Tuấn',
+                    studentIds: ['learner_028'],
                     classType: '1 and 1',
                     startTime: '2025-10-20T10:00:00',
                     endTime: '2025-10-20T12:00:00',
@@ -765,22 +785,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12361',
                 adminHoldAmount: 1000000,
                 platformFeeAmount: 200000,
-                instructorEarnings: 800000
+                tutorEarnings: 800000
             },
             {
                 id: 'pay_018',
                 paymentNumber: 'PAY-2025-OCT-018',
-                learnerName: 'Mark Davies',
-                learnerEmail: 'mark.davies@example.com',
-                learnerAvatar: 'images/users/user18.jpg',
+                studentName: 'Mark Davies',
+                studentEmail: 'mark.davies@example.com',
                 sessionId: 'session_2025_oct_19_001',
                 session: {
                     id: 'session_2025_oct_19_001',
                     classId: 'class_004',
                     className: 'Vue.js Mastery - Group',
-                    instructorId: 'tutor_004',
-                    instructorName: 'Lê Thị B',
-                    learnerIds: ['learner_029', 'learner_030', 'learner_031', 'learner_032'],
+                    tutorId: 'tutor_004',
+                    tutorName: 'Lê Thị B',
+                    studentIds: ['learner_029', 'learner_030', 'learner_031', 'learner_032'],
                     classType: '1 and n',
                     startTime: '2025-10-19T18:00:00',
                     endTime: '2025-10-19T19:30:00',
@@ -798,22 +817,21 @@ export class TransactionService {
                 transactionId: 'TXN-VNPAY-12362',
                 adminHoldAmount: 375000,
                 platformFeeAmount: 75000,
-                instructorEarnings: 300000
+                tutorEarnings: 300000
             },
             {
                 id: 'pay_019',
                 paymentNumber: 'PAY-2025-OCT-019',
-                learnerName: 'Donald Miller',
-                learnerEmail: 'donald.miller@example.com',
-                learnerAvatar: 'images/users/user19.jpg',
+                studentName: 'Donald Miller',
+                studentEmail: 'donald.miller@example.com',
                 sessionId: 'session_2025_oct_18_001',
                 session: {
                     id: 'session_2025_oct_18_001',
                     classId: 'class_003',
                     className: 'JavaScript Essentials - 1-1',
-                    instructorId: 'tutor_002',
-                    instructorName: 'Nguyễn Thị Hương',
-                    learnerIds: ['learner_033'],
+                    tutorId: 'tutor_002',
+                    tutorName: 'Nguyễn Thị Hương',
+                    studentIds: ['learner_033'],
                     classType: '1 and 1',
                     startTime: '2025-10-18T13:00:00',
                     endTime: '2025-10-18T15:00:00',
@@ -831,22 +849,21 @@ export class TransactionService {
                 transactionId: 'TXN-MOMO-12363',
                 adminHoldAmount: 1000000,
                 platformFeeAmount: 200000,
-                instructorEarnings: 800000
+                tutorEarnings: 800000
             },
             {
                 id: 'pay_020',
                 paymentNumber: 'PAY-2025-OCT-020',
-                learnerName: 'Dorothy Moore',
-                learnerEmail: 'dorothy.moore@example.com',
-                learnerAvatar: 'images/users/user20.jpg',
+                studentName: 'Dorothy Moore',
+                studentEmail: 'dorothy.moore@example.com',
                 sessionId: 'session_2025_oct_17_001',
                 session: {
                     id: 'session_2025_oct_17_001',
                     classId: 'class_008',
                     className: 'CSS Styling - 1-1',
-                    instructorId: 'tutor_003',
-                    instructorName: 'Trần Văn A',
-                    learnerIds: ['learner_034'],
+                    tutorId: 'tutor_003',
+                    tutorName: 'Trần Văn A',
+                    studentIds: ['learner_034'],
                     classType: '1 and 1',
                     startTime: '2025-10-17T11:00:00',
                     endTime: '2025-10-17T12:30:00',
@@ -867,17 +884,16 @@ export class TransactionService {
             {
                 id: 'pay_021',
                 paymentNumber: 'PAY-2025-NOV-021',
-                learnerName: 'Mike Wilson',
-                learnerEmail: 'mike.wilson@example.com',
-                learnerAvatar: 'images/users/user21.jpg',
+                studentName: 'Mike Wilson',
+                studentEmail: 'mike.wilson@example.com',
                 sessionId: 'session_2025_nov_03_002',
                 session: {
                     id: 'session_2025_nov_03_002',
                     classId: 'class_005',
                     className: 'Node.js Backend - 1-1',
-                    instructorId: 'tutor_002',
-                    instructorName: 'Nguyễn Thị C',
-                    learnerIds: ['learner_033'],
+                    tutorId: 'tutor_002',
+                    tutorName: 'Nguyễn Thị C',
+                    studentIds: ['learner_033'],
                     classType: '1 and 1',
                     startTime: '2025-11-03T14:00:00',
                     endTime: '2025-11-03T16:00:00',
@@ -896,17 +912,16 @@ export class TransactionService {
             {
                 id: 'pay_022',
                 paymentNumber: 'PAY-2025-NOV-022',
-                learnerName: 'Anna Lee',
-                learnerEmail: 'anna.lee@example.com',
-                learnerAvatar: 'images/users/user22.jpg',
+                studentName: 'Anna Lee',
+                studentEmail: 'anna.lee@example.com',
                 sessionId: 'session_2025_nov_02_003',
                 session: {
                     id: 'session_2025_nov_02_003',
                     classId: 'class_003',
                     className: 'Python AI - Group',
-                    instructorId: 'tutor_003',
-                    instructorName: 'Trần Văn A',
-                    learnerIds: ['learner_034', 'learner_035'],
+                    tutorId: 'tutor_003',
+                    tutorName: 'Trần Văn A',
+                    studentIds: ['learner_034', 'learner_035'],
                     classType: '1 and n',
                     startTime: '2025-11-02T10:00:00',
                     endTime: '2025-11-02T11:30:00',
@@ -925,17 +940,16 @@ export class TransactionService {
             {
                 id: 'pay_023',
                 paymentNumber: 'PAY-2025-OCT-023',
-                learnerName: 'David Chen',
-                learnerEmail: 'david.chen@example.com',
-                learnerAvatar: 'images/users/user23.jpg',
+                studentName: 'David Chen',
+                studentEmail: 'david.chen@example.com',
                 sessionId: 'session_2025_oct_25_004',
                 session: {
                     id: 'session_2025_oct_25_004',
                     classId: 'class_007',
                     className: 'Java Spring Boot - 1-1',
-                    instructorId: 'tutor_004',
-                    instructorName: 'Lê Thị B',
-                    learnerIds: ['learner_036'],
+                    tutorId: 'tutor_004',
+                    tutorName: 'Lê Thị B',
+                    studentIds: ['learner_036'],
                     classType: '1 and 1',
                     startTime: '2025-10-25T13:00:00',
                     endTime: '2025-10-25T15:00:00',
@@ -961,7 +975,7 @@ export class TransactionService {
      * API Endpoint: GET /api/v1/admin/transactions
      * Query Params:
      *   - page, size, status, paymentMethod, search, startDate, endDate, sortOrder, typeFilter (for table)
-     *   - summaryFilter (for KPI cards: 'all' | 'today' | '7days' | '30days' | 'thisMonth')
+     *   - summaryFilter (for KPI cards: 'today' | 'thisWeek' | 'thisMonth')
      * @returns Observable of TransactionsApiResponse with summary
      */
     getTransactions(params?: {
@@ -974,7 +988,7 @@ export class TransactionService {
         endDate?: string;
         sortOrder?: 'asc' | 'desc';
         typeFilter?: '1 and 1' | '1 and n';
-        summaryFilter?: string; // Filter for summary/KPI cards: 'all' | 'today' | '7days' | '30days' | 'thisMonth'
+        summaryFilter?: string; // Filter for summary/KPI cards: 'today' | 'thisWeek' | 'thisMonth'
     }): Observable<TransactionsApiResponse> {
         const queryParams: any = {};
         if (params?.page !== undefined) queryParams.page = params.page - 1; // Convert to 0-based
@@ -991,8 +1005,12 @@ export class TransactionService {
         return this.apiService.get<TransactionsApiResponse>('/transactions', queryParams).pipe(
             map(response => {
                 if (response.success && response.data) {
-                    // Update local state
-                    this.paymentsSubject.next(response.data.content);
+                    // Transform API response to simplified format
+                    const transformedContent = response.data.content.map(payment => this.transformPayment(payment));
+                    // Note: API response is already in simplified format, so we store as-is
+                    // For internal use, we need to convert back or store separately
+                    // For now, we'll store the transformed data
+                    this.paymentsSubject.next(response.data.content as any);
                     return response.data;
                 }
                 // If API returns error response, use mock data
@@ -1036,10 +1054,11 @@ export class TransactionService {
 
         if (params?.typeFilter) {
             filtered = filtered.filter(payment => {
+                const internalSession = (payment as any).session as InternalSession | undefined;
                 if (params.typeFilter === '1 and 1') {
-                    return payment.session?.classType === '1 and 1';
+                    return internalSession?.classType === '1 and 1';
                 } else {
-                    return payment.session?.classType === '1 and n';
+                    return internalSession?.classType === '1 and n';
                 }
             });
         }
@@ -1063,14 +1082,15 @@ export class TransactionService {
 
         if (params?.search) {
             const searchLower = params.search.toLowerCase();
-            filtered = filtered.filter(payment =>
-                payment.id.toLowerCase().includes(searchLower) ||
-                payment.paymentNumber.toLowerCase().includes(searchLower) ||
-                payment.learnerName.toLowerCase().includes(searchLower) ||
-                payment.learnerEmail.toLowerCase().includes(searchLower) ||
-                payment.session?.className.toLowerCase().includes(searchLower) ||
-                payment.session?.instructorName.toLowerCase().includes(searchLower)
-            );
+            filtered = filtered.filter(payment => {
+                const internalSession = payment.session as InternalSession | undefined;
+                return payment.id.toLowerCase().includes(searchLower) ||
+                    payment.paymentNumber.toLowerCase().includes(searchLower) ||
+                    payment.studentName.toLowerCase().includes(searchLower) ||
+                    payment.studentEmail.toLowerCase().includes(searchLower) ||
+                    internalSession?.className.toLowerCase().includes(searchLower) ||
+                    internalSession?.tutorName.toLowerCase().includes(searchLower);
+            });
         }
 
         // Sort
@@ -1082,86 +1102,19 @@ export class TransactionService {
             });
         }
 
+        // Transform payments to simplified format
+        const transformedPayments = filtered.map(payment => this.transformPayment(payment));
+
         // Pagination
         const page = (params?.page ?? 1) - 1; // Convert to 0-based
         const size = params?.size ?? 10;
         const startIndex = page * size;
         const endIndex = startIndex + size;
-        const paginatedContent = filtered.slice(startIndex, endIndex);
-        const totalElements = filtered.length;
+        const paginatedContent = transformedPayments.slice(startIndex, endIndex);
+        const totalElements = transformedPayments.length;
         const totalPages = Math.ceil(totalElements / size);
 
-        // Calculate summary based on summaryFilter
-        let summaryPayments = allPayments;
-        if (params?.summaryFilter && params.summaryFilter !== 'all') {
-            const today = new Date();
-            let summaryStartDate: Date | null = null;
-            let summaryEndDate: Date | null = null;
-
-            if (params.summaryFilter === 'today') {
-                summaryStartDate = new Date(today);
-                summaryStartDate.setHours(0, 0, 0, 0);
-                summaryEndDate = new Date(today);
-                summaryEndDate.setHours(23, 59, 59, 999);
-            } else if (params.summaryFilter === '7days') {
-                summaryStartDate = new Date(today);
-                summaryStartDate.setDate(today.getDate() - 7);
-                summaryStartDate.setHours(0, 0, 0, 0);
-                summaryEndDate = new Date(today);
-                summaryEndDate.setHours(23, 59, 59, 999);
-            } else if (params.summaryFilter === '30days') {
-                summaryStartDate = new Date(today);
-                summaryStartDate.setDate(today.getDate() - 30);
-                summaryStartDate.setHours(0, 0, 0, 0);
-                summaryEndDate = new Date(today);
-                summaryEndDate.setHours(23, 59, 59, 999);
-            } else if (params.summaryFilter === 'thisMonth') {
-                summaryStartDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                summaryStartDate.setHours(0, 0, 0, 0);
-                summaryEndDate = new Date(today);
-                summaryEndDate.setHours(23, 59, 59, 999);
-            }
-
-            if (summaryStartDate && summaryEndDate) {
-                summaryPayments = allPayments.filter(payment => {
-                    const paymentDate = new Date(payment.createdDate);
-                    return paymentDate >= summaryStartDate! && paymentDate <= summaryEndDate!;
-                });
-            }
-        }
-
-        const summary: TransactionsSummary = {
-            totalRevenue: summaryPayments
-                .filter(p => p.status === 'completed')
-                .reduce((sum, p) => sum + p.totalAmount, 0),
-            completedPayments: summaryPayments.filter(p => p.status === 'completed').length,
-            failedPayments: summaryPayments.filter(p => p.status === 'failed').length,
-            pendingPayments: summaryPayments.filter(p => p.status === 'pending').length,
-            averageOrderValue: 0,
-            successRate: 0,
-            revenueTrend: 0,
-            aovTrend: 0,
-            successRateTrend: 0
-        };
-
-        // Calculate AOV
-        if (summary.completedPayments > 0) {
-            summary.averageOrderValue = summary.totalRevenue / summary.completedPayments;
-        }
-
-        // Calculate Success Rate
-        const totalTransactions = summary.completedPayments + summary.failedPayments;
-        if (totalTransactions > 0) {
-            summary.successRate = (summary.completedPayments / totalTransactions) * 100;
-        } else {
-            // No transactions yet - show neutral 100% instead of 0% to avoid red icon
-            summary.successRate = 100;
-        }
-
-        // Calculate trend (mock data - compare to previous period)
-        summary.revenueTrend = this.calculateMockTrend(params?.summaryFilter || 'all', 'revenue');
-        summary.aovTrend = this.calculateMockTrend(params?.summaryFilter || 'all', 'aov');
-        summary.successRateTrend = this.calculateMockTrend(params?.summaryFilter || 'all', 'successRate');
+        // Note: summary calculation removed as KPI cards are removed
 
         return {
             content: paginatedContent,
@@ -1178,19 +1131,54 @@ export class TransactionService {
             numberOfElements: paginatedContent.length,
             size: size,
             number: page,
-            empty: paginatedContent.length === 0,
-            summary: summary
+            empty: paginatedContent.length === 0
         };
     }
 
-    // Get all payments
+    /**
+     * Transform payment to simplified format for API response
+     */
+    private transformPayment(payment: InternalPayment | PaymentResponse): PaymentResponse {
+        // If already transformed (PaymentResponse), return as is
+        if ('tutorName' in (payment.session || {}) || !payment.session) {
+            return payment as PaymentResponse;
+        }
+
+        // Transform from InternalPayment
+        const internalPayment = payment as InternalPayment;
+        const internalSession = internalPayment.session as InternalSession | undefined;
+        
+        const session = internalSession ? {
+            className: internalSession.className || '',
+            tutorName: internalSession.tutorName || ''
+        } : undefined;
+
+        return {
+            id: internalPayment.id,
+            paymentNumber: internalPayment.paymentNumber,
+            studentName: internalPayment.studentName,
+            studentEmail: internalPayment.studentEmail,
+            session: session,
+            totalAmount: internalPayment.totalAmount,
+            currency: internalPayment.currency || 'VND',
+            paymentMethod: internalPayment.paymentMethod,
+            status: internalPayment.status,
+            createdDate: internalPayment.createdDate,
+            transactionId: internalPayment.transactionId
+        };
+    }
+
+    // Get all payments (transformed to simplified format)
     getPayments(): Observable<Payment[]> {
-        return this.payments$;
+        return this.payments$.pipe(
+            map(payments => payments.map(p => this.transformPayment(p)))
+        );
     }
 
     // Get filtered payments (legacy method - kept for backward compatibility)
     getPaymentsFiltered(filters: TransactionFilters, page: number = 1, pageSize: number = 10): Payment[] {
-        const allPayments = this.paymentsSubject.value;
+        const allInternalPayments = this.paymentsSubject.value;
+        const allPayments = allInternalPayments.map(p => this.transformPayment(p));
         let filtered = [...allPayments];
 
         if (filters.status) {
@@ -1215,8 +1203,8 @@ export class TransactionService {
             filtered = filtered.filter(payment =>
                 payment.id.toLowerCase().includes(searchLower) ||
                 payment.paymentNumber.toLowerCase().includes(searchLower) ||
-                payment.learnerName.toLowerCase().includes(searchLower) ||
-                payment.learnerEmail.toLowerCase().includes(searchLower)
+                payment.studentName.toLowerCase().includes(searchLower) ||
+                payment.studentEmail.toLowerCase().includes(searchLower)
             );
         }
 
@@ -1227,7 +1215,8 @@ export class TransactionService {
 
     // Get single payment by ID
     getPaymentById(id: string): Payment | undefined {
-        return this.paymentsSubject.value.find(payment => payment.id === id);
+        const internalPayment = this.paymentsSubject.value.find(payment => payment.id === id);
+        return internalPayment ? this.transformPayment(internalPayment) : undefined;
     }
 
     // Manually approve a pending payment (fallback if webhook fails)
@@ -1254,8 +1243,8 @@ export class TransactionService {
         if (!payment.platformFeeAmount && payment.session) {
             payment.platformFeeAmount = payment.totalAmount * (payment.session.platformFeePercentage / 100);
         }
-        if (!payment.instructorEarnings) {
-            payment.instructorEarnings = payment.totalAmount - (payment.platformFeeAmount || 0);
+        if (!payment.tutorEarnings) {
+            payment.tutorEarnings = payment.totalAmount - (payment.platformFeeAmount || 0);
         }
 
         this.paymentsSubject.next([...payments]);
@@ -1281,8 +1270,11 @@ export class TransactionService {
     createMonthlyPayout(tutorId: string, tutorName: string, month: string, paymentIds: string[]): MonthlyPayout {
         const payments = this.paymentsSubject.value.filter(p => paymentIds.includes(p.id) && p.status === 'completed');
 
-        const totalEarnings = payments.reduce((sum, p) => sum + (p.instructorEarnings || 0), 0);
-        const totalHours = payments.reduce((sum, p) => sum + (p.session?.durationMinutes || 0), 0) / 60;
+        const totalEarnings = payments.reduce((sum, p) => sum + (p.tutorEarnings || 0), 0);
+        const totalHours = payments.reduce((sum, p) => {
+            const internalSession = p.session as InternalSession | undefined;
+            return sum + (internalSession?.durationMinutes || 0);
+        }, 0) / 60;
 
         const payout: MonthlyPayout = {
             id: `payout_${Date.now()}`,
@@ -1428,32 +1420,32 @@ export class TransactionService {
         return `${day}/${month}/${year}`;
     }
 
-    // Get top instructors by earnings
-    getTopInstructorsByEarnings(limit: number = 5): any[] {
+    // Get top tutors by earnings
+    getTopTutorsByEarnings(limit: number = 5): any[] {
         const allPayments = this.paymentsSubject.value;
-        const instructorMap = new Map<string, { instructorId: string; instructorName: string; sessionCount: number; totalEarnings: number }>();
+        const tutorMap = new Map<string, { tutorId: string; tutorName: string; sessionCount: number; totalEarnings: number }>();
 
         allPayments
             .filter(payment => payment.status === 'completed' && payment.session)
             .forEach(payment => {
-                const session = payment.session!;
-                const key = session.instructorId;
-                const existing = instructorMap.get(key);
+                const internalSession = payment.session as InternalSession;
+                const key = internalSession.tutorId;
+                const existing = tutorMap.get(key);
 
                 if (existing) {
                     existing.sessionCount += 1;
-                    existing.totalEarnings += payment.instructorEarnings || 0;
+                    existing.totalEarnings += payment.tutorEarnings || 0;
                 } else {
-                    instructorMap.set(key, {
-                        instructorId: session.instructorId,
-                        instructorName: session.instructorName,
+                    tutorMap.set(key, {
+                        tutorId: internalSession.tutorId,
+                        tutorName: internalSession.tutorName,
                         sessionCount: 1,
-                        totalEarnings: payment.instructorEarnings || 0
+                        totalEarnings: payment.tutorEarnings || 0
                     });
                 }
             });
 
-        return Array.from(instructorMap.values())
+        return Array.from(tutorMap.values())
             .sort((a, b) => b.totalEarnings - a.totalEarnings)
             .slice(0, limit);
     }
@@ -1481,8 +1473,8 @@ export class TransactionService {
         allPayments
             .filter(payment => payment.status === 'completed' && payment.session)
             .forEach(payment => {
-                const session = payment.session!;
-                const key = session.classId;
+                const internalSession = payment.session as InternalSession;
+                const key = internalSession.classId;
                 const existing = classMap.get(key);
 
                 if (existing) {
@@ -1490,8 +1482,8 @@ export class TransactionService {
                     existing.totalRevenue += payment.totalAmount;
                 } else {
                     classMap.set(key, {
-                        classId: session.classId,
-                        className: session.className,
+                        classId: internalSession.classId,
+                        className: internalSession.className,
                         sessionCount: 1,
                         totalRevenue: payment.totalAmount
                     });

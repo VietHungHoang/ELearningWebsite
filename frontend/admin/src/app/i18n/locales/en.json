@@ -772,8 +772,7 @@
     },
     "dateRange": {
       "today": "Today",
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
+      "thisWeek": "This Week",
       "thisMonth": "This Month"
     },
     "kpi": {
@@ -802,6 +801,38 @@
         "description": "Revenue per transaction"
       },
       "vsPrevious": "vs previous"
+    },
+    "charts": {
+      "revenueTrend": {
+        "title": "Revenue Trend",
+        "timeframe": {
+          "weekly": "This Week",
+          "monthly": "This Month",
+          "yearly": "This Year"
+        }
+      },
+      "paymentMethods": {
+        "title": "Payment Methods"
+      },
+      "topInstructors": {
+        "title": "Top 5 Instructors by Revenue",
+        "view": {
+          "chart": "Chart",
+          "table": "Table"
+        },
+        "timeFilter": {
+          "weekly": "This Week",
+          "monthly": "This Month",
+          "yearly": "This Year"
+        },
+        "table": {
+          "rank": "Rank",
+          "instructor": "Instructor",
+          "sessions": "Sessions",
+          "totalEarnings": "Total Earnings",
+          "avgPerSession": "Avg/Session"
+        }
+      }
     }
   },
   "payout": {
@@ -1001,10 +1032,8 @@
       "transactionErrors": "Transaction errors"
     },
     "summaryFilter": {
-      "all": "All",
       "today": "Today",
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
+      "thisWeek": "This Week",
       "thisMonth": "This Month"
     },
     "filters": {
@@ -1069,12 +1098,20 @@
         "email": "Email",
         "phone": "Phone"
       },
+      "studentInformation": {
+        "title": "Student Information",
+        "studentId": "Student ID",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone"
+      },
       "classInformation": {
         "title": "Class Information",
         "classId": "Class ID",
         "name": "Name",
         "type": "Type",
         "instructor": "Tutor",
+        "tutor": "Tutor",
         "classType": {
           "oneOnOne": "1-on-1",
           "group": "Group"

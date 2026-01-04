@@ -34,10 +34,6 @@ export class SignInComponent {
         }
     }
 
-    toggleTheme() {
-        this.toggleService.toggleTheme();
-    }
-
     togglePasswordVisibility(): void {
         this.isPasswordVisible = !this.isPasswordVisible;
     }
@@ -52,17 +48,10 @@ export class SignInComponent {
             return;
         }
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(this.email)) {
-            this.errorMessage = 'Email không hợp lệ';
-            return;
-        }
-
         // Start loading
         this.isLoading = true;
 
-        // Call login service
+        // Call login service - pass email as username to backend
         this.authService.login(this.email, this.password).subscribe({
             next: (success) => {
                 this.isLoading = false;

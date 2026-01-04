@@ -776,8 +776,7 @@
     },
     "dateRange": {
       "today": "Hôm nay",
-      "last7Days": "7 ngày qua",
-      "last30Days": "30 ngày qua",
+      "thisWeek": "Tuần này",
       "thisMonth": "Tháng này"
     },
     "kpi": {
@@ -837,9 +836,9 @@
       "revenueTrend": {
         "title": "Xu hướng doanh thu",
         "timeframe": {
-          "daily": "Theo ngày",
-          "weekly": "Theo tuần",
-          "monthly": "Theo tháng"
+          "weekly": "Tuần này",
+          "monthly": "Tháng này",
+          "yearly": "Năm này"
         }
       },
       "paymentMethods": {
@@ -852,9 +851,9 @@
           "table": "Bảng"
         },
         "timeFilter": {
-          "daily": "Theo ngày",
-          "weekly": "Theo tuần",
-          "monthly": "Theo tháng"
+          "weekly": "Tuần này",
+          "monthly": "Tháng này",
+          "yearly": "Năm này"
         },
         "table": {
           "rank": "Hạng",
@@ -1063,10 +1062,8 @@
       "transactionErrors": "Lỗi giao dịch"
     },
     "summaryFilter": {
-      "all": "Tất cả",
       "today": "Hôm nay",
-      "last7Days": "7 ngày qua",
-      "last30Days": "30 ngày qua",
+      "thisWeek": "Tuần này",
       "thisMonth": "Tháng này"
     },
     "filters": {
@@ -1131,12 +1128,20 @@
         "email": "Email",
         "phone": "Số điện thoại"
       },
+      "studentInformation": {
+        "title": "Thông tin học viên",
+        "studentId": "Mã học viên",
+        "name": "Tên",
+        "email": "Email",
+        "phone": "Số điện thoại"
+      },
       "classInformation": {
         "title": "Thông tin Lớp học",
         "classId": "Mã Lớp học",
         "name": "Tên",
         "type": "Loại",
         "instructor": "Gia sư",
+        "tutor": "Gia sư",
         "classType": {
           "oneOnOne": "1 kèm 1",
           "group": "Nhóm"
