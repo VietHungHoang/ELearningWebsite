@@ -4,9 +4,20 @@ import type {
   TutorAvailability,
   BookedSession,
   GetAvailabilityRequest,
-  GetBookedSessionsRequest,
-  BulkUpdateAvailabilityRequest
+  GetBookedSessionsRequest
 } from '../types/api';
+
+// Define BulkUpdateAvailabilityRequest locally since it's not exported from tutor.ts
+interface BulkUpdateAvailabilityRequest {
+  tutorId: string;
+  updates: Array<{
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    effectiveStartDate: string;
+    effectiveEndDate?: string;
+  }>;
+}
 
 export const useTutorSchedule = () => {
   const [availabilities, setAvailabilities] = useState<TutorAvailability[]>([]);
@@ -48,7 +59,8 @@ export const useTutorSchedule = () => {
       setError(null);
       const response = await scheduleService.getBookedSessions(request);
       if (response.success) {
-        setBookedSessions(response.data.sessions);
+        // GetBookedSessionsResponse is Session[] directly, not wrapped in sessions field
+        setBookedSessions(Array.isArray(response.data) ? response.data : (response.data as any).sessions || []);
         return { 
           success: true, 
           data: response.data,
@@ -75,8 +87,8 @@ export const useTutorSchedule = () => {
     try {
       setError(null);
       setLoading(true);
-      const response = await scheduleService.bulkUpdateAvailability(request);
-      if (response.success) {
+      const response = await scheduleService.bulkUpdateAvailability({ tutorId: request.tutorId, availabilities: request.updates.map(u => ({ dayOfWeek: u.dayOfWeek, startTime: u.startTime, endTime: u.endTime, effectiveStartDate: u.effectiveStartDate, effectiveEndDate: u.effectiveEndDate })) }) as unknown as { success: boolean; message: string; data?: { availabilities: TutorAvailability[] } };
+      if (response.success && response.data) {
         // Update availabilities with new data from backend
         setAvailabilities(response.data.availabilities);
         

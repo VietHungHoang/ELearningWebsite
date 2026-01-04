@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiFolder, FiPlus, FiDownload, FiTrash } from 'react-icons/fi';
-import type { ClassData } from '../../../../student/pages/MyClassPage';
+import type { ClassData } from '../../../my-class/components/EditClassModal';
 
 interface MaterialsTabProps {
     classData: ClassData;

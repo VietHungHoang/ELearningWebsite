@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ClassService, GroupClass, ClassStatus } from '../../../services/class.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { I18nService } from '../../../i18n/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-class-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent, LoadingComponent, TranslatePipe],
   templateUrl: './class-list.component.html',
   styleUrl: './class-list.component.scss'
 })
@@ -116,13 +117,24 @@ export class ClassListComponent implements OnInit {
   }
 
   getStatusText(status: ClassStatus): string {
-    return this.i18nService.translate(`classManagement.status.${status}`);
+    // Normalize API status to UI status for i18n
+    let normalizedStatus: 'upcoming' | 'ongoing' | 'completed';
+    if (status === 'OPENING') {
+      normalizedStatus = 'ongoing';
+    } else if (status === 'CLOSED' || status === 'COMPLETED' || status === 'CANCELLED' || status === 'completed') {
+      normalizedStatus = 'completed';
+    } else if (status === 'ongoing') {
+      normalizedStatus = 'ongoing';
+    } else {
+      normalizedStatus = 'upcoming';
+    }
+    return this.i18nService.translate(`classManagement.status.${normalizedStatus}`);
   }
 
   getClassTypeText(classType: string): string {
-    if (classType === '1-on-1') {
+    if (classType === '1-on-1' || classType === 'ONE_ON_ONE') {
       return this.i18nService.translate('classManagement.table.typeValue.oneOnOne');
-    } else if (classType === '1-on-n') {
+    } else if (classType === '1-on-n' || classType === 'GROUP') {
       return this.i18nService.translate('classManagement.table.typeValue.oneOnN');
     }
     return classType;
@@ -133,16 +145,38 @@ export class ClassListComponent implements OnInit {
   }
 
   getStatusClass(status: ClassStatus): string {
-    const statusClasses = {
+    // Normalize API status to UI status
+    let normalizedStatus: 'upcoming' | 'ongoing' | 'completed';
+    if (status === 'OPENING') {
+      normalizedStatus = 'ongoing';
+    } else if (status === 'CLOSED' || status === 'COMPLETED' || status === 'CANCELLED' || status === 'completed') {
+      normalizedStatus = 'completed';
+    } else if (status === 'ongoing') {
+      normalizedStatus = 'ongoing';
+    } else {
+      normalizedStatus = 'upcoming';
+    }
+
+    const statusClasses: Record<'upcoming' | 'ongoing' | 'completed', string> = {
       upcoming: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
       ongoing: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300',
       completed: 'bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300'
     };
-    return statusClasses[status] || '';
+    return statusClasses[normalizedStatus] || '';
   }
 
   formatCapacity(enrollment: number, max: number): string {
     return `${enrollment} / ${max}`;
+  }
+
+  formatDate(dateString: string | Date | undefined): string {
+    if (!dateString) return 'N/A';
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return new Intl.DateTimeFormat('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(date);
   }
 
   getSelectedStatusText(): string {

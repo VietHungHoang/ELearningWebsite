@@ -69,44 +69,29 @@ table {
     // Start Date column - left aligned
     th:nth-child(4),
     td:nth-child(4) {
-        width: 12%;
+        width: 15%;
         text-align: left;
     }
 
-    // Duration column - center aligned
+    // Enrollment column - center aligned
     th:nth-child(5),
     td:nth-child(5) {
-        width: 10%;
-        text-align: center;
-    }
-
-    // Enrollment column - center aligned
-    th:nth-child(6),
-    td:nth-child(6) {
-        width: 10%;
+        width: 12%;
         text-align: center;
     }
 
     // Type column - center aligned
-    th:nth-child(7),
-    td:nth-child(7) {
-        width: 10%;
+    th:nth-child(6),
+    td:nth-child(6) {
+        width: 12%;
         text-align: center;
     }
 
     // Status column - center aligned
-    th:nth-child(8),
-    td:nth-child(8) {
-        width: 13%;
+    th:nth-child(7),
+    td:nth-child(7) {
+        width: 18%;
         text-align: center;
-    }
-
-    // Action column - center aligned
-    th:nth-child(9),
-    td:nth-child(9) {
-        width: 8%;
-        text-align: center;
-        padding-right: 0 !important;
     }
 }
 
@@ -129,12 +114,12 @@ table {
 
         th:nth-child(4),
         td:nth-child(4) {
-            width: 15%;
+            width: 18%;
         }
 
         th:nth-child(5),
         td:nth-child(5) {
-            width: 10%;
+            width: 12%;
         }
 
         th:nth-child(6),
@@ -144,17 +129,7 @@ table {
 
         th:nth-child(7),
         td:nth-child(7) {
-            width: 8%;
-        }
-
-        th:nth-child(8),
-        td:nth-child(8) {
-            width: 9%;
-        }
-
-        th:nth-child(9),
-        td:nth-child(9) {
-            width: 8%;
+            width: 15%;
         }
     }
 }

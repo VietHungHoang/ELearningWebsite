@@ -354,7 +354,7 @@ const CartDetailPage: React.FC = () => {
                                                         <div key={item.id} className="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded border border-green-300">
                                                             <span className="font-mono font-semibold text-green-700 text-sm">{item.appliedCoupon}</span>
                                                             <button
-                                                                onClick={() => handleRemoveTutorCoupon(item.id)}
+                                                                onClick={() => setCartItems(items => items.map(i => i.id === item.id ? { ...i, appliedCoupon: undefined } : i))}
                                                                 className="text-red-500 hover:text-red-700 font-bold text-sm cursor-pointer transition-colors"
                                                                 title="Remove this coupon"
                                                             >

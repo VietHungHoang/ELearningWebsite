@@ -12,15 +12,16 @@ import { I18nService } from '../../../i18n/i18n.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+import { SubjectHelperService } from '../../../services/subject-helper.service';
 
 @Component({
-    selector: 'app-instructor-approval-detail',
+    selector: 'app-tutor-approval-detail',
     standalone: true,
     imports: [RouterLink, CommonModule, FormsModule, FilterByCareerTypePipe, TranslatePipe, CurrencyFormatPipe],
     templateUrl: './instructor-approval-detail.component.html',
     styleUrl: './instructor-approval-detail.component.scss'
 })
-export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
+export class TutorApprovalDetailComponent implements OnInit, OnDestroy {
     Math = Math;
     instructorId: string = '';
     instructor: InstructorRequestDetail | null = null;
@@ -86,7 +87,8 @@ export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
         private router: Router,
         private userService: UserService,
         private localeUtils: LocaleUtilsService,
-        public i18nService: I18nService
+        public i18nService: I18nService,
+        private subjectHelperService: SubjectHelperService
     ) {}
 
     ngOnInit() {
@@ -181,12 +183,18 @@ export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
     }
 
     getSubjectsDisplay(): string {
-        if (!this.instructor?.subjects || !Array.isArray(this.instructor.subjects) || this.instructor.subjects.length === 0) {
+        if (!this.instructor?.subjectIds || !Array.isArray(this.instructor.subjectIds) || this.instructor.subjectIds.length === 0) {
             return 'N/A';
         }
-        return this.instructor.subjects
-            .map(s => s.subjectName)
-            .join(', ');
+        const subjectNames = this.subjectHelperService.getSubjectNamesByIds(this.instructor.subjectIds);
+        return subjectNames.join(', ');
+    }
+
+    getSubjectNames(instructor: InstructorRequestDetail): string[] {
+        if (instructor.subjectIds && instructor.subjectIds.length > 0) {
+            return this.subjectHelperService.getSubjectNamesByIds(instructor.subjectIds);
+        }
+        return [];
     }
 
 
@@ -328,11 +336,31 @@ export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
 
 
     // Approve Dialog Methods
+    // TEMPORARY: Auto-approve without level selection
     openApproveDialog(): void {
-        this.showApproveDialog = true;
-        this.selectedLevels = [];
+        // Direct approval without opening dialog
+        if (this.instructor) {
+            this.isApproving = true;
+            // Call API without levels parameter
+            this.userService.approveInstructorRequest(this.instructor.id).subscribe(success => {
+                this.isApproving = false;
+                if (success) {
+                    console.log('Instructor request approved successfully!');
+                    setTimeout(() => {
+                        this.router.navigate(['/dashboard/user-management/instructor-approval']);
+                    }, 100);
+                } else {
+                    console.error('Failed to approve instructor request');
+                }
+            });
+        }
+        // OLD CODE: Open level selection dialog
+        // this.showApproveDialog = true;
+        // this.selectedLevels = [];
     }
 
+    // COMMENTED: Level selection dialog methods
+    /*
     closeApproveDialog(): void {
         this.showApproveDialog = false;
         this.selectedLevels = [];
@@ -347,6 +375,7 @@ export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
         }
     }
 
+    /*
     confirmApprove(): void {
         if (this.instructor && this.selectedLevels.length > 0) {
             this.isApproving = true;
@@ -371,6 +400,8 @@ export class InstructorApprovalDetailComponent implements OnInit, OnDestroy {
             });
         }
     }
+    */
+
 
     // Reject Dialog Methods
     openRejectDialog(): void {

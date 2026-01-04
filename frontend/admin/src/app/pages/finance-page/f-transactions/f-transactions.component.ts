@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { TransactionService, Payment, PaymentStatus, PaymentMethod, TransactionFilters } from '../../../services/transaction.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import * as XLSX from 'xlsx';
 
 @Component({
     selector: 'app-f-transactions',
-    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe, CurrencyFormatPipe],
+    imports: [RouterLink, CommonModule, FormsModule, TranslatePipe, CurrencyFormatPipe, LoadingComponent],
     templateUrl: './f-transactions.component.html',
     styleUrl: './f-transactions.component.scss'
 })
@@ -33,9 +34,6 @@ export class FTransactionsComponent implements OnInit {
     startDate: string = '';
     endDate: string = '';
 
-    // Summary filter for KPI cards
-    summaryFilter: string = '30days'; // 'all' | 'today' | '7days' | '30days'
-    isSummaryFilterMenuOpen: boolean = false;
 
     currentPage: number = 1;
     pageSize: number = 10;
@@ -52,16 +50,6 @@ export class FTransactionsComponent implements OnInit {
     loadingApproval = false;
     approvalNotes: string = '';
 
-    summary = {
-        totalRevenue: 0,
-        completedOrders: 0,
-        failedOrders: 0,
-        averageOrderValue: 0,
-        successRate: 0,
-        revenueTrend: 0,
-        aovTrend: 0,
-        successRateTrend: 0
-    };
 
     constructor(private transactionService: TransactionService, private router: Router) {}
 
@@ -82,7 +70,6 @@ export class FTransactionsComponent implements OnInit {
             endDate: this.endDate || undefined,
             sortOrder: this.sortOrder,
             typeFilter: this.typeFilter || undefined,
-            summaryFilter: this.summaryFilter || 'all' // Filter for KPI cards
         }).subscribe({
             next: (response) => {
                 this.filteredOrders = response.content;
@@ -90,20 +77,6 @@ export class FTransactionsComponent implements OnInit {
                 this.totalPages = response.totalPages;
                 this.totalElements = response.totalElements;
                 this.currentPage = response.number + 1; // Convert from 0-based to 1-based
-
-                // Update summary from API response
-                if (response.summary) {
-                    this.summary = {
-                        totalRevenue: response.summary.totalRevenue,
-                        completedOrders: response.summary.completedPayments,
-                        failedOrders: response.summary.failedPayments,
-                        averageOrderValue: response.summary.averageOrderValue,
-                        successRate: response.summary.successRate,
-                        revenueTrend: response.summary.revenueTrend,
-                        aovTrend: response.summary.aovTrend,
-                        successRateTrend: response.summary.successRateTrend
-                    };
-                }
 
                 this.loading = false;
             },
@@ -183,25 +156,6 @@ export class FTransactionsComponent implements OnInit {
         this.approvalNotes = '';
     }
 
-    onSummaryFilterChange(filter: string): void {
-        this.summaryFilter = filter;
-        this.isSummaryFilterMenuOpen = false;
-        this.loadOrders(); // Reload to update summary with new filter
-    }
-
-    toggleSummaryFilterMenu(): void {
-        this.isSummaryFilterMenuOpen = !this.isSummaryFilterMenuOpen;
-    }
-
-    getSummaryFilterText(): string {
-        const filterMap: { [key: string]: string } = {
-            'all': 'transactions.summaryFilter.all',
-            'today': 'transactions.summaryFilter.today',
-            '7days': 'transactions.summaryFilter.last7Days',
-            '30days': 'transactions.summaryFilter.last30Days'
-        };
-        return filterMap[this.summaryFilter] || 'transactions.summaryFilter.all';
-    }
 
     approveOrderManually(): void {
         if (!this.selectedOrder) return;
@@ -228,10 +182,6 @@ export class FTransactionsComponent implements OnInit {
         this.loadingApproval = false;
     }
 
-    updateSummary(): void {
-        // Summary is now updated from API response in loadOrders()
-        // This method kept for backward compatibility if needed
-    }
 
     goToPage(page: number): void {
         if (page >= 1 && page <= this.totalPages) {
@@ -365,21 +315,15 @@ export class FTransactionsComponent implements OnInit {
         const dataToExport = this.filteredOrders.map(payment => ({
             'Payment ID': payment.id,
             'Payment Number': payment.paymentNumber,
-            'Learner Name': payment.learnerName,
-            'Learner Email': payment.learnerEmail,
-            'Session ID': payment.sessionId,
+            'Student Name': payment.studentName,
+            'Student Email': payment.studentEmail,
             'Class Name': payment.session?.className || '',
-            'Instructor Name': payment.session?.instructorName || '',
-            'Duration (Minutes)': payment.session?.durationMinutes || 0,
-            'Rate per Hour': payment.session?.ratePerHour || 0,
+            'Tutor Name': payment.session?.tutorName || '',
             'Total Amount': payment.totalAmount,
             'Currency': payment.currency,
-            'Platform Fee': payment.platformFeeAmount || 0,
-            'Instructor Earnings': payment.instructorEarnings || 0,
             'Payment Method': this.getPaymentMethodDisplay(payment.paymentMethod),
             'Status': payment.status,
             'Created Date': payment.createdDate,
-            'Completed Date': payment.completedDate || '',
             'Transaction ID': payment.transactionId || ''
         }));
 
@@ -404,9 +348,6 @@ export class FTransactionsComponent implements OnInit {
         }
         if (!target.closest('.date-dropdown')) {
             this.isDateMenuOpen = false;
-        }
-        if (!target.closest('.trezo-card-dropdown')) {
-            this.isSummaryFilterMenuOpen = false;
         }
     }
 
@@ -434,32 +375,4 @@ export class FTransactionsComponent implements OnInit {
     }
 
     // Helper methods for trend indicators
-    getTrendIcon(trend: number): string {
-        if (trend > 0) return 'trending_up';
-        if (trend < 0) return 'trending_down';
-        return 'trending_flat';
-    }
-
-    getTrendColor(trend: number): string {
-        if (trend > 0) return 'text-success';
-        if (trend < 0) return 'text-danger';
-        return 'text-gray-500';
-    }
-
-    formatTrend(trend: number): string {
-        const prefix = trend > 0 ? '+' : '';
-        return `${prefix}${trend.toFixed(1)}%`;
-    }
-
-    getSuccessRateColor(rate: number): string {
-        if (rate >= 95) return '#10b981'; // Green
-        if (rate >= 85) return '#f59e0b'; // Yellow/Orange
-        return '#ef4444'; // Red
-    }
-
-    getSuccessRateIcon(rate: number): string {
-        if (rate >= 95) return 'check_circle';
-        if (rate >= 85) return 'warning';
-        return 'error';
-    }
 }

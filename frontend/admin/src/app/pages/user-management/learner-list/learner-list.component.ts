@@ -3,15 +3,19 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink, Router } from '@angular/router';
 import { UserService, Student } from '../../../services/user.service';
+import { ClassService, GroupClass } from '../../../services/class.service';
+import { PaginatedResponse } from '../../../types/pagination';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { I18nService } from '../../../i18n/i18n.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
     selector: 'app-learner-list',
     standalone: true,
-    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TranslatePipe],
+    imports: [CommonModule, HttpClientModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, LoadingComponent, TranslatePipe],
     templateUrl: './learner-list.component.html',
     styleUrl: './learner-list.component.scss'
 })
@@ -26,7 +30,12 @@ export class LearnerListComponent implements OnInit {
     paginatedLearners: Student[] = [];
     isLoading = false;
 
-    constructor(private userService: UserService, private router: Router, public i18nService: I18nService) {}
+    constructor(
+        private userService: UserService,
+        private classService: ClassService,
+        private router: Router,
+        public i18nService: I18nService
+    ) {}
 
     ngOnInit(): void {
         this.loadLearners();
@@ -37,22 +46,62 @@ export class LearnerListComponent implements OnInit {
      */
     loadLearners(): void {
         this.isLoading = true;
-        this.userService.getStudents().subscribe({
-            next: (learners) => {
-                this.learners = learners;
-                this.totalLearners = learners.length;
-                this.paginatedLearners = learners;
+        // Load both learners and classes to calculate enrollment count
+        forkJoin({
+            learners: this.userService.getStudents(),
+            classes: this.classService.getClasses(0, 1000) // Get all classes to count enrollments
+        }).subscribe({
+            next: ({ learners, classes }: { learners: Student[], classes: PaginatedResponse<GroupClass> }) => {
+                // Calculate enrollment count for each learner
+                const learnersWithEnrollment = learners.map((learner: Student) => {
+                    // Count how many classes this learner is enrolled in
+                    // Check if learner.id exists in any class's students array
+                    let enrollmentCount = 0;
+                    
+                    classes.content.forEach((cls: GroupClass) => {
+                        if (cls.students && Array.isArray(cls.students)) {
+                            // Check if learner.id matches any student in the class
+                            const isEnrolled = cls.students.some((student: any) => {
+                                // Handle different possible student object structures
+                                return student.id === learner.id || 
+                                       student.studentId === learner.id ||
+                                       (typeof student === 'string' && student === learner.id);
+                            });
+                            
+                            if (isEnrolled) {
+                                enrollmentCount++;
+                            }
+                        }
+                    });
+                    
+                    return {
+                        ...learner,
+                        enrollmentCount: enrollmentCount
+                    };
+                });
+                
+                this.learners = learnersWithEnrollment;
+                this.totalLearners = learnersWithEnrollment.length;
+                this.paginatedLearners = learnersWithEnrollment;
                 this.isLoading = false;
             },
-            error: (error) => {
+            error: (error: any) => {
                 console.error('Error loading learners:', error);
-                this.isLoading = false;
+                // Fallback: load learners without enrollment count
+                this.userService.getStudents().subscribe({
+                    next: (learners: Student[]) => {
+                        this.learners = learners.map((l: Student) => ({ ...l, enrollmentCount: 0 }));
+                        this.totalLearners = learners.length;
+                        this.paginatedLearners = this.learners;
+                        this.isLoading = false;
+                    },
+                    error: (err: any) => {
+                        console.error('Error loading learners:', err);
+                        this.isLoading = false;
+                    }
+                });
             }
         });
-    }
-
-    viewDetail(learner: Student): void {
-        this.router.navigate(['/dashboard/user-management/learner-detail', learner.id.toString()]);
     }
 
     openDeleteDialog(learner: Student): void {
@@ -69,7 +118,7 @@ export class LearnerListComponent implements OnInit {
                     this.showDeleteDialog = false;
                     this.learnerToDelete = null;
                 },
-                error: (error) => {
+                error: (error: any) => {
                     console.error('Error deleting student:', error);
                     // Still reload to update UI (fallback already updated local state)
                     this.loadLearners();
@@ -90,12 +139,12 @@ export class LearnerListComponent implements OnInit {
         if (searchTerm.trim()) {
             // Call search method with search term
             this.userService.searchStudents(searchTerm).subscribe({
-                next: (learners) => {
+                next: (learners: Student[]) => {
                     this.learners = learners;
                     this.totalLearners = learners.length;
                     this.paginatedLearners = learners;
                 },
-                error: (error) => console.error('Error searching learners:', error)
+                error: (error: any) => console.error('Error searching learners:', error)
             });
         } else {
             this.loadLearners();
@@ -128,7 +177,7 @@ export class LearnerListComponent implements OnInit {
     previousPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
-            this.userService.getStudents().subscribe(learners => {
+            this.userService.getStudents().subscribe((learners: Student[]) => {
                 this.applyPagination(learners);
             });
         }
@@ -137,7 +186,7 @@ export class LearnerListComponent implements OnInit {
     nextPage(): void {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.userService.getStudents().subscribe(learners => {
+            this.userService.getStudents().subscribe((learners: Student[]) => {
                 this.applyPagination(learners);
             });
         }

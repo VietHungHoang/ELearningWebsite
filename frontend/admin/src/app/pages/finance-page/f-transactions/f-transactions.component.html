@@ -1,149 +1,40 @@
 <div class="mb-[16px] md:flex items-center justify-between">
     <div class="flex items-center gap-[12px]">
-        <h5 class="!mb-0 text-gray-900 dark:text-white">
+        <h5 class="!mb-0 text-gray-900">
             {{ 'transactions.title' | translate }}
         </h5>
-        <div class="trezo-card-dropdown relative">
-        <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[4px] px-[10px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19] whitespace-nowrap" (click)="toggleSummaryFilterMenu()">
-            <span class="inline-block relative text-sm ltr:pr-[16px] rtl:pl-[16px]">
-                {{ getSummaryFilterText() | translate }}
-                <i class="ri-arrow-down-s-line text-base absolute ltr:-right-[2px] rtl:-left-[2px] top-1/2 -translate-y-1/2"></i>
-            </span>
-        </button>
-        @if (isSummaryFilterMenuOpen) {
-            <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[120px] z-[4] dark:bg-dark dark:shadow-none">
-                <li>
-                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('all')">
-                        {{ 'transactions.summaryFilter.all' | translate }}
-                    </button>
-                </li>
-                <li>
-                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('today')">
-                        {{ 'transactions.summaryFilter.today' | translate }}
-                    </button>
-                </li>
-                <li>
-                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('7days')">
-                        {{ 'transactions.summaryFilter.last7Days' | translate }}
-                    </button>
-                </li>
-                <li>
-                    <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onSummaryFilterChange('30days')">
-                        {{ 'transactions.summaryFilter.last30Days' | translate }}
-                    </button>
-                </li>
-            </ul>
-        }
-        </div>
     </div>
     <ol class="breadcrumb mt-[12px] md:mt-0">
         <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
+            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600">
                 <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
                 {{ 'transactions.breadcrumb.dashboard' | translate }}
             </a>
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0 text-gray-600">
             {{ 'transactions.breadcrumb.finance' | translate }}
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
+        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 rtl:last:ml-0 text-gray-600">
             {{ 'transactions.breadcrumb.transactions' | translate }}
         </li>
     </ol>
 </div>
 
-<!-- KPI Cards - New Design with Trends -->
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-[12px] mb-[16px]">
-    <!-- Total Revenue with Trend -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #10b981;">
-        <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">
-                {{ 'transactions.kpi.totalRevenue' | translate }}
-            </h6>
-        </div>
-        <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">
-                {{ summary.totalRevenue | currencyFormat }}
-            </span>
-            @if (summary.revenueTrend !== 0) {
-                <div class="flex items-center gap-[4px]" [ngClass]="getTrendColor(summary.revenueTrend)">
-                    <i class="material-symbols-outlined !text-[18px]">{{ getTrendIcon(summary.revenueTrend) }}</i>
-                    <span class="text-sm font-semibold">{{ formatTrend(summary.revenueTrend) }}</span>
-                </div>
-            }
-        </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">
-            {{ summary.completedOrders }} {{ 'transactions.kpi.completedTransactions' | translate }}
-        </p>
-    </div>
-
-    <!-- Average Order Value with Trend -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
-        <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">
-                {{ 'transactions.kpi.averageOrderValue' | translate }}
-            </h6>
-        </div>
-        <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none whitespace-nowrap">
-                {{ summary.averageOrderValue | currencyFormat }}
-            </span>
-            @if (summary.aovTrend !== 0) {
-                <div class="flex items-center gap-[4px]" [ngClass]="getTrendColor(summary.aovTrend)">
-                    <i class="material-symbols-outlined !text-[18px]">{{ getTrendIcon(summary.aovTrend) }}</i>
-                    <span class="text-sm font-semibold">{{ formatTrend(summary.aovTrend) }}</span>
-                </div>
-            }
-        </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">
-            {{ 'transactions.kpi.perTransaction' | translate }}
-        </p>
-    </div>
-
-    <!-- Success Rate with Trend -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" [style.border-left-color]="getSuccessRateColor(summary.successRate)">
-        <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">
-                {{ 'transactions.kpi.successRate' | translate }}
-            </h6>
-        </div>
-        <div class="mb-[8px] flex items-end justify-between">
-            <div class="flex items-baseline gap-[8px]">
-                <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">
-                    {{ summary.successRate.toFixed(1) }}%
-                </span>
-                <i class="material-symbols-outlined !text-[20px]" [style.color]="getSuccessRateColor(summary.successRate)">
-                    {{ getSuccessRateIcon(summary.successRate) }}
-                </i>
-            </div>
-            @if (summary.successRateTrend !== 0) {
-                <div class="flex items-center gap-[4px]" [ngClass]="getTrendColor(summary.successRateTrend)">
-                    <i class="material-symbols-outlined !text-[18px]">{{ getTrendIcon(summary.successRateTrend) }}</i>
-                    <span class="text-sm font-semibold">{{ formatTrend(summary.successRateTrend) }}</span>
-                </div>
-            }
-        </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">
-            {{ summary.completedOrders }}/{{ summary.completedOrders + summary.failedOrders }} {{ 'transactions.kpi.transactions' | translate }}
-        </p>
-    </div>
-</div>
-
 <!-- Table Card with Filters -->
-<div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[16px] rounded-md">
+<div class="trezo-card bg-white mb-[25px] p-[16px] rounded-md">
     <!-- Header with Search and Export -->
     <div class="trezo-card-header mb-[12px] sm:flex items-end justify-between gap-[12px]">
         <div class="trezo-card-title flex-1 min-w-[500px]">
             <form class="relative" (ngSubmit)="onSearchSubmit()">
-                <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
+                <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-gray-900 mt-px top-1/2 -translate-y-1/2">
                     <i class="material-symbols-outlined !text-[20px]">search</i>
                 </label>
                 <input
                     type="text"
                     [placeholder]="'transactions.table.searchPlaceholder' | translate"
-                    class="bg-gray-50 border border-gray-50 h-[36px] text-xs rounded-md w-full block text-black pt-[11px] pb-[12px] ltr:pl-[38px] rtl:pr-[38px] ltr:pr-[13px] rtl:pl-[13px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400"
+                    class="bg-gray-50 border border-gray-50 h-[36px] text-xs rounded-md w-full block text-gray-900 pt-[11px] pb-[12px] ltr:pl-[38px] rtl:pr-[38px] ltr:pr-[13px] rtl:pl-[13px] placeholder:text-gray-500 outline-0"
                     [(ngModel)]="searchTerm"
                     name="searchTerm"
                     (keydown.enter)="onSearchSubmit()"
@@ -161,13 +52,13 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="mb-[12px] p-[12px] bg-gray-50 dark:bg-[#15203c] rounded-lg border border-gray-200 dark:border-[#172036]">
-        <h6 class="text-xs font-semibold text-gray-800 dark:text-gray-300 mb-[10px]">{{ 'transactions.filters.title' | translate }}</h6>
+    <div class="mb-[12px] p-[12px] bg-gray-50 rounded-lg border border-gray-200">
+        <h6 class="text-xs font-semibold text-gray-800 mb-[10px]">{{ 'transactions.filters.title' | translate }}</h6>
         <div class="flex flex-wrap gap-[10px] items-end">
             <!-- Status Filter -->
             <div class="flex-1 min-w-[140px]">
-                <label class="block text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1">{{ 'transactions.filters.status' | translate }}</label>
-                <select [(ngModel)]="statusFilter" name="statusFilter" class="w-full px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md text-xs bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                <label class="block text-[10px] font-medium text-gray-700 mb-1">{{ 'transactions.filters.status' | translate }}</label>
+                <select [(ngModel)]="statusFilter" name="statusFilter" class="w-full px-[10px] py-[6px] border border-gray-200 rounded-md text-xs bg-white text-gray-900">
                     <option value="">{{ 'transactions.filters.all' | translate }}</option>
                     <option value="completed">{{ 'transactions.status.completed' | translate }}</option>
                     <option value="failed">{{ 'transactions.status.failed' | translate }}</option>
@@ -177,8 +68,8 @@
 
             <!-- Payment Method Filter -->
             <div class="flex-1 min-w-[140px]">
-                <label class="block text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1">{{ 'transactions.filters.paymentMethod' | translate }}</label>
-                <select [(ngModel)]="paymentMethodFilter" name="paymentMethodFilter" class="w-full px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md text-xs bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                <label class="block text-[10px] font-medium text-gray-700 mb-1">{{ 'transactions.filters.paymentMethod' | translate }}</label>
+                <select [(ngModel)]="paymentMethodFilter" name="paymentMethodFilter" class="w-full px-[10px] py-[6px] border border-gray-200 rounded-md text-xs bg-white text-gray-900">
                     <option value="">{{ 'transactions.filters.all' | translate }}</option>
                     <option value="momo">{{ 'transactions.paymentMethod.momo' | translate }}</option>
                     <option value="vnpay">{{ 'transactions.paymentMethod.vnpay' | translate }}</option>
@@ -187,13 +78,13 @@
 
             <!-- Date Range Filter -->
             <div class="flex-1 min-w-[140px]">
-                <label class="block text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1">{{ 'transactions.filters.fromDate' | translate }}</label>
-                <input type="date" [(ngModel)]="startDate" name="startDate" class="w-full px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md text-xs bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                <label class="block text-[10px] font-medium text-gray-700 mb-1">{{ 'transactions.filters.fromDate' | translate }}</label>
+                <input type="date" [(ngModel)]="startDate" name="startDate" class="w-full px-[10px] py-[6px] border border-gray-200 rounded-md text-xs bg-white text-gray-900">
             </div>
 
             <div class="flex-1 min-w-[140px]">
-                <label class="block text-[10px] font-medium text-gray-700 dark:text-gray-300 mb-1">{{ 'transactions.filters.toDate' | translate }}</label>
-                <input type="date" [(ngModel)]="endDate" name="endDate" class="w-full px-[10px] py-[6px] border border-gray-200 dark:border-[#172036] rounded-md text-xs bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white">
+                <label class="block text-[10px] font-medium text-gray-700 mb-1">{{ 'transactions.filters.toDate' | translate }}</label>
+                <input type="date" [(ngModel)]="endDate" name="endDate" class="w-full px-[10px] py-[6px] border border-gray-200 rounded-md text-xs bg-white text-gray-900">
             </div>
 
             <!-- Filter Buttons -->
@@ -212,98 +103,105 @@
 
     <!-- Table -->
     <div class="trezo-card-content -mx-[16px]">
-        <div class="table-responsive overflow-x-auto">
-            <table class="w-full bg-white dark:bg-[#0c1427]">
-                <thead class="text-black dark:text-white bg-gray-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
-                    <tr>
-                        <th class="font-medium text-center px-[12px] py-[10px] text-xs w-[60px]">{{ 'transactions.table.stt' | translate }}</th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[120px]">{{ 'transactions.table.learner' | translate }}</th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[180px]">{{ 'transactions.table.class' | translate }}</th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[100px]">{{ 'transactions.table.amount' | translate }}</th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[90px]">{{ 'transactions.table.method' | translate }}</th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[120px]">{{ 'transactions.table.date' | translate }}
-                            <button type="button" class="ml-1 text-primary-500 hover:text-primary-600 transition-colors" (click)="toggleSortOrder()">
-                                <i class="material-symbols-outlined !text-xs" [class.rotate-180]="sortOrder === 'desc'">
-                                    arrow_upward
-                                </i>
-                            </button>
-                        </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[100px]">{{ 'transactions.table.status' | translate }}</th>
-                        <th class="font-medium text-center px-[12px] py-[10px] text-xs w-[80px]">{{ 'transactions.table.action' | translate }}</th>
-                    </tr>
-                </thead>
-                <tbody class="text-black dark:text-white">
-                    @for (order of getPaginatedOrders(); track order.id; let i = $index) {
-                        <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
-                            <td class="text-center whitespace-nowrap px-[12px] py-[12px] text-xs">
-                                <span class="text-gray-600 dark:text-gray-400 font-medium">
-                                    {{ (currentPage - 1) * pageSize + i + 1 }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
-                                <span class="font-medium text-gray-900 dark:text-white">
-                                    {{ order.learnerName }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
-                                <div class="flex flex-col gap-[2px]">
-                                    <span class="font-medium text-gray-900 dark:text-white">{{ order.session?.className }}</span>
-                                    @if (order.session?.instructorName) {
-                                        <span class="text-[10px] text-gray-500 dark:text-gray-400">by {{ order.session?.instructorName }}</span>
-                                    }
-                                </div>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
-                                <span class="text-primary-500 font-semibold">
-                                    {{ order.totalAmount | currencyFormat:'VND' }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
-                                <span class="text-gray-600 dark:text-gray-400">
-                                    {{ getPaymentMethodDisplay(order.paymentMethod) | translate }}
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
-                                <span class="text-gray-600 dark:text-gray-400">
-                                    {{ order.createdDate | date: 'dd/MM/yyyy' }}<br>
-                                    <span class="text-[10px]">{{ order.createdDate | date: 'HH:mm' }}</span>
-                                </span>
-                            </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
-                                <span [class]="'inline-block px-[8px] py-[4px] rounded-full text-[10px] font-medium ' + getStatusClass(order.status)">
-                                    {{ getStatusText(order.status) | translate }}
-                                </span>
-                            </td>
-                            <td class="text-center whitespace-nowrap px-[12px] py-[12px]">
-                                <div class="flex items-center justify-center gap-[8px]">
-                                    <a [routerLink]="[order.id]" class="text-primary-500 leading-none hover:text-primary-600 transition-colors" title="View">
-                                        <i class="material-symbols-outlined !text-base">
-                                            visibility
-                                        </i>
-                                    </a>
-                                    @if (canApproveOrder(order)) {
-                                        <button type="button" class="text-success-500 leading-none hover:text-success-600 transition-colors" (click)="openApproveConfirm(order)" [title]="'transactions.confirm.title' | translate">
-                                            <i class="material-symbols-outlined !text-base">
-                                                check_circle
-                                            </i>
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    @if (filteredOrders.length === 0) {
+        @if (loading) {
+            <div class="p-[50px] text-center">
+                <app-loading></app-loading>
+            </div>
+        } @else {
+            <div class="table-responsive overflow-x-auto">
+                <table class="w-full bg-white">
+                    <thead class="text-gray-900 bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <td [attr.colspan]="8" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
-                                {{ 'transactions.table.noTransactionsFound' | translate }}
-                            </td>
+                            <th class="font-medium text-center px-[12px] py-[10px] text-xs w-[60px]">{{ 'transactions.table.stt' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[120px]">{{ 'transactions.table.learner' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[180px]">{{ 'transactions.table.class' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[100px]">{{ 'transactions.table.amount' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[90px]">{{ 'transactions.table.method' | translate }}</th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[120px]">{{ 'transactions.table.date' | translate }}
+                                <button type="button" class="ml-1 text-primary-500 hover:text-primary-600 transition-colors" (click)="toggleSortOrder()">
+                                    <i class="material-symbols-outlined !text-xs" [class.rotate-180]="sortOrder === 'desc'">
+                                        arrow_upward
+                                    </i>
+                                </button>
+                            </th>
+                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] text-xs min-w-[100px]">{{ 'transactions.table.status' | translate }}</th>
+                            <th class="font-medium text-center px-[12px] py-[10px] text-xs w-[80px]">{{ 'transactions.table.action' | translate }}</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="px-[16px] pt-[12px] sm:flex sm:items-center justify-between">
-            <p class="!mb-0 text-xs text-gray-600 dark:text-gray-400">
+                    </thead>
+                    <tbody class="text-gray-900">
+                        @for (order of getPaginatedOrders(); track order.id; let i = $index) {
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="text-center whitespace-nowrap px-[12px] py-[12px] text-xs">
+                                    <span class="text-gray-600 font-medium">
+                                        {{ (currentPage - 1) * pageSize + i + 1 }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                    <span class="font-medium text-gray-900">
+                                        {{ order.studentName }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                    <div class="flex flex-col gap-[2px]">
+                                        <span class="font-medium text-gray-900">{{ order.session?.className }}</span>
+                                        @if (order.session?.tutorName) {
+                                            <span class="text-[10px] text-gray-500">by {{ order.session?.tutorName }}</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                    <span class="text-primary-500 font-semibold">
+                                        {{ order.totalAmount | currencyFormat:'VND' }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                    <span class="text-gray-600">
+                                        {{ getPaymentMethodDisplay(order.paymentMethod) | translate }}
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                    <span class="text-gray-600">
+                                        {{ order.createdDate | date: 'dd/MM/yyyy' }}<br>
+                                        <span class="text-[10px]">{{ order.createdDate | date: 'HH:mm' }}</span>
+                                    </span>
+                                </td>
+                                <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] text-xs">
+                                    <span [class]="'inline-block px-[8px] py-[4px] rounded-full text-[10px] font-medium ' + getStatusClass(order.status)">
+                                        {{ getStatusText(order.status) | translate }}
+                                    </span>
+                                </td>
+                                <td class="text-center whitespace-nowrap px-[12px] py-[12px]">
+                                    <div class="flex items-center justify-center gap-[8px]">
+                                        <a [routerLink]="[order.id]" class="text-primary-500 leading-none hover:text-primary-600 transition-colors" title="View">
+                                            <i class="material-symbols-outlined !text-base">
+                                                visibility
+                                            </i>
+                                        </a>
+                                        @if (canApproveOrder(order)) {
+                                            <button type="button" class="text-success-500 leading-none hover:text-success-600 transition-colors" (click)="openApproveConfirm(order)" [title]="'transactions.confirm.title' | translate">
+                                                <i class="material-symbols-outlined !text-base">
+                                                    check_circle
+                                                </i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (filteredOrders.length === 0) {
+                            <tr>
+                                <td [attr.colspan]="8" class="text-center py-[30px] text-gray-500">
+                                    {{ 'transactions.table.noTransactionsFound' | translate }}
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (!loading) {
+            <div class="px-[16px] pt-[12px] sm:flex sm:items-center justify-between">
+            <p class="!mb-0 text-xs text-gray-600">
                 {{ 'transactions.pagination.showing' | translate }} {{ (currentPage - 1) * pageSize + 1 }} {{ 'transactions.pagination.to' | translate }} {{ currentPage * pageSize > filteredOrders.length ? filteredOrders.length : currentPage * pageSize }} {{ 'transactions.pagination.of' | translate }} {{ filteredOrders.length }}
             </p>
             @if (totalPages > 1) {
@@ -311,7 +209,7 @@
                     <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                         <button
                             type="button"
-                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             [disabled]="currentPage === 1"
                             (click)="prevPage()">
                             <span class="opacity-0">0</span>
@@ -323,7 +221,7 @@
                             <button
                                 type="button"
                                 class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500"
-                                [class]="page === currentPage ? 'border-primary-500 bg-primary-500 text-white' : 'border-gray-100 dark:border-[#172036]'"
+                                [class]="page === currentPage ? 'border-primary-500 bg-primary-500 text-white' : 'border-gray-100'"
                                 (click)="goToPage(page)">
                                 {{ page }}
                             </button>
@@ -332,7 +230,7 @@
                     <li class="inline-block mx-[3px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
                         <button
                             type="button"
-                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 dark:border-[#172036] transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-[31px] h-[31px] block leading-[29px] relative text-center rounded-md border border-gray-100 transition-all hover:bg-primary-500 hover:text-white hover:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             [disabled]="currentPage === totalPages"
                             (click)="nextPage()">
                             <span class="opacity-0">0</span>
@@ -342,6 +240,7 @@
                 </ol>
             }
         </div>
+        }
     </div>
 </div>
 
@@ -349,9 +248,9 @@
     <div class="modal-overlay" (click)="cancelApproval()">
         <div class="modal-content confirm-modal" (click)="$event.stopPropagation()">
             <div class="modal-body">
-                <h3 class="text-lg font-bold text-black dark:text-white mb-[16px]">{{ 'transactions.confirm.title' | translate }}</h3>
-                <p class="text-black dark:text-white mb-[12px]">{{ 'transactions.confirm.message' | translate: {id: selectedOrder.id} }}</p>
-                <textarea [(ngModel)]="approvalNotes" class="w-full p-[8px] border border-gray-200 rounded mb-[16px] text-black dark:text-white dark:bg-[#15203c] text-sm" [placeholder]="'transactions.confirm.notes' | translate"></textarea>
+                <h3 class="text-lg font-bold text-gray-900 mb-[16px]">{{ 'transactions.confirm.title' | translate }}</h3>
+                <p class="text-gray-900 mb-[12px]">{{ 'transactions.confirm.message' | translate: {id: selectedOrder.id} }}</p>
+                <textarea [(ngModel)]="approvalNotes" class="w-full p-[8px] border border-gray-200 rounded mb-[16px] text-gray-900 bg-white text-sm" [placeholder]="'transactions.confirm.notes' | translate"></textarea>
                 <div class="flex gap-[12px] justify-end">
                     <button type="button" class="px-[16px] py-[8px] bg-gray-200 text-black rounded hover:bg-gray-300 text-sm" [disabled]="loadingApproval" (click)="cancelApproval()">{{ 'transactions.confirm.cancel' | translate }}</button>
                     <button type="button" class="px-[16px] py-[8px] bg-success-500 text-white rounded hover:bg-success-600 font-medium text-sm" [disabled]="loadingApproval" (click)="approveOrderManually()">{{ loadingApproval ? ('transactions.confirm.processing' | translate) : ('transactions.confirm.confirm' | translate) }}</button>

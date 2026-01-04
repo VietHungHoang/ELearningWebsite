@@ -4,3 +4,4 @@ export * from './instructor';
 export * from './student';
 export * from './approval';
 export * from './pagination';
+export * from './category';

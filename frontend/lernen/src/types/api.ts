@@ -1,5 +1,31 @@
 import type { Category, Language, Timezone, Subject } from "./common";
-import type { TutorResponse, EducationItem, ExperienceItem, CertificationItem, SocialLink, UserInfo } from "./tutor";
+import type { TutorResponse, TutorDetail, Tutor, TutorAvailability, EducationItem, ExperienceItem, CertificationItem, SocialLink, UserInfo, GetAvailabilityRequest, UpdateAvailabilityRequest } from "./tutor";
+import type { GetBookedSessionsRequest, Session } from "./class";
+
+// Re-export all types
+export type { 
+    EducationItem, 
+    ExperienceItem, 
+    CertificationItem, 
+    TutorDetail, 
+    TutorResponse, 
+    Tutor, 
+    TutorAvailability, 
+    GetAvailabilityRequest, 
+    GetBookedSessionsRequest, 
+    UpdateAvailabilityRequest, 
+    Category, 
+    Subject, 
+    Language,
+    Timezone
+};
+export type BookedSession = Session;
+export type Subcategory = Subject;
+export type TutorProfile = TutorDetail;
+export type Course = any; // Placeholder
+
+// TutorDetailResponse is same as TutorResponse for now
+export type TutorDetailResponse = TutorResponse;
 
 export interface ApiResponse<T> {
     status: number;
@@ -47,7 +73,12 @@ export interface AccountCreatedResponse {
 export interface Student {
     id: string;
     fullName: string;
+    name?: string; // Alias for fullName
     avatarUrl: string;
+    email?: string;
+    enrollmentTypes?: StudentEnrollmentType[];
+    status?: StudentStatus;
+    registeredDate?: string;
 }
 
 export type StudentEnrollmentType = '1-on-1' | 'Group' | 'Trial';
@@ -181,6 +212,10 @@ export interface StudentCommunication {
 }
 
 export interface StudentDetail extends Student {
+    name?: string; // Alias for fullName
+    email: string;
+    enrollmentTypes: StudentEnrollmentType[];
+    status: StudentStatus;
     stats: StudentStats;
     contact: StudentContact;
     class: StudentClassInfo;
@@ -249,6 +284,7 @@ export interface RecentEarningsFilters {
     type?: '1-on-1' | 'Group' | 'All';
     page?: number;
     size?: number;
+    limit?: number;
 }
 
 export interface UpdateTutorProfileRequest {

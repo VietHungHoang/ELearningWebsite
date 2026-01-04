@@ -31,7 +31,7 @@ const BookASession: React.FC<BookASessionProps> = ({
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(new Date()); // Today
-    const [selectedDay, setSelectedDay] = useState<Date>(selectedDate); // UI-only selected day within the week (view-only)
+    const [, setSelectedDay] = useState<Date>(selectedDate); // UI-only selected day within the week (view-only)
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [timezones, setTimezones] = useState<Timezone[]>([]);
@@ -191,8 +191,11 @@ const BookASession: React.FC<BookASessionProps> = ({
                 // Get all available slots for the current week (empty array = check all tutor's slots)
                 const response = await classService.checkSlotConflicts(tutorId, []);
                 if (response.success && response.data) {
-                    // Store conflicted slot times (ISO strings in UTC+0)
-                    setConflictedSlots(response.data);
+                    // Store conflicted slot times (ISO strings in UTC+0) - extract sessionDateTime from Sessions
+                    const conflictedSlotStrings = response.data
+                        .map((session: any) => session.sessionDateTime)
+                        .filter((dateTime: string | undefined) => dateTime !== undefined) as string[];
+                    setConflictedSlots(conflictedSlotStrings);
                 }
             } catch (error) {
                 console.error('Error checking slot conflicts:', error);
@@ -275,13 +278,13 @@ const BookASession: React.FC<BookASessionProps> = ({
         });
 
         // Step 2: Get booked slots (already in UTC+0) - EXCLUDE trial sessions
-        const bookedSlotsSet = new Set(
+        const bookedSlotsSet = new Set<string>(
             tutorSessions
                 .filter((session: any) => session.sessionDateTime)
                 .map((session: any) => {
                     // Ensure UTC parsing by adding 'Z' if not present
                     let dateTimeString = session.sessionDateTime;
-                    if (typeof dateTimeString === 'string' && !dateTimeString.endsWith('Z') && !dateTimeString.includes('+')) {
+                    if (!dateTimeString.endsWith('Z') && !dateTimeString.includes('+')) {
                         dateTimeString += 'Z';
                     }
                     return new Date(dateTimeString).toISOString();
@@ -289,7 +292,7 @@ const BookASession: React.FC<BookASessionProps> = ({
         );
 
         // Step 3: Filter out booked slots AND conflicted slots (but keep trial sessions for display)
-        const conflictedSlotsSet = new Set(conflictedSlots);
+        const conflictedSlotsSet = new Set<string>(conflictedSlots);
         const availableSlots = allPossibleSlots.filter(slot => 
             !bookedSlotsSet.has(slot) && !conflictedSlotsSet.has(slot)
         );

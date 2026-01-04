@@ -374,4 +374,8 @@ const MyClassPage: React.FC = () => {
     );
 };
 
+// Export types for use in child components
+export type ClassData = ClassTable;
+export type Schedule = import('../../../../types/class').ClassSchedule;
+
 export default MyClassPage;

@@ -20,6 +20,9 @@
     </ol>
 </div>
 
+@if (loading) {
+    <app-loading></app-loading>
+} @else {
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
@@ -83,9 +86,6 @@
                             {{ 'classManagement.table.startDate' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'classManagement.table.duration' | translate }}
-                        </th>
-                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'classManagement.table.enrollment' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
@@ -93,9 +93,6 @@
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'classManagement.table.status' | translate }}
-                        </th>
-                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'classManagement.table.action' | translate }}
                         </th>
                     </tr>
                 </thead>
@@ -112,22 +109,17 @@
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400 truncate block max-w-full">
-                                    {{ groupClass.instructor_name }}
+                                    {{ groupClass.instructor_name || 'N/A' }}
                                 </span>
                             </td>
                             <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ formatDateTime(groupClass.start_datetime) }}
+                                    {{ groupClass.start_datetime ? formatDateTime(groupClass.start_datetime) : 'N/A' }}
                                 </span>
                             </td>
                             <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ formatDuration(groupClass.duration_in_minutes) }}
-                                </span>
-                            </td>
-                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ formatCapacity(groupClass.enrollment_count, groupClass.max_capacity) }}
+                                    {{ groupClass.enrollment_count }}
                                 </span>
                             </td>
                             <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
@@ -140,20 +132,11 @@
                                     {{ getStatusText(groupClass.status) }}
                                 </span>
                             </td>
-                            <td class="text-center whitespace-nowrap px-[12px] py-[15px] border-b border-gray-100 dark:border-[#172036]">
-                                <div class="flex items-center justify-center gap-[9px]">
-                                    <a [routerLink]="[groupClass.id]" class="text-primary-500 leading-none hover:text-primary-600 transition-colors" [title]="'common.view' | translate">
-                                        <i class="material-symbols-outlined !text-md">
-                                            visibility
-                                        </i>
-                                    </a>
-                                </div>
-                            </td>
                         </tr>
                     }
                     @if (paginatedClasses.length === 0) {
                         <tr>
-                            <td [attr.colspan]="9" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                            <td [attr.colspan]="7" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
                                 {{ 'classManagement.table.noClassesFound' | translate }}
                             </td>
                         </tr>
@@ -203,3 +186,4 @@
         </div>
     </div>
 </div>
+}

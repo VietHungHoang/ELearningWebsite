@@ -94,12 +94,12 @@ const BasicInformationStep: React.FC<BasicInformationStepProps> = ({ data, onCha
                     <div className="flex items-center justify-start gap-18 mt-4">
                         <GenderRadioOption
                             label="Male"
-                            selected={data.gender}
+                            selected={data.gender ?? undefined}
                             setSelected={(value: Gender) => onChange({ gender: value })}
                         />
                         <GenderRadioOption
                             label="Female"
-                            selected={data.gender}
+                            selected={data.gender ?? undefined}
                             setSelected={(value: Gender) => onChange({ gender: value })}
                         />
                     </div>

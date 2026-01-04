@@ -20,6 +20,9 @@
     </ol>
 </div>
 
+@if (isLoading) {
+    <app-loading></app-loading>
+} @else {
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
@@ -44,8 +47,8 @@
                         <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'learnerList.table.email' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'learnerList.table.phone' | translate }}
+                        <th class="font-medium text-center bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            {{ 'learnerList.table.enrollmentCount' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'learnerList.table.joinDate' | translate }}
@@ -58,52 +61,40 @@
                 <tbody class="text-black dark:text-white">
                     @for (learner of learners; track learner.id; let i = $index) {
                         <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
-                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                            <td class="text-center px-[12px] py-[15px] align-middle">
                                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
                                     {{ (currentPage - 1) * itemsPerPage + i + 1 }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
+                            <td class="ltr:text-left rtl:text-right px-[12px] py-[15px] align-middle">
                                 <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">
                                     {{ learner.fullname }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
-                                <span class="text-sm text-gray-600 dark:text-gray-400 break-all">
+                            <td class="ltr:text-left rtl:text-right px-[12px] py-[15px] align-middle">
+                                <span class="text-sm text-gray-600 dark:text-gray-400 break-words">
                                     {{ learner.email }}
                                 </span>
                             </td>
-                            <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[12px] py-[15px]">
-                                <span class="text-sm text-gray-600 dark:text-gray-400">
-                                    {{ learner.phone || 'N/A' }}
+                            <td class="text-center align-middle">
+                                <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                    {{ learner.enrollmentCount ?? 0 }}
                                 </span>
                             </td>
-                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
+                            <td class="text-center px-[12px] py-[15px] align-middle">
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ learner.joinDate }}
                                 </span>
                             </td>
-                            <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
-                                <div class="flex items-center justify-center gap-[9px]">
-                                    <button
-                                        type="button"
-                                        (click)="viewDetail(learner)"
-                                        class="text-primary-500 leading-none hover:text-primary-600 transition-colors"
-                                        [title]="'learnerList.actions.viewDetails' | translate">
-                                        <i class="material-symbols-outlined !text-lg">
-                                            visibility
-                                        </i>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        (click)="openDeleteDialog(learner)"
-                                        class="text-danger-500 leading-none hover:text-danger-600 transition-colors"
-                                        [title]="'learnerList.actions.delete' | translate">
-                                        <i class="material-symbols-outlined !text-lg">
-                                            delete
-                                        </i>
-                                    </button>
-                                </div>
+                            <td class="text-center px-[12px] py-[15px] align-middle">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center justify-center w-8 h-8 text-danger-600 dark:text-danger-400 hover:text-danger-700 dark:hover:text-danger-300 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-md transition-colors"
+                                    (click)="openDeleteDialog(learner)"
+                                    [attr.aria-label]="'learnerList.actions.delete' | translate"
+                                    [title]="'learnerList.actions.delete' | translate">
+                                    <i class="material-symbols-outlined text-xl">delete</i>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -162,6 +153,7 @@
         </div>
     </div>
 </div>
+}
 
 <app-confirm-dialog
     [isOpen]="showDeleteDialog"
@@ -169,6 +161,7 @@
     [message]="i18nService.translate('learnerList.confirm.deleteMessage', { name: learnerToDelete?.fullname || '' })"
     [cancelText]="'learnerList.confirm.cancel' | translate"
     [confirmText]="'learnerList.confirm.delete' | translate"
+    [type]="'danger'"
     (confirm)="confirmDelete()"
     (cancel)="cancelDelete()">
 </app-confirm-dialog>

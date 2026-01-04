@@ -20,17 +20,20 @@
     </ol>
 </div>
 
+@if (isLoading) {
+    <app-loading></app-loading>
+} @else {
 <!-- Tab Navigation -->
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="flex items-center gap-[20px] border-b border-gray-200 dark:border-[#172036]">
         <a
-            routerLink="/dashboard/course-management/subjects"
+            routerLink="/dashboard/category-subject-management/subjects"
             class="pb-[15px] px-[15px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-all relative">
             {{ 'categorySubjectManagement.tabs.subjectList' | translate }}
         </a>
 
         <a
-            routerLink="/dashboard/course-management/categories"
+            routerLink="/dashboard/category-subject-management/categories"
             routerLinkActive="text-primary-500"
             class="pb-[15px] px-[15px] font-medium text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-all relative text-primary-500">
             {{ 'categorySubjectManagement.tabs.categoryList' | translate }}
@@ -43,12 +46,18 @@
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
-            <input
-                type="text"
-                class="w-full px-[15px] py-[8px] rounded-md border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-primary-500 focus:outline-0 sm:w-[265px]"
-                [placeholder]="'categorySubjectManagement.categoryList.searchPlaceholder' | translate"
-                [(ngModel)]="searchTerm"
-                (input)="onSearchChange(searchTerm)">
+            <form class="relative sm:w-[265px]">
+                <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
+                    <i class="material-symbols-outlined !text-[20px]">search</i>
+                </label>
+                <input
+                    type="text"
+                    name="searchTerm"
+                    [placeholder]="'categorySubjectManagement.categoryList.searchPlaceholder' | translate"
+                    [(ngModel)]="searchTerm"
+                    (input)="onSearchChange(searchTerm)"
+                    class="bg-gray-50 border border-gray-50 h-[36px] text-xs rounded-md w-full block text-black pt-[11px] pb-[12px] ltr:pl-[38px] rtl:pr-[38px] ltr:pr-[13px] ltr:md:pr-[16px] rtl:pl-[13px] rtl:md:pl-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
+            </form>
         </div>
         <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex items-center gap-[15px]">
             <div class="trezo-card-dropdown relative">
@@ -129,9 +138,6 @@
                                 </td>
                                 <td class="ltr:text-left rtl:text-right px-[16px] py-[12px]">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                                            {{ category.name.charAt(0).toUpperCase() }}
-                                        </div>
                                         <span class="font-semibold text-gray-900 dark:text-white text-sm">{{ category.name }}</span>
                                     </div>
                                 </td>
@@ -144,7 +150,7 @@
                                     <div class="flex items-center gap-1.5">
                                         <i class="material-symbols-outlined text-blue-500 dark:text-blue-400 !text-sm">book</i>
                                         <span class="inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                            {{ category.subjects.length || 0 }}
+                                            {{ (category.subjects && category.subjects.length) ? category.subjects.length : 0 }}
                                         </span>
                                     </div>
                                 </td>
@@ -164,15 +170,15 @@
                                 </td>
                                 <td class="whitespace-nowrap px-[16px] py-[12px] text-center">
                                     <div class="flex items-center justify-center gap-[4px]">
-                                        <button 
-                                            class="p-[4px] rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 transition-all duration-150" 
-                                            title="View Details" 
+                                        <button
+                                            class="p-[4px] rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 transition-all duration-150"
+                                            title="View Details"
                                             (click)="openCategoryDetailsModal(category)">
                                             <i class="material-symbols-outlined !text-base">visibility</i>
                                         </button>
-                                        <button 
-                                            class="p-[4px] rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-all duration-150" 
-                                            title="Edit" 
+                                        <button
+                                            class="p-[4px] rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-all duration-150"
+                                            title="Edit"
                                             (click)="editCategory(category)">
                                             <i class="material-symbols-outlined !text-base">edit</i>
                                         </button>
@@ -184,10 +190,10 @@
                                                 {{ category.isActive ? 'toggle_on' : 'toggle_off' }}
                                             </i>
                                         </button>
-                                        <button 
-                                            type="button" 
-                                            class="p-[4px] rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all duration-150" 
-                                            title="Delete" 
+                                        <button
+                                            type="button"
+                                            class="p-[4px] rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all duration-150"
+                                            title="Delete"
                                             (click)="confirmDelete(category.id)">
                                             <i class="material-symbols-outlined !text-base">delete</i>
                                         </button>
@@ -358,7 +364,7 @@
                         <div class="flex items-center justify-between mb-[15px]">
                             <h6 class="font-semibold text-gray-900 dark:text-white">{{ 'categorySubjectManagement.categoryList.detailsModal.subjectsInCategory' | translate }}</h6>
                             <span class="inline-block px-[10px] py-[2px] rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                                {{ selectedCategoryForDetail.subjects.length || 0 }}
+                                {{ (selectedCategoryForDetail.subjects && selectedCategoryForDetail.subjects.length) ? selectedCategoryForDetail.subjects.length : 0 }}
                             </span>
                         </div>
 
@@ -399,6 +405,7 @@
         </div>
     </div>
 </div>
+}
 
 <!-- Delete Confirmation Modal -->
 @if (showDeleteConfirm) {

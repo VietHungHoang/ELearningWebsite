@@ -3,6 +3,7 @@ export interface CartResponse {
   learnerId: number;
   totalAmount: number;
   items: CartItem[];
+  status?: string;
 }
 
 
@@ -12,7 +13,9 @@ export interface CartItem {
   courseId: number;       
   name: string;          
   category: string;       
-  instructor: InstructorInfo;  
+  instructor: InstructorInfo;
+  tutor?: string;
+  tutorId?: number;  
   price: number;         
   image: string;          
   rating: number;        
@@ -37,7 +40,8 @@ export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 
 export interface CouponInfo {
   code: string;           
-  value: number;         
+  value: number;
+  type?: string;         
 }
 
 // Backend interfaces

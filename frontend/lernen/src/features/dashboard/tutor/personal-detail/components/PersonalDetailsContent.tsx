@@ -1,26 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    HiSparkles,
-    HiChevronDown,
     HiCloudUpload,
     HiTrash,
     HiX,
-    HiGlobe,
     HiVideoCamera,
-    HiCheckCircle,
-    HiExclamationCircle,
 } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
-import FileUpload from '../../components/FileUpload';
 import WriteWithAIModal from '../../pages/components/WriteWithAIModal';
 import { useTutorProfile } from '../../../../../hooks/useTutorProfile';
-import { useAuth } from '../../../../../context/AuthContext';
 import type { Country, Language, Subject } from '../../../../../types/common';
 import type { Tutor, TutorSocial } from '../../../../../types/tutor';
 import CustomDropdownDashboard from '../../../../../components/ui/CustomDropdownDashboard';
-import ResumeHighlightsContent from './ResumeHighlightsContent';
-import AccountSettingsContent from './AccountSettingsContent';
-import IdentityVerificationContent from './IdentityVerificationContent';
 import commonUtils from '../../../../../utils/commonUtils';
 
 interface PersonalDetailsContentProps {
@@ -44,11 +34,11 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
     const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(null);
     const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
 
-    const [activeFormats, setActiveFormats] = useState({
-        bold: false,
-        italic: false,
-        underline: false,
-    });
+    // const [activeFormats, setActiveFormats] = useState({
+    //     bold: false,
+    //     italic: false,
+    //     underline: false,
+    // });
 
     // Get countries, languages, and timezones data
     const countries = commonUtils.getAllCountries();
@@ -73,12 +63,12 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
         currentSessionFee: 0,
     });
 
-    const [originalData, setOriginalData] = useState<typeof formData | null>(null); 0
+    const [_originalData, setOriginalData] = useState<typeof formData | null>(null); 0
 
     // State for dropdown options from API
-    const [countryOptions, setCountryOptions] = useState<Country[]>([]);
-    const [languageOptions, setLanguageOptions] = useState<Language[]>([]);
-    const [subjectOptions, setSubjectOptions] = useState<Subject[]>([]);
+    const [, setCountryOptions] = useState<Country[]>([]);
+    const [_languageOptions, setLanguageOptions] = useState<Language[]>([]);
+    const [_subjectOptions, setSubjectOptions] = useState<Subject[]>([]);
 
     // Fetch dropdown options from API
     useEffect(() => {
@@ -96,9 +86,9 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                     { code: 'ja', name: 'Japanese' },
                 ];
                 const subjects: Subject[] = [
-                    { id: '1', name: 'Mathematics', categoryId: '1' },
-                    { id: '2', name: 'Physics', categoryId: '1' },
-                    { id: '3', name: 'English', categoryId: '2' },
+                    { id: '1', nameEn: 'Mathematics', nameVi: 'Toán học', categoryId: '1' },
+                    { id: '2', nameEn: 'Physics', nameVi: 'Vật lý', categoryId: '1' },
+                    { id: '3', nameEn: 'English', nameVi: 'Tiếng Anh', categoryId: '2' },
                 ];
 
                 setCountryOptions(countries);
@@ -143,46 +133,46 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
         }
     }, [tutor]);
 
-    const availableLanguages = useMemo(
-        () => languageOptions.filter((l) => !formData.languages.some(lang => lang.code === l.code)),
-        [languageOptions, formData.languages]
-    );
+    // const availableLanguages = useMemo(
+    //     () => languageOptions.filter((l) => !formData.languages.some(lang => lang.code === l.code)),
+    //     [languageOptions, formData.languages]
+    // );
 
-    const availableSubjects = useMemo(
-        () => subjectOptions.filter((s) => !formData.subjects.some(subj => subj.id === s.id)),
-        [subjectOptions, formData.subjects]
-    );
+    // const availableSubjects = useMemo(
+    //     () => subjectOptions.filter((s) => !formData.subjects.some(subj => subj.id === s.id)),
+    //     [subjectOptions, formData.subjects]
+    // );
 
-    const handleSocialLinkChange = (socialLinkId: string, value: string) => {
-        setFormData((prev) => ({
-            ...prev,
-            socialLinks: prev.socialLinks.map(link =>
-                link.id === socialLinkId ? { ...link, url: value } : link
-            ),
-        }));
-    };
+    // const handleSocialLinkChange = (socialLinkId: string, value: string) => {
+    //     setFormData((prev) => ({
+    //         ...prev,
+    //         socialLinks: prev.socialLinks.map(link =>
+    //             link.id === socialLinkId ? { ...link, url: value } : link
+    //         ),
+    //     }));
+    // };
 
-    const toggleFormat = (format: keyof typeof activeFormats) => {
-        setActiveFormats((prev) => ({ ...prev, [format]: !prev[format] }));
-    };
+    // const toggleFormat = (format: keyof typeof activeFormats) => {
+    //     setActiveFormats((prev) => ({ ...prev, [format]: !prev[format] }));
+    // };
 
-    const handleAddLanguage = (lang: Language) => {
-        if (!formData.languages.some(l => l.code === lang.code)) {
-            setFormData((prev) => ({
-                ...prev,
-                languages: [...prev.languages, { ...lang, isNative: false }],
-            }));
-        }
-    };
+    // const handleAddLanguage = (lang: Language) => {
+    //     if (!formData.languages.some(l => l.code === lang.code)) {
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             languages: [...prev.languages, { ...lang, isNative: false }],
+    //         }));
+    //     }
+    // };
 
-    const handleAddSubject = (subject: Subject) => {
-        if (!formData.subjects.some(s => s.id === subject.id)) {
-            setFormData((prev) => ({
-                ...prev,
-                subjects: [...prev.subjects, subject],
-            }));
-        }
-    };
+    // const handleAddSubject = (subject: Subject) => {
+    //     if (!formData.subjects.some(s => s.id === subject.id)) {
+    //         setFormData((prev) => ({
+    //             ...prev,
+    //             subjects: [...prev.subjects, subject],
+    //         }));
+    //     }
+    // };
 
     const handleProfilePhotoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -209,24 +199,24 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
     };
 
     // Check if form data has changed
-    const hasChanges = useMemo(() => {
-        if (!originalData) return false;
-        return (
-            formData.fullName !== originalData.fullName ||
-            formData.gender !== originalData.gender ||
-            formData.country.name !== originalData.country.name ||
-            formData.nativeLanguage?.code !== originalData.nativeLanguage?.code ||
-            JSON.stringify(formData.languages) !== JSON.stringify(originalData.languages) ||
-            formData.headline !== originalData.headline ||
-            JSON.stringify(formData.subjects) !== JSON.stringify(originalData.subjects) ||
-            formData.introduction !== originalData.introduction ||
-            JSON.stringify(formData.socialLinks) !== JSON.stringify(originalData.socialLinks) ||
-            formData.introVideo !== originalData.introVideo ||
-            formData.profilePhoto?.url !== originalData.profilePhoto?.url ||
-            formData.videoUrl !== originalData.videoUrl ||
-            formData.currentSessionFee !== originalData.currentSessionFee
-        );
-    }, [formData, originalData]);
+    // const hasChanges = useMemo(() => {
+    //     if (!originalData) return false;
+    //     return (
+    //         formData.fullName !== originalData.fullName ||
+    //         formData.gender !== originalData.gender ||
+    //         formData.country.name !== originalData.country.name ||
+    //         formData.nativeLanguage?.code !== originalData.nativeLanguage?.code ||
+    //         JSON.stringify(formData.languages) !== JSON.stringify(originalData.languages) ||
+    //         formData.headline !== originalData.headline ||
+    //         JSON.stringify(formData.subjects) !== JSON.stringify(originalData.subjects) ||
+    //         formData.introduction !== originalData.introduction ||
+    //         JSON.stringify(formData.socialLinks) !== JSON.stringify(originalData.socialLinks) ||
+    //         formData.introVideo !== originalData.introVideo ||
+    //         formData.profilePhoto?.url !== originalData.profilePhoto?.url ||
+    //         formData.videoUrl !== originalData.videoUrl ||
+    //         formData.currentSessionFee !== originalData.currentSessionFee
+    //     );
+    // }, [formData, originalData]);
 
     const handleSave = async () => {
         try {
@@ -250,8 +240,8 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
 
     const inputStyles =
         "w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-400 placeholder:font-thin hover:bg-white hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out";
-    const disabledInputStyles =
-        "w-full bg-gray-100/60 border-transparent rounded-lg px-4 py-2 text-gray-500 placeholder:text-gray-400 placeholder:font-thin cursor-not-allowed hover:bg-gray-100/60 hover:border-gray-200 transition-all duration-800 ease-in-out";
+    // const disabledInputStyles =
+    //     "w-full bg-gray-100/60 border-transparent rounded-lg px-4 py-2 text-gray-500 placeholder:text-gray-400 placeholder:font-thin cursor-not-allowed hover:bg-gray-100/60 hover:border-gray-200 transition-all duration-800 ease-in-out";
 
     if (loading) {
         return (

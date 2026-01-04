@@ -1,5 +1,5 @@
 import React from 'react';
-import type { AppPage } from '../../../../App';
+// import type { AppPage } from '../../../../App';
 import { FiPlay, FiUsers, FiClock, FiStar } from 'react-icons/fi';
 import type { Course, Tutor } from '../../../../types/api';
 import { useTranslation } from 'react-i18next';

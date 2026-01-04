@@ -133,7 +133,8 @@
       "user": "Người dùng",
       "instructors": "Gia sư",
       "instructorApproval": "Phê duyệt gia sư",
-      "learners": "học viên",
+      "tutorApproval": "Phê duyệt gia sư",
+      "learners": "Học viên",
       "finance": "Tài chính",
       "revenueDashboard": "Bảng doanh thu",
       "transactions": "Giao dịch",
@@ -335,16 +336,15 @@
       "reviewManagement": "Quản lý đánh giá"
     },
     "tabs": {
-      "flaggedReviews": "🚩 Đánh giá bị báo cáo",
+      "flaggedReviews": "Các đánh giá cần xử lý",
       "allReviews": "🗂️ Tất cả đánh giá"
     },
     "selected": "đã chọn",
     "selectAll": "Chọn tất cả",
     "selectReviews": "Chọn đánh giá để thực hiện thao tác",
-    "student": "học viên",
+    "student": "Học viên",
     "tutor": "Gia sư",
     "class": "Lớp học",
-    "learner": "học viên",
     "id": "ID",
     "stars": "Sao",
     "reason": "Lý do",
@@ -359,9 +359,10 @@
       "allReasons": "Tất cả lý do",
       "allStatus": "Tất cả trạng thái",
       "allRatings": "Tất cả đánh giá",
-      "lowRating": "1-2 Sao",
-      "inappropriateLanguage": "Ngôn ngữ không phù hợp",
-      "spam": "Spam/Quảng cáo"
+      "inappropriateLanguage": "Ngôn từ thô tục / không phù hợp",
+      "spam": "Spam/Quảng cáo",
+      "aiContentIssue": "Nội dung bạo lực / đe dọa",
+      "lowRating": "Đánh giá thấp"
     },
     "status": {
       "visible": "Hiển thị",
@@ -383,7 +384,7 @@
     "table": {
       "id": "ID",
       "stt": "STT",
-      "learner": "học viên",
+      "student": "Học viên",
       "tutor": "Gia sư",
       "rating": "Đánh giá",
       "content": "Nội dung",
@@ -433,11 +434,17 @@
     }
   },
   "instructorApproval": {
+    "searchPlaceholder": "Tìm kiếm gia sư...",
+    "pagination": {
+      "showing": "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} kết quả"
+    }
+  },
+  "tutorApproval": {
     "title": "Phê duyệt Gia sư",
     "subtitle": "Bạn có {{count}} đơn đang chờ phê duyệt.",
     "breadcrumb": {
       "userManagement": "Quản lý Người dùng",
-      "instructorApproval": "Phê duyệt Gia sư"
+      "tutorApproval": "Phê duyệt Gia sư"
     },
     "searchPlaceholder": "Tìm kiếm gia sư...",
     "selected": "đã chọn",
@@ -495,12 +502,12 @@
       "rejectSelected": "Từ chối đã chọn"
     }
   },
-  "instructorApprovalDetail": {
+  "tutorApprovalDetail": {
     "title": "Chi tiết Phê duyệt Gia sư",
     "breadcrumb": {
       "dashboard": "Bảng điều khiển",
       "userManagement": "Quản lý Người dùng",
-      "instructorApproval": "Phê duyệt Gia sư",
+      "tutorApproval": "Phê duyệt Gia sư",
       "detail": "Chi tiết"
     },
     "loading": "Đang tải...",
@@ -609,7 +616,7 @@
       "stt": "STT",
       "name": "Tên",
       "email": "Email",
-      "phone": "Số điện thoại",
+      "enrollmentCount": "Số lớp đang theo học",
       "joinDate": "Ngày tham gia",
       "action": "Thao tác"
     },
@@ -769,8 +776,7 @@
     },
     "dateRange": {
       "today": "Hôm nay",
-      "last7Days": "7 ngày qua",
-      "last30Days": "30 ngày qua",
+      "thisWeek": "Tuần này",
       "thisMonth": "Tháng này"
     },
     "kpi": {
@@ -830,9 +836,9 @@
       "revenueTrend": {
         "title": "Xu hướng doanh thu",
         "timeframe": {
-          "daily": "Theo ngày",
-          "weekly": "Theo tuần",
-          "monthly": "Theo tháng"
+          "weekly": "Tuần này",
+          "monthly": "Tháng này",
+          "yearly": "Năm này"
         }
       },
       "paymentMethods": {
@@ -845,9 +851,9 @@
           "table": "Bảng"
         },
         "timeFilter": {
-          "daily": "Theo ngày",
-          "weekly": "Theo tuần",
-          "monthly": "Theo tháng"
+          "weekly": "Tuần này",
+          "monthly": "Tháng này",
+          "yearly": "Năm này"
         },
         "table": {
           "rank": "Hạng",
@@ -980,51 +986,13 @@
     "modals": {
       "orderList": {
         "title": "QR Thanh toán",
-        "subtitle": "Mã QR Thanh toán",
-        "bank": "Ngân hàng",
-        "accountNumber": "Số tài khoản",
-        "accountHolder": "Chủ tài khoản",
-        "totalAmount": "Tổng tiền",
-        "download": "Tải QR",
-        "close": "Đóng"
-      },
-      "confirmPayment": {
-        "title": "Xác nhận Thanh toán",
-        "message": "Bạn có chắc chắn chuyển số tiền:",
-        "to": "đến",
-        "notes": "Ghi chú (tùy chọn)",
-        "notesPlaceholder": "Ví dụ: Chuyển khoản ngân hàng, Mã giao dịch: 123456...",
-        "cancel": "Hủy",
-        "confirm": "Xác nhận",
-        "processing": "Đang xử lý..."
-      },
-      "bulkConfirm": {
-        "title": "Xác nhận Thanh toán Hàng loạt",
-        "selectedInstructors": "Gia sư đã chọn",
-        "totalAmount": "Tổng tiền",
-        "notes": "Ghi chú (Tùy chọn)",
-        "notesPlaceholder": "Thêm ghi chú thanh toán...",
-        "cancel": "Hủy",
-        "confirmPayment": "Xác nhận Thanh toán"
-      }
-    },
-    "actions": {
-      "viewDetails": "Xem chi tiết & Order List",
-      "qrPayment": "QR Thanh toán"
-    },
-    "pagination": {
-      "showing": "Hiển thị",
-      "to": "đến",
-      "of": "của"
-    },
-    "modals": {
-      "orderList": {
         "subtitle": "Danh sách đơn hàng",
         "total": "Tổng",
         "noOrders": "Không có đơn hàng nào",
         "close": "Đóng"
       },
       "qrPayment": {
+        "title": "QR Thanh toán",
         "subtitle": "Quét mã QR để thanh toán",
         "bank": "Ngân hàng",
         "accountNumber": "Số tài khoản",
@@ -1061,6 +1029,15 @@
         "date": "Ngày thanh toán",
         "viewHistory": "Xem lịch sử"
       }
+    },
+    "actions": {
+      "viewDetails": "Xem chi tiết & Order List",
+      "qrPayment": "QR Thanh toán"
+    },
+    "pagination": {
+      "showing": "Hiển thị",
+      "to": "đến",
+      "of": "của"
     }
   },
   "transactions": {
@@ -1085,10 +1062,8 @@
       "transactionErrors": "Lỗi giao dịch"
     },
     "summaryFilter": {
-      "all": "Tất cả",
       "today": "Hôm nay",
-      "last7Days": "7 ngày qua",
-      "last30Days": "30 ngày qua",
+      "thisWeek": "Tuần này",
       "thisMonth": "Tháng này"
     },
     "filters": {
@@ -1153,12 +1128,20 @@
         "email": "Email",
         "phone": "Số điện thoại"
       },
+      "studentInformation": {
+        "title": "Thông tin học viên",
+        "studentId": "Mã học viên",
+        "name": "Tên",
+        "email": "Email",
+        "phone": "Số điện thoại"
+      },
       "classInformation": {
         "title": "Thông tin Lớp học",
         "classId": "Mã Lớp học",
         "name": "Tên",
         "type": "Loại",
         "instructor": "Gia sư",
+        "tutor": "Gia sư",
         "classType": {
           "oneOnOne": "1 kèm 1",
           "group": "Nhóm"

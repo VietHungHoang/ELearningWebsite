@@ -43,7 +43,7 @@ const PayoutsPage = () => {
         itemsPerPage: 5
     });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [, setError] = useState<string | null>(null);
 
     // UI states
     const [selectedMethodId, setSelectedMethodId] = useState<string | null>(null);
@@ -748,5 +748,9 @@ const PayoutsPage = () => {
         </div>
     );
 };
+
+// Export types for use in other components
+export type { PayoutMethod, PayoutStatus, PayoutHistoryItem };
+export type PayoutMethodType = 'Bank' | 'PayPal' | 'Stripe';
 
 export default PayoutsPage;

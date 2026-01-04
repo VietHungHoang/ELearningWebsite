@@ -24,7 +24,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     const [displayDate, setDisplayDate] = useState(
         new Date(Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1))
     );
-    const [hoveredWeek, setHoveredWeek] = useState<{ start: Date; end: Date } | null>(null);
+    // const [hoveredWeek, setHoveredWeek] = useState<{ start: Date; end: Date } | null>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
 
     const currentDate = activeTab === 'start' ? startDate : endDate;
@@ -53,16 +53,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         };
     }, [isOpen, onClose]);
 
-    const getWeekRangeForDate = (date: Date) => {
-        const d = new Date(date.getTime());
-        d.setUTCHours(0, 0, 0, 0);
-        const day = d.getUTCDay();
-        const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
-        const start = new Date(d.setUTCDate(diff));
-        const end = new Date(start.getTime());
-        end.setUTCDate(start.getUTCDate() + 6);
-        return { start, end };
-    };
+    // const getWeekRangeForDate = (date: Date) => {
+    //     const d = new Date(date.getTime());
+    //     d.setUTCHours(0, 0, 0, 0);
+    //     const day = d.getUTCDay();
+    //     const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+    //     const start = new Date(d.setUTCDate(diff));
+    //     const end = new Date(start.getTime());
+    //     end.setUTCDate(start.getUTCDate() + 6);
+    //     return { start, end };
+    // };
 
     const handleDateApply = (date: Date) => {
         const newCurrentDate = new Date(
@@ -108,7 +108,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         <div key={`blank-${i}`}></div>
                     ))}
                     {days.map((day) => {
-                        const dayDate = new Date(Date.UTC(year, month, day));
+                        // const dayDate = new Date(Date.UTC(year, month, day));
                         const isSelected =
                             currentDate.getUTCDate() === day &&
                             currentDate.getUTCMonth() === month &&

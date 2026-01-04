@@ -19,7 +19,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSidebar, breadcrumb, isSidebarOpen = true }) => {
-    const { t, i18n } = useTranslation();
+    const { i18n } = useTranslation();
     const { currencyDisplay, setSelectedCurrency } = useCurrency();
 
     const currentLanguageOption = languageOptions.find(option => option.code === i18n.language) || languageOptions[0];

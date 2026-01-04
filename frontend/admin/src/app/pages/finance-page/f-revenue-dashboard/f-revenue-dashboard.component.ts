@@ -4,10 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { RevenueTrendComponent } from './revenue-trend/revenue-trend.component';
 import { PaymentMethodChartComponent } from './payment-method-chart/payment-method-chart.component';
 import { TopInstructorsChartComponent } from './top-instructors-chart/top-instructors-chart.component';
 import { RevenueDashboardService, RevenueDashboardData } from './revenue-dashboard.service';
+import { I18nService } from '../../../i18n/i18n.service';
 
 @Component({
     selector: 'app-f-revenue-dashboard',
@@ -17,6 +19,7 @@ import { RevenueDashboardService, RevenueDashboardData } from './revenue-dashboa
         RouterLink,
         TranslatePipe,
         CurrencyFormatPipe,
+        LoadingComponent,
         RevenueTrendComponent,
         PaymentMethodChartComponent,
         TopInstructorsChartComponent
@@ -25,16 +28,16 @@ import { RevenueDashboardService, RevenueDashboardData } from './revenue-dashboa
     styleUrl: './f-revenue-dashboard.component.scss'
 })
 export class FRevenueDashboardComponent implements OnInit {
-    selectedDateRange: string = '30days';
-    selectedTimeframe: string = 'Daily';  // For Revenue Trend chart
-    selectedTimeFilter: 'day' | 'week' | 'month' = 'month';  // For Top Instructors chart
+    selectedDateRange: string = 'thisMonth';
+    selectedTimeframe: string = 'Weekly';  // For Revenue Trend chart
+    selectedTimeFilter: 'week' | 'month' | 'year' = 'month';  // For Top Tutors chart
     isDateRangeDropdownOpen: boolean = false;
 
     kpis = {
         // Main Metrics
         totalRevenue: 0,              // Tổng doanh thu từ tất cả giao dịch
         platformFeeEarned: 0,         // Phí nền tảng thu được (15% của revenue)
-        instructorPayouts: 0,         // Tổng tiền trả cho giảng viên
+        tutorPayouts: 0,         // Tổng tiền trả cho giảng viên
         successRate: 0,               // % tỷ lệ thành công (completed / total * 100)
         totalTransactions: 0,         // Tổng số giao dịch
         averageOrderValue: 0,         // Giá trị trung bình mỗi đơn (Revenue / Transactions)
@@ -49,8 +52,12 @@ export class FRevenueDashboardComponent implements OnInit {
     };
 
     dashboardData: RevenueDashboardData | null = null;
+    loading: boolean = false;
 
-    constructor(private revenueDashboardService: RevenueDashboardService) {}
+    constructor(
+        private revenueDashboardService: RevenueDashboardService,
+        private i18nService: I18nService
+    ) {}
 
     ngOnInit(): void {
         this.loadDashboardData();
@@ -71,23 +78,30 @@ export class FRevenueDashboardComponent implements OnInit {
         this.loadDashboardData();
     }
 
-    onTimeFilterChange(timeFilter: 'day' | 'week' | 'month'): void {
+    onTimeFilterChange(timeFilter: 'week' | 'month' | 'year'): void {
         this.selectedTimeFilter = timeFilter;
         this.loadDashboardData();
     }
 
     private loadDashboardData(): void {
+        this.loading = true;
+        // Map display values to API values
+        const apiDateRange = this.mapDateRangeToApi(this.selectedDateRange);
+        const languageCode = this.i18nService.getCurrentLanguage();
         this.revenueDashboardService.getRevenueDashboardData(
-            this.selectedDateRange,
+            apiDateRange,
             this.selectedTimeframe,
-            this.selectedTimeFilter
+            this.selectedTimeFilter,
+            languageCode
         ).subscribe({
             next: (data: RevenueDashboardData) => {
                 this.dashboardData = data;
                 this.kpis = data.kpis;
+                this.loading = false;
             },
             error: (error) => {
                 console.error('Error loading revenue dashboard data:', error);
+                this.loading = false;
             }
         });
     }
@@ -103,10 +117,13 @@ export class FRevenueDashboardComponent implements OnInit {
     getDateRangeDisplayText(): string {
         const displayMap: { [key: string]: string } = {
             'today': 'revenueDashboard.dateRange.today',
-            '7days': 'revenueDashboard.dateRange.last7Days',
-            '30days': 'revenueDashboard.dateRange.last30Days'
+            'thisWeek': 'revenueDashboard.dateRange.thisWeek',
+            'thisMonth': 'revenueDashboard.dateRange.thisMonth',
+            // Backward compatibility
+            '7days': 'revenueDashboard.dateRange.thisWeek',
+            '30days': 'revenueDashboard.dateRange.thisMonth'
         };
-        return displayMap[this.selectedDateRange] || 'revenueDashboard.dateRange.last30Days';
+        return displayMap[this.selectedDateRange] || 'revenueDashboard.dateRange.thisMonth';
     }
 
     getTrendIcon(trend: number): string {
@@ -124,6 +141,16 @@ export class FRevenueDashboardComponent implements OnInit {
     formatTrend(trend: number): string {
         const sign = trend >= 0 ? '+' : '';
         return `${sign}${trend.toFixed(1)}%`;
+    }
+
+    private mapDateRangeToApi(dateRange: string): string {
+        // Map display values to API values
+        const mapping: { [key: string]: string } = {
+            'today': 'today',
+            'thisWeek': '7days',
+            'thisMonth': '30days'
+        };
+        return mapping[dateRange] || dateRange;
     }
 
     @HostListener('document:click', ['$event'])

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ReviewService, Review } from '../../../services/review.service';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { I18nService } from '../../../i18n/i18n.service';
 import { Observable } from 'rxjs';
@@ -12,7 +13,7 @@ import { forkJoin } from 'rxjs';
 @Component({
     selector: 'app-review-management',
     standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent, TranslatePipe],
+    imports: [CommonModule, FormsModule, RouterLink, SearchInputComponent, LoadingComponent, TranslatePipe],
     templateUrl: './review-management.component.html',
     styleUrl: './review-management.component.scss'
 })
@@ -40,9 +41,9 @@ export class ReviewManagementComponent implements OnInit {
 
     flagReasons = [
         { value: 'all', label: '' },
-        { value: 'low_rating', label: '' },
         { value: 'bad_words', label: '' },
-        { value: 'spam', label: '' }
+        { value: 'spam', label: '' },
+        { value: 'ai_content', label: '' }
     ];
 
     visibilityOptions = [
@@ -87,9 +88,9 @@ export class ReviewManagementComponent implements OnInit {
         // Initialize flag reasons labels
         this.flagReasons = [
             { value: 'all', label: this.i18nService.translate('reviewManagement.filters.allReasons') },
-            { value: 'low_rating', label: this.i18nService.translate('reviewManagement.filters.lowRating') },
             { value: 'bad_words', label: this.i18nService.translate('reviewManagement.filters.inappropriateLanguage') },
-            { value: 'spam', label: this.i18nService.translate('reviewManagement.filters.spam') }
+            { value: 'spam', label: this.i18nService.translate('reviewManagement.filters.spam') },
+            { value: 'ai_content', label: this.i18nService.translate('reviewManagement.filters.aiContentIssue') }
         ];
 
         // Initialize visibility options labels
@@ -123,25 +124,35 @@ export class ReviewManagementComponent implements OnInit {
         }
 
         console.log('[ReviewManagement] loadReviews called:', { currentPage: this.currentPage, itemsPerPage: this.itemsPerPage, filters, activeTab: this.activeTab });
-        
-        this.reviewService.getReviews(this.currentPage, this.itemsPerPage, filters).subscribe(response => {
-            console.log('[ReviewManagement] Received response:', {
-                totalElements: response.totalElements,
-                contentLength: response.content.length,
-                content: response.content.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged }))
-            });
-            
-            this.filteredReviews = response.content;
-            this.reviews = response.content; // For backward compatibility
-            this.totalReviews = response.totalElements;
-            this.totalPages = response.totalPages;
-            this.loading = false;
-            
-            console.log('[ReviewManagement] Updated component state:', {
-                filteredReviewsLength: this.filteredReviews.length,
-                totalReviews: this.totalReviews,
-                totalPages: this.totalPages
-            });
+
+        this.reviewService.getReviews(this.currentPage, this.itemsPerPage, filters).subscribe({
+            next: (response) => {
+                console.log('[ReviewManagement] Received response:', {
+                    totalElements: response.totalElements,
+                    contentLength: response.content.length,
+                    content: response.content.map(r => ({ id: r.id, status: r.status, isFlagged: r.isFlagged }))
+                });
+
+                this.filteredReviews = response.content;
+                this.reviews = response.content; // For backward compatibility
+                this.totalReviews = response.totalElements;
+                this.totalPages = response.totalPages;
+                this.loading = false;
+
+                console.log('[ReviewManagement] Updated component state:', {
+                    filteredReviewsLength: this.filteredReviews.length,
+                    totalReviews: this.totalReviews,
+                    totalPages: this.totalPages
+                });
+            },
+            error: (error) => {
+                console.error('[ReviewManagement] Error loading reviews:', error);
+                this.loading = false;
+                this.filteredReviews = [];
+                this.reviews = [];
+                this.totalReviews = 0;
+                this.totalPages = 0;
+            }
         });
     }
 
@@ -199,13 +210,13 @@ export class ReviewManagementComponent implements OnInit {
     }
 
     getRatingLabel(): string {
-        return this.selectedRating === 'all' 
+        return this.selectedRating === 'all'
             ? this.i18nService.translate('reviewManagement.filters.allRatings')
             : `${this.selectedRating} ${this.i18nService.translate('reviewManagement.stars')}`;
     }
 
     getDisplayedRating(rating: any): string {
-        return rating === 'all' 
+        return rating === 'all'
             ? this.i18nService.translate('reviewManagement.filters.allRatings')
             : `${rating} ${this.i18nService.translate('reviewManagement.stars')}`;
     }
@@ -245,7 +256,7 @@ export class ReviewManagementComponent implements OnInit {
         } else if (this.actionConfirmType === 'toggleVisibility') {
             // Toggle between visible and hidden
             const newStatus = this.selectedReviewForAction.status === 'hidden' ? 'visible' : 'hidden';
-            action$ = newStatus === 'hidden' 
+            action$ = newStatus === 'hidden'
                 ? this.reviewService.hideReview(this.selectedReviewForAction.id)
                 : this.reviewService.makeReviewVisible(this.selectedReviewForAction.id);
         } else {
@@ -291,7 +302,7 @@ export class ReviewManagementComponent implements OnInit {
     }
 
     getStatusText(status: string): string {
-        return status === 'hidden' 
+        return status === 'hidden'
             ? this.i18nService.translate('reviewManagement.status.hidden')
             : this.i18nService.translate('reviewManagement.status.visible');
     }
@@ -400,11 +411,11 @@ export class ReviewManagementComponent implements OnInit {
                     this.isProcessingBulk = false;
                     const successCount = results.filter(r => r === true).length;
                     const failCount = results.length - successCount;
-                    
+
                     if (failCount > 0) {
                         console.warn(`[ReviewManagement] Bulk action completed: ${successCount} succeeded, ${failCount} failed`);
                     }
-                    
+
                     // Reload data regardless of success/failure to sync with backend
                     this.selectedReviews.clear();
                     this.bulkConfirmType = null;
@@ -429,7 +440,7 @@ export class ReviewManagementComponent implements OnInit {
     getBulkConfirmMessage(): string {
         if (!this.bulkConfirmType) return '';
         const count = this.selectedReviews.size;
-        
+
         switch (this.bulkConfirmType) {
             case 'hide':
                 return this.i18nService.translate('reviewManagement.confirm.bulkHide', { count });
@@ -442,7 +453,7 @@ export class ReviewManagementComponent implements OnInit {
 
     getBulkConfirmButtonText(): string {
         if (!this.bulkConfirmType) return '';
-        
+
         switch (this.bulkConfirmType) {
             case 'hide':
                 return this.i18nService.translate('reviewManagement.bulkActions.hide');
@@ -456,9 +467,9 @@ export class ReviewManagementComponent implements OnInit {
     formatFlagReason(reason?: string): string {
         if (!reason || reason === 'none') return '';
         const reasonMap: { [key: string]: string } = {
-            'low_rating': this.i18nService.translate('reviewManagement.filters.lowRating'),
             'bad_words': this.i18nService.translate('reviewManagement.filters.inappropriateLanguage'),
-            'spam': this.i18nService.translate('reviewManagement.filters.spam')
+            'spam': this.i18nService.translate('reviewManagement.filters.spam'),
+            'ai_content': this.i18nService.translate('reviewManagement.filters.aiContentIssue')
         };
         return reasonMap[reason] || reason;
         }

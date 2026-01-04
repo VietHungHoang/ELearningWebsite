@@ -15,20 +15,18 @@ export class ToggleService {
 
     initializeTheme() {
         if (this.isBrowser) {
-            const savedTheme = localStorage.getItem(this.themeKey) || 'light';
+            // Force light mode - remove dark mode completely
+            localStorage.removeItem(this.themeKey);
             const savedDirection = localStorage.getItem(this.directionKey) || 'ltr';
 
-            this.applyTheme(savedTheme);
+            this.applyTheme('light');
             this.applyDirection(savedDirection);
         }
     }
 
     toggleTheme() {
-        if (!this.isBrowser) return;
-
-        const currentTheme = localStorage.getItem(this.themeKey) === 'dark' ? 'light' : 'dark';
-        this.applyTheme(currentTheme);
-        localStorage.setItem(this.themeKey, currentTheme);
+        // Disabled - always use light mode
+        return;
     }
 
     toggleDirection() {
@@ -42,13 +40,9 @@ export class ToggleService {
     private applyTheme(theme: string) {
         if (this.isBrowser) {
             const htmlElement = document.documentElement;
-            if (theme === 'dark') {
-                htmlElement.classList.add('dark');
-                htmlElement.classList.remove('light');
-            } else {
-                htmlElement.classList.add('light');
-                htmlElement.classList.remove('dark');
-            }
+            // Always force light mode - remove dark class if exists
+            htmlElement.classList.remove('dark');
+            htmlElement.classList.add('light');
         }
     }
 

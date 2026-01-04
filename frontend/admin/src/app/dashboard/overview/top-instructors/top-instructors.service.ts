@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Top instructor data item
@@ -29,7 +30,7 @@ export interface TopInstructorItem {
 /**
  * Response data for Top Instructors API
  * API Endpoint: GET /api/v1/admin/dashboard/top-instructors
- * Query Params: 
+ * Query Params:
  *   - criteria (revenue|rating|bookings) - Ranking criteria
  *   - period (week|month|year|all) - Time period
  *   - limit (number) - Maximum number of instructors to return
@@ -62,7 +63,7 @@ interface ApiResponse<T> {
 })
 export class TopInstructorsService {
 
-    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
 
     constructor(private http: HttpClient) {}
 

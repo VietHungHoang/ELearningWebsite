@@ -13,6 +13,7 @@ export interface Student {
   fullname: string;
   phone?: string;
   joinDate: string;
+  enrollmentCount?: number; // Số lớp đang theo học
 }
 
 export interface StudentDetail extends Student {

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HiSearch, HiFilter } from 'react-icons/hi';
+import { HiSearch } from 'react-icons/hi';
 import Breadcrumb from '../../components/Breadcrumb';
 import { useAuth } from '../../../../context/AuthContext';
 
@@ -95,9 +95,9 @@ const mockQuizAttempts: QuizAttempt[] = [
 type FilterTab = 'All Quizzes' | 'Completed' | 'In Progress' | 'Not Started';
 
 const MyQuizzesPage: React.FC = () => {
-    const { state } = useAuth();
+    const { } = useAuth();
     const navigate = useNavigate();
-    const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>(mockQuizAttempts);
+    const [quizAttempts] = useState<QuizAttempt[]>(mockQuizAttempts);
     const [activeTab, setActiveTab] = useState<FilterTab>('All Quizzes');
     const [searchTerm, setSearchTerm] = useState('');
 

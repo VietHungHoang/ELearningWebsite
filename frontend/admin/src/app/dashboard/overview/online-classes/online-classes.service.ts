@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { I18nService } from '../../../i18n/i18n.service';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Response data for Completed Sessions API
@@ -55,7 +56,7 @@ interface ApiResponse<T> {
 export class OnlineClassesService {
 
     private isBrowser: boolean;
-    private apiUrl = 'http://localhost:8081/api/v1/admin/dashboard';
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
     private chart: any = null;
 
     constructor(
@@ -77,7 +78,7 @@ export class OnlineClassesService {
 
     getCompletedSessionsData(startDate?: string, endDate?: string): Observable<CompletedSessionsData> {
         let params = new HttpParams();
-        
+
         // Default to last 7 days if no dates provided
         if (!startDate || !endDate) {
             const end = new Date();
@@ -86,7 +87,7 @@ export class OnlineClassesService {
             startDate = start.toISOString().split('T')[0];
             endDate = end.toISOString().split('T')[0];
         }
-        
+
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 

@@ -63,7 +63,7 @@ export const tutorService = {
         }
     },
 
-    getTutorDetail: async (tutorId: string, studentId?: string): Promise<ApiResponse<TutorDetail>> => {
+    getTutorDetail: async (tutorId: string, studentId?: string): Promise<ApiResponse<import('../types/api').TutorDetail>> => {
         try {
             const params: Record<string, string> = {};
             console.log("Fetching tutor detail with studentId:", studentId);

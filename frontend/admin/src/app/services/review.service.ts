@@ -16,7 +16,7 @@ export interface Review {
     content: string;
     status: 'visible' | 'hidden'; // visible = công khai, hidden = đã ẩn
     isFlagged?: boolean; // true = needs moderation, false/undefined = already processed
-    flagReason?: 'low_rating' | 'bad_words' | 'spam' | 'none';
+    flagReason?: 'bad_words' | 'spam' | 'ai_content' | 'none';
     tutorReply?: string;
     createdDate: string;
     updatedDate?: string;
@@ -24,7 +24,7 @@ export interface Review {
 
 export interface ReviewFilters {
     type: 'flagged' | 'all';
-    flagReason?: 'low_rating' | 'bad_words' | 'spam' | 'all';
+    flagReason?: 'bad_words' | 'spam' | 'ai_content' | 'all';
     visibility?: 'all' | 'visible' | 'hidden';
     rating?: number | 'all';
     search?: string;
@@ -57,7 +57,7 @@ export class ReviewService {
                 content: 'Gia sư đến muộn 15 phút và không có lời xin lỗi nào. Thái độ dạy rất hời hợt. Tôi muốn hoàn tiền ngay lập tức! Đừng học người này.',
                 status: 'visible',
                 isFlagged: true,
-                flagReason: 'low_rating',
+                flagReason: 'bad_words',
                 tutorReply: undefined,
                 createdDate: '2025-11-18 14:30:45'
             },
@@ -121,7 +121,7 @@ export class ReviewService {
                 content: 'Không hiểu gì cả. Gia sư không giải thích kỹ lưỡng.',
                 status: 'visible',
                 isFlagged: true,
-                flagReason: 'low_rating',
+                flagReason: 'ai_content',
                 tutorReply: undefined,
                 createdDate: '2025-11-14 11:05:50'
             },

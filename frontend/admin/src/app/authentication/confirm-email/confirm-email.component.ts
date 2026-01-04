@@ -19,10 +19,6 @@ export class ConfirmEmailComponent {
         this.toggleService.initializeTheme();
     }
 
-    toggleTheme() {
-        this.toggleService.toggleTheme();
-    }
-
     toggleDirection() {
         this.toggleService.toggleDirection();
     }

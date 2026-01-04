@@ -54,7 +54,7 @@ const ProfileSettingsPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState("My Bookings");
   const [viewingClass, setViewingClass] = useState<any | null>(null);
-  const [sentRequests, setSentRequests] = useState<any[]>(mockSentRequests);
+  const [sentRequests] = useState<any[]>(mockSentRequests);
 
   const viewToLabel: Record<string, string> = {
     'profile-settings': t('profile.sidebar.profileSettings'),
@@ -80,9 +80,9 @@ const ProfileSettingsPage: React.FC = () => {
     console.log('Logout');
   };
 
-  const navigateToApp = (page: string) => {
-    console.log('Navigate to', page);
-  };
+  // const navigateToApp = (page: string) => {
+  //   console.log('Navigate to', page);
+  // };
 
   const renderContent = () => {
     switch (activeView) {

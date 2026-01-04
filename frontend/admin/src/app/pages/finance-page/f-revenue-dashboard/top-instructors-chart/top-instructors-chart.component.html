@@ -14,11 +14,6 @@
                 @if (isTimeFilterDropdownOpen) {
                     <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[140px] z-[4] dark:bg-[#0c1427] dark:shadow-none">
                         <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('day')">
-                                {{ 'revenueDashboard.charts.topInstructors.timeFilter.daily' | translate }}
-                            </button>
-                        </li>
-                        <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('week')">
                                 {{ 'revenueDashboard.charts.topInstructors.timeFilter.weekly' | translate }}
                             </button>
@@ -26,6 +21,11 @@
                         <li>
                             <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('month')">
                                 {{ 'revenueDashboard.charts.topInstructors.timeFilter.monthly' | translate }}
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-[#15203c]" (click)="setTimeFilter('year')">
+                                {{ 'revenueDashboard.charts.topInstructors.timeFilter.yearly' | translate }}
                             </button>
                         </li>
                     </ul>
@@ -73,21 +73,21 @@
                         </tr>
                     </thead>
                     <tbody class="text-black dark:text-white">
-                        @for (instructor of topInstructors; track instructor.instructorId; let i = $index) {
+                        @for (tutor of topTutors; track tutor.tutorId; let i = $index) {
                             <tr class="border-b border-gray-100 dark:border-[#172036]">
                                 <td class="px-[12px] py-[10px] text-xs font-medium">
                                     <span class="inline-block w-[24px] h-[24px] leading-[24px] text-center rounded-full" [ngClass]="i === 0 ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300' : i === 1 ? 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-300' : i === 2 ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-300'">
                                         #{{ i + 1 }}
                                     </span>
                                 </td>
-                                <td class="px-[12px] py-[10px] text-xs">{{ instructor.instructorName }}</td>
+                                <td class="px-[12px] py-[10px] text-xs">{{ tutor.tutorName }}</td>
                                 <td class="px-[12px] py-[10px] text-xs">
                                     <span class="inline-block px-[8px] py-[3px] rounded text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                                        {{ instructor.totalSessions }}
+                                        {{ tutor.totalSessions }}
                                     </span>
                                 </td>
-                                <td class="px-[12px] py-[10px] text-xs font-bold text-primary-500">{{ instructor.totalEarnings | currencyFormat:'VND' }}</td>
-                                <td class="px-[12px] py-[10px] text-xs text-gray-600 dark:text-gray-400">{{ instructor.avgEarningsPerSession | currencyFormat:'VND' }}</td>
+                                <td class="px-[12px] py-[10px] text-xs font-bold text-primary-500">{{ tutor.totalEarnings | currencyFormat:'VND' }}</td>
+                                <td class="px-[12px] py-[10px] text-xs text-gray-600 dark:text-gray-400">{{ tutor.avgEarningsPerSession | currencyFormat:'VND' }}</td>
                             </tr>
                         }
                     </tbody>

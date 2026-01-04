@@ -34,6 +34,7 @@ export interface TutorResponse extends UserInfo {
 export type TutorProfileHeaderResponse = TutorResponse;
 
 export interface Tutor extends UserInfo {
+    name?: string;
     email?: string;
     isVerified: boolean;
     headline: string;
@@ -61,6 +62,7 @@ export interface TutorDetail extends UserInfo {
     headline: string;
     introduction: string;
     videoUrl: string;
+    introductionVideoUrl?: string; // Alias for videoUrl
     currentSessionFee: number;
     originalSessionFee?: number;
     averageRating: number;
@@ -82,6 +84,9 @@ export interface TutorDetail extends UserInfo {
     experiences: ExperienceItem[];
     certifications: CertificationItem[];
     groupClasses?: GroupClass;
+    // Backward compatibility aliases
+    education?: EducationItem[];
+    experience?: ExperienceItem[];
 }
 
 export interface TutorReview {
@@ -237,7 +242,7 @@ export interface TutorOnboardingData {
     id: string;
     fullName: string;
     email: string;
-    gender: Gender;
+    gender: Gender | null;
     countryCode: string;
     timezone: string;
     languages: TutorLanguage[];

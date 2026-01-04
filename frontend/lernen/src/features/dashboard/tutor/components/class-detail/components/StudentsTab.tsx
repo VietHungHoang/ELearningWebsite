@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import { FiUserPlus, FiTrash2, FiMessageCircle, FiSearch } from 'react-icons/fi';
 import Avatar from 'react-avatar';
 import ModalLayout from '../../../../../../components/ui/ModalLayout';
-import type { ClassData } from '../../../my-class/MyClassPage';
-import { useTranslation } from 'react-i18next';
+import type { ClassData } from '../../../my-class/components/EditClassModal';
 
 interface StudentsTabProps {
     classData: ClassData;
 }
 
 const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
-    const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 

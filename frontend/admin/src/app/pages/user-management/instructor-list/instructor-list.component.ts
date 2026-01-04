@@ -5,6 +5,7 @@ import { RouterLink, Router } from '@angular/router';
 import { UserService, Tutor } from '../../../services/user.service';
 import { ConfirmDialogComponent } from '../../../components/confirm-dialog/confirm-dialog.component';
 import { SearchInputComponent } from '../../../components/search-input/search-input.component';
+import { LoadingComponent } from '../../../components/loading/loading.component';
 import { LocaleUtilsService } from '../../../shared/utils';
 import { I18nService } from '../../../i18n/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
@@ -12,7 +13,7 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 @Component({
     selector: 'app-instructor-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, TranslatePipe],
+    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, LoadingComponent, TranslatePipe],
     templateUrl: './instructor-list.component.html',
     styleUrl: './instructor-list.component.scss'
 })

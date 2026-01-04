@@ -192,11 +192,11 @@ const CreateCoursePage: React.FC = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Level</label>
-                                 <CustomDropdownDashboardDashboard
+                                 <CustomDropdownDashboard
                                     options={['Beginner', 'Intermediate', 'Expert']}
                                     selectedValue={courseData.level}
                                     placeholder="Select course level"
-                                    onSelect={(val) => handleDataChange('level', val)}
+                                    onSelect={(val: string) => handleDataChange('level', val)}
                                     dropdownId="course-level"
                                     openDropdown={openDropdown}
                                     setOpenDropdown={setOpenDropdown}
@@ -204,11 +204,11 @@ const CreateCoursePage: React.FC = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                                 <CustomDropdownDashboardDashboard
+                                 <CustomDropdownDashboard
                                     options={['English', 'Spanish', 'French']}
                                     selectedValue={courseData.language}
                                     placeholder="Select language"
-                                    onSelect={(val) => handleDataChange('language', val)}
+                                    onSelect={(val: string) => handleDataChange('language', val)}
                                     dropdownId="course-language"
                                     openDropdown={openDropdown}
                                     setOpenDropdown={setOpenDropdown}

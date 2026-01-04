@@ -34,13 +34,13 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({ student, onClos
 
   const getMockCoursesForStudent = (student: Student) => {
     const courses: {title: string, type: '1-on-1' | 'Group' | 'Trial'}[] = [];
-    if (student.enrollmentTypes.includes('1-on-1')) {
+    if (student.enrollmentTypes?.includes('1-on-1')) {
         courses.push({title: 'Personalized Math Tutoring', type: '1-on-1'});
     }
-    if (student.enrollmentTypes.includes('Group')) {
+    if (student.enrollmentTypes?.includes('Group')) {
         courses.push({title: 'Group Physics Workshop', type: 'Group'});
     }
-    if (student.enrollmentTypes.includes('Trial')) {
+    if (student.enrollmentTypes?.includes('Trial')) {
         courses.push({title: 'Introduction to Algebra Course', type: 'Trial'});
     }
     if(courses.length === 0) { // Add a default if no types are specified
@@ -76,7 +76,7 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({ student, onClos
                 <img src={student.avatarUrl} alt={student.name} className="w-20 h-20 rounded-full" />
                 <div>
                     <h3 className="text-2xl font-bold text-gray-800">{student.name}</h3>
-                    <div className="mt-1"><StudentStatusBadge status={student.status} /></div>
+                    <div className="mt-1"><StudentStatusBadge status={(student.status || 'Active') as any} /></div>
                 </div>
             </div>
             

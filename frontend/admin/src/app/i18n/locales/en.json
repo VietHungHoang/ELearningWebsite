@@ -132,7 +132,7 @@
       "review": "Review",
       "user": "User",
       "instructors": "Tutors",
-      "instructorApproval": "Tutor Approval",
+      "tutorApproval": "Tutor Approval",
       "learners": "Learners",
       "finance": "Finance",
       "revenueDashboard": "Revenue Dashboard",
@@ -335,8 +335,8 @@
       "reviewManagement": "Review Management"
     },
     "tabs": {
-      "flaggedReviews": "🚩 Flagged Reviews",
-      "allReviews": "🗂️ All Reviews"
+      "flaggedReviews": "🚩 Need to be processed",
+      "allReviews": "🗂️ All reviews"
     },
     "selected": "selected",
     "selectAll": "Select All",
@@ -344,7 +344,6 @@
     "student": "Student",
     "tutor": "Tutor",
     "class": "Class",
-    "learner": "Learner",
     "id": "ID",
     "stars": "Stars",
     "reason": "Reason",
@@ -359,9 +358,9 @@
       "allReasons": "All Reasons",
       "allStatus": "All Status",
       "allRatings": "All Ratings",
-      "lowRating": "1-2 Stars",
-      "inappropriateLanguage": "Inappropriate Language",
-      "spam": "Spam/Advertising"
+      "inappropriateLanguage": "Profanity / Inappropriate Words",
+      "spam": "Spam/Advertising",
+      "aiContentIssue": "Violence / Threat Content"
     },
     "status": {
       "visible": "Visible",
@@ -383,7 +382,7 @@
     "table": {
       "id": "ID",
       "stt": "STT",
-      "learner": "Learner",
+      "student": "Student",
       "tutor": "Tutor",
       "rating": "Rating",
       "content": "Content",
@@ -431,11 +430,17 @@
     }
   },
   "instructorApproval": {
+    "searchPlaceholder": "Search tutors...",
+    "pagination": {
+      "showing": "Showing {{start}} to {{end}} of {{total}} results"
+    }
+  },
+  "tutorApproval": {
     "title": "Tutor Approval",
     "subtitle": "You have {{count}} pending applications.",
     "breadcrumb": {
       "userManagement": "User Management",
-      "instructorApproval": "Tutor Approval"
+      "tutorApproval": "Tutor Approval"
     },
     "searchPlaceholder": "Search tutors...",
     "selected": "selected",
@@ -493,12 +498,12 @@
       "rejectSelected": "Reject Selected"
     }
   },
-  "instructorApprovalDetail": {
+  "tutorApprovalDetail": {
     "title": "Tutor Approval Detail",
     "breadcrumb": {
       "dashboard": "Dashboard",
       "userManagement": "User Management",
-      "instructorApproval": "Tutor Approval",
+      "tutorApproval": "Tutor Approval",
       "detail": "Detail"
     },
     "loading": "Loading...",
@@ -607,7 +612,7 @@
       "stt": "STT",
       "name": "Name",
       "email": "Email",
-      "phone": "Phone",
+      "enrollmentCount": "Active Classes",
       "joinDate": "Join Date",
       "action": "Action"
     },
@@ -767,8 +772,7 @@
     },
     "dateRange": {
       "today": "Today",
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
+      "thisWeek": "This Week",
       "thisMonth": "This Month"
     },
     "kpi": {
@@ -797,6 +801,38 @@
         "description": "Revenue per transaction"
       },
       "vsPrevious": "vs previous"
+    },
+    "charts": {
+      "revenueTrend": {
+        "title": "Revenue Trend",
+        "timeframe": {
+          "weekly": "This Week",
+          "monthly": "This Month",
+          "yearly": "This Year"
+        }
+      },
+      "paymentMethods": {
+        "title": "Payment Methods"
+      },
+      "topInstructors": {
+        "title": "Top 5 Instructors by Revenue",
+        "view": {
+          "chart": "Chart",
+          "table": "Table"
+        },
+        "timeFilter": {
+          "weekly": "This Week",
+          "monthly": "This Month",
+          "yearly": "This Year"
+        },
+        "table": {
+          "rank": "Rank",
+          "instructor": "Instructor",
+          "sessions": "Sessions",
+          "totalEarnings": "Total Earnings",
+          "avgPerSession": "Avg/Session"
+        }
+      }
     }
   },
   "payout": {
@@ -922,56 +958,11 @@
         "title": "Order List",
         "subtitle": "Order List",
         "total": "Total",
-        "noOrders": "No orders",
-        "close": "Close"
-      },
-      "qrPayment": {
-        "title": "QR Payment",
-        "subtitle": "Payment QR Code",
-        "bank": "Bank",
-        "accountNumber": "Account Number",
-        "accountHolder": "Account Holder",
-        "totalAmount": "Total Amount",
-        "download": "Download QR",
-        "close": "Close"
-      },
-      "confirmPayment": {
-        "title": "Confirm Payment",
-        "message": "Are you sure the transfer amount:",
-        "to": "to",
-        "notes": "Notes (optional)",
-        "notesPlaceholder": "Example: Bank transfer, Transaction ID: 123456...",
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "processing": "Processing..."
-      },
-      "bulkConfirm": {
-        "title": "Confirm Bulk Payment",
-        "selectedInstructors": "Selected Tutors",
-        "totalAmount": "Total Amount",
-        "notes": "Notes (Optional)",
-        "notesPlaceholder": "Add payment notes...",
-        "cancel": "Cancel",
-        "confirmPayment": "Confirm Payment"
-      }
-    },
-    "actions": {
-      "viewDetails": "View Details & Order List",
-      "qrPayment": "QR Payment"
-    },
-    "pagination": {
-      "showing": "Showing",
-      "to": "to",
-      "of": "of"
-    },
-    "modals": {
-      "orderList": {
-        "subtitle": "Order List",
-        "total": "Total",
         "noOrders": "No orders found",
         "close": "Close"
       },
       "qrPayment": {
+        "title": "QR Payment",
         "subtitle": "Scan QR Code to Pay",
         "bank": "Bank",
         "accountNumber": "Account Number",
@@ -1008,6 +999,15 @@
         "date": "Payment Date",
         "viewHistory": "View History"
       }
+    },
+    "actions": {
+      "viewDetails": "View Details & Order List",
+      "qrPayment": "QR Payment"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "to": "to",
+      "of": "of"
     }
   },
   "transactions": {
@@ -1032,10 +1032,8 @@
       "transactionErrors": "Transaction errors"
     },
     "summaryFilter": {
-      "all": "All",
       "today": "Today",
-      "last7Days": "Last 7 Days",
-      "last30Days": "Last 30 Days",
+      "thisWeek": "This Week",
       "thisMonth": "This Month"
     },
     "filters": {
@@ -1100,12 +1098,20 @@
         "email": "Email",
         "phone": "Phone"
       },
+      "studentInformation": {
+        "title": "Student Information",
+        "studentId": "Student ID",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone"
+      },
       "classInformation": {
         "title": "Class Information",
         "classId": "Class ID",
         "name": "Name",
         "type": "Type",
         "instructor": "Tutor",
+        "tutor": "Tutor",
         "classType": {
           "oneOnOne": "1-on-1",
           "group": "Group"

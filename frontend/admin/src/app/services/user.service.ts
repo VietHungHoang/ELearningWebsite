@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail, PaginatedResponse } from '../types/index';
+import { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail, PaginatedResponse, InstructorRequestBackend, mapBackendToInstructorRequest } from '../types/index';
 
 export type { Tutor, TutorDetail, Student, StudentDetail, InstructorRequest, InstructorRequestDetail } from '../types/index';
 export type Instructor = TutorDetail;
@@ -519,11 +519,7 @@ export class UserService {
                     { languageCode: 'fr', isNative: false },
                     { languageCode: 'de', isNative: false }
                 ],
-                subjects: [
-                    { categoryId: 'tech', subjectName: 'Công nghệ' },
-                    { categoryId: 'cyber', subjectName: 'An ninh mạng' },
-                    { categoryId: 'cloud', subjectName: 'Điện toán đám mây' }
-                ],
+                subjectIds: ['1.1', '1.3', '2.1'],
                 certifications: [
                     { id: 'cert-001', name: 'CISSP Certificate', issuingOrganization: 'ISC2', issueDate: '2022-01-15', expirationDate: '2025-01-15', credentialId: 'CISSP-001', credentialUrl: 'https://example.com/cert1.pdf' },
                     { id: 'cert-002', name: 'CEH Certificate', issuingOrganization: 'EC-Council', issueDate: '2021-06-20', credentialId: 'CEH-002', credentialUrl: 'https://example.com/cert2.pdf' },
@@ -546,11 +542,7 @@ export class UserService {
                     { languageCode: 'en', isNative: true },
                     { languageCode: 'es', isNative: false }
                 ],
-                subjects: [
-                    { categoryId: 'marketing', subjectName: 'Tiếp thị Số' },
-                    { categoryId: 'social', subjectName: 'Tiếp thị Mạng xã hội' },
-                    { categoryId: 'seo', subjectName: 'Tối ưu SEO' }
-                ],
+                subjectIds: ['3.1', '3.2'],
                 certifications: [
                     { id: 'cert-004', name: 'Google Analytics Professional', issuingOrganization: 'Google', issueDate: '2023-03-10', credentialId: 'GA-003', credentialUrl: 'https://example.com/cert3.pdf' },
                     { id: 'cert-005', name: 'Facebook Blueprint Certification', issuingOrganization: 'Meta', issueDate: '2023-07-22', credentialId: 'FB-BP-002' }
@@ -571,12 +563,7 @@ export class UserService {
                     { languageCode: 'en', isNative: false },
                     { languageCode: 'ja', isNative: false }
                 ],
-                subjects: [
-                    { categoryId: 'ai', subjectName: 'Trí tuệ Nhân tạo' },
-                    { categoryId: 'ml', subjectName: 'Học máy' },
-                    { categoryId: 'python', subjectName: 'Lập trình Python' },
-                    { categoryId: 'data', subjectName: 'Khoa học Dữ liệu' }
-                ],
+                subjectIds: ['1.1', '2.1', '2.2'],
                 certifications: [
                     { id: 'cert-006', name: 'TensorFlow Developer Certificate', issuingOrganization: 'Google', issueDate: '2022-11-05', credentialId: 'TF-DEV-006' },
                     { id: 'cert-007', name: 'Deep Learning Specialization', issuingOrganization: 'Coursera/deeplearning.ai', issueDate: '2021-08-15', credentialId: 'DL-SPEC-007', credentialUrl: 'https://example.com/dl-cert.pdf' },
@@ -599,11 +586,7 @@ export class UserService {
                     { languageCode: 'en', isNative: false },
                     { languageCode: 'pt', isNative: false }
                 ],
-                subjects: [
-                    { categoryId: 'spanish', subjectName: 'Tiếng Tây Ban Nha' },
-                    { categoryId: 'culture', subjectName: 'Văn hóa Mỹ Latinh' },
-                    { categoryId: 'business', subjectName: 'Tiếng Tây Ban Nha Thương mại' }
-                ],
+                subjectIds: ['4.2', '4.3'],
                 certifications: [
                     { id: 'cert-009', name: 'DELE C2 Certificate', issuingOrganization: 'Instituto Cervantes', issueDate: '2018-06-30', credentialId: 'DELE-C2-009', credentialUrl: 'https://example.com/dele-cert.pdf' },
                     { id: 'cert-010', name: 'Teaching Spanish as Foreign Language', issuingOrganization: 'University of Barcelona', issueDate: '2019-12-15', credentialId: 'ELE-010' }
@@ -623,11 +606,7 @@ export class UserService {
                     { languageCode: 'en', isNative: true },
                     { languageCode: 'fr', isNative: false }
                 ],
-                subjects: [
-                    { categoryId: 'finance', subjectName: 'Tài chính' },
-                    { categoryId: 'accounting', subjectName: 'Kế toán' },
-                    { categoryId: 'investment', subjectName: 'Ngân hàng Đầu tư' }
-                ],
+                subjectIds: ['3.2'],
                 certifications: [
                     { id: 'cert-011', name: 'CFA Level III', issuingOrganization: 'CFA Institute', issueDate: '2020-09-01', credentialId: 'CFA-L3-011', credentialUrl: 'https://example.com/cfa-cert.pdf' },
                     { id: 'cert-012', name: 'CPA License', issuingOrganization: 'AICPA', issueDate: '2018-05-20', credentialId: 'CPA-012' }
@@ -648,11 +627,7 @@ export class UserService {
                     { languageCode: 'en', isNative: false },
                     { languageCode: 'ko', isNative: false }
                 ],
-                subjects: [
-                    { categoryId: 'design', subjectName: 'Thiết kế Đồ họa' },
-                    { categoryId: 'ui', subjectName: 'Thiết kế UI/UX' },
-                    { categoryId: 'branding', subjectName: 'Nhận diện Thương hiệu' }
-                ],
+                subjectIds: ['5.1'],
                 certifications: [
                     { id: 'cert-013', name: 'Adobe Certified Expert', issuingOrganization: 'Adobe', issueDate: '2021-04-10', credentialId: 'ACE-013', credentialUrl: 'https://example.com/adobe-cert.pdf' },
                     { id: 'cert-014', name: 'Google UX Design Certificate', issuingOrganization: 'Google', issueDate: '2022-09-25', credentialId: 'GUX-014' }
@@ -682,10 +657,10 @@ export class UserService {
                          req.id === '550e8400-e29b-41d4-a716-446655442005' ? 'US' : 'JP',
             gender: 'Male',
             instructorLevel: [],
-            initialPrice: req.experience > 10 ? 75 : req.experience > 7 ? 60 : 50,
+            initialPrice: (req.experience || 0) > 10 ? 75 : (req.experience || 0) > 7 ? 60 : 50,
             timezone: 'America/New_York',
-            headline: `Chuyên gia ${req.subjects.map(s => s.subjectName).join(' & ')} | ${req.experience}+ năm Kinh nghiệm`,
-            introduction: `Xin chào! Tôi là ${req.name}, một giảng viên ${req.subjects.map(s => s.subjectName).join(' và ')} tận tâm với ${req.experience}+ năm kinh nghiệm chuyên môn. Tôi chuyên giảng dạy ${req.subjects.length > 1 ? 'các khía cạnh khác nhau của ' + req.subjects.map(s => s.subjectName).join(' và ') : req.subjects[0].subjectName} với trọng tâm vào ứng dụng thực tế và các tình huống thực tế.`,
+            headline: `Chuyên gia với ${(req.experience || 0)}+ năm Kinh nghiệm`,
+            introduction: `Xin chào! Tôi là ${req.name}, một giảng viên tận tâm với ${(req.experience || 0)}+ năm kinh nghiệm chuyên môn. Tôi chuyên giảng dạy với trọng tâm vào ứng dụng thực tế và các tình huống thực tế.`,
             videoUrl: 'https://media-cdn.example.com/videos/intro.mp4',
             videoThumbnailUrl: 'https://media-cdn.example.com/thumbnails/intro.jpg',
             socialLinks: [
@@ -735,15 +710,15 @@ export class UserService {
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for tutors:', response.message);
-                return this.instructorsSubject.value.length > 0 
-                    ? this.instructorsSubject.value 
+                return this.instructorsSubject.value.length > 0
+                    ? this.instructorsSubject.value
                     : this.mockTutors;
             }),
             catchError(error => {
                 // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
                 console.error('[UserService] API error for tutors, returning mock data:', error);
-                return of(this.instructorsSubject.value.length > 0 
-                    ? this.instructorsSubject.value 
+                return of(this.instructorsSubject.value.length > 0
+                    ? this.instructorsSubject.value
                     : this.mockTutors);
             })
         );
@@ -782,15 +757,15 @@ export class UserService {
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for students:', response.message);
-                return this.studentsSubject.value.length > 0 
-                    ? this.studentsSubject.value 
+                return this.studentsSubject.value.length > 0
+                    ? this.studentsSubject.value
                     : this.mockStudents;
             }),
             catchError(error => {
                 // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
                 console.error('[UserService] API error for students, returning mock data:', error);
-                return of(this.studentsSubject.value.length > 0 
-                    ? this.studentsSubject.value 
+                return of(this.studentsSubject.value.length > 0
+                    ? this.studentsSubject.value
                     : this.mockStudents);
             })
         );
@@ -846,17 +821,16 @@ export class UserService {
 
         // Filter by subject
         if (params?.subject && params.subject !== 'all') {
-            filtered = filtered.filter(req =>
-                req.subjects.some(subject => subject.subjectName.toLowerCase().includes(params.subject!.toLowerCase()))
-            );
+            // For mock data, skip subject filtering since we don't have subject names here
+            // In real implementation, this would filter by subject names
         }
 
         // Filter by search term
         if (params?.search && params.search.trim()) {
             const searchLower = params.search.toLowerCase().trim();
             filtered = filtered.filter(req =>
-                req.name.toLowerCase().includes(searchLower) ||
-                req.subjects.some(subject => subject.subjectName.toLowerCase().includes(searchLower))
+                req.name.toLowerCase().includes(searchLower)
+                // Subject search removed for mock data simplicity
             );
         }
 
@@ -908,14 +882,21 @@ export class UserService {
         if (params?.page !== undefined) queryParams.page = params.page;
         if (params?.size !== undefined) queryParams.size = params.size;
 
-        // Gọi API thực - apiService.get() trả về ApiResponse<PaginatedResponse<InstructorRequest>>
-        return this.apiService.get<PaginatedResponse<InstructorRequest>>('/instructor-requests', queryParams).pipe(
+        // Gọi API thực - apiService.get() trả về ApiResponse<PaginatedResponse<InstructorRequestBackend>>
+        return this.apiService.get<PaginatedResponse<InstructorRequestBackend>>('/tutors/requests', queryParams).pipe(
             map(response => {
-                // Nếu API thành công → dùng dữ liệu API
+                // Nếu API thành công → dùng dữ liệu API và map sang format frontend
                 if (response.success && response.data) {
-                    // Update subject with content array for backward compatibility
-                    this.instructorRequestsSubject.next(response.data.content);
-                    return response.data;
+                    // Map backend response to frontend format
+                    const mappedContent = response.data.content.map(mapBackendToInstructorRequest);
+                    const mappedResponse: PaginatedResponse<InstructorRequest> = {
+                        ...response.data,
+                        content: mappedContent
+                    };
+
+                    // Update subject with mapped content array
+                    this.instructorRequestsSubject.next(mappedContent);
+                    return mappedResponse;
                 }
                 // Nếu API lỗi → trả về mock data
                 console.warn('[UserService] API failed for instructor requests:', response.message);
@@ -933,7 +914,7 @@ export class UserService {
 
     getInstructorRequestDetailObservable(requestId: string): Observable<InstructorRequestDetail | undefined> {
         // Thử lấy từ API - apiService.get() trả về ApiResponse<InstructorRequestDetail>
-        return this.apiService.get<InstructorRequestDetail>(`/instructor-requests/${requestId}`).pipe(
+        return this.apiService.get<InstructorRequestDetail>(`/tutors/requests/${requestId}`).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
@@ -993,9 +974,12 @@ export class UserService {
     //     );
     // }
 
-    approveInstructorRequest(tutorId: string, levels: string[]): Observable<boolean> {
-        // Gọi API thực để approve instructor request
-        return this.apiService.post<boolean>(`/tutors/${tutorId}/approve`, { levels }).pipe(
+    // TEMPORARY: Approve without levels parameter
+    // approveInstructorRequest(tutorId: string, levels: string[]): Observable<boolean> {
+    approveInstructorRequest(tutorId: string): Observable<boolean> {
+        // Gọi API thực để approve instructor request - KHÔNG GỬI LEVELS
+        // return this.apiService.post<boolean>(`/tutors/${tutorId}/approve`, { levels }).pipe(
+        return this.apiService.post<boolean>(`/tutors/approve/${tutorId}`, {}).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success) {

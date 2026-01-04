@@ -11,18 +11,18 @@ import { TranslatePipe } from '../../../../i18n/translate.pipe';
 })
 export class FTransactionsDetailComponent implements OnInit {
     transactionId: string | null = null;
-    learnerId: string | null = 'LRN-2025-00145';
+    studentId: string | null = 'STU-2025-00145';
     classId: string | null = 'CLS-2025-00089';
 
-    // Learner Information
-    learnerName: string = 'Shannon Nelson';
-    learnerEmail: string = 'shannon.nelson@example.com';
-    learnerPhone: string = '+1 444 556 8899';
+    // Student Information
+    studentName: string = 'Shannon Nelson';
+    studentEmail: string = 'shannon.nelson@example.com';
+    studentPhone: string = '+1 444 556 8899';
 
     // Class Information
     className: string = 'English Conversation Advanced';
     classType: string = '1-on-1';
-    instructorName: string = 'David Smith';
+    tutorName: string = 'David Smith';
 
     // Payment Information
     totalAmount: number = 75;
@@ -35,7 +35,7 @@ export class FTransactionsDetailComponent implements OnInit {
     ngOnInit(): void {
         this.route.params.subscribe(params => {
             this.transactionId = params['id'] || '#PAY-2025-12-001';
-            this.learnerId = params['learnerId'] || this.learnerId;
+            this.studentId = params['studentId'] || this.studentId;
             this.classId = params['classId'] || this.classId;
         });
     }

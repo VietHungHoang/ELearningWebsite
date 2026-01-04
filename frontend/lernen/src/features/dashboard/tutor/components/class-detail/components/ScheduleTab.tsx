@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiCalendar, FiVideo, FiEdit, FiDownload } from "react-icons/fi";
+import { FiCalendar, FiEdit } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { format, startOfToday } from "date-fns";
 import { enUS, vi } from "date-fns/locale";
@@ -410,7 +410,6 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
     upcomingSessions,
     pastSessions,
     onOpenReschedule,
-    onViewPastSession,
 }) => {
     const { t, i18n } = useTranslation();
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -419,7 +418,6 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
     const [noteContent, setNoteContent] = useState("");
     const [selectedSessionId, setSelectedSessionId] = useState<string>("");
     const [expandedSessions, setExpandedSessions] = useState<Set<number>>(new Set());
-    const [loading, setLoading] = useState(false);
 
     // Toggle expand/collapse for past sessions
     const toggleExpand = (sessionId: number) => {
@@ -482,7 +480,7 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* Upcoming Sessions */}
                     <div className="flex-1 h-[370px] overflow-y-auto border border-gray-200 p-4 rounded-xl shadow-sm">
-                        {loading ? (
+                        {false /* loading state disabled */ ? (
                             <UpcomingSkeleton />
                         ) : (
                             <>
@@ -534,7 +532,7 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
 
                 {/* Past Sessions - Simplified */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                    {loading ? (
+                    {false /* loading state disabled */ ? (
                         <PastSessionsSkeleton />
                     ) : (
                         <>

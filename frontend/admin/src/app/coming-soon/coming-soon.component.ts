@@ -53,10 +53,6 @@ export class ComingSoonComponent {
         clearInterval(this.countdownInterval);
     }
 
-    toggleTheme() {
-        this.toggleService.toggleTheme();
-    }
-
     toggleDirection() {
         this.toggleService.toggleDirection();
     }

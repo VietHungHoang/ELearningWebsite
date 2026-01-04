@@ -238,8 +238,8 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({ }) =>
     // Sync with profile
     React.useEffect(() => {
         if (profile) {
-            setEducationItems(profile.education || []);
-            setExperienceItems(profile.experience || []);
+            setEducationItems(profile.educations || profile.education || []);
+            setExperienceItems(profile.experiences || profile.experience || []);
             setCertificationItems(profile.certifications || []);
         }
     }, [profile]);

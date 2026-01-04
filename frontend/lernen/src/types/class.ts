@@ -1,6 +1,7 @@
 export interface UserBasicInfoResponse {
     id: string;
     fullName: string;
+    name?: string; // Alias for fullName, for backward compatibility
     avatarUrl?: string;
     enrollmentStatus?: EnrollmentStatus;
 }
@@ -83,6 +84,7 @@ export interface Session {
     tutor: UserBasicInfoResponse;
     sessionDatetime: string;
     classInfo: ClassBasicInfoResponse;
+    className?: string; // Optional className field
     sessionType: ClassType;
     createdAt: string;
     updatedAt: string;

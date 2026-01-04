@@ -11,12 +11,14 @@ export interface Language {
 
 export interface Category {
     id: string;
+    name?: string; // For backward compatibility
     nameVi: string;
     nameEn: string;
 }
 
 export interface Subject {
     id: string;
+    name?: string; // For backward compatibility
     nameVi: string;
     nameEn: string;
     categoryId: string;

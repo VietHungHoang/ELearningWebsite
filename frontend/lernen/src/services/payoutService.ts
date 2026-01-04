@@ -2,10 +2,10 @@ import apiService from './apiService';
 import type { PayoutMethod, PayoutHistoryItem, PayoutSummary, PayoutFilters, ApiResponse, PaginatedResponse, RecentEarning, RecentEarningsFilters } from '../types/api';
 
 const mockMethods: PayoutMethod[] = [
-  { id: 1, type: 'PayPal', identifier: 'john.doe@example.com' },
-  { id: 2, type: 'Bank', identifier: '**** 4567' },
-  { id: 3, type: 'PayPal', identifier: 'sarah.smith@gmail.com' },
-  { id: 4, type: 'Bank', identifier: '**** 8901' }
+  { id: '1', type: 'PayPal', identifier: 'john.doe@example.com' },
+  { id: '2', type: 'Bank', identifier: '**** 4567' },
+  { id: '3', type: 'PayPal', identifier: 'sarah.smith@gmail.com' },
+  { id: '4', type: 'Bank', identifier: '**** 8901' }
 ];
 
 const mockHistory: PayoutHistoryItem[] = [
@@ -38,25 +38,25 @@ const mockSummary: PayoutSummary = {
 };
 
 const mockEarnings: RecentEarning[] = [
-  { id: 'ERN001', course: 'Web Development Bootcamp', type: '1-on-1', date: '22/11/2025 14:30', amount: 50.00 },
+  { id: 'ERN001', course: 'Web Development Bootcamp', type: 'one-on-one', date: '22/11/2025 14:30', amount: 50.00 },
   { id: 'ERN002', course: 'Advanced React Course', type: 'Group', date: '20/11/2025 09:15', amount: 45.00 },
-  { id: 'ERN003', course: 'JavaScript Fundamentals', type: '1-on-1', date: '19/11/2025 16:45', amount: 38.50 },
+  { id: 'ERN003', course: 'JavaScript Fundamentals', type: 'one-on-one', date: '19/11/2025 16:45', amount: 38.50 },
   { id: 'ERN004', course: 'Python for Data Science', type: 'Group', date: '18/11/2025 11:20', amount: 42.00 },
-  { id: 'ERN005', course: 'UI/UX Design Principles', type: '1-on-1', date: '17/11/2025 13:10', amount: 55.00 },
+  { id: 'ERN005', course: 'UI/UX Design Principles', type: 'one-on-one', date: '17/11/2025 13:10', amount: 55.00 },
   { id: 'ERN006', course: 'Machine Learning Basics', type: 'Group', date: '16/11/2025 15:30', amount: 48.00 },
-  { id: 'ERN007', course: 'Node.js Backend Development', type: '1-on-1', date: '15/11/2025 10:45', amount: 52.00 },
+  { id: 'ERN007', course: 'Node.js Backend Development', type: 'one-on-one', date: '15/11/2025 10:45', amount: 52.00 },
   { id: 'ERN008', course: 'Database Design & Management', type: 'Group', date: '14/11/2025 17:00', amount: 40.00 },
-  { id: 'ERN009', course: 'Mobile App Development', type: '1-on-1', date: '13/11/2025 12:15', amount: 60.00 },
+  { id: 'ERN009', course: 'Mobile App Development', type: 'one-on-one', date: '13/11/2025 12:15', amount: 60.00 },
   { id: 'ERN010', course: 'Cloud Computing with AWS', type: 'Group', date: '12/11/2025 08:30', amount: 45.00 },
-  { id: 'ERN011', course: 'DevOps Essentials', type: '1-on-1', date: '11/11/2025 14:20', amount: 58.00 },
+  { id: 'ERN011', course: 'DevOps Essentials', type: 'one-on-one', date: '11/11/2025 14:20', amount: 58.00 },
   { id: 'ERN012', course: 'Cybersecurity Fundamentals', type: 'Group', date: '10/11/2025 16:45', amount: 43.00 },
-  { id: 'ERN013', course: 'Full Stack Development', type: '1-on-1', date: '09/11/2025 11:30', amount: 65.00 },
+  { id: 'ERN013', course: 'Full Stack Development', type: 'one-on-one', date: '09/11/2025 11:30', amount: 65.00 },
   { id: 'ERN014', course: 'Data Structures & Algorithms', type: 'Group', date: '08/11/2025 13:15', amount: 47.00 },
-  { id: 'ERN015', course: 'API Development with REST', type: '1-on-1', date: '07/11/2025 09:45', amount: 53.00 },
+  { id: 'ERN015', course: 'API Development with REST', type: 'one-on-one', date: '07/11/2025 09:45', amount: 53.00 },
   { id: 'ERN016', course: 'Blockchain Technology', type: 'Group', date: '06/11/2025 15:20', amount: 49.00 },
-  { id: 'ERN017', course: 'iOS App Development', type: '1-on-1', date: '05/11/2025 10:30', amount: 62.00 },
+  { id: 'ERN017', course: 'iOS App Development', type: 'one-on-one', date: '05/11/2025 10:30', amount: 62.00 },
   { id: 'ERN018', course: 'Android Development', type: 'Group', date: '04/11/2025 17:15', amount: 44.00 },
-  { id: 'ERN019', course: 'System Design Interview Prep', type: '1-on-1', date: '03/11/2025 12:00', amount: 70.00 },
+  { id: 'ERN019', course: 'System Design Interview Prep', type: 'one-on-one', date: '03/11/2025 12:00', amount: 70.00 },
   { id: 'ERN020', course: 'Agile Project Management', type: 'Group', date: '02/11/2025 14:45', amount: 41.00 },
 ];
 
@@ -238,7 +238,7 @@ export const payoutService = {
       console.warn('Failed to add payout method via API, using mock response:', error);
       const newMethod: PayoutMethod = {
         ...methodData,
-        id: Math.max(...mockMethods.map(m => m.id)) + 1
+        id: String(Math.max(...mockMethods.map(m => Number(m.id))) + 1)
       };
       return {
         status: 201,

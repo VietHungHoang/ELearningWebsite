@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { HiChevronLeft, HiChevronRight, HiPencil, HiX } from "react-icons/hi";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import Toast from "../../../../components/ui/Toast";
 import Tooltip from "../../../../components/ui/Tooltip";
 import CustomDropdownDashboard from "../../../../components/ui/CustomDropdownDashboard";
@@ -12,14 +12,14 @@ import { classService } from "../../../../services/classService";
 import { useAuth } from "../../../../context/AuthContext";
 import { useBreadcrumb } from "../../context/BreadcrumbContext";
 import type { TutorAvailability } from "../../../../types/tutor";
-import type { GetBookedSessionsResponse, Session } from "../../../../types/class";
+import type { Session } from "../../../../types/class";
 import commonUtils from "../../../../utils/commonUtils";
 
 // --- INTERFACES ---
 // Using BookedSession directly from API types// --- COMPONENT ---
 const ScheduleManagementContent: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const { state } = useAuth();
     const { user } = state;
     const { setBreadcrumb } = useBreadcrumb();
@@ -30,7 +30,7 @@ const ScheduleManagementContent: React.FC = () => {
     const [availability, setAvailability] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [availabilityData, setAvailabilityData] = useState<{startDate: Date, endDate: Date, slots: string[]} | null>(null);
-    const [originalAvailabilities, setOriginalAvailabilities] = useState<TutorAvailability[]>([]);
+    const [_originalAvailabilities, setOriginalAvailabilities] = useState<TutorAvailability[]>([]);
     const [bookedSessions, setBookedSessions] = useState<Session[]>([]);
     const [selectedSession, setSelectedSession] = useState<Session | null>(null);
     const [modalPosition, setModalPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
@@ -1107,80 +1107,80 @@ const ScheduleManagementContent: React.FC = () => {
     };
 
     // Helper function to get day name from dayOfWeek (1=Monday, 7=Sunday)
-    const getDayName = (dayOfWeek: number): string => {
-        const days = [
-            t('common.days.monday'),
-            t('common.days.tuesday'),
-            t('common.days.wednesday'),
-            t('common.days.thursday'),
-            t('common.days.friday'),
-            t('common.days.saturday'),
-            t('common.days.sunday')
-        ];
-        return days[dayOfWeek === 7 ? 6 : dayOfWeek - 1] || '';
-    };
+    // const getDayName = (dayOfWeek: number): string => {
+    //     const days = [
+    //         t('common.days.monday'),
+    //         t('common.days.tuesday'),
+    //         t('common.days.wednesday'),
+    //         t('common.days.thursday'),
+    //         t('common.days.friday'),
+    //         t('common.days.saturday'),
+    //         t('common.days.sunday')
+    //     ];
+    //     return days[dayOfWeek === 7 ? 6 : dayOfWeek - 1] || '';
+    // };
 
     // Render availability details panel
-    const renderAvailabilityDetails = () => {
-        if (!originalAvailabilities || originalAvailabilities.length === 0) {
-            return (
-                <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full">
-                    <div className="p-4 border-b border-gray-200 flex-shrink-0">
-                        <h3 className="text-lg font-semibold text-gray-800">{t('dashboard.tutor.schedule.availabilityDetails.title')}</h3>
-                    </div>
-                    <div className="p-4 flex-1 flex items-center justify-center">
-                        <p className="text-sm text-gray-500">{t('dashboard.tutor.schedule.availabilityDetails.noAvailability')}</p>
-                    </div>
-                </div>
-            );
-        }
+    // const renderAvailabilityDetails = () => {
+    //     if (!originalAvailabilities || originalAvailabilities.length === 0) {
+    //         return (
+    //             <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full">
+    //                 <div className="p-4 border-b border-gray-200 flex-shrink-0">
+    //                     <h3 className="text-lg font-semibold text-gray-800">{t('dashboard.tutor.schedule.availabilityDetails.title')}</h3>
+    //                 </div>
+    //                 <div className="p-4 flex-1 flex items-center justify-center">
+    //                     <p className="text-sm text-gray-500">{t('dashboard.tutor.schedule.availabilityDetails.noAvailability')}</p>
+    //                 </div>
+    //             </div>
+    //         );
+    //     }
 
-        // Group availabilities by dayOfWeek (1=Monday, 7=Sunday)
-        const groupedByDay: { [key: number]: typeof originalAvailabilities } = {};
-        originalAvailabilities.forEach((avail) => {
-            if (!groupedByDay[avail.dayOfWeek]) {
-                groupedByDay[avail.dayOfWeek] = [];
-            }
-            groupedByDay[avail.dayOfWeek].push(avail);
-        });
+    //     // Group availabilities by dayOfWeek (1=Monday, 7=Sunday)
+    //     const groupedByDay: { [key: number]: typeof originalAvailabilities } = {};
+    //     originalAvailabilities.forEach((avail) => {
+    //         if (!groupedByDay[avail.dayOfWeek]) {
+    //             groupedByDay[avail.dayOfWeek] = [];
+    //         }
+    //         groupedByDay[avail.dayOfWeek].push(avail);
+    //     });
 
-        // Sort by dayOfWeek (Monday to Sunday)
-        const sortedDays = [1, 2, 3, 4, 5, 6, 7].filter(day => groupedByDay[day]);
+    //     // Sort by dayOfWeek (Monday to Sunday)
+    //     const sortedDays = [1, 2, 3, 4, 5, 6, 7].filter(day => groupedByDay[day]);
 
-        return (
-            <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full min-h-0">
-                <div className="p-3 border-b border-gray-200 flex-shrink-0 sticky top-0 bg-white z-10 rounded-t-lg">
-                    <h3 className="text-base font-semibold text-gray-800">{t('dashboard.tutor.schedule.availabilityDetails.title')}</h3>
-                    <p className="text-[10px] text-gray-500 mt-0.5">
-                        {originalAvailabilities.length} {originalAvailabilities.length > 1 ? t('dashboard.tutor.schedule.availabilityDetails.slots') : t('dashboard.tutor.schedule.availabilityDetails.slot')}
-                    </p>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2 min-h-0">
-                    <div className="space-y-2">
-                        {sortedDays.map((dayOfWeek) => {
-                            const dayAvailabilities = groupedByDay[dayOfWeek];
-                            return (
-                                <div key={dayOfWeek} className="border border-gray-200 rounded-md p-2 hover:border-[#0b6459] transition-colors bg-gray-50 hover:bg-white">
-                                    <div className="mb-1.5">
-                                        <span className="text-xs font-semibold text-gray-800">
-                                            {getDayName(dayOfWeek)}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {dayAvailabilities.map((avail) => (
-                                            <span key={avail.id} className="text-[10px] text-gray-600 font-medium px-1.5 py-0.5 bg-white rounded border border-gray-200">
-                                                {avail.startTime} - {avail.endTime}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-        );
-    };
+    //     return (
+    //         <div className="bg-white rounded-lg border border-gray-200 flex flex-col h-full min-h-0">
+    //             <div className="p-3 border-b border-gray-200 flex-shrink-0 sticky top-0 bg-white z-10 rounded-t-lg">
+    //                 <h3 className="text-base font-semibold text-gray-800">{t('dashboard.tutor.schedule.availabilityDetails.title')}</h3>
+    //                 <p className="text-[10px] text-gray-500 mt-0.5">
+    //                     {originalAvailabilities.length} {originalAvailabilities.length > 1 ? t('dashboard.tutor.schedule.availabilityDetails.slots') : t('dashboard.tutor.schedule.availabilityDetails.slot')}
+    //                 </p>
+    //             </div>
+    //             <div className="flex-1 overflow-y-auto p-2 min-h-0">
+    //                 <div className="space-y-2">
+    //                     {sortedDays.map((dayOfWeek) => {
+    //                         const dayAvailabilities = groupedByDay[dayOfWeek];
+    //                         return (
+    //                             <div key={dayOfWeek} className="border border-gray-200 rounded-md p-2 hover:border-[#0b6459] transition-colors bg-gray-50 hover:bg-white">
+    //                                 <div className="mb-1.5">
+    //                                     <span className="text-xs font-semibold text-gray-800">
+    //                                         {getDayName(dayOfWeek)}
+    //                                     </span>
+    //                                 </div>
+    //                                 <div className="flex flex-wrap gap-1.5">
+    //                                     {dayAvailabilities.map((avail) => (
+    //                                         <span key={avail.id} className="text-[10px] text-gray-600 font-medium px-1.5 py-0.5 bg-white rounded border border-gray-200">
+    //                                             {avail.startTime} - {avail.endTime}
+    //                                         </span>
+    //                                     ))}
+    //                                 </div>
+    //                             </div>
+    //                         );
+    //                     })}
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     );
+    // };
 
     const renderDailyView = () => renderHourlyGrid([currentDate], true);
     const renderWeeklyView = () => renderHourlyGrid(getWeekDays(currentDate), false);
