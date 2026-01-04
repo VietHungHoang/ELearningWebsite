@@ -10,10 +10,10 @@
         <div class="text-center mb-[30px]">
             <img src="images/logo-white.svg" alt="logo" class="inline-block h-[50px]">
             <h1 class="!font-semibold !text-[24px] md:!text-[28px] !mb-[8px] mt-[20px]">
-                Admin Login
+                Đăng nhập Admin
             </h1>
             <p class="font-medium text-[#445164] dark:text-gray-400">
-                Sign in to access admin dashboard
+                Đăng nhập để truy cập bảng điều khiển admin
             </p>
         </div>
 
@@ -30,7 +30,7 @@
 
                 <div class="mb-[20px]">
                     <label class="mb-[10px] text-black dark:text-white font-medium block">
-                        Email Address
+                        Email
                     </label>
                     <input
                         type="email"
@@ -38,13 +38,13 @@
                         name="email"
                         [disabled]="isLoading"
                         class="h-[50px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        placeholder="admin@example.com"
+                        placeholder="admin@vidu.com"
                         required>
                 </div>
 
                 <div class="mb-[25px] relative">
                     <label class="mb-[10px] text-black dark:text-white font-medium block">
-                        Password
+                        Mật khẩu
                     </label>
                     <input
                         [type]="isPasswordVisible ? 'text' : 'password'"
@@ -52,7 +52,7 @@
                         name="password"
                         [disabled]="isLoading"
                         class="h-[50px] rounded-md text-black dark:text-white border border-gray-200 dark:border-[#172036] bg-white dark:bg-[#0c1427] px-[17px] block w-full outline-0 transition-all placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-primary-500 disabled:opacity-50 disabled:cursor-not-allowed pr-[50px]"
-                        placeholder="Enter your password"
+                        placeholder="Nhập mật khẩu của bạn"
                         required>
                     <button
                         class="absolute text-lg ltr:right-[20px] rtl:left-[20px] bottom-[12px] transition-all hover:text-primary-500"
@@ -70,10 +70,10 @@
                     <span class="flex items-center justify-center gap-[8px]">
                         @if (isLoading) {
                             <i class="material-symbols-outlined animate-spin">refresh</i>
-                            �ang dang nh?p...
+                            Đang đăng nhập...
                         } @else {
                             <i class="material-symbols-outlined">login</i>
-                            �ang nh?p
+                            Đăng nhập
                         }
                     </span>
                 </button>

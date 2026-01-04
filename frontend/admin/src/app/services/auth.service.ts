@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
     email: string;
