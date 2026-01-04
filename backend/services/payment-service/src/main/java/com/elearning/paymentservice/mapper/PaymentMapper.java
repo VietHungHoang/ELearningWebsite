@@ -9,6 +9,7 @@ public class PaymentMapper {
     public static PaymentTransaction toEntity(InitiatePaymentRequest request) {
         return PaymentTransaction.builder()
                 .orderId(request.getOrderId())
+                .userId(request.getUserId())
                 .amount(request.getAmount())
                 .currency("VND")
                 .provider(request.getPaymentProvider())

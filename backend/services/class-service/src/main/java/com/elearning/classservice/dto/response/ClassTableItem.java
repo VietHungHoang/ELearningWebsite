@@ -14,6 +14,7 @@ import java.util.List;
 public class ClassTableItem {
     private String id;
     private String title;
+    private UserInfoResponse tutor;
     private List<UserInfoResponse> students;
     private String type;
     private String status;

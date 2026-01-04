@@ -26,9 +26,9 @@ const EXCHANGE_RATES: Record<CurrencyCode, number> = {
 export const CURRENCY_INFO: Record<CurrencyCode, CurrencyInfo> = {
   VND: {
     code: 'VND',
-    symbol: '₫',
+    symbol: 'đ',
     name: 'Vietnamese Dong',
-    displayFormat: 'VND ₫'
+    displayFormat: 'VND đ'
   },
   USD: {
     code: 'USD',
@@ -131,7 +131,7 @@ export function formatCurrency(
       formatted = amount.toFixed(2);
   }
   
-  return includeSymbol ? `${info.symbol}${formatted}` : formatted;
+  return includeSymbol ? (currency === 'VND' ? `${formatted}đ` : `${info.symbol}${formatted}`) : formatted;
 }
 
 /**
@@ -168,7 +168,7 @@ export function parseCurrencyDisplay(displayString: string): { amount: number; c
   if (displayString.includes('$')) currency = 'USD';
   else if (displayString.includes('£')) currency = 'GBP';
   else if (displayString.includes('¥')) currency = 'JPY';
-  else if (displayString.includes('₫')) currency = 'VND';
+  else if (displayString.includes('đ')) currency = 'VND';
   
   return { amount, currency };
 }

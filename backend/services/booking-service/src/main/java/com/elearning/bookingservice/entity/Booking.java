@@ -20,7 +20,7 @@ public class Booking extends BaseEntity {
     @Column(name = "tutor_id", nullable = false)
     private UUID tutorId;
 
-    @Column(name = "class_id", nullable = false)
+    @Column(name = "class_id", nullable = true)
     private UUID classId;
 
     // Package information
@@ -39,6 +39,12 @@ public class Booking extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_provider")
     private PaymentProvider paymentProvider;
+
+    @Column(name = "transaction_id")
+    private UUID transactionId; // ID giao dịch nội bộ (từ payment-service)
+
+    @Column(name = "provider_transaction_id")
+    private String providerTransactionId; // ID giao dịch từ cổng thanh toán (Momo, VNPay, SePay)
 
     @Column(name = "schedule", columnDefinition = "TEXT")
     private String schedule;

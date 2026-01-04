@@ -25,7 +25,9 @@ public class VnpayInitiateRequest {
     private String vnp_Locale;
     private String vnp_ReturnUrl;
     private String vnp_IpnUrl;
+    private String vnp_IpAddr;
     private String vnp_CreateDate;
     private String vnp_ExpireDate;
     private String vnp_SecureHash;
+    private String vnp_SecureHashType;
 }

@@ -1,5 +1,6 @@
 package com.elearning.paymentservice.service;
 
+import com.elearning.paymentservice.dto.request.SepayWebhookRequest;
 import com.elearning.paymentservice.dto.sepay.SepayIpnRequest;
 
 public interface SepayService {
@@ -8,4 +9,9 @@ public interface SepayService {
      * Process IPN notification from SePay
      */
     void processIpn(String secretKey, SepayIpnRequest request);
+
+    /**
+     * Process webhook payment notification from SePay
+     */
+    void processSepayWebhook(SepayWebhookRequest request);
 }

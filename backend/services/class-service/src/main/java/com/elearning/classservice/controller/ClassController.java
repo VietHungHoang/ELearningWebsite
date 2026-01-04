@@ -25,6 +25,22 @@ public class ClassController {
     private final ClassService classService;
 
     /**
+     * GET /api/v1/classes?page=1&size=10
+     * <p>
+     * Get all classes with pagination
+     * @param page Page number (1-based, default: 1)
+     * @param size Page size (default: 10)
+     * @return Paginated list of all classes
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<ClassTableItem>>> getAllClasses(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<ClassTableItem> classes = classService.getAllClasses(page, size);
+        return ResponseEntity.ok(ApiResponse.success(classes, "All classes retrieved successfully"));
+    }
+
+    /**
      * GET /api/v1/classes/tutors/{tutorId}/opening
      * <p>
      * Get all opening classes available for enrollment by specific tutor

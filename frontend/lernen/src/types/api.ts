@@ -275,6 +275,27 @@ export interface UpdateTutorProfileRequest {
     certifications?: CertificationItem[];
 }
 
+export interface CareerEntryRequest {
+    type: 'EDUCATION' | 'EXPERIENCE';
+    title: string;
+    institution: string;
+    startDate: string; // ISO Date "YYYY-MM-DD"
+    endDate?: string | null; // ISO Date "YYYY-MM-DD" or null
+    location?: string;
+    description?: string;
+}
+
+export interface CareerEntryResponse {
+    id: string;
+    type: 'EDUCATION' | 'EXPERIENCE';
+    title: string;
+    institution: string;
+    startDate: string;
+    endDate?: string | null;
+    location?: string;
+    description?: string;
+}
+
 export interface UploadFileResponse {
     fileUrl: string;
     fileName: string;

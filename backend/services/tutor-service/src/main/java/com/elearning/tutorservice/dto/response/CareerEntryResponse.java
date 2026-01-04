@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CareerEntryResponse {
     private UUID id;
+    private String type; // 'EDUCATION' or 'EXPERIENCE'
     private String title;
     private String institution;
     private LocalDate startDate;

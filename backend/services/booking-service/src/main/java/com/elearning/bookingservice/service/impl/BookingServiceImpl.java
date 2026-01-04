@@ -1,13 +1,10 @@
 package com.elearning.bookingservice.service.impl;
 
 import com.elearning.bookingservice.service.BookingService;
-import com.elearning.bookingservice.client.ClassServiceClient;
 import com.elearning.bookingservice.client.PaymentServiceClient;
 import com.elearning.bookingservice.dto.request.CreateBookingRequest;
 import com.elearning.bookingservice.dto.request.CreateBookingResponse;
-import com.elearning.bookingservice.dto.request.CreateClassBookingRequest;
 import com.elearning.bookingservice.dto.request.CreatePaymentRequest;
-import com.elearning.bookingservice.dto.response.CreateClassBookingResponse;
 import com.elearning.bookingservice.dto.response.CreatePaymentResponse;
 import com.elearning.bookingservice.entity.Booking;
 import com.elearning.bookingservice.entity.BookingStatus;
@@ -19,9 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of BookingService
@@ -31,7 +26,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
 
-    private final ClassServiceClient classServiceClient;
     private final PaymentServiceClient paymentServiceClient;
     private final BookingRepository bookingRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -41,7 +35,7 @@ public class BookingServiceImpl implements BookingService {
     public CreateBookingResponse createBooking(CreateBookingRequest request) {
         log.info("Creating booking for student: {}, tutor: {}", request.getStudentId(), request.getTutorId());
 
-        // Create Booking record first
+        // Serialize schedule to JSON array
         String scheduleJson;
         try {
             scheduleJson = objectMapper.writeValueAsString(request.getSchedule());
@@ -50,10 +44,11 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Failed to serialize schedule", e);
         }
 
+        // Create Booking record - classId will be set later after class is created
         Booking booking = Booking.builder()
                 .studentId(request.getStudentId())
                 .tutorId(request.getTutorId())
-                .classId(null) // Will be updated after API call
+                .classId(null) // Will be set after payment success via Kafka event
                 .sessionsPurchased(request.getSessions())
                 .discount(request.getDiscount())
                 .amount(request.getAmount())
@@ -65,31 +60,10 @@ public class BookingServiceImpl implements BookingService {
         booking = bookingRepository.save(booking);
         log.info("Created booking record with ID: {}", booking.getId());
 
-        // Now call class-service to create class, enrollment, sessions
-        List<CreateClassBookingRequest.ScheduleItem> scheduleItems = request.getSchedule().stream()
-                .map(item -> CreateClassBookingRequest.ScheduleItem.builder().time(item.getTime()).build())
-                .collect(Collectors.toList());
-
-        CreateClassBookingRequest classBookingRequest = CreateClassBookingRequest.builder()
-                .tutorId(request.getTutorId())
-                .studentId(request.getStudentId())
-                .sessions(request.getSessions())
-                .pricePerHour(request.getAmount() / request.getSessions())
-                .schedule(scheduleItems)
-                .build();
-
-        CreateClassBookingResponse classBookingResponse = classServiceClient.createClassBooking(classBookingRequest);
-        UUID classId = classBookingResponse.getClassId();
-        log.info("Created class booking with classId: {}", classId);
-
-        // Update booking with classId
-        booking.setClassId(classId);
-        bookingRepository.save(booking);
-        log.info("Updated booking {} with classId: {}", booking.getId(), classId);
-
         // Call payment service to create payment request
         CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
                 .orderId(booking.getId())
+                .userId(request.getStudentId()) // Pass studentId as userId for payment
                 .amount(request.getAmount())
                 .paymentProvider(request.getPaymentProvider())
                 .redirectUrl(request.getRedirectUrl())

@@ -14,10 +14,11 @@ import { useCurrency } from '../../../../context/CurrencyContext';
 import { formatCurrency, convertFromVND } from '../../../../utils/currencyHelper';
 
 interface GroupClassSectionProps {
-  groupClasses: GroupClass[];
+    groupClasses: GroupClass[];
+    tutor: any;
 }
 
-const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) => {
+const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tutor }) => {
     const navigate = useNavigate();
     const { state } = useAuth();
     const { selectedCurrency } = useCurrency();
@@ -53,7 +54,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
 
         // Map dayOfWeek (1-7, where 1 = Monday) to i18n keys
         const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-        
+
         const dayNames = schedule.map(item => {
             const dayKey = dayKeys[item.dayOfWeek - 1];
             return t(`common.days.${dayKey}`);
@@ -155,15 +156,15 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
             <div className="flex justify-between items-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-800">{t('tutorDetail.groupClass.title')}</h2>
                 <div className="flex items-center gap-2">
-                    <button 
-                        onClick={() => scroll('left')} 
+                    <button
+                        onClick={() => scroll('left')}
                         disabled={!canScrollLeft}
                         className="p-2 rounded-full bg-white border border-gray-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                     >
                         <FiChevronLeft />
                     </button>
-                    <button 
-                        onClick={() => scroll('right')} 
+                    <button
+                        onClick={() => scroll('right')}
                         disabled={!canScrollRight}
                         className="p-2 rounded-full bg-white border border-gray-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
                     >
@@ -184,7 +185,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                 OPTION 3: Compact with price in corner
                                 OPTION 4: Card-style with colored background
                             */}
-                            
+
                             {/* OPTION 1: Side-by-side layout with price badge */}
                             <div className="p-6 border-b border-gray-200">
                                 <div className="flex items-start justify-between gap-4">
@@ -341,7 +342,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
 
                                 {/* Action buttons */}
                                 <div className="flex gap-3 pt-2">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             // Navigate to inbox/chat for this group class
                                             navigate(`/dashboard/inbox?classId=${gc.id}&type=group`);
@@ -352,7 +353,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                         {t('tutorDetail.groupClass.message')}
                                     </button>
                                     {joinedClasses.has(gc.id) ? (
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setSelectedClass(gc);
                                                 setShowLeaveModal(true);
@@ -362,14 +363,14 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                             {t('tutorDetail.groupClass.leaveClass')}
                                         </button>
                                     ) : (
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setSelectedClass(gc);
                                                 // Check if this is the last student
                                                 const currentEnrolled = gc.enrolledStudents ?? gc.students?.length ?? 0;
                                                 const maxStudents = gc.maxStudents ?? Infinity;
                                                 const isLastStudent = currentEnrolled + 1 === maxStudents;
-                                                
+
                                                 if (isLastStudent) {
                                                     setShowLastStudentModal(true);
                                                 } else {
@@ -398,7 +399,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                 selectedClass={selectedClass}
                 onConfirm={async () => {
                     if (!selectedClass || !state.user?.id) return;
-                    
+
                     setIsLoading(true);
                     try {
                         const response = await classService.addStudentToClass(selectedClass.id, state.user.id);
@@ -407,8 +408,8 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                             setShowPaymentPromptModal(true);
                             setJoinedClasses(prev => new Set(prev).add(selectedClass.id));
                             // Update enrolled students count
-                            setLocalGroupClasses(prev => prev.map(gc => 
-                                gc.id === selectedClass.id 
+                            setLocalGroupClasses(prev => prev.map(gc =>
+                                gc.id === selectedClass.id
                                     ? { ...gc, enrolledStudents: (gc.enrolledStudents ?? 0) + 1 }
                                     : gc
                             ));
@@ -435,9 +436,32 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                 selectedClass={selectedClass}
                 onPayNow={() => {
                     setShowPaymentPromptModal(false);
-                    setSelectedClass(null);
-                    // Navigate to checkout page
-                    navigate(`/checkout?classId=${selectedClass?.id}&type=group`);
+                    // Navigate to checkout with proper state
+                    if (selectedClass) {
+                        navigate('/checkout', {
+                            state: {
+                                tutor: tutor,
+                                bookingData: {
+                                    sessions: selectedClass.schedule?.length || 1, // Fallback
+                                    schedule: selectedClass.schedule?.map(s => ({
+                                        date: '', // No specific date for fixed schedule
+                                        dayOfWeek: s.dayOfWeek,
+                                        time: s.time
+                                    })) || [],
+                                    package: {
+                                        name: selectedClass.title,
+                                        isGroupClass: true,
+                                        classId: selectedClass.id
+                                    },
+                                    pricing: {
+                                        originalPrice: selectedClass.pricePerHour, // Assumption: price is per entire course or session? usually per hour/session
+                                        totalPrice: selectedClass.pricePerHour
+                                    }
+                                }
+                            }
+                        });
+                        setSelectedClass(null);
+                    }
                 }}
                 onPayLater={() => {
                     setShowPaymentPromptModal(false);
@@ -540,7 +564,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
 
                         {/* Actions */}
                         <div className="px-6 pb-6 flex gap-3">
-                            <button 
+                            <button
                                 onClick={() => {
                                     setShowConfirmModal(false);
                                     setSelectedClass(null);
@@ -549,10 +573,10 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                             >
                                 {t('tutorDetail.groupClass.cancel')}
                             </button>
-                            <button 
+                            <button
                                 onClick={async () => {
                                     if (!selectedClass || !state.user?.id) return;
-                                    
+
                                     setIsLoading(true);
                                     try {
                                         const response = await classService.addStudentToClass(selectedClass.id, state.user.id);
@@ -561,8 +585,8 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                             setShowSuccessModal(true);
                                             setJoinedClasses(prev => new Set(prev).add(selectedClass.id));
                                             // Update enrolled students count
-                                            setLocalGroupClasses(prev => prev.map(gc => 
-                                                gc.id === selectedClass.id 
+                                            setLocalGroupClasses(prev => prev.map(gc =>
+                                                gc.id === selectedClass.id
                                                     ? { ...gc, enrolledStudents: (gc.enrolledStudents ?? 0) + 1 }
                                                     : gc
                                             ));
@@ -595,38 +619,38 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                 }}
                 maxWidth="md"
             >
-                        <div className="px-6 pt-6 pb-5 text-center">
-                            {/* Success Icon */}
-                            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
+                <div className="px-6 pt-6 pb-5 text-center">
+                    {/* Success Icon */}
+                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
 
-                            {/* Title */}
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('tutorDetail.groupClass.successRegistered')}</h3>
-                            
-                            {/* Message */}
-                            <p className="text-sm text-gray-600 mb-1">
-                                {t('tutorDetail.groupClass.successMessage')}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                                {t('tutorDetail.groupClass.emailNotification')}
-                            </p>
-                        </div>
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{t('tutorDetail.groupClass.successRegistered')}</h3>
 
-                        {/* Action */}
-                        <div className="px-6 pb-6">
-                            <button 
-                                onClick={() => {
-                                    setShowSuccessModal(false);
-                                    setSelectedClass(null);
-                                }}
-                                className="w-full px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] text-sm font-semibold transition-colors"
-                            >
-                                {t('tutorDetail.groupClass.gotIt')}
-                            </button>
-                        </div>
+                    {/* Message */}
+                    <p className="text-sm text-gray-600 mb-1">
+                        {t('tutorDetail.groupClass.successMessage')}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        {t('tutorDetail.groupClass.emailNotification')}
+                    </p>
+                </div>
+
+                {/* Action */}
+                <div className="px-6 pb-6">
+                    <button
+                        onClick={() => {
+                            setShowSuccessModal(false);
+                            setSelectedClass(null);
+                        }}
+                        className="w-full px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] text-sm font-semibold transition-colors"
+                    >
+                        {t('tutorDetail.groupClass.gotIt')}
+                    </button>
+                </div>
             </ModalLayout>
 
             {/* Leave Confirmation Modal */}
@@ -675,7 +699,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
 
                         {/* Actions */}
                         <div className="px-6 pb-6 flex gap-3">
-                            <button 
+                            <button
                                 onClick={() => {
                                     setShowLeaveModal(false);
                                     setSelectedClass(null);
@@ -684,10 +708,10 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                             >
                                 {t('tutorDetail.groupClass.cancel')}
                             </button>
-                            <button 
+                            <button
                                 onClick={async () => {
                                     if (!selectedClass || !state.user?.id) return;
-                                    
+
                                     setIsLoading(true);
                                     try {
                                         const response = await classService.removeStudentFromClass(selectedClass.id, state.user.id);
@@ -700,8 +724,8 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                                                 return newSet;
                                             });
                                             // Update enrolled students count
-                                            setLocalGroupClasses(prev => prev.map(gc => 
-                                                gc.id === selectedClass.id 
+                                            setLocalGroupClasses(prev => prev.map(gc =>
+                                                gc.id === selectedClass.id
                                                     ? { ...gc, enrolledStudents: Math.max(0, (gc.enrolledStudents ?? 0) - 1) }
                                                     : gc
                                             ));
@@ -734,35 +758,35 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses }) =
                 }}
                 maxWidth="md"
             >
-                        <div className="px-6 pt-6 pb-5 text-center">
-                            {/* Success Icon */}
-                            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
+                <div className="px-6 pt-6 pb-5 text-center">
+                    {/* Success Icon */}
+                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
 
-                            {/* Title */}
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('tutorDetail.groupClass.successLeft')}</h3>
-                            
-                            {/* Message */}
-                            <p className="text-sm text-gray-600">
-                                {t('tutorDetail.groupClass.leaveSuccessMessage')}
-                            </p>
-                        </div>
+                    {/* Title */}
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{t('tutorDetail.groupClass.successLeft')}</h3>
 
-                        {/* Action */}
-                        <div className="px-6 pb-6">
-                            <button 
-                                onClick={() => {
-                                    setShowLeaveSuccessModal(false);
-                                    setSelectedClass(null);
-                                }}
-                                className="w-full px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] text-sm font-semibold transition-colors"
-                            >
-                                {t('tutorDetail.groupClass.gotIt')}
-                            </button>
-                        </div>
+                    {/* Message */}
+                    <p className="text-sm text-gray-600">
+                        {t('tutorDetail.groupClass.leaveSuccessMessage')}
+                    </p>
+                </div>
+
+                {/* Action */}
+                <div className="px-6 pb-6">
+                    <button
+                        onClick={() => {
+                            setShowLeaveSuccessModal(false);
+                            setSelectedClass(null);
+                        }}
+                        className="w-full px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43] text-sm font-semibold transition-colors"
+                    >
+                        {t('tutorDetail.groupClass.gotIt')}
+                    </button>
+                </div>
             </ModalLayout>
         </div>
     );

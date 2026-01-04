@@ -119,14 +119,30 @@ const ScheduleAndCalendar: React.FC = () => {
     // Handle start session
     const handleStartSession = async (sessionId: string) => {
         try {
+            const session = sessionsData.find(s => s.id === sessionId);
+            if (!session?.meetingUrl) {
+                console.error("No meeting URL found for session:", sessionId);
+                return;
+            }
+
             setSessionStarting(true);
-            // TODO: Call API to start session
-            // await startSessionAPI(sessionId);
 
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            // Convert standard URL to Web Client URL to allow joining via browser
+            // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
+            let openUrl = session.meetingUrl;
 
-            console.log("Starting session:", sessionId);
+            // Regex to match /j/{meetingId}
+            const match = openUrl.match(/\/j\/(\d+)/);
+            if (match && match[1]) {
+                const meetingId = match[1];
+                // Replace /j/{meetingId} with /wc/{meetingId}/join
+                openUrl = openUrl.replace(/\/j\/\d+/, `/wc/${meetingId}/join`);
+            }
+
+            // Open meeting URL in new tab
+            window.open(openUrl, '_blank');
+            console.log("Starting session (Web Client):", sessionId, openUrl);
+
         } catch (error) {
             console.error("Error starting session:", error);
         } finally {
@@ -165,13 +181,13 @@ const ScheduleAndCalendar: React.FC = () => {
                                                     ? selectedDate.toDateString() === today.toDateString()
                                                         ? t("dashboard.tutor.todayPeriod")
                                                         : format(
-                                                              selectedDate,
-                                                              i18n.language === "vi" ? "dd MMMM" : "MMMM dd",
-                                                              { locale: getLocale() }
-                                                          )
+                                                            selectedDate,
+                                                            i18n.language === "vi" ? "dd MMMM" : "MMMM dd",
+                                                            { locale: getLocale() }
+                                                        )
                                                     : filterMode === "today"
-                                                    ? t("dashboard.tutor.todayPeriod")
-                                                    : t("dashboard.tutor.weekPeriod"),
+                                                        ? t("dashboard.tutor.todayPeriod")
+                                                        : t("dashboard.tutor.weekPeriod"),
                                             }
                                         )}
                                     </p>
@@ -181,21 +197,19 @@ const ScheduleAndCalendar: React.FC = () => {
                                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center gap-1">
                                     <button
                                         onClick={() => handleFilterChange("today")}
-                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                                            filterMode === "today" && !isCustomDateFilter
-                                                ? "bg-white text-gray-800 shadow-sm"
-                                                : "text-gray-500 hover:bg-white/50"
-                                        } ${isCustomDateFilter ? "opacity-50" : ""}`}
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${filterMode === "today" && !isCustomDateFilter
+                                            ? "bg-white text-gray-800 shadow-sm"
+                                            : "text-gray-500 hover:bg-white/50"
+                                            } ${isCustomDateFilter ? "opacity-50" : ""}`}
                                     >
                                         {t("dashboard.tutor.today")}
                                     </button>
                                     <button
                                         onClick={() => handleFilterChange("week")}
-                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                                            filterMode === "week" && !isCustomDateFilter
-                                                ? "bg-white text-gray-800 shadow-sm"
-                                                : "text-gray-500 hover:bg-white/50"
-                                        } ${isCustomDateFilter ? "opacity-50" : ""}`}
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${filterMode === "week" && !isCustomDateFilter
+                                            ? "bg-white text-gray-800 shadow-sm"
+                                            : "text-gray-500 hover:bg-white/50"
+                                            } ${isCustomDateFilter ? "opacity-50" : ""}`}
                                     >
                                         {t("dashboard.tutor.week")}
                                     </button>
@@ -318,7 +332,7 @@ const SessionCard: React.FC<SessionCardProps> = ({ session, locale, language, t,
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
                         <h4 className="font-semibold text-gray-800 text-base">
-                            {session.sessionType === 'TRIAL' 
+                            {session.sessionType === 'TRIAL'
                                 ? getStatusText(session.sessionType)
                                 : (session.classInfo?.title || getStatusText(session.sessionType))
                             }

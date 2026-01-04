@@ -37,7 +37,8 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Handling payment success for bookingId: {}, classId: {}", event.getBookingId(), event.getClassId());
 
         if (event.getClassId() == null) {
-            log.warn("ClassId is null in payment success event for bookingId: {}", event.getBookingId());
+            log.info("ClassId is null, creating new class for bookingId: {}", event.getBookingId());
+            createNewClass(event);
             return;
         }
 
@@ -53,6 +54,72 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
         // Create Zoom meeting links for all sessions of this class
         createZoomMeetingsForClass(classEntity);
+    }
+
+    private void createNewClass(BookingPaymentSuccessEvent event) {
+        log.info("Creating new class for booking: {}", event.getBookingId());
+
+        // 1. Create Class Entity
+        ClassEntity newClass = ClassEntity.builder()
+                .title("Lớp học 1-1 " + (event.getNotes() != null ? event.getNotes() : ""))
+                .tutor(com.elearning.classservice.entity.User.builder().id(event.getTutorId()).build()) // Setup proxy user reference
+                .status(ClassStatus.IN_PROGRESS)
+                .classType(com.elearning.classservice.entity.enums.ClassType.ONE_ON_ONE)
+                .build();
+        
+        newClass = classRepository.save(newClass);
+        log.info("Created new class entity with ID: {}", newClass.getId());
+
+        // 2. Create Sessions from Schedule
+        if (event.getSchedule() != null) {
+            createSessionsFromSchedule(newClass, event.getSchedule());
+        }
+
+        // 3. Create Enrollment
+        ClassEnrollment enrollment = ClassEnrollment.builder()
+                .classEntity(newClass)
+                .student(com.elearning.classservice.entity.User.builder().id(event.getStudentId()).build())
+                .status(com.elearning.classservice.entity.enums.EnrollmentStatus.ACTIVE)
+                .enrolledAt(java.time.LocalDateTime.now())
+                .build();
+        
+        enrollmentRepository.save(enrollment);
+        log.info("Enrolled student {} to class {}", event.getStudentId(), newClass.getId());
+
+        // 4. Create Zoom Meetings
+        createZoomMeetingsForClass(newClass);
+    }
+
+    private void createSessionsFromSchedule(ClassEntity classEntity, String scheduleJson) {
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            // Assuming schedule is a JSON array of objects with "time" field or just ISO strings
+            // Based on CreateBookingRequest it's List<ScheduleItem> where ScheduleItem has "time"
+            com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = 
+                new com.fasterxml.jackson.core.type.TypeReference<>() {};
+            
+            List<java.util.Map<String, String>> scheduleItems = mapper.readValue(scheduleJson, typeRef);
+            
+            for (java.util.Map<String, String> item : scheduleItems) {
+                String timeStr = item.get("time");
+                if (timeStr != null) {
+                    java.time.LocalDateTime startTime = java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+                    
+                    Session session = Session.builder()
+                            .classEntity(classEntity)
+                            .title("Buổi học")
+                            .startTime(startTime)
+                            .endTime(startTime.plusMinutes(60)) // Default 60 mins duration
+                            .status(ScheduleStatus.PENDING)
+                            .build();
+                    
+                    sessionRepository.save(session);
+                }
+            }
+            log.info("Created {} sessions for class {}", scheduleItems.size(), classEntity.getId());
+        } catch (Exception e) {
+            log.error("Failed to parse schedule JSON: {}", scheduleJson, e);
+        }
     }
 
     /**

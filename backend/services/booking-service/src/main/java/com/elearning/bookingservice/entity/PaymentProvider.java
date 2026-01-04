@@ -4,5 +4,6 @@ public enum PaymentProvider {
     MOMO,
     VNPAY,
     ZALOPAY,
-    PAYPAL
+    PAYPAL,
+    SEPAY
 }

@@ -14,6 +14,7 @@ import java.util.UUID;
 public class CreatePaymentRequest {
 
     private UUID orderId;
+    private UUID userId;
     private Long amount;
     private String paymentProvider;
     private String redirectUrl;

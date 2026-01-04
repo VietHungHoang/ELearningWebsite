@@ -15,6 +15,14 @@ import java.util.UUID;
 public interface ClassService {
 
     /**
+     * Get all classes with pagination
+     * @param page Page number
+     * @param size Page size
+     * @return Page of ClassTableItem
+     */
+    Page<ClassTableItem> getAllClasses(int page, int size);
+
+    /**
      * Get class table for tutor dashboard
      * @param tutorId Tutor ID
      * @param status Optional status filter

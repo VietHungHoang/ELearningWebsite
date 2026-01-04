@@ -10,8 +10,8 @@ const AccountSettingsPage: React.FC = () => {
         <ProfileSettingsLayout activeTab="Account Settings" maxWidth="48rem">
             <AccountSettingsContent
                 onSave={() => { }}
-                timezone={tutorData?.timezone || undefined}
                 zoomConnected={tutorData?.zoomConnected || false}
+                tutorId={tutorData?.id}
             />
         </ProfileSettingsLayout>
     );

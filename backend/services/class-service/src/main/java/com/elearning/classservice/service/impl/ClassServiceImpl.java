@@ -52,6 +52,96 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ClassTableItem> getAllClasses(int page, int size) {
+        log.info("Getting all classes, page: {}, size: {}", page, size);
+        
+        // Convert 1-based page to 0-based page index
+        int pageIndex = page > 0 ? page - 1 : 0;
+        log.info("Converted page {} to pageIndex {}", page, pageIndex);
+        
+        Pageable pageable = PageRequest.of(pageIndex, size);
+        Page<ClassEntity> classPage = classRepository.findAll(pageable);
+        
+        log.info("Found {} total classes", classPage.getTotalElements());
+        log.info("classPage.getContent() size: {}", classPage.getContent().size());
+        
+        List<ClassTableItem> items = classPage.getContent().stream()
+                .map(classEntity -> {
+                    log.info("=== Processing class: {} ({})", classEntity.getId(), classEntity.getTitle());
+                    
+                    try {
+                        // Get tutor info
+                        UserInfoResponse tutorInfo = UserInfoResponse.builder()
+                                .id(classEntity.getTutor().getId().toString())
+                                .fullName(classEntity.getTutor().getFullName())
+                                .avatarUrl(classEntity.getTutor().getAvatarUrl())
+                                .build();
+
+                        // Get students - filter by status != LEFT and != CANCELLED
+                        List<UserInfoResponse> students = classEntity.getEnrollments().stream()
+                                .filter(e -> e.getStatus() != EnrollmentStatus.LEFT && e.getStatus() != EnrollmentStatus.CANCELLED)
+                                .map(enrollment -> {
+                                    log.info("Mapping student: {} - {} (status: {})", 
+                                            enrollment.getStudent().getId(), enrollment.getStudent().getFullName(), enrollment.getStatus());
+                                    return UserInfoResponse.builder()
+                                            .id(enrollment.getStudent().getId().toString())
+                                            .fullName(enrollment.getStudent().getFullName())
+                                            .avatarUrl(enrollment.getStudent().getAvatarUrl())
+                                            .enrollmentStatus(enrollment.getStatus().name())
+                                            .build();
+                                })
+                                .collect(Collectors.toList());
+                        log.info("Mapped {} students", students.size());
+
+                        // Get schedules
+                        List<ClassSchedule> schedules = classEntity.getSchedules();
+                        log.info("Class {} has {} schedules (raw)", classEntity.getId(), schedules != null ? schedules.size() : "null");
+                        
+                        List<ScheduleInfo> scheduleInfos = schedules.stream()
+                                .map(schedule -> {
+                                    log.info("Mapping schedule: dayOfWeek={}, startTime={}", schedule.getDayOfWeek(), schedule.getStartTime());
+                                    return ScheduleInfo.builder()
+                                            .dayOfWeek(schedule.getDayOfWeek())
+                                            .time(schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm")))
+                                            .build();
+                                })
+                                .collect(Collectors.toList());
+                        log.info("Mapped {} schedules", scheduleInfos.size());
+
+                        // Get sessions count
+                        long completedSessions = sessionRepository.countByClassEntityIdAndStatus(classEntity.getId(), ScheduleStatus.ACCEPTED);
+                        long totalSessions = sessionRepository.countByClassEntityId(classEntity.getId());
+                        log.info("Class {} has {}/{} completed sessions", classEntity.getId(), completedSessions, totalSessions);
+
+                        ClassTableItem item = ClassTableItem.builder()
+                                .id(classEntity.getId().toString())
+                                .title(classEntity.getTitle())
+                                .tutor(tutorInfo)
+                                .students(students)
+                                .type(classEntity.getClassType().name())
+                                .status(classEntity.getStatus().name())
+                                .schedules(scheduleInfos)
+                                .startDate(classEntity.getCreatedAt().toLocalDate().toString())
+                                .completedSessions((int) completedSessions)
+                                .totalSessions((int) totalSessions)
+                                .build();
+                        
+                        log.info("Successfully built ClassTableItem: {}", item.getId());
+                        return item;
+                    } catch (Exception e) {
+                        log.error("ERROR processing class {}: {}", classEntity.getId(), e.getMessage(), e);
+                        throw new RuntimeException("Failed to process class: " + classEntity.getId(), e);
+                    }
+                })
+                .collect(Collectors.toList());
+
+        log.info("Stream collected {} items", items.size());
+        log.info("Returning {} class items out of {} total", items.size(), classPage.getTotalElements());
+        return new PageImpl<>(items, pageable, classPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<ClassTableItem> getMyClass(UUID tutorId, String status, int page, int size) {
         log.info("Getting classes for tutorId: {}, status: {}, page: {}, size: {}", tutorId, status, page, size);
         

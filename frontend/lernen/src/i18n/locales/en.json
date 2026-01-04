@@ -1478,7 +1478,8 @@
         "deleteEntry": "Delete {{type}} entry",
         "deleteConfirm": "Are you sure you want to delete this entry? This action cannot be undone.",
         "present": "Present",
-        "noCalendarLinked": "No calendar linked at the moment"
+        "noCalendarLinked": "No calendar linked at the moment",
+        "noItems": "No items added yet"
       },
       "accountSettings": {
         "title": "Account settings",

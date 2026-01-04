@@ -11,7 +11,7 @@ const initiatePayment = async (request: PaymentRequest): Promise<PaymentResponse
 };
 
 const getPaymentStatus = async (paymentId: string): Promise<PaymentResponse> => {
-  const response = await apiService.get<PaymentResponse>(`/payment/status/${paymentId}`);
+  const response = await apiService.get<PaymentResponse>(`/v1/payments/status/${paymentId}`);
   if (response.status !== 200) {
     throw new Error(response.message);
   }

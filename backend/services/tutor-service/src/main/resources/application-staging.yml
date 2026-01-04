@@ -31,6 +31,19 @@ services:
   tutor-service:
     url: ${TUTOR_SERVICE_URL}
 
+zoom:
+  oauth:
+    client-id: ${ZOOM_CLIENT_ID:12Vtzm5XSNqb21sZfzzfvA}
+    client-secret: ${ZOOM_CLIENT_SECRET:Bo1SkrrNbr2qQ1Sg7LecESkOQLsAW2eE}
+    redirect-uri: ${ZOOM_REDIRECT_URI:http://localhost:5173/dashboard/profile-settings/personal-details}
+    authorize-url: https://zoom.us/oauth/authorize
+    token-url: https://zoom.us/oauth/token
+  api:
+    base-url: https://api.zoom.us/v2
+  meeting:
+    default-duration: 60
+    waiting-room: true
+
 logging:
   level:
     root: INFO

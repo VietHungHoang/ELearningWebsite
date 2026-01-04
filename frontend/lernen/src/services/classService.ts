@@ -135,7 +135,7 @@ export const classService = {
             };
         } catch (error) {
             console.warn("Failed to fetch classes from API, using mock data:", error);
-            
+
             // Return mock data for testing when API fails
             return {
                 status: 200,
@@ -185,7 +185,7 @@ export const classService = {
             };
         } catch (error) {
             console.warn("Failed to fetch classes from API, using mock data:", error);
-            
+
             // Return mock data for testing when API fails
             return {
                 status: 200,
@@ -392,7 +392,7 @@ export const classService = {
     // Handle Zoom OAuth callback
     zoomCallback: async (code: string, tutorId: string): Promise<ApiResponse<{ message: string }>> => {
         try {
-            const response = await apiService.post<{ message: string }>(`/v1/public/class/zoom/callback`, {
+            const response = await apiService.post<{ message: string }>(`/v1/tutors/zoom/oauth/callback`, {
                 code,
                 state: tutorId,
             });
@@ -528,9 +528,8 @@ export const classService = {
         if (filters?.page) queryParams.append("page", filters.page.toString());
         if (filters?.limit) queryParams.append("limit", filters.limit.toString());
 
-        const url = `/v1/payments/me/history${
-            queryParams.toString() ? `?${queryParams.toString()}` : ""
-        }`;
+        const url = `/v1/payments/me/history${queryParams.toString() ? `?${queryParams.toString()}` : ""
+            }`;
         return await apiService.get<PaginatedResponse<PayoutHistoryItem>>(url);
     },
 
@@ -544,9 +543,8 @@ export const classService = {
         if (filters?.page) queryParams.append("page", filters.page.toString());
         if (filters?.size) queryParams.append("size", filters.size.toString());
 
-        const url = `/v1/tutors/me/earnings${
-            queryParams.toString() ? `?${queryParams.toString()}` : ""
-        }`;
+        const url = `/v1/tutors/me/earnings${queryParams.toString() ? `?${queryParams.toString()}` : ""
+            }`;
         return await apiService.get<PaginatedResponse<RecentEarning>>(url);
     },
 
@@ -574,10 +572,10 @@ export const classService = {
             // Call API to get class detail
             const url = `/v1/classes/${classId}`;
             const response = await apiService.get<any>(url);
-            
+
             if (response.data) {
                 const data = response.data;
-                
+
                 // Helper function to convert day of week number to name
                 // Backend returns dayOfWeek: 1-7 (ISO format: 1=Monday, 7=Sunday)
                 // Our array uses: 0=Sunday, 1=Monday, ..., 6=Saturday
@@ -592,7 +590,7 @@ export const classService = {
                     } else if (dayOfWeek === 0) {
                         normalizedDay = 0; // Sunday (if backend uses 0-6 format)
                     }
-                    
+
                     if (isVietnamese) {
                         const vietnameseDays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
                         return vietnameseDays[normalizedDay] || 'Unknown';
@@ -601,23 +599,23 @@ export const classService = {
                         return englishDays[normalizedDay] || 'Unknown';
                     }
                 };
-                
+
                 // Get subject and category names from subjectId
                 let subjectName = '';
                 let categoryName = '';
-                
+
                 if (data.subjectId) {
                     try {
                         // Import commonUtils dynamically to avoid circular dependency
                         const commonUtils = await import('../utils/commonUtils');
                         const subjects = await commonUtils.default.getSubjects();
                         const categories = await commonUtils.default.getCategories();
-                        
+
                         const subject = subjects.find(s => s.id === data.subjectId);
                         if (subject) {
                             // For now, use English name. Can be made dynamic based on i18n later
                             subjectName = subject.nameEn || subject.nameVi || '';
-                            
+
                             // Get category from subject
                             const category = categories.find(c => c.id === subject.categoryId);
                             if (category) {
@@ -628,7 +626,7 @@ export const classService = {
                         console.warn('Failed to fetch subject/category details:', error);
                     }
                 }
-                
+
                 // Map response to ClassData format
                 return {
                     id: data.id || classId,
@@ -640,8 +638,8 @@ export const classService = {
                         email: student.email
                     })),
                     type: data.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
-                    status: data.status === 'ONGOING' ? 'Ongoing' : 
-                            data.status === 'COMPLETED' ? 'Completed' : 
+                    status: data.status === 'ONGOING' ? 'Ongoing' :
+                        data.status === 'COMPLETED' ? 'Completed' :
                             data.status === 'CANCELLED' ? 'Completed' : 'Opening',
                     schedules: (data.schedules || []).map((schedule: any) => {
                         // Backend returns dayOfWeek as number (0-6 or 1-7)
@@ -678,7 +676,7 @@ export const classService = {
                     materials: data.materials || []
                 };
             }
-            
+
             throw new Error('No data in response');
         } catch (error) {
             console.error('Failed to fetch class details:', error);
@@ -790,7 +788,7 @@ export const classService = {
     getGroupClassesForTutor: async (tutorId: string): Promise<ApiResponse<GroupClass[]>> => {
         try {
             const response = await apiService.get<GroupClassApiResponse[] | { content: GroupClassApiResponse[] }>(`/v1/classes/tutors/${tutorId}/opening`);
-            
+
             // Handle both response formats: direct array or { content: [...] }
             let apiData: GroupClassApiResponse[] = [];
             if (Array.isArray(response.data)) {
@@ -800,12 +798,12 @@ export const classService = {
                 // Wrapped in content object
                 apiData = response.data.content;
             }
-            
+
             console.log('Group classes API response:', response);
             console.log('Parsed API data:', apiData);
-            
+
             // Map API response to GroupClass format
-            const mappedData: GroupClass[] = apiData.map(item => 
+            const mappedData: GroupClass[] = apiData.map(item =>
                 classService.mapGroupClassApiResponse(item)
             );
 
@@ -874,9 +872,9 @@ export const classService = {
             // oldSchedule is UTC string from backend without timezone indicator (e.g., "2026-01-15T07:00:00")
             // Backend stores datetime in UTC but without 'Z' suffix
             // Need to parse it as UTC, not local time, to avoid double conversion
-            const hasTimezone = oldSchedule.endsWith('Z') || 
-                               /[+-]\d{2}:\d{2}$/.test(oldSchedule) ||
-                               /[+-]\d{4}$/.test(oldSchedule);
+            const hasTimezone = oldSchedule.endsWith('Z') ||
+                /[+-]\d{2}:\d{2}$/.test(oldSchedule) ||
+                /[+-]\d{4}$/.test(oldSchedule);
             const oldScheduleUTCString = hasTimezone ? oldSchedule : `${oldSchedule}Z`;
             const oldScheduleDate = new Date(oldScheduleUTCString);
             const oldScheduleISO = oldScheduleDate.toISOString();

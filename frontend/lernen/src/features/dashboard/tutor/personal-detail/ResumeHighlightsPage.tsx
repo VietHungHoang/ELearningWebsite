@@ -6,6 +6,8 @@ import ProfileSettingsLayout from './ProfileSettingsLayout';
 import ResumeItemModal from '../components/profile-setting/ResumeItemModal';
 import { useProfileSettings } from './context/ProfileSettingsContext';
 import type { CertificationItem, EducationItem, ExperienceItem } from '../../../../types/tutor';
+import { tutorService } from '../../../../services/tutorService';
+import type { CareerEntryRequest } from '../../../../types/api';
 
 // --- TYPE DEFINITIONS ---
 export type ResumeItemData = EducationItem | ExperienceItem | CertificationItem;
@@ -263,6 +265,9 @@ const ResumeHighlightsPage: React.FC = () => {
         }
     };
 
+    const { refetch } = useProfileSettings();
+    const [actionLoading, setActionLoading] = useState(false);
+
     React.useEffect(() => {
         setBreadcrumb([
             { label: t('dashboard.header.breadcrumb.dashboard'), path: '/dashboard' },
@@ -276,15 +281,65 @@ const ResumeHighlightsPage: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleSaveItem = async (_itemData: any) => {
-        // Mock save - just close modal for demonstration
-        setIsModalOpen(false);
-        setEditingItem(null);
+    const handleSaveItem = async (itemData: any) => {
+        if (activeTab === 'Certification & Awards') {
+            console.log('Certification updates not yet implemented individually', itemData);
+            setIsModalOpen(false);
+            setEditingItem(null);
+            return;
+        }
+
+        try {
+            setActionLoading(true);
+            const type: 'EDUCATION' | 'EXPERIENCE' = activeTab === 'Education' ? 'EDUCATION' : 'EXPERIENCE';
+
+            const request: CareerEntryRequest = {
+                type,
+                title: itemData.title,
+                institution: itemData.institution,
+                startDate: itemData.startDate,
+                endDate: itemData.endDate || null,
+                location: itemData.location,
+                description: itemData.description
+            };
+
+            if (editingItem && editingItem.id) {
+                // Update
+                await tutorService.updateCareerEntry(editingItem.id, request);
+            } else {
+                // Create
+                await tutorService.createCareerEntry(request);
+            }
+
+            // Refresh data
+            await refetch();
+            setIsModalOpen(false);
+            setEditingItem(null);
+        } catch (error) {
+            console.error('Failed to save career entry:', error);
+            // Ideally show a toast notification here
+        } finally {
+            setActionLoading(false);
+        }
     };
 
-    const handleDeleteItem = (item: ResumeItemData) => {
-        // Mock delete for demonstration
-        console.log('Delete item:', item);
+    const handleDeleteItem = async (item: ResumeItemData) => {
+        if (activeTab === 'Certification & Awards') {
+            console.log('Certification delete not yet implemented individually', item);
+            return;
+        }
+
+        if (!item.id) return;
+
+        try {
+            setActionLoading(true);
+            await tutorService.deleteCareerEntry(item.id);
+            await refetch();
+        } catch (error) {
+            console.error('Failed to delete career entry:', error);
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const renderContent = () => {
@@ -300,6 +355,11 @@ const ResumeHighlightsPage: React.FC = () => {
                         onDelete={() => handleDeleteItem(item)}
                     />
                 )}
+                {items.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                        {t('dashboard.tutor.resumeHighlights.noItems')}
+                    </div>
+                )}
             </div>
         );
     };
@@ -314,7 +374,13 @@ const ResumeHighlightsPage: React.FC = () => {
                 sectionTitle={activeTab}
             />
 
-            <div className="flex gap-8 h-full pb-12">
+            <div className="flex gap-8 h-full pb-12 relative">
+                {actionLoading && (
+                    <div className="absolute inset-0 bg-white/50 z-50 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#045A46]"></div>
+                    </div>
+                )}
+
                 {/* Sidebar Navigation */}
                 <div className="w-full lg:w-70 flex-shrink-0 pr-4 border-r border-gray-100 h-full">
                     <ResumeNav activeTab={activeTab} onTabChange={setActiveTab} />

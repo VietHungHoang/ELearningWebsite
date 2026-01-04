@@ -40,11 +40,12 @@ public class VnpayGatewayStrategy implements PaymentGatewayStrategy {
         String tmnCode = vnpayConfig.getTmnCode();
         String txnRef = request.getOrderId().toString();
         String amount = String.valueOf(request.getAmount().longValue() * 100); // VNPay amount in smallest unit
-        String orderInfo = "Payment for order " + request.getOrderId();
+        String orderInfo = "Thanh toan don hang " + request.getOrderId();
         String returnUrl = request.getRedirectUrl();
         String ipnUrl = "http://localhost:8086/payment/callback";
 
-        LocalDateTime now = LocalDateTime.now();
+        // VNPay requires Vietnam timezone (GMT+7) for createDate and expireDate
+        java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
         String createDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String expireDate = now.plusMinutes(15).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 
@@ -60,8 +61,10 @@ public class VnpayGatewayStrategy implements PaymentGatewayStrategy {
             .vnp_Locale("vn")
             .vnp_ReturnUrl(returnUrl)
             .vnp_IpnUrl(ipnUrl)
+            .vnp_IpAddr("127.0.0.1") // Client IP address - required by VNPay
             .vnp_CreateDate(createDate)
             .vnp_ExpireDate(expireDate)
+            .vnp_SecureHashType("SHA512")
             .build();
 
         String secureHash = createVnpaySignature(vnpayRequest);
@@ -100,42 +103,61 @@ public class VnpayGatewayStrategy implements PaymentGatewayStrategy {
     private String createVnpaySignature(VnpayInitiateRequest req) {
         String secretKey = vnpayConfig.getHashSecret();
 
-        String rawSyntax = "vnp_Amount=" + req.getVnp_Amount()
-                + "&vnp_Command=" + req.getVnp_Command()
-                + "&vnp_CreateDate=" + req.getVnp_CreateDate()
-                + "&vnp_CurrCode=" + req.getVnp_CurrCode()
-                + "&vnp_ExpireDate=" + req.getVnp_ExpireDate()
-                + "&vnp_IpnUrl=" + req.getVnp_IpnUrl()
-                + "&vnp_Locale=" + req.getVnp_Locale()
-                + "&vnp_OrderInfo=" + req.getVnp_OrderInfo()
-                + "&vnp_OrderType=" + req.getVnp_OrderType()
-                + "&vnp_ReturnUrl=" + req.getVnp_ReturnUrl()
-                + "&vnp_TmnCode=" + req.getVnp_TmnCode()
-                + "&vnp_TxnRef=" + req.getVnp_TxnRef()
-                + "&vnp_Version=" + req.getVnp_Version();
         try {
-            return CryptoUtils.hmacSha256Hex(secretKey, rawSyntax);
+            // VNPay requires URL encoding for BOTH keys and values in hashdata
+            // Parameters must be sorted alphabetically by parameter name
+            java.util.Map<String, String> params = new java.util.TreeMap<>();
+            params.put("vnp_Amount", req.getVnp_Amount());
+            params.put("vnp_Command", req.getVnp_Command());
+            params.put("vnp_CreateDate", req.getVnp_CreateDate());
+            params.put("vnp_CurrCode", req.getVnp_CurrCode());
+            params.put("vnp_ExpireDate", req.getVnp_ExpireDate());
+            params.put("vnp_IpAddr", req.getVnp_IpAddr());
+            params.put("vnp_Locale", req.getVnp_Locale());
+            params.put("vnp_OrderInfo", req.getVnp_OrderInfo());
+            params.put("vnp_OrderType", req.getVnp_OrderType());
+            params.put("vnp_ReturnUrl", req.getVnp_ReturnUrl());
+            params.put("vnp_TmnCode", req.getVnp_TmnCode());
+            params.put("vnp_TxnRef", req.getVnp_TxnRef());
+            params.put("vnp_Version", req.getVnp_Version());
+
+            StringBuilder hashData = new StringBuilder();
+            boolean first = true;
+            for (java.util.Map.Entry<String, String> entry : params.entrySet()) {
+                if (!first) {
+                    hashData.append("&");
+                }
+                hashData.append(java.net.URLEncoder.encode(entry.getKey(), "UTF-8"));
+                hashData.append("=");
+                hashData.append(java.net.URLEncoder.encode(entry.getValue(), "UTF-8"));
+                first = false;
+            }
+
+            return CryptoUtils.hmacSha512Hex(secretKey, hashData.toString());
         } catch (Exception e) {
             throw new PaymentGatewayException("Failed to create VNPay signature: " + e.getMessage(), e);
         }
     }
 
     private String buildVnpayUrl(VnpayInitiateRequest req) {
+        // URL params must match signature params (alphabetically sorted)
+        // vnp_SecureHashType is not required for v2.1.0
         return UriComponentsBuilder.fromUriString(vnpayConfig.getEndpoint())
-                .queryParam("vnp_Version", req.getVnp_Version())
-                .queryParam("vnp_Command", req.getVnp_Command())
-                .queryParam("vnp_TmnCode", req.getVnp_TmnCode())
                 .queryParam("vnp_Amount", req.getVnp_Amount())
+                .queryParam("vnp_Command", req.getVnp_Command())
+                .queryParam("vnp_CreateDate", req.getVnp_CreateDate())
                 .queryParam("vnp_CurrCode", req.getVnp_CurrCode())
-                .queryParam("vnp_TxnRef", req.getVnp_TxnRef())
+                .queryParam("vnp_ExpireDate", req.getVnp_ExpireDate())
+                .queryParam("vnp_IpAddr", req.getVnp_IpAddr())
+                .queryParam("vnp_Locale", req.getVnp_Locale())
                 .queryParam("vnp_OrderInfo", req.getVnp_OrderInfo())
                 .queryParam("vnp_OrderType", req.getVnp_OrderType())
-                .queryParam("vnp_Locale", req.getVnp_Locale())
                 .queryParam("vnp_ReturnUrl", req.getVnp_ReturnUrl())
-                .queryParam("vnp_IpnUrl", req.getVnp_IpnUrl())
-                .queryParam("vnp_CreateDate", req.getVnp_CreateDate())
-                .queryParam("vnp_ExpireDate", req.getVnp_ExpireDate())
+                .queryParam("vnp_TmnCode", req.getVnp_TmnCode())
+                .queryParam("vnp_TxnRef", req.getVnp_TxnRef())
+                .queryParam("vnp_Version", req.getVnp_Version())
                 .queryParam("vnp_SecureHash", req.getVnp_SecureHash())
-                .build().toUriString();
+                .encode()  // URL encode all parameter values
+                .toUriString();
     }
 }

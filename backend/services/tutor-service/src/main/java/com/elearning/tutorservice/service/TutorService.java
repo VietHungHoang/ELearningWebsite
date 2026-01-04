@@ -2,6 +2,7 @@ package com.elearning.tutorservice.service;
 
 import com.elearning.tutorservice.dto.request.SubmitReviewRequest;
 import com.elearning.tutorservice.dto.request.UpdateOnboardingStatusRequest;
+import com.elearning.tutorservice.dto.request.UpdateTutorProfileRequest;
 import com.elearning.tutorservice.dto.response.*;
 import com.elearning.tutorservice.dto.event.AccountCreatedEvent;
 import com.elearning.tutorservice.dto.event.TutorProfileUpdatedEvent;
@@ -15,4 +16,6 @@ public interface TutorService {
     List<TutorResponse> getTutorsByIds(List<UUID> ids);
 
     void submitReview(UUID tutorId, SubmitReviewRequest request);
+    
+    TutorResponse updateTutorProfile(UUID tutorId, UpdateTutorProfileRequest request);
 }

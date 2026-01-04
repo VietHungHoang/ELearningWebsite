@@ -15,4 +15,13 @@ public class BookingPaymentSuccessEvent {
     
     private UUID bookingId;
     private UUID classId;
+    private UUID transactionId;
+    private String providerTransactionId;
+
+    // New fields for class creation
+    private UUID tutorId;
+    private UUID studentId;
+    private String schedule;
+    private Integer sessionsPurchased;
+    private String notes;
 }

@@ -89,7 +89,7 @@ public class PaymentServiceImpl implements PaymentService {
         // Build richer response for the client
         PaymentData paymentData = PaymentData.builder()
             .redirectUrl(response.getPaymentUrl())
-            .qrCodeContent(null)
+            .qrCodeContent(response.getQrCodeContent())
             .sdkParameters(null)
             .build();
 
@@ -232,6 +232,15 @@ public class PaymentServiceImpl implements PaymentService {
             kafkaProducer.sendPaymentCompletedEvent(event);
             log.info("Published payment completed event for order: {}", transaction.getOrderId());
 
+            // Also send BookingPaymentSuccessEvent for booking-service
+            BookingPaymentSuccessEvent bookingEvent = BookingPaymentSuccessEvent.builder()
+                .bookingId(transaction.getOrderId())
+                .classId(null)
+                .build();
+
+            kafkaProducer.sendBookingPaymentSuccessEvent(bookingEvent);
+            log.info("Published booking payment success event for bookingId: {}", transaction.getOrderId());
+
         } else {
             newStatus = PaymentStatus.FAILED;
 
@@ -249,6 +258,16 @@ public class PaymentServiceImpl implements PaymentService {
 
             kafkaProducer.sendPaymentFailedEvent(event);
             log.info("Published payment failed event for order: {}", transaction.getOrderId());
+
+            // Also send BookingPaymentFailedEvent for booking-service
+            BookingPaymentFailedEvent bookingEvent = BookingPaymentFailedEvent.builder()
+                .bookingId(transaction.getOrderId())
+                .classId(null)
+                .reason("Payment failed with resultCode: " + request.getResultCode())
+                .build();
+
+            kafkaProducer.sendBookingPaymentFailedEvent(bookingEvent);
+            log.info("Published booking payment failed event for bookingId: {}", transaction.getOrderId());
         }
 
         // Update and save transaction
@@ -333,5 +352,11 @@ public class PaymentServiceImpl implements PaymentService {
 
         kafkaProducer.sendBookingPaymentFailedEvent(event);
         log.info("Sent BookingPaymentFailedEvent for bookingId: {}", bookingId);
+    }
+    @Override
+    public com.elearning.paymentservice.enums.PaymentStatus checkPaymentStatus(UUID orderId) {
+        return paymentTransactionRepository.findByOrderId(orderId)
+                .map(PaymentTransaction::getStatus)
+                .orElseThrow(() -> new RuntimeException("Transaction not found for orderId: " + orderId));
     }
 }

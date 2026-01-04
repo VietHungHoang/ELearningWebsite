@@ -22,7 +22,7 @@ public class TutorServiceClient {
     }
 
     public String getZoomAccessToken(UUID tutorId) {
-        String url = serviceUrl + "/internal/tutors/zoom/" + tutorId + "/token";
+        String url = serviceUrl + "/api/v1/internal/tutors/zoom/" + tutorId + "/token";
         
         try {
             ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(

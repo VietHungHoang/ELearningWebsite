@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 interface AccountSettingsContentProps {
     onSave: () => void;
-    timezone?: string | null;
     zoomConnected?: boolean;
+    tutorId?: string;
 }
 
 // Fix: Changed the type of the `subtitle` prop from `string` to `React.ReactNode` to allow passing JSX elements.
@@ -33,13 +33,10 @@ const ActionRow: React.FC<{ buttonText: string; onSave: () => void }> = ({ butto
     );
 };
 
-const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave, timezone, zoomConnected }) => {
+const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave, zoomConnected, tutorId }) => {
     const { t } = useTranslation();
     // Match input styles with PersonalDetailsContent - white background, no hover bg effect
     const inputStyles = "w-full bg-white border border-gray-200 rounded-lg px-4 py-2 text-gray-800 placeholder:text-gray-400 placeholder:font-thin hover:border-gray-300 hover:shadow-sm focus:outline-none focus:ring-0 focus:border-[#0b6459] transition-all duration-500 ease-in-out";
-
-    // Default timezone if not provided
-    const selectedTimezone = timezone || 'Pacific/Tongatapu';
 
     return (
         <div className="space-y-8">
@@ -83,34 +80,41 @@ const AccountSettingsContent: React.FC<AccountSettingsContentProps> = ({ onSave,
                 <ActionRow buttonText={t('dashboard.tutor.accountSettings.changePassword.updatePassword')} onSave={onSave} />
             </FormSection>
 
-            {/* Update Time Zone */}
-            <FormSection title={t('dashboard.tutor.accountSettings.timeZone.title')} subtitle={t('dashboard.tutor.accountSettings.timeZone.subtitle')}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-                    <label className="block text-sm font-medium text-gray-700">
-                        {t('dashboard.tutor.accountSettings.timeZone.timeZone')} <span className="text-red-500">*</span>
-                        <select defaultValue={selectedTimezone} className={`mt-1 ${inputStyles}`}>
-                            <option>Pacific/Tongatapu</option>
-                            <option>(GMT+07:00) Asia/Ho_Chi_Minh</option>
-                        </select>
-                    </label>
-                </div>
-                <ActionRow buttonText={t('dashboard.tutor.accountSettings.timeZone.saveAndUpdate')} onSave={onSave} />
-            </FormSection>
-
-            {/* Link Zoom Account - Only 1 button */}
             <FormSection title={t('dashboard.tutor.accountSettings.zoom.title')} subtitle={
                 <>{t('dashboard.tutor.accountSettings.zoom.subtitle')} <a href="#" className="font-semibold text-[#0b6459] underline">{t('dashboard.tutor.accountSettings.zoom.steps')}</a> {t('dashboard.tutor.accountSettings.zoom.toCreate')}</>
             } hideBorder>
-                <button
-                    onClick={onSave}
-                    disabled={zoomConnected}
-                    className={`flex items-center gap-2 font-semibold py-2.5 px-5 rounded-lg text-sm transition-colors ${zoomConnected
+                <div className="flex flex-col gap-2">
+                    <button
+                        onClick={async () => {
+                            if (!tutorId) {
+                                console.error("Tutor ID is missing");
+                                return;
+                            }
+                            try {
+                                const response = await import('../../../../../services/tutorService').then(m => m.tutorService.getZoomAuthorizationUrl(tutorId));
+                                if (response.success && response.data.authorizationUrl) {
+                                    window.location.href = response.data.authorizationUrl;
+                                } else {
+                                    console.error("Failed to get Zoom authorization URL", response);
+                                }
+                            } catch (error) {
+                                console.error("Error connecting to Zoom:", error);
+                            }
+                        }}
+                        disabled={zoomConnected}
+                        className={`flex items-center justify-center gap-2 font-semibold py-2.5 px-5 rounded-lg text-sm transition-colors w-fit ${zoomConnected
                             ? 'bg-green-100 text-green-700 cursor-default'
                             : 'bg-[#0b6459] text-white hover:bg-[#084c43]'
-                        }`}
-                >
-                    {zoomConnected ? '✓ Đã liên kết Zoom' : 'Liên kết Zoom'}
-                </button>
+                            }`}
+                    >
+                        {zoomConnected ? '✓ Đã liên kết Zoom' : 'Liên kết Zoom'}
+                    </button>
+                    {!zoomConnected && (
+                        <p className="text-xs text-gray-500 italic">
+                            * Bạn sẽ được chuyển hướng đến Zoom để xác thực tài khoản.
+                        </p>
+                    )}
+                </div>
             </FormSection>
         </div>
     );

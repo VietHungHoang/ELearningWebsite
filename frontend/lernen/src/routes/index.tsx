@@ -13,6 +13,8 @@ import quizRoutes from '../features/quiz/routes';
 import tutorRoutes from '../features/tutor/route';
 import NotFoundPage from '../features/app/pages/NotFoundPage';
 import SystemErrorPage from '../features/app/pages/SystemErrorPage';
+import PaymentSuccessPage from '../features/checkout/pages/PaymentSuccessPage';
+import PaymentFailedPage from '../features/checkout/pages/PaymentFailedPage';
 import PaymentResultPage from '../features/checkout/pages/PaymentResultPage';
 
 const router = createBrowserRouter([
@@ -28,8 +30,16 @@ const router = createBrowserRouter([
   ...dashboardRoutes,
   ...quizRoutes,
   {
-    path: '/payment-success',
+    path: '/payment-result',
     element: <PaymentResultPage />,
+  },
+  {
+    path: '/payment-success',
+    element: <PaymentSuccessPage />,
+  },
+  {
+    path: '/payment-failed',
+    element: <PaymentFailedPage />,
   },
   {
     path: '/error',

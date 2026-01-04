@@ -7,7 +7,7 @@ interface TutorDetailsTabsProps {
 }
 
 const TutorDetailsTabs: React.FC<TutorDetailsTabsProps> = ({ groupClassesCount, reviewsCount }) => {
-    const [activeTab, setActiveTab] = useState("reviews");
+    const [activeTab, setActiveTab] = useState("introduction");
     const navRef = useRef<HTMLElement>(null);
     const { t } = useTranslation();
 
@@ -32,13 +32,13 @@ const TutorDetailsTabs: React.FC<TutorDetailsTabsProps> = ({ groupClassesCount, 
     }
 
     const tabs = [
-        { name: t("tutorDetail.tabs.reviews"), id: "reviews", count: reviewsCount! },
         { name: t("tutorDetail.tabs.introduction"), id: "introduction", count: null },
         { name: t("tutorDetail.tabs.availability"), id: "availability", count: null },
         ...(groupClassesCount! > 0
             ? [{ name: t("tutorDetail.tabs.groupClass"), id: "group-class", count: groupClassesCount! }]
             : []),
         { name: t("tutorDetail.tabs.resumeHighlights"), id: "resume-highlights", count: null },
+        { name: t("tutorDetail.tabs.reviews"), id: "reviews", count: reviewsCount! },
     ];
 
     useEffect(() => {
@@ -89,18 +89,16 @@ const TutorDetailsTabs: React.FC<TutorDetailsTabsProps> = ({ groupClassesCount, 
                             key={tab.name}
                             href={`#${tab.id}`}
                             onClick={(e) => handleNavClick(e, tab.id)}
-                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-base transition-colors focus:outline-none ${
-                                activeTab === tab.id
+                            className={`whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-base transition-colors focus:outline-none ${activeTab === tab.id
                                     ? "border-[#0b6459] text-[#0b6459]"
                                     : "border-transparent text-gray-500 hover:text-gray-700"
-                            }`}
+                                }`}
                         >
                             {tab.name}
                             {tab.count !== null && (
                                 <span
-                                    className={`ml-2 text-sm font-bold px-2 py-0.5 rounded-full transition-colors ${
-                                        activeTab === tab.id ? "bg-[#0b6459] text-white" : "bg-[#f9f3eb] text-gray-700"
-                                    }`}
+                                    className={`ml-2 text-sm font-bold px-2 py-0.5 rounded-full transition-colors ${activeTab === tab.id ? "bg-[#0b6459] text-white" : "bg-[#f9f3eb] text-gray-700"
+                                        }`}
                                 >
                                     {tab.count}
                                 </span>

@@ -1,5 +1,6 @@
 package com.elearning.tutorservice.controller;
 
+import com.elearning.tutorservice.dto.request.UpdateTutorProfileRequest;
 import com.elearning.tutorservice.dto.response.ApiResponse;
 import com.elearning.tutorservice.dto.response.TutorResponse;
 import com.elearning.tutorservice.service.TutorOnboardingService;
@@ -31,6 +32,19 @@ public class TutorController {
         log.info("Fetching profile for tutor: {}", tutorId);
         TutorResponse profile = tutorService.getTutorById(tutorId);
         return ResponseEntity.ok(ApiResponse.success(profile, "Tutor profile retrieved successfully"));
+    }
+
+    /**
+     * PUT /tutors/me/profile
+     * Update current tutor's profile using X-User-Id header
+     */
+    @PutMapping("/me/profile")
+    public ResponseEntity<ApiResponse<TutorResponse>> updateCurrentTutorProfile(
+            @RequestHeader("X-User-Id") UUID tutorId,
+            @RequestBody UpdateTutorProfileRequest request) {
+        log.info("Updating profile for tutor: {}", tutorId);
+        TutorResponse updatedProfile = tutorService.updateTutorProfile(tutorId, request);
+        return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Tutor profile updated successfully"));
     }
 
     @GetMapping("/{id}")

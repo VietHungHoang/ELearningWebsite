@@ -9,4 +9,4 @@ spring:
 
 services:
   tutor-service:
-    url: ${TUTOR_SERVICE_URL:http://tutor-service:8089}
+    url: ${TUTOR_SERVICE_URL:http://tutor-service:8085}

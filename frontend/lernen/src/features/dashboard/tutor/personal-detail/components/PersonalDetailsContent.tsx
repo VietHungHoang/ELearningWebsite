@@ -50,9 +50,10 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
         underline: false,
     });
 
-    // Get countries and languages data
+    // Get countries, languages, and timezones data
     const countries = commonUtils.getAllCountries();
     const allLanguages = commonUtils.getAllLanguages();
+    const allTimezones = commonUtils.getAllTimezones();
 
     // Local state for form inputs
     const [formData, setFormData] = useState({
@@ -61,6 +62,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
         country: { code: "", name: "", flag: "" },
         nativeLanguage: null as ApiLanguage | null,
         languages: [] as ApiLanguage[],
+        timezone: null as { code: string; name: string; offset: string } | null,
         headline: "",
         subjects: [] as Subject[],
         introduction: "",
@@ -112,12 +114,21 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
     // Sync form data with tutor data when loaded
     useEffect(() => {
         if (tutor) {
+            // Find full country info from country.code
+            const countryCode = tutor.country?.code || "";
+            const fullCountry = countryCode ? commonUtils.getCountryByCode(countryCode) : null;
+
+            // Find full timezone info from timezone name
+            const tutorTimezone = tutor.timezone || "";
+            const fullTimezone = tutorTimezone ? commonUtils.getTimezoneByName(tutorTimezone) : null;
+
             const initialData = {
                 fullName: tutor.fullName || "",
                 gender: tutor.gender || "",
-                country: tutor.country || { code: "", name: "", flag: "" },
+                country: fullCountry || { code: countryCode, name: "", flag: "" },
                 nativeLanguage: tutor.languages?.find(lang => lang.isNative)?.language ? { code: tutor.languages.find(lang => lang.isNative)!.language.code, name: tutor.languages.find(lang => lang.isNative)!.language.name, isNative: true } : null,
                 languages: tutor.languages?.map(lang => ({ code: lang.language.code, name: lang.language.name, isNative: lang.isNative })) || [],
+                timezone: fullTimezone || null,
                 headline: tutor.headline || "",
                 subjects: tutor.subjects || [],
                 introduction: tutor.introduction || "",
@@ -413,6 +424,36 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ tutor }
                                 }));
                             }}
                             dropdownId="country"
+                            openDropdown={openDropdown}
+                            setOpenDropdown={setOpenDropdown}
+                            hasSearch={true}
+                        />
+                    </div>
+                </div>
+
+                {/* Timezone */}
+                <div className="flex items-center py-8 border-b border-gray-200">
+                    <div className="w-48 text-left">
+                        <label className="text-sm font-medium text-gray-700">{t('dashboard.tutor.personalDetails.timezone', 'Timezone')} <span className="text-red-500">*</span></label>
+                    </div>
+                    <div className="flex-1 pl-4">
+                        <CustomDropdownDashboard
+                            options={allTimezones.map(tz => `(GMT${tz.offset}) ${tz.name}`)}
+                            selectedValue={formData.timezone ? `(GMT${formData.timezone.offset}) ${formData.timezone.name}` : t('dashboard.tutor.personalDetails.timezonePlaceholder', 'Select your timezone')}
+                            placeholder={t('dashboard.tutor.personalDetails.timezonePlaceholder', 'Select your timezone')}
+                            onSelect={(value: string) => {
+                                // Extract timezone name from the formatted string
+                                const match = value.match(/\(GMT[+-]\d{2}:\d{2}\)\s(.+)/);
+                                if (match) {
+                                    const tzName = match[1];
+                                    const selectedTz = allTimezones.find(tz => tz.name === tzName);
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        timezone: selectedTz || null,
+                                    }));
+                                }
+                            }}
+                            dropdownId="timezone"
                             openDropdown={openDropdown}
                             setOpenDropdown={setOpenDropdown}
                             hasSearch={true}

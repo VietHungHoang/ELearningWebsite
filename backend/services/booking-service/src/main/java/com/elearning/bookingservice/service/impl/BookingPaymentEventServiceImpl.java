@@ -31,14 +31,23 @@ public class BookingPaymentEventServiceImpl implements BookingPaymentEventServic
 
         // Update booking status to CONFIRMED
         booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setTransactionId(event.getTransactionId());
+        booking.setProviderTransactionId(event.getProviderTransactionId());
         bookingRepository.save(booking);
 
         log.info("Updated booking {} status to CONFIRMED after payment success", event.getBookingId());
 
-        // Forward event to class-service with classId
+        // Forward event to class-service with classId and creation details
         BookingPaymentSuccessEvent classServiceEvent = BookingPaymentSuccessEvent.builder()
                 .bookingId(event.getBookingId())
                 .classId(booking.getClassId())
+                .transactionId(event.getTransactionId())
+                .providerTransactionId(event.getProviderTransactionId())
+                .tutorId(booking.getTutorId())
+                .studentId(booking.getStudentId())
+                .schedule(booking.getSchedule())
+                .sessionsPurchased(booking.getSessionsPurchased())
+                .notes(booking.getNotes())
                 .build();
 
         kafkaProducer.sendBookingPaymentSuccessToClassService(classServiceEvent);

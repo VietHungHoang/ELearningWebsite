@@ -27,6 +27,10 @@ const getCountryByName = (name: string) => {
     return getAllCountries().find((country) => country.name === name);
 };
 
+const getCountryByCode = (code: string): Country | undefined => {
+    return getAllCountries().find((country) => country.code === code);
+};
+
 const getAllTimezones = () => {
     const timezones = Intl.supportedValuesOf('timeZone');
 
@@ -76,7 +80,7 @@ const getSubjects = async (): Promise<Subject[]> => {
             const parsedCache = JSON.parse(cached);
             // Handle both old format (array) and new format ({ data, timestamp })
             let data: Subject[] | null = null;
-            
+
             if (Array.isArray(parsedCache)) {
                 // Old format: just an array
                 data = parsedCache;
@@ -84,7 +88,7 @@ const getSubjects = async (): Promise<Subject[]> => {
                 // New format: { data, timestamp }
                 data = parsedCache.data;
             }
-            
+
             if (data && data.length > 0) {
                 console.log('Using cached subjects:', data.length, 'items');
                 // Fetch from API in background to update cache (don't wait for it)
@@ -103,7 +107,7 @@ const getSubjects = async (): Promise<Subject[]> => {
             console.warn('Error parsing cached subjects:', error);
         }
     }
-    
+
     // No cache available, fetch from API
     try {
         const response = await apiService.get<Subject[]>('/v1/public/common/subjects');
@@ -114,7 +118,7 @@ const getSubjects = async (): Promise<Subject[]> => {
     } catch (error) {
         console.warn('Failed to fetch subjects from API:', error);
     }
-    
+
     // No cache and no API - return empty array
     console.warn('No subjects available from API or cache');
     return [];
@@ -129,7 +133,7 @@ const getCategories = async (): Promise<Category[]> => {
             const parsedCache = JSON.parse(cached);
             // Handle both old format (array) and new format ({ data, timestamp })
             let data: Category[] | null = null;
-            
+
             if (Array.isArray(parsedCache)) {
                 // Old format: just an array
                 data = parsedCache;
@@ -137,7 +141,7 @@ const getCategories = async (): Promise<Category[]> => {
                 // New format: { data, timestamp }
                 data = parsedCache.data;
             }
-            
+
             if (data && data.length > 0) {
                 console.log('Using cached categories:', data.length, 'items');
                 // Fetch from API in background to update cache (don't wait for it)
@@ -156,7 +160,7 @@ const getCategories = async (): Promise<Category[]> => {
             console.warn('Error parsing cached categories:', error);
         }
     }
-    
+
     // No cache available, fetch from API
     try {
         const response = await apiService.get<Category[]>('/v1/public/common/categories');
@@ -167,7 +171,7 @@ const getCategories = async (): Promise<Category[]> => {
     } catch (error) {
         console.warn('Failed to fetch categories from API:', error);
     }
-    
+
     // No cache and no API - return empty array
     console.warn('No categories available from API or cache');
     return [];
@@ -301,6 +305,7 @@ export default {
     getAllLanguages,
     getAllTimezones,
     getCountryByName,
+    getCountryByCode,
     getLanguageByName,
     getTimezoneByName,
     getSubjects,

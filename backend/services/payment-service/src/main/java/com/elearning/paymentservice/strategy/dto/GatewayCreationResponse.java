@@ -8,4 +8,5 @@ import lombok.Data;
 public class GatewayCreationResponse {
     private String paymentUrl;
     private String providerTransactionId;
+    private String qrCodeContent;
 }

@@ -5,11 +5,12 @@ import type {
     FilterData,
     UpdateTutorProfileRequest,
     UploadFileResponse,
-
+    CareerEntryRequest,
+    CareerEntryResponse,
 } from "../types/api";
 import apiService from "./apiService";
 import { mapTutorResponseToTutor, mapTutorProfileHeaderResponseToTutorProfileHeader } from "../mappers/tutorMapper";
-import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse } from "../types/tutor";
+import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse, TutorDetail } from "../types/tutor";
 import type { SubmitReviewRequest } from "../types/student";
 
 interface FuzzySearchSuggestion {
@@ -70,7 +71,7 @@ export const tutorService = {
                 console.log("Including studentId in request params", studentId);
                 params.studentId = studentId;
             }
-            const response = await apiService.get<TutorDetailResponse>(`/v1/public/tutors/${tutorId}`, params);
+            const response = await apiService.get<TutorResponse>(`/v1/public/tutors/${tutorId}`, params);
             // const tutor = await mapTutorDetailResponseToTutorDetail(response.data);
             return {
                 status: response.status,
@@ -121,7 +122,7 @@ export const tutorService = {
 
     updateTutorProfile: async (profileData: UpdateTutorProfileRequest): Promise<ApiResponse<any>> => {
         try {
-            return await apiService.put<any>("/api/v1/tutors/profile", profileData);
+            return await apiService.put<any>("/v1/tutors/me/profile", profileData);
         } catch (error) {
             console.warn("Failed to update tutor profile from API:", error);
             throw error;
@@ -230,6 +231,71 @@ export const tutorService = {
             );
         } catch (error) {
             console.warn('Failed to submit resume text to API:', error);
+            throw error;
+        }
+    },
+
+    // ===== Career Entry (Education & Experience) API =====
+
+    getCareerEntries: async (): Promise<ApiResponse<CareerEntryResponse[]>> => {
+        try {
+            return await apiService.get<CareerEntryResponse[]>("/v1/tutors/me/career-entries");
+        } catch (error) {
+            console.warn("Failed to fetch career entries:", error);
+            throw error;
+        }
+    },
+
+    getEducations: async (): Promise<ApiResponse<CareerEntryResponse[]>> => {
+        try {
+            return await apiService.get<CareerEntryResponse[]>("/v1/tutors/me/career-entries/educations");
+        } catch (error) {
+            console.warn("Failed to fetch educations:", error);
+            throw error;
+        }
+    },
+
+    getExperiences: async (): Promise<ApiResponse<CareerEntryResponse[]>> => {
+        try {
+            return await apiService.get<CareerEntryResponse[]>("/v1/tutors/me/career-entries/experiences");
+        } catch (error) {
+            console.warn("Failed to fetch experiences:", error);
+            throw error;
+        }
+    },
+
+    createCareerEntry: async (entryData: CareerEntryRequest): Promise<ApiResponse<CareerEntryResponse>> => {
+        try {
+            return await apiService.post<CareerEntryResponse>("/v1/tutors/me/career-entries", entryData);
+        } catch (error) {
+            console.warn("Failed to create career entry:", error);
+            throw error;
+        }
+    },
+
+    updateCareerEntry: async (id: string, entryData: CareerEntryRequest): Promise<ApiResponse<CareerEntryResponse>> => {
+        try {
+            return await apiService.put<CareerEntryResponse>(`/v1/tutors/me/career-entries/${id}`, entryData);
+        } catch (error) {
+            console.warn(`Failed to update career entry ${id}:`, error);
+            throw error;
+        }
+    },
+
+    getZoomAuthorizationUrl: async (tutorId: string): Promise<ApiResponse<{ authorizationUrl: string }>> => {
+        try {
+            return await apiService.get<{ authorizationUrl: string }>("/v1/tutors/zoom/oauth/authorize", { tutorId });
+        } catch (error) {
+            console.warn("Failed to get Zoom authorization URL:", error);
+            throw error;
+        }
+    },
+
+    deleteCareerEntry: async (id: string): Promise<ApiResponse<void>> => {
+        try {
+            return await apiService.delete<void>(`/v1/tutors/me/career-entries/${id}`);
+        } catch (error) {
+            console.warn(`Failed to delete career entry ${id}:`, error);
             throw error;
         }
     },

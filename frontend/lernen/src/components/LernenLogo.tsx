@@ -7,6 +7,6 @@ interface LernenLogoProps {
 }
 
 export const LernenLogo: React.FC<LernenLogoProps> = ({ variant = 'default', className = '' }) => {
-    const logoSrc = variant === 'white' ? "../../../public/images/logo-default.svg" : "../../../public/images/logo-default.svg";
+    const logoSrc = variant === 'white' ? "/images/logo-default.svg" : "/images/logo-default.svg";
     return <img src={logoSrc} alt="Lernen Logo" className={className} />;
 };

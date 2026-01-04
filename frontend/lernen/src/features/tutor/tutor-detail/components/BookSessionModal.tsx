@@ -1,12 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiCheckCircle, FiLoader } from 'react-icons/fi';
-import ModalLayout from '../../../../components/ui/ModalLayout';
+import { FiX, FiCheckCircle, FiLoader, FiArrowRight } from 'react-icons/fi';
+import { HiCheckCircle, HiCalendar } from 'react-icons/hi';
+import { MdSavings, MdReceipt } from 'react-icons/md';
 import Avatar from 'react-avatar';
 import { useCurrency } from '../../../../context/CurrencyContext';
 import { convertFromVND, formatCurrency } from '../../../../utils/currencyHelper';
 import { useTranslation } from 'react-i18next';
 import type { Timezone } from '../../../../types/common';
 import type { Tutor } from '../../../../types/tutor';
+
+// Custom currency formatter for VND in pricing cards (shows "tr" for millions)
+const formatCurrencyVND = (amount: number, currency: string): string => {
+    if (currency === 'VND') {
+        // Format VND currency with "tr" for millions in pricing cards
+        if (amount >= 1000000) {
+            // Convert to million format with "tr" suffix
+            const millionAmount = amount / 1000000;
+            // Round to 1 decimal place, but show as integer if it's whole number
+            const formatted = millionAmount % 1 === 0
+                ? millionAmount.toFixed(0)
+                : millionAmount.toFixed(1);
+            return `${formatted}tr`;
+        } else {
+            // Format with thousand separators and "đ" suffix
+            return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+        }
+    } else {
+        // For other currencies, use standard formatting
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: currency,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+        }).format(amount);
+    }
+};
 
 interface BookSessionModalProps {
     isOpen: boolean;
@@ -18,10 +46,9 @@ interface BookSessionModalProps {
 }
 
 const packages = [
-    { sessions: 5, discount: 0, isBestValue: false },
-    { sessions: 10, discount: 10, isBestValue: true },
-    { sessions: 20, discount: 15, isBestValue: false },
-    { sessions: 30, discount: 20, isBestValue: false },
+    { sessions: 5, discount: 0, isBestValue: false, validity: '2 tháng' },
+    { sessions: 10, discount: 10, isBestValue: true, validity: '6 tháng' },
+    { sessions: 20, discount: 20, isBestValue: false, validity: '1 năm' },
 ];
 
 const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tutorData, navigateToApp, selectedTimes = [], timezone }) => {
@@ -33,6 +60,25 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
     const { selectedCurrency } = useCurrency();
     const { t } = useTranslation();
 
+    // Animation states
+    const [shouldRender, setShouldRender] = useState(isOpen);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setShouldRender(true);
+            setTimeout(() => {
+                setIsAnimating(true);
+            }, 10);
+        } else {
+            setIsAnimating(false);
+            const timer = setTimeout(() => {
+                setShouldRender(false);
+            }, 200);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen]);
+
     useEffect(() => {
         if (!isOpen) return;
         if (tutorData) {
@@ -42,8 +88,14 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
         }
     }, [isOpen, tutorData]);
 
+    const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
     // Don't render anything if modal is not open
-    if (!isOpen) return null;
+    if (!shouldRender) return null;
 
     if (loading || !tutor) {
         return null; // Return null instead of loading div when tutor data is not yet available
@@ -127,91 +179,47 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                 return `${hour12}:${displayMinute.toString().padStart(2, '0')} ${ampm}`;
             };
 
-            // Generate learning schedule based on selected times or fallback to weekly
-            const generateSchedule = (totalSessions: number, selectedTimes: string[], timezone: Timezone | null) => {
-                const schedule = [];
-                console.log(JSON.parse(JSON.stringify(selectedTimes)));
+            // Generate fixed schedule pattern (dayOfWeek + time) instead of calculating all dates
+            const generateFixedSchedule = (selectedTimes: string[], timezone: Timezone | null) => {
+                const schedule: { sessionNumber: number; date: string; time: string; dayOfWeek?: number }[] = [];
 
-                // Use selected times if available, otherwise fall back to mock schedule
                 if (selectedTimes && selectedTimes.length > 0) {
-                    // Calculate how many full cycles we need
-                    const cycleLength = selectedTimes.length;
-                    const fullCycles = Math.floor(totalSessions / cycleLength);
-                    const remainingSessions = totalSessions % cycleLength;
+                    // Extract unique day-time patterns from selected times
+                    const seenPatterns = new Set<string>();
 
-                    let sessionCount = 0;
+                    selectedTimes.forEach((selectedTime, index) => {
+                        const baseDate = new Date(selectedTime);
+                        const dayOfWeek = baseDate.getUTCDay(); // 0 = Sunday, 6 = Saturday
+                        // Convert to 1-7 format (1 = Monday, 7 = Sunday)
+                        const dayOfWeekConverted = dayOfWeek === 0 ? 7 : dayOfWeek;
 
-                    // Generate sessions for each cycle
-                    for (let cycle = 0; cycle <= fullCycles; cycle++) {
-                        for (let timeIndex = 0; timeIndex < cycleLength; timeIndex++) {
-                            if (sessionCount >= totalSessions) break;
+                        const timeString = convertUTCToTimezoneTime(selectedTime, timezone);
+                        const patternKey = `${dayOfWeekConverted}-${timeString}`;
 
-                            // Skip remaining sessions if we're in the last partial cycle
-                            if (cycle === fullCycles && timeIndex >= remainingSessions) break;
-
-                            const selectedTime = selectedTimes[timeIndex];
-                            // selectedTime is already UTC ISO string
-                            const baseDate = new Date(selectedTime);
-
-                            // Add weeks for subsequent cycles (keeping in UTC)
-                            const sessionDate = new Date(baseDate);
-                            sessionDate.setUTCDate(baseDate.getUTCDate() + (cycle * 7));
-
-                            // Convert to ISO string for the helper function
-                            const sessionISOString = sessionDate.toISOString();
-
-                            // For date display, use UTC components
-                            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-                            const dayName = dayNames[sessionDate.getUTCDay()];
-                            const monthName = monthNames[sessionDate.getUTCMonth()];
-                            const day = sessionDate.getUTCDate();
-                            const year = sessionDate.getUTCFullYear();
-                            const timeString = convertUTCToTimezoneTime(sessionISOString, timezone);
-
+                        if (!seenPatterns.has(patternKey)) {
+                            seenPatterns.add(patternKey);
                             schedule.push({
-                                sessionNumber: sessionCount + 1,
-                                date: `${dayName}, ${monthName} ${day}, ${year}`,
-                                time: timeString
+                                sessionNumber: schedule.length + 1,
+                                date: '', // Empty for fixed schedule
+                                time: timeString,
+                                dayOfWeek: dayOfWeekConverted
                             });
-
-                            sessionCount++;
                         }
-                    }
+                    });
                 } else {
-                    // Fallback to mock schedule if no selected times
-                    const now = new Date();
-                    // Find next Monday
-                    const nextMonday = new Date(now);
-                    nextMonday.setDate(now.getDate() + (1 - now.getDay() + 7) % 7);
-                    if (nextMonday <= now) {
-                        nextMonday.setDate(nextMonday.getDate() + 7);
-                    }
-
-                    for (let i = 0; i < Math.min(totalSessions, 5); i++) { // Show first 5 sessions
-                        const sessionDate = new Date(nextMonday);
-                        sessionDate.setDate(nextMonday.getDate() + (i * 7)); // Weekly
-
-                        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-                        const dayName = dayNames[sessionDate.getDay()];
-                        const monthName = monthNames[sessionDate.getMonth()];
-                        const day = sessionDate.getDate();
-                        const year = sessionDate.getFullYear();
-
-                        schedule.push({
-                            sessionNumber: i + 1,
-                            date: `${dayName}, ${monthName} ${day}, ${year}`,
-                            time: "10:00 AM" // Default time, could be made configurable
-                        });
-                    }
+                    // Fallback: Monday 10:00 AM
+                    schedule.push({
+                        sessionNumber: 1,
+                        date: '',
+                        time: '10:00 AM',
+                        dayOfWeek: 1 // Monday
+                    });
                 }
+
                 return schedule;
             };
 
-            const schedule = generateSchedule(selectedPackage.sessions, selectedTimes, timezone || null);
+            const schedule = generateFixedSchedule(selectedTimes, timezone || null);
 
             const bookingData = {
                 package: selectedPackage,
@@ -223,7 +231,9 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                     currency: selectedCurrency
                 },
                 sessions: selectedPackage.sessions,
-                schedule: schedule
+                schedule: schedule,
+                // Also pass selectedTimes for backend processing (actual date calculation)
+                selectedTimes: selectedTimes
             };
 
             navigateToApp('checkout', { bookingData, tutor: tutorData });
@@ -234,95 +244,177 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
     const totalPrice = selectedPackage ? calculateTotalPrice(selectedPackage.sessions, selectedPackage.discount) : 0;
 
     return (
-        <ModalLayout
-            isOpen={isOpen}
-            onClose={onClose}
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={handleOverlayClick}
+            role="dialog"
+            aria-modal="true"
         >
-            <div className="flex flex-col overflow-hidden w-full max-w-2xl min-w-[400px]">
-                {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <Avatar
-                            src={tutor.avatarUrl}
-                            name={tutor.fullName}
-                            size="48"
-                            round="8px"
-                            className="w-12 h-12"
-                        />
-                        <div>
-                            <h2 className="font-bold text-base text-gray-800">{t('tutorDetail.bookSessionModal.title')}</h2>
-                            <p className="text-sm text-gray-500">{t('tutorDetail.bookSessionModal.withTutor', { tutorName: tutor.fullName })}</p>
-                        </div>
+            {/* Background overlay */}
+            <div
+                className={`fixed inset-0 bg-black transition-opacity duration-200 ${isAnimating ? 'opacity-50' : 'opacity-0'
+                    }`}
+            />
+
+            {/* Modal Container */}
+            <div className={`relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-200 ease-out ${isAnimating ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+                }`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+                    <div>
+                        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900">
+                            Chọn Gói Buổi Học
+                        </h2>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Mua nhiều buổi hơn để tiết kiệm chi phí cho hành trình học tập của bạn.
+                        </p>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full"><FiX /></button>
+                    <button
+                        onClick={onClose}
+                        className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
+                    >
+                        <FiX className="text-2xl" />
+                    </button>
                 </div>
 
-                {/* Body */}
-                <div className="p-6">
-                    <h3 className="text-lg font-bold text-center text-gray-800">{t('tutorDetail.bookSessionModal.choosePackage')}</h3>
-                    <p className="text-center text-gray-500 mt-1">{t('tutorDetail.bookSessionModal.commitMessage')}</p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                {/* Modal Body (Scrollable) */}
+                <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+                    {/* Pricing Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                         {packages.map((pkg, index) => {
                             const pricePerSession = calculatePricePerSession(pkg.discount);
                             const total = calculateTotalPrice(pkg.sessions, pkg.discount);
                             const isSelected = selectedPackageIndex === index;
+                            const pkgOriginalPrice = convertedBasePrice * pkg.sessions;
 
                             return (
-                                <button
+                                <div
                                     key={index}
                                     onClick={() => setSelectedPackageIndex(index)}
-                                    className={`relative text-left p-4 rounded-xl border-2 transition-all duration-200 focus:outline-none ${isSelected
-                                        ? 'border-transparent bg-[#0b6459] text-white shadow-lg transform scale-105'
-                                        : 'bg-gray-50 border-gray-200 hover:border-[#0b6459]/50 hover:bg-white'
+                                    className={`group relative flex flex-col rounded-xl p-5 cursor-pointer border-2 transition-all duration-300 ease-out ${isSelected
+                                        ? 'border-[#0b6459] bg-white shadow-md shadow-[#0b6459]/10 -translate-y-1'
+                                        : 'border-slate-200 bg-white hover:border-[#0b6459]/50 hover:shadow-lg hover:-translate-y-0.5'
                                         }`}
                                 >
+                                    {/* Badge for Best Value */}
                                     {pkg.isBestValue && (
-                                        <div className={`absolute top-0 right-4 -translate-y-1/2 px-3 py-1 text-xs font-bold rounded-full border-2 ${isSelected ? 'bg-white text-[#0b6459] border-[#0b6459]' : 'bg-[#0b6459] text-white border-white'}`}>
-                                            {t('tutorDetail.bookSessionModal.bestValue')}
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#0b6459] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                                            PHỔ BIẾN NHẤT
                                         </div>
                                     )}
 
-                                    <h4 className="text-lg font-bold">{pkg.sessions} {t('tutorDetail.bookSessionModal.sessions')}</h4>
-                                    <p className={`text-sm ${isSelected ? 'text-gray-200' : 'text-gray-500'}`}>{formatCurrency(pricePerSession, selectedCurrency)}{t('tutorDetail.bookSessionModal.perSession')}</p>
-
-                                    <div className="mt-4 flex items-baseline gap-2">
-                                        <p className="text-xl font-extrabold">{formatCurrency(total, selectedCurrency)}</p>
-                                        {pkg.discount > 0 && (
-                                            <span className={`font-semibold text-sm ${isSelected ? 'text-green-300' : 'text-green-600'}`}>{t('tutorDetail.bookSessionModal.savePercent', { percent: pkg.discount })}</span>
-                                        )}
+                                    {/* Selection Ring */}
+                                    <div className={`absolute top-6 right-6 h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'border-[#0b6459]' : 'border-slate-300 group-hover:border-[#0b6459]'
+                                        }`}>
+                                        <div className={`h-3 w-3 rounded-full bg-[#0b6459] transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0'
+                                            }`}></div>
                                     </div>
 
-                                    {isSelected && (
-                                        <div className="absolute top-4 right-4 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                            <div className="w-4 h-4 text-white"><FiCheckCircle /></div>
+                                    <div className={`mb-4 ${pkg.isBestValue ? 'pt-2' : ''}`}>
+                                        <h3 className={`text-lg font-bold ${isSelected ? 'text-[#0b6459]' : 'text-slate-900'}`}>
+                                            {index === 0 ? 'Gói Khởi Động' : index === 1 ? 'Gói Tiêu Chuẩn' : 'Gói Chuyên Nghiệp'}
+                                        </h3>
+                                        <p className="text-sm text-slate-500 font-normal">
+                                            {index === 0 ? 'Thích hợp để trải nghiệm' : index === 1 ? 'Lộ trình học tập cơ bản' : 'Đầu tư dài hạn, tối ưu chi phí'}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-baseline gap-1 mb-1">
+                                        <span className={`font-black tracking-tight text-slate-900 transition-all duration-300 ease-out ${isSelected ? 'text-4xl' : 'text-3xl'}`}>
+                                            {formatCurrencyVND(total, selectedCurrency)}
+                                        </span>
+                                        <span className="text-sm text-slate-500 font-medium">
+                                            / {pkg.sessions} buổi
+                                        </span>
+                                    </div>
+
+                                    {pkg.discount > 0 && (
+                                        <div className="text-xs text-slate-400 line-through mb-6">
+                                            Giá gốc: {formatCurrencyVND(pkgOriginalPrice, selectedCurrency)}
                                         </div>
                                     )}
-                                </button>
+
+                                    <div className="w-full h-px bg-slate-100 mb-6"></div>
+
+                                    <ul className="flex flex-col gap-3 mb-auto">
+                                        <li className="flex items-start gap-3 text-sm text-slate-700">
+                                            <HiCheckCircle className="text-[#0b6459] text-[20px] flex-shrink-0 mt-0.5" />
+                                            <span>
+                                                <strong>{formatCurrencyVND(pricePerSession, selectedCurrency)}</strong>/buổi
+                                            </span>
+                                        </li>
+                                        {pkg.discount > 0 && (
+                                            <li className="flex items-start gap-3 text-sm text-slate-700">
+                                                <MdSavings className="text-green-600 text-[20px] flex-shrink-0 mt-0.5" />
+                                                <span className="text-green-600 font-bold">
+                                                    Tiết kiệm {pkg.discount}%
+                                                </span>
+                                            </li>
+                                        )}
+                                        <li className="flex items-start gap-3 text-sm text-slate-700">
+                                            <HiCalendar className="text-slate-400 text-[20px] flex-shrink-0 mt-0.5" />
+                                            <span>
+                                                Đổi lịch hoàn toàn miễn phí
+                                            </span>
+                                        </li>
+                                    </ul>
+
+                                    <button
+                                        className={`mt-6 w-full py-2.5 rounded-lg font-semibold text-sm transition-all ${isSelected
+                                            ? 'bg-[#0b6459] text-white hover:bg-[#084c43] shadow-md shadow-[#0b6459]/30'
+                                            : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        {isSelected ? 'Đang chọn' : 'Chọn gói này'}
+                                    </button>
+                                </div>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                        <p className="text-xs text-gray-500">{t('tutorDetail.bookSessionModal.securePayments')}</p>
+                {/* Modal Footer */}
+                <div className="px-6 py-5 border-t border-slate-100 bg-white shrink-0">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                <MdReceipt className="text-xl" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm text-slate-500">Tổng thanh toán:</span>
+                                <span className="text-xl font-bold text-slate-900">
+                                    {formatCurrency(totalPrice, selectedCurrency)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex w-full md:w-auto gap-3">
+                            <button
+                                onClick={onClose}
+                                className="flex-1 md:flex-none px-6 py-3 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={handleCheckout}
+                                disabled={selectedPackageIndex === null || isProcessing}
+                                className="flex-1 md:flex-none px-8 py-3 rounded-lg bg-[#0b6459] text-white font-bold text-sm hover:bg-[#084c43] transition-all shadow-md shadow-[#0b6459]/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isProcessing ? (
+                                    <FiLoader className="animate-spin text-lg" />
+                                ) : (
+                                    <>
+                                        <span>Tiếp tục thanh toán</span>
+                                        <FiArrowRight className="text-lg" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
-                    <button
-                        onClick={handleCheckout}
-                        disabled={selectedPackageIndex === null || isProcessing}
-                        className="w-full bg-[#0b6459] text-white font-bold py-4 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed btn-scale"
-                    >
-                        {isProcessing ? (
-                            <FiLoader className="h-5 w-5 text-white animate-spin" />
-                        ) : (
-                            <span>{t('tutorDetail.bookSessionModal.proceedToCheckout', { price: formatCurrency(totalPrice, selectedCurrency) })}</span>
-                        )}
-                    </button>
                 </div>
             </div>
-        </ModalLayout>
+        </div>
     );
 };
 

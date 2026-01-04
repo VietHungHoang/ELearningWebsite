@@ -20,6 +20,9 @@ public class InitiatePaymentRequest {
     @NotNull(message = "Order ID is required")
     private UUID orderId;
 
+    @NotNull(message = "User ID is required")
+    private UUID userId;
+
     @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
     private BigDecimal amount;
 

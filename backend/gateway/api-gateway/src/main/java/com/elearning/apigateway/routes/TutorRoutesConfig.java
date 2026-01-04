@@ -29,7 +29,13 @@ public class TutorRoutesConfig {
                                 prefix + "me/earnings/**",
                                 "/api/v1/public/tutors/{tutorId}",
                                 "/api/v1/tutors/me/profile",
-                                "/api/v1/admin/tutors/approve/{tutorId}"
+                                "/api/v1/tutors/me/career-entries",
+                                "/api/v1/tutors/me/career-entries/educations",
+                                "/api/v1/tutors/me/career-entries/experiences",
+                                "/api/v1/tutors/me/career-entries/{id}",
+                                "/api/v1/admin/tutors/approve/{tutorId}",
+                                "/api/v1/tutors/zoom/oauth/authorize",
+                                "/api/v1/tutors/zoom/oauth/callback"
                                 )
                         .filters(f -> f
                                 .rewritePath(

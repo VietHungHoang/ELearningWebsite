@@ -15,4 +15,6 @@ public class BookingPaymentSuccessEvent {
     
     private UUID bookingId;
     private UUID classId;
+    private UUID transactionId;
+    private String providerTransactionId;
 }

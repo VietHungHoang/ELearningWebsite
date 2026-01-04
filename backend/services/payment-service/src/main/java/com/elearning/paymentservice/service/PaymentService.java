@@ -23,4 +23,6 @@ public interface PaymentService {
     void handlePaymentSuccess(UUID bookingId);
 
     void handlePaymentError(UUID bookingId);
+
+    com.elearning.paymentservice.enums.PaymentStatus checkPaymentStatus(UUID orderId);
 }

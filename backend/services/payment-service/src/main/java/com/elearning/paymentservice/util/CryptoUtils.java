@@ -20,4 +20,16 @@ public final class CryptoUtils {
         }
         return sb.toString();
     }
+
+    public static String hmacSha512Hex(String secret, String message) throws Exception {
+        Mac sha512_HMAC = Mac.getInstance("HmacSHA512");
+        SecretKeySpec secret_key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+        sha512_HMAC.init(secret_key);
+        byte[] macData = sha512_HMAC.doFinal(message.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder(macData.length * 2);
+        for (byte b : macData) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 }

@@ -143,16 +143,16 @@ const TutorDetailPage: React.FC = () => {
                 <div className="container max-w-7xl mx-auto px-8 py-8">
                     {groupClasses.length > 0 && !groupClassesError && (
                         <div id="group-class" className="pt-16 -mt-16">
-                            <GroupClassSection groupClasses={groupClasses} />
+                            <GroupClassSection groupClasses={groupClasses} tutor={tutorData} />
                         </div>
                     )}
                     <div id="resume-highlights" className="pt-16 -mt-16">
                         <ResumeHighlights tutor={tutorData} />
                     </div>
                     <div id="reviews" className="pt-16 -mt-16">
-                        <StudentReviews 
-                            reviews={tutorData?.reviews || []} 
-                            tutorId={tutorId!} 
+                        <StudentReviews
+                            reviews={tutorData?.reviews || []}
+                            tutorId={tutorId!}
                             hasTrialSession={hasTrialSession}
                         />
                     </div>

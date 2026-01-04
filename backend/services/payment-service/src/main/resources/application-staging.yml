@@ -41,6 +41,6 @@ payment:
       secretKey: "UeTsSYek1420zZmXpbinGDnTviPnditj"
       endpoint: "https://test-payment.momo.vn/v2/gateway/api"
     vnpay:
-      tmn-code: "97IDADFL"
-      hash-secret: "X4OOQTBSKPM75HI2CIFULM3AILRQFC7M"
+      tmn-code: "4T1NZKGF"
+      hash-secret: "6EPV9PNCGU7WC7HWNQI56IYGUSNNV9WV"
       endpoint: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"

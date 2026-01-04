@@ -109,4 +109,9 @@ public class PaymentController {
             return ResponseEntity.ok(ApiResponse.error("Failed to process payment error: " + e.getMessage(), 500));
         }
     }
+    @GetMapping("/status/{orderId}")
+    public ResponseEntity<ApiResponse<com.elearning.paymentservice.enums.PaymentStatus>> checkPaymentStatus(
+            @PathVariable UUID orderId) {
+        return ResponseEntity.ok(ApiResponse.success(paymentService.checkPaymentStatus(orderId), "Payment status retrieved successfully"));
+    }
 }

@@ -2,6 +2,7 @@ package com.elearning.paymentservice.service.impl;
 
 import com.elearning.paymentservice.dto.event.BookingPaymentFailedEvent;
 import com.elearning.paymentservice.dto.event.BookingPaymentSuccessEvent;
+import com.elearning.paymentservice.dto.request.SepayWebhookRequest;
 import com.elearning.paymentservice.dto.sepay.SepayIpnRequest;
 import com.elearning.paymentservice.entity.PaymentTransaction;
 import com.elearning.paymentservice.enums.PaymentStatus;
@@ -14,9 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +86,94 @@ public class SepayServiceImpl implements SepayService {
         }
     }
 
+    @Override
+    @Transactional
+    public void processSepayWebhook(SepayWebhookRequest request) {
+        log.info("Processing SePay webhook: id={}, gateway={}, amount={}, content={}", 
+                request.getId(), request.getGateway(), request.getTransferAmount(), request.getContent());
+
+        // Only process incoming transfers
+        if (!"in".equals(request.getTransferType())) {
+            log.info("Ignoring non-incoming transfer: type={}", request.getTransferType());
+            return;
+        }
+
+        // Extract order ID from content (assuming format contains UUID)
+        UUID orderId = extractOrderIdFromContent(request.getContent());
+        
+        if (orderId == null) {
+            log.warn("Could not extract order ID from content: {}", request.getContent());
+            return;
+        }
+
+        log.info("Extracted orderId: {} from content", orderId);
+
+        // Find payment transaction by orderId
+        Optional<PaymentTransaction> optionalTransaction = paymentTransactionRepository.findByOrderId(orderId);
+        
+        if (optionalTransaction.isEmpty()) {
+            log.warn("Payment transaction not found for orderId: {}", orderId);
+            return;
+        }
+
+        PaymentTransaction transaction = optionalTransaction.get();
+
+        // Verify amount matches
+        BigDecimal expectedAmount = transaction.getAmount();
+        BigDecimal receivedAmount = BigDecimal.valueOf(request.getTransferAmount());
+
+        if (expectedAmount.compareTo(receivedAmount) != 0) {
+            log.warn("Amount mismatch: expected={}, received={}", expectedAmount, receivedAmount);
+            // Still process but log warning
+        }
+
+        // Update transaction with Sepay details
+        transaction.setProviderTransactionId(String.valueOf(request.getId()));
+        transaction.setPartnerCode(request.getGateway());
+        transaction.setOrderInfo(request.getContent());
+        transaction.setResultCode("0"); // Success
+        transaction.setResultMessage("Payment received via SePay webhook");
+        
+        // Parse transaction date
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            transaction.setResponseTime(LocalDateTime.parse(request.getTransactionDate(), formatter));
+        } catch (Exception e) {
+            transaction.setResponseTime(LocalDateTime.now());
+        }
+
+        // Mark as successful
+        handlePaymentSuccess(transaction);
+        
+        log.info("Successfully processed SePay webhook for orderId: {}", orderId);
+    }
+
+    /**
+     * Extract UUID order ID from transfer content
+     * Supports formats like: "DH abc123..." or just the UUID
+     */
+    private UUID extractOrderIdFromContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return null;
+        }
+
+        // Pattern to match UUID format
+        Pattern uuidPattern = Pattern.compile(
+            "([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"
+        );
+        
+        Matcher matcher = uuidPattern.matcher(content);
+        if (matcher.find()) {
+            try {
+                return UUID.fromString(matcher.group(1));
+            } catch (Exception e) {
+                log.error("Failed to parse UUID from content: {}", content);
+            }
+        }
+
+        return null;
+    }
+
     private void handlePaymentSuccess(PaymentTransaction transaction) {
         log.info("Handling payment success for transaction ID: {}", transaction.getId());
 
@@ -92,6 +185,8 @@ public class SepayServiceImpl implements SepayService {
         BookingPaymentSuccessEvent event = BookingPaymentSuccessEvent.builder()
                 .bookingId(transaction.getOrderId())
                 .classId(null)
+                .transactionId(transaction.getId())
+                .providerTransactionId(transaction.getProviderTransactionId())
                 .build();
 
         kafkaProducer.sendBookingPaymentSuccessEvent(event);
@@ -116,3 +211,4 @@ public class SepayServiceImpl implements SepayService {
         log.info("Sent payment failed event for bookingId: {}", transaction.getOrderId());
     }
 }
+

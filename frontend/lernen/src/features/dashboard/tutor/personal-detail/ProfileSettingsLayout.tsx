@@ -45,11 +45,14 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
     }, [setBreadcrumb, activeTab, t]);
 
     // Handle Zoom OAuth callback
+    const hasProcessedCode = React.useRef(false);
     useEffect(() => {
         const code = searchParams.get("code");
         const error = searchParams.get("error");
 
         if (code) {
+            if (hasProcessedCode.current) return;
+            hasProcessedCode.current = true;
             // Handle successful authorization
             handleZoomCallback(code);
         } else if (error) {
@@ -100,7 +103,7 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
             {/* Main Container */}
             <div className="bg-white h-full">
                 {/* Tab Navigation */}
-                <div className="bg-gray-100 p-1.5 rounded-2xl">
+                <div className="bg-[#f7f7f8] p-1.5 rounded-2xl mt-2 mx-2">
                     <div className="flex justify-center">
                         <div className="flex items-center gap-1 max-w-3xl w-full">
                             {(["Personal Details", "Resume Highlights", "Account Settings", "Subjects I Can Teach"] as ProfileTab[]).map((tab) => {
@@ -115,8 +118,8 @@ const ProfileSettingsLayout: React.FC<ProfileSettingsLayoutProps> = ({
                                         key={tab}
                                         onClick={() => handleTabChange(tab)}
                                         className={`flex-1 px-6 py-2.5 text-sm font-semibold rounded-xl transition-colors ${activeTab === tab
-                                                ? "bg-white text-gray-800 shadow-sm"
-                                                : "text-gray-500 hover:bg-white/50"
+                                            ? "bg-white text-gray-800 shadow-sm"
+                                            : "text-gray-500 hover:bg-white/50"
                                             }`}
                                     >
                                         {tabLabels[tab]}

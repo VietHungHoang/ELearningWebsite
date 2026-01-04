@@ -19,7 +19,7 @@ import java.time.LocalDate;
  * Admin controller for dashboard statistics
  */
 @RestController
-@RequestMapping("/api/v1/admin/dashboard")
+@RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
 public class AdminController {
 

@@ -12,12 +12,22 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: booking-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 services:
   class-service:
-    url: ${CLASS_SERVICE_URL:http://localhost:8088}
+    url: ${CLASS_SERVICE_URL:http://class-service:8088}
   payment-service:
-    url: ${PAYMENT_SERVICE_URL:http://localhost:8091}
+    url: ${PAYMENT_SERVICE_URL:http://payment-service:8091}
 
 logging:
   level:
