@@ -142,8 +142,9 @@ const CheckoutPage: React.FC = () => {
 
       // Handle SePay specifically
       if (paymentMethod === 'sepay') {
-        if (bookingResponse.id) {
-          setPendingOrderId(bookingResponse.id);
+        const bookingId = bookingResponse.bookingId || bookingResponse.id;
+        if (bookingId) {
+          setPendingOrderId(bookingId);
         } else {
           throw new Error("Missing booking ID");
         }
