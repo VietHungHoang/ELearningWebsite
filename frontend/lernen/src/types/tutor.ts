@@ -135,7 +135,7 @@ export interface ExperienceItem {
 }
 
 export interface CertificationItem {
-    id: string;
+    id?: string;
     name: string;
     issuingOrganization: string;
     issueDate: string;

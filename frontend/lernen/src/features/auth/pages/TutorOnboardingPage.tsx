@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import AuthLayout from '../components/AuthLayout';
+import OnboardingLayout from '../components/OnboardingLayout';
 import BasicInformationStep from '../components/onboarding/BasicInformationStep';
 import ProfessionalProfileStep from '../components/onboarding/ProfessionalProfileStep';
 import MediaPortfolioStep from '../components/onboarding/MediaPortfolioStep';
@@ -320,22 +320,21 @@ const TutorOnboardingPage: React.FC = () => {
 
     if (!currentStep) {
         return (
-            <AuthLayout>
-                <div className="flex justify-center items-center min-h-screen">
+            <OnboardingLayout>
+                <div className="flex justify-center items-center min-h-[400px]">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0b6459] mx-auto"></div>
                         <p className="mt-4 text-gray-600">{t('onboarding.loadingOnboarding')}</p>
                     </div>
                 </div>
-            </AuthLayout>
+            </OnboardingLayout>
         )
     }
 
     return (
-        <AuthLayout>
-            <main className="relative w-full max-w-5xl mx-auto mt-8 mb-8 bg-white rounded-lg shadow-lg overflow-hidden">
-                {/* Simple Header */}
-                <div className="border-b border-gray-200 bg-white px-6 py-4">
+        <OnboardingLayout>
+            {/* Simple Header */}
+            <div className="border-b border-gray-200 bg-white px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
                             {currentStep === 1 && (
@@ -477,8 +476,7 @@ const TutorOnboardingPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </main>
-        </AuthLayout>
+        </OnboardingLayout>
     )
 };
 
