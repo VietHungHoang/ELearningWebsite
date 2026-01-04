@@ -79,7 +79,6 @@ public class SepayServiceImpl implements SepayService {
             handlePaymentFailed(paymentTransaction, "Transaction voided");
             
         } else {
-            
             // Other statuses
             log.warn("Unhandled IPN status - Type: {}, OrderStatus: {}", 
                     notificationType, orderStatus);

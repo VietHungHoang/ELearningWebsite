@@ -3,6 +3,7 @@ package com.elearning.notificationservice.dto.response;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -15,6 +16,7 @@ public class NotificationResponse {
     private String title;
     private String message;
     private String actionUrl;
+    private Map<String, Object> metadata;
     private boolean read;
     private LocalDateTime createdAt;
 }

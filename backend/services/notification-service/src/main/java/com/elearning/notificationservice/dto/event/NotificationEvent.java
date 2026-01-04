@@ -2,6 +2,7 @@ package com.elearning.notificationservice.dto.event;
 
 import lombok.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -14,4 +15,5 @@ public class NotificationEvent {
     private String title;
     private String message;
     private String actionUrl;
+    private Map<String, Object> metadata;
 }

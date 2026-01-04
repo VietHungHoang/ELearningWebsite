@@ -29,6 +29,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private final ClassRepository classRepository;
     private final SessionRepository sessionRepository;
     private final ClassEnrollmentRepository enrollmentRepository;
+    private final com.elearning.classservice.repository.ClassScheduleRepository classScheduleRepository;
     private final ZoomMeetingService zoomMeetingService;
 
     @Override
@@ -72,14 +73,19 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
         // 2. Create Sessions from Schedule
         if (event.getSchedule() != null) {
-            createSessionsFromSchedule(newClass, event.getSchedule());
+            // Create ClassSchedule entities (to store the recurring pattern)
+            createClassSchedules(newClass, event.getSchedule());
+            
+            // Generate Sessions (based on pattern + total sessions purchased)
+            int totalSessions = event.getSessionsPurchased() != null ? event.getSessionsPurchased() : 1;
+            createSessionsFromSchedule(newClass, event.getSchedule(), totalSessions);
         }
 
         // 3. Create Enrollment
         ClassEnrollment enrollment = ClassEnrollment.builder()
                 .classEntity(newClass)
                 .student(com.elearning.classservice.entity.User.builder().id(event.getStudentId()).build())
-                .status(com.elearning.classservice.entity.enums.EnrollmentStatus.ACTIVE)
+                .status(com.elearning.classservice.entity.enums.EnrollmentStatus.JOINED)
                 .enrolledAt(java.time.LocalDateTime.now())
                 .build();
         
@@ -90,36 +96,163 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         createZoomMeetingsForClass(newClass);
     }
 
-    private void createSessionsFromSchedule(ClassEntity classEntity, String scheduleJson) {
+    private void createClassSchedules(ClassEntity classEntity, String scheduleJson) {
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            // Assuming schedule is a JSON array of objects with "time" field or just ISO strings
-            // Based on CreateBookingRequest it's List<ScheduleItem> where ScheduleItem has "time"
             com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = 
                 new com.fasterxml.jackson.core.type.TypeReference<>() {};
             
             List<java.util.Map<String, String>> scheduleItems = mapper.readValue(scheduleJson, typeRef);
             
+            // To avoid duplicates, we track which day/time pairs we've added
+            java.util.Set<String> processedPatterns = new java.util.HashSet<>();
+
             for (java.util.Map<String, String> item : scheduleItems) {
                 String timeStr = item.get("time");
                 if (timeStr != null) {
-                    java.time.LocalDateTime startTime = java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+                    java.time.LocalDateTime dateTime = java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
                     
-                    Session session = Session.builder()
-                            .classEntity(classEntity)
-                            .title("Buổi học")
-                            .startTime(startTime)
-                            .endTime(startTime.plusMinutes(60)) // Default 60 mins duration
-                            .status(ScheduleStatus.PENDING)
-                            .build();
+                    int dayOfWeek = dateTime.getDayOfWeek().getValue();
+                    java.time.LocalTime startTime = dateTime.toLocalTime();
+                    // Duration is fixed at 60 for now, or could be passed in
+                    int duration = 60;
                     
-                    sessionRepository.save(session);
+                    String key = dayOfWeek + "-" + startTime;
+                    if (!processedPatterns.contains(key)) {
+                        com.elearning.classservice.entity.ClassSchedule schedule = com.elearning.classservice.entity.ClassSchedule.builder()
+                                .classEntity(classEntity)
+                                .dayOfWeek(dayOfWeek)
+                                .startTime(startTime)
+                                .durationMinutes(duration)
+                                .build();
+                        
+                        classScheduleRepository.save(schedule);
+                        processedPatterns.add(key);
+                    }
                 }
             }
-            log.info("Created {} sessions for class {}", scheduleItems.size(), classEntity.getId());
+            log.info("Created class schedules for class {}", classEntity.getId());
         } catch (Exception e) {
-            log.error("Failed to parse schedule JSON: {}", scheduleJson, e);
+            log.error("Failed to create class schedules: {}", scheduleJson, e);
         }
+    }
+
+    private void createSessionsFromSchedule(ClassEntity classEntity, String scheduleJson, int totalSessionsToCreate) {
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = 
+                new com.fasterxml.jackson.core.type.TypeReference<>() {};
+            
+            List<java.util.Map<String, String>> scheduleItems = mapper.readValue(scheduleJson, typeRef);
+            List<java.time.LocalDateTime> initialDates = new java.util.ArrayList<>();
+            
+            // 1. Collect initial dates from JSON
+            for (java.util.Map<String, String> item : scheduleItems) {
+                String timeStr = item.get("time");
+                if (timeStr != null) {
+                    initialDates.add(java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME));
+                }
+            }
+            // Sort initial dates
+            java.util.Collections.sort(initialDates);
+            
+            int sessionsCreated = 0;
+            java.util.Set<java.time.LocalDateTime> createdSessionTimes = new java.util.HashSet<>();
+
+            // 2. Create sessions for the specific dates provided in the schedule (First Week)
+            for (java.time.LocalDateTime startTime : initialDates) {
+                if (sessionsCreated >= totalSessionsToCreate) break;
+                
+                createSession(classEntity, startTime);
+                createdSessionTimes.add(startTime);
+                sessionsCreated++;
+            }
+            
+            // 3. If we need more sessions, generate them based on the pattern
+            if (sessionsCreated < totalSessionsToCreate && !initialDates.isEmpty()) {
+                // Determine the weekly pattern from initial dates
+                // Pattern: [DayOfWeek -> StartTime]
+                List<java.time.LocalDateTime> sortedPattern = new java.util.ArrayList<>(initialDates);
+                // We assume the input schedule represents one week (or the cycle). 
+                // We will continue generating by adding 1 week to the last generated batch.
+                
+                // Strategy: Keep advancing week by week.
+                // Start checking from the week following the *earliest* date we have? 
+                // Or simply: Take the pattern relative to the first date, and project forward?
+                
+                // Simpler Strategy: 
+                // Find all unique (DayOfWeek, Time) pairs.
+                // Start from the last date in initialDates.
+                // Iterate day by day, if matches pattern, add session.
+                
+                java.time.LocalDateTime subequentDate = initialDates.get(initialDates.size() - 1).plusDays(1);
+                
+                // Get strictly the recurring patterns
+                class Patterns {
+                    int dayOfWeek;
+                    java.time.LocalTime time;
+                    Patterns(int d, java.time.LocalTime t) { this.dayOfWeek = d; this.time = t; }
+                }
+                List<Patterns> patterns = new java.util.ArrayList<>();
+                for (java.time.LocalDateTime output : initialDates) {
+                     // Check if this pattern (Day + Time) is already added? 
+                     // A user might have Mon 10am and Mon 2pm. both valid.
+                     boolean exists = patterns.stream().anyMatch(p -> p.dayOfWeek == output.getDayOfWeek().getValue() && p.time.equals(output.toLocalTime()));
+                     if (!exists) {
+                         patterns.add(new Patterns(output.getDayOfWeek().getValue(), output.toLocalTime()));
+                     }
+                }
+                
+                // Sort patterns by day of week then time, to ensure logical order within a week
+                // (Optional, but good for consistent generation)
+                
+                while (sessionsCreated < totalSessionsToCreate) {
+                    // Check if 'subequentDate' matches any pattern
+                     int currentDay = subequentDate.getDayOfWeek().getValue();
+                     
+                     for (Patterns p : patterns) {
+                         if (p.dayOfWeek == currentDay) {
+                             // potential match
+                             java.time.LocalDateTime candidate = java.time.LocalDateTime.of(subequentDate.toLocalDate(), p.time);
+                             
+                             // Don't duplicate if for some reason it overlaps with existing (though logic starts after)
+                             if (!createdSessionTimes.contains(candidate)) {
+                                 createSession(classEntity, candidate);
+                                 createdSessionTimes.add(candidate);
+                                 sessionsCreated++;
+                                 
+                                 if (sessionsCreated >= totalSessionsToCreate) break;
+                             }
+                         }
+                     }
+                     
+                     subequentDate = subequentDate.plusDays(1);
+                     
+                     // Safety break to prevent infinite loops (e.g. 5 years)
+                     if (subequentDate.isAfter(initialDates.get(0).plusYears(1))) {
+                         log.warn("Exceeded 1 year of sessions generation. Stopping.");
+                         break;
+                     }
+                }
+            }
+
+            log.info("Created total {} sessions for class {}", sessionsCreated, classEntity.getId());
+        } catch (Exception e) {
+            log.error("Failed to parse schedule JSON or create sessions: {}", scheduleJson, e);
+        }
+    }
+    
+    private void createSession(ClassEntity classEntity, java.time.LocalDateTime startTime) {
+        Session session = Session.builder()
+                .classEntity(classEntity)
+                .tutor(classEntity.getTutor())
+                .title("Buổi học")
+                .startTime(startTime)
+                .endTime(startTime.plusMinutes(60)) // Default 60 mins duration
+                .status(ScheduleStatus.PENDING)
+                .build();
+        
+        sessionRepository.save(session);
     }
 
     /**

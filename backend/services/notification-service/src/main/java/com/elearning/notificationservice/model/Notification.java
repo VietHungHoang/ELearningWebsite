@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Document(collection = "notifications") 
@@ -21,6 +22,7 @@ public class Notification {
     private String title;
     private String message;
     private String actionUrl;
+    private Map<String, Object> metadata;
     private boolean isRead; 
     private LocalDateTime createdAt;
 }
