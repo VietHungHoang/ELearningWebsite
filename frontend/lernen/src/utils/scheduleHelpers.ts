@@ -159,3 +159,62 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
     date1.getDate() === date2.getDate()
   );
 };
+
+/**
+ * Convert UTC time string (HH:mm) to local timezone time string (HH:mm)
+ * @param utcTime - Time string in UTC format "HH:mm" (e.g., "02:00")
+ * @returns Time string in local timezone format "HH:mm" (e.g., "09:00" for UTC+7)
+ */
+export const convertUtcTimeToLocal = (utcTime: string): string => {
+  try {
+    // Parse UTC time (HH:mm format)
+    const [hours, minutes] = utcTime.split(':').map(Number);
+    
+    // Create a date object with UTC time (using today's date)
+    const today = new Date();
+    const utcDate = new Date(Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate(),
+      hours,
+      minutes,
+      0
+    ));
+    
+    // Get local time hours and minutes
+    const localHours = utcDate.getHours();
+    const localMinutes = utcDate.getMinutes();
+    
+    // Format back to HH:mm
+    return `${String(localHours).padStart(2, '0')}:${String(localMinutes).padStart(2, '0')}`;
+  } catch (error) {
+    console.error('Error converting UTC time to local:', error);
+    return utcTime; // Return original time if conversion fails
+  }
+};
+
+/**
+ * Convert UTC datetime string to local timezone datetime string
+ * @param utcDateTime - ISO datetime string in UTC (e.g., "2026-01-08T02:00:00")
+ * @returns ISO datetime string in local timezone
+ */
+export const convertUtcDateTimeToLocal = (utcDateTime: string): string => {
+  try {
+    // Parse UTC datetime
+    const utcDate = new Date(utcDateTime);
+    
+    // Get local datetime components
+    const localYear = utcDate.getFullYear();
+    const localMonth = String(utcDate.getMonth() + 1).padStart(2, '0');
+    const localDay = String(utcDate.getDate()).padStart(2, '0');
+    const localHours = String(utcDate.getHours()).padStart(2, '0');
+    const localMinutes = String(utcDate.getMinutes()).padStart(2, '0');
+    const localSeconds = String(utcDate.getSeconds()).padStart(2, '0');
+    
+    // Format back to ISO string
+    return `${localYear}-${localMonth}-${localDay}T${localHours}:${localMinutes}:${localSeconds}`;
+  } catch (error) {
+    console.error('Error converting UTC datetime to local:', error);
+    return utcDateTime; // Return original datetime if conversion fails
+  }
+};

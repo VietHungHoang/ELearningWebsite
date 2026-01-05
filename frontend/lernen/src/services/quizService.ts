@@ -17,6 +17,7 @@ import type {
     SubmitAnswerRequest,
     SubmitQuizRequest,
 } from '../types/quiz';
+import type { PaginatedResponse } from '../types/api';
 
 // ============ TUTOR ENDPOINTS ============
 
@@ -105,24 +106,91 @@ export const getQuizStatistics = async (quizId: string): Promise<QuizStatistics>
  */
 export const getStudentQuizzes = async (status?: StudentQuizStatus): Promise<StudentQuizSummary[]> => {
     const params = status ? { status } : undefined;
-    const response = await apiService.get<StudentQuizSummary[]>('/v1/student/quizzes', params);
-    return response.data;
+    const response = await apiService.get<PaginatedResponse<StudentQuizSummary>>('/v1/quizzes/student', params);
+    // Handle paginated response - extract content array
+    if (response.data && 'content' in response.data) {
+        return response.data.content;
+    }
+    // Fallback for non-paginated response (backward compatibility)
+    return Array.isArray(response.data) ? response.data : [];
 };
 
 /**
  * Get quiz for taking (without correct answers)
  */
 export const getQuizForStudent = async (quizId: string): Promise<QuizDetail> => {
-    const response = await apiService.get<QuizDetail>(`/api/student/quizzes/${quizId}`);
+    const response = await apiService.get<QuizDetail>(`/v1/quizzes/student/${quizId}`);
+    
+    // Check if response is successful
+    if (!response.success) {
+        throw new Error(response.message || 'Failed to load quiz');
+    }
+    
+    // Ensure timeLimitMinutes is a number (convert if needed)
+    if (response.data) {
+        const timeLimit = response.data.timeLimitMinutes;
+        if (timeLimit !== undefined && timeLimit !== null) {
+            const numValue = Number(timeLimit);
+            if (!isNaN(numValue)) {
+                response.data.timeLimitMinutes = numValue;
+            } else {
+                console.warn('timeLimitMinutes cannot be converted to number:', timeLimit);
+            }
+        }
+    }
+    
     return response.data;
+};
+
+/**
+ * Check if error message indicates max attempts reached
+ */
+const isMaxAttemptsError = (message: string | undefined): boolean => {
+    if (!message) return false;
+    const lowerMessage = message.toLowerCase();
+    // Only match specific patterns that clearly indicate max attempts
+    return (
+        lowerMessage.includes('hết lượt') ||
+        lowerMessage.includes('max attempt') ||
+        lowerMessage.includes('maximum attempt') ||
+        lowerMessage.includes('exceeded') ||
+        lowerMessage.includes('attempt limit') ||
+        lowerMessage.includes('no more attempts')
+    );
 };
 
 /**
  * Start a quiz attempt
  */
 export const startQuizAttempt = async (quizId: string): Promise<QuizAttempt> => {
-    const response = await apiService.post<QuizAttempt>(`/api/student/quizzes/${quizId}/start`);
-    return response.data;
+    try {
+        const response = await apiService.post<QuizAttempt>(`/v1/quizzes/student/${quizId}/start`);
+        
+        // Check if response is successful
+        if (!response.success) {
+            const error = new Error(response.message || 'Failed to start quiz attempt');
+            // Only mark as max attempts error if success = false AND message indicates max attempts
+            (error as any).isMaxAttemptsReached = isMaxAttemptsError(response.message);
+            (error as any).isApiError = true; // Mark as API error (success = false)
+            throw error;
+        }
+        
+        return response.data;
+    } catch (err: any) {
+        // Handle axios errors that might contain ApiResponse in response.data
+        if (err.response?.data) {
+            const apiResponse = err.response.data;
+            if (apiResponse.success === false) {
+                const error = new Error(apiResponse.message || 'Failed to start quiz attempt');
+                // Only mark as max attempts error if success = false AND message indicates max attempts
+                (error as any).isMaxAttemptsReached = isMaxAttemptsError(apiResponse.message);
+                (error as any).isApiError = true; // Mark as API error (success = false)
+                throw error;
+            }
+        }
+        // For network errors or other errors, don't mark as max attempts
+        throw err;
+    }
 };
 
 /**
@@ -130,10 +198,22 @@ export const startQuizAttempt = async (quizId: string): Promise<QuizAttempt> => 
  */
 export const getCurrentAttempt = async (quizId: string): Promise<QuizAttempt | null> => {
     try {
-        const response = await apiService.get<QuizAttempt>(`/api/student/quizzes/${quizId}/current-attempt`);
+        const response = await apiService.get<QuizAttempt>(`/v1/quizzes/student/${quizId}/current-attempt`);
+        
+        // Check if response is successful
+        if (!response.success) {
+            // If not successful, return null (no current attempt)
+            return null;
+        }
+        
         return response.data;
-    } catch {
-        return null;
+    } catch (err: any) {
+        // Handle axios errors - if it's a 404 or success=false, return null
+        if (err.response?.status === 404 || err.response?.data?.success === false) {
+            return null;
+        }
+        // For other errors, rethrow
+        throw err;
     }
 };
 
@@ -141,22 +221,40 @@ export const getCurrentAttempt = async (quizId: string): Promise<QuizAttempt | n
  * Save an answer during quiz taking
  */
 export const saveAnswer = async (attemptId: string, request: SubmitAnswerRequest): Promise<void> => {
-    await apiService.post(`/api/student/attempts/${attemptId}/answers`, request);
+    await apiService.post(`/v1/quizzes/student/attempts/${attemptId}/answers`, request);
 };
 
 /**
  * Submit quiz attempt
  */
 export const submitQuizAttempt = async (attemptId: string, request: SubmitQuizRequest): Promise<QuizResult> => {
-    const response = await apiService.post<QuizResult>(`/api/student/attempts/${attemptId}/submit`, request);
-    return response.data;
+    try {
+        const response = await apiService.post<QuizResult>(`/v1/quizzes/student/attempts/${attemptId}/submit`, request);
+        
+        // Check if response is successful
+        if (!response.success) {
+            const error = new Error(response.message || 'Failed to submit quiz attempt');
+            throw error;
+        }
+        
+        return response.data;
+    } catch (err: any) {
+        // Handle axios errors that might contain ApiResponse in response.data
+        if (err.response?.data) {
+            const apiResponse = err.response.data;
+            if (apiResponse.success === false) {
+                throw new Error(apiResponse.message || 'Failed to submit quiz attempt');
+            }
+        }
+        throw err;
+    }
 };
 
 /**
  * Get quiz result
  */
 export const getQuizResult = async (attemptId: string): Promise<QuizResult> => {
-    const response = await apiService.get<QuizResult>(`/api/student/attempts/${attemptId}/result`);
+    const response = await apiService.get<QuizResult>(`/v1/quizzes/student/attempts/${attemptId}/result`);
     return response.data;
 };
 
@@ -164,15 +262,36 @@ export const getQuizResult = async (attemptId: string): Promise<QuizResult> => {
  * Get student's attempt history for a quiz
  */
 export const getAttemptHistory = async (quizId: string): Promise<QuizAttempt[]> => {
-    const response = await apiService.get<QuizAttempt[]>(`/api/student/quizzes/${quizId}/attempts`);
+    const response = await apiService.get<QuizAttempt[]>(`/v1/quizzes/student/${quizId}/attempts`);
     return response.data;
+};
+
+/**
+ * Get latest completed attempt ID for a quiz
+ */
+export const getLatestCompletedAttemptId = async (quizId: string): Promise<string | null> => {
+    try {
+        const attempts = await getAttemptHistory(quizId);
+        // Find the latest submitted/graded attempt
+        const completedAttempt = attempts
+            .filter(attempt => attempt.status === 'SUBMITTED' || attempt.status === 'GRADED')
+            .sort((a, b) => {
+                const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+                const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+                return dateB - dateA; // Latest first
+            })[0];
+        
+        return completedAttempt?.id || null;
+    } catch {
+        return null;
+    }
 };
 
 /**
  * Get all student's quiz attempts
  */
 export const getAllStudentAttempts = async (): Promise<QuizAttempt[]> => {
-    const response = await apiService.get<QuizAttempt[]>('/api/student/attempts');
+    const response = await apiService.get<QuizAttempt[]>('/v1/quizzes/student/attempts');
     return response.data;
 };
 
@@ -180,7 +299,7 @@ export const getAllStudentAttempts = async (): Promise<QuizAttempt[]> => {
  * Check if student can attempt quiz
  */
 export const canAttemptQuiz = async (quizId: string): Promise<boolean> => {
-    const response = await apiService.get<boolean>(`/api/student/quizzes/${quizId}/can-attempt`);
+    const response = await apiService.get<boolean>(`/v1/quizzes/student/${quizId}/can-attempt`);
     return response.data;
 };
 
@@ -208,6 +327,7 @@ const quizService = {
     getAttemptHistory,
     getAllStudentAttempts,
     canAttemptQuiz,
+    getLatestCompletedAttemptId,
 };
 
 export default quizService;

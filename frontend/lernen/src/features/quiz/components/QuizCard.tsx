@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import quizService from '../../../services/quizService';
 
 export interface Quiz {
-    id: number;
+    id: number | string;
     title: string;
     classTitle: string;
     tutor: { name: string; avatar: string };
@@ -11,6 +12,7 @@ export interface Quiz {
     status: 'not_started' | 'in_progress' | 'completed';
     questionsAnswered?: number; // for in_progress
     score?: number; // for completed
+    currentAttemptId?: string; // for completed quizzes
 }
 
 interface QuizCardProps {
@@ -31,7 +33,34 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
                     <div className="text-center">
                         <p className="text-xs text-gray-500">Score</p>
                         <p className="text-lg font-bold text-green-600">{quiz.score}/{quiz.totalQuestions} Correct</p>
-                        <button onClick={() => navigate('/quiz/result')} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                        <button 
+                            onClick={() => {
+                                // If we have attemptId, navigate immediately
+                                if (quiz.currentAttemptId) {
+                                    navigate(`/quiz/result/${quiz.currentAttemptId}`);
+                                } else if (typeof quiz.id === 'string') {
+                                    // Navigate immediately and fetch attemptId in background
+                                    navigate(`/quiz/result/loading`, { 
+                                        state: { quizId: quiz.id } 
+                                    });
+                                    
+                                    // Fetch attemptId in background and update URL
+                                    quizService.getLatestCompletedAttemptId(quiz.id)
+                                        .then(attemptId => {
+                                            if (attemptId) {
+                                                navigate(`/quiz/result/${attemptId}`, { replace: true });
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to get attempt ID:', err);
+                                        });
+                                } else {
+                                    console.warn('No attempt ID found for completed quiz');
+                                    navigate('/quiz/result');
+                                }
+                            }} 
+                            className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors"
+                        >
                             View Result
                         </button>
                     </div>
@@ -46,7 +75,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
                         <div className="w-full bg-gray-200 rounded-full h-2">
                             <div className="bg-[#0b6459] h-2 rounded-full" style={{ width: `${progress}%` }}></div>
                         </div>
-                        <button onClick={() => navigate('/quiz/take')} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                        <button onClick={() => navigate(`/quiz/take/${quiz.id}`)} className="mt-3 w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
                             Continue Quiz
                         </button>
                     </div>
@@ -54,7 +83,7 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
             case 'not_started':
             default:
                 return (
-                    <button onClick={() => navigate('/quiz/take')} className="w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
+                    <button onClick={() => navigate(`/quiz/take/${quiz.id}`)} className="w-full text-sm font-semibold text-white bg-[#0b6459] rounded-lg px-5 py-2.5 hover:bg-[#084c43] transition-colors">
                         Start Quiz
                     </button>
                 );

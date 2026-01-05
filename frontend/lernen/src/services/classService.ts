@@ -19,7 +19,12 @@ import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
 // ClassData interface for class detail page
 export interface ClassData {
     id: string;
-    classTitle: string;
+    classTitle: string | null;
+    tutor?: {
+        id: string;
+        fullName: string;
+        avatarUrl?: string;
+    } | null;
     students: StudentInfo[];
     type: '1-on-1' | 'Group';
     status: 'Ongoing' | 'Opening' | 'Completed';
@@ -27,6 +32,16 @@ export interface ClassData {
     startDate: string;
     completedSessions: number;
     totalSessions: number;
+    sessions?: {
+        id: string;
+        sessionNumber: number | null;
+        title: string;
+        startTime: string;
+        endTime: string;
+        meetingLink: string;
+        status: string;
+        participantsCount: number;
+    }[];
     quizzes: { id: string; title: string; status: 'Completed' | 'Pending' }[];
     materials: { id: string; name: string; type: 'PDF' | 'Video' | 'ZIP'; date: string }[];
     subject?: string;
@@ -80,7 +95,7 @@ export interface ClassDetailResponse {
     // Sessions
     sessions: {
         id: string;
-        sessionNumber: number;
+        sessionNumber: number | null;
         title: string;
         startTime: string;
         endTime: string;
