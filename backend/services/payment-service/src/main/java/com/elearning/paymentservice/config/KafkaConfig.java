@@ -2,6 +2,7 @@ package com.elearning.paymentservice.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -22,7 +23,8 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfig {
 
-    private String bootstrapServers = "kafka:9092";
+    @Value("${KAFKA_BOOTSTRAP_SERVERS}")
+    private String bootstrapServers;
     private String groupId = "payment-service-group";
 
     @Bean

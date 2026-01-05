@@ -1,11 +1,11 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017/notification_db}
+      uri: ${MONGO_URI}
 
   mail:
     host: smtp.gmail.com
-    port: ${MAIl_PORT:587}
+    port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:your-email@gmail.com}
     password: ${MAIL_PASSWORD:your-app-password}
     properties:

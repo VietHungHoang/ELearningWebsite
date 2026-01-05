@@ -16,12 +16,9 @@ spring:
 services:
   auth-service:
     url: ${AUTH_SERVICE_URL}
-  cart-service:
-    url: http://cart-service:8082
+
   notification-service:
     url: ${NOTIFICATION_SERVICE_URL}
-  course-service:
-    url: ${COURSE_SERVICE_URL}
   common-service:
     url: ${COMMON_SERVICE_URL}
   tutor-service:

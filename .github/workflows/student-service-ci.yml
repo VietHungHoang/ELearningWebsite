@@ -27,6 +27,6 @@ jobs:
           file: ./backend/services/student-service/docker/Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/lernen-student-service:latest
-
+          
       - name: Trigger OnRender Deploy for Student Service
         run: curl -X POST ${{ secrets.ONRENDER_HOOK_STUDENT_SERVICE }}
