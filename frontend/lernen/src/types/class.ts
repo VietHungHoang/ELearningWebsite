@@ -28,6 +28,7 @@ export interface ClassTable extends ClassBasicInfoResponse {
     startDate: string;
     completedSessions: number;
     totalSessions: number;
+    createdAt?: string;
 }
 
 export interface ClassStudent {

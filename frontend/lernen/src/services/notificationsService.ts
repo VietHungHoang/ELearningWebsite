@@ -1,25 +1,10 @@
 import apiService from './apiService';
 import type { Notification, ViewNotificationBFFResponse } from '../types/notifications';
 
-const getUserId = (): string => {
-  // Get userId from localStorage (set by AuthContext on login)
-  try {
-    const authData = localStorage.getItem('auth');
-    if (authData) {
-      const parsed = JSON.parse(authData);
-      return parsed.user?.id || '';
-    }
-  } catch (e) {
-    console.error('Failed to get userId from localStorage:', e);
-  }
-  return '';
-};
-
 class NotificationsService {
   async getNotifications(): Promise<Notification[]> {
     try {
-      const userId = getUserId();
-      const response = await apiService.get<ViewNotificationBFFResponse>(`/v1/notifications/${userId}`, {
+      const response = await apiService.get<ViewNotificationBFFResponse>('/v1/notifications', {
         page: 0,
         size: 3
       });
@@ -39,8 +24,7 @@ class NotificationsService {
 
   async loadMoreNotifications(page: number, size: number): Promise<Notification[]> {
     try {
-      const userId = getUserId();
-      const response = await apiService.get<ViewNotificationBFFResponse>(`/v1/notifications/${userId}`, {
+      const response = await apiService.get<ViewNotificationBFFResponse>('/v1/notifications', {
         page,
         size
       });
@@ -60,8 +44,7 @@ class NotificationsService {
 
   async getUnreadCount(): Promise<number> {
     try {
-      const userId = getUserId();
-      const response = await apiService.get<number>(`/v1/notifications/${userId}/unread-count`);
+      const response = await apiService.get<number>('/v1/notifications/unread-count');
       if (response.success === true && typeof response.data === 'number') {
         return response.data;
       } else {
@@ -75,8 +58,7 @@ class NotificationsService {
 
   async markAsRead(notificationId: string): Promise<void> {
     try {
-      const userId = getUserId();
-      await apiService.post<void>(`/v1/notifications/${notificationId}/${userId}/mark-read`);
+      await apiService.post<void>(`/v1/notifications/${notificationId}/mark-read`);
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;
@@ -85,8 +67,7 @@ class NotificationsService {
 
   async markAllAsRead(): Promise<void> {
     try {
-      const userId = getUserId();
-      await apiService.post<void>(`/v1/notifications/${userId}/mark-all-read`);
+      await apiService.post<void>('/v1/notifications/mark-all-read');
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       throw error;
