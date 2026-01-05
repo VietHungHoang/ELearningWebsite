@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { type MessageResponse } from './chatService';
 
 // WebSocket base URL - direct to chat service
-const WS_BASE_URL = 'http://localhost:8089/ws';
+const WS_BASE_URL = 'https://lernen-chat-service.onrender.com/ws';
 
 export interface TypingIndicator {
     conversationId: string;

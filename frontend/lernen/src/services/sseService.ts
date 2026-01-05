@@ -1,6 +1,6 @@
 import type { Notification } from '../types/notifications';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://1mf17bgk-8081.asse.devtunnels.ms';
+const API_BASE_URL ='https://lernen-api-gateway.onrender.com';
 
 interface SseConnectionOptions {
     onNotification: (notification: Notification) => void;
