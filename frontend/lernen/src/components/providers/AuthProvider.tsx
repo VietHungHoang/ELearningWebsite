@@ -83,6 +83,7 @@ export interface AuthUser {
     name: string;
     email: string;
     avatarUrl?: string;
+    fullName?: string;
 }
 
 type AuthStatus = "idle" | "loading" | "failed";
@@ -103,7 +104,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
     switch (action.type) {
         case "LOGIN_START":
             return { ...state, status: "loading" };
-        case "LOGIN_SUCCESS":
+        case "LOGIN_SUCCESS": {
             const decodedUser = decodeJwt(action.payload.accessToken);
             const user = decodedUser
                 ? {
@@ -122,7 +123,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
                     "refreshTokenExpiresIn",
                     String(action.payload.refreshExpiresIn)
                 );
-            } catch (e) {
+            } catch {
                 // ignore localStorage errors
             }
             return {
@@ -130,6 +131,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
                 user,
                 status: "idle",
             };
+        }
         case "LOGIN_FAILURE":
             return { ...state, status: "failed" };
         case "LOGOUT":
@@ -186,6 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     name: bypassCheck.role === "tutor" ? "Fake Tutor User" : "Fake Student User",
                     email: request.email,
                     role: bypassCheck.role,
+                    fullName: bypassCheck.role === "tutor" ? "Fake Tutor User" : "Fake Student User",
                 };
             }
 
@@ -202,6 +205,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     email: decodedUser.email,
                     role: extractUserRole(decodedUser),
                     avatarUrl: decodedUser.picture,
+                    fullName: decodedUser.name,
                 };
             }
             return null;

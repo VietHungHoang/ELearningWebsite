@@ -1,6 +1,6 @@
 import type { Notification } from '../types/notifications';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://1mf17bgk-8081.asse.devtunnels.ms';
+const API_BASE_URL ='https://ec2-13-236-4-126.ap-southeast-2.compute.amazonaws.com:8081';
 
 interface SseConnectionOptions {
     onNotification: (notification: Notification) => void;

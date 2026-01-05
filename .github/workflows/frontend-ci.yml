@@ -30,3 +30,4 @@ jobs:
           
       - name: Trigger OnRender Deploy for Frontend
         run: curl -X POST ${{ secrets.ONRENDER_HOOK_FRONTEND }}
+        

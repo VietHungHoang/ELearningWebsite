@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IoClose, IoChevronBack, IoChevronForward, IoCheckmarkCircle, IoReload } from 'react-icons/io5';
+import { IoClose, IoChevronBack, IoChevronForward, IoReload } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import type { Tutor } from '../../../../types/api';
 

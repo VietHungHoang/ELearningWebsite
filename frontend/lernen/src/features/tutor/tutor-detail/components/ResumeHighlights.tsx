@@ -93,7 +93,7 @@ const ResumeHighlights: React.FC<{ tutor: TutorDetail }> = ({ tutor }) => {
 
     const certificationItems: ResumeItemData[] = useMemo(() => {
         return tutor?.certifications?.map(cert => ({
-            id: parseInt(cert.id),
+            id: parseInt(cert.id || '0'),
             period: new Date(cert.issueDate).getFullYear().toString(),
             title: cert.name,
             institution: cert.issuingOrganization,

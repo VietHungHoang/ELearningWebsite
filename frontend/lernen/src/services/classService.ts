@@ -13,7 +13,7 @@ import type {
     RecentEarningsFilters,
     RescheduleRequest,
 } from "../types/api";
-import type { ClassDetail, ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
+import type { ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
 import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
 
 // ClassData interface for class detail page

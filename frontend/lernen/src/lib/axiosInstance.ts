@@ -14,8 +14,7 @@ const getUserIdFromToken = (token: string): string | null => {
 
 // Create axios instance with base configuration
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api',
-  // baseURL: import.meta.env.VITE_API_BASE_URL || 'https://lernen-api-gateway.onrender.com/api',
+  baseURL:'https://ec2-13-236-4-126.ap-southeast-2.compute.amazonaws.com:8081/api',
   timeout: 100000,
   headers: {
     'Content-Type': 'application/json',

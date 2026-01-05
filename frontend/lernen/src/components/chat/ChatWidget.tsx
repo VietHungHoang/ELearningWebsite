@@ -384,7 +384,7 @@ const ChatWidget: React.FC = () => {
                 type: 'ONE_TO_ONE' as const,
                 participantIds: [tutorId],
                 participantInfos: [
-                    { id: state.user.id, fullName: state.user.fullName || state.user.name || 'User', avatarUrl: state.user.avatarUrl },
+                    { id: state.user.id, fullName: state.user.name || 'User', avatarUrl: state.user.avatarUrl },
                     { id: tutorId, fullName: tutorName, avatarUrl: undefined }
                 ]
             };
