@@ -6,7 +6,6 @@ on:
     paths:
       - 'backend/services/notification-service/**'
       - '.github/workflows/notification-service-ci.yml'
-
 jobs:
   build-and-push-notification-service:
     runs-on: ubuntu-latest
@@ -30,4 +29,3 @@ jobs:
 
       - name: Trigger OnRender Deploy for Notification Service
         run: curl -X POST ${{ secrets.ONRENDER_HOOK_NOTIFICATION_SERVICE }}
-        
