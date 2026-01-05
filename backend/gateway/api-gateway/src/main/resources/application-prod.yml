@@ -30,3 +30,4 @@ services:
     url: ${BOOKING_SERVICE_URL}
   quiz-service:
     url: ${QUIZ_SERVICE_URL}
+    
