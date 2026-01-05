@@ -6,7 +6,6 @@ on:
     paths:
       - 'backend/services/chat-service/**'
       - '.github/workflows/chat-service-ci.yml'
-
 jobs:
   build-and-push-chat-service:
     runs-on: ubuntu-latest
