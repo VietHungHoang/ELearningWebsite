@@ -6,7 +6,6 @@ on:
     paths:
       - 'backend/services/class-service/**'
       - '.github/workflows/class-service-ci.yml'
-
 jobs:
   build-and-push-class-service:
     runs-on: ubuntu-latest
