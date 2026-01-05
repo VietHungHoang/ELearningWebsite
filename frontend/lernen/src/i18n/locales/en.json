@@ -1002,6 +1002,7 @@
           "students": "Students",
           "schedule": "Schedule",
           "progress": "Progress",
+          "createdAt": "Created At",
           "actions": "Actions"
         },
         "classTypes": {

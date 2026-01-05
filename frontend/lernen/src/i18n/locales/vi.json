@@ -1003,6 +1003,7 @@
           "students": "Học sinh",
           "schedule": "Lịch dạy",
           "progress": "Tiến độ",
+          "createdAt": "Ngày tạo",
           "actions": "Hành động"
         },
         "classTypes": {

@@ -70,6 +70,31 @@ const MyClassPage: React.FC = () => {
         }
     };
 
+    // Helper function to format date
+    const formatDate = (dateString?: string): string => {
+        if (!dateString) return '-';
+        try {
+            const date = new Date(dateString);
+            const isVietnamese = i18n.language === 'vi';
+            
+            if (isVietnamese) {
+                return date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            } else {
+                return date.toLocaleDateString('en-US', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+        } catch (error) {
+            return dateString;
+        }
+    };
+
 
     useEffect(() => {
         setBreadcrumb([
@@ -305,6 +330,7 @@ const MyClassPage: React.FC = () => {
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.schedule')}</th>
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.progress')}</th>
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.status')}</th>
+                                    <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.createdAt')}</th>
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.actions')}</th>
                                 </tr>
                             </thead>
@@ -380,6 +406,11 @@ const MyClassPage: React.FC = () => {
                                                         ? t('dashboard.tutor.myClass.statusLabels.completed')
                                                         : t('dashboard.tutor.myClass.statusLabels.opening')
                                                 }
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <span className="text-sm text-gray-600">
+                                                {formatDate(classData.createdAt)}
                                             </span>
                                         </td>
                                         <td className="p-4">
