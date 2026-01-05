@@ -47,7 +47,8 @@ public class PaymentServiceImpl implements PaymentService {
     public InitiatePaymentResponse initiatePayment(InitiatePaymentRequest request) {
         log.info("Initiating payment for orderId: {}", request.getOrderId());
 
-        Optional<PaymentTransaction> existingTransaction = paymentTransactionRepository.findByOrderId(request.getOrderId());
+        Optional<PaymentTransaction> existingTransaction = paymentTransactionRepository
+                .findByOrderId(request.getOrderId());
 
         if (existingTransaction.isPresent()) {
             PaymentTransaction transaction = existingTransaction.get();
@@ -57,26 +58,27 @@ public class PaymentServiceImpl implements PaymentService {
                 existingUrl = request.getRedirectUrl() + "?tx=" + transaction.getProviderTransactionId();
             }
             PaymentData existingPaymentData = PaymentData.builder()
-                .redirectUrl(existingUrl)
-                .qrCodeContent(null)
-                .sdkParameters(null)
-                .build();
+                    .redirectUrl(existingUrl)
+                    .qrCodeContent(null)
+                    .sdkParameters(null)
+                    .build();
 
             return InitiatePaymentResponse.builder()
-                .paymentId(transaction.getId())
-                .provider(request.getPaymentProvider())
-                .status("PENDING")
-                .paymentMethodType(PaymentMethodType.REDIRECT)
-                .paymentData(existingPaymentData)
-                .build();
+                    .paymentId(transaction.getId())
+                    .provider(request.getPaymentProvider())
+                    .status("PENDING")
+                    .paymentMethodType(PaymentMethodType.REDIRECT)
+                    .paymentData(existingPaymentData)
+                    .build();
         }
-        
+
         GatewayCreationResponse response;
         try {
             var strategy = paymentGatewayFactory.getStrategy(request.getPaymentProvider());
             response = strategy.createPaymentIntent(request);
         } catch (Exception e) {
-            log.error("Failed to create payment intent for orderId: {}, provider: {}", request.getOrderId(), request.getPaymentProvider(), e);
+            log.error("Failed to create payment intent for orderId: {}, provider: {}", request.getOrderId(),
+                    request.getPaymentProvider(), e);
             throw new RuntimeException("Payment gateway error: " + e.getMessage(), e);
         }
 
@@ -84,22 +86,23 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentTransaction newTransaction = PaymentMapper.toEntity(request);
         newTransaction.setProviderTransactionId(response.getProviderTransactionId());
         PaymentTransaction savedTransaction = paymentTransactionRepository.save(newTransaction);
-        log.info("Created new payment transaction with id: {} for orderId: {}", savedTransaction.getId(), request.getOrderId());
+        log.info("Created new payment transaction with id: {} for orderId: {}", savedTransaction.getId(),
+                request.getOrderId());
 
         // Build richer response for the client
         PaymentData paymentData = PaymentData.builder()
-            .redirectUrl(response.getPaymentUrl())
-            .qrCodeContent(response.getQrCodeContent())
-            .sdkParameters(null)
-            .build();
+                .redirectUrl(response.getPaymentUrl())
+                .qrCodeContent(response.getQrCodeContent())
+                .sdkParameters(null)
+                .build();
 
         return InitiatePaymentResponse.builder()
-            .paymentId(savedTransaction.getId())
-            .provider(request.getPaymentProvider())
-            .status("PENDING")
-            .paymentMethodType(PaymentMethodType.REDIRECT)
-            .paymentData(paymentData)
-            .build();
+                .paymentId(savedTransaction.getId())
+                .provider(request.getPaymentProvider())
+                .status("PENDING")
+                .paymentMethodType(PaymentMethodType.REDIRECT)
+                .paymentData(paymentData)
+                .build();
     }
 
     @Override
@@ -109,7 +112,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Find the transaction by provider transaction ID
         Optional<PaymentTransaction> transactionOpt = paymentTransactionRepository
-            .findByProviderTransactionId(payload.getProviderTransactionId());
+                .findByProviderTransactionId(payload.getProviderTransactionId());
 
         if (transactionOpt.isEmpty()) {
             log.warn("No transaction found for provider transaction ID: {}", payload.getProviderTransactionId());
@@ -134,14 +137,14 @@ public class PaymentServiceImpl implements PaymentService {
 
             // Publish payment completed event
             PaymentCompletedEvent event = PaymentCompletedEvent.builder()
-                .paymentId(transaction.getId())
-                .orderId(transaction.getOrderId())
-                .amount(transaction.getAmount())
-                .currency(transaction.getCurrency())
-                .paymentProvider(transaction.getProvider().name())
-                .providerTransactionId(transaction.getProviderTransactionId())
-                .completedAt(eventTime)
-                .build();
+                    .paymentId(transaction.getId())
+                    .orderId(transaction.getOrderId())
+                    .amount(transaction.getAmount())
+                    .currency(transaction.getCurrency())
+                    .paymentProvider(transaction.getProvider().name())
+                    .providerTransactionId(transaction.getProviderTransactionId())
+                    .completedAt(eventTime)
+                    .build();
 
             kafkaProducer.sendPaymentCompletedEvent(event);
             log.info("Published payment completed event for order: {}", transaction.getOrderId());
@@ -151,21 +154,22 @@ public class PaymentServiceImpl implements PaymentService {
 
             // Publish payment failed event
             PaymentFailedEvent event = PaymentFailedEvent.builder()
-                .paymentId(transaction.getId())
-                .orderId(transaction.getOrderId())
-                .amount(transaction.getAmount())
-                .currency(transaction.getCurrency())
-                .paymentProvider(transaction.getProvider().name())
-                .providerTransactionId(transaction.getProviderTransactionId())
-                .failureReason("Payment failed via webhook")
-                .failedAt(eventTime)
-                .build();
+                    .paymentId(transaction.getId())
+                    .orderId(transaction.getOrderId())
+                    .amount(transaction.getAmount())
+                    .currency(transaction.getCurrency())
+                    .paymentProvider(transaction.getProvider().name())
+                    .providerTransactionId(transaction.getProviderTransactionId())
+                    .failureReason("Payment failed via webhook")
+                    .failedAt(eventTime)
+                    .build();
 
             kafkaProducer.sendPaymentFailedEvent(event);
             log.info("Published payment failed event for order: {}", transaction.getOrderId());
 
         } else {
-            log.info("Webhook status {} not requiring status change for transaction: {}", result.getStatus(), transaction.getId());
+            log.info("Webhook status {} not requiring status change for transaction: {}", result.getStatus(),
+                    transaction.getId());
             return;
         }
 
@@ -182,8 +186,10 @@ public class PaymentServiceImpl implements PaymentService {
     public void confirmPayment(ConfirmPaymentRequest request) {
         log.info("Confirming payment for orderId: {}", request.getOrderId());
 
-        // Find the transaction by orderId
-        Optional<PaymentTransaction> transactionOpt = paymentTransactionRepository.findByOrderId(request.getOrderId());
+        // Find the transaction by orderId WITH LOCK to prevent race conditions
+        // This ensures only one thread can process this transaction at a time
+        Optional<PaymentTransaction> transactionOpt = paymentTransactionRepository
+                .findByOrderIdWithLock(request.getOrderId());
 
         if (transactionOpt.isEmpty()) {
             log.warn("No transaction found for orderId: {}", request.getOrderId());
@@ -191,6 +197,19 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         PaymentTransaction transaction = transactionOpt.get();
+
+        // IDEMPOTENCY CHECK: If already processed, skip to avoid duplicate Kafka events
+        // This handles React StrictMode double-mount and retry scenarios
+        if (transaction.getStatus() == PaymentStatus.COMPLETED) {
+            log.info("Transaction {} already COMPLETED, skipping duplicate confirm for orderId: {}",
+                    transaction.getId(), request.getOrderId());
+            return; // Already processed, no need to send Kafka again
+        }
+        if (transaction.getStatus() == PaymentStatus.FAILED) {
+            log.info("Transaction {} already FAILED, skipping duplicate confirm for orderId: {}",
+                    transaction.getId(), request.getOrderId());
+            return;
+        }
 
         // Update transaction with response data
         transaction.setPartnerCode(request.getPartnerCode());
@@ -220,23 +239,23 @@ public class PaymentServiceImpl implements PaymentService {
 
             // Publish payment completed event
             PaymentCompletedEvent event = PaymentCompletedEvent.builder()
-                .paymentId(transaction.getId())
-                .orderId(transaction.getOrderId())
-                .amount(transaction.getAmount())
-                .currency(transaction.getCurrency())
-                .paymentProvider(transaction.getProvider().name())
-                .providerTransactionId(transaction.getProviderTransactionId())
-                .completedAt(eventTime)
-                .build();
+                    .paymentId(transaction.getId())
+                    .orderId(transaction.getOrderId())
+                    .amount(transaction.getAmount())
+                    .currency(transaction.getCurrency())
+                    .paymentProvider(transaction.getProvider().name())
+                    .providerTransactionId(transaction.getProviderTransactionId())
+                    .completedAt(eventTime)
+                    .build();
 
             kafkaProducer.sendPaymentCompletedEvent(event);
             log.info("Published payment completed event for order: {}", transaction.getOrderId());
 
             // Also send BookingPaymentSuccessEvent for booking-service
             BookingPaymentSuccessEvent bookingEvent = BookingPaymentSuccessEvent.builder()
-                .bookingId(transaction.getOrderId())
-                .classId(null)
-                .build();
+                    .bookingId(transaction.getOrderId())
+                    .classId(null)
+                    .build();
 
             kafkaProducer.sendBookingPaymentSuccessEvent(bookingEvent);
             log.info("Published booking payment success event for bookingId: {}", transaction.getOrderId());
@@ -246,25 +265,26 @@ public class PaymentServiceImpl implements PaymentService {
 
             // Publish payment failed event
             PaymentFailedEvent event = PaymentFailedEvent.builder()
-                .paymentId(transaction.getId())
-                .orderId(transaction.getOrderId())
-                .amount(transaction.getAmount())
-                .currency(transaction.getCurrency())
-                .paymentProvider(transaction.getProvider().name())
-                .providerTransactionId(transaction.getProviderTransactionId())
-                .failureReason("Payment failed with resultCode: " + request.getResultCode() + ", message: " + request.getMessage())
-                .failedAt(eventTime)
-                .build();
+                    .paymentId(transaction.getId())
+                    .orderId(transaction.getOrderId())
+                    .amount(transaction.getAmount())
+                    .currency(transaction.getCurrency())
+                    .paymentProvider(transaction.getProvider().name())
+                    .providerTransactionId(transaction.getProviderTransactionId())
+                    .failureReason("Payment failed with resultCode: " + request.getResultCode() + ", message: "
+                            + request.getMessage())
+                    .failedAt(eventTime)
+                    .build();
 
             kafkaProducer.sendPaymentFailedEvent(event);
             log.info("Published payment failed event for order: {}", transaction.getOrderId());
 
             // Also send BookingPaymentFailedEvent for booking-service
             BookingPaymentFailedEvent bookingEvent = BookingPaymentFailedEvent.builder()
-                .bookingId(transaction.getOrderId())
-                .classId(null)
-                .reason("Payment failed with resultCode: " + request.getResultCode())
-                .build();
+                    .bookingId(transaction.getOrderId())
+                    .classId(null)
+                    .reason("Payment failed with resultCode: " + request.getResultCode())
+                    .build();
 
             kafkaProducer.sendBookingPaymentFailedEvent(bookingEvent);
             log.info("Published booking payment failed event for bookingId: {}", transaction.getOrderId());
@@ -275,12 +295,14 @@ public class PaymentServiceImpl implements PaymentService {
         transaction.setUpdatedAt(eventTime);
         paymentTransactionRepository.save(transaction);
 
-        log.info("Updated transaction {} status to {} based on resultCode: {}", transaction.getId(), newStatus, request.getResultCode());
+        log.info("Updated transaction {} status to {} based on resultCode: {}", transaction.getId(), newStatus,
+                request.getResultCode());
     }
 
     @Override
     public Page<PaymentHistoryItem> getPaymentHistory(UUID userId, Pageable pageable) {
-        Page<PaymentTransaction> transactions = paymentTransactionRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        Page<PaymentTransaction> transactions = paymentTransactionRepository.findByUserIdOrderByCreatedAtDesc(userId,
+                pageable);
         return transactions.map(transaction -> PaymentHistoryItem.builder()
                 .id(transaction.getId().toString())
                 .date(transaction.getCreatedAt().toString())
@@ -297,7 +319,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Find payment transaction by orderId (bookingId)
         Optional<PaymentTransaction> optionalTransaction = paymentTransactionRepository.findByOrderId(bookingId);
-        
+
         if (optionalTransaction.isEmpty()) {
             log.error("Payment transaction not found for bookingId: {}", bookingId);
             throw new RuntimeException("Payment transaction not found for booking: " + bookingId);
@@ -329,7 +351,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Find payment transaction by orderId (bookingId)
         Optional<PaymentTransaction> optionalTransaction = paymentTransactionRepository.findByOrderId(bookingId);
-        
+
         if (optionalTransaction.isEmpty()) {
             log.error("Payment transaction not found for bookingId: {}", bookingId);
             throw new RuntimeException("Payment transaction not found for booking: " + bookingId);
@@ -353,6 +375,7 @@ public class PaymentServiceImpl implements PaymentService {
         kafkaProducer.sendBookingPaymentFailedEvent(event);
         log.info("Sent BookingPaymentFailedEvent for bookingId: {}", bookingId);
     }
+
     @Override
     public com.elearning.paymentservice.enums.PaymentStatus checkPaymentStatus(UUID orderId) {
         return paymentTransactionRepository.findByOrderId(orderId)

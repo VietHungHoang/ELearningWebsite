@@ -8,9 +8,10 @@ import Toast from '../../../../components/ui/Toast';
 import BirdLoading from '../../../../components/ui/BirdLoading';
 import AIGenerateQuestionsModal from './components/AIGenerateQuestionsModal';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../../../context/AuthContext';
 import quizService from '../../../../services/quizService';
 import { classService } from '../../../../services/classService';
-import type { CreateQuizRequest, CreateQuestionRequest, UpdateQuizRequest } from '../../../../types/quiz';
+import type { CreateQuizRequest, CreateQuestionRequest, UpdateQuizRequest, UserInfo } from '../../../../types/quiz';
 import type { ClassTable } from '../../../../types/class';
 
 interface QuizQuestion {
@@ -25,6 +26,7 @@ const CreateQuizPage: React.FC = () => {
     const navigate = useNavigate();
     const { quizId } = useParams<{ quizId: string }>();
     const { t } = useTranslation();
+    const { state } = useAuth();
     const isEditMode = Boolean(quizId);
 
     const [quizTitle, setQuizTitle] = useState('');
@@ -242,6 +244,15 @@ const CreateQuizPage: React.FC = () => {
     const buildQuizRequest = (): CreateQuizRequest => {
         // selectedClass is now the class ID directly
         const classId = selectedClass;
+        
+        // Find selected class to get title and students
+        const selectedClassData = classes.find(c => c.id === classId);
+        const classTitle = selectedClassData?.title;
+        const students: UserInfo[] | undefined = selectedClassData?.students?.map(s => ({
+            id: s.id,
+            fullName: s.fullName,
+            avatarUrl: s.avatarUrl
+        }));
 
         const quizQuestions: CreateQuestionRequest[] = questions.map((q) => ({
             questionText: q.question,
@@ -254,6 +265,10 @@ const CreateQuizPage: React.FC = () => {
 
         return {
             classId,
+            classTitle,
+            students,
+            creatorFullName: state.user?.name,
+            creatorAvatarUrl: state.user?.avatarUrl,
             title: quizTitle,
             description: quizDescription || undefined,
             timeLimitMinutes: timeLimit,

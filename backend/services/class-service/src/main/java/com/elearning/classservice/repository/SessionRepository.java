@@ -15,29 +15,33 @@ import java.util.UUID;
 @Repository
 public interface SessionRepository extends JpaRepository<Session, UUID> {
     List<Session> findByClassEntityIdOrderByStartTimeAsc(UUID classId);
+
     List<Session> findByClassEntityIdAndStatus(UUID classId, ScheduleStatus status);
+
     List<Session> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
-    
+
     /**
      * Find booked sessions by tutor ID and date range
      */
     List<Session> findByTutorIdAndStartTimeBetween(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate);
-    
+
     /**
      * Find booked sessions by tutor ID, date range, and statuses
      */
-    List<Session> findByTutorIdAndStartTimeBetweenAndStatusIn(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate, List<ScheduleStatus> statuses);
-    
+    List<Session> findByTutorIdAndStartTimeBetweenAndStatusIn(UUID tutorId, LocalDateTime startDate,
+            LocalDateTime endDate, List<ScheduleStatus> statuses);
+
     /**
      * Count total sessions by tutor ID
      */
     long countByTutorId(UUID tutorId);
 
     /**
-     * Find sessions by student ID (through session participants) and date range
+     * Find sessions by student ID (through class enrollments) and date range
      */
-    @Query("SELECT s FROM Session s JOIN s.participants p WHERE p.student.id = :studentId AND s.startTime BETWEEN :startDate AND :endDate")
-    List<Session> findByStudentIdAndStartTimeBetween(@Param("studentId") UUID studentId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    @Query("SELECT s FROM Session s JOIN s.classEntity c JOIN c.enrollments e WHERE e.student.id = :studentId AND s.startTime BETWEEN :startDate AND :endDate")
+    List<Session> findByStudentIdAndStartTimeBetween(@Param("studentId") UUID studentId,
+            @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     /**
      * Count completed sessions by class ID
@@ -55,17 +59,31 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
     List<Session> findByTutorIdAndStartTimeGreaterThanEqual(UUID tutorId, LocalDateTime startTime);
 
     /**
-     * Count completed sessions in date range (sessions that have ended and were booked/accepted)
+     * Count completed sessions in date range (sessions that have ended and were
+     * booked/accepted)
      */
     @Query("SELECT COUNT(s) FROM Session s WHERE s.endTime < :currentTime AND s.status IN ('BOOKED', 'ACCEPTED') AND DATE(s.startTime) BETWEEN :startDate AND :endDate")
-    Long countCompletedSessionsInDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("currentTime") LocalDateTime currentTime);
+    Long countCompletedSessionsInDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate,
+            @Param("currentTime") LocalDateTime currentTime);
 
     /**
      * Get daily completed sessions count
      */
     @Query("SELECT DATE(s.startTime) as date, COUNT(s) as count FROM Session s WHERE s.endTime < :currentTime AND s.status IN ('BOOKED', 'ACCEPTED') AND DATE(s.startTime) BETWEEN :startDate AND :endDate GROUP BY DATE(s.startTime) ORDER BY DATE(s.startTime)")
-    List<Object[]> getDailyCompletedSessions(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("currentTime") LocalDateTime currentTime);
+    List<Object[]> getDailyCompletedSessions(@Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate, @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Batch count sessions by class IDs - returns classId and total count
+     */
+    @Query("SELECT s.classEntity.id, COUNT(s) FROM Session s WHERE s.classEntity.id IN :classIds GROUP BY s.classEntity.id")
+    List<Object[]> countSessionsByClassIds(@Param("classIds") List<UUID> classIds);
+
+    /**
+     * Batch count completed sessions by class IDs - returns classId and completed
+     * count
+     */
+    @Query("SELECT s.classEntity.id, COUNT(s) FROM Session s WHERE s.classEntity.id IN :classIds AND s.status = :status GROUP BY s.classEntity.id")
+    List<Object[]> countSessionsByClassIdsAndStatus(@Param("classIds") List<UUID> classIds,
+            @Param("status") ScheduleStatus status);
 }
-
-
-

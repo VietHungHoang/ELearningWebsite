@@ -20,6 +20,7 @@ public class ClassTableItem {
     private String status;
     private List<ScheduleInfo> schedules;
     private String startDate;
+    private String createdAt;
     private Integer completedSessions;
     private Integer totalSessions;
 }

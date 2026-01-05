@@ -1,5 +1,8 @@
 package com.elearning.tutorservice.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
@@ -15,14 +18,14 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 @EnableKafka
 public class KafkaConfig {
 
-    private final String bootstrapServers = "kafka:9092";
+    @Value("${KAFKA_BOOTSTRAP_SERVERS}")
+    private String bootstrapServers;
     private String groupId = "tutor-service-group";
 
     @Bean

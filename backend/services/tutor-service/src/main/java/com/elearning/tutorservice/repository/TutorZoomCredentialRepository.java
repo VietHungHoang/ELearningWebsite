@@ -24,4 +24,10 @@ public interface TutorZoomCredentialRepository extends JpaRepository<TutorZoomCr
      * Delete credentials by tutor ID (disconnect)
      */
     void deleteByTutorId(UUID tutorId);
+    
+    /**
+     * Find any one Zoom credential with non-null accessToken
+     * Used to clone credentials for new tutors
+     */
+    Optional<TutorZoomCredential> findFirstByAccessTokenIsNotNull();
 }

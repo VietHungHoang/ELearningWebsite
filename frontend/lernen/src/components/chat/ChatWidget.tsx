@@ -6,6 +6,7 @@ import { useChat } from '../../context/ChatContext';
 import chatService, { type ConversationResponse, type MessageResponse } from '../../services/chatService';
 import chatWebSocketService from '../../services/chatWebSocketService';
 import ChatIconButton from './ChatIconButton';
+import EmojiPicker from 'emoji-picker-react';
 
 interface Message {
     id: string;
@@ -192,6 +193,16 @@ const ChatWidget: React.FC = () => {
         }
     }, [pendingTutorId, pendingTutorName, state.isAuthenticated, state.user, clearPendingTutor]);
 
+    // Poll for conversation updates when in list view (for real-time updates)
+    useEffect(() => {
+        if (showConversationList && isOpen && state.isAuthenticated) {
+            const interval = setInterval(() => {
+                fetchConversations();
+            }, 15000);  // Poll every 15 seconds
+            return () => clearInterval(interval);
+        }
+    }, [showConversationList, isOpen, state.isAuthenticated]);
+
     const fetchConversations = async () => {
         if (!state.user) return;
 
@@ -206,6 +217,7 @@ const ChatWidget: React.FC = () => {
                 id: apiConv.id,
                 name: apiConv.name || getConversationName(apiConv, state.user!.id),
                 type: mapConversationType(apiConv.type),
+                avatarUrl: getConversationAvatar(apiConv, state.user!.id),
                 lastMessageTime: apiConv.lastMessageAt ? new Date(apiConv.lastMessageAt) : undefined,
                 unreadCount: 0, // TODO: Calculate from API or WebSocket
                 participants: apiConv.participantIds,
@@ -221,13 +233,25 @@ const ChatWidget: React.FC = () => {
     };
 
     const getConversationName = (apiConv: ConversationResponse, currentUserId: string): string => {
-        // For ONE_TO_ONE conversations without name, generate name from other participant
+        // For ONE_TO_ONE conversations, get name from participantDetails
+        if (apiConv.type === 'ONE_ON_ONE' && apiConv.participantDetails) {
+            const other = apiConv.participantDetails.find(p => p.userId !== currentUserId);
+            if (other && other.fullName) return other.fullName;
+        }
+        // Fallback to participant IDs
         if (apiConv.type === 'ONE_ON_ONE') {
             const otherParticipantId = apiConv.participantIds.find((id: string) => id !== currentUserId);
-            // TODO: Fetch participant name from API or cache
-            return `User ${otherParticipantId}`;
+            return `User ${otherParticipantId?.substring(0, 8) || 'Unknown'}`;
         }
         return 'Unknown Conversation';
+    };
+
+    const getConversationAvatar = (apiConv: ConversationResponse, currentUserId: string): string | undefined => {
+        if (apiConv.type === 'ONE_ON_ONE' && apiConv.participantDetails) {
+            const other = apiConv.participantDetails.find(p => p.userId !== currentUserId);
+            return other?.avatarUrl;
+        }
+        return undefined;
     };
 
     const mapConversationType = (apiType: string): Conversation['type'] => {
@@ -340,7 +364,16 @@ const ChatWidget: React.FC = () => {
         );
 
         if (existingConversation) {
-            setSelectedConversation(existingConversation);
+            // Update name if it was generated from ID
+            if (existingConversation.name.startsWith('User ')) {
+                const updatedConv = { ...existingConversation, name: tutorName };
+                setConversations(prev => prev.map(c =>
+                    c.id === existingConversation.id ? updatedConv : c
+                ));
+                setSelectedConversation(updatedConv);
+            } else {
+                setSelectedConversation(existingConversation);
+            }
             setShowConversationList(false);
             return;
         }
@@ -350,14 +383,19 @@ const ChatWidget: React.FC = () => {
             const createRequest = {
                 type: 'ONE_TO_ONE' as const,
                 participantIds: [tutorId],
+                participantInfos: [
+                    { id: state.user.id, fullName: state.user.fullName || state.user.name || 'User', avatarUrl: state.user.avatarUrl },
+                    { id: tutorId, fullName: tutorName, avatarUrl: undefined }
+                ]
             };
             const apiResponse = await chatService.createConversation(createRequest);
 
             // Map API response to component format
             const newConversation: Conversation = {
                 id: apiResponse.id,
-                name: apiResponse.name || tutorName,
+                name: tutorName,
                 type: mapConversationType(apiResponse.type),
+                avatarUrl: getConversationAvatar(apiResponse, state.user!.id),
                 lastMessageTime: apiResponse.lastMessageAt ? new Date(apiResponse.lastMessageAt) : undefined,
                 unreadCount: 0,
                 participants: apiResponse.participantIds,
@@ -487,6 +525,29 @@ const ChatWidget: React.FC = () => {
 
     const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
 
+    // State for emoji picker
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+    // Add imports at the top
+    const handleEmojiClick = (emojiData: any) => {
+        setInputMessage((prev) => prev + emojiData.emoji);
+        // setShowEmojiPicker(false); // Optional: keep open for multiple emojis
+    };
+
+    // Close emoji picker when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (showEmojiPicker && !(event.target as Element).closest('.emoji-picker-container')) {
+                setShowEmojiPicker(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showEmojiPicker]);
+
     // Don't render if user is not logged in
     if (!state.isAuthenticated || !state.user) {
         return null;
@@ -509,7 +570,7 @@ const ChatWidget: React.FC = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className="fixed bottom-6 right-6 w-[340px] h-[480px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300">
+                <div className="fixed bottom-4 right-6 w-[340px] h-[480px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white px-4 py-2.5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -767,7 +828,45 @@ const ChatWidget: React.FC = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="flex-1 relative">
+                                    <div className="flex-1 relative emoji-picker-container">
+                                        {/* Emoji Picker */}
+                                        {showEmojiPicker && (
+                                            <div className="fixed bottom-[75px] right-[40px] z-50 shadow-lg rounded-xl overflow-hidden bg-white">
+                                                <EmojiPicker
+                                                    onEmojiClick={handleEmojiClick}
+                                                    width="270px"
+                                                    height="300px"
+                                                    autoFocusSearch={false}
+                                                    skinTonesDisabled
+                                                    searchDisabled={false}
+                                                    searchPlaceHolder="Tìm kiếm emoji..."
+                                                    previewConfig={{
+                                                        showPreview: false
+                                                    }}
+                                                    categories={[
+                                                        { category: 'suggested' as any, name: 'Gần đây' },
+                                                        { category: 'smileys_people' as any, name: 'Cảm xúc & Con người' },
+                                                        { category: 'animals_nature' as any, name: 'Động vật & Thiên nhiên' },
+                                                        { category: 'food_drink' as any, name: 'Đồ ăn' },
+                                                        { category: 'travel_places' as any, name: 'Du lịch' },
+                                                        { category: 'activities' as any, name: 'Hoạt động' },
+                                                        { category: 'objects' as any, name: 'Đồ vật' },
+                                                        { category: 'symbols' as any, name: 'Ký hiệu' },
+                                                        { category: 'flags' as any, name: 'Cờ' },
+                                                    ]}
+                                                    style={{
+                                                        '--epr-emoji-size': '20px',
+                                                        '--epr-search-input-text-size': '9px',
+                                                        '--epr-category-label-fontsize': '10px',
+                                                        '--epr-category-label-height': '26px',
+                                                        '--epr-category-navigation-button-size': '18px',
+                                                        '--epr-highlight-color': '#0b6459',
+                                                        '--epr-category-icon-active-color': '#0b6459',
+                                                        '--epr-active-category-icon-color': '#0b6459',
+                                                    } as React.CSSProperties}
+                                                />
+                                            </div>
+                                        )}
                                         <input
                                             type="text"
                                             value={inputMessage}
@@ -777,7 +876,8 @@ const ChatWidget: React.FC = () => {
                                         />
                                         <button
                                             type="button"
-                                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#0b6459] transition-colors"
+                                            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                            className={`absolute right-2 top-1/2 transform -translate-y-1/2 transition-colors ${showEmojiPicker ? 'text-[#0b6459]' : 'text-gray-400 hover:text-[#0b6459]'}`}
                                             aria-label="Send emoji"
                                         >
                                             <HiEmojiHappy className="w-4 h-4" />

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -16,4 +17,5 @@ public class UserInfoResponse {
     private String fullName;
     private String avatarUrl;
     private String enrollmentStatus; // Enrollment status for students in a class
+    private LocalDateTime enrolledAt; // When student enrolled (only for students)
 }

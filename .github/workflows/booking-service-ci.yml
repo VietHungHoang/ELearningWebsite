@@ -26,7 +26,6 @@ jobs:
           context: ./backend/services/booking-service
           file: ./backend/services/booking-service/docker/Dockerfile.prod
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-booking-service:latest
-          
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-booking-service:latest      
       - name: Trigger OnRender Deploy for Booking Service
         run: curl -X POST ${{ secrets.ONRENDER_HOOK_BOOKING_SERVICE }}

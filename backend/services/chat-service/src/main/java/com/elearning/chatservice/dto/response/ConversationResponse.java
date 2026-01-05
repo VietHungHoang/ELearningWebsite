@@ -27,6 +27,11 @@ public class ConversationResponse {
 
     private List<UUID> participantIds;
 
+    /**
+     * Participant details with name and avatar from UserCache
+     */
+    private List<ParticipantUserInfo> participantDetails;
+
     private UUID classId;
 
     private MessageResponse lastMessage;

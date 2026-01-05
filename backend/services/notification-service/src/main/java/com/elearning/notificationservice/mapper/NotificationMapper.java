@@ -7,12 +7,14 @@ import com.elearning.notificationservice.dto.response.NotificationResponse;
 import com.elearning.notificationservice.model.Notification;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 public class NotificationMapper {
 
     public Notification toEntity(NotificationEvent event) {
         return Notification.builder()
+                .id(UUID.randomUUID())  // Generate UUID for MongoDB
                 .userId(event.getUserId())
                 .type(event.getType())
                 .title(event.getTitle())

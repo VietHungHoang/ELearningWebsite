@@ -7,6 +7,7 @@ import com.elearning.quizservice.dto.response.QuestionResponse;
 import com.elearning.quizservice.dto.response.QuizDetailResponse;
 import com.elearning.quizservice.dto.response.QuizSummaryResponse;
 import com.elearning.quizservice.dto.response.StudentQuizSummaryResponse;
+import com.elearning.quizservice.entity.ClassInfo;
 import com.elearning.quizservice.entity.Quiz;
 import com.elearning.quizservice.entity.QuizAttempt;
 import com.elearning.quizservice.entity.StudentQuizStatus;
@@ -21,10 +22,13 @@ import com.elearning.quizservice.service.QuestionService;
 import com.elearning.quizservice.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +48,28 @@ public class QuizServiceImpl implements QuizService {
     private final QuizAttemptRepository attemptRepository;
     private final QuestionService questionService;
     private final QuizMapper quizMapper;
+    private final com.elearning.quizservice.service.UserSyncService userSyncService;
+    private final com.elearning.quizservice.service.ClassSyncService classSyncService;
     
     @Override
     @Transactional
     public QuizDetailResponse createQuiz(UUID creatorId, CreateQuizRequest request) {
         log.info("Creating quiz for creator: {}", creatorId);
         
+        // Sync creator info
+        if (request.getCreatorFullName() != null) {
+            userSyncService.saveOrUpdateUser(creatorId, request.getCreatorFullName(), request.getCreatorAvatarUrl());
+        }
+        
+        // Sync class info and students
+        ClassInfo classInfo = classSyncService.saveOrUpdateClass(
+                request.getClassId(), 
+                request.getClassTitle(), 
+                request.getStudents());
+        
         // Create quiz
         Quiz quiz = Quiz.builder()
-                .classId(request.getClassId())
+                .classInfo(classInfo)
                 .creatorId(creatorId)
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -226,11 +243,11 @@ public class QuizServiceImpl implements QuizService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus statusFilter) {
-        log.info("Getting quizzes for student: {} with status filter: {}", studentId, statusFilter);
+    public Page<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus statusFilter, Pageable pageable) {
+        log.info("Getting quizzes for student: {} with status filter: {} and pagination", studentId, statusFilter);
         
-        // Get all published quizzes with creator info
-        List<Quiz> quizzes = quizRepository.findAllPublishedQuizzesWithCreator();
+        // Get all published quizzes for this student (via class membership)
+        List<Quiz> quizzes = quizRepository.findPublishedQuizzesForStudent(studentId);
         
         // Get student's latest attempts for all quizzes
         List<QuizAttempt> latestAttempts = attemptRepository.findLatestAttemptsByStudentId(studentId);
@@ -249,11 +266,18 @@ public class QuizServiceImpl implements QuizService {
                 continue;
             }
             
-            StudentQuizSummaryResponse response = buildStudentQuizSummary(quiz, latestAttempt, studentStatus);
+            StudentQuizSummaryResponse response = buildStudentQuizSummarySimple(quiz, studentStatus);
             result.add(response);
         }
         
-        return result;
+        // Apply pagination
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), result.size());
+        
+        List<StudentQuizSummaryResponse> pageContent = start >= result.size() ? 
+            new ArrayList<>() : result.subList(start, end);
+        
+        return new PageImpl<>(pageContent, pageable, result.size());
     }
     
     /**
@@ -272,12 +296,12 @@ public class QuizServiceImpl implements QuizService {
     }
     
     /**
-     * Build StudentQuizSummaryResponse from quiz and attempt data
+     * Build simple StudentQuizSummaryResponse from quiz only (no attempt data)
      */
-    private StudentQuizSummaryResponse buildStudentQuizSummary(Quiz quiz, QuizAttempt latestAttempt, StudentQuizStatus studentStatus) {
+    private StudentQuizSummaryResponse buildStudentQuizSummarySimple(Quiz quiz, StudentQuizStatus studentStatus) {
         User creator = quiz.getCreator();
         
-        StudentQuizSummaryResponse.StudentQuizSummaryResponseBuilder builder = StudentQuizSummaryResponse.builder()
+        return StudentQuizSummaryResponse.builder()
                 .id(quiz.getId())
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
@@ -289,32 +313,8 @@ public class QuizServiceImpl implements QuizService {
                 .tutorName(creator != null ? creator.getFullName() : null)
                 .tutorAvatar(creator != null ? creator.getAvatarUrl() : null)
                 .assignedAt(quiz.getPublishedAt())
-                .createdAt(quiz.getCreatedAt());
-        
-        // Add attempt-specific data
-        if (latestAttempt != null) {
-            builder.currentAttemptId(latestAttempt.getId());
-            
-            if (studentStatus == StudentQuizStatus.IN_PROGRESS) {
-                // Calculate time remaining
-                builder.questionsAnswered(latestAttempt.getAnswersCount());
-                
-                if (latestAttempt.getStartedAt() != null && quiz.getTimeLimitMinutes() != null) {
-                    long elapsedSeconds = Duration.between(latestAttempt.getStartedAt(), LocalDateTime.now()).getSeconds();
-                    long totalSeconds = quiz.getTimeLimitMinutes() * 60L;
-                    int remainingSeconds = (int) Math.max(0, totalSeconds - elapsedSeconds);
-                    builder.timeRemainingSeconds(remainingSeconds);
-                }
-            } else if (studentStatus == StudentQuizStatus.COMPLETED) {
-                builder.score(latestAttempt.getCorrectAnswers())
-                        .maxScore(latestAttempt.getTotalQuestions())
-                        .percentage(latestAttempt.getPercentage())
-                        .passed(latestAttempt.getPassed())
-                        .completedAt(latestAttempt.getSubmittedAt());
-            }
-        }
-        
-        return builder.build();
+                .createdAt(quiz.getCreatedAt())
+                .build();
     }
     
     /**

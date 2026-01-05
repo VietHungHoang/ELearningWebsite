@@ -32,6 +32,7 @@ public class QuizController {
     private final QuizService quizService;
     private final GradingService gradingService;
     private final GeminiQuizService geminiQuizService;
+    private final com.elearning.quizservice.service.UserSyncService userSyncService;
     
     /**
      * Create a new quiz
@@ -41,6 +42,11 @@ public class QuizController {
             @RequestHeader("X-User-Id") UUID creatorId,
             @Valid @RequestBody CreateQuizRequest request) {
         log.info("Creating quiz for creator: {}", creatorId);
+        
+        // Sync creator info
+        if (request.getCreatorFullName() != null) {
+            userSyncService.saveOrUpdateUser(creatorId, request.getCreatorFullName(), request.getCreatorAvatarUrl());
+        }
         
         QuizDetailResponse response = quizService.createQuiz(creatorId, request);
         
