@@ -51,6 +51,21 @@ jobs:
               --name lernen-api-gateway \
               --restart unless-stopped \
               -p 8081:8081 \
+              -e AUTH_SERVICE_URL=https://lernen-auth-service.onrender.com \
+              -e BFF_SERVICE_URL=https://lernen-bff-service.onrender.com \
+              -e BOOKING_SERVICE_URL=https://lernen-booking-service.onrender.com \
+              -e CHAT_SERVICE_URL=https://lernen-chat-service.onrender.com \
+              -e CLASS_SERVICE_URL=https://lernen-class-service.onrender.com \
+              -e COMMON_SERVICE_URL=https://lernen-common-service.onrender.com \
+              -e FILE_SERVICE_URL=https://lernen-file-service.onrender.com \
+              -e KEYCLOAK_ISSUER_URI=https://ec2-3-25-139-45.ap-southeast-2.compute.amazonaws.com:8443/realms/lernen \
+              -e NOTIFICATION_SERVICE_URL=https://lernen-notification-service.onrender.com \
+              -e PAYMENT_SERVICE_URL=https://lernen-payment-service.onrender.com \
+              -e QUIZ_SERVICE_URL=https://lernen-quiz-service.onrender.com \
+              -e SEARCH_SERVICE_URL=https://lernen-search-service.onrender.com \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e STUDENT_SERVICE_URL=https://lernen-student-service.onrender.com \
+              -e TUTOR_SERVICE_URL=https://lernen-tutor-service.onrender.com \
               ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway-aws
             
             # Cleanup old images
