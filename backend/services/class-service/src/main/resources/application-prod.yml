@@ -16,7 +16,7 @@ spring:
         format_sql: true
         default_schema: class
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     consumer:
       group-id: class-service-group
       auto-offset-reset: earliest

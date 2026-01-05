@@ -1,9 +1,30 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: chat
+
 services:
-  common-service:
-    url: ${COMMON_SERVICE_URL:http://localhost:8082}
-  cart-service:
-    url: ${CART_SERVICE_URL:http://localhost:8082}
-  course-service:
-    url: ${COURSE_SERVICE_URL:http://localhost:8081}
+  auth-service:
+    url: ${AUTH_SERVICE_URL}
+
   notification-service:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8082}
+    url: ${NOTIFICATION_SERVICE_URL}
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL}
+
+logging:
+  level:
+    root: INFO
+    "[com.elearning.bffservice]": DEBUG
