@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { type MessageResponse } from './chatService';
 
 // WebSocket base URL - direct to chat service
-const WS_BASE_URL = 'http://ec2-13-236-4-126.ap-southeast-2.compute.amazonaws.com:8081/ws';
+const WS_BASE_URL = 'https://ec2-13-236-4-126.ap-southeast-2.compute.amazonaws.com:8081/ws';
 
 export interface TypingIndicator {
     conversationId: string;
