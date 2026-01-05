@@ -26,7 +26,37 @@ jobs:
           context: ./backend/gateway/api-gateway
           file: ./backend/gateway/api-gateway/docker/Dockerfile.prod
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway:latest
-          
-      - name: Trigger OnRender Deploy for API Gateway
-        run: curl -X POST ${{ secrets.ONRENDER_HOOK_API_GATEWAY }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway-aws:latest
+
+      - name: Setup SSH Key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Deploy to AWS EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.AWS_API_GATEWAY }} << 'EOF'
+            # Login to Docker Hub
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+            
+            # Pull latest image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway-aws
+            
+            # Stop and remove existing container if exists
+            docker stop lernen-api-gateway || true
+            docker rm lernen-api-gateway || true
+            
+            # Run new container
+            docker run -d \
+              --name lernen-api-gateway \
+              --restart unless-stopped \
+              -p 8081:8081 \
+              ${{ secrets.DOCKER_USERNAME }}/lernen-api-gateway-aws
+            
+            # Cleanup old images
+            docker image prune -f
+          EOF
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: rm -f private_key.pem
