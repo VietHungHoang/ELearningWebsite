@@ -26,8 +26,39 @@ jobs:
           context: ./frontend/lernen
           file: ./frontend/lernen/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-frontend:latest
-          
-      - name: Trigger OnRender Deploy for Frontend
-        run: curl -X POST ${{ secrets.ONRENDER_HOOK_FRONTEND }}
-        
+          tags: ${{ secrets.DOCKER_USERNAME }}/lernen-frontend-aws:latest
+
+      - name: Setup SSH Key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Deploy to AWS EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ubuntu@${{ secrets.AWS_LERNEN_FRONTEND }} << 'EOF'
+            # Login to Docker Hub
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+            
+            # Pull latest image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/lernen-frontend-aws:latest
+            
+            # Stop and remove existing container if exists
+            docker stop lernen-frontend || true
+            docker rm lernen-frontend || true
+            
+            # Run new container
+            docker run -d \
+              --name lernen-frontend \
+              --restart unless-stopped \
+              -p 80:80 \
+              -p 443:443 \
+              ${{ secrets.DOCKER_USERNAME }}/lernen-frontend-aws:latest
+            
+            # Cleanup old images
+            docker image prune -f
+          EOF
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: rm -f private_key.pem
+

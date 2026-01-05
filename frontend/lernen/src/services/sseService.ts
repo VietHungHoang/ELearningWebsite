@@ -1,6 +1,6 @@
 import type { Notification } from '../types/notifications';
 
-const API_BASE_URL ='https://ec2-13-236-4-126.ap-southeast-2.compute.amazonaws.com:8081';
+const API_BASE_URL ='http://13.236.4.126:8081';
 
 interface SseConnectionOptions {
     onNotification: (notification: Notification) => void;
