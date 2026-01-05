@@ -1,9 +1,45 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      url: ${REDIS_URL}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: class
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: class-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+zoom:
+  oauth:
+    client-id: ${ZOOM_CLIENT_ID}
+    client-secret: ${ZOOM_CLIENT_SECRET}
+    redirect-uri: ${ZOOM_REDIRECT_URI}
+    authorize-url: https://zoom.us/oauth/authorize
+    token-url: https://zoom.us/oauth/token
+  api:
+    base-url: https://api.zoom.us/v2
+  meeting:
+    default-duration: 60
+    waiting-room: true
 services:
   common-service:
-    url: ${COMMON_SERVICE_URL:http://localhost:8082}
-  cart-service:
-    url: ${CART_SERVICE_URL:http://localhost:8082}
-  course-service:
-    url: ${COURSE_SERVICE_URL:http://localhost:8081}
+    url: ${COMMON_SERVICE_URL}
   notification-service:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8082}
+    url: ${NOTIFICATION_SERVICE_URL}
