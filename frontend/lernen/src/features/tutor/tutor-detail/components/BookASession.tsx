@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import CustomDropdown from "../../../../components/ui/CustomDropdown";
 import ModalLayout from "../../../../components/ui/ModalLayout";
 import { FiCalendar, FiChevronLeft, FiChevronRight } from "react-icons/fi";
@@ -29,7 +28,6 @@ const BookASession: React.FC<BookASessionProps> = ({
 }) => {
     const { state, isInitialized } = useAuth();
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(new Date()); // Today
     const [, setSelectedDay] = useState<Date>(selectedDate); // UI-only selected day within the week (view-only)
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -232,7 +230,7 @@ const BookASession: React.FC<BookASessionProps> = ({
             const normalizedDayOfWeek = avail.dayOfWeek === 7 ? 0 : avail.dayOfWeek;
 
             // Find all dates in current week that match this dayOfWeek
-            let currentDate = new Date(weekStart);
+            const currentDate = new Date(weekStart);
             while (currentDate <= weekEnd) {
                 if (currentDate.getUTCDay() === normalizedDayOfWeek) {
                     // Check if current date is within effective date range

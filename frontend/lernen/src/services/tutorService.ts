@@ -10,7 +10,7 @@ import type {
 } from "../types/api";
 import apiService from "./apiService";
 import { mapTutorResponseToTutor, mapTutorProfileHeaderResponseToTutorProfileHeader } from "../mappers/tutorMapper";
-import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse, TutorDetail } from "../types/tutor";
+import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse } from "../types/tutor";
 import type { SubmitReviewRequest } from "../types/student";
 
 interface FuzzySearchSuggestion {

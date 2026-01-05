@@ -42,6 +42,7 @@ export interface Tutor extends UserInfo {
     videoUrl: string;
     currentSessionFee: number;
     originalSessionFee?: number;
+    hourlyRate?: number;
     averageRating: number;
     reviewCount: number;
     bookedSessionsCount: number;

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { 
     HiStar, 
     HiCheckCircle, 
@@ -37,7 +36,6 @@ const DISCOUNT_TIERS = [
 const SLIDER_MARKS = [5, 10, 20, 30, 50];
 
 export default function SessionPackagePage({ tutorId: propTutorId }: SessionPackagePageProps) {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const { tutorId: paramTutorId } = useParams<{ tutorId: string }>();
@@ -46,8 +44,6 @@ export default function SessionPackagePage({ tutorId: propTutorId }: SessionPack
     // Get data from location state
     const locationState = location.state as LocationState;
     const tutorDataFromState = locationState?.tutorData;
-    const selectedTimes = locationState?.selectedTimes || [];
-    const timezone = locationState?.timezone;
 
     const [sessionCount, setSessionCount] = useState(15);
     
