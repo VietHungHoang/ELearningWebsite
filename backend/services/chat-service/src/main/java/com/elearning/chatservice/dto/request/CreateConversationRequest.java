@@ -1,5 +1,6 @@
 package com.elearning.chatservice.dto.request;
 
+import com.elearning.chatservice.dto.UserInfo;
 import com.elearning.chatservice.entity.ConversationType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateConversationRequest {
 
-    private String name;  // Required for group chats, optional for 1-1
+    private String name; // Required for group chats, optional for 1-1
 
     @NotNull(message = "Conversation type is required")
     private ConversationType type;
@@ -28,5 +29,12 @@ public class CreateConversationRequest {
     @NotEmpty(message = "At least one participant is required")
     private List<UUID> participantIds;
 
-    private UUID classId;  // Optional: for class-based group chats
+    private UUID classId; // Optional: for class-based group chats
+
+    /**
+     * Optional: User info for caching (id, fullName, avatarUrl)
+     * Frontend should send this to enable name/avatar display without cross-service
+     * calls
+     */
+    private List<UserInfo> participantInfos;
 }

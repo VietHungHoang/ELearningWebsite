@@ -31,6 +31,12 @@ public class TrialSessionController {
         return ResponseEntity.ok(ApiResponse.success(null, "Trial session accepted successfully"));
     }
 
+    @PostMapping("/{requestId}/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectTrialSession(@PathVariable UUID requestId) {
+        trialSessionRequestService.rejectTrialSessionRequest(requestId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Trial session rejected successfully"));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<TrialSessionRequestResponse>> getTrialSessionRequest(
             @RequestParam UUID tutorId,
@@ -45,7 +51,8 @@ public class TrialSessionController {
             @RequestParam UUID userId,
             @RequestParam String userType) {
 
-        List<TrialSessionRequestResponse> response = trialSessionRequestService.getTrialSessionRequestsByRole(userType, userId);
+        List<TrialSessionRequestResponse> response = trialSessionRequestService.getTrialSessionRequestsByRole(userType,
+                userId);
 
         return ResponseEntity.ok(ApiResponse.success(response, "Trial session requests retrieved successfully"));
     }

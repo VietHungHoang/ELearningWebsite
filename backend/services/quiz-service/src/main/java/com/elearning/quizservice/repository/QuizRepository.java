@@ -67,4 +67,17 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID> {
            "WHERE q.status = 'ACTIVE' AND q.isActive = true " +
            "ORDER BY q.publishedAt DESC")
     List<Quiz> findAllPublishedQuizzesWithCreator();
+    
+    /**
+     * Find all published quizzes for a student (via class membership)
+     */
+    @Query("SELECT DISTINCT q FROM Quiz q " +
+           "LEFT JOIN FETCH q.creator " +
+           "LEFT JOIN FETCH q.classInfo ci " +
+           "LEFT JOIN ci.students s " +
+           "WHERE s.id = :studentId " +
+           "AND q.status = 'ACTIVE' " +
+           "AND q.isActive = true " +
+           "ORDER BY q.publishedAt DESC")
+    List<Quiz> findPublishedQuizzesForStudent(@Param("studentId") UUID studentId);
 }

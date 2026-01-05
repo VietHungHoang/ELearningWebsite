@@ -21,7 +21,10 @@ public class QuizDetailResponse {
     
     private UUID id;
     private UUID classId;
+    private String classTitle;
     private UUID creatorId;
+    private String creatorName;
+    private String creatorAvatar;
     private String title;
     private String description;
     private Integer timeLimitMinutes;

@@ -20,7 +20,9 @@ public class QuizSummaryResponse {
     
     private UUID id;
     private UUID classId;
+    private String classTitle;
     private UUID creatorId;
+    
     private String title;
     private String description;
     private Integer timeLimitMinutes;

@@ -20,8 +20,8 @@ import java.util.UUID;
 })
 @Data
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true, exclude = {"questions", "attempts", "creator"})
-@ToString(exclude = {"questions", "attempts", "creator"})
+@EqualsAndHashCode(callSuper = true, exclude = {"questions", "attempts", "creator", "classInfo"})
+@ToString(exclude = {"questions", "attempts", "creator", "classInfo"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Quiz extends BaseEntity {
@@ -30,8 +30,12 @@ public class Quiz extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     
-    @Column(name = "class_id", nullable = false)
-    private UUID classId;
+    /**
+     * Denormalized class info - for display purposes
+     */
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "class_id", nullable = false)
+    private ClassInfo classInfo;
     
     @Column(name = "creator_id", nullable = false)
     private UUID creatorId;
@@ -110,5 +114,12 @@ public class Quiz extends BaseEntity {
 
     public int getTotalQuestions() {
         return questions.size();
+    }
+    
+    /**
+     * Get classId from classInfo (for backward compatibility)
+     */
+    public UUID getClassId() {
+        return classInfo != null ? classInfo.getId() : null;
     }
 }

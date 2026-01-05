@@ -25,7 +25,7 @@ file:
 
 # WebSocket Configuration
 websocket:
-  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4200}
+  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4200,http://localhost:8081,https://1mf17bgk-8081.asse.devtunnels.ms}
   message-broker:
     relay-host: ${STOMP_RELAY_HOST:localhost}
     relay-port: ${STOMP_RELAY_PORT:61613}
