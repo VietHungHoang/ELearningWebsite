@@ -2,8 +2,8 @@ import { Client, type StompSubscription, type IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { type MessageResponse } from './chatService';
 
-// WebSocket base URL - now going through gateway
-const WS_BASE_URL = import.meta.env.VITE_CHAT_WS_URL || 'http://localhost:8081/api/v1/chat/ws';
+// WebSocket base URL - direct to chat service
+const WS_BASE_URL = 'http://localhost:8089/ws';
 
 export interface TypingIndicator {
     conversationId: string;

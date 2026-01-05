@@ -23,6 +23,14 @@ public class CreateQuizRequest {
     @NotNull(message = "Class ID is required")
     private UUID classId;
     
+    private String classTitle;
+    
+    private List<UserInfoDto> students;
+    
+    private String creatorFullName;
+    
+    private String creatorAvatarUrl;
+    
     @NotBlank(message = "Title is required")
     @Size(max = 255, message = "Title must not exceed 255 characters")
     private String title;

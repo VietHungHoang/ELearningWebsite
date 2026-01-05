@@ -25,19 +25,66 @@ const ClassDetailPage: React.FC = () => {
     const [showUpdateScheduleModal, setShowUpdateScheduleModal] = useState(false);
 
     useEffect(() => {
-        // If no data in state, fetch from API using classId
-        if (!initialClassData && classId) {
+        // Always fetch fresh data from API when classId is available
+        if (classId) {
             const loadClassData = async () => {
                 setIsLoading(true);
 
                 try {
-                    const data = await classService.getClassDetailForPage(classId);
-                    setClassData(data);
+                    const response = await classService.getClassDetail(classId);
+                    if (response.success && response.data) {
+                        // Transform ClassDetailResponse to ClassData format
+                        const apiData = response.data;
+                        const transformedData: ClassData = {
+                            id: apiData.id,
+                            classTitle: apiData.title,
+                            students: apiData.students.map(s => ({
+                                id: s.id,
+                                name: s.fullName,
+                                avatar: s.avatarUrl || '',
+                                email: undefined
+                            })),
+                            type: apiData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
+                            status: apiData.status === 'ONGOING' ? 'Ongoing' :
+                                apiData.status === 'OPENING' ? 'Opening' : 'Completed',
+                            schedules: apiData.schedules.map(s => ({
+                                day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][s.dayOfWeek % 7],
+                                time: s.time
+                            })),
+                            startDate: apiData.createdAt,
+                            completedSessions: apiData.completedSessions,
+                            totalSessions: apiData.totalSessions,
+                            quizzes: [], // Will be populated from separate API or tabs
+                            materials: apiData.materials?.map(m => ({
+                                id: m.id,
+                                name: m.name,
+                                type: m.type as 'PDF' | 'Video' | 'ZIP',
+                                date: m.uploadDate
+                            })) || [],
+                            subject: undefined,
+                            category: undefined,
+                            tuitionFee: apiData.pricePerHour,
+                            description: apiData.description,
+                            maxStudents: apiData.maxStudents
+                        };
+                        setClassData(transformedData);
+                    } else {
+                        console.warn('API returned unsuccessful response');
+                        // Use initial data from navigation state as fallback
+                        if (initialClassData) {
+                            setClassData(initialClassData);
+                        } else {
+                            setClassData(null);
+                        }
+                    }
                 } catch (apiError) {
-                    console.warn('Using mock data due to API failure');
-                    // The service already returns mock data on failure, so this shouldn't happen
-                    // But keeping as fallback
-                    setClassData(null);
+                    console.error('Failed to fetch class detail:', apiError);
+                    // Use initial data from navigation state as fallback
+                    if (initialClassData) {
+                        setClassData(initialClassData);
+                    } else {
+                        setClassData(null);
+                    }
                 } finally {
                     setIsLoading(false);
                 }
@@ -45,7 +92,7 @@ const ClassDetailPage: React.FC = () => {
 
             loadClassData();
         }
-    }, [classId, initialClassData]);
+    }, [classId]);
 
     const handleBack = () => {
         navigate('/dashboard/my-class');

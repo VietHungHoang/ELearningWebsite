@@ -57,26 +57,29 @@ public class ConversationController {
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }
-//    @GetMapping("/one-to-one/{otherUserId}")
-//    public ResponseEntity<ApiResponse<ConversationResponse>> getOrCreateOneToOne(
-//            @PathVariable UUID otherUserId,
-//            @RequestHeader("X-User-Id") UUID userId) {
-//
-//        log.info("Get or create one-to-one conversation: userId={}, otherUserId={}", userId, otherUserId);
-//        ConversationResponse response = conversationService.getOrCreateOneToOneConversation(userId, otherUserId);
-//        return ResponseEntity.ok(ApiResponse.success(response));
-//    }
-//
-//    @GetMapping("/{conversationId}")
-//    public ResponseEntity<ApiResponse<ConversationResponse>> getConversation(
-//            @PathVariable UUID conversationId,
-//            @RequestHeader("X-User-Id") UUID userId) {
-//
-//        log.info("Get conversation: conversationId={}, userId={}", conversationId, userId);
-//        ConversationResponse response = conversationService.getConversationById(conversationId, userId);
-//        return ResponseEntity.ok(ApiResponse.success(response));
-//    }
-
+    // @GetMapping("/one-to-one/{otherUserId}")
+    // public ResponseEntity<ApiResponse<ConversationResponse>> getOrCreateOneToOne(
+    // @PathVariable UUID otherUserId,
+    // @RequestHeader("X-User-Id") UUID userId) {
+    //
+    // log.info("Get or create one-to-one conversation: userId={}, otherUserId={}",
+    // userId, otherUserId);
+    // ConversationResponse response =
+    // conversationService.getOrCreateOneToOneConversation(userId, otherUserId);
+    // return ResponseEntity.ok(ApiResponse.success(response));
+    // }
+    //
+    // @GetMapping("/{conversationId}")
+    // public ResponseEntity<ApiResponse<ConversationResponse>> getConversation(
+    // @PathVariable UUID conversationId,
+    // @RequestHeader("X-User-Id") UUID userId) {
+    //
+    // log.info("Get conversation: conversationId={}, userId={}", conversationId,
+    // userId);
+    // ConversationResponse response =
+    // conversationService.getConversationById(conversationId, userId);
+    // return ResponseEntity.ok(ApiResponse.success(response));
+    // }
 
     @PutMapping("/{conversationId}/participants")
     public ResponseEntity<ApiResponse<ConversationResponse>> addParticipants(

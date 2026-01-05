@@ -68,10 +68,10 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
             notification.put("userId", request.getTutor().getId());
             notification.put("type", "TRIAL_REQUEST");
             notification.put("title", "Yêu cầu học thử mới");
-            notification.put("message", "Bạn có yêu cầu học thử mới vào lúc " + 
-                    request.getSessionDateTime().toLocalDate() + " " + 
+            notification.put("message", "Bạn có yêu cầu học thử mới vào lúc " +
+                    request.getSessionDateTime().toLocalDate() + " " +
                     request.getSessionDateTime().toLocalTime());
-            
+
             // Metadata for type-based routing
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("requestId", request.getId().toString());
@@ -104,6 +104,20 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
         log.info("Trial session request accepted successfully");
     }
 
+    @Override
+    @Transactional
+    public void rejectTrialSessionRequest(UUID requestId) {
+        log.info("Rejecting trial session request with ID: {}", requestId);
+
+        TrialSessionRequestEntity entity = trialSessionRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Trial session request not found"));
+
+        entity.setStatus(ScheduleStatus.CANCELLED);
+        trialSessionRepository.save(entity);
+
+        log.info("Trial session request rejected successfully");
+    }
+
     private void createTrialSessionFromRequest(TrialSessionRequestEntity entity) {
         Session session = Session.builder()
                 .tutor(entity.getTutor())
@@ -118,9 +132,9 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
 
         // Create Zoom meeting
         try {
-            com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(
-                entity.getTutor().getId(), session.getId()
-            );
+            com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = zoomMeetingService
+                    .createScheduledMeeting(
+                            entity.getTutor().getId(), session.getId());
             session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
             session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
             session.setZoomPassword(zoomMeeting.getPassword());

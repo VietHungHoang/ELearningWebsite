@@ -93,8 +93,8 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
     const messageRef = useRef<HTMLParagraphElement>(null);
 
     // Get person info based on viewMode
-    const person = viewMode === 'tutor' 
-        ? request.student 
+    const person = viewMode === 'tutor'
+        ? request.student
         : ((request as any).tutor || { fullName: 'Unknown Tutor', avatarUrl: 'https://i.pravatar.cc/150?img=1' });
 
     // Close menu when clicking outside
@@ -116,37 +116,37 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
 
     // Check if message needs truncation
     const [needsTruncation, setNeedsTruncation] = useState(true); // Default to true to prevent flash
-    
+
     useEffect(() => {
         const checkTruncation = () => {
             if (messageRef.current) {
                 const element = messageRef.current;
                 // Temporarily remove line-clamp to get actual height
                 element.classList.remove('line-clamp-3');
-                
+
                 // Force reflow
                 void element.offsetHeight;
-                
+
                 const lineHeight = parseFloat(getComputedStyle(element).lineHeight) || 20;
                 const maxHeight = lineHeight * 3; // 3 lines
                 const needsTrunc = element.scrollHeight > maxHeight;
-                
+
                 // Restore line-clamp if needed and not expanded
                 if (needsTrunc && !isMessageExpanded) {
                     element.classList.add('line-clamp-3');
                 }
-                
+
                 setNeedsTruncation(needsTrunc);
             }
         };
-        
+
         // Check immediately and after a short delay to ensure DOM is ready
         checkTruncation();
         const timeoutId = setTimeout(checkTruncation, 0);
-        
+
         // Also check on window resize
         window.addEventListener('resize', checkTruncation);
-        
+
         return () => {
             clearTimeout(timeoutId);
             window.removeEventListener('resize', checkTruncation);
@@ -173,8 +173,13 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
     const handleDecline = async () => {
         setIsDeclining(true);
         try {
-            setToast({ message: t('dashboard.tutor.requests.trial.declineSuccess'), type: 'success' });
-            onRequestProcessed?.(request.id);
+            const result = await classService.rejectTrialRequest(request.id);
+            if (result.success) {
+                setToast({ message: t('dashboard.tutor.requests.trial.declineSuccess'), type: 'success' });
+                onRequestProcessed?.(request.id);
+            } else {
+                setToast({ message: result.message || t('dashboard.tutor.requests.trial.declineFailed'), type: 'error' });
+            }
         } catch (error) {
             setToast({ message: t('dashboard.tutor.requests.trial.declineError'), type: 'error' });
         } finally {
@@ -185,37 +190,37 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
     const formatDateTime = (dateString: string): string => {
         // Parse sessionDateTime from UTC format
         const utcDate = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
-        
+
         // Format according to current locale
         const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
-        
+
         // Format: "Mon, Jan 5, 02:00 AM"
-        const formattedDate = utcDate.toLocaleDateString(locale, { 
-            weekday: 'short', 
-            month: 'short', 
+        const formattedDate = utcDate.toLocaleDateString(locale, {
+            weekday: 'short',
+            month: 'short',
             day: 'numeric'
         });
-        
-        const formattedTime = utcDate.toLocaleTimeString(locale, { 
-            hour: '2-digit', 
+
+        const formattedTime = utcDate.toLocaleTimeString(locale, {
+            hour: '2-digit',
             minute: '2-digit',
-            hour12: true 
+            hour12: true
         });
-        
+
         return `${formattedDate}, ${formattedTime}`;
     };
 
     const formatTimestamp = (dateString: string): string => {
         // Parse createdAt from backend format: "2026-01-02T06:57:17.923084" (LocalDateTime, no timezone)
         // Backend stores in UTC, so we treat it as UTC for accurate relative time calculation
-        
+
         let utcDate: Date;
-        
+
         // Check if string already has timezone indicator (Z, +HH:MM, or -HH:MM)
-        const hasTimezone = dateString.endsWith('Z') || 
-                           /[+-]\d{2}:\d{2}$/.test(dateString) ||
-                           /[+-]\d{4}$/.test(dateString);
-        
+        const hasTimezone = dateString.endsWith('Z') ||
+            /[+-]\d{2}:\d{2}$/.test(dateString) ||
+            /[+-]\d{4}$/.test(dateString);
+
         // Normalize the date string: handle microseconds (JavaScript Date only supports milliseconds)
         // Format: "2026-01-02T06:57:17.923084" -> "2026-01-02T06:57:17.923Z"
         let normalizedDateString = dateString;
@@ -234,7 +239,7 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                 }
             }
         }
-        
+
         if (hasTimezone) {
             // Already has timezone info, parse directly
             utcDate = new Date(normalizedDateString);
@@ -243,14 +248,14 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
             // Add 'Z' to indicate UTC
             utcDate = new Date(normalizedDateString + 'Z');
         }
-        
+
         // Validate parsed date
         if (isNaN(utcDate.getTime())) {
             // Fallback: try parsing without fractional seconds
             const withoutFractional = normalizedDateString.split('.')[0];
             utcDate = new Date(hasTimezone ? withoutFractional : withoutFractional + 'Z');
         }
-        
+
         // Get current time (JavaScript Date is always in UTC internally)
         const now = new Date();
         const diffInMs = now.getTime() - utcDate.getTime();
@@ -269,8 +274,8 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
         } else {
             // Format date according to current locale and timezone
             const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
-            return utcDate.toLocaleDateString(locale, { 
-                month: 'short', 
+            return utcDate.toLocaleDateString(locale, {
+                month: 'short',
                 day: 'numeric',
                 year: utcDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
             });
@@ -282,19 +287,19 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
         <>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4 relative">
                 {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-                
+
                 {/* Status badge - Top left corner */}
                 <RequestStatusBadge status={request.status} />
-                
+
                 {viewMode === 'tutor' ? (
                     /* Tutor View: Original UI - Avatar + Name + Menu */
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
                         {person && (
                             <div className="flex-shrink-0">
-                                <img 
-                                    src={person.avatarUrl || person.avatar || 'https://i.pravatar.cc/150?img=1'} 
-                                    alt={person.fullName || person.name || 'Unknown'} 
-                                    className="w-12 h-12 rounded-lg object-cover border-2 border-black" 
+                                <img
+                                    src={person.avatarUrl || person.avatar || 'https://i.pravatar.cc/150?img=1'}
+                                    alt={person.fullName || person.name || 'Unknown'}
+                                    className="w-12 h-12 rounded-lg object-cover border-2 border-black"
                                 />
                             </div>
                         )}
@@ -395,10 +400,10 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
                         {/* Row 1: Avatar + Name + Timestamp */}
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0">
-                                <img 
-                                    src={person?.avatarUrl || person?.avatar || 'https://i.pravatar.cc/150?img=1'} 
-                                    alt={person?.fullName || person?.name || 'Unknown'} 
-                                    className="w-12 h-12 rounded-lg object-cover border-2 border-black" 
+                                <img
+                                    src={person?.avatarUrl || person?.avatar || 'https://i.pravatar.cc/150?img=1'}
+                                    alt={person?.fullName || person?.name || 'Unknown'}
+                                    className="w-12 h-12 rounded-lg object-cover border-2 border-black"
                                 />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -465,7 +470,7 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
 
                 {/* Message */}
                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <p 
+                    <p
                         ref={messageRef}
                         className={`text-sm text-gray-700 leading-relaxed ${!isMessageExpanded && needsTruncation ? 'line-clamp-3' : ''}`}
                         style={!isMessageExpanded && !needsTruncation ? { WebkitLineClamp: 'unset' } : undefined}

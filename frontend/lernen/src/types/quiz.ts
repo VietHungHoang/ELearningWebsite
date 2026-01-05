@@ -10,6 +10,14 @@ export type StudentQuizStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
 export type AttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'GRADED' | 'ABANDONED';
 export type QuestionType = 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE';
 
+// ============ USER INFO ============
+
+export interface UserInfo {
+    id: string;
+    fullName?: string;
+    avatarUrl?: string;
+}
+
 // ============ QUESTION TYPES ============
 
 export interface QuestionOption {
@@ -35,6 +43,7 @@ export interface Question {
 export interface QuizSummary {
     id: string;
     classId: string;
+    classTitle?: string;
     creatorId: string;
     title: string;
     description?: string;
@@ -59,7 +68,10 @@ export interface QuizSummary {
 export interface QuizDetail {
     id: string;
     classId: string;
+    classTitle?: string;
     creatorId: string;
+    creatorName?: string;
+    creatorAvatar?: string;
     title: string;
     description?: string;
     timeLimitMinutes: number;
@@ -208,6 +220,10 @@ export interface CreateQuestionRequest {
 
 export interface CreateQuizRequest {
     classId: string;
+    classTitle?: string;
+    students?: UserInfo[];
+    creatorFullName?: string;
+    creatorAvatarUrl?: string;
     title: string;
     description?: string;
     timeLimitMinutes: number;

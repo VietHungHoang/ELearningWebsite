@@ -38,11 +38,24 @@ export interface ParticipantResponse {
     unreadCount: number;
 }
 
+export interface UserInfo {
+    id: string;
+    fullName: string;
+    avatarUrl?: string;
+}
+
+export interface ParticipantUserInfo {
+    userId: string;
+    fullName: string;
+    avatarUrl?: string;
+}
+
 export interface ConversationResponse {
     id: string;
     name?: string;
     type: "ONE_ON_ONE" | "GROUP";
     participantIds: string[];
+    participantDetails?: ParticipantUserInfo[];
     classId?: string;
     lastMessageId?: string;
     lastMessageAt?: string;
@@ -63,6 +76,7 @@ export interface CreateConversationRequest {
     type: "ONE_TO_ONE" | "GROUP";
     participantIds: string[];
     classId?: string;
+    participantInfos?: UserInfo[];
 }
 
 export interface UpdateMessageRequest {

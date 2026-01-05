@@ -7,6 +7,8 @@ import com.elearning.quizservice.dto.response.QuizSummaryResponse;
 import com.elearning.quizservice.dto.response.StudentQuizSummaryResponse;
 import com.elearning.quizservice.entity.Quiz;
 import com.elearning.quizservice.entity.StudentQuizStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +46,7 @@ public interface QuizService {
     /**
      * Get all quizzes for a student with their status and progress
      */
-    List<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus status);
+    Page<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus status, Pageable pageable);
     
     /**
      * Update a quiz

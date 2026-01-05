@@ -13,6 +13,9 @@ import com.elearning.quizservice.service.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,15 +36,16 @@ public class StudentQuizController {
     private final QuizAttemptService attemptService;
     
     /**
-     * Get all quizzes assigned to student with their status and progress
+     * Get all quizzes assigned to student with pagination and optional status filter
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<StudentQuizSummaryResponse>>> getStudentQuizzes(
+    public ResponseEntity<ApiResponse<Page<StudentQuizSummaryResponse>>> getStudentQuizzes(
             @RequestHeader("X-User-Id") UUID studentId,
-            @RequestParam(required = false) StudentQuizStatus status) {
-        log.info("Getting quizzes for student: {} with status filter: {}", studentId, status);
+            @RequestParam(required = false) StudentQuizStatus status,
+            Pageable pageable) {
+        log.info("Getting quizzes for student: {} with status filter: {} and pagination", studentId, status);
         
-        List<StudentQuizSummaryResponse> response = quizService.getQuizzesForStudent(studentId, status);
+        Page<StudentQuizSummaryResponse> response = quizService.getQuizzesForStudent(studentId, status, pageable);
         
         return ResponseEntity.ok(ApiResponse.success(response));
     }

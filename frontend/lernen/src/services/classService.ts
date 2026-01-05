@@ -43,6 +43,93 @@ export interface StudentInfo {
     email?: string;
 }
 
+// ClassDetailResponse matches BE ClassDetailResponse.java
+export interface ClassDetailResponse {
+    id: string;
+    title: string;
+    description: string;
+    subjectId: string;
+    type: string; // ONE_ON_ONE, GROUP
+    status: string; // CREATED, DRAFT, OPENING, PUBLISHED, IN_PROGRESS, COMPLETED, CANCELLED
+    maxStudents: number;
+    pricePerHour: number;
+    createdAt: string;
+
+    // Tutor info
+    tutor: {
+        id: string;
+        fullName: string;
+        avatarUrl: string;
+    };
+
+    // Students
+    students: {
+        id: string;
+        fullName: string;
+        avatarUrl: string;
+        enrollmentStatus: string;
+    }[];
+
+    // Schedules
+    schedules: {
+        dayOfWeek: number; // 1=Monday, 7=Sunday
+        time: string; // HH:mm
+        durationMinutes: number;
+    }[];
+
+    // Sessions
+    sessions: {
+        id: string;
+        sessionNumber: number;
+        title: string;
+        startTime: string;
+        endTime: string;
+        meetingLink: string;
+        status: string;
+        participantsCount: number;
+    }[];
+    completedSessions: number;
+    totalSessions: number;
+
+    // Materials
+    materials: {
+        id: string;
+        name: string;
+        type: string;
+        s3Url: string;
+        uploadDate: string;
+        fileSize: number;
+        description: string;
+    }[];
+
+    // Announcements
+    announcements: {
+        id: string;
+        title: string;
+        content: string;
+        date: string;
+        author: string;
+    }[];
+
+    // Assignments
+    assignments: {
+        id: string;
+        title: string;
+        description: string;
+        dueDate: string;
+        submissionsCount: number;
+    }[];
+
+    // Stats
+    stats: {
+        totalStudents: number;
+        activeStudents: number;
+        completedSessions: number;
+        totalSessions: number;
+        completionRate: number;
+    };
+}
+
 // Mock data for testing when API fails
 const mockClassData: ClassTable[] = [
     {
@@ -257,12 +344,34 @@ export const classService = {
         }
     },
 
-    getClassById: async (tutorId: string, classId: string): Promise<ApiResponse<ClassTable>> => {
-        return await apiService.get<ClassTable>(`/tutors/${tutorId}/classes/${classId}`);
+    getClassById: async (classId: string): Promise<ApiResponse<ClassDetailResponse>> => {
+        try {
+            const response = await apiService.get<ClassDetailResponse>(`/v1/classes/${classId}`);
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data,
+            };
+        } catch (error) {
+            console.error("Failed to get class detail:", error);
+            throw error;
+        }
     },
 
-    getClassDetail: async (tutorId: string, classId: string): Promise<ApiResponse<ClassDetail>> => {
-        return await apiService.get<ClassDetail>(`/tutors/${tutorId}/classes/${classId}/detail`);
+    getClassDetail: async (classId: string): Promise<ApiResponse<ClassDetailResponse>> => {
+        try {
+            const response = await apiService.get<ClassDetailResponse>(`/v1/classes/${classId}`);
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data,
+            };
+        } catch (error) {
+            console.error("Failed to get class detail:", error);
+            throw error;
+        }
     },
 
     requestTrialSession: async (request: TrialSessionRequest): Promise<ApiResponse<null>> => {
@@ -361,6 +470,26 @@ export const classService = {
                 status: error.response?.status || 500,
                 success: false,
                 message: error.response?.data?.message || "Failed to accept trial session request",
+                data: null,
+            };
+        }
+    },
+
+    rejectTrialRequest: async (requestId: string): Promise<ApiResponse<null>> => {
+        try {
+            const response = await apiService.post<null>(`/v1/classes/trial-session/${requestId}/reject`);
+            return {
+                status: response.status,
+                success: true,
+                message: "Trial session request rejected successfully",
+                data: null,
+            };
+        } catch (error: any) {
+            console.error("Error rejecting trial session request:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to reject trial session request",
                 data: null,
             };
         }
