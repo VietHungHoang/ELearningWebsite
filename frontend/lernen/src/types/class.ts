@@ -10,7 +10,7 @@ export type EnrollmentStatus = 'JOINED' | 'PENDING_PAYMENT' | 'ON_GOING' | 'COMP
 
 export interface ClassBasicInfoResponse {
     id: string;
-    title: string;
+    title: string | null;
 }
 
 export interface ClassSchedule {
@@ -21,6 +21,7 @@ export interface ClassSchedule {
 export type ClassStatus = 'ONGOING' | 'COMPLETED' | 'OPENING' | 'CANCELLED';
 
 export interface ClassTable extends ClassBasicInfoResponse {
+    tutor?: UserBasicInfoResponse | null;
     students: UserBasicInfoResponse[];
     type: ClassType;
     status: ClassStatus;
@@ -89,7 +90,8 @@ export interface Session {
     sessionType: ClassType;
     createdAt: string;
     updatedAt: string;
-    meetingUrl?: string;
+    meetingUrl?: string; // Deprecated, use meetingLink instead
+    meetingLink?: string;
     notes?: string;
 }
 

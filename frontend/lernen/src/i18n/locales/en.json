@@ -683,6 +683,7 @@
         "selectStatus": "Select status",
         "tableHeaders": {
           "classTitle": "Class title",
+          "tutorName": "Tutor name",
           "type": "Type",
           "startDate": "Start date",
           "schedule": "Schedule",
@@ -1110,6 +1111,103 @@
           "categoryPlaceholder": "Select category",
           "subject": "Subject",
           "subjectPlaceholder": "Select subject"
+        },
+        "detail": {
+          "tabs": {
+            "schedule": "Schedule",
+            "students": "Students",
+            "quizzes": "Quizzes",
+            "materials": "Materials"
+          },
+          "loading": "Loading class details...",
+          "notFound": {
+            "title": "Class not found",
+            "description": "The class you're looking for doesn't exist.",
+            "backButton": "Back to My Classes"
+          },
+          "chat": "Chat",
+          "updateSchedule": {
+            "title": "Update Class Schedule",
+            "daysOfWeek": "Days of Week",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "cancel": "Cancel",
+            "update": "Update Schedule"
+          },
+          "statusLabels": {
+            "inProgress": "In Progress",
+            "ongoing": "Ongoing",
+            "opening": "Opening",
+            "completed": "Completed"
+          },
+          "quizzesTab": {
+            "tutor": {
+              "title": "Quizzes ({{count}})",
+              "description": "Track student quiz performance",
+              "newQuiz": "New Quiz",
+              "noQuizzes": "No quizzes yet",
+              "noQuizzesDescription": "Create your first quiz to get started"
+            },
+            "student": {
+              "title": "Quizzes ({{count}})",
+              "description": "View and take quizzes assigned to you",
+              "noQuizzes": "No quizzes yet",
+              "noQuizzesDescription": "No quizzes have been assigned yet"
+            },
+            "questions": "{{count}} questions",
+            "timeLimit": "{{count}}min",
+            "createdAt": "Created at {{date}}",
+            "submitted": "{{submittedCount}}/{{totalStudents}} Submitted",
+            "viewResults": "View Results",
+            "deleteQuiz": "Delete Quiz"
+          },
+          "materialsTab": {
+            "tutor": {
+              "title": "Materials ({{count}})",
+              "description": "Manage your class materials",
+              "uploadMaterial": "Upload Material",
+              "noMaterials": "No materials yet",
+              "noMaterialsDescription": "Upload documents, videos, or links for your students."
+            },
+            "student": {
+              "title": "Materials ({{count}})",
+              "description": "View class materials and resources",
+              "noMaterials": "No materials yet",
+              "noMaterialsDescription": "No materials have been uploaded yet"
+            },
+            "uploadedOn": "Uploaded on {{date}}",
+            "download": "Download",
+            "delete": "Delete",
+            "loading": "Loading class data...",
+            "loadingDescription": "Please wait while we load the class information."
+          },
+          "studentsTab": {
+            "tutor": {
+              "title": "Students ({{count}})",
+              "description": "Manage students in your class",
+              "addStudent": "Add Student",
+              "noStudents": "No students yet",
+              "noStudentsDescription": "Add your first student to get started",
+              "deleteStudent": "Delete Student",
+              "sendMessage": "Send message",
+              "addStudentModal": {
+                "title": "Add Student",
+                "searchPlaceholder": "Search students...",
+                "searchFeature": "Search feature will be implemented",
+                "searchingFor": "Searching for: \"{{term}}\"",
+                "enterToSearch": "Enter to search for students",
+                "cancel": "Cancel",
+                "addSelected": "Add Selected"
+              }
+            },
+            "student": {
+              "title": "Classmates ({{count}})",
+              "description": "View your classmates in this class",
+              "noStudents": "No classmates yet",
+              "noStudentsDescription": "There are no other students in this class",
+              "sendMessage": "Send message"
+            }
+          }
         }
       },
       "dealsCoupons": {
@@ -1339,6 +1437,8 @@
         "upcomingSessions": "Upcoming sessions",
         "noUpcomingSessions": "No upcoming sessions",
         "pastSessions": "Past sessions",
+        "noPastSessions": "No past sessions",
+        "noMeetingLink": "Meeting link not available",
         "session": "session",
         "sessions": "sessions",
         "attendance": "Attendance",
@@ -2347,6 +2447,18 @@
       "continue": "Continue",
       "exit": "Exit",
       "warning": "Your progress will not be saved. Are you sure you want to exit?"
+    },
+    "errors": {
+      "maxAttemptsReached": "You have reached the maximum number of attempts",
+      "failedToLoad": "Failed to load quiz. Please try again.",
+      "failedToStart": "Failed to start quiz. Please try again.",
+      "failedToSubmit": "Failed to submit quiz. Please try again.",
+      "failedToSaveAnswer": "Failed to save answer. Please try again.",
+      "quizIdMissing": "Quiz ID is missing"
+    },
+    "loading": "Loading quiz...",
+    "success": {
+      "quizSubmitted": "Quiz submitted successfully!"
     }
   },
   "quizResult": {
@@ -2370,6 +2482,12 @@
       "correct": "Correct",
       "incorrect": "Incorrect"
     },
-    "noQuestionsMatch": "No questions match this filter"
+    "noQuestionsMatch": "No questions match this filter",
+    "errors": {
+      "failedToLoad": "Failed to load quiz result. Please try again.",
+      "attemptIdMissing": "Attempt ID is missing",
+      "quizIdMissing": "Quiz ID is missing",
+      "noAttemptFound": "No attempt found for this quiz"
+    }
   }
 }

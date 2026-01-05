@@ -352,7 +352,7 @@ const MyQuizzesPage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/quiz/take');
+                            navigate(`/quiz/take/${quiz.id}`);
                             setOpenMenuId(null);
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#475569]/5 active:bg-[#475569]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
@@ -366,7 +366,7 @@ const MyQuizzesPage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/quiz/take');
+                            navigate(`/quiz/take/${quiz.id}`);
                             setOpenMenuId(null);
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#a16207]/5 active:bg-[#a16207]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 whitespace-nowrap"
@@ -380,7 +380,7 @@ const MyQuizzesPage: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                             e.stopPropagation();
-                            navigate('/quiz/take');
+                            navigate(`/quiz/take/${quiz.id}`);
                             setOpenMenuId(null);
                         }}
                         className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
@@ -513,9 +513,29 @@ const MyQuizzesPage: React.FC = () => {
                     <button
                         onClick={() => {
                             if (quiz.status === 'not_started' || quiz.status === 'in_progress') {
-                                navigate('/quiz/take');
+                                navigate(`/quiz/take/${quiz.id}`);
                             } else if (quiz.status === 'completed') {
-                                navigate('/quiz/result');
+                                // If we have attemptId, navigate immediately
+                                if (quiz.currentAttemptId) {
+                                    navigate(`/quiz/result/${quiz.currentAttemptId}`);
+                                } else {
+                                    // Navigate immediately and fetch attemptId in background
+                                    // QuizResultPage will handle loading state
+                                    navigate(`/quiz/result/loading`, { 
+                                        state: { quizId: quiz.id } 
+                                    });
+                                    
+                                    // Fetch attemptId in background and update URL
+                                    quizService.getLatestCompletedAttemptId(quiz.id)
+                                        .then(attemptId => {
+                                            if (attemptId) {
+                                                navigate(`/quiz/result/${attemptId}`, { replace: true });
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to get attempt ID:', err);
+                                        });
+                                }
                             }
                         }}
                         className={`w-full mt-auto pt-2 py-2 rounded-lg text-xs font-semibold transition-colors ${quiz.status === 'completed'

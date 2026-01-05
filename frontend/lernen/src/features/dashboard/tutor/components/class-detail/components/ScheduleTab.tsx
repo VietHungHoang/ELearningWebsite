@@ -8,6 +8,7 @@ import { HiVideoCamera, HiChevronLeft, HiChevronRight, HiChevronDown } from "rea
 import { MdAccessTime, MdDateRange } from "react-icons/md";
 import type { Session } from "../../../../../../types/class";
 import LoadingOverlay from "../../LoadingOverlay";
+import { useAuth } from "../../../../../../context/AuthContext";
 
 interface ScheduleTabProps {
     upcomingSessions: Session[];
@@ -21,7 +22,7 @@ interface SessionCardProps {
     locale: Locale;
     language: string;
     t: any;
-    onStartSession: (sessionId: string) => Promise<void>;
+    onStartSession: (session: Session) => void;
     onReschedule: (sessionDate: string) => void;
     onAddNote: (sessionId: string) => void;
 }
@@ -72,8 +73,10 @@ const SessionCard: React.FC<SessionCardProps> = ({
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={() => onStartSession(session.id)}
-                        className="bg-[#0b6459] text-white px-3 py-2 rounded-lg font-semibold text-sm hover:bg-[#094d44] transition-colors duration-200 flex items-center gap-2"
+                        onClick={() => onStartSession(session)}
+                        className="bg-[#0b6459] text-white px-3 py-2 rounded-lg font-semibold text-sm hover:bg-[#094d44] transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!session.meetingLink}
+                        title={!session.meetingLink ? t("dashboard.tutor.scheduleTab.noMeetingLink") : undefined}
                     >
                         <HiVideoCamera className="w-4 h-4" />
                         {t("dashboard.tutor.startSession")}
@@ -412,8 +415,9 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
     onOpenReschedule,
 }) => {
     const { t, i18n } = useTranslation();
+    const { state } = useAuth();
+    const isStudent = state.user?.role === 'student';
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [sessionStarting, setSessionStarting] = useState(false);
     const [showAddNoteModal, setShowAddNoteModal] = useState(false);
     const [noteContent, setNoteContent] = useState("");
     const [selectedSessionId, setSelectedSessionId] = useState<string>("");
@@ -437,14 +441,33 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
         return i18n.language === "vi" ? vi : enUS;
     };
 
-    const handleStartSession = async (sessionId: string) => {
-        setSessionStarting(true);
-        console.log("Starting session:", sessionId);
-        // TODO: Implement session start logic
-        // Simulate API call
-        setTimeout(() => {
-            setSessionStarting(false);
-        }, 2000);
+    const convertToWebLink = (link: string): string => {
+        // Convert zoommtg:// protocol to https:// for web
+        if (link.startsWith('zoommtg://')) {
+            link = link.replace('zoommtg://', 'https://');
+        }
+        
+        // Convert Zoom meeting link to web client format
+        // Change /j/ to /wc/join/ to force web browser instead of app
+        // Example: https://us05web.zoom.us/j/83597249421?pwd=... 
+        //          -> https://us05web.zoom.us/wc/join/83597249421?pwd=...
+        if (link.includes('zoom.us/j/')) {
+            // Replace /j/ with /wc/join/ to force web client
+            link = link.replace(/zoom\.us\/j\//, 'zoom.us/wc/join/');
+        }
+        
+        return link;
+    };
+
+    const handleStartSession = (session: Session) => {
+        if (!session.meetingLink) {
+            console.warn("No meeting URL available for session:", session.id);
+            return;
+        }
+        
+        // Convert to web link and open in new tab
+        const webLink = convertToWebLink(session.meetingLink);
+        window.open(webLink, '_blank', 'noopener,noreferrer');
     };
 
     const handleAddNote = (sessionId: string) => {
@@ -530,26 +553,28 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
                     </div>
                 </div>
 
-                {/* Past Sessions - Simplified */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
-                    {false /* loading state disabled */ ? (
-                        <PastSessionsSkeleton />
-                    ) : (
-                        <>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-bold text-gray-800">
-                                    {t("dashboard.tutor.scheduleTab.pastSessions")}
-                                </h3>
-                                <span className="text-sm text-gray-500 font-medium">
-                                    {pastSessions.length}{" "}
-                                    {pastSessions.length === 1
-                                        ? t("dashboard.tutor.scheduleTab.session")
-                                        : t("dashboard.tutor.scheduleTab.sessions")}
-                                </span>
-                            </div>
+                {/* Past Sessions - Only show for tutors */}
+                {!isStudent && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                        {false /* loading state disabled */ ? (
+                            <PastSessionsSkeleton />
+                        ) : (
+                            <>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-bold text-gray-800">
+                                        {t("dashboard.tutor.scheduleTab.pastSessions")}
+                                    </h3>
+                                    <span className="text-sm text-gray-500 font-medium">
+                                        {pastSessions.length}{" "}
+                                        {pastSessions.length === 1
+                                            ? t("dashboard.tutor.scheduleTab.session")
+                                            : t("dashboard.tutor.scheduleTab.sessions")}
+                                    </span>
+                                </div>
 
-                            <div className="space-y-4">
-                                {pastSessions.map((session) => {
+                                {pastSessions.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {pastSessions.map((session) => {
                                     const isExpanded = expandedSessions.has(session.id);
                                     const totalStudents =
                                         session.participantsCount + (session.absentStudents?.length || 0);
@@ -702,12 +727,20 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
                                         </div>
                                     );
                                 })}
-                            </div>
-                        </>
-                    )}
-                </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <p className="text-gray-500 text-sm">
+                                            {t("dashboard.tutor.scheduleTab.noPastSessions")}
+                                        </p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
-            <LoadingOverlay sessionStarting={sessionStarting} t={t} />
+            <LoadingOverlay sessionStarting={false} t={t} />
 
             {/* Add Note Modal */}
             {showAddNoteModal && (

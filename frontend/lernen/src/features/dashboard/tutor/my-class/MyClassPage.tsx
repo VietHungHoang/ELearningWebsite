@@ -16,6 +16,8 @@ import Pagination from '../../../../components/ui/Pagination';
 import { useTranslation } from 'react-i18next';
 import { classService } from '../../../../services/classService';
 import type { ClassTable, ClassStatus } from '../../../../types/class';
+import { convertUtcTimeToLocal } from '../../../../utils/scheduleHelpers';
+import { useAuth } from '../../../../context/AuthContext';
 
 type FilterTab = 'All Status' | 'Ongoing' | 'Opening' | 'Completed';
 
@@ -23,6 +25,7 @@ type FilterTab = 'All Status' | 'Ongoing' | 'Opening' | 'Completed';
 const MyClassPage: React.FC = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
+    const { state } = useAuth();
     const [classes, setClasses] = useState<ClassTable[]>([]);
     const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -40,6 +43,11 @@ const MyClassPage: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const itemsPerPage = 10;
     const { setBreadcrumb } = useBreadcrumb();
+
+    // Helper function to check if title is null or "null" string
+    const isTitleNull = (title: string | null | undefined): boolean => {
+        return !title || title === 'null' || title.trim() === '';
+    };
 
     // Helper function to convert day of week number to name
     const getDayName = (dayOfWeek: number): string => {
@@ -60,13 +68,15 @@ const MyClassPage: React.FC = () => {
     const formatScheduleDisplay = (dayOfWeek: number, time: string): string => {
         const isVietnamese = i18n.language === 'vi';
         const dayName = getDayName(dayOfWeek);
+        // Convert UTC time to local timezone
+        const localTime = convertUtcTimeToLocal(time);
 
         if (isVietnamese) {
             // Vietnamese: "19:00 Thứ 2"
-            return `${time} ${dayName}`;
+            return `${localTime} ${dayName}`;
         } else {
             // English: "Mon 19:00"
-            return `${dayName} ${time}`;
+            return `${dayName} ${localTime}`;
         }
     };
 
@@ -135,10 +145,19 @@ const MyClassPage: React.FC = () => {
     }, [currentPage]);
 
     const handleViewDetails = (classData: ClassTable) => {
-        // Navigate to class detail page with class data in state
-        navigate(`/dashboard/my-class/${classData.id}`, {
-            state: { classData }
-        });
+        // Check class status: if OPENING, navigate to view-only page
+        // Otherwise, navigate to full detail page with tabs
+        if (classData.status === 'OPENING') {
+            // Navigate to view-only page (ClassInfoPage with view mode)
+            navigate(`/dashboard/my-class/${classData.id}/view`, {
+                state: { classData, isViewMode: true }
+            });
+        } else {
+            // Navigate to detail page with tabs (Schedule, Students, Quizzes, Materials)
+            navigate(`/dashboard/my-class/${classData.id}`, {
+                state: { classData }
+            });
+        }
     };
 
     const handleEditClass = (classData: ClassTable) => {
@@ -229,10 +248,11 @@ const MyClassPage: React.FC = () => {
 
         return classes
             .filter(c => !statusFilter || c.status === statusFilter)
-            .filter(c =>
-                c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                c.students.some(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()))
-            );
+            .filter(c => {
+                const titleMatch = !isTitleNull(c.title) && c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase());
+                const studentMatch = c.students.some(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()));
+                return titleMatch || studentMatch;
+            });
     }, [classes, activeTab, searchTerm]);
 
     return (
@@ -324,7 +344,9 @@ const MyClassPage: React.FC = () => {
                             <thead className="bg-gray-50 text-gray-600 font-semibold">
                                 <tr>
                                     <th className="p-4 text-center">#</th>
-                                    <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.classTitle')}</th>
+                                    <th className="p-4 text-center">
+                                        {t('dashboard.tutor.myClass.tableHeaders.classTitle')}
+                                    </th>
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.type')}</th>
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.students')}</th>
                                     <th className="p-4 text-center">{t('dashboard.tutor.myClass.tableHeaders.schedule')}</th>
@@ -342,8 +364,10 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4">
                                             <div className="max-w-xs">
-                                                <p className="font-semibold text-gray-800 truncate" title={classData.title}>
-                                                    {classData.title}
+                                                <p className="font-semibold text-gray-800 truncate" title={!isTitleNull(classData.title) ? (classData.title || '') : (classData.students[0]?.fullName || '')}>
+                                                    {!isTitleNull(classData.title) 
+                                                        ? (classData.title || '') 
+                                                        : (state.user?.role === 'tutor' && classData.students.length > 0 ? classData.students[0].fullName : '-')}
                                                 </p>
                                             </div>
                                         </td>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
     IoCheckmarkCircle,
     IoCloseCircle,
@@ -10,78 +10,114 @@ import {
     IoTrophyOutline,
     IoRefreshOutline,
     IoArrowBack,
-    IoTimeOutline,
-    IoFilterOutline
+    IoFilterOutline,
+    IoWarningOutline
 } from 'react-icons/io5';
 import { HiChevronDown } from 'react-icons/hi';
 import { useAuth } from '../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import QuizLayout from '../components/QuizLayout';
+import quizService from '../../../services/quizService';
+import type { QuizResult as QuizResultType } from '../../../types/quiz';
+import Toast from '../../../components/ui/Toast';
 
-// Mock Data
-const quizResult = {
-    quizTitle: 'Chapter 1 - Introduction to Physics',
-    classTitle: 'Physics 101',
-    score: 18,
-    totalQuestions: 20,
-    passingScore: 70,
-    status: 'Passed',
-    dateCompleted: 'Oct 22, 2025',
-    timeTaken: '15:32',
-    questions: [
-        {
-            id: 1,
-            text: 'What is the primary benefit of using the Eisenhower Matrix for task prioritization?',
-            options: [
-                'It helps in delegating tasks to others.',
-                'It categorizes tasks based on urgency and importance.',
-                'It focuses only on long-term goals.',
-                'It ensures all tasks are completed in chronological order.',
-            ],
-            correctAnswer: 'It categorizes tasks based on urgency and importance.',
-            userAnswer: 'It categorizes tasks based on urgency and importance.',
-            explanation: 'The Eisenhower Matrix, also known as the Urgent-Important Matrix, helps prioritize tasks by dividing them into four quadrants based on urgency and importance. This allows you to focus on what truly matters while delegating or eliminating less critical tasks.',
-        },
-        {
-            id: 2,
-            text: 'Which of the following is a key principle of the Pomodoro Technique?',
-            options: [
-                'Working on multiple tasks simultaneously.',
-                'Taking long, infrequent breaks.',
-                'Working in short, focused intervals with planned breaks.',
-                'Completing the easiest tasks first.',
-            ],
-            correctAnswer: 'Working in short, focused intervals with planned breaks.',
-            userAnswer: 'Working on multiple tasks simultaneously.',
-            explanation: 'The Pomodoro Technique involves working in 25-minute focused intervals (called "pomodoros") followed by 5-minute breaks. After four pomodoros, take a longer 15-30 minute break. This helps maintain focus and prevents burnout.',
-        },
-        {
-            id: 3,
-            text: 'What does the "Two-Minute Rule" suggest in time management?',
-            options: [
-                'Spend only two minutes planning your day.',
-                'If a task takes less than two minutes, do it immediately.',
-                'Take a two-minute break every hour.',
-                'Limit meetings to two minutes.',
-            ],
-            correctAnswer: 'If a task takes less than two minutes, do it immediately.',
-            userAnswer: 'If a task takes less than two minutes, do it immediately.',
-            explanation: 'The Two-Minute Rule, popularized by David Allen in "Getting Things Done," states that if a task takes less than two minutes to complete, you should do it right away rather than adding it to your to-do list. This prevents small tasks from piling up.',
-        },
-        {
-            id: 4,
-            text: 'Which technique involves batching similar tasks together?',
-            options: [
-                'Time blocking',
-                'Task batching',
-                'Pomodoro Technique',
-                'Eisenhower Matrix',
-            ],
-            correctAnswer: 'Task batching',
-            userAnswer: 'Task batching',
-            explanation: 'Task batching is the practice of grouping similar tasks together and completing them in one dedicated time block. This reduces context switching, increases efficiency, and helps maintain focus by keeping your brain in one "mode" for longer periods.',
-        },
-    ]
+
+// Skeleton Loading Component for Quiz Result
+const QuizResultSkeleton: React.FC = () => {
+    return (
+        <QuizLayout showBackButton={true} title="Quiz Result">
+            <div className="h-[calc(100vh-140px)] flex overflow-hidden bg-gray-50">
+                {/* Left Sidebar Skeleton */}
+                <div className="w-72 flex-shrink-0 border-r border-gray-200 bg-white p-5 hidden lg:flex flex-col">
+                    {/* Score Card Skeleton */}
+                    <div className="rounded-2xl p-5 mb-5 text-center shadow-lg bg-gradient-to-br from-gray-200 to-gray-300">
+                        <div className="flex items-center justify-center gap-2 mb-4">
+                            <div className="w-6 h-6 bg-white/50 rounded animate-pulse"></div>
+                            <div className="h-5 w-24 bg-white/50 rounded animate-pulse"></div>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 mb-3 shadow-md">
+                            <div className="w-32 h-32 mx-auto">
+                                <div className="w-full h-full rounded-full border-8 border-gray-200 animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div className="h-5 w-32 bg-white/50 rounded animate-pulse mx-auto"></div>
+                    </div>
+
+                    {/* Quiz Info Skeleton */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 mb-5 shadow-sm">
+                        <div className="h-5 w-full bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+
+                    {/* Stats Skeleton */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3 shadow-sm">
+                        {[1, 2].map((i) => (
+                            <div key={i} className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-3 h-3 rounded-full bg-gray-200 animate-pulse"></div>
+                                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                                </div>
+                                <div className="h-5 w-8 bg-gray-200 rounded animate-pulse"></div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Action Buttons Skeleton */}
+                    <div className="mt-auto space-y-3 pt-4">
+                        <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+                        <div className="h-12 w-full bg-gray-200 rounded-xl animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Main Content Skeleton */}
+                <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+                    {/* Header Skeleton */}
+                    <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-white">
+                        <div>
+                            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-2"></div>
+                            <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+
+                        {/* Filter Tabs Skeleton */}
+                        <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="h-8 w-20 bg-white rounded-md animate-pulse"></div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Mobile Stats Bar Skeleton */}
+                    <div className="lg:hidden flex-shrink-0 flex items-center justify-between px-5 py-3 bg-gradient-to-r from-gray-200 to-gray-300">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-white rounded-lg animate-pulse"></div>
+                            <div>
+                                <div className="h-4 w-20 bg-white/50 rounded animate-pulse mb-1"></div>
+                                <div className="h-3 w-24 bg-white/50 rounded animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div className="w-10 h-10 bg-white/50 rounded-lg animate-pulse"></div>
+                    </div>
+
+                    {/* Questions List Skeleton */}
+                    <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden shadow-sm">
+                                <div className="px-5 py-4 flex items-center gap-4">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+                                    <div className="flex-1">
+                                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse mb-2"></div>
+                                        <div className="h-5 w-full bg-gray-200 rounded animate-pulse mb-1"></div>
+                                        <div className="h-5 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                                    </div>
+                                    <div className="w-8 h-8 bg-gray-100 rounded-lg animate-pulse"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </QuizLayout>
+    );
 };
 
 // Compact Circular Progress
@@ -124,7 +160,7 @@ const CircularProgress: React.FC<{ percentage: number; isPassed: boolean; label:
 
 // Question Card Component - Compact
 const QuestionCard: React.FC<{
-    question: typeof quizResult.questions[0];
+    question: QuizResultType['questions'][0];
     index: number;
     isExpanded: boolean;
     onToggle: () => void;
@@ -137,7 +173,7 @@ const QuestionCard: React.FC<{
         hideExplanation: string;
     };
 }> = ({ question, index, isExpanded, onToggle, translations }) => {
-    const isCorrect = question.userAnswer === question.correctAnswer;
+    const isCorrect = question.isCorrect;
     const [showExplanation, setShowExplanation] = useState(false);
 
     return (
@@ -163,7 +199,7 @@ const QuestionCard: React.FC<{
                             {isCorrect ? translations.correct : translations.incorrect}
                         </span>
                     </div>
-                    <p className="text-base font-semibold text-gray-900 line-clamp-2">{question.text}</p>
+                    <p className="text-base font-semibold text-gray-900 line-clamp-2">{question.questionText}</p>
                 </div>
                 <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
                     {isExpanded ? (
@@ -178,9 +214,9 @@ const QuestionCard: React.FC<{
                 }`}>
                 <div className="px-5 pb-5 space-y-3 border-t border-gray-200 pt-4">
                     {question.options.map((option, optionIndex) => {
-                        const isCorrectOption = option === question.correctAnswer;
-                        const isUserOption = option === question.userAnswer;
-                        const isIncorrectUserOption = isUserOption && !isCorrectOption;
+                        const isCorrectOption = option.isCorrect;
+                        const isSelectedOption = option.isSelected;
+                        const isIncorrectSelected = isSelectedOption && !isCorrectOption;
 
                         let optionStyles = 'bg-gray-50 border-gray-200 text-gray-700';
                         let iconElement = <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />;
@@ -194,7 +230,7 @@ const QuestionCard: React.FC<{
                             );
                         }
 
-                        if (isIncorrectUserOption) {
+                        if (isIncorrectSelected) {
                             optionStyles = 'bg-[#b91c1c]/5 border-[#b91c1c]/40 text-[#b91c1c]';
                             iconElement = (
                                 <div className="w-5 h-5 rounded-full bg-[#b91c1c] flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -206,13 +242,13 @@ const QuestionCard: React.FC<{
                         return (
                             <div key={optionIndex} className={`flex items-center gap-3 px-4 py-3 border-2 rounded-lg text-sm font-medium ${optionStyles}`}>
                                 {iconElement}
-                                <span className="flex-1">{option}</span>
+                                <span className="flex-1">{option.optionText}</span>
                                 {isCorrectOption && (
                                     <span className="text-xs font-semibold text-white bg-[#065A46] px-2 py-1 rounded-md">
                                         {translations.correctAnswer}
                                     </span>
                                 )}
-                                {isIncorrectUserOption && (
+                                {isIncorrectSelected && (
                                     <span className="text-xs font-semibold text-white bg-[#b91c1c] px-2 py-1 rounded-md">
                                         {translations.yourAnswer}
                                     </span>
@@ -263,30 +299,122 @@ type FilterType = 'all' | 'correct' | 'incorrect';
 
 const QuizResultPage: React.FC = () => {
     const navigate = useNavigate();
-    const { state } = useAuth();
+    const { attemptId } = useParams<{ attemptId: string }>();
+    const location = useLocation();
+    const { state: authState } = useAuth();
     const { t } = useTranslation();
-    const percentage = Math.round((quizResult.score / quizResult.totalQuestions) * 100);
-    const isPassed = percentage >= quizResult.passingScore;
-    const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
+    
+    // State
+    const [quizResult, setQuizResult] = useState<QuizResultType | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+    const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
     const [filter, setFilter] = useState<FilterType>('all');
     const [showConfetti, setShowConfetti] = useState(false);
+    
+    // Ref to track if component is mounted and prevent duplicate API calls
+    const isMountedRef = useRef(true);
+    const hasLoadedRef = useRef(false);
 
-    const isTutor = state.user?.role === 'tutor';
+    const isTutor = authState.user?.role === 'tutor';
     const quizzesPath = isTutor ? '/dashboard/quizzes' : '/dashboard/my-quizzes';
 
+    // Load quiz result from API
     useEffect(() => {
-        document.title = 'Quiz Result - ELearning';
-    }, []);
+        // Reset mounted flag when component mounts
+        isMountedRef.current = true;
+        hasLoadedRef.current = false;
+        
+        const loadQuizResult = async () => {
+            // Prevent duplicate calls
+            if (hasLoadedRef.current || !isMountedRef.current) {
+                return;
+            }
+            
+            hasLoadedRef.current = true;
+            // Handle case where we need to fetch attemptId first
+            if (attemptId === 'loading') {
+                const quizId = (location.state as any)?.quizId;
+                if (quizId) {
+                    try {
+                        if (!isMountedRef.current) return;
+                        setLoading(true);
+                        const fetchedAttemptId = await quizService.getLatestCompletedAttemptId(quizId);
+                        if (!isMountedRef.current) return;
+                        
+                        if (fetchedAttemptId) {
+                            // Navigate to correct URL with attemptId
+                            navigate(`/quiz/result/${fetchedAttemptId}`, { replace: true });
+                            return;
+                        } else {
+                            setToast({ message: t('quizResult.errors.noAttemptFound'), type: 'error' });
+                            setLoading(false);
+                            return;
+                        }
+                    } catch (err: any) {
+                        if (!isMountedRef.current) return;
+                        console.error('Failed to get attempt ID:', err);
+                        setToast({ message: t('quizResult.errors.failedToLoad'), type: 'error' });
+                        setLoading(false);
+                        return;
+                    }
+                } else {
+                    if (!isMountedRef.current) return;
+                    setToast({ message: t('quizResult.errors.quizIdMissing'), type: 'error' });
+                    setLoading(false);
+                    return;
+                }
+            }
+
+            if (!attemptId || attemptId === 'loading') {
+                if (!isMountedRef.current) return;
+                setToast({ message: t('quizResult.errors.attemptIdMissing'), type: 'error' });
+                setLoading(false);
+                return;
+            }
+
+            try {
+                if (!isMountedRef.current) return;
+                setLoading(true);
+                const result = await quizService.getQuizResult(attemptId);
+                if (!isMountedRef.current) return;
+                
+                setQuizResult(result);
+                document.title = `${result.quizTitle} - Quiz Result`;
+            } catch (err: any) {
+                if (!isMountedRef.current) return;
+                console.error('Failed to load quiz result:', err);
+                setToast({ message: err.message || t('quizResult.errors.failedToLoad'), type: 'error' });
+            } finally {
+                if (isMountedRef.current) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        loadQuizResult();
+        
+        // Cleanup function
+        return () => {
+            isMountedRef.current = false;
+            hasLoadedRef.current = false;
+        };
+    }, [attemptId, location.state, navigate, t]);
+
+    // Calculate derived values
+    const percentage = quizResult ? Math.round((quizResult.correctAnswers / quizResult.totalQuestions) * 100) : 0;
+    const isPassed = quizResult ? quizResult.passed : false;
+    const quizId = quizResult?.quizId || null;
 
     useEffect(() => {
-        if (isPassed) {
+        if (isPassed && quizResult) {
             setShowConfetti(true);
             const timer = setTimeout(() => setShowConfetti(false), 3000);
             return () => clearTimeout(timer);
         }
-    }, [isPassed]);
+    }, [isPassed, quizResult]);
 
-    const toggleQuestion = (questionId: number) => {
+    const toggleQuestion = (questionId: string) => {
         setExpandedQuestions(prev => {
             const newSet = new Set(prev);
             if (newSet.has(questionId)) {
@@ -298,15 +426,50 @@ const QuizResultPage: React.FC = () => {
         });
     };
 
-    const correctCount = quizResult.questions.filter(q => q.userAnswer === q.correctAnswer).length;
-    const incorrectCount = quizResult.questions.length - correctCount;
+    const correctCount = quizResult ? quizResult.questions.filter(q => q.isCorrect).length : 0;
+    const incorrectCount = quizResult ? quizResult.questions.filter(q => !q.isCorrect).length : 0;
 
-    const filteredQuestions = quizResult.questions.filter(q => {
-        const isCorrect = q.userAnswer === q.correctAnswer;
-        if (filter === 'correct') return isCorrect;
-        if (filter === 'incorrect') return !isCorrect;
+    const filteredQuestions = quizResult ? quizResult.questions.filter(q => {
+        if (filter === 'correct') return q.isCorrect;
+        if (filter === 'incorrect') return !q.isCorrect;
         return true;
-    });
+    }) : [];
+
+    // Loading state
+    if (loading) {
+        return <QuizResultSkeleton />;
+    }
+
+    // If no quiz result, show empty state
+    if (!quizResult) {
+        return (
+            <QuizLayout showBackButton={true} title="Quiz Result">
+                <div className="h-[calc(100vh-140px)] flex items-center justify-center bg-gray-50">
+                    <div className="text-center px-6 max-w-md">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <IoWarningOutline className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                            {t('quizResult.errors.failedToLoad')}
+                        </h2>
+                        <button
+                            onClick={() => navigate(quizzesPath)}
+                            className="px-6 py-2.5 bg-[#065A46] text-white rounded-lg hover:bg-[#054d3b] transition-colors text-sm font-medium"
+                        >
+                            {t('quizResult.backToQuizzes')}
+                        </button>
+                    </div>
+                </div>
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                )}
+            </QuizLayout>
+        );
+    }
 
     return (
         <QuizLayout showBackButton={true} title="Quiz Result">
@@ -346,14 +509,13 @@ const QuizResultPage: React.FC = () => {
                             <CircularProgress percentage={percentage} isPassed={isPassed} label={t('quizResult.score')} />
                         </div>
                         <p className="text-white text-sm font-medium">
-                            {quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}
+                            {quizResult.correctAnswers}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}
                         </p>
                     </div>
 
                     {/* Quiz Info */}
                     <div className="bg-white rounded-xl p-4 border border-gray-200 mb-5 shadow-sm">
                         <h2 className="font-semibold text-gray-900 text-base mb-1.5 line-clamp-2">{quizResult.quizTitle}</h2>
-                        <p className="text-sm text-gray-500">{quizResult.classTitle}</p>
                     </div>
 
                     {/* Stats */}
@@ -373,25 +535,22 @@ const QuizResultPage: React.FC = () => {
                             <span className="font-bold text-base text-[#b91c1c]">{incorrectCount}</span>
                         </div>
                         <div className="pt-3 border-t border-gray-200 space-y-2.5">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2.5">
-                                    <IoTimeOutline className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm text-gray-700 font-medium">{t('quizResult.time')}</span>
-                                </div>
-                                <span className="font-semibold text-sm text-gray-900">{quizResult.timeTaken}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-700 font-medium">{t('quizResult.passScore')}</span>
-                                <span className="font-semibold text-sm text-gray-900">{quizResult.passingScore}%</span>
-                            </div>
                         </div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="mt-auto space-y-3 pt-4">
                         <button
-                            onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
-                            className="w-full px-4 py-3 bg-[#065A46] text-white text-sm font-semibold rounded-xl hover:bg-[#054d3b] transition-all flex items-center justify-center gap-2 shadow-md"
+                            onClick={() => {
+                                if (quizId) {
+                                    navigate(`/quiz/take/${quizId}`);
+                                } else {
+                                    // TODO: Load quizId from API when implementing real data
+                                    console.warn('QuizId not available for retake');
+                                }
+                            }}
+                            disabled={!quizId}
+                            className="w-full px-4 py-3 bg-[#065A46] text-white text-sm font-semibold rounded-xl hover:bg-[#054d3b] transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <IoRefreshOutline className="w-5 h-5" />
                             {t('quizResult.retakeQuiz')}
@@ -412,7 +571,6 @@ const QuizResultPage: React.FC = () => {
                     <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-white">
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">{t('quizResult.reviewAnswers')}</h1>
-                            <p className="text-sm text-gray-500 mt-1">{quizResult.dateCompleted}</p>
                         </div>
 
                         {/* Filter Tabs */}
@@ -422,7 +580,7 @@ const QuizResultPage: React.FC = () => {
                                 className={`px-4 py-2 text-xs font-semibold rounded-md transition-all ${filter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                                     }`}
                             >
-                                {t('quizResult.filter.all')} ({quizResult.questions.length})
+                                {t('quizResult.filter.all')} ({quizResult?.questions.length || 0})
                             </button>
                             <button
                                 onClick={() => setFilter('correct')}
@@ -449,13 +607,21 @@ const QuizResultPage: React.FC = () => {
                             </div>
                             <div className="text-white">
                                 <p className="text-sm font-bold">{isPassed ? t('quizResult.passed') : t('quizResult.notPassed')}</p>
-                                <p className="text-xs text-white/80">{quizResult.score}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}</p>
+                                <p className="text-xs text-white/80">{quizResult.correctAnswers}/{quizResult.totalQuestions} {t('quizResult.correct').toLowerCase()}</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => navigate(isTutor ? '/quiz/take' : '/quiz/take')}
-                                className="p-2.5 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all"
+                                onClick={() => {
+                                    if (quizId) {
+                                        navigate(`/quiz/take/${quizId}`);
+                                    } else {
+                                        // TODO: Load quizId from API when implementing real data
+                                        console.warn('QuizId not available for retake');
+                                    }
+                                }}
+                                disabled={!quizId}
+                                className="p-2.5 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <IoRefreshOutline className="w-5 h-5" />
                             </button>
@@ -472,11 +638,11 @@ const QuizResultPage: React.FC = () => {
                         ) : (
                             filteredQuestions.map((question) => (
                                 <QuestionCard
-                                    key={question.id}
+                                    key={question.questionId}
                                     question={question}
-                                    index={quizResult.questions.findIndex(q => q.id === question.id)}
-                                    isExpanded={expandedQuestions.has(question.id)}
-                                    onToggle={() => toggleQuestion(question.id)}
+                                    index={quizResult.questions.findIndex(q => q.questionId === question.questionId)}
+                                    isExpanded={expandedQuestions.has(question.questionId)}
+                                    onToggle={() => toggleQuestion(question.questionId)}
                                     translations={{
                                         correct: t('quizResult.correct'),
                                         incorrect: t('quizResult.incorrect'),
@@ -499,6 +665,15 @@ const QuizResultPage: React.FC = () => {
                 }
                 .animate-confetti { animation: confetti-fall 3s ease-in-out forwards; }
             `}</style>
+
+                {/* Toast Notification */}
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                )}
             </div>
         </QuizLayout>
     );

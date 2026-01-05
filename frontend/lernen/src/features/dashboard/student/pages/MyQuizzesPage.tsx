@@ -253,9 +253,31 @@ const MyQuizzesPage: React.FC = () => {
                         <button
                             onClick={() => {
                                 if (quiz.status === 'not_started' || quiz.status === 'in_progress') {
-                                    navigate('/quiz/take');
+                                    navigate(`/quiz/take/${quiz.id}`);
                                 } else {
-                                    navigate('/quiz/result');
+                                    // If we have attemptId, navigate immediately
+                                    const currentAttemptId = (quiz as any).currentAttemptId;
+                                    if (currentAttemptId) {
+                                        navigate(`/quiz/result/${currentAttemptId}`);
+                                    } else {
+                                        // Navigate immediately and fetch attemptId in background
+                                        navigate(`/quiz/result/loading`, { 
+                                            state: { quizId: quiz.id } 
+                                        });
+                                        
+                                        // Fetch attemptId in background and update URL
+                                        import('../../../../services/quizService').then(({ default: quizService }) => {
+                                            return quizService.getLatestCompletedAttemptId(quiz.id);
+                                        })
+                                        .then(attemptId => {
+                                            if (attemptId) {
+                                                navigate(`/quiz/result/${attemptId}`, { replace: true });
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.error('Failed to get attempt ID:', err);
+                                        });
+                                    }
                                 }
                             }}
                             className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${quiz.status === 'completed'

@@ -115,6 +115,12 @@ export interface StudentQuizSummary {
 
 // ============ QUIZ ATTEMPT ============
 
+export interface AttemptAnswer {
+    questionId: string;
+    selectedOptions: string[]; // Array of option IDs
+    answeredAt?: string;
+}
+
 export interface QuizAttempt {
     id: string;
     quizId: string;
@@ -124,10 +130,11 @@ export interface QuizAttempt {
     startedAt?: string;
     submittedAt?: string;
     correctAnswers: number;
-    totalQuestions: number;
-    percentage?: number;
+    totalQuestions: number | null;
+    percentage?: number | null;
     passed: boolean;
     createdAt: string;
+    answers?: AttemptAnswer[]; // Saved answers for in-progress attempts
 }
 
 // ============ QUIZ RESULT ============

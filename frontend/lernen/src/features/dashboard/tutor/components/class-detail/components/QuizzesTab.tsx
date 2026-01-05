@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiFileText, FiPlus, FiEye, FiTrash2 } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../../../../../context/AuthContext';
 
 interface QuizzesTabProps {
     onViewQuizResult: (quizId: number) => void;
@@ -8,6 +10,9 @@ interface QuizzesTabProps {
 
 const QuizzesTab: React.FC<QuizzesTabProps> = ({ onViewQuizResult }) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { state } = useAuth();
+    const isStudent = state.user?.role === 'student';
 
     // Mock data for testing
     const mockQuizzes = [
@@ -74,19 +79,21 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({ onViewQuizResult }) => {
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                        Quizzes ({mockQuizzes.length})
+                        {t(`dashboard.tutor.myClass.detail.quizzesTab.${isStudent ? 'student' : 'tutor'}.title`, { count: mockQuizzes.length })}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
-                        Track student quiz performance
+                        {t(`dashboard.tutor.myClass.detail.quizzesTab.${isStudent ? 'student' : 'tutor'}.description`)}
                     </p>
                 </div>
-                <button
-                    onClick={() => navigate('/dashboard/quizzes/create')}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors text-sm font-semibold"
-                >
-                    <FiPlus className="w-4 h-4" />
-                    New Quiz
-                </button>
+                {!isStudent && (
+                    <button
+                        onClick={() => navigate('/dashboard/quizzes/create')}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors text-sm font-semibold"
+                    >
+                        <FiPlus className="w-4 h-4" />
+                        {t('dashboard.tutor.myClass.detail.quizzesTab.tutor.newQuiz')}
+                    </button>
+                )}
             </div>
 
             {/* Quizzes List */}
@@ -100,28 +107,32 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({ onViewQuizResult }) => {
                                 </div>
                                 <div>
                                     <p className="font-bold text-gray-800 truncate">{quiz.title}</p>
-                                    <p className="text-xs text-gray-500">{quiz.questions} questions • {quiz.timeLimit}min • Created at {quiz.createdAt}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {t('dashboard.tutor.myClass.detail.quizzesTab.questions', { count: quiz.questions })} • {t('dashboard.tutor.myClass.detail.quizzesTab.timeLimit', { count: quiz.timeLimit })} • {t('dashboard.tutor.myClass.detail.quizzesTab.createdAt', { date: quiz.createdAt })}
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="hidden md:block text-sm text-gray-500">
-                                {quiz.submittedCount}/{quiz.totalStudents} Submitted
+                                {t('dashboard.tutor.myClass.detail.quizzesTab.submitted', { submittedCount: quiz.submittedCount, totalStudents: quiz.totalStudents })}
                             </div>
 
                             <div className="flex items-center gap-2 justify-end">
                                 <button
                                     onClick={() => onViewQuizResult(quiz.id)}
                                     className="p-2 text-gray-500 hover:text-[#0b6459] hover:bg-gray-100 rounded-lg transition-colors"
-                                    title="View Results"
+                                    title={t('dashboard.tutor.myClass.detail.quizzesTab.viewResults')}
                                 >
                                     <FiEye />
                                 </button>
-                                <button
-                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Delete Quiz"
-                                >
-                                    <FiTrash2 />
-                                </button>
+                                {!isStudent && (
+                                    <button
+                                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title={t('dashboard.tutor.myClass.detail.quizzesTab.deleteQuiz')}
+                                    >
+                                        <FiTrash2 />
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -132,8 +143,8 @@ const QuizzesTab: React.FC<QuizzesTabProps> = ({ onViewQuizResult }) => {
             {mockQuizzes.length === 0 && (
                 <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
                     <FiFileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <h4 className="text-gray-900 font-medium mb-2">No quizzes yet</h4>
-                    <p className="text-gray-600 text-sm">Create your first quiz to get started</p>
+                    <h4 className="text-gray-900 font-medium mb-2">{t(`dashboard.tutor.myClass.detail.quizzesTab.${isStudent ? 'student' : 'tutor'}.noQuizzes`)}</h4>
+                    <p className="text-gray-600 text-sm">{t(`dashboard.tutor.myClass.detail.quizzesTab.${isStudent ? 'student' : 'tutor'}.noQuizzesDescription`)}</p>
                 </div>
             )}
         </div>

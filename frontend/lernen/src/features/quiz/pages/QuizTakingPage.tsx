@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-    IoTimeOutline,
     IoCheckmarkCircle,
     IoChevronBack,
     IoChevronForward,
@@ -17,36 +16,75 @@ import { useTranslation } from 'react-i18next';
 import QuizLayout from '../components/QuizLayout';
 import quizService from '../../../services/quizService';
 import type { QuizDetail, QuizAttempt, SubmitAnswerRequest } from '../../../types/quiz';
+import Toast from '../../../components/ui/Toast';
 
 // Remove all mock quiz data interfaces and constants
 
-// Compact Timer Component
-const CompactTimer: React.FC<{ timeRemaining: number; totalTime: number }> = ({ timeRemaining, totalTime }) => {
-    const percentage = (timeRemaining / totalTime) * 100;
-    const isWarning = timeRemaining < 300;
-    const isDanger = timeRemaining < 60;
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
-
+// Skeleton Loading Component
+const QuizSkeleton: React.FC = () => {
     return (
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${isDanger ? 'bg-red-100 text-red-700' : isWarning ? 'bg-amber-100 text-amber-700' : 'bg-[#065A46]/10 text-[#065A46]'
-            }`}>
-            <IoTimeOutline className="w-4 h-4" />
-            <span className={isDanger ? 'animate-pulse' : ''}>{formatTime(timeRemaining)}</span>
-            <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                    className={`h-full rounded-full transition-all duration-1000 ${isDanger ? 'bg-red-500' : isWarning ? 'bg-amber-500' : 'bg-[#065A46]'
-                        }`}
-                    style={{ width: `${percentage}%` }}
-                />
+        <div className="h-full flex items-center justify-center bg-gray-100 p-6">
+            <div className="w-full max-w-[1600px] h-full max-h-[900px] flex flex-col bg-white rounded-2xl shadow-2xl overflow-hidden">
+                {/* Header Skeleton */}
+                <div className="flex-shrink-0 flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200 bg-white">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="h-7 w-24 bg-gray-200 rounded-lg animate-pulse"></div>
+                        <div className="h-6 w-48 bg-gray-200 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="h-8 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
+                        <div className="h-8 w-8 bg-gray-200 rounded-lg animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Question Header Skeleton */}
+                <div className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-gradient-to-r from-gray-200 to-gray-300">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-white/50 rounded-lg animate-pulse"></div>
+                        <div className="h-5 w-40 bg-white/50 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="h-5 w-24 bg-white/50 rounded-lg animate-pulse"></div>
+                        <div className="h-8 w-8 bg-white/50 rounded-lg animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Question Content Skeleton */}
+                <div className="flex-1 flex flex-col overflow-y-auto bg-white">
+                    <div className="flex-1 flex flex-col w-full px-6 py-6">
+                        <div className="h-8 w-full bg-gray-200 rounded-lg animate-pulse mb-6"></div>
+                        <div className="h-8 w-3/4 bg-gray-200 rounded-lg animate-pulse mb-8"></div>
+
+                        {/* Answer Options Skeleton */}
+                        <div className="flex-1 flex flex-col gap-4 min-h-0">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div
+                                    key={i}
+                                    className="min-h-[80px] px-6 py-4 rounded-xl border-2 border-gray-200 flex items-center"
+                                >
+                                    <div className="w-10 h-10 bg-gray-200 rounded-lg animate-pulse mr-4"></div>
+                                    <div className="flex-1 h-6 bg-gray-200 rounded-lg animate-pulse"></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Navigation Footer Skeleton */}
+                <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-gradient-to-r from-gray-200 to-gray-300">
+                    <div className="h-10 w-24 bg-white/50 rounded-xl animate-pulse"></div>
+                    <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className="w-2.5 h-2.5 bg-white/50 rounded-full animate-pulse"></div>
+                        ))}
+                    </div>
+                    <div className="h-10 w-24 bg-white/50 rounded-xl animate-pulse"></div>
+                </div>
             </div>
         </div>
     );
 };
+
 
 // Modal Component
 const Modal: React.FC<{
@@ -94,67 +132,130 @@ const QuizTakingPage: React.FC = () => {
     const [quiz, setQuiz] = useState<QuizDetail | null>(null);
     const [attempt, setAttempt] = useState<QuizAttempt | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Map<string, number[]>>(new Map());
     const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set());
-    const [timeRemaining, setTimeRemaining] = useState(0);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [showExitModal, setShowExitModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
 
     const isTutor = state.user?.role === 'tutor';
     const quizzesPath = isTutor ? '/dashboard/quizzes' : '/dashboard/my-quizzes';
+    
+    // Ref to track if component is mounted and prevent duplicate API calls
+    const isMountedRef = useRef(true);
+    const hasLoadedRef = useRef(false);
 
     // Load quiz and attempt data
     useEffect(() => {
+        // Reset mounted flag when component mounts
+        isMountedRef.current = true;
+        hasLoadedRef.current = false;
+        
         const loadQuizData = async () => {
+            // Prevent duplicate calls
+            if (hasLoadedRef.current || !isMountedRef.current) {
+                return;
+            }
+            
+            hasLoadedRef.current = true;
+            
             if (!quizId) {
-                setError('Quiz ID is missing');
+                if (!isMountedRef.current) return;
+                setToast({ message: t('quizTaking.errors.quizIdMissing'), type: 'error' });
                 setLoading(false);
                 return;
             }
 
             try {
+                if (!isMountedRef.current) return;
                 setLoading(true);
                 
                 // Fetch quiz data
                 const quizData = await quizService.getQuizForStudent(quizId);
+                if (!isMountedRef.current) return;
                 setQuiz(quizData);
 
                 // Check for existing attempt or start new one
                 let currentAttempt = await quizService.getCurrentAttempt(quizId);
+                if (!isMountedRef.current) return;
                 
                 if (!currentAttempt) {
-                    // Start new attempt
-                    currentAttempt = await quizService.startQuizAttempt(quizId);
+                    try {
+                        // Start new attempt
+                        currentAttempt = await quizService.startQuizAttempt(quizId);
+                        if (!isMountedRef.current) return;
+                    } catch (startError: any) {
+                        if (!isMountedRef.current) return;
+                        // Only show max attempts error if explicitly marked as such
+                        if (startError.isMaxAttemptsReached) {
+                            setToast({ message: t('quizTaking.errors.maxAttemptsReached'), type: 'error' });
+                        } else {
+                            // Show generic error for other failures
+                            setToast({ message: startError.message || t('quizTaking.errors.failedToStart'), type: 'error' });
+                        }
+                        setLoading(false);
+                        return;
+                    }
                 }
                 
+                if (!isMountedRef.current) return;
                 setAttempt(currentAttempt);
 
-                // Calculate time remaining
-                if (currentAttempt.startedAt && quizData.timeLimitMinutes) {
-                    const startTime = new Date(currentAttempt.startedAt).getTime();
-                    const now = Date.now();
-                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
-                    const totalSeconds = quizData.timeLimitMinutes * 60;
-                    const remaining = Math.max(0, totalSeconds - elapsedSeconds);
-                    setTimeRemaining(remaining);
-                } else {
-                    setTimeRemaining(quizData.timeLimitMinutes * 60);
+                // Restore saved answers from attempt
+                if (currentAttempt.answers && currentAttempt.answers.length > 0 && quizData.questions) {
+                    const restoredAnswers = new Map<string, number[]>();
+                    
+                    currentAttempt.answers.forEach((answer) => {
+                        const question = quizData.questions.find(q => q.id === answer.questionId);
+                        if (question) {
+                            // Map selectedOptionIds to option indexes
+                            const optionIndexes = answer.selectedOptions
+                                .map(optionId => {
+                                    const index = question.options.findIndex(opt => opt.id === optionId);
+                                    return index >= 0 ? index : null;
+                                })
+                                .filter((idx): idx is number => idx !== null);
+                            
+                            if (optionIndexes.length > 0) {
+                                restoredAnswers.set(answer.questionId, optionIndexes);
+                            }
+                        }
+                    });
+                    
+                    setSelectedAnswers(restoredAnswers);
                 }
 
-                setLoading(false);
-            } catch (err) {
+                if (isMountedRef.current) {
+                    setLoading(false);
+                }
+            } catch (err: any) {
+                if (!isMountedRef.current) return;
                 console.error('Failed to load quiz:', err);
-                setError('Failed to load quiz. Please try again.');
+                
+                // Only show max attempts error if explicitly marked as such
+                if (err.isMaxAttemptsReached) {
+                    setToast({ message: t('quizTaking.errors.maxAttemptsReached'), type: 'error' });
+                } else {
+                    // Show generic error message for other failures
+                    const errorMessage = err.message || err.response?.data?.message;
+                    setToast({ message: errorMessage || t('quizTaking.errors.failedToLoad'), type: 'error' });
+                }
                 setLoading(false);
             }
         };
 
         loadQuizData();
-    }, [quizId]);
+        
+        // Cleanup function
+        return () => {
+            isMountedRef.current = false;
+            hasLoadedRef.current = false;
+        };
+    }, [quizId, t]);
 
     useEffect(() => {
         if (quiz) {
@@ -164,26 +265,9 @@ const QuizTakingPage: React.FC = () => {
 
     const currentQuestion = quiz?.questions[currentQuestionIndex];
     const currentAnswers = currentQuestion ? (selectedAnswers.get(currentQuestion.id) || []) : [];
-    const totalTime = quiz?.timeLimitMinutes ? quiz.timeLimitMinutes * 60 : 0;
 
-    // Timer countdown
-    useEffect(() => {
-        if (!quiz || timeRemaining === 0) return;
-
-        const timer = setInterval(() => {
-            setTimeRemaining((prev) => {
-                if (prev <= 1) {
-                    clearInterval(timer);
-                    handleAutoSubmit();
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(timer);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [quiz]);
+    // Define confirmSubmit first (will be defined later, but we reference it here)
+    const confirmSubmitRef = useRef<(() => Promise<void>) | null>(null);
 
     const handleAnswerSelect = async (optionIndex: number) => {
         if (!currentQuestion || !attempt) return;
@@ -216,6 +300,7 @@ const QuizTakingPage: React.FC = () => {
             });
         } catch (error) {
             console.error('Failed to save answer:', error);
+            setToast({ message: t('quizTaking.errors.failedToSaveAnswer'), type: 'error' });
         }
     };
 
@@ -255,7 +340,10 @@ const QuizTakingPage: React.FC = () => {
     };
 
     const confirmSubmit = useCallback(async () => {
-        if (!attempt || !quiz) return;
+        // Prevent multiple submissions
+        if (!attempt || !quiz || isSubmitting || hasSubmitted) {
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -274,18 +362,28 @@ const QuizTakingPage: React.FC = () => {
             // Submit quiz
             await quizService.submitQuizAttempt(attempt.id, { answers });
             
+            // Mark as submitted to prevent duplicate submissions
+            setHasSubmitted(true);
+            
+            // Show success toast
+            setToast({ message: t('quizTaking.success.quizSubmitted'), type: 'success' });
+            
             // Navigate to result page
             navigate(`/quiz/result/${attempt.id}`);
         } catch (error) {
             console.error('Failed to submit quiz:', error);
             setIsSubmitting(false);
-            alert('Failed to submit quiz. Please try again.');
+            // Only show toast if we actually attempted to submit and not already submitted
+            if (!hasSubmitted) {
+                setToast({ message: t('quizTaking.errors.failedToSubmit'), type: 'error' });
+            }
         }
-    }, [attempt, quiz, selectedAnswers, navigate]);
+    }, [attempt, quiz, selectedAnswers, navigate, isSubmitting, hasSubmitted]);
 
-    const handleAutoSubmit = () => {
-        confirmSubmit();
-    };
+    // Store confirmSubmit in ref
+    useEffect(() => {
+        confirmSubmitRef.current = confirmSubmit;
+    }, [confirmSubmit]);
 
     const handleExit = () => {
         setShowExitModal(true);
@@ -298,28 +396,7 @@ const QuizTakingPage: React.FC = () => {
     return (
         <QuizLayout showBackButton={false} fullscreen={true}>
             {loading ? (
-                <div className="h-full flex items-center justify-center bg-gray-100">
-                    <div className="text-center">
-                        <div className="w-16 h-16 border-4 border-[#065A46] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading quiz...</p>
-                    </div>
-                </div>
-            ) : error ? (
-                <div className="h-full flex items-center justify-center bg-gray-100 p-6">
-                    <div className="text-center bg-white rounded-2xl p-8 shadow-xl max-w-md">
-                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <IoWarningOutline className="w-8 h-8 text-red-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">Error Loading Quiz</h3>
-                        <p className="text-gray-600 mb-6">{error}</p>
-                        <button
-                            onClick={() => navigate(quizzesPath)}
-                            className="px-6 py-2.5 bg-[#065A46] text-white rounded-xl hover:bg-[#054d3b] transition-all"
-                        >
-                            Back to Quizzes
-                        </button>
-                    </div>
-                </div>
+                <QuizSkeleton />
             ) : !quiz || !currentQuestion ? (
                 <div className="h-full flex items-center justify-center bg-gray-100">
                     <p className="text-gray-600">No quiz data available</p>
@@ -341,7 +418,6 @@ const QuizTakingPage: React.FC = () => {
                                     <h1 className="text-base font-semibold text-gray-800 truncate">{quiz.title}</h1>
                                 </div>
                                 <div className="flex items-center gap-3 flex-shrink-0">
-                                    <CompactTimer timeRemaining={timeRemaining} totalTime={totalTime} />
                                     <button
                                         onClick={handleExit}
                                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -620,6 +696,15 @@ const QuizTakingPage: React.FC = () => {
                     >
                         <p>{t('quizTaking.exitModal.warning')}</p>
                     </Modal>
+
+                    {/* Toast Notification */}
+                    {toast && (
+                        <Toast
+                            message={toast.message}
+                            type={toast.type}
+                            onClose={() => setToast(null)}
+                        />
+                    )}
                 </div>
             </div>
             )}

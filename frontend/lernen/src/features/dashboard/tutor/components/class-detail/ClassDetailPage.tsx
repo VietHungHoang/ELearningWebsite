@@ -8,6 +8,9 @@ import QuizzesTab from "./components/QuizzesTab";
 import MaterialsTab from "./components/MaterialsTab";
 import { classService, type ClassData } from "../../../../../services/classService";
 import type { Session } from "../../../../../types/class";
+import { useTranslation } from "react-i18next";
+import { convertUtcTimeToLocal, convertUtcDateTimeToLocal } from "../../../../../utils/scheduleHelpers";
+import { useAuth } from "../../../../../context/AuthContext";
 
 type DetailTab = "Schedule" | "Students" | "Quizzes" | "Materials";
 
@@ -15,6 +18,78 @@ const ClassDetailPage: React.FC = () => {
     const { classId } = useParams<{ classId: string }>();
     const navigate = useNavigate();
     const location = useLocation();
+    const { t, i18n } = useTranslation();
+    const { state } = useAuth();
+    
+    // Helper function to check if title is null or "null" string
+    const isTitleNull = (title: string | null | undefined): boolean => {
+        return !title || title === 'null' || title.trim() === '';
+    };
+
+    // Helper function to get day name
+    const getDayName = (dayOfWeek: number): string => {
+        const isVietnamese = i18n.language === 'vi';
+        if (isVietnamese) {
+            const vietnameseDays = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+            // dayOfWeek from API: 1=Monday, 2=Tuesday, ..., 7=Sunday
+            return vietnameseDays[dayOfWeek === 7 ? 0 : dayOfWeek - 1] || 'Unknown';
+        } else {
+            const englishDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return englishDays[dayOfWeek === 7 ? 0 : dayOfWeek - 1] || 'Unknown';
+        }
+    };
+
+    // Helper function to format time to 12-hour format
+    const formatTime12Hour = (time24: string): string => {
+        try {
+            const [hours, minutes] = time24.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const hours12 = hours % 12 || 12;
+            return `${hours12}:${String(minutes).padStart(2, '0')} ${period}`;
+        } catch {
+            return time24;
+        }
+    };
+
+    // Helper function to format schedule display
+    const formatScheduleDisplay = (schedules: Array<{ dayOfWeek?: number; day?: string; time: string }> | undefined): string => {
+        if (!schedules || schedules.length === 0) {
+            return '';
+        }
+
+        // Group schedules by time
+        const timeGroups = new Map<string, string[]>();
+        schedules.forEach(schedule => {
+            const localTime = convertUtcTimeToLocal(schedule.time);
+            const timeKey = localTime;
+            if (!timeGroups.has(timeKey)) {
+                timeGroups.set(timeKey, []);
+            }
+            // Use dayOfWeek if available, otherwise use day string
+            const dayName = schedule.dayOfWeek !== undefined 
+                ? getDayName(schedule.dayOfWeek)
+                : schedule.day || '';
+            timeGroups.get(timeKey)!.push(dayName);
+        });
+
+        // Format: if all schedules have the same time, show "Mon, Wed 7:00 PM"
+        // If different times, show "Mon 7:00 PM, Wed 8:00 PM"
+        if (timeGroups.size === 1) {
+            const time = Array.from(timeGroups.keys())[0];
+            const formattedTime = formatTime12Hour(time);
+            const dayNames = Array.from(timeGroups.values())[0].join(', ');
+            return `${dayNames} ${formattedTime}`;
+        } else {
+            // Multiple times - format each group
+            const parts: string[] = [];
+            timeGroups.forEach((days, time) => {
+                const formattedTime = formatTime12Hour(time);
+                const dayNames = days.join(', ');
+                parts.push(`${dayNames} ${formattedTime}`);
+            });
+            return parts.join(', ');
+        }
+    };
 
     // Get class data from navigation state or fetch from API
     const initialClassData = location.state?.classData as ClassData | undefined;
@@ -38,6 +113,11 @@ const ClassDetailPage: React.FC = () => {
                         const transformedData: ClassData = {
                             id: apiData.id,
                             classTitle: apiData.title,
+                            tutor: apiData.tutor ? {
+                                id: apiData.tutor.id,
+                                fullName: apiData.tutor.fullName,
+                                avatarUrl: apiData.tutor.avatarUrl
+                            } : null,
                             students: apiData.students.map(s => ({
                                 id: s.id,
                                 name: s.fullName,
@@ -48,12 +128,23 @@ const ClassDetailPage: React.FC = () => {
                             status: apiData.status === 'ONGOING' ? 'Ongoing' :
                                 apiData.status === 'OPENING' ? 'Opening' : 'Completed',
                             schedules: apiData.schedules.map(s => ({
-                                day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][s.dayOfWeek % 7],
+                                dayOfWeek: s.dayOfWeek,
+                                day: getDayName(s.dayOfWeek), // Keep for backward compatibility
                                 time: s.time
                             })),
                             startDate: apiData.createdAt,
                             completedSessions: apiData.completedSessions,
                             totalSessions: apiData.totalSessions,
+                            sessions: apiData.sessions?.map(s => ({
+                                id: s.id,
+                                sessionNumber: s.sessionNumber,
+                                title: s.title,
+                                startTime: convertUtcDateTimeToLocal(s.startTime),
+                                endTime: convertUtcDateTimeToLocal(s.endTime),
+                                meetingLink: s.meetingLink,
+                                status: s.status,
+                                participantsCount: s.participantsCount
+                            })) || [],
                             quizzes: [], // Will be populated from separate API or tabs
                             materials: apiData.materials?.map(m => ({
                                 id: m.id,
@@ -110,105 +201,120 @@ const ClassDetailPage: React.FC = () => {
         console.log('View quiz result for quiz:', quizId);
     };
 
-    // Mock data for sessions - in real app this would come from API
-    const upcomingSessions: Session[] = classData ? [
-        {
-            id: 'session-1',
-            sessionDatetime: '2025-12-22T14:00:00',
+    // Map sessions from API to Session format and split into upcoming and past
+    const now = new Date();
+    const mappedSessions: Session[] = classData?.sessions?.map(session => {
+        const classTitle = !isTitleNull(classData.classTitle) 
+            ? (classData.classTitle || '')
+            : (state.user?.role === 'student' 
+                ? (classData.tutor?.fullName || '')
+                : (classData.students.length > 0 ? classData.students[0].name : ''));
+        
+        return {
+            id: session.id,
+            sessionDatetime: session.startTime, // Already converted to local timezone
             sessionType: classData.type === '1-on-1' ? 'ONE_ON_ONE' : 'GROUP',
             classInfo: {
                 id: classData.id,
-                title: classData.classTitle
+                title: classTitle
             },
             students: classData.students.map(student => ({
                 id: student.id,
                 fullName: student.name,
                 avatarUrl: student.avatar
             })),
-            tutor: {
-                id: 'tutor-1',
-                fullName: 'Tên Giảng viên',
+            tutor: classData.tutor ? {
+                id: classData.tutor.id,
+                fullName: classData.tutor.fullName,
+                avatarUrl: classData.tutor.avatarUrl || ''
+            } : {
+                id: '',
+                fullName: '',
                 avatarUrl: ''
             },
-            createdAt: '2025-12-20T10:00:00',
-            updatedAt: '2025-12-20T10:00:00',
-            notes: 'Ôn tập bài tập về nhà và luyện tập thực hành'
-        },
-        {
-            id: 'session-2',
-            sessionDatetime: '2025-12-24T14:00:00',
-            sessionType: classData.type === '1-on-1' ? 'ONE_ON_ONE' : 'GROUP',
-            classInfo: {
-                id: classData.id,
-                title: classData.classTitle
-            },
-            students: classData.students.map(student => ({
-                id: student.id,
-                fullName: student.name,
-                avatarUrl: student.avatar
-            })),
-            tutor: {
-                id: 'tutor-1',
-                fullName: 'Tutor Name',
-                avatarUrl: ''
-            },
-            createdAt: '2025-12-20T10:00:00',
-            updatedAt: '2025-12-20T10:00:00'
-        }
-    ] : [];
+            createdAt: classData.startDate,
+            updatedAt: classData.startDate,
+            meetingUrl: session.meetingLink, // Keep for backward compatibility
+            meetingLink: session.meetingLink,
+            notes: session.title
+        };
+    }) || [];
 
-    const pastSessions = [
-        {
-            id: 3,
-            date: "2025-11-18",
-            time: "14:00 - 15:30",
-            actualStartTime: "14:05",
-            actualEndTime: "15:35",
-            duration: "1h 30m",
-            topic: "Bắt đầu với React",
-            status: "completed",
-            recording: true,
-            participantsCount: 5,
-            notes: "học viên thể hiện sự hiểu biết tốt về React cơ bản. Cần ôn tập vòng đời component trong buổi học tiếp theo.",
-            attendanceHistory: [
-                { studentId: "1", studentName: "Nguyễn Nam Sơn", joinTime: "14:05", leaveTime: "15:35", status: "present" },
-                { studentId: "2", studentName: "Trần Thị Mai", joinTime: "14:10", leaveTime: "15:30", status: "present" },
-                { studentId: "3", studentName: "Lê Minh Đức", joinTime: "14:00", leaveTime: "15:35", status: "present" },
-                { studentId: "4", studentName: "Phạm Thị Hương", joinTime: "14:15", leaveTime: "15:20", status: "present" },
-                { studentId: "5", studentName: "Hoàng Văn Quang", joinTime: "14:08", leaveTime: "15:35", status: "present" }
-            ],
-            absentStudents: []
-        },
-        {
-            id: 4,
-            date: "2025-11-15",
-            time: "10:00 - 11:30",
-            actualStartTime: "10:02",
-            actualEndTime: "11:28",
-            duration: "1h 26m",
-            topic: "Khái niệm JavaScript Nâng cao",
-            status: "completed",
-            recording: true,
-            participantsCount: 4,
-            notes: "Đã học về closures và prototypes. Một học viên gặp vấn đề về kết nối.",
-            attendanceHistory: [
-                { studentId: "1", studentName: "Nguyễn Nam Sơn", joinTime: "10:02", leaveTime: "11:28", status: "present" },
-                { studentId: "2", studentName: "Trần Thị Mai", joinTime: "10:05", leaveTime: "11:25", status: "present" },
-                { studentId: "3", studentName: "Lê Minh Đức", joinTime: "10:00", leaveTime: "11:28", status: "present" },
-                { studentId: "6", studentName: "Vũ Văn Sơn", joinTime: "10:10", leaveTime: "11:28", status: "present" }
-            ],
-            absentStudents: [
-                { studentId: "4", studentName: "Phạm Thị Hương", reason: "Ốm" },
-                { studentId: "5", studentName: "Hoàng Văn Quang", reason: "Việc khẩn cấp gia đình" }
-            ]
-        }
-    ];
+    // Split sessions into upcoming and past based on startTime
+    const upcomingSessions = mappedSessions.filter(session => {
+        const sessionDate = new Date(session.sessionDatetime);
+        return sessionDate >= now;
+    }).sort((a, b) => {
+        return new Date(a.sessionDatetime).getTime() - new Date(b.sessionDatetime).getTime();
+    });
+
+    // Map past sessions to format expected by ScheduleTab
+    const pastSessions = classData?.sessions
+        ?.filter(session => {
+            const sessionDate = new Date(convertUtcDateTimeToLocal(session.startTime));
+            return sessionDate < now;
+        })
+        .map(session => {
+            const startTime = new Date(convertUtcDateTimeToLocal(session.startTime));
+            const endTime = new Date(convertUtcDateTimeToLocal(session.endTime));
+            const durationMs = endTime.getTime() - startTime.getTime();
+            const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+            const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            // Format date
+            const dateStr = startTime.toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            
+            // Format time
+            const startTimeStr = startTime.toLocaleTimeString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            const endTimeStr = endTime.toLocaleTimeString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            
+            // Format duration
+            const durationStr = durationHours > 0 
+                ? `${durationHours}h ${durationMinutes}m`
+                : `${durationMinutes}m`;
+            
+            // Generate a numeric id from string id for toggleExpand
+            const numericId = session.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            
+            return {
+                id: numericId,
+                sessionId: session.id, // Keep original id
+                date: dateStr,
+                time: `${startTimeStr} - ${endTimeStr}`,
+                actualStartTime: startTimeStr,
+                actualEndTime: endTimeStr,
+                duration: durationStr,
+                topic: session.title,
+                status: session.status.toLowerCase(),
+                recording: false, // Not provided by API
+                participantsCount: session.participantsCount,
+                notes: session.title,
+                attendanceHistory: [], // Not provided by API
+                absentStudents: [] // Not provided by API
+            };
+        })
+        .sort((a, b) => {
+            // Sort by date descending (most recent first)
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+        }) || [];
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <BirdLoading
-                    title="Loading class details..."
+                    title={t('dashboard.tutor.myClass.detail.loading')}
                     size="md"
                 />
             </div>
@@ -219,13 +325,13 @@ const ClassDetailPage: React.FC = () => {
         return (
             <div className="flex items-center justify-center h-screen">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-800">Class not found</h2>
-                    <p className="mt-2 text-gray-600">The class you're looking for doesn't exist.</p>
+                    <h2 className="text-2xl font-bold text-gray-800">{t('dashboard.tutor.myClass.detail.notFound.title')}</h2>
+                    <p className="mt-2 text-gray-600">{t('dashboard.tutor.myClass.detail.notFound.description')}</p>
                     <button
                         onClick={handleBack}
                         className="mt-4 px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#084c43]"
                     >
-                        Back to My Classes
+                        {t('dashboard.tutor.myClass.detail.notFound.backButton')}
                     </button>
                 </div>
             </div>
@@ -233,6 +339,11 @@ const ClassDetailPage: React.FC = () => {
     }
 
 
+
+    const getTabLabel = (tab: DetailTab): string => {
+        const tabKey = tab.toLowerCase() as 'schedule' | 'students' | 'quizzes' | 'materials';
+        return t(`dashboard.tutor.myClass.detail.tabs.${tabKey}`);
+    };
 
     const NavItem: React.FC<{ label: DetailTab, icon: React.ReactNode }> = ({ label, icon }) => (
         <button
@@ -245,7 +356,7 @@ const ClassDetailPage: React.FC = () => {
             <div className={`w-6 h-6 flex-shrink-0 flex items-center justify-center ${activeTab === label ? 'text-white' : 'text-gray-500'}`}>
                 {icon}
             </div>
-            <p className={`font-bold text-sm ${activeTab === label ? 'text-white' : 'text-gray-800'}`}>{label}</p>
+            <p className={`font-bold text-sm ${activeTab === label ? 'text-white' : 'text-gray-800'}`}>{getTabLabel(label)}</p>
         </button>
     );
 
@@ -263,20 +374,32 @@ const ClassDetailPage: React.FC = () => {
                         <div className="flex-grow">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div>
-                                    <h1 className="text-2xl font-bold text-gray-800">{classData?.classTitle}</h1>
+                                    <h1 className="text-2xl font-bold text-gray-800">
+                                        {!isTitleNull(classData?.classTitle) 
+                                            ? (classData?.classTitle || '')
+                                            : (state.user?.role === 'student' 
+                                                ? (classData?.tutor?.fullName || '-')
+                                                : (classData?.students.length > 0 ? classData.students[0].name : '-'))}
+                                    </h1>
                                     <div className="flex items-center gap-3 mt-2 text-sm">
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${classData?.type === '1-on-1' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                                            {classData?.type}
+                                            {classData?.type === '1-on-1' 
+                                                ? t('dashboard.tutor.myClass.classTypes.oneOnOne')
+                                                : t('dashboard.tutor.myClass.classTypes.group')}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${classData?.status === 'Ongoing' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                            {classData?.status}
+                                            {classData?.status === 'Ongoing' 
+                                                ? t('dashboard.tutor.myClass.detail.statusLabels.ongoing')
+                                                : classData?.status === 'Opening'
+                                                ? t('dashboard.tutor.myClass.detail.statusLabels.opening')
+                                                : t('dashboard.tutor.myClass.detail.statusLabels.completed')}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                         <FiCalendar className="w-4 h-4" />
-                                        <span>Mon, Wed 7:00 PM - 8:30 PM</span>
+                                        <span>{formatScheduleDisplay(classData?.schedules)}</span>
                                     </div>
                                     <button
                                         onClick={() => setShowUpdateScheduleModal(true)}
@@ -287,7 +410,7 @@ const ClassDetailPage: React.FC = () => {
                                     </button>
                                     <button className="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors text-gray-700 flex items-center gap-2">
                                         <FiMessageSquare className="w-4 h-4" />
-                                        <span className="text-sm font-medium">Chat</span>
+                                        <span className="text-sm font-medium">{t('dashboard.tutor.myClass.detail.chat')}</span>
                                     </button>
                                 </div>
                             </div>
@@ -341,10 +464,10 @@ const ClassDetailPage: React.FC = () => {
             {showUpdateScheduleModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
-                        <h3 className="text-lg font-bold text-gray-800 mb-4">Update Class Schedule</h3>
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">{t('dashboard.tutor.myClass.detail.updateSchedule.title')}</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Days of Week</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{t('dashboard.tutor.myClass.detail.updateSchedule.daysOfWeek')}</label>
                                 <div className="flex gap-2 flex-wrap">
                                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
                                         <label key={day} className="flex items-center gap-2">
@@ -356,7 +479,7 @@ const ClassDetailPage: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Time</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('dashboard.tutor.myClass.detail.updateSchedule.startTime')}</label>
                                     <input
                                         type="time"
                                         defaultValue="19:00"
@@ -364,7 +487,7 @@ const ClassDetailPage: React.FC = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">End Time</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{t('dashboard.tutor.myClass.detail.updateSchedule.endTime')}</label>
                                     <input
                                         type="time"
                                         defaultValue="20:30"
@@ -378,13 +501,13 @@ const ClassDetailPage: React.FC = () => {
                                 onClick={() => setShowUpdateScheduleModal(false)}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                Cancel
+                                {t('dashboard.tutor.myClass.detail.updateSchedule.cancel')}
                             </button>
                             <button
                                 onClick={() => setShowUpdateScheduleModal(false)}
                                 className="px-4 py-2 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors"
                             >
-                                Update Schedule
+                                {t('dashboard.tutor.myClass.detail.updateSchedule.update')}
                             </button>
                         </div>
                     </div>
