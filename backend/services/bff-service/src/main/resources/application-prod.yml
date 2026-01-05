@@ -9,8 +9,6 @@ services:
     url: ${TUTOR_SERVICE_URL}
   class-service:
     url: ${CLASS_SERVICE_URL}
-  user-service:
-    url: ${USER_SERVICE_URL}
   student-service:
     url: ${STUDENT_SERVICE_URL}
   search-service:
