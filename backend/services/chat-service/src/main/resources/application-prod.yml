@@ -1,22 +1,10 @@
 spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
-        default_schema: chat
-
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
 services:
   auth-service:
     url: ${AUTH_SERVICE_URL}
-
   notification-service:
     url: ${NOTIFICATION_SERVICE_URL}
   common-service:

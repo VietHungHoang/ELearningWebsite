@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGO_URL}
+      uri: ${MONGO_URI}
 
   mail:
     host: smtp.gmail.com
