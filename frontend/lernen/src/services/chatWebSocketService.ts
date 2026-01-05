@@ -3,7 +3,7 @@ import SockJS from 'sockjs-client';
 import { type MessageResponse } from './chatService';
 
 // WebSocket base URL - now going through gateway
-const WS_BASE_URL = import.meta.env.VITE_CHAT_WS_URL || 'http://localhost:8081/api/v1/chat/ws';
+const WS_BASE_URL = import.meta.env.VITE_CHAT_WS_URL || 'https://1mf17bgk-8089.asse.devtunnels.ms/ws';
 
 export interface TypingIndicator {
     conversationId: string;
