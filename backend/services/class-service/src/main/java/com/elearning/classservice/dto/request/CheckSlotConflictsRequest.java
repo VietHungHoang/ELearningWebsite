@@ -6,14 +6,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
+/**
+ * Request for checking slot conflicts
+ * Used to find both tutor and student busy slots in a date range
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CheckSlotConflictsRequest {
     private UUID tutorId;
-    private List<LocalDateTime> slotDateTimes;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 }

@@ -2,6 +2,7 @@ package com.elearning.classservice.service.impl;
 
 import com.elearning.classservice.dto.event.SessionStartedEvent;
 import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
+import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.response.StartSessionResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
 import com.elearning.classservice.entity.ClassEnrollment;
@@ -30,7 +31,7 @@ public class SessionServiceImpl implements SessionService {
 
     private final SessionRepository sessionRepository;
     private final ClassEnrollmentRepository enrollmentRepository;
-//    private final ZoomMeetingService zoomMeetingService;
+    // private final ZoomMeetingService zoomMeetingService;
     private final KafkaProducerService kafkaProducerService;
     private final SessionMapper sessionMapper;
 
@@ -38,64 +39,68 @@ public class SessionServiceImpl implements SessionService {
     @Transactional
     public StartSessionResponse startSession(UUID sessionId, UUID tutorId) {
         log.info("Starting session {} by tutor {}", sessionId, tutorId);
-//
-//        // 1. Validate session exists
-//        Session session = sessionRepository.findById(sessionId)
-//                .orElseThrow(() -> new SessionNotFoundException(sessionId));
-//
-//        // 2. Check authorization
-//        if (!session.getTutor().getId().equals(tutorId)) {
-//            throw new UnauthorizedSessionAccessException(tutorId, sessionId);
-//        }
-//
-//        // 3. Check if Zoom meeting already exists
-//        ZoomMeetingResponse zoomMeeting;
-//        if (session.getZoomMeetingId() == null || session.getZoomMeetingId().isEmpty()) {
-//            // Create new Zoom meeting
-//            log.info("Creating new Zoom meeting for session {}", sessionId);
-//            zoomMeeting = zoomMeetingService.createScheduledMeeting(tutorId, session);
-//
-//            // Update session with Zoom details
-//            session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
-//            session.setZoomPassword(zoomMeeting.getPassword());
-//            session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
-//            session.setMeetingLink(zoomMeeting.getJoinUrl());
-//        } else {
-//            // Use existing Zoom meeting
-//            log.info("Session {} already has Zoom meeting ID: {}", sessionId, session.getZoomMeetingId());
-//            zoomMeeting = ZoomMeetingResponse.builder()
-//                    .joinUrl(session.getZoomJoinUrl())
-//                    .startUrl(session.getMeetingLink()) // Will be fetched from Zoom if needed
-//                    .password(session.getZoomPassword())
-//                    .build();
-//
-//            // Get full meeting details from Zoom
-//            try {
-//                zoomMeeting = zoomMeetingService.getMeetingDetails(tutorId, session.getZoomMeetingId());
-//            } catch (Exception e) {
-//                log.warn("Could not fetch meeting details, using stored values: {}", e.getMessage());
-//            }
-//        }
-//
-//        // 4. Update session status to BOOKED (keep existing status)
-//        // session.setStatus(ScheduleStatus.BOOKED);
-//        sessionRepository.save(session);
-//
-//        // 5. Get enrolled students
-//        List<UUID> studentIds = getEnrolledStudents(session);
-//
-//        // 6. Send Kafka notification event
-//        sendSessionStartedEvent(session, studentIds);
-//
-//        // 7. Return response
-//        return StartSessionResponse.builder()
-//                .sessionId(session.getId())
-//                .status(session.getStatus().name())
-//                .zoomJoinUrl(zoomMeeting.getJoinUrl())
-//                .zoomStartUrl(zoomMeeting.getStartUrl())
-//                .zoomMeetingId(String.valueOf(zoomMeeting.getId()))
-//                .zoomPassword(zoomMeeting.getPassword())
-//                .build();
+        //
+        // // 1. Validate session exists
+        // Session session = sessionRepository.findById(sessionId)
+        // .orElseThrow(() -> new SessionNotFoundException(sessionId));
+        //
+        // // 2. Check authorization
+        // if (!session.getTutor().getId().equals(tutorId)) {
+        // throw new UnauthorizedSessionAccessException(tutorId, sessionId);
+        // }
+        //
+        // // 3. Check if Zoom meeting already exists
+        // ZoomMeetingResponse zoomMeeting;
+        // if (session.getZoomMeetingId() == null ||
+        // session.getZoomMeetingId().isEmpty()) {
+        // // Create new Zoom meeting
+        // log.info("Creating new Zoom meeting for session {}", sessionId);
+        // zoomMeeting = zoomMeetingService.createScheduledMeeting(tutorId, session);
+        //
+        // // Update session with Zoom details
+        // session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
+        // session.setZoomPassword(zoomMeeting.getPassword());
+        // session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
+        // session.setMeetingLink(zoomMeeting.getJoinUrl());
+        // } else {
+        // // Use existing Zoom meeting
+        // log.info("Session {} already has Zoom meeting ID: {}", sessionId,
+        // session.getZoomMeetingId());
+        // zoomMeeting = ZoomMeetingResponse.builder()
+        // .joinUrl(session.getZoomJoinUrl())
+        // .startUrl(session.getMeetingLink()) // Will be fetched from Zoom if needed
+        // .password(session.getZoomPassword())
+        // .build();
+        //
+        // // Get full meeting details from Zoom
+        // try {
+        // zoomMeeting = zoomMeetingService.getMeetingDetails(tutorId,
+        // session.getZoomMeetingId());
+        // } catch (Exception e) {
+        // log.warn("Could not fetch meeting details, using stored values: {}",
+        // e.getMessage());
+        // }
+        // }
+        //
+        // // 4. Update session status to BOOKED (keep existing status)
+        // // session.setStatus(ScheduleStatus.BOOKED);
+        // sessionRepository.save(session);
+        //
+        // // 5. Get enrolled students
+        // List<UUID> studentIds = getEnrolledStudents(session);
+        //
+        // // 6. Send Kafka notification event
+        // sendSessionStartedEvent(session, studentIds);
+        //
+        // // 7. Return response
+        // return StartSessionResponse.builder()
+        // .sessionId(session.getId())
+        // .status(session.getStatus().name())
+        // .zoomJoinUrl(zoomMeeting.getJoinUrl())
+        // .zoomStartUrl(zoomMeeting.getStartUrl())
+        // .zoomMeetingId(String.valueOf(zoomMeeting.getId()))
+        // .zoomPassword(zoomMeeting.getPassword())
+        // .build();
         return null;
     }
 
@@ -115,7 +120,7 @@ public class SessionServiceImpl implements SessionService {
                     .map(participant -> participant.getStudent().getId())
                     .collect(Collectors.toList());
         }
-        
+
         // If regular session, get from class enrollments
         if (session.getClassEntity() != null) {
             List<ClassEnrollment> enrollments = enrollmentRepository
@@ -124,7 +129,7 @@ public class SessionServiceImpl implements SessionService {
                     .map(enrollment -> enrollment.getStudent().getId())
                     .collect(Collectors.toList());
         }
-        
+
         return List.of();
     }
 
@@ -142,12 +147,12 @@ public class SessionServiceImpl implements SessionService {
                 .sessionTitle(session.getTitle())
                 .isTrial(session.getIsTrial())
                 .build();
-        
+
         kafkaProducerService.sendSessionStartedEvent(event);
-        log.info("Sent session started event for session {} to {} students", 
+        log.info("Sent session started event for session {} to {} students",
                 session.getId(), studentIds.size());
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<SessionResponse> getBookedSessions(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate) {
@@ -158,7 +163,8 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SessionResponse> getBookedSessionsForStudent(UUID studentId, LocalDateTime startDate, LocalDateTime endDate) {
+    public List<SessionResponse> getBookedSessionsForStudent(UUID studentId, LocalDateTime startDate,
+            LocalDateTime endDate) {
         log.info("Getting booked sessions for student {} from {} to {}", studentId, startDate, endDate);
         List<Session> sessions = sessionRepository.findByStudentIdAndStartTimeBetween(studentId, startDate, endDate);
         return sessions.stream().map(sessionMapper::toSessionResponse).toList();
@@ -186,32 +192,60 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public List<SessionResponse> checkSlotConflicts(CheckSlotConflictsRequest request) {
+    public SlotConflictResponse checkSlotConflicts(UUID studentId, CheckSlotConflictsRequest request) {
         UUID tutorId = request.getTutorId();
-        List<LocalDateTime> slotDateTimes = request.getSlotDateTimes();
+        LocalDateTime startDate = request.getStartDate() != null ? request.getStartDate() : LocalDateTime.now();
+        LocalDateTime endDate = request.getEndDate() != null ? request.getEndDate() : startDate.plusMonths(1);
 
-        log.info("Checking slot conflicts for tutor {} with {} slots", tutorId, slotDateTimes.size());
+        log.info("Checking slot conflicts for tutor {}, student {}, from {} to {}", tutorId, studentId, startDate,
+                endDate);
 
-        // Find the earliest slot date
-        LocalDateTime earliestSlot = slotDateTimes.stream().min(LocalDateTime::compareTo).orElse(LocalDateTime.now());
+        // 1. Get tutor's busy sessions (status != COMPLETED, CANCELLED)
+        List<String> tutorBusySlots = getTutorBusySlots(tutorId, startDate, endDate);
+        log.info("Found {} tutor busy slots", tutorBusySlots.size());
 
-        // Get all future sessions for the tutor from the earliest slot date
-        List<Session> futureSessions = sessionRepository.findByTutorIdAndStartTimeGreaterThanEqual(tutorId, earliestSlot);
+        // 2. Get student's busy sessions with OTHER tutors (if studentId provided)
+        List<String> studentBusySlots = List.of();
+        if (studentId != null) {
+            studentBusySlots = getStudentBusySlots(studentId, tutorId, startDate, endDate);
+            log.info("Found {} student busy slots", studentBusySlots.size());
+        }
 
-        // For each slot, check if there's a conflicting session
-        List<Session> conflictingSessions = slotDateTimes.stream()
-                .flatMap(slotDateTime -> {
-                    java.time.DayOfWeek dayOfWeek = slotDateTime.getDayOfWeek();
-                    java.time.LocalTime time = slotDateTime.toLocalTime();
-                    return futureSessions.stream()
-                            .filter(session -> session.getStartTime().getDayOfWeek() == dayOfWeek
-                                    && session.getStartTime().toLocalTime().equals(time));
-                })
-                .distinct() // Remove duplicates if any
+        return SlotConflictResponse.builder()
+                .tutorBusySlots(tutorBusySlots)
+                .studentBusySlots(studentBusySlots)
+                .build();
+    }
+
+    /**
+     * Get tutor's busy slots (sessions that are not completed or cancelled)
+     */
+    private List<String> getTutorBusySlots(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Session> sessions = sessionRepository.findByTutorIdAndStartTimeBetween(tutorId, startDate, endDate);
+        return sessions.stream()
+                .filter(s -> !isCompletedOrCancelled(s))
+                .map(s -> s.getStartTime().toString())
                 .collect(Collectors.toList());
+    }
 
-        return conflictingSessions.stream()
-                .map(sessionMapper::toSessionResponse)
+    /**
+     * Get student's busy slots (sessions with OTHER tutors, not completed or
+     * cancelled)
+     */
+    private List<String> getStudentBusySlots(UUID studentId, UUID currentTutorId, LocalDateTime startDate,
+            LocalDateTime endDate) {
+        List<Session> sessions = sessionRepository.findByStudentIdAndStartTimeBetween(studentId, startDate, endDate);
+        return sessions.stream()
+                .filter(s -> !isCompletedOrCancelled(s))
+                .filter(s -> !s.getTutor().getId().equals(currentTutorId)) // Exclude current tutor's sessions
+                .map(s -> s.getStartTime().toString())
                 .collect(Collectors.toList());
+    }
+
+    private boolean isCompletedOrCancelled(Session session) {
+        if (session.getStatus() == null)
+            return false;
+        String status = session.getStatus().name();
+        return "COMPLETED".equals(status) || "CANCELLED".equals(status);
     }
 }

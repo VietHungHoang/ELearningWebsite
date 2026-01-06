@@ -4,6 +4,7 @@ import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
 import com.elearning.classservice.dto.response.ApiResponse;
 import com.elearning.classservice.dto.response.CreateClassBookingResponse;
+import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
 import com.elearning.classservice.service.ClassService;
 import com.elearning.classservice.service.RescheduleRequestService;
@@ -42,12 +43,14 @@ public class SessionController {
     }
 
     @PostMapping("/check-slot-conflicts")
-    public ResponseEntity<ApiResponse<List<SessionResponse>>> checkSlotConflicts(
+    public ResponseEntity<ApiResponse<SlotConflictResponse>> checkSlotConflicts(
+            @RequestHeader(value = "X-User-Id", required = false) UUID studentId,
             @RequestBody CheckSlotConflictsRequest request) {
 
-        log.info("Checking slot conflicts for tutor {}", request.getTutorId());
-        List<SessionResponse> conflictingSessions = sessionService.checkSlotConflicts(request);
-        return ResponseEntity.ok(ApiResponse.success(conflictingSessions, "Slot conflicts checked successfully"));
+        log.info("Checking slot conflicts for tutor {}, student {}, from {} to {}",
+                request.getTutorId(), studentId, request.getStartDate(), request.getEndDate());
+        SlotConflictResponse response = sessionService.checkSlotConflicts(studentId, request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Slot conflicts checked successfully"));
     }
 
     @GetMapping("/tutors/{tutorId}")
@@ -72,7 +75,8 @@ public class SessionController {
         log.info("Request to get sessions for student {} from {} to {}", studentId, startDate, endDate);
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(23, 59, 59, 999999999);
-        List<SessionResponse> sessions = sessionService.getBookedSessionsForStudent(studentId, startDateTime, endDateTime);
+        List<SessionResponse> sessions = sessionService.getBookedSessionsForStudent(studentId, startDateTime,
+                endDateTime);
         return ResponseEntity.ok(ApiResponse.success(sessions, "Sessions retrieved successfully"));
     }
 
@@ -80,7 +84,8 @@ public class SessionController {
     public ResponseEntity<ApiResponse<CreateClassBookingResponse>> createClassBooking(
             @RequestBody CreateClassBookingRequest request) {
 
-        log.info("Request to create class booking for student {} with tutor {}", request.getStudentId(), request.getTutorId());
+        log.info("Request to create class booking for student {} with tutor {}", request.getStudentId(),
+                request.getTutorId());
         CreateClassBookingResponse response = classService.createClassBooking(request);
         return ResponseEntity.ok(ApiResponse.success(response, "Class booking created successfully"));
     }
@@ -91,7 +96,8 @@ public class SessionController {
             @RequestHeader("X-User-Id") UUID userId,
             @RequestBody RescheduleRequestRequest request) {
 
-        log.info("User {} requests reschedule for session {} -> newSchedule={}", userId, sessionId, request.getNewSchedule());
+        log.info("User {} requests reschedule for session {} -> newSchedule={}", userId, sessionId,
+                request.getNewSchedule());
         rescheduleRequestService.createForSession(sessionId, userId, request);
         return ResponseEntity.status(201).body(ApiResponse.success(null, "Reschedule request created"));
     }
