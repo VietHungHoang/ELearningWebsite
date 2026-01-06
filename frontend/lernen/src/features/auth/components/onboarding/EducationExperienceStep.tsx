@@ -177,18 +177,47 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
         }
     };
 
+    // Helper function to check if ID is old format (edu-xxx or exp-xxx)
+    const isOldIdFormat = (id: string | undefined): boolean => {
+        if (!id) return true;
+        return id.startsWith('edu-') || id.startsWith('exp-');
+    };
+
+    // Helper function to ensure UUID format
+    const ensureUUID = (id: string | undefined): string => {
+        if (!id || isOldIdFormat(id)) {
+            return crypto.randomUUID();
+        }
+        return id;
+    };
+
     const handleSave = (item: EducationItem | ExperienceItem) => {
+        const newId = ensureUUID(item.id);
+        const itemWithUUID = { ...item, id: newId };
+
         if (editingType === 'education') {
             if (item.id) {
-                onChange({ educations: (data.educations || []).map((e: EducationItem) => e.id === item.id ? item : e) });
+                // Edit existing item - find by old ID and replace with new UUID
+                onChange({ 
+                    educations: (data.educations || []).map((e: EducationItem) => 
+                        e.id === item.id ? itemWithUUID : e
+                    ) 
+                });
             } else {
-                onChange({ educations: [...(data.educations || []), { ...item, id: crypto.randomUUID() }] });
+                // Add new item with UUID
+                onChange({ educations: [...(data.educations || []), itemWithUUID] });
             }
         } else {
             if (item.id) {
-                onChange({ experiences: (data.experiences || []).map((e: ExperienceItem) => e.id === item.id ? item : e) });
+                // Edit existing item - find by old ID and replace with new UUID
+                onChange({ 
+                    experiences: (data.experiences || []).map((e: ExperienceItem) => 
+                        e.id === item.id ? itemWithUUID : e
+                    ) 
+                });
             } else {
-                onChange({ experiences: [...(data.experiences || []), { ...item, id: crypto.randomUUID() }] });
+                // Add new item with UUID
+                onChange({ experiences: [...(data.experiences || []), itemWithUUID] });
             }
         }
         setIsModalOpen(false);
