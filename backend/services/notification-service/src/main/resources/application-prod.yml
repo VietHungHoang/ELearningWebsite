@@ -1,7 +1,8 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGO_URI}notification_db?retryWrites=true&w=majority
+      uri: ${MONGO_URI}
+      database: notification_db
 
   mail:
     host: smtp.gmail.com
