@@ -72,4 +72,17 @@ public class KeycloakConfig {
             throw new RuntimeException("Failed to disable SSL verification", e);
         }
     }
+
+    @jakarta.annotation.PostConstruct
+    public void logConfiguration() {
+        log.info("Keycloak Configuration:");
+        log.info("Auth Server URL: {}", keycloakProperties.getAuthServerUrl());
+        log.info("Realm: {}", keycloakProperties.getRealm());
+        log.info("Client ID: {}", keycloakProperties.getResource());
+        String clientSecret = keycloakProperties.getClientSecret();
+        String maskedSecret = (clientSecret != null && clientSecret.length() > 4)
+                ? clientSecret.substring(0, 4) + "*****"
+                : "*****";
+        log.info("Client Secret: {}", maskedSecret);
+    }
 }
