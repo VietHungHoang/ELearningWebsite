@@ -1,6 +1,8 @@
 import React from 'react';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import { useTranslation } from 'react-i18next';
+import { formatVNDSimplified } from '../../../../utils/currencyHelper';
+import { convertUtcTimeToLocal } from '../../../../utils/scheduleHelpers';
 import type { GroupClass } from '../../../../types/tutor';
 
 interface LastStudentModalProps {
@@ -66,14 +68,12 @@ const LastStudentModal: React.FC<LastStudentModalProps> = ({
                     <div>
                         <div className="flex items-center justify-between gap-4 mb-2">
                             <p className="text-lg font-bold text-gray-900">{selectedClass.title}</p>
-                            {(selectedClass as any).price && (
+                            {selectedClass.pricePerHour && (
                                 <span className="font-bold text-[#0b6459] text-2xl flex-shrink-0">
-                                    {t('common.currency')}{(selectedClass as any).price}
-                                    {(selectedClass as any).sessions && (
-                                        <span className="text-sm text-gray-600 font-medium">
-                                            /{(selectedClass as any).sessions}
-                                        </span>
-                                    )}
+                                    {formatVNDSimplified(selectedClass.pricePerHour)}
+                                    <span className="text-sm text-gray-600 font-medium">
+                                        /{((selectedClass as any).sessions) || 10} {t('tutorDetail.groupClass.sessions')}
+                                    </span>
                                 </span>
                             )}
                         </div>
@@ -109,6 +109,10 @@ const LastStudentModal: React.FC<LastStudentModalProps> = ({
                                         <span className="text-white mt-0.5">•</span>
                                         <span>{t('tutorDetail.groupClass.lastStudent.notice3')}</span>
                                     </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-white mt-0.5">•</span>
+                                        <span>{t('tutorDetail.groupClass.lastStudent.notice4')}</span>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -124,9 +128,11 @@ const LastStudentModal: React.FC<LastStudentModalProps> = ({
                                         const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
                                         const dayKey = dayKeys[s.dayOfWeek - 1];
                                         const dayName = t(`common.days.${dayKey}`);
+                                        // Convert UTC time to local timezone
+                                        const localTime = convertUtcTimeToLocal(s.time);
                                         return idx === 0 
-                                            ? `${dayName} ${s.time}`
-                                            : `, ${dayName} ${s.time}`;
+                                            ? `${dayName} ${localTime}`
+                                            : `, ${dayName} ${localTime}`;
                                     })}
                                 </span>
                             </div>

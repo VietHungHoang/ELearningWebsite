@@ -39,7 +39,7 @@ interface TutorCardProps {
 }
 
 const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
   // const navigate = useNavigate(); // Temporarily commented - using window.open instead
@@ -213,7 +213,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
               />
               <StatItem
                 icon={<PiBookOpenTextLight style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{t('findTutors.tutorCard.iCanTeach')}</span> {tutor.subjects?.map((s: Subject) => t('locale') === 'vi' ? s.nameVi : s.nameEn).join(', ') || t('findTutors.tutorCard.notAvailable')}</>}
+                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{t('findTutors.tutorCard.iCanTeach')}</span> {tutor.subjects?.map((s: Subject) => i18n.language === 'vi' ? s.nameVi : s.nameEn).join(', ') || t('findTutors.tutorCard.notAvailable')}</>}
               />
             </div>
           </div>

@@ -42,6 +42,11 @@ export interface FilterData {
 
 export type ClassType = '1-on-1' | 'Group';
 
+export interface AvailabilitySlot {
+    day: number; // 1=Monday, 2=Tuesday, ..., 7=Sunday
+    timeSlot: string; // "Morning", "Afternoon", "Evening"
+}
+
 export interface TutorSearchFilter {
     category?: string;
     subject?: string;
@@ -52,6 +57,7 @@ export interface TutorSearchFilter {
     timezone?: string;
     keyword?: string;
     sessionType?: ClassType;
+    availability?: AvailabilitySlot[];
     page?: number;
     size?: number;
 }

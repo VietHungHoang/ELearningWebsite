@@ -165,6 +165,12 @@ export const STUDENT_SIDEBAR_OPTIONS: SidebarOption[] = [
         path: "/dashboard/messages",
     },
     {
+        icon: <FiStar className="w-4 h-4" />,
+        activeIcon: <FiStar className="w-4 h-4" />,
+        labelKey: "dashboard.sidebar.student.wishlist",
+        path: "/dashboard/wishlist",
+    },
+    {
         icon: <FiSettings className="w-4 h-4" />,
         activeIcon: <FiSettings className="w-4 h-4" />,
         labelKey: "dashboard.sidebar.student.profileSettings",

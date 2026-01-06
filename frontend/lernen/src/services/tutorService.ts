@@ -39,14 +39,66 @@ export const tutorService = {
 
     searchTutors: async (filters: TutorSearchFilter, studentId?: string): Promise<ApiResponse<PaginatedResponse<Tutor>>> => {
         try {
-            const params: Record<string, unknown> = { ...filters };
-            if (studentId) {
-                params.studentId = studentId;
+            // Format params manually to avoid Axios default serialization issues
+            const queryParams = new URLSearchParams();
+            
+            if (filters.category) queryParams.append('category', filters.category);
+            if (filters.subject) queryParams.append('subject', filters.subject);
+            
+            // Handle languageCodes array - append each separately
+            if (filters.languageCodes && filters.languageCodes.length > 0) {
+                filters.languageCodes.forEach(code => {
+                    queryParams.append('languageCodes', code);
+                });
             }
-            const response = await apiService.get<PaginatedResponse<TutorResponse>>(
-                "/v1/public/search/tutors",
-                params
-            );
+            
+            if (filters.minFee !== undefined) queryParams.append('minFee', filters.minFee.toString());
+            if (filters.maxFee !== undefined) queryParams.append('maxFee', filters.maxFee.toString());
+            if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
+            if (filters.keyword) queryParams.append('keyword', filters.keyword);
+            if (filters.sessionType) queryParams.append('sessionType', filters.sessionType);
+            
+            // Handle availability - convert to availableDays format with timeSlot
+            // Format: "MONDAY_MORNING", "TUESDAY_AFTERNOON", etc.
+            // Backend expects availableDays as List<String> with format "DAY_TIMESLOT"
+            if (filters.availability && filters.availability.length > 0) {
+                // Map day numbers to day names
+                const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+                
+                // Map timeSlot from Vietnamese/English to uppercase English
+                const timeSlotMap: Record<string, string> = {
+                    'Morning': 'MORNING',
+                    'Afternoon': 'AFTERNOON',
+                    'Evening': 'EVENING',
+                    'Buổi sáng': 'MORNING',
+                    'Buổi chiều': 'AFTERNOON',
+                    'Buổi tối': 'EVENING',
+                    'MORNING': 'MORNING',
+                    'AFTERNOON': 'AFTERNOON',
+                    'EVENING': 'EVENING'
+                };
+                
+                // Convert each availability slot to "DAY_TIMESLOT" format
+                filters.availability.forEach(slot => {
+                    if (slot.day && slot.day >= 1 && slot.day <= 7 && slot.timeSlot) {
+                        const dayName = dayNames[slot.day - 1];
+                        const timeSlotUpper = timeSlotMap[slot.timeSlot] || slot.timeSlot.toUpperCase();
+                        
+                        if (dayName && timeSlotUpper) {
+                            // Format: "MONDAY_MORNING", "TUESDAY_AFTERNOON", etc.
+                            const dayTimeSlot = `${dayName}_${timeSlotUpper}`;
+                            queryParams.append('availableDays', dayTimeSlot);
+                        }
+                    }
+                });
+            }
+            
+            if (filters.page !== undefined) queryParams.append('page', filters.page.toString());
+            if (filters.size !== undefined) queryParams.append('size', filters.size.toString());
+            if (studentId) queryParams.append('studentId', studentId);
+            
+            const url = `/v1/public/search/tutors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+            const response = await apiService.get<PaginatedResponse<TutorResponse>>(url);
             const mappedContent = await Promise.all(response.data.content.map(mapTutorResponseToTutor));
             return {
                 status: response.status,

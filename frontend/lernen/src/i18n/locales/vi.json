@@ -506,6 +506,7 @@
         "myPurchases": "Mua hàng của tôi",
         "certificates": "Chứng chỉ",
         "messages": "Tin nhắn",
+        "wishlist": "Yêu thích",
         "profileSettings": "Cài đặt hồ sơ",
         "whiteboard": "Bảng vẽ"
       },
@@ -668,6 +669,11 @@
           "viewResults": "Xem kết quả",
           "retake": "Làm lại"
         },
+        "loading": "Đang tải...",
+        "errors": {
+          "maxAttemptsReached": "Đã đạt số lần làm tối đa",
+          "failedToStart": "Không thể bắt đầu bài kiểm tra"
+        },
         "empty": {
           "title": "Không tìm thấy bài kiểm tra",
           "descriptionSearch": "Thử điều chỉnh từ khóa tìm kiếm.",
@@ -791,6 +797,52 @@
           "notes": "Ghi chú",
           "payNow": "Thanh toán ngay",
           "close": "Đóng"
+        }
+      },
+      "personalDetails": {
+        "title": "Thông tin cơ bản",
+        "description": "Xem thông tin cá nhân của bạn",
+        "fullName": "Họ và Tên",
+        "email": "Email",
+        "country": "Quốc gia",
+        "countryPlaceholder": "Chọn quốc gia",
+        "dateOfBirth": "Ngày sinh",
+        "profilePhoto": "Ảnh đại diện",
+        "editButton": "Chỉnh sửa thông tin",
+        "saveButton": "Lưu",
+        "cancelButton": "Hủy"
+      },
+      "profileSettings": {
+        "tabs": {
+          "personalDetails": "Thông tin cá nhân"
+        },
+        "breadcrumb": {
+          "profileSettings": "Cài đặt hồ sơ"
+        }
+      },
+      "wishlist": {
+        "title": "Danh sách yêu thích",
+        "description": "Xem các gia sư bạn đã thêm vào danh sách yêu thích",
+        "reviews": "đánh giá",
+        "perMin": "/1 giờ",
+        "viewDetails": "Xem chi tiết",
+        "removeFromWishlist": "Xóa khỏi yêu thích",
+        "empty": {
+          "title": "Danh sách yêu thích trống",
+          "description": "Bạn chưa thêm gia sư nào vào danh sách yêu thích. Hãy khám phá và thêm các gia sư bạn quan tâm!"
+        },
+        "deleteModal": {
+          "title": "Xóa khỏi yêu thích",
+          "message": "Bạn có chắc chắn muốn xóa gia sư này khỏi danh sách yêu thích?",
+          "confirm": "Xóa",
+          "cancel": "Hủy"
+        },
+        "success": {
+          "removed": "Đã xóa khỏi danh sách yêu thích"
+        },
+        "error": {
+          "fetch": "Không thể tải danh sách yêu thích",
+          "remove": "Không thể xóa khỏi danh sách yêu thích"
         }
       }
     },
@@ -1508,7 +1560,7 @@
         }
       },
       "personalDetails": {
-        "title": "Thông tin cơ nản",
+        "title": "Thông tin cơ bản",
         "description": "Cung cấp thông tin cá nhân cơ bản của bạn để giúp học sinh hiểu rõ hơn về bạn.",
         "fullName": "Họ và Tên",
         "fullNamePlaceholder": "Nhập họ và tên của bạn",
@@ -1823,6 +1875,11 @@
     }
   },
   "tutorDetail": {
+    "breadcrumb": {
+      "home": "Trang chủ",
+      "findTutors": "Tìm gia sư",
+      "tutorProfile": "Hồ sơ gia sư"
+    },
     "profile": {
       "bookedSessions": "phiên học đã dạy",
       "students": "Học sinh",
@@ -1836,6 +1893,14 @@
       "videoNotSupported": "Trình duyệt của bạn không hỗ trợ thẻ video.",
       "sessionFee": "Học phí",
       "perMin": "/1 giờ"
+    },
+    "wishlist": {
+      "addToWishlist": "Thêm vào yêu thích",
+      "removeFromWishlist": "Xóa khỏi yêu thích",
+      "added": "Đã thêm vào danh sách yêu thích",
+      "removed": "Đã xóa khỏi danh sách yêu thích",
+      "error": "Có lỗi xảy ra",
+      "loginRequired": "Vui lòng đăng nhập để thêm vào yêu thích"
     },
     "booking": {
       "selectTimeSlot": "Vui lòng chọn khung giờ trước khi yêu cầu buổi học.",
@@ -1935,6 +2000,7 @@
         "notice1": "Bạn là học viên cuối cùng để đủ số lượng tối đa của lớp học.",
         "notice2": "Lớp học sẽ được kích hoạt và bắt đầu ngay sau khi bạn tham gia.",
         "notice3": "Bạn có thể thanh toán ngay hoặc thanh toán sau khi lớp học bắt đầu.",
+        "notice4": "Bạn không thể rời lớp này sau khi tham gia.",
         "info1": "Lớp học sẽ được mở ngay sau khi bạn xác nhận tham gia.",
         "info2": "Bạn sẽ nhận được thông báo qua email khi lớp học bắt đầu.",
         "confirmJoin": "Xác nhận & tham gia"
@@ -2471,6 +2537,7 @@
     "time": "Thời gian",
     "passScore": "Điểm đạt",
     "retakeQuiz": "Làm lại",
+    "retaking": "Đang làm lại...",
     "backToQuizzes": "Quay lại",
     "filter": {
       "all": "Tất cả",
@@ -2482,7 +2549,9 @@
       "failedToLoad": "Không thể tải kết quả bài kiểm tra. Vui lòng thử lại.",
       "attemptIdMissing": "Thiếu ID lượt làm bài",
       "quizIdMissing": "Thiếu ID bài kiểm tra",
-      "noAttemptFound": "Không tìm thấy lượt làm bài cho bài kiểm tra này"
+      "noAttemptFound": "Không tìm thấy lượt làm bài cho bài kiểm tra này",
+      "maxAttemptsReached": "Đã đạt số lần làm tối đa",
+      "failedToRetake": "Không thể làm lại bài kiểm tra"
     }
   }
 }

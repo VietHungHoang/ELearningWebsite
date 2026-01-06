@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import quizService from '../../services/quizService';
 import type { QuizSummary, StudentQuizSummary } from '../../types/quiz';
 import BirdLoading from '../../components/ui/BirdLoading';
+import Toast from '../../components/ui/Toast';
 
 // Unified Quiz type for display (maps both tutor and student responses)
 interface Quiz {
@@ -85,6 +86,8 @@ const MyQuizzesPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const [loadingQuizId, setLoadingQuizId] = useState<string | null>(null);
 
     // Determine role
     const isTutor = state.user?.role === 'tutor';
@@ -344,49 +347,82 @@ const MyQuizzesPage: React.FC = () => {
             </div>
         );
 
+        // Handle start/continue/retake quiz with maximum attempts check
+        const handleStartQuiz = async (quizId: string, e: React.MouseEvent) => {
+            e.stopPropagation();
+            setOpenMenuId(null);
+            
+            // For in_progress status, check if there's a current attempt first
+            if (quiz.status === 'in_progress') {
+                try {
+                    const currentAttempt = await quizService.getCurrentAttempt(quizId);
+                    if (currentAttempt) {
+                        // If there's a current attempt, navigate directly
+                        navigate(`/quiz/take/${quizId}`);
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Failed to get current attempt:', err);
+                }
+            }
+
+            // For not_started or retake (completed), need to start new attempt
+            setLoadingQuizId(quizId);
+            try {
+                await quizService.startQuizAttempt(quizId);
+                // If successful, navigate to quiz taking page
+                navigate(`/quiz/take/${quizId}`);
+            } catch (err: any) {
+                setLoadingQuizId(null);
+                // Check if it's a maximum attempts error
+                if (err.isMaxAttemptsReached || err.message?.toLowerCase().includes('maximum number of attempts reached')) {
+                    setToast({ 
+                        message: err.message || t('dashboard.student.myQuizzes.errors.maxAttemptsReached'), 
+                        type: 'error' 
+                    });
+                } else {
+                    setToast({ 
+                        message: err.message || t('dashboard.student.myQuizzes.errors.failedToStart'), 
+                        type: 'error' 
+                    });
+                }
+            }
+        };
+
         // Student menu items
         const renderStudentMenu = () => (
             <div className="absolute top-10 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[120px] z-40">
                 {quiz.status === 'not_started' && (
                     <button
                         type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/quiz/take/${quiz.id}`);
-                            setOpenMenuId(null);
-                        }}
-                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#475569]/5 active:bg-[#475569]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                        onClick={(e) => handleStartQuiz(quiz.id, e)}
+                        disabled={loadingQuizId === quiz.id}
+                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#475569]/5 active:bg-[#475569]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <HiOutlinePlay className="w-4 h-4 text-[#475569] flex-shrink-0" />
-                        <span>{t('dashboard.student.myQuizzes.actions.startQuiz')}</span>
+                        <span>{loadingQuizId === quiz.id ? t('dashboard.student.myQuizzes.loading') : t('dashboard.student.myQuizzes.actions.startQuiz')}</span>
                     </button>
                 )}
                 {quiz.status === 'in_progress' && (
                     <button
                         type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/quiz/take/${quiz.id}`);
-                            setOpenMenuId(null);
-                        }}
-                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#a16207]/5 active:bg-[#a16207]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 whitespace-nowrap"
+                        onClick={(e) => handleStartQuiz(quiz.id, e)}
+                        disabled={loadingQuizId === quiz.id}
+                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#a16207]/5 active:bg-[#a16207]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <HiOutlinePlay className="w-4 h-4 text-[#a16207] flex-shrink-0" />
-                        <span>{t('dashboard.student.myQuizzes.actions.continueQuiz')}</span>
+                        <span>{loadingQuizId === quiz.id ? t('dashboard.student.myQuizzes.loading') : t('dashboard.student.myQuizzes.actions.continueQuiz')}</span>
                     </button>
                 )}
                 {quiz.status === 'completed' && (
                     <button
                         type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/quiz/take/${quiz.id}`);
-                            setOpenMenuId(null);
-                        }}
-                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150"
+                        onClick={(e) => handleStartQuiz(quiz.id, e)}
+                        disabled={loadingQuizId === quiz.id}
+                        className="w-full px-3 py-2 text-sm text-left hover:bg-[#065A46]/5 active:bg-[#065A46]/10 flex items-center gap-2 text-gray-700 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <HiOutlinePlay className="w-4 h-4 text-[#065A46] flex-shrink-0" />
-                        <span>{t('dashboard.student.myQuizzes.actions.retake')}</span>
+                        <span>{loadingQuizId === quiz.id ? t('dashboard.student.myQuizzes.loading') : t('dashboard.student.myQuizzes.actions.retake')}</span>
                     </button>
                 )}
             </div>
@@ -667,6 +703,9 @@ const MyQuizzesPage: React.FC = () => {
                     )}
                 </div>
             )}
+
+            {/* Toast for error messages */}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

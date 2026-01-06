@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { HiSearch } from 'react-icons/hi';
 import Breadcrumb from '../../components/Breadcrumb';
 import { useAuth } from '../../../../context/AuthContext';
+import quizService from '../../../../services/quizService';
+import Toast from '../../../../components/ui/Toast';
 
 // Types
 interface QuizAttempt {
@@ -100,6 +102,8 @@ const MyQuizzesPage: React.FC = () => {
     const [quizAttempts] = useState<QuizAttempt[]>(mockQuizAttempts);
     const [activeTab, setActiveTab] = useState<FilterTab>('All Quizzes');
     const [searchTerm, setSearchTerm] = useState('');
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const [loadingQuizId, setLoadingQuizId] = useState<string | null>(null);
 
     const filteredQuizzes = useMemo(() => {
         let filtered = quizAttempts;
@@ -251,9 +255,43 @@ const MyQuizzesPage: React.FC = () => {
 
                         {/* Action Button */}
                         <button
-                            onClick={() => {
+                            onClick={async () => {
                                 if (quiz.status === 'not_started' || quiz.status === 'in_progress') {
-                                    navigate(`/quiz/take/${quiz.id}`);
+                                    // For in_progress status, check if there's a current attempt first
+                                    if (quiz.status === 'in_progress') {
+                                        try {
+                                            const currentAttempt = await quizService.getCurrentAttempt(quiz.id);
+                                            if (currentAttempt) {
+                                                // If there's a current attempt, navigate directly
+                                                navigate(`/quiz/take/${quiz.id}`);
+                                                return;
+                                            }
+                                        } catch (err) {
+                                            console.error('Failed to get current attempt:', err);
+                                        }
+                                    }
+
+                                    // For not_started or if no current attempt, need to start new attempt
+                                    setLoadingQuizId(quiz.id);
+                                    try {
+                                        await quizService.startQuizAttempt(quiz.id);
+                                        // If successful, navigate to quiz taking page
+                                        navigate(`/quiz/take/${quiz.id}`);
+                                    } catch (err: any) {
+                                        setLoadingQuizId(null);
+                                        // Check if it's a maximum attempts error
+                                        if (err.isMaxAttemptsReached || err.message?.toLowerCase().includes('maximum number of attempts reached')) {
+                                            setToast({ 
+                                                message: err.message || 'Maximum number of attempts reached', 
+                                                type: 'error' 
+                                            });
+                                        } else {
+                                            setToast({ 
+                                                message: err.message || 'Failed to start quiz', 
+                                                type: 'error' 
+                                            });
+                                        }
+                                    }
                                 } else {
                                     // If we have attemptId, navigate immediately
                                     const currentAttemptId = (quiz as any).currentAttemptId;
@@ -280,12 +318,14 @@ const MyQuizzesPage: React.FC = () => {
                                     }
                                 }
                             }}
-                            className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors ${quiz.status === 'completed'
+                            disabled={loadingQuizId === quiz.id}
+                            className={`w-full py-2.5 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${quiz.status === 'completed'
                                 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 : 'bg-[#0b6459] text-white hover:bg-[#084c43]'
                                 }`}
                         >
-                            {quiz.status === 'completed' ? 'View Results' :
+                            {loadingQuizId === quiz.id ? 'Loading...' :
+                                quiz.status === 'completed' ? 'View Results' :
                                 quiz.status === 'in_progress' ? 'Continue Quiz' :
                                     'Start Quiz'}
                         </button>
@@ -311,6 +351,9 @@ const MyQuizzesPage: React.FC = () => {
                     </p>
                 </div>
             )}
+
+            {/* Toast for error messages */}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

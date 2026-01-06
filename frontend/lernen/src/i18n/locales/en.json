@@ -1829,6 +1829,11 @@
     }
   },
   "tutorDetail": {
+    "breadcrumb": {
+      "home": "Home",
+      "findTutors": "Find Tutors",
+      "tutorProfile": "Tutor Profile"
+    },
     "profile": {
       "bookedSessions": "Booked sessions",
       "students": "Students",
@@ -1941,6 +1946,7 @@
         "notice1": "You are the last student to reach the maximum capacity of the class.",
         "notice2": "The class will be activated and start immediately after you join.",
         "notice3": "You can pay now or pay later when the class starts.",
+        "notice4": "You cannot leave this class after joining.",
         "info1": "The class will be opened immediately after you confirm your participation.",
         "info2": "You will receive an email notification when the class starts.",
         "confirmJoin": "Confirm & Join"

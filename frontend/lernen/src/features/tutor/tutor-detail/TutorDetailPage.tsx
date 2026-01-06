@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../../../components/ui/Layout";
 import Breadcrumb from "../../../components/ui/Breadcrumb";
 import TutorDetailsTabs from "./components/TutorDetailsTabs";
@@ -19,6 +20,7 @@ const TutorDetailPage: React.FC = () => {
     const navigate = useNavigate();
     const { tutorId } = useParams<{ tutorId: string }>();
     const { state } = useAuth();
+    const { t } = useTranslation();
 
     const [introduction, setIntroduction] = useState<string>("");
     const [tutorData, setTutorData] = useState<any>(null);
@@ -112,9 +114,9 @@ const TutorDetailPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto">
                     <Breadcrumb
                         paths={[
-                            { name: "Home", path: "/" },
-                            { name: "Find Tutors", path: "/find-tutors" },
-                            { name: "Tutor Profile", path: `/tutors/${tutorId}` },
+                            { name: t('tutorDetail.breadcrumb.home'), path: "/" },
+                            { name: t('tutorDetail.breadcrumb.findTutors'), path: "/find-tutors" },
+                            { name: t('tutorDetail.breadcrumb.tutorProfile'), path: `/tutors/${tutorId}` },
                         ]}
                     />
                 </div>

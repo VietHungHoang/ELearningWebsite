@@ -2,7 +2,7 @@ import React from 'react';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../../../context/CurrencyContext';
-import { formatCurrency, convertFromVND } from '../../../../utils/currencyHelper';
+import { formatCurrency, convertFromVND, formatVNDSimplified } from '../../../../utils/currencyHelper';
 import type { GroupClass } from '../../../../types/tutor';
 
 interface PaymentPromptModalProps {
@@ -25,9 +25,13 @@ const PaymentPromptModal: React.FC<PaymentPromptModalProps> = ({
 
     if (!selectedClass) return null;
 
-    // Calculate price (assuming pricePerHour is in VND)
-    const convertedPrice = convertFromVND(selectedClass.pricePerHour, selectedCurrency);
-    const formattedPrice = formatCurrency(convertedPrice, selectedCurrency);
+    // Format price - use simplified format for VND if >= 1,000,000, otherwise use currency conversion
+    const formattedPrice = selectedCurrency === 'VND' 
+        ? formatVNDSimplified(selectedClass.pricePerHour)
+        : (() => {
+            const convertedPrice = convertFromVND(selectedClass.pricePerHour, selectedCurrency);
+            return formatCurrency(convertedPrice, selectedCurrency);
+        })();
 
     return (
         <ModalLayout
@@ -67,7 +71,7 @@ const PaymentPromptModal: React.FC<PaymentPromptModalProps> = ({
                             <p className="text-lg font-bold text-[#0b6459]">
                                 {formattedPrice}
                                 <span className="text-sm text-gray-600 font-medium ml-1">
-                                    {t('tutorDetail.groupClass.perHour')}
+                                    /{((selectedClass as any).sessions) || 10} {t('tutorDetail.groupClass.sessions')}
                                 </span>
                             </p>
                         </div>
