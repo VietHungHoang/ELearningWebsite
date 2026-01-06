@@ -4,6 +4,7 @@ import com.elearning.tutorservice.dto.event.AvatarUpdateEvent;
 import com.elearning.tutorservice.dto.event.RoleAssignRequestEvent;
 import com.elearning.tutorservice.dto.event.TutorApprovedEvent;
 import com.elearning.tutorservice.dto.event.TutorIndexEvent;
+import com.elearning.tutorservice.dto.event.TutorHourlyRateResponseEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +68,20 @@ public class KafkaProducer {
         } catch (JsonProcessingException e) {
             log.error("Error converting AvatarUpdateEvent to JSON: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to serialize AvatarUpdateEvent", e);
+        }
+    }
+
+    private static final String TUTOR_HOURLY_RATE_RESPONSE_TOPIC = "tutor_hourly_rate_response";
+
+    public void sendTutorHourlyRateResponse(TutorHourlyRateResponseEvent event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(TUTOR_HOURLY_RATE_RESPONSE_TOPIC, event.getClassId().toString(), jsonMessage);
+            log.info("Sent tutor hourly rate response to topic {}: classId={}, hourlyRate={}",
+                    TUTOR_HOURLY_RATE_RESPONSE_TOPIC, event.getClassId(), event.getHourlyRate());
+        } catch (JsonProcessingException e) {
+            log.error("Error converting TutorHourlyRateResponseEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize TutorHourlyRateResponseEvent", e);
         }
     }
 }

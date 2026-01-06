@@ -12,7 +12,9 @@ import com.elearning.classservice.repository.ClassEnrollmentRepository;
 import com.elearning.classservice.repository.ClassRepository;
 import com.elearning.classservice.repository.SessionRepository;
 import com.elearning.classservice.service.ClassPaymentEventService;
+import com.elearning.classservice.service.KafkaProducerService;
 import com.elearning.classservice.service.ZoomMeetingService;
+import com.elearning.classservice.dto.event.TutorHourlyRateRequestEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private final ClassEnrollmentRepository enrollmentRepository;
     private final com.elearning.classservice.repository.ClassScheduleRepository classScheduleRepository;
     private final ZoomMeetingService zoomMeetingService;
+    private final KafkaProducerService kafkaProducerService;
 
     @Override
     @Transactional
@@ -63,11 +66,13 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         // 1. Create Class Entity
         ClassEntity newClass = ClassEntity.builder()
                 .title("Lớp học 1-1 " + (event.getNotes() != null ? event.getNotes() : ""))
-                .tutor(com.elearning.classservice.entity.User.builder().id(event.getTutorId()).build()) // Setup proxy user reference
+                .tutor(com.elearning.classservice.entity.User.builder().id(event.getTutorId()).build()) // Setup proxy
+                                                                                                        // user
+                                                                                                        // reference
                 .status(ClassStatus.IN_PROGRESS)
                 .classType(com.elearning.classservice.entity.enums.ClassType.ONE_ON_ONE)
                 .build();
-        
+
         newClass = classRepository.save(newClass);
         log.info("Created new class entity with ID: {}", newClass.getId());
 
@@ -75,7 +80,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         if (event.getSchedule() != null) {
             // Create ClassSchedule entities (to store the recurring pattern)
             createClassSchedules(newClass, event.getSchedule());
-            
+
             // Generate Sessions (based on pattern + total sessions purchased)
             int totalSessions = event.getSessionsPurchased() != null ? event.getSessionsPurchased() : 1;
             createSessionsFromSchedule(newClass, event.getSchedule(), totalSessions);
@@ -88,44 +93,56 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 .status(com.elearning.classservice.entity.enums.EnrollmentStatus.JOINED)
                 .enrolledAt(java.time.LocalDateTime.now())
                 .build();
-        
+
         enrollmentRepository.save(enrollment);
         log.info("Enrolled student {} to class {}", event.getStudentId(), newClass.getId());
 
         // 4. Create Zoom Meetings
         createZoomMeetingsForClass(newClass);
+
+        // 5. Request tutor hourly rate if pricePerHour is not set
+        if (newClass.getPricePerHour() == null || newClass.getPricePerHour() == 0) {
+            log.info("pricePerHour is null/0 for class {}, requesting tutor hourly rate", newClass.getId());
+            TutorHourlyRateRequestEvent rateRequest = TutorHourlyRateRequestEvent.builder()
+                    .classId(newClass.getId())
+                    .tutorId(event.getTutorId())
+                    .build();
+            kafkaProducerService.sendTutorHourlyRateRequest(rateRequest);
+        }
     }
 
     private void createClassSchedules(ClassEntity classEntity, String scheduleJson) {
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = 
-                new com.fasterxml.jackson.core.type.TypeReference<>() {};
-            
+            com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = new com.fasterxml.jackson.core.type.TypeReference<>() {
+            };
+
             List<java.util.Map<String, String>> scheduleItems = mapper.readValue(scheduleJson, typeRef);
-            
+
             // To avoid duplicates, we track which day/time pairs we've added
             java.util.Set<String> processedPatterns = new java.util.HashSet<>();
 
             for (java.util.Map<String, String> item : scheduleItems) {
                 String timeStr = item.get("time");
                 if (timeStr != null) {
-                    java.time.LocalDateTime dateTime = java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
-                    
+                    java.time.LocalDateTime dateTime = java.time.LocalDateTime.parse(timeStr,
+                            java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+
                     int dayOfWeek = dateTime.getDayOfWeek().getValue();
                     java.time.LocalTime startTime = dateTime.toLocalTime();
                     // Duration is fixed at 60 for now, or could be passed in
                     int duration = 60;
-                    
+
                     String key = dayOfWeek + "-" + startTime;
                     if (!processedPatterns.contains(key)) {
-                        com.elearning.classservice.entity.ClassSchedule schedule = com.elearning.classservice.entity.ClassSchedule.builder()
+                        com.elearning.classservice.entity.ClassSchedule schedule = com.elearning.classservice.entity.ClassSchedule
+                                .builder()
                                 .classEntity(classEntity)
                                 .dayOfWeek(dayOfWeek)
                                 .startTime(startTime)
                                 .durationMinutes(duration)
                                 .build();
-                        
+
                         classScheduleRepository.save(schedule);
                         processedPatterns.add(key);
                     }
@@ -140,99 +157,117 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private void createSessionsFromSchedule(ClassEntity classEntity, String scheduleJson, int totalSessionsToCreate) {
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = 
-                new com.fasterxml.jackson.core.type.TypeReference<>() {};
-            
+            com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = new com.fasterxml.jackson.core.type.TypeReference<>() {
+            };
+
             List<java.util.Map<String, String>> scheduleItems = mapper.readValue(scheduleJson, typeRef);
             List<java.time.LocalDateTime> initialDates = new java.util.ArrayList<>();
-            
+
             // 1. Collect initial dates from JSON
             for (java.util.Map<String, String> item : scheduleItems) {
                 String timeStr = item.get("time");
                 if (timeStr != null) {
-                    initialDates.add(java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME));
+                    initialDates.add(
+                            java.time.LocalDateTime.parse(timeStr, java.time.format.DateTimeFormatter.ISO_DATE_TIME));
                 }
             }
             // Sort initial dates
             java.util.Collections.sort(initialDates);
-            
+
+            // Get current max sessionNumber for this class (to support adding more
+            // sessions)
+            int currentMaxSessionNumber = sessionRepository.findMaxSessionNumberByClassId(classEntity.getId());
+            int nextSessionNumber = currentMaxSessionNumber + 1;
+
             int sessionsCreated = 0;
             java.util.Set<java.time.LocalDateTime> createdSessionTimes = new java.util.HashSet<>();
 
-            // 2. Create sessions for the specific dates provided in the schedule (First Week)
+            // 2. Create sessions for the specific dates provided in the schedule (First
+            // Week)
             for (java.time.LocalDateTime startTime : initialDates) {
-                if (sessionsCreated >= totalSessionsToCreate) break;
-                
-                createSession(classEntity, startTime);
+                if (sessionsCreated >= totalSessionsToCreate)
+                    break;
+
+                createSession(classEntity, startTime, nextSessionNumber);
                 createdSessionTimes.add(startTime);
                 sessionsCreated++;
+                nextSessionNumber++;
             }
-            
+
             // 3. If we need more sessions, generate them based on the pattern
             if (sessionsCreated < totalSessionsToCreate && !initialDates.isEmpty()) {
                 // Determine the weekly pattern from initial dates
                 // Pattern: [DayOfWeek -> StartTime]
                 List<java.time.LocalDateTime> sortedPattern = new java.util.ArrayList<>(initialDates);
-                // We assume the input schedule represents one week (or the cycle). 
+                // We assume the input schedule represents one week (or the cycle).
                 // We will continue generating by adding 1 week to the last generated batch.
-                
+
                 // Strategy: Keep advancing week by week.
-                // Start checking from the week following the *earliest* date we have? 
+                // Start checking from the week following the *earliest* date we have?
                 // Or simply: Take the pattern relative to the first date, and project forward?
-                
-                // Simpler Strategy: 
+
+                // Simpler Strategy:
                 // Find all unique (DayOfWeek, Time) pairs.
                 // Start from the last date in initialDates.
                 // Iterate day by day, if matches pattern, add session.
-                
+
                 java.time.LocalDateTime subequentDate = initialDates.get(initialDates.size() - 1).plusDays(1);
-                
+
                 // Get strictly the recurring patterns
                 class Patterns {
                     int dayOfWeek;
                     java.time.LocalTime time;
-                    Patterns(int d, java.time.LocalTime t) { this.dayOfWeek = d; this.time = t; }
+
+                    Patterns(int d, java.time.LocalTime t) {
+                        this.dayOfWeek = d;
+                        this.time = t;
+                    }
                 }
                 List<Patterns> patterns = new java.util.ArrayList<>();
                 for (java.time.LocalDateTime output : initialDates) {
-                     // Check if this pattern (Day + Time) is already added? 
-                     // A user might have Mon 10am and Mon 2pm. both valid.
-                     boolean exists = patterns.stream().anyMatch(p -> p.dayOfWeek == output.getDayOfWeek().getValue() && p.time.equals(output.toLocalTime()));
-                     if (!exists) {
-                         patterns.add(new Patterns(output.getDayOfWeek().getValue(), output.toLocalTime()));
-                     }
+                    // Check if this pattern (Day + Time) is already added?
+                    // A user might have Mon 10am and Mon 2pm. both valid.
+                    boolean exists = patterns.stream().anyMatch(p -> p.dayOfWeek == output.getDayOfWeek().getValue()
+                            && p.time.equals(output.toLocalTime()));
+                    if (!exists) {
+                        patterns.add(new Patterns(output.getDayOfWeek().getValue(), output.toLocalTime()));
+                    }
                 }
-                
+
                 // Sort patterns by day of week then time, to ensure logical order within a week
                 // (Optional, but good for consistent generation)
-                
+
                 while (sessionsCreated < totalSessionsToCreate) {
                     // Check if 'subequentDate' matches any pattern
-                     int currentDay = subequentDate.getDayOfWeek().getValue();
-                     
-                     for (Patterns p : patterns) {
-                         if (p.dayOfWeek == currentDay) {
-                             // potential match
-                             java.time.LocalDateTime candidate = java.time.LocalDateTime.of(subequentDate.toLocalDate(), p.time);
-                             
-                             // Don't duplicate if for some reason it overlaps with existing (though logic starts after)
-                             if (!createdSessionTimes.contains(candidate)) {
-                                 createSession(classEntity, candidate);
-                                 createdSessionTimes.add(candidate);
-                                 sessionsCreated++;
-                                 
-                                 if (sessionsCreated >= totalSessionsToCreate) break;
-                             }
-                         }
-                     }
-                     
-                     subequentDate = subequentDate.plusDays(1);
-                     
-                     // Safety break to prevent infinite loops (e.g. 5 years)
-                     if (subequentDate.isAfter(initialDates.get(0).plusYears(1))) {
-                         log.warn("Exceeded 1 year of sessions generation. Stopping.");
-                         break;
-                     }
+                    int currentDay = subequentDate.getDayOfWeek().getValue();
+
+                    for (Patterns p : patterns) {
+                        if (p.dayOfWeek == currentDay) {
+                            // potential match
+                            java.time.LocalDateTime candidate = java.time.LocalDateTime.of(subequentDate.toLocalDate(),
+                                    p.time);
+
+                            // Don't duplicate if for some reason it overlaps with existing (though logic
+                            // starts after)
+                            if (!createdSessionTimes.contains(candidate)) {
+                                createSession(classEntity, candidate, nextSessionNumber);
+                                createdSessionTimes.add(candidate);
+                                sessionsCreated++;
+                                nextSessionNumber++;
+
+                                if (sessionsCreated >= totalSessionsToCreate)
+                                    break;
+                            }
+                        }
+                    }
+
+                    subequentDate = subequentDate.plusDays(1);
+
+                    // Safety break to prevent infinite loops (e.g. 5 years)
+                    if (subequentDate.isAfter(initialDates.get(0).plusYears(1))) {
+                        log.warn("Exceeded 1 year of sessions generation. Stopping.");
+                        break;
+                    }
                 }
             }
 
@@ -241,8 +276,8 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
             log.error("Failed to parse schedule JSON or create sessions: {}", scheduleJson, e);
         }
     }
-    
-    private void createSession(ClassEntity classEntity, java.time.LocalDateTime startTime) {
+
+    private void createSession(ClassEntity classEntity, java.time.LocalDateTime startTime, int sessionNumber) {
         Session session = Session.builder()
                 .classEntity(classEntity)
                 .tutor(classEntity.getTutor())
@@ -250,8 +285,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 .startTime(startTime)
                 .endTime(startTime.plusMinutes(60)) // Default 60 mins duration
                 .status(ScheduleStatus.PENDING)
+                .sessionNumber(sessionNumber) // Gán thứ tự session
                 .build();
-        
+
         sessionRepository.save(session);
     }
 
@@ -278,12 +314,14 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 try {
                     // Skip if Zoom meeting already exists
                     if (session.getZoomMeetingId() != null && !session.getZoomMeetingId().isEmpty()) {
-                        log.info("Session {} already has Zoom meeting ID: {}", session.getId(), session.getZoomMeetingId());
+                        log.info("Session {} already has Zoom meeting ID: {}", session.getId(),
+                                session.getZoomMeetingId());
                         continue;
                     }
 
                     // Create Zoom meeting
-                    ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(tutorId, session.getId());
+                    ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(tutorId,
+                            session.getId());
 
                     // Update session with Zoom details
                     session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
@@ -303,7 +341,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 }
             }
 
-            log.info("Zoom meeting creation completed for class {}. Success: {}, Failed: {}", 
+            log.info("Zoom meeting creation completed for class {}. Success: {}, Failed: {}",
                     classEntity.getId(), successCount, failCount);
 
         } catch (Exception e) {
@@ -315,7 +353,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     @Override
     @Transactional
     public void handlePaymentFailed(BookingPaymentFailedEvent event) {
-        log.info("Handling payment failed for bookingId: {}, classId: {}, reason: {}", 
+        log.info("Handling payment failed for bookingId: {}, classId: {}, reason: {}",
                 event.getBookingId(), event.getClassId(), event.getReason());
 
         if (event.getClassId() == null) {
@@ -336,17 +374,19 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     /**
      * Rollback logic when payment fails
      * - Xóa tất cả sessions PENDING (sessions mới được tạo cho booking này)
-     * - Nếu sau khi xóa không còn sessions nào -> Đây là booking MUA MỚI -> Xóa class và enrollment
-     * - Nếu sau khi xóa vẫn còn sessions -> Đây là booking MUA THÊM -> Giữ lại class và enrollment
+     * - Nếu sau khi xóa không còn sessions nào -> Đây là booking MUA MỚI -> Xóa
+     * class và enrollment
+     * - Nếu sau khi xóa vẫn còn sessions -> Đây là booking MUA THÊM -> Giữ lại
+     * class và enrollment
      */
     private void rollbackFailedPayment(ClassEntity classEntity) {
         UUID classId = classEntity.getId();
-        
+
         log.info("Starting rollback for class {}", classId);
 
         // 1. Get all PENDING sessions (sessions chưa được thanh toán)
         List<Session> pendingSessions = sessionRepository.findByClassEntityIdAndStatus(classId, ScheduleStatus.PENDING);
-        
+
         log.info("Found {} PENDING sessions to delete for class {}", pendingSessions.size(), classId);
 
         // 2. Delete all PENDING sessions
@@ -357,30 +397,33 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
         // 3. Check remaining sessions
         List<Session> remainingSessions = sessionRepository.findByClassEntityIdOrderByStartTimeAsc(classId);
-        
+
         log.info("Remaining sessions after deletion: {} for class {}", remainingSessions.size(), classId);
 
         // 4. Decide rollback strategy
         if (remainingSessions.isEmpty()) {
             // Case: MUA MỚI - Không còn sessions nào -> Xóa toàn bộ class và enrollments
-            log.info("No remaining sessions. This is a NEW PURCHASE. Deleting class and enrollments for class {}", classId);
-            
+            log.info("No remaining sessions. This is a NEW PURCHASE. Deleting class and enrollments for class {}",
+                    classId);
+
             // Delete all enrollments
             List<ClassEnrollment> enrollments = enrollmentRepository.findByClassEntityId(classId);
             if (!enrollments.isEmpty()) {
                 enrollmentRepository.deleteAll(enrollments);
                 log.info("Deleted {} enrollments for class {}", enrollments.size(), classId);
             }
-            
+
             // Delete class entity
             classRepository.delete(classEntity);
             log.info("Deleted class entity {} (NEW PURCHASE rollback)", classId);
-            
+
         } else {
-            // Case: MUA THÊM - Vẫn còn sessions -> Chỉ xóa sessions PENDING, giữ lại class và enrollment
-            log.info("Found {} remaining sessions. This is an ADD MORE HOURS. Keeping class and enrollments for class {}", 
+            // Case: MUA THÊM - Vẫn còn sessions -> Chỉ xóa sessions PENDING, giữ lại class
+            // và enrollment
+            log.info(
+                    "Found {} remaining sessions. This is an ADD MORE HOURS. Keeping class and enrollments for class {}",
                     remainingSessions.size(), classId);
-            
+
             // Optionally: Update class status if needed
             // Nếu class đang ở trạng thái CREATED, có thể rollback về trạng thái trước đó
             if (classEntity.getStatus() == ClassStatus.CREATED) {

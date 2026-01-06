@@ -42,4 +42,17 @@ public class KafkaProducerService {
             throw new RuntimeException("Failed to serialize SessionStartedEvent", e);
         }
     }
+
+    private static final String TUTOR_HOURLY_RATE_REQUEST_TOPIC = "request_tutor_hourly_rate";
+
+    public void sendTutorHourlyRateRequest(Object event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(TUTOR_HOURLY_RATE_REQUEST_TOPIC, jsonMessage);
+            log.info("Sent tutor hourly rate request to topic {}: {}", TUTOR_HOURLY_RATE_REQUEST_TOPIC, jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting TutorHourlyRateRequestEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize TutorHourlyRateRequestEvent", e);
+        }
+    }
 }

@@ -74,8 +74,8 @@ const CreateQuizPage: React.FC = () => {
             return cls.title || '';
         }
         // If title is null, return first student's name
-        return cls.students && cls.students.length > 0 
-            ? cls.students[0].fullName 
+        return cls.students && cls.students.length > 0
+            ? cls.students[0].fullName
             : '';
     };
 
@@ -88,7 +88,7 @@ const CreateQuizPage: React.FC = () => {
                     page: 0,
                     size: 100 // Get all classes, adjust if needed
                 });
-                
+
                 if (response.success && response.data) {
                     setClasses(response.data.content || []);
                 } else {
@@ -204,19 +204,37 @@ const CreateQuizPage: React.FC = () => {
     const handleAIGenerate = async (prompt: string) => {
         setIsGeneratingAI(true);
         try {
-            // TODO: Call AI API to generate questions
-            // For now, this is a placeholder - will be implemented when API is ready
-            console.log('Generating questions with prompt:', prompt);
-            
-            // Simulate API call - replace with actual API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Example: Add generated questions (this will be replaced with actual AI response)
-            // const generatedQuestions = await quizService.generateQuestionsWithAI(prompt);
-            // setQuestions([...questions, ...generatedQuestions]);
-            
+            // Call AI API to generate questions
+            const generatedQuiz = await quizService.generateQuizWithAI(prompt);
+
+            // Map AI response to QuizQuestion format
+            const generatedQuestions: QuizQuestion[] = generatedQuiz.questions.map((q, index) => ({
+                id: `ai-${Date.now()}-${index}`,
+                question: q.text,
+                multipleChoiceOptions: q.options,
+                isMultipleSelection: false, // AI generates single choice questions by default
+                selectedOptions: [q.correctAnswer] // Pre-select the correct answer
+            }));
+
+            // Append generated questions to existing questions (or replace empty ones)
+            if (questions.length === 1 && !questions[0].question.trim()) {
+                // If only empty question exists, replace with generated ones
+                setQuestions(generatedQuestions);
+            } else {
+                // Append to existing questions
+                setQuestions([...questions, ...generatedQuestions]);
+            }
+
+            // Optionally set quiz title and description if empty
+            if (!quizTitle.trim() && generatedQuiz.title) {
+                setQuizTitle(generatedQuiz.title);
+            }
+            if (!quizDescription.trim() && generatedQuiz.description) {
+                setQuizDescription(generatedQuiz.description);
+            }
+
             setIsAIModalOpen(false);
-            setSuccessMessage(t('quiz.create.aiGenerate.success') || 'Câu hỏi đã được tạo thành công!');
+            setSuccessMessage(t('quiz.create.aiGenerate.success') || `Đã tạo thành công ${generatedQuestions.length} câu hỏi!`);
             // Clear success message after 3 seconds
             setTimeout(() => setSuccessMessage(null), 3000);
         } catch (error) {
@@ -260,7 +278,7 @@ const CreateQuizPage: React.FC = () => {
     const buildQuizRequest = (): CreateQuizRequest => {
         // selectedClass is now the class ID directly
         const classId = selectedClass;
-        
+
         // Find selected class to get title and students
         const selectedClassData = classes.find(c => c.id === classId);
         const classTitle = selectedClassData?.title;
@@ -509,7 +527,7 @@ const CreateQuizPage: React.FC = () => {
                                 <CustomDropdown2
                                     label={<>{t('quiz.create.assignClass')} <span className="text-red-500">*</span></>}
                                     options={isLoadingClasses ? [] : classes.map(cls => getClassDisplayName(cls))}
-                                    selectedValue={classes.find(cls => cls.id === selectedClass) 
+                                    selectedValue={classes.find(cls => cls.id === selectedClass)
                                         ? getClassDisplayName(classes.find(cls => cls.id === selectedClass)!)
                                         : selectedClass}
                                     placeholder={isLoadingClasses ? t('common.loading', { defaultValue: 'Đang tải...' }) : t('quiz.create.classPlaceholder')}
