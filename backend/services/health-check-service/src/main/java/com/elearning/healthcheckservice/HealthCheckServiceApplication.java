@@ -1,4 +1,4 @@
-package com.elearning.healthcheckservice;
+package main.java.com.elearning.healthcheckservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

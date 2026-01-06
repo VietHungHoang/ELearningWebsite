@@ -1,4 +1,4 @@
-package com.elearning.healthcheckservice.controller;
+package main.java.com.elearning.healthcheckservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
