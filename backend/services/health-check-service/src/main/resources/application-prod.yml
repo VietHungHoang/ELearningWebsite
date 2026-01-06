@@ -1,39 +1,51 @@
 # Health check configuration
 health-check:
   enabled: true
-  interval: 600000 # 10 minutes in milliseconds
-  timeout: 5000 # 5 seconds timeout per service
+  interval: 600000 # 10 minutes
+  timeout: 5000    # 5 seconds
 
 # Service URLs for health checking
 services:
   auth-service:
-    url: ${AUTH_SERVICE_URL}
+    url: https://lernen-auth-service.onrender.com
+
   notification-service:
-    url: ${NOTIFICATION_SERVICE_URL}
+    url: https://lernen-notification-service.onrender.com
+
   common-service:
-    url: ${COMMON_SERVICE_URL}
+    url: https://lernen-common-service.onrender.com
+
   tutor-service:
-    url: ${TUTOR_SERVICE_URL}
+    url: https://lernen-tutor-service.onrender.com
+
   class-service:
-    url: ${CLASS_SERVICE_URL}
+    url: https://lernen-class-service.onrender.com
+
   student-service:
-    url: ${STUDENT_SERVICE_URL}
+    url: https://lernen-student-service.onrender.com
+
   search-service:
-    url: ${SEARCH_SERVICE_URL}
+    url: https://lernen-search-service.onrender.com
+
   chat-service:
-    url: ${CHAT_SERVICE_URL}
+    url: https://lernen-chat-service.onrender.com
+
   booking-service:
-    url: ${BOOKING_SERVICE_URL}
+    url: https://lernen-booking-service.onrender.com
+
   payment-service:
-    url: ${PAYMENT_SERVICE_URL}
+    url: https://lernen-payment-service.onrender.com
+
   quiz-service:
-    url: ${QUIZ_SERVICE_URL}
+    url: https://lernen-quiz-service.onrender.com
+
   file-service:
-    url: ${FILE_SERVICE_URL}
+    url: https://lernen-file-service.onrender.com
+
   bff-service:
-    url: ${BFF_SERVICE_URL}
+    url: https://lernen-bff-service.onrender.com
 
 logging:
   level:
     root: INFO
-    "[com.elearning.healthcheckservice]": DEBUG
+    com.elearning.healthcheckservice: DEBUG

@@ -19,6 +19,20 @@ import type {
 } from '../types/quiz';
 import type { PaginatedResponse } from '../types/api';
 
+// AI Generated Quiz types
+export interface AIGeneratedQuestion {
+    text: string;
+    options: string[];
+    correctAnswer: number; // Index of correct option (0-3)
+    explanation?: string;
+}
+
+export interface AIGeneratedQuiz {
+    title: string;
+    description: string;
+    questions: AIGeneratedQuestion[];
+}
+
 // ============ TUTOR ENDPOINTS ============
 
 /**
@@ -99,6 +113,18 @@ export const getQuizStatistics = async (quizId: string): Promise<QuizStatistics>
     return response.data;
 };
 
+/**
+ * Generate quiz using AI (Gemini) - does NOT save to database
+ * @param prompt User's quiz generation request
+ * @returns AI-generated quiz with questions
+ */
+export const generateQuizWithAI = async (prompt: string): Promise<AIGeneratedQuiz> => {
+    const response = await apiService.post<string>('/v1/quizzes/generate', { prompt });
+    // Parse the JSON string response into AIGeneratedQuiz object
+    const quizData = JSON.parse(response.data);
+    return quizData as AIGeneratedQuiz;
+};
+
 // ============ STUDENT ENDPOINTS ============
 
 /**
@@ -120,12 +146,12 @@ export const getStudentQuizzes = async (status?: StudentQuizStatus): Promise<Stu
  */
 export const getQuizForStudent = async (quizId: string): Promise<QuizDetail> => {
     const response = await apiService.get<QuizDetail>(`/v1/quizzes/student/${quizId}`);
-    
+
     // Check if response is successful
     if (!response.success) {
         throw new Error(response.message || 'Failed to load quiz');
     }
-    
+
     // Ensure timeLimitMinutes is a number (convert if needed)
     if (response.data) {
         const timeLimit = response.data.timeLimitMinutes;
@@ -138,7 +164,7 @@ export const getQuizForStudent = async (quizId: string): Promise<QuizDetail> => 
             }
         }
     }
-    
+
     return response.data;
 };
 
@@ -165,7 +191,7 @@ const isMaxAttemptsError = (message: string | undefined): boolean => {
 export const startQuizAttempt = async (quizId: string): Promise<QuizAttempt> => {
     try {
         const response = await apiService.post<QuizAttempt>(`/v1/quizzes/student/${quizId}/start`);
-        
+
         // Check if response is successful
         if (!response.success) {
             const error = new Error(response.message || 'Failed to start quiz attempt');
@@ -174,7 +200,7 @@ export const startQuizAttempt = async (quizId: string): Promise<QuizAttempt> => 
             (error as any).isApiError = true; // Mark as API error (success = false)
             throw error;
         }
-        
+
         return response.data;
     } catch (err: any) {
         // Handle axios errors that might contain ApiResponse in response.data
@@ -199,13 +225,13 @@ export const startQuizAttempt = async (quizId: string): Promise<QuizAttempt> => 
 export const getCurrentAttempt = async (quizId: string): Promise<QuizAttempt | null> => {
     try {
         const response = await apiService.get<QuizAttempt>(`/v1/quizzes/student/${quizId}/current-attempt`);
-        
+
         // Check if response is successful
         if (!response.success) {
             // If not successful, return null (no current attempt)
             return null;
         }
-        
+
         return response.data;
     } catch (err: any) {
         // Handle axios errors - if it's a 404 or success=false, return null
@@ -230,13 +256,13 @@ export const saveAnswer = async (attemptId: string, request: SubmitAnswerRequest
 export const submitQuizAttempt = async (attemptId: string, request: SubmitQuizRequest): Promise<QuizResult> => {
     try {
         const response = await apiService.post<QuizResult>(`/v1/quizzes/student/attempts/${attemptId}/submit`, request);
-        
+
         // Check if response is successful
         if (!response.success) {
             const error = new Error(response.message || 'Failed to submit quiz attempt');
             throw error;
         }
-        
+
         return response.data;
     } catch (err: any) {
         // Handle axios errors that might contain ApiResponse in response.data
@@ -280,7 +306,7 @@ export const getLatestCompletedAttemptId = async (quizId: string): Promise<strin
                 const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
                 return dateB - dateA; // Latest first
             })[0];
-        
+
         return completedAttempt?.id || null;
     } catch {
         return null;
@@ -316,6 +342,7 @@ const quizService = {
     publishQuiz,
     archiveQuiz,
     getQuizStatistics,
+    generateQuizWithAI,
     // Student
     getStudentQuizzes,
     getQuizForStudent,
