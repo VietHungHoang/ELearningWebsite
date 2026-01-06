@@ -23,10 +23,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Enable a simple memory-based message broker
         // Prefix for messages FROM server TO client
         config.enableSimpleBroker("/topic", "/queue");
-        
+
         // Prefix for messages FROM client TO server
         config.setApplicationDestinationPrefixes("/app");
-        
+
         // Prefix for user-specific messages
         config.setUserDestinationPrefix("/user");
     }
@@ -35,11 +35,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // Register STOMP endpoint
         registry.addEndpoint("/ws")
-                .setAllowedOrigins(allowedOrigins.split(","))
-                .withSockJS();  // Fallback for browsers that don't support WebSocket
-        
+                .setAllowedOriginPatterns(allowedOrigins.split(","))
+                .withSockJS(); // Fallback for browsers that don't support WebSocket
+
         // Also register without SockJS for native WebSocket clients
         registry.addEndpoint("/ws")
-                .setAllowedOrigins(allowedOrigins.split(","));
+                .setAllowedOriginPatterns(allowedOrigins.split(","));
     }
 }
