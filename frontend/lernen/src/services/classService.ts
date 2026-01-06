@@ -320,9 +320,9 @@ export const classService = {
         }
     },
 
-    createClass: async (classData: CreateClassRequest): Promise<ApiResponse<ClassTable>> => {
+    createClass: async (classData: CreateClassRequest): Promise<ApiResponse<PaginatedResponse<ClassTable>>> => {
         try {
-            const response = await apiService.post<ClassTable>("/v1/classes/tutors/me", classData);
+            const response = await apiService.post<PaginatedResponse<ClassTable>>("/v1/classes/tutors/me", classData);
             return {
                 status: response.status,
                 success: response.success,

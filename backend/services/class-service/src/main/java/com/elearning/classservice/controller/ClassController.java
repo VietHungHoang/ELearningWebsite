@@ -101,17 +101,18 @@ public class ClassController {
     /**
      * POST /api/v1/classes/tutors/me
      * <p>
-     * Create a new class for current tutor
+     * Create a new class for current tutor and return paginated list of classes
      * 
      * @param tutorId Tutor ID from header
      * @param request Create class request
+     * @return Paginated list of tutor's classes (sorted by createdAt desc)
      */
     @PostMapping("/tutors/me")
-    public ResponseEntity<ApiResponse<Void>> createClass(
+    public ResponseEntity<ApiResponse<Page<ClassTableItem>>> createClass(
             @RequestHeader("X-User-Id") UUID tutorId,
             @RequestBody CreateClassRequest request) {
-        classService.createClass(tutorId, request);
-        return ResponseEntity.ok(ApiResponse.success(null, "Class created successfully"));
+        Page<ClassTableItem> classes = classService.createClass(tutorId, request);
+        return ResponseEntity.ok(ApiResponse.success(classes, "Class created successfully"));
     }
 
     /**
