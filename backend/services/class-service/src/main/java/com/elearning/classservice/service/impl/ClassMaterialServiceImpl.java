@@ -48,15 +48,14 @@ public class ClassMaterialServiceImpl implements ClassMaterialService {
         material = classMaterialRepository.save(material);
         log.info("Material saved with ID: {}", material.getId());
 
-        String sizeStr = formatFileSize(material.getFileSize());
-
         return MaterialInfo.builder()
-                .id(material.getId().toString())
+                .id(material.getId())
                 .name(material.getName())
                 .type(material.getType())
-                .url(material.getS3Url())
-                .uploadDate(material.getUploadDate().toString())
-                .size(sizeStr)
+                .s3Url(material.getS3Url())
+                .uploadDate(material.getUploadDate())
+                .fileSize(material.getFileSize())
+                .description(material.getDescription())
                 .build();
     }
 
