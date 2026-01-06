@@ -79,7 +79,7 @@ export interface AuthContextType {
 
 export interface AuthUser {
     id: string;
-    role: UserRole;
+    role?: UserRole | null; // Optional - null means user is in tutor onboarding
     name: string;
     email: string;
     avatarUrl?: string;

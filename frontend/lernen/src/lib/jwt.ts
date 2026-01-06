@@ -61,18 +61,18 @@ export const isTokenExpired = (token: string): boolean => {
 
 /**
  * Extract user role from JWT claims (realm_access.roles)
- * This is a placeholder - implement based on your role mapping logic
  * @param decoded Decoded JWT payload
- * @returns User role or null if not found
+ * @returns User role or null if not found (null means user is in onboarding)
  */
-export const extractUserRole = (decoded: DecodedUser): UserRole => {
+export const extractUserRole = (decoded: DecodedUser): UserRole | null => {
   const roles = (decoded.realm_access?.roles || []).map(r => r.toLowerCase());
 
-  // Example mapping - adjust based on your Keycloak realm configuration
+  // Check for valid roles - tutor or student
   if (roles.includes('tutor')) return 'tutor';
-  if (roles.includes('student') || roles.includes('default-roles-lernen')) return 'student';
+  if (roles.includes('student')) return 'student';
 
-  return 'student'; // Default to student if no matching role
+  // Return null if no valid role found (user may be in tutor onboarding)
+  return null;
 };
 
 /**
