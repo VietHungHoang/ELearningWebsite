@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { LernenLogo } from '../LernenLogo';
 import { useAuth } from '../../context/AuthContext';
 import ProfileDropdown from './ProfileDropdown';
 
 const HeaderNoNavbar: React.FC = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { state } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);

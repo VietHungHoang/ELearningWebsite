@@ -63,6 +63,22 @@ const CreateQuizPage: React.FC = () => {
         }
     ]);
 
+    // Helper function to check if title is null
+    const isTitleNull = (title: string | null | undefined): boolean => {
+        return !title || title === 'null' || title.trim() === '';
+    };
+
+    // Helper function to get display name for class
+    const getClassDisplayName = (cls: ClassTable): string => {
+        if (!isTitleNull(cls.title)) {
+            return cls.title || '';
+        }
+        // If title is null, return first student's name
+        return cls.students && cls.students.length > 0 
+            ? cls.students[0].fullName 
+            : '';
+    };
+
     // Load classes for dropdown
     useEffect(() => {
         const fetchClasses = async () => {
@@ -265,7 +281,7 @@ const CreateQuizPage: React.FC = () => {
 
         return {
             classId,
-            classTitle,
+            classTitle: classTitle ?? undefined,
             students,
             creatorFullName: state.user?.name,
             creatorAvatarUrl: state.user?.avatarUrl,
@@ -492,12 +508,14 @@ const CreateQuizPage: React.FC = () => {
                             <div>
                                 <CustomDropdown2
                                     label={<>{t('quiz.create.assignClass')} <span className="text-red-500">*</span></>}
-                                    options={isLoadingClasses ? [] : classes.map(cls => cls.title)}
-                                    selectedValue={classes.find(cls => cls.id === selectedClass)?.title || selectedClass}
+                                    options={isLoadingClasses ? [] : classes.map(cls => getClassDisplayName(cls))}
+                                    selectedValue={classes.find(cls => cls.id === selectedClass) 
+                                        ? getClassDisplayName(classes.find(cls => cls.id === selectedClass)!)
+                                        : selectedClass}
                                     placeholder={isLoadingClasses ? t('common.loading', { defaultValue: 'Đang tải...' }) : t('quiz.create.classPlaceholder')}
                                     onSelect={(value: string) => {
-                                        // Find class by title and set its ID
-                                        const selectedClassObj = classes.find(cls => cls.title === value);
+                                        // Find class by display name and set its ID
+                                        const selectedClassObj = classes.find(cls => getClassDisplayName(cls) === value);
                                         if (selectedClassObj) {
                                             setSelectedClass(selectedClassObj.id);
                                         } else {

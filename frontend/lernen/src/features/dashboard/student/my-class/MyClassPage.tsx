@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { classService } from '../../../../services/classService';
 import { useAuth } from '../../../../context/AuthContext';
 import type { ClassTable, EnrollmentStatus } from '../../../../types/class';
+import { convertUtcTimeToLocal } from '../../../../utils/scheduleHelpers';
 
 type FilterTab = 'All Status' | 'Ongoing' | 'Completed';
 
@@ -27,6 +28,11 @@ const MyClassPage: React.FC = () => {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const itemsPerPage = 10;
     const { setBreadcrumb } = useBreadcrumb();
+
+    // Helper function to check if title is null or "null" string
+    const isTitleNull = (title: string | null | undefined): boolean => {
+        return !title || title === 'null' || title.trim() === '';
+    };
 
     // Helper function to get enrollment status for current student
     const getEnrollmentStatus = (classData: ClassTable): EnrollmentStatus | null => {
@@ -54,13 +60,15 @@ const MyClassPage: React.FC = () => {
     const formatScheduleDisplay = (dayOfWeek: number, time: string): string => {
         const isVietnamese = i18n.language === 'vi';
         const dayName = getDayName(dayOfWeek);
+        // Convert UTC time to local timezone
+        const localTime = convertUtcTimeToLocal(time);
 
         if (isVietnamese) {
             // Vietnamese: "19:00 Thứ 2"
-            return `${time} ${dayName}`;
+            return `${localTime} ${dayName}`;
         } else {
             // English: "Mon 19:00"
-            return `${dayName} ${time}`;
+            return `${dayName} ${localTime}`;
         }
     };
 
@@ -104,25 +112,17 @@ const MyClassPage: React.FC = () => {
     }, [currentPage]);
 
     const handleViewDetails = (classData: ClassTable) => {
-        // Check enrollmentStatus of current student to determine navigation
-        const enrollmentStatus = getEnrollmentStatus(classData);
-        
-        // If enrollmentStatus is JOINED, PENDING_PAYMENT, or ON_GOING, show view-only page
-        // If enrollmentStatus is COMPLETED, navigate to detail page
-        if (enrollmentStatus === 'JOINED' || enrollmentStatus === 'PENDING_PAYMENT' || enrollmentStatus === 'ON_GOING') {
+        // Check class status: if OPENING, navigate to view-only page
+        // Otherwise, navigate to full detail page with tabs
+        if (classData.status === 'OPENING') {
             // Navigate to view-only page (reuse ClassInfoPage with view mode)
             navigate(`/dashboard/my-class/${classData.id}/view`, { 
                 state: { classData, isViewMode: true, isStudentView: true } 
             });
-        } else if (enrollmentStatus === 'COMPLETED') {
-            // Navigate to detail page for completed classes
+        } else {
+            // Navigate to detail page with tabs (Schedule, Students, Quizzes, Materials)
             navigate(`/dashboard/my-class/${classData.id}`, { 
                 state: { classData } 
-            });
-        } else {
-            // Default: navigate to view page
-            navigate(`/dashboard/my-class/${classData.id}/view`, { 
-                state: { classData, isViewMode: true, isStudentView: true } 
             });
         }
     };
@@ -141,10 +141,12 @@ const MyClassPage: React.FC = () => {
                 const enrollmentStatus = getEnrollmentStatus(c);
                 return enrollmentStatus === enrollmentStatusFilter;
             })
-            .filter(c =>
-                c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                c.students.some(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()))
-            );
+            .filter(c => {
+                const titleMatch = !isTitleNull(c.title) && c.title && c.title.toLowerCase().includes(searchTerm.toLowerCase());
+                const studentMatch = c.students.some(s => s.fullName.toLowerCase().includes(searchTerm.toLowerCase()));
+                const tutorMatch = c.tutor?.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
+                return titleMatch || studentMatch || tutorMatch;
+            });
     }, [classes, activeTab, searchTerm, state.user?.id]);
 
     return (
@@ -224,7 +226,11 @@ const MyClassPage: React.FC = () => {
                             <thead className="bg-gray-50 text-gray-600 font-semibold">
                                 <tr>
                                     <th className="p-4 text-center">#</th>
-                                    <th className="p-4 text-center">{t('dashboard.student.myClass.tableHeaders.classTitle')}</th>
+                                    <th className="p-4 text-center">
+                                        {filteredClasses.some(c => isTitleNull(c.title)) && state.user?.role === 'student'
+                                            ? (t('dashboard.student.myClass.tableHeaders.tutorName') || 'Tên tutor')
+                                            : t('dashboard.student.myClass.tableHeaders.classTitle')}
+                                    </th>
                                     <th className="p-4 text-center">{t('dashboard.student.myClass.tableHeaders.type')}</th>
                                     <th className="p-4 text-center">{t('dashboard.student.myClass.tableHeaders.startDate')}</th>
                                     <th className="p-4 text-center">{t('dashboard.student.myClass.tableHeaders.schedule')}</th>
@@ -241,8 +247,10 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4">
                                             <div className="max-w-xs">
-                                                <p className="font-semibold text-gray-800 truncate" title={classData.title}>
-                                                    {classData.title}
+                                                <p className="font-semibold text-gray-800 truncate" title={!isTitleNull(classData.title) ? (classData.title || '') : (classData.tutor?.fullName || '')}>
+                                                    {!isTitleNull(classData.title) 
+                                                        ? (classData.title || '') 
+                                                        : (state.user?.role === 'student' ? classData.tutor?.fullName || '-' : '-')}
                                                 </p>
                                             </div>
                                         </td>

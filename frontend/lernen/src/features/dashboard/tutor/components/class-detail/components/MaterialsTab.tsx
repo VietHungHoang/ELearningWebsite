@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { FiFolder, FiPlus, FiDownload, FiTrash, FiFile, FiVideo, FiArchive } from 'react-icons/fi';
 import { HiOutlineDocumentText } from 'react-icons/hi';
-import type { ClassData } from '../../../my-class/components/EditClassModal';
+import type { ClassData } from '../../../../../../services/classService';
 import { classService } from '../../../../../../services/classService';
 import { uploadService } from '../../../../../../services/uploadService';
 import Toast from '../../../../../../components/ui/Toast';
+import { t } from 'i18next';
+import { useAuth } from '../../../../../../context/AuthContext';
 
 interface MaterialsTabProps {
     classData: ClassData;
@@ -24,6 +26,9 @@ interface Material {
 }
 
 const MaterialsTab: React.FC<MaterialsTabProps> = ({ classData, onUpdate }) => {
+    const { state } = useAuth();
+    const isStudent = state.user?.role === 'student';
+
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -145,7 +150,8 @@ const MaterialsTab: React.FC<MaterialsTabProps> = ({ classData, onUpdate }) => {
                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400 mb-4">
                         <FiFolder />
                     </div>
-                    <h4 className="text-gray-800 font-bold">Loading class data...</h4>
+                    <h4 className="text-gray-800 font-bold">{t('dashboard.tutor.myClass.detail.materialsTab.loading')}</h4>
+                    <p className="text-gray-500 text-sm mt-1">{t('dashboard.tutor.myClass.detail.materialsTab.loadingDescription')}</p>
                 </div>
             </div>
         );
@@ -160,10 +166,10 @@ const MaterialsTab: React.FC<MaterialsTabProps> = ({ classData, onUpdate }) => {
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                        Materials ({materials.length})
+                        {t(`dashboard.tutor.myClass.detail.materialsTab.${isStudent ? 'student' : 'tutor'}.title`, { count: materials.length })}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
-                        Manage your class materials
+                        {t(`dashboard.tutor.myClass.detail.materialsTab.${isStudent ? 'student' : 'tutor'}.description`)}
                     </p>
                 </div>
                 <div>
@@ -186,7 +192,7 @@ const MaterialsTab: React.FC<MaterialsTabProps> = ({ classData, onUpdate }) => {
                         ) : (
                             <>
                                 <FiPlus className="w-4 h-4" />
-                                Upload Material
+                                {t('dashboard.tutor.myClass.detail.materialsTab.tutor.uploadMaterial')}
                             </>
                         )}
                     </button>
@@ -216,7 +222,7 @@ const MaterialsTab: React.FC<MaterialsTabProps> = ({ classData, onUpdate }) => {
                             </div>
 
                             <div className="hidden md:block text-sm text-gray-500">
-                                Uploaded on {material.date}
+                                {t('dashboard.tutor.myClass.detail.materialsTab.uploadedOn', { date: material.date })}
                             </div>
 
                             <div className="flex items-center gap-2 justify-end">
@@ -242,8 +248,8 @@ const MaterialsTab: React.FC<MaterialsTabProps> = ({ classData, onUpdate }) => {
                         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto text-gray-400 mb-4">
                             <FiFolder />
                         </div>
-                        <h4 className="text-gray-800 font-bold">No materials yet</h4>
-                        <p className="text-gray-500 text-sm mt-1">Upload documents, videos, or links for your students.</p>
+                        <h4 className="text-gray-800 font-bold">{t(`dashboard.tutor.myClass.detail.materialsTab.${isStudent ? 'student' : 'tutor'}.noMaterials`)}</h4>
+                        <p className="text-gray-500 text-sm mt-1">{t(`dashboard.tutor.myClass.detail.materialsTab.${isStudent ? 'student' : 'tutor'}.noMaterialsDescription`)}</p>
                     </div>
                 )}
             </div>

@@ -685,6 +685,7 @@
         "selectStatus": "Chọn trạng thái",
         "tableHeaders": {
           "classTitle": "Tên lớp học",
+          "tutorName": "Tên gia sư",
           "type": "Loại",
           "startDate": "Ngày bắt đầu",
           "schedule": "Lịch dạy",
@@ -1003,6 +1004,7 @@
           "students": "Học sinh",
           "schedule": "Lịch dạy",
           "progress": "Tiến độ",
+          "createdAt": "Ngày tạo",
           "actions": "Hành động"
         },
         "classTypes": {
@@ -1110,6 +1112,103 @@
           "categoryPlaceholder": "Chọn danh mục",
           "subject": "Môn học",
           "subjectPlaceholder": "Chọn môn học"
+        },
+        "detail": {
+          "tabs": {
+            "schedule": "Lịch dạy",
+            "students": "Học sinh",
+            "quizzes": "Bài kiểm tra",
+            "materials": "Tài liệu"
+          },
+          "loading": "Đang tải chi tiết lớp học...",
+          "notFound": {
+            "title": "Không tìm thấy lớp học",
+            "description": "Lớp học bạn đang tìm không tồn tại.",
+            "backButton": "Quay lại Lớp học của tôi"
+          },
+          "chat": "Nhắn tin",
+          "updateSchedule": {
+            "title": "Cập nhật lịch dạy",
+            "daysOfWeek": "Các ngày trong tuần",
+            "startTime": "Giờ bắt đầu",
+            "endTime": "Giờ kết thúc",
+            "cancel": "Hủy",
+            "update": "Cập nhật lịch"
+          },
+          "statusLabels": {
+            "inProgress": "Đang tiến hành",
+            "ongoing": "Đang dạy",
+            "opening": "Đang chờ",
+            "completed": "Đã hoàn thành"
+          },
+          "quizzesTab": {
+            "tutor": {
+              "title": "Bài kiểm tra ({{count}})",
+              "description": "Theo dõi kết quả bài kiểm tra của học sinh",
+              "newQuiz": "Tạo bài kiểm tra mới",
+              "noQuizzes": "Chưa có bài kiểm tra",
+              "noQuizzesDescription": "Tạo bài kiểm tra đầu tiên để bắt đầu"
+            },
+            "student": {
+              "title": "Bài kiểm tra ({{count}})",
+              "description": "Xem và làm các bài kiểm tra được giao cho bạn",
+              "noQuizzes": "Chưa có bài kiểm tra",
+              "noQuizzesDescription": "Chưa có bài kiểm tra nào được giao"
+            },
+            "questions": "{{count}} câu hỏi",
+            "timeLimit": "{{count}} phút",
+            "createdAt": "Tạo vào {{date}}",
+            "submitted": "{{submittedCount}}/{{totalStudents}} đã nộp",
+            "viewResults": "Xem kết quả",
+            "deleteQuiz": "Xóa bài kiểm tra"
+          },
+          "materialsTab": {
+            "tutor": {
+              "title": "Tài liệu ({{count}})",
+              "description": "Quản lý tài liệu lớp học",
+              "uploadMaterial": "Tải lên tài liệu",
+              "noMaterials": "Chưa có tài liệu",
+              "noMaterialsDescription": "Tải lên tài liệu, video hoặc liên kết cho học sinh của bạn."
+            },
+            "student": {
+              "title": "Tài liệu ({{count}})",
+              "description": "Xem tài liệu và tài nguyên lớp học",
+              "noMaterials": "Chưa có tài liệu",
+              "noMaterialsDescription": "Chưa có tài liệu nào được tải lên"
+            },
+            "uploadedOn": "Tải lên vào {{date}}",
+            "download": "Tải xuống",
+            "delete": "Xóa",
+            "loading": "Đang tải dữ liệu lớp học...",
+            "loadingDescription": "Vui lòng đợi trong khi chúng tôi tải thông tin lớp học."
+          },
+          "studentsTab": {
+            "tutor": {
+              "title": "Học viên ({{count}})",
+              "description": "Quản lý học viên trong lớp học",
+              "addStudent": "Thêm học viên",
+              "noStudents": "Chưa có học viên",
+              "noStudentsDescription": "Thêm học viên đầu tiên để bắt đầu",
+              "deleteStudent": "Xóa học viên",
+              "sendMessage": "Gửi tin nhắn",
+              "addStudentModal": {
+                "title": "Thêm học viên",
+                "searchPlaceholder": "Tìm kiếm học viên...",
+                "searchFeature": "Tính năng tìm kiếm sẽ được triển khai",
+                "searchingFor": "Đang tìm kiếm: \"{{term}}\"",
+                "enterToSearch": "Nhập để tìm kiếm học viên",
+                "cancel": "Hủy",
+                "addSelected": "Thêm đã chọn"
+              }
+            },
+            "student": {
+              "title": "Bạn cùng lớp ({{count}})",
+              "description": "Xem các bạn cùng lớp trong lớp học này",
+              "noStudents": "Chưa có bạn cùng lớp",
+              "noStudentsDescription": "Chưa có học sinh nào khác trong lớp học này",
+              "sendMessage": "Gửi tin nhắn"
+            }
+          }
         }
       },
       "dealsCoupons": {
@@ -1339,6 +1438,8 @@
         "upcomingSessions": "Lịch dạy sắp tới",
         "noUpcomingSessions": "Không có lịch nào",
         "pastSessions": "Lịch sử",
+        "noPastSessions": "Chưa có lịch sử nào",
+        "noMeetingLink": "Chưa có link phòng học",
         "session": "buổi học",
         "sessions": "buổi học",
         "attendance": "Điểm danh",
@@ -2341,6 +2442,18 @@
       "continue": "Tiếp tục",
       "exit": "Thoát",
       "warning": "Tiến trình của bạn sẽ không được lưu. Bạn có chắc chắn muốn thoát?"
+    },
+    "errors": {
+      "maxAttemptsReached": "Bạn đã hết lượt thử",
+      "failedToLoad": "Không thể tải bài kiểm tra. Vui lòng thử lại.",
+      "failedToStart": "Không thể bắt đầu bài kiểm tra. Vui lòng thử lại.",
+      "failedToSubmit": "Không thể nộp bài kiểm tra. Vui lòng thử lại.",
+      "failedToSaveAnswer": "Không thể lưu câu trả lời. Vui lòng thử lại.",
+      "quizIdMissing": "Thiếu ID bài kiểm tra"
+    },
+    "loading": "Đang tải bài kiểm tra...",
+    "success": {
+      "quizSubmitted": "Nộp bài kiểm tra thành công!"
     }
   },
   "quizResult": {
@@ -2364,6 +2477,12 @@
       "correct": "Đúng",
       "incorrect": "Sai"
     },
-    "noQuestionsMatch": "Không có câu hỏi nào phù hợp với bộ lọc"
+    "noQuestionsMatch": "Không có câu hỏi nào phù hợp với bộ lọc",
+    "errors": {
+      "failedToLoad": "Không thể tải kết quả bài kiểm tra. Vui lòng thử lại.",
+      "attemptIdMissing": "Thiếu ID lượt làm bài",
+      "quizIdMissing": "Thiếu ID bài kiểm tra",
+      "noAttemptFound": "Không tìm thấy lượt làm bài cho bài kiểm tra này"
+    }
   }
 }

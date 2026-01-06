@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiCheckCircle, FiLoader, FiArrowRight } from 'react-icons/fi';
+import { FiX, FiLoader, FiArrowRight } from 'react-icons/fi';
 import { HiCheckCircle, HiCalendar } from 'react-icons/hi';
 import { MdSavings, MdReceipt } from 'react-icons/md';
-import Avatar from 'react-avatar';
+
 import { useCurrency } from '../../../../context/CurrencyContext';
 import { convertFromVND, formatCurrency } from '../../../../utils/currencyHelper';
-import { useTranslation } from 'react-i18next';
 import type { Timezone } from '../../../../types/common';
 import type { Tutor } from '../../../../types/tutor';
 
@@ -58,7 +57,6 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
     const [selectedPackageIndex, setSelectedPackageIndex] = useState<number | null>(1); // Default to best value
     const [isProcessing, setIsProcessing] = useState(false);
     const { selectedCurrency } = useCurrency();
-    const { t } = useTranslation();
 
     // Animation states
     const [shouldRender, setShouldRender] = useState(isOpen);
@@ -187,7 +185,7 @@ const BookSessionModal: React.FC<BookSessionModalProps> = ({ isOpen, onClose, tu
                     // Extract unique day-time patterns from selected times
                     const seenPatterns = new Set<string>();
 
-                    selectedTimes.forEach((selectedTime, index) => {
+                    selectedTimes.forEach((selectedTime) => {
                         const baseDate = new Date(selectedTime);
                         const dayOfWeek = baseDate.getUTCDay(); // 0 = Sunday, 6 = Saturday
                         // Convert to 1-7 format (1 = Monday, 7 = Sunday)

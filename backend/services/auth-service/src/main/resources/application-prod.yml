@@ -1,17 +1,17 @@
 spring:
   data:
     redis:
-      url: ${REDIS_URL:http://localhost:8085}
+      url: ${REDIS_URL}
 
 notification-service:
-  url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+  url: ${NOTIFICATION_SERVICE_URL}
 
 jwt:
   secret: ${JWT_SECRET:mySuperSecretKeyForInternalJwtThatIsAtLeast256BitsLongEnough}
   expiry: ${JWT_EXPIRY:600000}
 
 keycloak:
-  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8080}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
   realm: ${KEYCLOAK_REALM:elearning}
   resource: ${KEYCLOAK_RESOURCE:auth-service}
   client-secret: ${KEYCLOAK_CLIENT_SECRET:your-client-secret}
