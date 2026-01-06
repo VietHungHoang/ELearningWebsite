@@ -182,13 +182,13 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
             if (item.id) {
                 onChange({ educations: (data.educations || []).map((e: EducationItem) => e.id === item.id ? item : e) });
             } else {
-                onChange({ educations: [...(data.educations || []), { ...item, id: `edu-${Date.now()}` }] });
+                onChange({ educations: [...(data.educations || []), { ...item, id: crypto.randomUUID() }] });
             }
         } else {
             if (item.id) {
                 onChange({ experiences: (data.experiences || []).map((e: ExperienceItem) => e.id === item.id ? item : e) });
             } else {
-                onChange({ experiences: [...(data.experiences || []), { ...item, id: `exp-${Date.now()}` }] });
+                onChange({ experiences: [...(data.experiences || []), { ...item, id: crypto.randomUUID() }] });
             }
         }
         setIsModalOpen(false);

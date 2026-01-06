@@ -23,53 +23,78 @@ public class KeycloakConfig {
 
     @Bean
     public Keycloak keycloak() {
-        // Disable SSL verification for self-signed certificates
-        disableSslVerification();
+        try {
+            // Create SSL context that trusts all certificates
+            SSLContext sslContext = createTrustAllSslContext();
 
-        return KeycloakBuilder.builder()
-                .serverUrl(keycloakProperties.getAuthServerUrl())
-                .realm(keycloakProperties.getRealm())
-                .clientId(keycloakProperties.getResource())
-                .clientSecret(keycloakProperties.getClientSecret())
-                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .build();
+            // Create HTTP client with custom SSL context
+            org.apache.http.impl.client.CloseableHttpClient httpClient = org.apache.http.impl.client.HttpClients
+                    .custom()
+                    .setSSLContext(sslContext)
+                    .setSSLHostnameVerifier(org.apache.http.conn.ssl.NoopHostnameVerifier.INSTANCE)
+                    .build();
+
+            // Create Resteasy client with custom HTTP client
+            org.jboss.resteasy.client.jaxrs.ResteasyClient client = ((org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder) org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl
+                    .newBuilder())
+                    .httpEngine(new org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine(httpClient))
+                    .build();
+
+            log.warn("Keycloak client configured with SSL verification disabled - only use for development/testing!");
+
+            return KeycloakBuilder.builder()
+                    .serverUrl(keycloakProperties.getAuthServerUrl())
+                    .realm(keycloakProperties.getRealm())
+                    .clientId(keycloakProperties.getResource())
+                    .clientSecret(keycloakProperties.getClientSecret())
+                    .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
+                    .resteasyClient(client)
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to configure Keycloak client with SSL", e);
+            throw new RuntimeException("Failed to configure Keycloak client", e);
+        }
     }
 
     /**
-     * Disable SSL verification globally for Keycloak connections.
+     * Create SSL context that trusts all certificates.
      * WARNING: Only use this for development/testing with self-signed certificates!
      */
-    private void disableSslVerification() {
-        try {
-            // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                            // Trust all clients
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                            // Trust all servers
-                        }
+    private SSLContext createTrustAllSslContext() throws Exception {
+        // Create a trust manager that does not validate certificate chains
+        TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
                     }
-            };
 
-            // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        // Trust all clients
+                    }
 
-            // Create all-trusting host name verifier
-            javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        // Trust all servers
+                    }
+                }
+        };
 
-            log.warn("SSL verification disabled - only use this for development/testing!");
-        } catch (Exception e) {
-            log.error("Failed to disable SSL verification", e);
-            throw new RuntimeException("Failed to disable SSL verification", e);
-        }
+        // Create and initialize SSL context
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+        return sslContext;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void logConfiguration() {
+        log.info("Keycloak Configuration:");
+        log.info("Auth Server URL: {}", keycloakProperties.getAuthServerUrl());
+        log.info("Realm: {}", keycloakProperties.getRealm());
+        log.info("Client ID: {}", keycloakProperties.getResource());
+        String clientSecret = keycloakProperties.getClientSecret();
+        String maskedSecret = (clientSecret != null && clientSecret.length() > 4)
+                ? clientSecret.substring(0, 4) + "*****"
+                : "*****";
+        log.info("Client Secret: {}", maskedSecret);
     }
 }
