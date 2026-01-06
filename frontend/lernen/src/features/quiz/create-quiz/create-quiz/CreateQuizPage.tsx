@@ -281,7 +281,7 @@ const CreateQuizPage: React.FC = () => {
 
         return {
             classId,
-            classTitle,
+            classTitle: classTitle ?? undefined,
             students,
             creatorFullName: state.user?.name,
             creatorAvatarUrl: state.user?.avatarUrl,

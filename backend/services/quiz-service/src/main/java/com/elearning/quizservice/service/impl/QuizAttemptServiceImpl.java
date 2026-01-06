@@ -35,7 +35,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class QuizAttemptServiceImpl implements QuizAttemptService {
-    
+
     private final QuizAttemptRepository attemptRepository;
     private final StudentAnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
@@ -43,32 +43,32 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     private final GradingService gradingService;
     private final QuizMapper quizMapper;
     private final ObjectMapper objectMapper;
-    
+
     @Override
     @Transactional
     public QuizAttemptResponse startQuizAttempt(UUID quizId, UUID studentId) {
         log.info("Starting quiz attempt for student: {} on quiz: {}", studentId, quizId);
-        
+
         // Validate quiz access
         quizService.validateQuizAccess(quizId);
-        
+
         // Check if student can attempt
         if (!canStudentAttemptQuiz(quizId, studentId)) {
             throw InvalidOperationException.maxAttemptsReached();
         }
-        
+
         // Check for existing in-progress attempt
         Optional<QuizAttempt> existingAttempt = attemptRepository.findByStudentIdAndQuiz_IdAndStatus(
                 studentId, quizId, QuizAttempt.AttemptStatus.IN_PROGRESS);
-        
+
         if (existingAttempt.isPresent()) {
             log.info("Resuming existing attempt: {}", existingAttempt.get().getId());
             return quizMapper.toAttemptResponse(existingAttempt.get());
         }
-        
+
         // Get attempt number
         Long attemptCount = getAttemptCount(quizId, studentId);
-        
+
         // Create new attempt
         Quiz quiz = quizService.getQuizById(quizId);
         QuizAttempt attempt = QuizAttempt.builder()
@@ -79,40 +79,65 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .startedAt(LocalDateTime.now())
                 .passed(false)
                 .build();
-        
+
         attempt = attemptRepository.save(attempt);
-        
+
         log.info("Created quiz attempt: {}", attempt.getId());
         return quizMapper.toAttemptResponse(attempt);
     }
-    
+
     @Override
     public QuizAttempt getAttemptById(UUID attemptId) {
         return attemptRepository.findById(attemptId)
                 .orElseThrow(() -> ResourceNotFoundException.attempt(attemptId.toString()));
     }
-    
+
     @Override
     public QuizAttemptResponse getCurrentAttempt(UUID quizId, UUID studentId) {
         QuizAttempt attempt = attemptRepository.findByStudentIdAndQuiz_IdAndStatus(
                 studentId, quizId, QuizAttempt.AttemptStatus.IN_PROGRESS)
                 .orElseThrow(() -> new ResourceNotFoundException("No in-progress attempt found"));
-        
-        return quizMapper.toAttemptResponse(attempt);
+
+        List<com.elearning.quizservice.dto.response.UserAnswerResponse> answers = getUserAnswers(attempt.getId());
+        return quizMapper.toAttemptResponse(attempt, answers);
     }
-    
+
+    private List<com.elearning.quizservice.dto.response.UserAnswerResponse> getUserAnswers(UUID attemptId) {
+        List<StudentAnswer> studentAnswers = answerRepository.findByAttempt_Id(attemptId);
+        return studentAnswers.stream()
+                .map(answer -> {
+                    try {
+                        List<UUID> selectedOptions = objectMapper.readValue(
+                                answer.getSelectedOptionIds(),
+                                new com.fasterxml.jackson.core.type.TypeReference<List<UUID>>() {
+                                });
+
+                        return com.elearning.quizservice.dto.response.UserAnswerResponse.builder()
+                                .questionId(answer.getQuestion().getId())
+                                .selectedOptions(selectedOptions)
+                                .answeredAt(answer.getAnsweredAt())
+                                .build();
+                    } catch (Exception e) {
+                        log.error("Error parsing answer options for answer: {}", answer.getId(), e);
+                        return null;
+                    }
+                })
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
     @Override
     @Transactional
     public void saveAnswer(UUID attemptId, SubmitAnswerRequest request) {
         log.info("Saving answer for attempt: {} question: {}", attemptId, request.getQuestionId());
-        
+
         QuizAttempt attempt = getAttemptById(attemptId);
-        
+
         // Validate attempt is in progress
         if (attempt.getStatus() != QuizAttempt.AttemptStatus.IN_PROGRESS) {
             throw InvalidOperationException.attemptNotInProgress();
         }
-        
+
         // Convert option IDs to JSON
         String selectedOptionIdsJson;
         try {
@@ -121,11 +146,11 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             log.error("Error serializing option IDs", e);
             throw new RuntimeException("Error saving answer", e);
         }
-        
+
         // Check if answer already exists
         Optional<StudentAnswer> existingAnswer = answerRepository.findByAttempt_IdAndQuestion_Id(
                 attemptId, request.getQuestionId());
-        
+
         if (existingAnswer.isPresent()) {
             // Update existing answer
             StudentAnswer answer = existingAnswer.get();
@@ -137,7 +162,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             // Create new answer
             Question question = questionRepository.findByIdAndIsActiveTrue(request.getQuestionId())
                     .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
-            
+
             StudentAnswer answer = StudentAnswer.builder()
                     .attempt(attempt)
                     .question(question)
@@ -145,66 +170,66 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                     .answeredAt(LocalDateTime.now())
                     .isCorrect(false)
                     .build();
-            
+
             answerRepository.save(answer);
-            
+
             log.info("Created new answer");
         }
     }
-    
+
     @Override
     @Transactional
     public QuizResultResponse submitQuizAttempt(UUID attemptId, UUID studentId, SubmitQuizRequest request) {
         log.info("Submitting quiz attempt: {}", attemptId);
-        
+
         QuizAttempt attempt = getAttemptById(attemptId);
-        
+
         // Validate ownership
         if (!attempt.getStudentId().equals(studentId)) {
             throw new ResourceNotFoundException("Attempt not found");
         }
-        
+
         // Validate attempt is in progress
         if (attempt.getStatus() != QuizAttempt.AttemptStatus.IN_PROGRESS) {
             throw InvalidOperationException.attemptAlreadySubmitted();
         }
-        
+
         // Save all answers from request
         if (request.getAnswers() != null) {
             for (SubmitAnswerRequest answerRequest : request.getAnswers()) {
                 saveAnswer(attemptId, answerRequest);
             }
         }
-        
+
         // Update attempt
         attempt.setSubmittedAt(LocalDateTime.now());
         attempt.setStatus(QuizAttempt.AttemptStatus.SUBMITTED);
         attemptRepository.save(attempt);
-        
+
         // Grade the attempt
         gradingService.gradeAttempt(attemptId);
-        
+
         // Return result
         return getQuizResult(attemptId, studentId);
     }
-    
+
     @Override
     public QuizResultResponse getQuizResult(UUID attemptId, UUID studentId) {
         QuizAttempt attempt = getAttemptById(attemptId);
-        
+
         // Validate ownership
         if (!attempt.getStudentId().equals(studentId)) {
             throw new ResourceNotFoundException("Attempt not found");
         }
-        
+
         // Validate attempt is graded
         if (attempt.getStatus() != QuizAttempt.AttemptStatus.GRADED) {
             throw new InvalidOperationException("Attempt has not been graded yet");
         }
-        
+
         return gradingService.buildQuizResult(attemptId);
     }
-    
+
     @Override
     public List<QuizAttemptResponse> getAttemptsByQuiz(UUID quizId) {
         List<QuizAttempt> attempts = attemptRepository.findByQuiz_IdOrderBySubmittedAtDesc(quizId);
@@ -212,7 +237,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .map(quizMapper::toAttemptResponse)
                 .toList();
     }
-    
+
     @Override
     public List<QuizAttemptResponse> getStudentAttemptHistory(UUID quizId, UUID studentId) {
         List<QuizAttempt> attempts = attemptRepository.findByStudentIdAndQuiz_IdOrderByAttemptNumberDesc(
@@ -221,7 +246,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .map(quizMapper::toAttemptResponse)
                 .toList();
     }
-    
+
     @Override
     public List<QuizAttemptResponse> getAllStudentAttempts(UUID studentId) {
         List<QuizAttempt> attempts = attemptRepository.findByStudentIdOrderByStartedAtDesc(studentId);
@@ -229,15 +254,15 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .map(quizMapper::toAttemptResponse)
                 .toList();
     }
-    
+
     @Override
     public boolean canStudentAttemptQuiz(UUID quizId, UUID studentId) {
         Quiz quiz = quizService.getQuizById(quizId);
         Long attemptCount = getAttemptCount(quizId, studentId);
-        
+
         return attemptCount < quiz.getMaxAttempts();
     }
-    
+
     @Override
     public Long getAttemptCount(UUID quizId, UUID studentId) {
         return attemptRepository.countByStudentIdAndQuiz_Id(studentId, quizId);

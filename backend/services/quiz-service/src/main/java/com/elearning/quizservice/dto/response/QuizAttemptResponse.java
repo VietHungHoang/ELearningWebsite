@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizAttemptResponse {
-    
+
     private UUID id;
     private UUID quizId;
     private UUID studentId;
@@ -30,4 +30,5 @@ public class QuizAttemptResponse {
     private Double percentage;
     private Boolean passed;
     private LocalDateTime createdAt;
+    private java.util.List<UserAnswerResponse> answers;
 }

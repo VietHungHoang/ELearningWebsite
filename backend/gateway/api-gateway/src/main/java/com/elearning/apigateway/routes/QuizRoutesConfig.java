@@ -17,7 +17,7 @@ public class QuizRoutesConfig {
         return builder.routes()
                 // Direct routes
                 .route("quiz", r -> r
-                        .path("/api/v1/quizzes/**")
+                        .path("/api/v1/quizzes/**", "/api/v1/student/quizzes/**")
                         .uri(tutorServiceUrl))
                 .build();
     }

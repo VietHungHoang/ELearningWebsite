@@ -43,30 +43,30 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class QuizServiceImpl implements QuizService {
-    
+
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository attemptRepository;
     private final QuestionService questionService;
     private final QuizMapper quizMapper;
     private final com.elearning.quizservice.service.UserSyncService userSyncService;
     private final com.elearning.quizservice.service.ClassSyncService classSyncService;
-    
+
     @Override
     @Transactional
     public QuizDetailResponse createQuiz(UUID creatorId, CreateQuizRequest request) {
         log.info("Creating quiz for creator: {}", creatorId);
-        
+
         // Sync creator info
         if (request.getCreatorFullName() != null) {
             userSyncService.saveOrUpdateUser(creatorId, request.getCreatorFullName(), request.getCreatorAvatarUrl());
         }
-        
+
         // Sync class info and students
         ClassInfo classInfo = classSyncService.saveOrUpdateClass(
-                request.getClassId(), 
-                request.getClassTitle(), 
+                request.getClassId(),
+                request.getClassTitle(),
                 request.getStudents());
-        
+
         // Create quiz
         Quiz quiz = Quiz.builder()
                 .classInfo(classInfo)
@@ -82,50 +82,50 @@ public class QuizServiceImpl implements QuizService {
                 .maxAttempts(request.getMaxAttempts() != null ? request.getMaxAttempts() : 1)
                 .isActive(true)
                 .build();
-        
+
         quiz = quizRepository.save(quiz);
-        
+
         // Create questions if provided
         if (request.getQuestions() != null && !request.getQuestions().isEmpty()) {
             for (CreateQuestionRequest questionRequest : request.getQuestions()) {
                 questionService.createQuestion(quiz.getId(), questionRequest);
             }
-            
+
             quiz = quizRepository.save(quiz);
         }
-        
+
         log.info("Created quiz: {}", quiz.getId());
-        
+
         // Get detail response with questions
         return getQuizDetail(quiz.getId(), true);
     }
-    
+
     @Override
     public Quiz getQuizById(UUID quizId) {
         return quizRepository.findByIdAndIsActiveTrue(quizId)
                 .orElseThrow(() -> ResourceNotFoundException.quiz(quizId.toString()));
     }
-    
+
     @Override
     public QuizDetailResponse getQuizDetail(UUID quizId, boolean includeAnswers) {
         Quiz quiz = getQuizById(quizId);
         QuizDetailResponse response = quizMapper.toDetailResponse(quiz);
-        
+
         // Add questions
         List<QuestionResponse> questions = questionService.getQuestionResponsesByQuizId(quizId, includeAnswers);
         response.setQuestions(questions);
-        
+
         return response;
     }
-    
+
     @Override
     public List<QuizSummaryResponse> getQuizzesByClass(UUID classId) {
-        List<Quiz> quizzes = quizRepository.findByClassIdAndIsActiveTrue(classId);
+        List<Quiz> quizzes = quizRepository.findByClassInfoIdAndIsActiveTrue(classId);
         return quizzes.stream()
                 .map(this::toSummaryWithStats)
                 .toList();
     }
-    
+
     @Override
     public List<QuizSummaryResponse> getQuizzesByCreator(UUID creatorId) {
         List<Quiz> quizzes = quizRepository.findByCreatorIdAndIsActiveTrue(creatorId);
@@ -133,14 +133,14 @@ public class QuizServiceImpl implements QuizService {
                 .map(this::toSummaryWithStats)
                 .toList();
     }
-    
+
     @Override
     @Transactional
     public QuizDetailResponse updateQuiz(UUID quizId, UpdateQuizRequest request) {
         log.info("Updating quiz: {}", quizId);
-        
+
         Quiz quiz = getQuizById(quizId);
-        
+
         // Check if quiz can be updated
         if (quiz.getStatus() == Quiz.QuizStatus.ACTIVE) {
             Long attemptCount = attemptRepository.countByQuizIdAndStatus(
@@ -149,7 +149,7 @@ public class QuizServiceImpl implements QuizService {
                 throw InvalidOperationException.quizAlreadyPublished();
             }
         }
-        
+
         // Update fields
         quiz.setTitle(request.getTitle());
         quiz.setDescription(request.getDescription());
@@ -159,65 +159,66 @@ public class QuizServiceImpl implements QuizService {
         quiz.setShuffleQuestions(request.getShuffleQuestions() != null ? request.getShuffleQuestions() : false);
         quiz.setShowCorrectAnswers(request.getShowCorrectAnswers() != null ? request.getShowCorrectAnswers() : true);
         quiz.setMaxAttempts(request.getMaxAttempts() != null ? request.getMaxAttempts() : 1);
-        
+
         quizRepository.save(quiz);
-        
+
         log.info("Updated quiz: {}", quizId);
         return getQuizDetail(quizId, true);
     }
-    
+
     @Override
     @Transactional
     public void deleteQuiz(UUID quizId) {
         log.info("Deleting quiz: {}", quizId);
-        
+
         Quiz quiz = getQuizById(quizId);
         quiz.setIsActive(false);
         quizRepository.save(quiz);
-        
+
         log.info("Deleted quiz: {}", quizId);
     }
-    
+
     @Override
     @Transactional
     public QuizDetailResponse publishQuiz(UUID quizId) {
         log.info("Publishing quiz: {}", quizId);
-        
+
         Quiz quiz = getQuizById(quizId);
-        
+
         // Validate quiz has questions
         Long questionCount = Long.valueOf(questionService.getQuestionsByQuizId(quizId).size());
         if (questionCount == 0) {
             throw ValidationException.noQuestions();
         }
-        
+
         // Check if already published
         if (quiz.getStatus() == Quiz.QuizStatus.ACTIVE) {
             throw InvalidOperationException.quizAlreadyPublished();
         }
-        
+
         // Publish
         quiz.setStatus(Quiz.QuizStatus.ACTIVE);
         quiz.setPublishedAt(LocalDateTime.now());
-        // quiz.setTotalQuestions(questionCount.intValue()); // Field does not exist in Quiz entity
+        // quiz.setTotalQuestions(questionCount.intValue()); // Field does not exist in
+        // Quiz entity
         quizRepository.save(quiz);
-        
+
         log.info("Published quiz: {}", quizId);
         return getQuizDetail(quizId, true);
     }
-    
+
     @Override
     @Transactional
     public void archiveQuiz(UUID quizId) {
         log.info("Archiving quiz: {}", quizId);
-        
+
         Quiz quiz = getQuizById(quizId);
         quiz.setStatus(Quiz.QuizStatus.ARCHIVED);
         quizRepository.save(quiz);
-        
+
         log.info("Archived quiz: {}", quizId);
     }
-    
+
     @Override
     public List<QuizSummaryResponse> searchQuizzes(UUID classId, String searchTerm) {
         List<Quiz> quizzes = quizRepository.searchByClassId(classId, searchTerm);
@@ -225,61 +226,62 @@ public class QuizServiceImpl implements QuizService {
                 .map(this::toSummaryWithStats)
                 .toList();
     }
-    
+
     @Override
     public void validateQuizAccess(UUID quizId) {
         Quiz quiz = getQuizById(quizId);
-        
+
         // Check if quiz is published
         if (quiz.getStatus() != Quiz.QuizStatus.ACTIVE) {
             throw InvalidOperationException.quizNotPublished();
         }
-        
+
         // Check if quiz is expired
         if (quiz.getDueDate() != null && quiz.getDueDate().isBefore(LocalDateTime.now())) {
             throw InvalidOperationException.quizExpired();
         }
     }
-    
+
     @Override
     @Transactional(readOnly = true)
-    public Page<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus statusFilter, Pageable pageable) {
+    public Page<StudentQuizSummaryResponse> getQuizzesForStudent(UUID studentId, StudentQuizStatus statusFilter,
+            Pageable pageable) {
         log.info("Getting quizzes for student: {} with status filter: {} and pagination", studentId, statusFilter);
-        
+
         // Get all published quizzes for this student (via class membership)
         List<Quiz> quizzes = quizRepository.findPublishedQuizzesForStudent(studentId);
-        
+
         // Get student's latest attempts for all quizzes
         List<QuizAttempt> latestAttempts = attemptRepository.findLatestAttemptsByStudentId(studentId);
         Map<UUID, QuizAttempt> attemptsByQuizId = latestAttempts.stream()
                 .collect(Collectors.toMap(a -> a.getQuiz().getId(), a -> a));
-        
+
         // Build response list
         List<StudentQuizSummaryResponse> result = new ArrayList<>();
-        
+
         for (Quiz quiz : quizzes) {
             QuizAttempt latestAttempt = attemptsByQuizId.get(quiz.getId());
             StudentQuizStatus studentStatus = calculateStudentStatus(latestAttempt);
-            
+
             // Apply filter if specified
             if (statusFilter != null && studentStatus != statusFilter) {
                 continue;
             }
-            
+
             StudentQuizSummaryResponse response = buildStudentQuizSummarySimple(quiz, studentStatus);
             result.add(response);
         }
-        
+
         // Apply pagination
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), result.size());
-        
-        List<StudentQuizSummaryResponse> pageContent = start >= result.size() ? 
-            new ArrayList<>() : result.subList(start, end);
-        
+
+        List<StudentQuizSummaryResponse> pageContent = start >= result.size() ? new ArrayList<>()
+                : result.subList(start, end);
+
         return new PageImpl<>(pageContent, pageable, result.size());
     }
-    
+
     /**
      * Calculate student's status for a quiz based on their latest attempt
      */
@@ -287,20 +289,20 @@ public class QuizServiceImpl implements QuizService {
         if (latestAttempt == null) {
             return StudentQuizStatus.NOT_STARTED;
         }
-        
+
         return switch (latestAttempt.getStatus()) {
             case IN_PROGRESS -> StudentQuizStatus.IN_PROGRESS;
             case SUBMITTED, GRADED -> StudentQuizStatus.COMPLETED;
             case ABANDONED -> StudentQuizStatus.NOT_STARTED; // Can retry
         };
     }
-    
+
     /**
      * Build simple StudentQuizSummaryResponse from quiz only (no attempt data)
      */
     private StudentQuizSummaryResponse buildStudentQuizSummarySimple(Quiz quiz, StudentQuizStatus studentStatus) {
         User creator = quiz.getCreator();
-        
+
         return StudentQuizSummaryResponse.builder()
                 .id(quiz.getId())
                 .title(quiz.getTitle())
@@ -316,7 +318,7 @@ public class QuizServiceImpl implements QuizService {
                 .createdAt(quiz.getCreatedAt())
                 .build();
     }
-    
+
     /**
      * Convert quiz to summary response with statistics
      */
@@ -325,7 +327,7 @@ public class QuizServiceImpl implements QuizService {
                 quiz.getId(), QuizAttempt.AttemptStatus.GRADED);
         Double avgScore = attemptRepository.getAverageScoreByQuizId(quiz.getId());
         Double highScore = attemptRepository.getHighestScoreByQuizId(quiz.getId());
-        
+
         return quizMapper.toSummaryResponse(quiz, totalAttempts, avgScore, highScore);
     }
 }

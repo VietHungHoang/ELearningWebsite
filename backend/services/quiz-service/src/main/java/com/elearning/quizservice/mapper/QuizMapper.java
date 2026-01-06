@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class QuizMapper {
-    
+
     /**
      * Map Quiz entity to QuizSummaryResponse
      */
@@ -39,7 +39,7 @@ public class QuizMapper {
                 .updatedAt(quiz.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * Map Quiz entity to QuizSummaryResponse with statistics
      */
@@ -49,16 +49,17 @@ public class QuizMapper {
         response.setAveragePercentage(avgPercentage);
         return response;
     }
-    
+
     /**
      * Map Quiz entity to QuizSummaryResponse with full statistics
      */
-    public QuizSummaryResponse toSummaryResponse(Quiz quiz, Long totalAttempts, Double avgPercentage, Double highestScore) {
+    public QuizSummaryResponse toSummaryResponse(Quiz quiz, Long totalAttempts, Double avgPercentage,
+            Double highestScore) {
         QuizSummaryResponse response = toSummaryResponse(quiz, totalAttempts, avgPercentage);
         response.setHighestScore(highestScore);
         return response;
     }
-    
+
     /**
      * Map Quiz entity to QuizDetailResponse
      */
@@ -85,10 +86,20 @@ public class QuizMapper {
                 .updatedAt(quiz.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * Map QuizAttempt entity to QuizAttemptResponse
      */
+    /**
+     * Map QuizAttempt entity to QuizAttemptResponse with answers
+     */
+    public QuizAttemptResponse toAttemptResponse(QuizAttempt attempt,
+            java.util.List<com.elearning.quizservice.dto.response.UserAnswerResponse> answers) {
+        QuizAttemptResponse response = toAttemptResponse(attempt);
+        response.setAnswers(answers);
+        return response;
+    }
+
     public QuizAttemptResponse toAttemptResponse(QuizAttempt attempt) {
         return QuizAttemptResponse.builder()
                 .id(attempt.getId())

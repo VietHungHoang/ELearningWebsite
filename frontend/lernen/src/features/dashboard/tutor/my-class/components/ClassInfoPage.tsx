@@ -283,7 +283,7 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
             };
 
             const initialFormData = {
-                classTitle: finalData.classTitle,
+                classTitle: finalData.classTitle || '',
                 subject: localizedSubject,
                 category: localizedCategory,
                 maxStudents: finalData.maxStudents || finalData.students.length,
@@ -324,7 +324,7 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
                     materials: []
                 };
                 const initialFormData = {
-                    classTitle: initialClassData.title,
+                    classTitle: initialClassData.title || '',
                     subject: (initialClassData as any).subject || '',
                     category: (initialClassData as any).category || '',
                     maxStudents: (initialClassData as any).maxStudents || initialClassData.students.length,
@@ -416,7 +416,7 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
         // Enter edit mode with current data (no API call)
         if (classData) {
             const initialFormData = {
-                classTitle: classData.classTitle,
+                classTitle: classData.classTitle || '',
                 subject: classData.subject || '',
                 category: classData.category || '',
                 maxStudents: classData.maxStudents ?? classData.students.length,
@@ -535,7 +535,7 @@ const ClassInfoPage: React.FC<ClassInfoPageProps> = ({ isViewMode = false, isStu
             };
 
             const updatedFormData = {
-                classTitle: finalData.classTitle,
+                classTitle: finalData.classTitle || '',
                 subject: localizedSubject,
                 category: localizedCategory,
                 maxStudents: finalData.maxStudents ?? finalData.students.length,

@@ -145,14 +145,7 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
             throw new com.elearning.classservice.exception.ZoomApiException(e.getMessage());
         }
 
-        // Add participants: tutor and student
-        SessionParticipant tutorParticipant = SessionParticipant.builder()
-                .session(session)
-                .student(entity.getTutor())
-                .attendanceStatus(AttendanceStatus.REGISTERED)
-                .isHost(true)
-                .build();
-
+        // Add student as participant (tutor is already stored in session.tutor)
         SessionParticipant studentParticipant = SessionParticipant.builder()
                 .session(session)
                 .student(entity.getStudent())
@@ -160,7 +153,6 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
                 .isHost(false)
                 .build();
 
-        sessionParticipantRepository.save(tutorParticipant);
         sessionParticipantRepository.save(studentParticipant);
 
         log.info("Trial session created with ID: {}", session.getId());

@@ -1,0 +1,13 @@
+server:
+  port: 8095
+
+spring:
+  application:
+    name: health-check-service
+  profiles:
+    active: dev # Changed from prod to dev for local development
+
+logging:
+  level:
+    root: INFO
+    "[com.elearning.healthcheckservice]": DEBUG

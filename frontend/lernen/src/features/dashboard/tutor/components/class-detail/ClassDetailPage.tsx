@@ -20,7 +20,7 @@ const ClassDetailPage: React.FC = () => {
     const location = useLocation();
     const { t, i18n } = useTranslation();
     const { state } = useAuth();
-    
+
     // Helper function to check if title is null or "null" string
     const isTitleNull = (title: string | null | undefined): boolean => {
         return !title || title === 'null' || title.trim() === '';
@@ -66,7 +66,7 @@ const ClassDetailPage: React.FC = () => {
                 timeGroups.set(timeKey, []);
             }
             // Use dayOfWeek if available, otherwise use day string
-            const dayName = schedule.dayOfWeek !== undefined 
+            const dayName = schedule.dayOfWeek !== undefined
                 ? getDayName(schedule.dayOfWeek)
                 : schedule.day || '';
             timeGroups.get(timeKey)!.push(dayName);
@@ -99,91 +99,84 @@ const ClassDetailPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(!initialClassData);
     const [showUpdateScheduleModal, setShowUpdateScheduleModal] = useState(false);
 
-    useEffect(() => {
-        // Always fetch fresh data from API when classId is available
-        if (classId) {
-            const loadClassData = async () => {
-                setIsLoading(true);
+    const fetchClassData = async () => {
+        if (!classId) return;
+        setIsLoading(true);
 
-                try {
-                    const response = await classService.getClassDetail(classId);
-                    if (response.success && response.data) {
-                        // Transform ClassDetailResponse to ClassData format
-                        const apiData = response.data;
-                        const transformedData: ClassData = {
-                            id: apiData.id,
-                            classTitle: apiData.title,
-                            tutor: apiData.tutor ? {
-                                id: apiData.tutor.id,
-                                fullName: apiData.tutor.fullName,
-                                avatarUrl: apiData.tutor.avatarUrl
-                            } : null,
-                            students: apiData.students.map(s => ({
-                                id: s.id,
-                                name: s.fullName,
-                                avatar: s.avatarUrl || '',
-                                email: undefined
-                            })),
-                            type: apiData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
-                            status: apiData.status === 'ONGOING' ? 'Ongoing' :
-                                apiData.status === 'OPENING' ? 'Opening' : 'Completed',
-                            schedules: apiData.schedules.map(s => ({
-                                dayOfWeek: s.dayOfWeek,
-                                day: getDayName(s.dayOfWeek), // Keep for backward compatibility
-                                time: s.time
-                            })),
-                            startDate: apiData.createdAt,
-                            completedSessions: apiData.completedSessions,
-                            totalSessions: apiData.totalSessions,
-                            sessions: apiData.sessions?.map(s => ({
-                                id: s.id,
-                                sessionNumber: s.sessionNumber,
-                                title: s.title,
-                                startTime: convertUtcDateTimeToLocal(s.startTime),
-                                endTime: convertUtcDateTimeToLocal(s.endTime),
-                                meetingLink: s.meetingLink,
-                                status: s.status,
-                                participantsCount: s.participantsCount
-                            })) || [],
-                            quizzes: [], // Will be populated from separate API or tabs
-                            materials: apiData.materials?.map(m => ({
-                                id: m.id,
-                                name: m.name,
-                                type: m.type as 'PDF' | 'Video' | 'ZIP',
-                                date: m.uploadDate
-                            })) || [],
-                            subject: undefined,
-                            category: undefined,
-                            tuitionFee: apiData.pricePerHour,
-                            description: apiData.description,
-                            maxStudents: apiData.maxStudents
-                        };
-                        setClassData(transformedData);
-                    } else {
-                        console.warn('API returned unsuccessful response');
-                        // Use initial data from navigation state as fallback
-                        if (initialClassData) {
-                            setClassData(initialClassData);
-                        } else {
-                            setClassData(null);
-                        }
-                    }
-                } catch (apiError) {
-                    console.error('Failed to fetch class detail:', apiError);
-                    // Use initial data from navigation state as fallback
-                    if (initialClassData) {
-                        setClassData(initialClassData);
-                    } else {
-                        setClassData(null);
-                    }
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-
-            loadClassData();
+        try {
+            const response = await classService.getClassDetail(classId);
+            if (response.success && response.data) {
+                // Transform ClassDetailResponse to ClassData format
+                const apiData = response.data;
+                const transformedData: ClassData = {
+                    id: apiData.id,
+                    classTitle: apiData.title,
+                    tutor: apiData.tutor ? {
+                        id: apiData.tutor.id,
+                        fullName: apiData.tutor.fullName,
+                        avatarUrl: apiData.tutor.avatarUrl
+                    } : null,
+                    students: apiData.students.map(s => ({
+                        id: s.id,
+                        name: s.fullName,
+                        avatar: s.avatarUrl || '',
+                        email: undefined
+                    })),
+                    type: apiData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
+                    status: apiData.status === 'ONGOING' ? 'Ongoing' :
+                        apiData.status === 'OPENING' ? 'Opening' : 'Completed',
+                    schedules: apiData.schedules.map(s => ({
+                        dayOfWeek: s.dayOfWeek,
+                        day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][s.dayOfWeek % 7],
+                        time: s.time
+                    })),
+                    startDate: apiData.createdAt,
+                    completedSessions: apiData.completedSessions,
+                    totalSessions: apiData.totalSessions,
+                    sessions: apiData.sessions?.map(s => ({
+                        id: s.id,
+                        sessionNumber: s.sessionNumber,
+                        title: s.title,
+                        startTime: convertUtcDateTimeToLocal(s.startTime),
+                        endTime: convertUtcDateTimeToLocal(s.endTime),
+                        meetingLink: s.meetingLink,
+                        status: s.status,
+                        participantsCount: s.participantsCount
+                    })) || [],
+                    quizzes: [], // Will be populated from separate API or tabs
+                    materials: apiData.materials?.map(m => ({
+                        id: m.id,
+                        name: m.name,
+                        type: m.type as 'PDF' | 'Video' | 'ZIP',
+                        date: m.uploadDate,
+                        s3Url: m.s3Url,
+                        fileSize: m.fileSize
+                    })) || [],
+                    subject: undefined,
+                    category: undefined,
+                    tuitionFee: apiData.pricePerHour,
+                    description: apiData.description,
+                    maxStudents: apiData.maxStudents
+                };
+                setClassData(transformedData);
+            } else {
+                console.warn('API returned unsuccessful response');
+                if (initialClassData) setClassData(initialClassData);
+                else setClassData(null);
+            }
+        } catch (apiError) {
+            console.error('Failed to fetch class detail:', apiError);
+            if (initialClassData) setClassData(initialClassData);
+            else setClassData(null);
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    useEffect(() => {
+        fetchClassData();
     }, [classId]);
+
 
     const handleBack = () => {
         navigate('/dashboard/my-class');
@@ -204,12 +197,12 @@ const ClassDetailPage: React.FC = () => {
     // Map sessions from API to Session format and split into upcoming and past
     const now = new Date();
     const mappedSessions: Session[] = classData?.sessions?.map(session => {
-        const classTitle = !isTitleNull(classData.classTitle) 
+        const classTitle = !isTitleNull(classData.classTitle)
             ? (classData.classTitle || '')
-            : (state.user?.role === 'student' 
+            : (state.user?.role === 'student'
                 ? (classData.tutor?.fullName || '')
                 : (classData.students.length > 0 ? classData.students[0].name : ''));
-        
+
         return {
             id: session.id,
             sessionDatetime: session.startTime, // Already converted to local timezone
@@ -260,14 +253,14 @@ const ClassDetailPage: React.FC = () => {
             const durationMs = endTime.getTime() - startTime.getTime();
             const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
             const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-            
+
             // Format date
             const dateStr = startTime.toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit'
             });
-            
+
             // Format time
             const startTimeStr = startTime.toLocaleTimeString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
                 hour: '2-digit',
@@ -279,15 +272,15 @@ const ClassDetailPage: React.FC = () => {
                 minute: '2-digit',
                 hour12: false
             });
-            
+
             // Format duration
-            const durationStr = durationHours > 0 
+            const durationStr = durationHours > 0
                 ? `${durationHours}h ${durationMinutes}m`
                 : `${durationMinutes}m`;
-            
+
             // Generate a numeric id from string id for toggleExpand
             const numericId = session.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            
+
             return {
                 id: numericId,
                 sessionId: session.id, // Keep original id
@@ -375,24 +368,24 @@ const ClassDetailPage: React.FC = () => {
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                 <div>
                                     <h1 className="text-2xl font-bold text-gray-800">
-                                        {!isTitleNull(classData?.classTitle) 
+                                        {!isTitleNull(classData?.classTitle)
                                             ? (classData?.classTitle || '')
-                                            : (state.user?.role === 'student' 
+                                            : (state.user?.role === 'student'
                                                 ? (classData?.tutor?.fullName || '-')
                                                 : (classData?.students.length > 0 ? classData.students[0].name : '-'))}
                                     </h1>
                                     <div className="flex items-center gap-3 mt-2 text-sm">
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${classData?.type === '1-on-1' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                                            {classData?.type === '1-on-1' 
+                                            {classData?.type === '1-on-1'
                                                 ? t('dashboard.tutor.myClass.classTypes.oneOnOne')
                                                 : t('dashboard.tutor.myClass.classTypes.group')}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${classData?.status === 'Ongoing' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                            {classData?.status === 'Ongoing' 
+                                            {classData?.status === 'Ongoing'
                                                 ? t('dashboard.tutor.myClass.detail.statusLabels.ongoing')
                                                 : classData?.status === 'Opening'
-                                                ? t('dashboard.tutor.myClass.detail.statusLabels.opening')
-                                                : t('dashboard.tutor.myClass.detail.statusLabels.completed')}
+                                                    ? t('dashboard.tutor.myClass.detail.statusLabels.opening')
+                                                    : t('dashboard.tutor.myClass.detail.statusLabels.completed')}
                                         </span>
                                     </div>
                                 </div>
@@ -451,7 +444,7 @@ const ClassDetailPage: React.FC = () => {
                                         <QuizzesTab onViewQuizResult={handleViewQuizResult} />
                                     )}
                                     {activeTab === "Materials" && (
-                                        <MaterialsTab classData={classData} />
+                                        <MaterialsTab classData={classData} onUpdate={fetchClassData} />
                                     )}
                                 </>
                             )}

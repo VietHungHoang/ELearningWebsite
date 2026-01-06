@@ -172,6 +172,21 @@ services:
     depends_on:
       - db
 
+  health-check-service:
+    build:
+      context: ./backend/services/health-check-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: health-check-service
+    ports:
+      - "8095:8095"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    env_file:
+      - .env
+    volumes:
+      - ./backend/services/health-check-service/src:/app/src
+      - ./backend/services/health-check-service/pom.xml:/app/pom.xml
+
   tutor-service:
     build:
       context: ./backend/services/tutor-service
