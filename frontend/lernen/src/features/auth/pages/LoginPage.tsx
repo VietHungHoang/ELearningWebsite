@@ -46,6 +46,12 @@ const LoginPage: React.FC = () => {
                                 try {
                                     const tutorOnboarding = await authService.getOnboardingData(user!.id);
 
+                                    // Clear token after API call - user is not authenticated
+                                    localStorage.removeItem("accessToken");
+                                    localStorage.removeItem("refreshToken");
+                                    localStorage.removeItem("accessTokenExpiresIn");
+                                    localStorage.removeItem("refreshTokenExpiresIn");
+
                                     // Validate currentStep
                                     const step = tutorOnboarding?.currentStep;
                                     if (step === undefined || step === null || typeof step !== 'number' || step < 0) {
@@ -64,6 +70,11 @@ const LoginPage: React.FC = () => {
                                         navigate(`/onboarding/tutor?step=${step}`);
                                     }
                                 } catch (onboardingError: any) {
+                                    // Clear token on error too
+                                    localStorage.removeItem("accessToken");
+                                    localStorage.removeItem("refreshToken");
+                                    localStorage.removeItem("accessTokenExpiresIn");
+                                    localStorage.removeItem("refreshTokenExpiresIn");
                                     console.error("Failed to get onboarding data:", onboardingError);
                                     setToast({
                                         message: 'Không thể lấy thông tin onboarding. Vui lòng thử lại sau.',
@@ -146,6 +157,12 @@ const LoginPage: React.FC = () => {
                 try {
                     const tutorOnboarding = await authService.getOnboardingData(user!.id);
 
+                    // Clear token after API call - user is not authenticated
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("refreshToken");
+                    localStorage.removeItem("accessTokenExpiresIn");
+                    localStorage.removeItem("refreshTokenExpiresIn");
+
                     // Validate currentStep
                     const step = tutorOnboarding?.currentStep;
                     if (step === undefined || step === null || typeof step !== 'number' || step < 0) {
@@ -164,6 +181,11 @@ const LoginPage: React.FC = () => {
                         navigate(`/onboarding/tutor?step=${step}`);
                     }
                 } catch (onboardingError: any) {
+                    // Clear token on error too
+                    localStorage.removeItem("accessToken");
+                    localStorage.removeItem("refreshToken");
+                    localStorage.removeItem("accessTokenExpiresIn");
+                    localStorage.removeItem("refreshTokenExpiresIn");
                     console.error("Failed to get onboarding data:", onboardingError);
                     setToast({
                         message: 'Không thể lấy thông tin onboarding. Vui lòng thử lại sau.',

@@ -16,6 +16,12 @@ import type {
 import type { ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
 import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
 
+// Response for slot conflict check API
+export interface SlotConflictResponse {
+    tutorBusySlots: string[];    // Slots to HIDE (tutor already has sessions)
+    studentBusySlots: string[];  // Slots to show with WARNING style (student has sessions with other tutors)
+}
+
 // ClassData interface for class detail page
 export interface ClassData {
     id: string;
@@ -314,9 +320,9 @@ export const classService = {
         }
     },
 
-    createClass: async (classData: CreateClassRequest): Promise<ApiResponse<ClassTable>> => {
+    createClass: async (classData: CreateClassRequest): Promise<ApiResponse<PaginatedResponse<ClassTable>>> => {
         try {
-            const response = await apiService.post<ClassTable>("/v1/classes/tutors/me", classData);
+            const response = await apiService.post<PaginatedResponse<ClassTable>>("/v1/classes/tutors/me", classData);
             return {
                 status: response.status,
                 success: response.success,
@@ -885,13 +891,15 @@ export const classService = {
     },
 
     // Check conflicts for selected time slots
-    checkSlotConflicts: async (tutorId: string, slotDateTimes: string[]): Promise<ApiResponse<Session[]>> => {
+    // Returns both tutor busy slots (to hide) and student busy slots (to show with warning)
+    checkSlotConflicts: async (tutorId: string, startDate: string, endDate: string): Promise<ApiResponse<SlotConflictResponse>> => {
         try {
-            return await apiService.post<GetBookedSessionsResponse>(
+            return await apiService.post<SlotConflictResponse>(
                 `/v1/classes/sessions/check-slot-conflicts`,
                 {
                     tutorId,
-                    slotDateTimes
+                    startDate: startDate.replace('Z', ''),
+                    endDate: endDate.replace('Z', '')
                 }
             );
         } catch (error: any) {

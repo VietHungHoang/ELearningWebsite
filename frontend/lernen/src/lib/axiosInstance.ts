@@ -1,10 +1,19 @@
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios';
 
-// Helper function to decode JWT and extract userId
+// Helper function to decode JWT and extract userId (handles base64url encoding)
 const getUserIdFromToken = (token: string): string | null => {
   try {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
+    const base64Url = token.split('.')[1];
+    // Convert base64url to base64
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    // Decode and handle Unicode characters
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const decoded = JSON.parse(jsonPayload);
     return decoded.userId || decoded.sub || decoded.id || null;
   } catch (error) {
     console.error('Failed to decode token:', error);
@@ -14,7 +23,7 @@ const getUserIdFromToken = (token: string): string | null => {
 
 // Create axios instance with base configuration
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL:'http://13.236.4.126:8081/api',
+  baseURL: 'http://13.236.4.126:8081/api',
   timeout: 100000,
   headers: {
     'Content-Type': 'application/json',
@@ -33,7 +42,7 @@ axiosInstance.interceptors.request.use(
       const token = localStorage.getItem('accessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        
+
         // Add X-User-Id header for chat endpoints
         const userId = getUserIdFromToken(token);
         if (userId) {

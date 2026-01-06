@@ -2,6 +2,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGO_URI}
+      database: notification_db
 
   mail:
     host: smtp.gmail.com

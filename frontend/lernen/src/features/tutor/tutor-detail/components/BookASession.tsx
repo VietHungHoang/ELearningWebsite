@@ -51,7 +51,8 @@ const BookASession: React.FC<BookASessionProps> = ({
     const [tutorAvailabilities, setTutorAvailabilities] = useState<any[]>([]);
     const [tutorSessions, setTutorSessions] = useState<Session[]>([]);
     const [hasTrialSession, setHasTrialSession] = useState(true); // Default to true (can book trial)
-    const [conflictedSlots, setConflictedSlots] = useState<string[]>([]); // Slots that conflict with student's existing classes
+    const [tutorBusySlots, setTutorBusySlots] = useState<string[]>([]); // Slots to HIDE (tutor already has sessions)
+    const [studentBusySlots, setStudentBusySlots] = useState<string[]>([]); // Slots to show with WARNING style
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Initialize timezones and set default to machine timezone
@@ -179,21 +180,19 @@ const BookASession: React.FC<BookASessionProps> = ({
         }
     }, [tutorId, weekRange]);
 
-    // Check slot conflicts ONCE when component loads (for regular sessions only)
+    // Check slot conflicts whenever weekRange changes
     useEffect(() => {
         const checkConflicts = async () => {
-            // Only check conflicts for regular sessions (not trial)
-            if (hasTrialSession || !tutorId) return;
+            if (!tutorId) return;
 
             try {
-                // Get all available slots for the current week (empty array = check all tutor's slots)
-                const response = await classService.checkSlotConflicts(tutorId, []);
+                const startDate = weekRange.start.toISOString();
+                const endDate = weekRange.end.toISOString();
+
+                const response = await classService.checkSlotConflicts(tutorId, startDate, endDate);
                 if (response.success && response.data) {
-                    // Store conflicted slot times (ISO strings in UTC+0) - extract sessionDateTime from Sessions
-                    const conflictedSlotStrings = response.data
-                        .map((session: any) => session.sessionDateTime)
-                        .filter((dateTime: string | undefined) => dateTime !== undefined) as string[];
-                    setConflictedSlots(conflictedSlotStrings);
+                    setTutorBusySlots(response.data.tutorBusySlots || []);
+                    setStudentBusySlots(response.data.studentBusySlots || []);
                 }
             } catch (error) {
                 console.error('Error checking slot conflicts:', error);
@@ -201,7 +200,7 @@ const BookASession: React.FC<BookASessionProps> = ({
         };
 
         checkConflicts();
-    }, [tutorId, hasTrialSession]); // Only re-run if tutorId or hasTrialSession changes
+    }, [tutorId, weekRange]); // Re-run when tutorId or weekRange changes
 
     // Generate available slots in UTC+0 for current week
     const availableSlotsUTC = useMemo(() => {
@@ -216,7 +215,7 @@ const BookASession: React.FC<BookASessionProps> = ({
 
         // Step 1: Generate all possible slots from availabilities in UTC+0
         const allPossibleSlots: string[] = [];
-        
+
         tutorAvailabilities.forEach((avail: any) => {
             // Parse start and end time (format: "HH:MM")
             const startHour = Number(avail.startTime.split(':')[0]);
@@ -236,7 +235,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                     // Check if current date is within effective date range
                     const currentDateOnly = new Date(currentDate);
                     currentDateOnly.setUTCHours(0, 0, 0, 0);
-                    
+
                     // Skip if before effectiveStartDate
                     if (effectiveStartDate) {
                         const effectiveStartDateOnly = new Date(effectiveStartDate);
@@ -246,7 +245,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                             continue;
                         }
                     }
-                    
+
                     // Skip if after effectiveEndDate (if it exists)
                     if (effectiveEndDate) {
                         const effectiveEndDateOnly = new Date(effectiveEndDate);
@@ -256,7 +255,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                             continue;
                         }
                     }
-                    
+
                     // Generate hourly slots for this date (only if within effective date range)
                     for (let hour = startHour; hour < endHour; hour++) {
                         const slotDate = new Date(Date.UTC(
@@ -289,12 +288,13 @@ const BookASession: React.FC<BookASessionProps> = ({
                 })
         );
 
-        // Step 3: Filter out booked slots AND conflicted slots (but keep trial sessions for display)
-        const conflictedSlotsSet = new Set<string>(conflictedSlots);
-        const availableSlots = allPossibleSlots.filter(slot => 
-            !bookedSlotsSet.has(slot) && !conflictedSlotsSet.has(slot)
+        // Step 3: Filter out booked slots AND tutor busy slots (hide completely)
+        // Note: studentBusySlots are NOT filtered - they will be shown with warning style
+        const tutorBusySlotsSet = new Set<string>(tutorBusySlots);
+        const availableSlots = allPossibleSlots.filter(slot =>
+            !bookedSlotsSet.has(slot) && !tutorBusySlotsSet.has(slot)
         );
-        
+
         // Step 4: Add trial session slot if it exists and is in current week
         if (trialSessionRequest?.sessionDateTime) {
             try {
@@ -304,7 +304,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                     dateTimeString += 'Z'; // Treat as UTC
                 }
                 const trialDate = new Date(dateTimeString);
-                
+
                 if (!isNaN(trialDate.getTime())) {
                     const trialSlotISO = trialDate.toISOString();
                     // Check if trial session is within current week range
@@ -321,7 +321,7 @@ const BookASession: React.FC<BookASessionProps> = ({
         }
 
         return availableSlots.sort();
-    }, [tutorAvailabilities, tutorSessions, weekRange, trialSessionRequest, conflictedSlots]);
+    }, [tutorAvailabilities, tutorSessions, weekRange, trialSessionRequest, tutorBusySlots]);
 
     // Group available slots by date for display
     const sessions = useMemo(() => {
@@ -329,45 +329,45 @@ const BookASession: React.FC<BookASessionProps> = ({
 
         // Group UTC slots by date
         const sessionsMap = new Map<string, string[]>();
-        
+
         availableSlotsUTC.forEach(utcSlot => {
             // Parse UTC time from ISO string
             const utcDate = new Date(utcSlot);
-            
+
             // Get UTC components (not affected by local timezone)
-            const utcYear = utcDate.getUTCFullYear();   
+            const utcYear = utcDate.getUTCFullYear();
             const utcMonth = utcDate.getUTCMonth();
             const utcDay = utcDate.getUTCDate();
             const utcHour = utcDate.getUTCHours();
             const utcMinute = utcDate.getUTCMinutes();
-            
+
             // Apply timezone offset to UTC time
             const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
             if (!offsetMatch) return;
-            
+
             const sign = offsetMatch[1] === "+" ? 1 : -1;
             const offsetHours = parseInt(offsetMatch[2]);
             const offsetMinutes = parseInt(offsetMatch[3]);
-            
+
             // Create a new date with offset applied
             const localDate = new Date(Date.UTC(
-                utcYear, 
-                utcMonth, 
-                utcDay, 
-                utcHour + sign * offsetHours, 
+                utcYear,
+                utcMonth,
+                utcDay,
+                utcHour + sign * offsetHours,
                 utcMinute + sign * offsetMinutes
             ));
-            
+
             // Use UTC components for grouping (to get correct date after offset)
             const localYear = localDate.getUTCFullYear();
             const localMonth = localDate.getUTCMonth();
             const localDay = localDate.getUTCDate();
             const displayHour = localDate.getUTCHours();
             const displayMinute = localDate.getUTCMinutes();
-            
+
             // Create date key using local components
             const dateKey = new Date(localYear, localMonth, localDay).toDateString();
-            
+
             // Format time in 12-hour format
             const hour12 = displayHour === 0 ? 12 : displayHour > 12 ? displayHour - 12 : displayHour;
             const ampm = displayHour >= 12 ? 'PM' : 'AM';
@@ -471,7 +471,7 @@ const BookASession: React.FC<BookASessionProps> = ({
             }
         }
         // Update the state only if there are changes
-        if (combinedSlots.length !== bookedTrialSlots.length || 
+        if (combinedSlots.length !== bookedTrialSlots.length ||
             combinedSlots.some(slot => !bookedTrialSlots.includes(slot))) {
             setBookedTrialSlots(combinedSlots);
         }
@@ -786,9 +786,8 @@ const BookASession: React.FC<BookASessionProps> = ({
                             <div key={index} className="text-center">
                                 <button
                                     onClick={() => handleSelectDay(d.fullDate)}
-                                    className={`w-full p-3 rounded-lg transition-colors ${
-                                        isToday ? "bg-[#F9F3EB]" : "hover:bg-gray-50"
-                                    }`}
+                                    className={`w-full p-3 rounded-lg transition-colors ${isToday ? "bg-[#F9F3EB]" : "hover:bg-gray-50"
+                                        }`}
                                 >
                                     <p className="text-sm font-semibold">{d.date}</p>
                                     <p className="text-xs text-gray-500 mt-1">{d.day}</p>
@@ -812,7 +811,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                                             const year = displayDate.getFullYear();
                                             const month = displayDate.getMonth();
                                             const day = displayDate.getDate();
-                                            
+
                                             // Convert back to UTC by reversing timezone offset
                                             if (!selectedTimezone) return null;
                                             const offsetMatch = selectedTimezone.offset.match(/([+-])(\d{1,2}):(\d{2})/);
@@ -825,7 +824,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                                             // Subtract the offset to get UTC (reverse of display conversion)
                                             const utcHours = displayHours - sign * offsetHours;
                                             const utcMinutes = displayMinutes - sign * offsetMinutes;
-                                            
+
                                             // Create UTC datetime
                                             const utcDateTime = new Date(Date.UTC(year, month, day, utcHours, utcMinutes, 0, 0));
                                             const utcSlot = utcDateTime.toISOString();
@@ -836,7 +835,7 @@ const BookASession: React.FC<BookASessionProps> = ({
 
                                             const isSelected = selectedTimes.includes(utcSlot);
                                             const isBookedTrial = bookedTrialSlots.includes(utcSlot);
-                                            
+
                                             // Check if this slot is the trial session request
                                             let isTrialRequest = false;
                                             if (trialSessionRequest?.sessionDateTime) {
@@ -853,30 +852,43 @@ const BookASession: React.FC<BookASessionProps> = ({
                                                     console.warn('Error comparing trial session:', error);
                                                 }
                                             }
-                                            
+
                                             const trialStatus = isTrialRequest
                                                 ? (trialSessionRequest?.status as any)
                                                 : null;
+
+                                            // Check if student has another class at this time (with different tutor)
+                                            const isStudentBusy = studentBusySlots.some(busySlot => {
+                                                try {
+                                                    const busyTime = new Date(busySlot.endsWith('Z') ? busySlot : busySlot + 'Z');
+                                                    return busyTime.getTime() === utcDateTime.getTime();
+                                                } catch {
+                                                    return busySlot === utcSlot;
+                                                }
+                                            });
+
                                             return (
                                                 <div key={`${time}-${timeIndex}`} className="space-y-1">
                                                     <button
-                                                        className={`pending-trial-slot w-full text-xs py-2.5 rounded-md font-semibold transition-colors ${
-                                                            isPastSlot
-                                                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                                : isTrialRequest && trialStatus
+                                                        className={`pending-trial-slot w-full text-xs py-2.5 rounded-md font-semibold transition-colors ${isPastSlot
+                                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                                            : isTrialRequest && trialStatus
                                                                 ? trialStatus === "PENDING"
                                                                     ? "bg-yellow-100 text-yellow-700 border-2 border-yellow-300 cursor-pointer hover:bg-yellow-200"
                                                                     : trialStatus === "CONFIRMED"
-                                                                    ? "bg-green-100 text-green-700 border-2 border-green-300 cursor-not-allowed"
-                                                                    : trialStatus === "CANCELLED"
-                                                                    ? "bg-red-100 text-red-700 border-2 border-red-300 cursor-not-allowed"
-                                                                    : "bg-gray-100 text-gray-700 border-2 border-gray-300 cursor-not-allowed"
+                                                                        ? "bg-green-100 text-green-700 border-2 border-green-300 cursor-not-allowed"
+                                                                        : trialStatus === "CANCELLED"
+                                                                            ? "bg-red-100 text-red-700 border-2 border-red-300 cursor-not-allowed"
+                                                                            : "bg-gray-100 text-gray-700 border-2 border-gray-300 cursor-not-allowed"
                                                                 : isBookedTrial
-                                                                ? "bg-orange-100 text-orange-700 border-2 border-orange-300 cursor-not-allowed"
-                                                                : isSelected
-                                                                ? "bg-[#0b6459] text-white"
-                                                                : "bg-[#F9F3EB] text-gray-700 hover:bg-[#e9e0d4]"
-                                                        }`}
+                                                                    ? "bg-orange-100 text-orange-700 border-2 border-orange-300 cursor-not-allowed"
+                                                                    : isStudentBusy
+                                                                        ? "bg-amber-100 text-amber-700 border-2 border-amber-400 hover:bg-amber-200"
+                                                                        : isSelected
+                                                                            ? "bg-[#0b6459] text-white"
+                                                                            : "bg-[#F9F3EB] text-gray-700 hover:bg-[#e9e0d4]"
+                                                            }`}
+                                                        title={isStudentBusy ? "Bạn đã có lịch học khác vào giờ này" : undefined}
                                                         onClick={() => {
                                                             if (isRescheduling) {
                                                                 // In rescheduling mode: only allow selecting one slot, no toggle
@@ -911,10 +923,10 @@ const BookASession: React.FC<BookASessionProps> = ({
                                                                 {trialStatus === "PENDING"
                                                                     ? t("tutorDetail.booking.pending")
                                                                     : trialStatus === "CONFIRMED"
-                                                                    ? t("tutorDetail.booking.confirmed")
-                                                                    : trialStatus === "CANCELLED"
-                                                                    ? t("tutorDetail.booking.cancelled")
-                                                                    : trialStatus}
+                                                                        ? t("tutorDetail.booking.confirmed")
+                                                                        : trialStatus === "CANCELLED"
+                                                                            ? t("tutorDetail.booking.cancelled")
+                                                                            : trialStatus}
                                                                 )
                                                             </span>
                                                         )}
@@ -982,7 +994,7 @@ const BookASession: React.FC<BookASessionProps> = ({
                 tutorData={tutorData}
                 selectedTimes={selectedTimes}
                 timezone={selectedTimezone}
-                navigateToApp={navigateToApp || (() => {})}
+                navigateToApp={navigateToApp || (() => { })}
             />
             <BookTrialModal
                 isOpen={isTrialModalOpen}

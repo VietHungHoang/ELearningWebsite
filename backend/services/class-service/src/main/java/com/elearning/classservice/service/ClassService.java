@@ -46,12 +46,13 @@ public interface ClassService {
     Page<ClassTableItem> getMyClassesAsStudent(UUID studentId, String status, int page, int size);
 
     /**
-     * Create a new class for tutor
+     * Create a new class for tutor and return paginated list of classes
      * 
      * @param tutorId Tutor ID
      * @param request Create class request
+     * @return Page of ClassTableItem (sorted by createdAt desc)
      */
-    void createClass(UUID tutorId, CreateClassRequest request);
+    Page<ClassTableItem> createClass(UUID tutorId, CreateClassRequest request);
 
     /**
      * Create a class booking (class, enrollment, sessions)

@@ -27,11 +27,40 @@ public class KeycloakConfig {
             // Create SSL context that trusts all certificates
             SSLContext sslContext = createTrustAllSslContext();
 
-            // Create HTTP client with custom SSL context
+            // Configure connection manager with pooling
+            org.apache.http.config.Registry<org.apache.http.conn.socket.ConnectionSocketFactory> socketFactoryRegistry = org.apache.http.config.RegistryBuilder.<org.apache.http.conn.socket.ConnectionSocketFactory>create()
+                    .register("https", new org.apache.http.conn.ssl.SSLConnectionSocketFactory(
+                            sslContext,
+                            org.apache.http.conn.ssl.NoopHostnameVerifier.INSTANCE))
+                    .register("http", org.apache.http.conn.socket.PlainConnectionSocketFactory.getSocketFactory())
+                    .build();
+
+            org.apache.http.impl.conn.PoolingHttpClientConnectionManager connectionManager = new org.apache.http.impl.conn.PoolingHttpClientConnectionManager(
+                    socketFactoryRegistry);
+            connectionManager.setMaxTotal(50);
+            connectionManager.setDefaultMaxPerRoute(20);
+            connectionManager.setValidateAfterInactivity(5000); // Validate connections after 5 seconds of inactivity
+
+            // Configure request config with timeouts
+            org.apache.http.client.config.RequestConfig requestConfig = org.apache.http.client.config.RequestConfig
+                    .custom()
+                    .setConnectTimeout(30000) // 30 seconds connection timeout
+                    .setSocketTimeout(60000) // 60 seconds socket timeout
+                    .setConnectionRequestTimeout(10000) // 10 seconds to get connection from pool
+                    .build();
+
+            // Create HTTP client with connection pooling, retry, and keep-alive
             org.apache.http.impl.client.CloseableHttpClient httpClient = org.apache.http.impl.client.HttpClients
                     .custom()
-                    .setSSLContext(sslContext)
-                    .setSSLHostnameVerifier(org.apache.http.conn.ssl.NoopHostnameVerifier.INSTANCE)
+                    .setConnectionManager(connectionManager)
+                    .setDefaultRequestConfig(requestConfig)
+                    .setRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(3, true)) // Retry
+                                                                                                              // up to 3
+                                                                                                              // times
+                    .setKeepAliveStrategy((response, context) -> 30000) // Keep connections alive for 30 seconds
+                    .evictExpiredConnections()
+                    .evictIdleConnections(60, java.util.concurrent.TimeUnit.SECONDS) // Evict idle connections after 60
+                                                                                     // seconds
                     .build();
 
             // Create Resteasy client with custom HTTP client

@@ -40,7 +40,7 @@ public class TutorMapper {
             return null;
         }
         return tutor.getSubjects().stream()
-                .map(subject -> subject.getId())
+                .map(subject -> subject.getSubjectId())
                 .collect(Collectors.toList());
     }
 
