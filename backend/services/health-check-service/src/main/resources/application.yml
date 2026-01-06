@@ -1,0 +1,13 @@
+server:
+  port: 8095
+
+spring:
+  application:
+    name: health-check-service
+  profiles:
+    active: prod
+
+logging:
+  level:
+    root: INFO
+    "[com.elearning.healthcheckservice]": DEBUG

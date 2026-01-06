@@ -1,0 +1,39 @@
+# Health check configuration
+health-check:
+  enabled: true
+  interval: 600000 # 10 minutes in milliseconds
+  timeout: 5000 # 5 seconds timeout per service
+
+# Service URLs for health checking
+services:
+  auth-service:
+    url: ${AUTH_SERVICE_URL}
+  notification-service:
+    url: ${NOTIFICATION_SERVICE_URL}
+  common-service:
+    url: ${COMMON_SERVICE_URL}
+  tutor-service:
+    url: ${TUTOR_SERVICE_URL}
+  class-service:
+    url: ${CLASS_SERVICE_URL}
+  student-service:
+    url: ${STUDENT_SERVICE_URL}
+  search-service:
+    url: ${SEARCH_SERVICE_URL}
+  chat-service:
+    url: ${CHAT_SERVICE_URL}
+  booking-service:
+    url: ${BOOKING_SERVICE_URL}
+  payment-service:
+    url: ${PAYMENT_SERVICE_URL}
+  quiz-service:
+    url: ${QUIZ_SERVICE_URL}
+  file-service:
+    url: ${FILE_SERVICE_URL}
+  bff-service:
+    url: ${BFF_SERVICE_URL}
+
+logging:
+  level:
+    root: INFO
+    "[com.elearning.healthcheckservice]": DEBUG
