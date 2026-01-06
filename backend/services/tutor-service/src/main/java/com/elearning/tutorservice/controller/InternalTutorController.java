@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/internal/tutors")
+@RequestMapping("/internal/tutors")
 @RequiredArgsConstructor
 public class InternalTutorController {
 
