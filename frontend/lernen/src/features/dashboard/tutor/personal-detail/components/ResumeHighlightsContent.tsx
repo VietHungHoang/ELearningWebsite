@@ -4,6 +4,7 @@ import { HiAcademicCap, HiLocationMarker, HiPencil, HiTrash, HiPlus, HiOutlineAc
 import ResumeItemModal from '../../components/profile-setting/ResumeItemModal';
 import type { CertificationItem, EducationItem, ExperienceItem } from '../../../../../types/tutor';
 import { useTutorProfile } from '../../../../../hooks/useTutorProfile';
+import { generateUUID } from '../../../../../utils/uuidUtils';
 
 // --- TYPE DEFINITIONS ---
 export type ResumeItemData = EducationItem | ExperienceItem | CertificationItem;
@@ -274,7 +275,7 @@ const ResumeHighlightsContent: React.FC<ResumeHighlightsContentProps> = ({ }) =>
             );
         } else { // Adding new item
             // Generate UUID-like id
-            const newId = `${activeTab.toLowerCase().substring(0, 4)}-${crypto.randomUUID()}`;
+            const newId = `${activeTab.toLowerCase().substring(0, 4)}-${generateUUID()}`;
             updatedItems = [...items, { ...itemData, id: newId } as ResumeItemData];
         }
 
