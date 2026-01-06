@@ -42,18 +42,43 @@ const LoginPage: React.FC = () => {
                         try {
                             const user = await login({ email: "", password: "" }); // Get user from token
                             if (!user?.role) {
-                                const tutorOnboarding = await authService.getOnboardingData(user!.id);
-                                if (tutorOnboarding.currentStep < 7) {
-                                    navigate(`/onboarding/tutor?step=${tutorOnboarding.currentStep}`);
-                                } else {
-                                    navigate("/onboarding-completion");
+                                // User has no role - tutor in onboarding process
+                                try {
+                                    const tutorOnboarding = await authService.getOnboardingData(user!.id);
+
+                                    // Validate currentStep
+                                    const step = tutorOnboarding?.currentStep;
+                                    if (step === undefined || step === null || typeof step !== 'number' || step < 0) {
+                                        setToast({
+                                            message: 'Dữ liệu onboarding không hợp lệ. Vui lòng liên hệ hỗ trợ.',
+                                            type: 'error'
+                                        });
+                                        return;
+                                    }
+
+                                    if (step >= 6) {
+                                        // Onboarding completed, waiting for approval
+                                        navigate("/onboarding-completion");
+                                    } else {
+                                        // Still in onboarding process
+                                        navigate(`/onboarding/tutor?step=${step}`);
+                                    }
+                                } catch (onboardingError: any) {
+                                    console.error("Failed to get onboarding data:", onboardingError);
+                                    setToast({
+                                        message: 'Không thể lấy thông tin onboarding. Vui lòng thử lại sau.',
+                                        type: 'error'
+                                    });
                                 }
                             } else {
                                 navigate("/dashboard");
                             }
                         } catch {
-                            // If can't get user info, default to dashboard
-                            navigate("/dashboard");
+                            // If can't get user info, show error
+                            setToast({
+                                message: 'Không thể lấy thông tin người dùng. Vui lòng thử lại.',
+                                type: 'error'
+                            });
                         }
                     } else {
                         // Students go to home
@@ -62,7 +87,10 @@ const LoginPage: React.FC = () => {
                 } catch (error) {
                     console.error("Google login failed:", error);
                     hasCalledCallback.current = false;
-                    // Handle error
+                    setToast({
+                        message: 'Đăng nhập Google thất bại. Vui lòng thử lại.',
+                        type: 'error'
+                    });
                 }
             };
             handleGoogleCallback();
@@ -71,15 +99,15 @@ const LoginPage: React.FC = () => {
 
     const formatLoginError = (error: any): string => {
         const errorMessage = error?.message || error?.response?.data?.message || '';
-        
+
         // Check for 401 Unauthorized (wrong credentials)
-        if (errorMessage.includes('401') || 
+        if (errorMessage.includes('401') ||
             errorMessage.includes('Unauthorized') ||
             errorMessage.includes('Invalid credentials') ||
             errorMessage.toLowerCase().includes('invalid username or password')) {
             return 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.';
         }
-        
+
         // Check for Keycloak connection errors
         if (errorMessage.includes('Keycloak') || errorMessage.includes('keycloak')) {
             if (errorMessage.includes('401')) {
@@ -87,25 +115,25 @@ const LoginPage: React.FC = () => {
             }
             return 'Không thể kết nối đến hệ thống xác thực. Vui lòng thử lại sau.';
         }
-        
+
         // Check for network errors
         if (errorMessage.includes('Network Error') || errorMessage.includes('timeout')) {
             return 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối internet và thử lại.';
         }
-        
+
         // Check for server errors
         if (errorMessage.includes('500') || errorMessage.includes('Internal Server Error')) {
             return 'Lỗi hệ thống. Vui lòng thử lại sau.';
         }
-        
+
         // If error message is too technical, show user-friendly message
-        if (errorMessage.includes('RuntimeException') || 
+        if (errorMessage.includes('RuntimeException') ||
             errorMessage.includes('java.lang') ||
             errorMessage.includes('POST request for') ||
             errorMessage.length > 100) {
             return 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.';
         }
-        
+
         // Return original message if it's user-friendly
         return errorMessage || 'Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.';
     };
@@ -114,11 +142,33 @@ const LoginPage: React.FC = () => {
         try {
             const user = await login({ email, password });
             if (!user?.role) {
-                const tutorOnboarding = await authService.getOnboardingData(user!.id);
-                if (tutorOnboarding.currentStep < 7) {
-                    navigate(`/onboarding/tutor?step=${tutorOnboarding.currentStep}`);
-                } else {
-                    navigate("/onboarding-completion");
+                // User has no role - tutor in onboarding process
+                try {
+                    const tutorOnboarding = await authService.getOnboardingData(user!.id);
+
+                    // Validate currentStep
+                    const step = tutorOnboarding?.currentStep;
+                    if (step === undefined || step === null || typeof step !== 'number' || step < 0) {
+                        setToast({
+                            message: 'Dữ liệu onboarding không hợp lệ. Vui lòng liên hệ hỗ trợ.',
+                            type: 'error'
+                        });
+                        return;
+                    }
+
+                    if (step >= 6) {
+                        // Onboarding completed, waiting for approval
+                        navigate("/onboarding-completion");
+                    } else {
+                        // Still in onboarding process
+                        navigate(`/onboarding/tutor?step=${step}`);
+                    }
+                } catch (onboardingError: any) {
+                    console.error("Failed to get onboarding data:", onboardingError);
+                    setToast({
+                        message: 'Không thể lấy thông tin onboarding. Vui lòng thử lại sau.',
+                        type: 'error'
+                    });
                 }
             } else if (user.role === "tutor") {
                 navigate("/dashboard");
