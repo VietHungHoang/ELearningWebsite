@@ -17,3 +17,7 @@ logging:
   level:
     root: INFO
     "[com.elearning.bffservice]": DEBUG
+
+# WebSocket Configuration for production
+websocket:
+  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:*}
