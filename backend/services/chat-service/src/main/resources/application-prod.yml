@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: ${MONGO_URI}
+      uri: ${MONGO_URI}chat_db?retryWrites=true&w=majority
 services:
   auth-service:
     url: ${AUTH_SERVICE_URL}
