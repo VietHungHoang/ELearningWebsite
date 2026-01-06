@@ -179,6 +179,7 @@ const isMaxAttemptsError = (message: string | undefined): boolean => {
         lowerMessage.includes('hết lượt') ||
         lowerMessage.includes('max attempt') ||
         lowerMessage.includes('maximum attempt') ||
+        lowerMessage.includes('maximum number of attempts reached') ||
         lowerMessage.includes('exceeded') ||
         lowerMessage.includes('attempt limit') ||
         lowerMessage.includes('no more attempts')

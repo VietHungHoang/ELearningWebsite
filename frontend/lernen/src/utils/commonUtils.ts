@@ -71,6 +71,13 @@ const clearSubjectsCache = (): void => {
     console.log('Cleared subjects and categories cache');
 };
 
+// Cache refresh interval: only refresh if cache is older than 5 minutes
+const CACHE_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+// Track if background refresh is in progress to avoid duplicate calls
+let subjectsRefreshInProgress = false;
+let categoriesRefreshInProgress = false;
+
 // Get subjects - use cache first, then fetch from API in background to update cache
 const getSubjects = async (): Promise<Subject[]> => {
     // Check cache first
@@ -80,27 +87,44 @@ const getSubjects = async (): Promise<Subject[]> => {
             const parsedCache = JSON.parse(cached);
             // Handle both old format (array) and new format ({ data, timestamp })
             let data: Subject[] | null = null;
+            let cacheTimestamp: number | null = null;
 
             if (Array.isArray(parsedCache)) {
-                // Old format: just an array
+                // Old format: just an array - treat as fresh cache
                 data = parsedCache;
+                cacheTimestamp = Date.now();
             } else if (parsedCache && parsedCache.data && Array.isArray(parsedCache.data)) {
                 // New format: { data, timestamp }
                 data = parsedCache.data;
+                cacheTimestamp = parsedCache.timestamp || Date.now();
             }
 
             if (data && data.length > 0) {
                 console.log('Using cached subjects:', data.length, 'items');
-                // Fetch from API in background to update cache (don't wait for it)
-                apiService.get<Subject[]>('/v1/public/common/subjects')
-                    .then(response => {
-                        if (response.data && response.data.length > 0) {
-                            localStorage.setItem('subjects', JSON.stringify(response.data));
-                        }
-                    })
-                    .catch(error => {
-                        console.warn('Background fetch subjects failed:', error);
-                    });
+                
+                // Only refresh in background if cache is older than refresh interval AND no refresh is in progress
+                const cacheAge = Date.now() - (cacheTimestamp || 0);
+                const shouldRefresh = cacheAge > CACHE_REFRESH_INTERVAL && !subjectsRefreshInProgress;
+                
+                if (shouldRefresh) {
+                    subjectsRefreshInProgress = true;
+                    // Fetch from API in background to update cache (don't wait for it)
+                    apiService.get<Subject[]>('/v1/public/common/subjects')
+                        .then(response => {
+                            if (response.data && response.data.length > 0) {
+                                localStorage.setItem('subjects', JSON.stringify({
+                                    data: response.data,
+                                    timestamp: Date.now()
+                                }));
+                            }
+                        })
+                        .catch(error => {
+                            console.warn('Background fetch subjects failed:', error);
+                        })
+                        .finally(() => {
+                            subjectsRefreshInProgress = false;
+                        });
+                }
                 return data;
             }
         } catch (error) {
@@ -112,7 +136,10 @@ const getSubjects = async (): Promise<Subject[]> => {
     try {
         const response = await apiService.get<Subject[]>('/v1/public/common/subjects');
         if (response.data && response.data.length > 0) {
-            localStorage.setItem('subjects', JSON.stringify(response.data));
+            localStorage.setItem('subjects', JSON.stringify({
+                data: response.data,
+                timestamp: Date.now()
+            }));
             return response.data;
         }
     } catch (error) {
@@ -133,27 +160,44 @@ const getCategories = async (): Promise<Category[]> => {
             const parsedCache = JSON.parse(cached);
             // Handle both old format (array) and new format ({ data, timestamp })
             let data: Category[] | null = null;
+            let cacheTimestamp: number | null = null;
 
             if (Array.isArray(parsedCache)) {
-                // Old format: just an array
+                // Old format: just an array - treat as fresh cache
                 data = parsedCache;
+                cacheTimestamp = Date.now();
             } else if (parsedCache && parsedCache.data && Array.isArray(parsedCache.data)) {
                 // New format: { data, timestamp }
                 data = parsedCache.data;
+                cacheTimestamp = parsedCache.timestamp || Date.now();
             }
 
             if (data && data.length > 0) {
                 console.log('Using cached categories:', data.length, 'items');
-                // Fetch from API in background to update cache (don't wait for it)
-                apiService.get<Category[]>('/v1/public/common/categories')
-                    .then(response => {
-                        if (response.data && response.data.length > 0) {
-                            localStorage.setItem('categories', JSON.stringify(response.data));
-                        }
-                    })
-                    .catch(error => {
-                        console.warn('Background fetch categories failed:', error);
-                    });
+                
+                // Only refresh in background if cache is older than refresh interval AND no refresh is in progress
+                const cacheAge = Date.now() - (cacheTimestamp || 0);
+                const shouldRefresh = cacheAge > CACHE_REFRESH_INTERVAL && !categoriesRefreshInProgress;
+                
+                if (shouldRefresh) {
+                    categoriesRefreshInProgress = true;
+                    // Fetch from API in background to update cache (don't wait for it)
+                    apiService.get<Category[]>('/v1/public/common/categories')
+                        .then(response => {
+                            if (response.data && response.data.length > 0) {
+                                localStorage.setItem('categories', JSON.stringify({
+                                    data: response.data,
+                                    timestamp: Date.now()
+                                }));
+                            }
+                        })
+                        .catch(error => {
+                            console.warn('Background fetch categories failed:', error);
+                        })
+                        .finally(() => {
+                            categoriesRefreshInProgress = false;
+                        });
+                }
                 return data;
             }
         } catch (error) {
@@ -165,7 +209,10 @@ const getCategories = async (): Promise<Category[]> => {
     try {
         const response = await apiService.get<Category[]>('/v1/public/common/categories');
         if (response.data && response.data.length > 0) {
-            localStorage.setItem('categories', JSON.stringify(response.data));
+            localStorage.setItem('categories', JSON.stringify({
+                data: response.data,
+                timestamp: Date.now()
+            }));
             return response.data;
         }
     } catch (error) {

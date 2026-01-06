@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram, FaPinterest, FaYoutube } from "react-icons/fa";
 import { VscVerified } from "react-icons/vsc";
 import { PiStar, PiStudentLight, PiCalendar, PiBookOpenTextLight } from "react-icons/pi";
@@ -13,8 +13,10 @@ import { useCurrency } from "../../../../context/CurrencyContext";
 import { useChat } from "../../../../context/ChatContext";
 import { convertFromVND, formatCurrency } from "../../../../utils/currencyHelper";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../../../context/AuthContext";
+import wishlistService from "../../../../services/wishlistService";
+import Toast from "../../../../components/ui/Toast";
 // import { tutorService } from "../../../../services/tutorService";
-// import { useAuth } from "../../../../context/AuthContext";
 // import { classService } from "../../../../services/classService";
 
 const TutorProfileHeader: React.FC<{
@@ -22,10 +24,14 @@ const TutorProfileHeader: React.FC<{
     hasTrialSession: boolean;
 }> = ({ tutor, hasTrialSession }) => {
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isInWishlist, setIsInWishlist] = useState(false);
+    const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const { selectedCurrency } = useCurrency();
     const { openChatWithTutor } = useChat();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const { state: authState } = useAuth();
 
     const convertedPrice = tutor ? convertFromVND(tutor.currentSessionFee || 0, selectedCurrency) : 0;
     const formattedPrice = formatCurrency(convertedPrice, selectedCurrency);
@@ -53,6 +59,47 @@ const TutorProfileHeader: React.FC<{
     const handleSendMessageClick = () => {
         if (tutor) {
             openChatWithTutor(tutor.id, tutor.fullName);
+        }
+    };
+
+    // Check if tutor is in wishlist
+    useEffect(() => {
+        const checkWishlistStatus = async () => {
+            if (!tutor?.id || authState.user?.role !== 'student') return;
+            
+            try {
+                const inWishlist = await wishlistService.isTutorInWishlist(tutor.id);
+                setIsInWishlist(inWishlist);
+            } catch (error) {
+                console.error('Failed to check wishlist status:', error);
+            }
+        };
+
+        checkWishlistStatus();
+    }, [tutor?.id, authState.user?.role]);
+
+    const handleWishlistToggle = async () => {
+        if (!tutor?.id || authState.user?.role !== 'student') {
+            setToast({ message: t('tutorDetail.wishlist.loginRequired'), type: 'error' });
+            return;
+        }
+
+        setIsWishlistLoading(true);
+        try {
+            if (isInWishlist) {
+                await wishlistService.removeTutorFromWishlist(tutor.id);
+                setIsInWishlist(false);
+                setToast({ message: t('tutorDetail.wishlist.removed'), type: 'success' });
+            } else {
+                await wishlistService.addTutorToWishlist(tutor.id);
+                setIsInWishlist(true);
+                setToast({ message: t('tutorDetail.wishlist.added'), type: 'success' });
+            }
+        } catch (error: any) {
+            console.error('Failed to toggle wishlist:', error);
+            setToast({ message: error.message || t('tutorDetail.wishlist.error'), type: 'error' });
+        } finally {
+            setIsWishlistLoading(false);
         }
     };
 
@@ -308,7 +355,7 @@ const TutorProfileHeader: React.FC<{
                                         <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
                                             {tutor.subjects &&
                                                 tutor.subjects.map((subject: any) =>
-                                                    t('locale') === 'vi' ? subject.nameVi : subject.nameEn
+                                                    i18n.language === 'vi' ? subject.nameVi : subject.nameEn
                                                 ).join(", ")}
                                         </span>
                                     </div>
@@ -365,9 +412,20 @@ const TutorProfileHeader: React.FC<{
                     >
                         {t("tutorDetail.profile.sendMessage")} <FiMessageSquare />
                     </button>
-                    <button className="p-3.5 text-gray-500 rounded-lg hover:border hover:border-gray-300 hover:bg-gray-50 hover:text-red-500 transition-colors">
-                        <FaHeart />
-                    </button>
+                    {authState.user?.role === 'student' && (
+                        <button 
+                            onClick={handleWishlistToggle}
+                            disabled={isWishlistLoading}
+                            className={`p-3.5 rounded-lg hover:border transition-colors ${
+                                isInWishlist
+                                    ? 'text-red-500 border-red-300 bg-red-50'
+                                    : 'text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-red-500'
+                            } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            title={isInWishlist ? t('tutorDetail.wishlist.removeFromWishlist') : t('tutorDetail.wishlist.addToWishlist')}
+                        >
+                            <FaHeart />
+                        </button>
+                    )}
                 </div>
             </div>
             {/* Right Column: Video Player */}
@@ -398,6 +456,7 @@ const TutorProfileHeader: React.FC<{
                     )}
                 </div>
             </div>
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

@@ -174,6 +174,28 @@ export function parseCurrencyDisplay(displayString: string): { amount: number; c
 }
 
 /**
+ * Format VND amount in simplified format (a,btr) if >= 1,000,000
+ * @param amountInVND - Amount in Vietnamese Dong
+ * @returns Formatted string (e.g., "1,5tr" for 1,500,000)
+ */
+export function formatVNDSimplified(amountInVND: number): string {
+  if (amountInVND === null || amountInVND === undefined) return '';
+  if (amountInVND < 1000000) {
+    // For amounts less than 1 million, use normal format
+    return formatCurrency(amountInVND, 'VND');
+  }
+  
+  // Convert to millions and format with 1 decimal place
+  const millions = amountInVND / 1000000;
+  // Round to 1 decimal place
+  const rounded = Math.round(millions * 10) / 10;
+  // Format with dot as decimal separator (e.g., 10.1tr)
+  const formatted = rounded.toString();
+  
+  return `${formatted}tr`;
+}
+
+/**
  * Get all available currencies for dropdown
  */
 export function getAvailableCurrencies(): CurrencyInfo[] {

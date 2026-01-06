@@ -32,11 +32,20 @@ import ReviewsPage from '../tutor/reviews/ReviewsPage';
 import MyBookingsPage from '../student/my-session/MyBookingsPage';
 import StudentMyClassPage from '../student/my-class/MyClassPage';
 import PurchasesPage from '../student/purchases/PurchasesPage';
+import StudentPersonalDetailsPage from '../student/personal-detail/StudentPersonalDetailsPage';
+import WishlistPage from '../student/wishlist/WishlistPage';
 
 // Conditional components
 const ConditionalMyClassPage = () => {
   const { state } = useAuth();
   return state.user?.role === 'student' ? <StudentMyClassPage /> : <MyClassPage />;
+};
+
+const ConditionalPersonalDetailsPage = () => {
+  const { state } = useAuth();
+  return state.user?.role === 'student' 
+    ? <StudentPersonalDetailsPage />
+    : <ProfileSettingsWrapper><PersonalDetailsPage /></ProfileSettingsWrapper>;
 };
 
 // Wrapper component for profile settings with provider
@@ -157,13 +166,17 @@ const dashboardRoutes: RouteObject[] = [
         path: 'messages',
         element: <InboxPage />,
       },
+      {
+        path: 'wishlist',
+        element: <WishlistPage />,
+      },
       // Shared routes - Profile settings with shared context
       {
         path: 'profile-settings',
         children: [
           {
             path: 'personal-details',
-            element: <ProfileSettingsWrapper><PersonalDetailsPage /></ProfileSettingsWrapper>,
+            element: <ConditionalPersonalDetailsPage />,
           },
           {
             path: 'resume-highlights',

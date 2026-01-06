@@ -21,3 +21,31 @@ export interface WishlistItemWithCourse extends WishlistItemResponse {
   duration: string;
   language: string;
 }
+
+// Tutor Wishlist Types
+export interface AddTutorToWishlistRequest {
+  tutorId: string;
+}
+
+export interface TutorWishlistItemResponse {
+  id: number;
+  tutorId: string;
+  addedAt: string;
+}
+
+export interface TutorWishlistItemWithTutor extends TutorWishlistItemResponse {
+  tutor: {
+    id: string;
+    fullName: string;
+    headline: string;
+    avatarUrl: string;
+    averageRating: number;
+    reviewsCount: number;
+    currentSessionFee: number;
+    country: {
+      code: string;
+      name: string;
+    };
+    isVerified: boolean;
+  };
+}
