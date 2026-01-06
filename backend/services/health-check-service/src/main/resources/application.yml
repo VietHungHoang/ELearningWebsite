@@ -5,7 +5,7 @@ spring:
   application:
     name: health-check-service
   profiles:
-    active: prod
+    active: dev # Changed from prod to dev for local development
 
 logging:
   level:
