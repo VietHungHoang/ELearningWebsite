@@ -82,18 +82,18 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
     const transformFormDataToApiRequest = (formData: ClassFormData): CreateClassRequest => {
         // formData.subject now stores the subject ID directly
 
-        // Map day names to numbers (Monday = 1, Tuesday = 2, etc.)
+        // Map day names to numbers (Sunday = 0, Monday = 1, ..., Saturday = 6)
         const dayNameToNumber = (dayName: string): number => {
             const dayMap: Record<string, number> = {
+                [t('common.days.sunday')]: 0,
                 [t('common.days.monday')]: 1,
                 [t('common.days.tuesday')]: 2,
                 [t('common.days.wednesday')]: 3,
                 [t('common.days.thursday')]: 4,
                 [t('common.days.friday')]: 5,
                 [t('common.days.saturday')]: 6,
-                [t('common.days.sunday')]: 7,
             };
-            return dayMap[dayName] || 1; // Default to Monday if not found
+            return dayMap[dayName] ?? 1; // Default to Monday if not found
         };
 
         // Convert time from "10:00 AM" format to "10:00" (24h format)
@@ -122,6 +122,48 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             return `${hours.toString().padStart(2, '0')}:${minutes}`;
         };
 
+        // Convert local time and dayOfWeek to UTC+0
+        // dayOfWeek: 0=Sunday, 1=Monday, ..., 6=Saturday
+        // Example: Friday (5) 8:00 AM in UTC+7 -> Thursday (4) 1:00 AM in UTC+0
+        const convertToUtc = (dayOfWeek: number, localTime: string): { dayOfWeek: number; time: string } => {
+            // Get timezone offset in hours (e.g., UTC+7 = -420 minutes = +7 hours)
+            const timezoneOffsetMinutes = new Date().getTimezoneOffset(); // This is negative for UTC+ timezones
+            const timezoneOffsetHours = -timezoneOffsetMinutes / 60; // Convert to positive hours for UTC+
+
+            // Parse local time
+            const [hoursStr, minutesStr] = localTime.split(':');
+            let localHours = parseInt(hoursStr, 10);
+            const localMinutes = parseInt(minutesStr, 10);
+
+            // Convert to UTC: subtract timezone offset
+            // For UTC+7: local 8:00 -> UTC 8:00 - 7 = 1:00
+            let utcHours = localHours - timezoneOffsetHours;
+            let utcMinutes = localMinutes;
+
+            // Handle day rollover (using 0-6 range)
+            let adjustedDayOfWeek = dayOfWeek;
+            if (utcHours < 0) {
+                // Rolled back to previous day
+                utcHours += 24;
+                adjustedDayOfWeek = dayOfWeek - 1;
+                if (adjustedDayOfWeek < 0) {
+                    adjustedDayOfWeek = 6; // Wrap to Saturday
+                }
+            } else if (utcHours >= 24) {
+                // Rolled forward to next day
+                utcHours -= 24;
+                adjustedDayOfWeek = dayOfWeek + 1;
+                if (adjustedDayOfWeek > 6) {
+                    adjustedDayOfWeek = 0; // Wrap to Sunday
+                }
+            }
+
+            return {
+                dayOfWeek: adjustedDayOfWeek,
+                time: `${Math.floor(utcHours).toString().padStart(2, '0')}:${utcMinutes.toString().padStart(2, '0')}`
+            };
+        };
+
         return {
             title: formData.classTitle,
             subjectId: formData.subject || '',
@@ -130,10 +172,15 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             description: formData.description,
             schedules: formData.schedules
                 .filter(schedule => schedule.day && schedule.time)
-                .map(schedule => ({
-                    dayOfWeek: Number(dayNameToNumber(schedule.day)), // Ensure it's a number, not string
-                    time: convertTimeTo24Hour(schedule.time)
-                }))
+                .map(schedule => {
+                    const localDayOfWeek = Number(dayNameToNumber(schedule.day));
+                    const localTime = convertTimeTo24Hour(schedule.time);
+                    const utcSchedule = convertToUtc(localDayOfWeek, localTime);
+                    return {
+                        dayOfWeek: utcSchedule.dayOfWeek,
+                        time: utcSchedule.time
+                    };
+                })
         };
     };
 
