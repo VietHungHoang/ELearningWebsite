@@ -3,6 +3,7 @@ import { HiPlus, HiPencil, HiTrash, HiAcademicCap, HiBriefcase } from 'react-ico
 import { useTranslation } from 'react-i18next';
 import ModalLayout from '../../../../components/ui/ModalLayout';
 import type { EducationItem, ExperienceItem, TutorOnboardingData } from '../../../../types/tutor';
+import { generateUUID } from '../../../../utils/uuidUtils';
 
 interface EducationExperienceStepProps {
     data: Partial<TutorOnboardingData>;
@@ -186,7 +187,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
     // Helper function to ensure UUID format
     const ensureUUID = (id: string | undefined): string => {
         if (!id || isOldIdFormat(id)) {
-            return crypto.randomUUID();
+            return generateUUID();
         }
         return id;
     };
@@ -198,6 +199,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
         if (editingType === 'education') {
             if (item.id) {
                 // Edit existing item - find by old ID and replace with new UUID
+                console.log('📝 Editing education item:', { oldId: item.id, newId: newId, item: itemWithUUID });
                 onChange({ 
                     educations: (data.educations || []).map((e: EducationItem) => 
                         e.id === item.id ? itemWithUUID : e
@@ -205,11 +207,13 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                 });
             } else {
                 // Add new item with UUID
+                console.log('➕ Adding new education item:', { id: newId, item: itemWithUUID });
                 onChange({ educations: [...(data.educations || []), itemWithUUID] });
             }
         } else {
             if (item.id) {
                 // Edit existing item - find by old ID and replace with new UUID
+                console.log('📝 Editing experience item:', { oldId: item.id, newId: newId, item: itemWithUUID });
                 onChange({ 
                     experiences: (data.experiences || []).map((e: ExperienceItem) => 
                         e.id === item.id ? itemWithUUID : e
@@ -217,6 +221,7 @@ const EducationExperienceStep: React.FC<EducationExperienceStepProps> = ({ data,
                 });
             } else {
                 // Add new item with UUID
+                console.log('➕ Adding new experience item:', { id: newId, item: itemWithUUID });
                 onChange({ experiences: [...(data.experiences || []), itemWithUUID] });
             }
         }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { HiAcademicCap, HiLocationMarker, HiPencil, HiTrash, HiPlus } from 'react-icons/hi';
 import ResumeItemModal from './ResumeItemModal';
 import type { EducationItem, ExperienceItem, CertificationItem } from '../../../../../types/api';
+import { generateUUID } from '../../../../../utils/uuidUtils';
 
 
 // --- TYPE DEFINITIONS ---
@@ -218,7 +219,7 @@ const ResumeHighlights: React.FC<ResumeHighlightsProps> = ({
             );
         } else { // Adding new item
             // Generate UUID-like id
-            const newId = `${activeTab.toLowerCase().substring(0, 4)}-${crypto.randomUUID()}`;
+            const newId = `${activeTab.toLowerCase().substring(0, 4)}-${generateUUID()}`;
             updatedItems = [...items, { ...itemData, id: newId } as ResumeItemData];
         }
 
