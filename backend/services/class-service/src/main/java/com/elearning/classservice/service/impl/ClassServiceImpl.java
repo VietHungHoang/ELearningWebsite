@@ -229,14 +229,23 @@ public class ClassServiceImpl implements ClassService {
                 // Map to DTOs - now all data is already loaded (no lazy loading queries)
                 List<ClassTableItem> items = classPage.getContent().stream()
                                 .map(classEntity -> {
-                                        // Get students from eagerly loaded enrollments
+                                        // Get tutor info
+                                        UserInfoResponse tutorInfo = UserInfoResponse.builder()
+                                                        .id(classEntity.getTutor().getId().toString())
+                                                        .fullName(classEntity.getTutor().getFullName())
+                                                        .avatarUrl(classEntity.getTutor().getAvatarUrl())
+                                                        .build();
+
+                                        // Get students from eagerly loaded enrollments - include active statuses
                                         List<UserInfoResponse> students = classEntity.getEnrollments().stream()
-                                                        .filter(e -> e.getStatus() == EnrollmentStatus.ON_GOING)
+                                                        .filter(e -> e.getStatus() != EnrollmentStatus.LEFT
+                                                                        && e.getStatus() != EnrollmentStatus.CANCELLED)
                                                         .map(enrollment -> UserInfoResponse.builder()
                                                                         .id(enrollment.getStudent().getId().toString())
                                                                         .fullName(enrollment.getStudent().getFullName())
                                                                         .avatarUrl(enrollment.getStudent()
                                                                                         .getAvatarUrl())
+                                                                        .enrollmentStatus(enrollment.getStatus().name())
                                                                         .enrolledAt(enrollment.getCreatedAt())
                                                                         .build())
                                                         .collect(Collectors.toList());
@@ -262,6 +271,7 @@ public class ClassServiceImpl implements ClassService {
                                         return ClassTableItem.builder()
                                                         .id(classEntity.getId().toString())
                                                         .title(classEntity.getTitle())
+                                                        .tutor(tutorInfo)
                                                         .students(students)
                                                         .type(classEntity.getClassType().name())
                                                         .status(classEntity.getStatus().name())
@@ -397,6 +407,7 @@ public class ClassServiceImpl implements ClassService {
                                                 ClassTableItem item = ClassTableItem.builder()
                                                                 .id(classEntity.getId().toString())
                                                                 .title(classEntity.getTitle())
+                                                                .tutor(tutorInfo)
                                                                 .students(students) // Other students in the class
                                                                 .type(classEntity.getClassType().name())
                                                                 .status(classEntity.getStatus().name()) // Use class
@@ -518,15 +529,28 @@ public class ClassServiceImpl implements ClassService {
 
         @Override
         @Transactional(readOnly = true)
-        public ClassDetailResponse getClassDetail(UUID classId, UUID tutorId) {
-                log.info("Getting class detail for classId: {}, tutorId: {}", classId, tutorId);
+        public ClassDetailResponse getClassDetail(UUID classId, UUID userId) {
+                log.info("Getting class detail for classId: {}, userId: {}", classId, userId);
 
-                // Find class and verify tutor ownership
+                // Find class
                 ClassEntity classEntity = classRepository.findById(classId)
                                 .orElseThrow(() -> new RuntimeException("Class not found"));
 
-                if (!classEntity.getTutor().getId().equals(tutorId)) {
-                        throw new RuntimeException("Unauthorized: You are not the tutor of this class");
+                // Validate authorization (Tutor or Student)
+                boolean isTutor = classEntity.getTutor().getId().equals(userId);
+                boolean isStudent = false;
+
+                if (!isTutor) {
+                        // Check if user is an actively enrolled student
+                        isStudent = classEnrollmentRepository.findByClassEntityIdAndStudentId(classId, userId)
+                                        .map(enrollment -> enrollment.getStatus() == EnrollmentStatus.ON_GOING ||
+                                                        enrollment.getStatus() == EnrollmentStatus.JOINED ||
+                                                        enrollment.getStatus() == EnrollmentStatus.COMPLETED)
+                                        .orElse(false);
+                }
+
+                if (!isTutor && !isStudent) {
+                        throw new RuntimeException("Unauthorized: You are not a member of this class");
                 }
 
                 // Map tutor info

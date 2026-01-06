@@ -1035,4 +1035,44 @@ export const classService = {
             };
         }
     },
+
+    addMaterial: async (classId: string, materialData: any): Promise<ApiResponse<any>> => {
+        try {
+            const response = await apiService.post<any>(`/v1/classes/${classId}/materials`, materialData);
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: response.data
+            };
+        } catch (error: any) {
+            console.error("Failed to add material:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to add material",
+                data: null
+            };
+        }
+    },
+
+    deleteMaterial: async (classId: string, materialId: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await apiService.delete<void>(`/v1/classes/${classId}/materials/${materialId}`);
+            return {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: undefined
+            };
+        } catch (error: any) {
+            console.error("Failed to delete material:", error);
+            return {
+                status: error.response?.status || 500,
+                success: false,
+                message: error.response?.data?.message || "Failed to delete material",
+                data: undefined
+            };
+        }
+    },
 };

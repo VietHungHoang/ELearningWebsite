@@ -28,6 +28,7 @@ public class ClassController {
      * GET /api/v1/classes?page=1&size=10
      * <p>
      * Get all classes with pagination
+     * 
      * @param page Page number (1-based, default: 1)
      * @param size Page size (default: 10)
      * @return Paginated list of all classes
@@ -44,6 +45,7 @@ public class ClassController {
      * GET /api/v1/classes/tutors/{tutorId}/opening
      * <p>
      * Get all opening classes available for enrollment by specific tutor
+     * 
      * @param tutorId Tutor ID from path variable
      * @return List of all opening classes for the tutor
      */
@@ -58,10 +60,11 @@ public class ClassController {
      * GET /api/v1/classes/tutors/me?status={status}&page=0&size=10
      * <p>
      * Get class table for current tutor dashboard
+     * 
      * @param tutorId Tutor ID from header
-     * @param status Optional status filter
-     * @param page Page number (default: 0)
-     * @param size Page size (default: 10)
+     * @param status  Optional status filter
+     * @param page    Page number (default: 0)
+     * @param size    Page size (default: 10)
      * @return Paginated list of classes with student and schedule info
      */
     @GetMapping("/tutors/me")
@@ -78,10 +81,11 @@ public class ClassController {
      * GET /api/v1/classes/students/me?status={status}&page=0&size=10
      * <p>
      * Get class table for current student dashboard
+     * 
      * @param studentId Student ID from header
-     * @param status Optional status filter
-     * @param page Page number (default: 0)
-     * @param size Page size (default: 10)
+     * @param status    Optional status filter
+     * @param page      Page number (default: 0)
+     * @param size      Page size (default: 10)
      * @return Paginated list of classes with tutor and schedule info
      */
     @GetMapping("/students/me")
@@ -98,6 +102,7 @@ public class ClassController {
      * POST /api/v1/classes/tutors/me
      * <p>
      * Create a new class for current tutor
+     * 
      * @param tutorId Tutor ID from header
      * @param request Create class request
      */
@@ -113,6 +118,7 @@ public class ClassController {
      * POST /api/v1/classes/bookings
      * <p>
      * Create a class booking (class, enrollment, sessions)
+     * 
      * @param request Create class booking request
      * @return Create class booking response with classId
      */
@@ -127,15 +133,16 @@ public class ClassController {
      * GET /api/v1/classes/{classId}
      * <p>
      * Get class detail by classId for current tutor
+     * 
      * @param tutorId Tutor ID from header
      * @param classId Class ID from path
      * @return ClassDetailResponse with full class information
      */
     @GetMapping("/{classId}")
     public ResponseEntity<ApiResponse<ClassDetailResponse>> getClassDetail(
-            @RequestHeader("X-User-Id") UUID tutorId,
+            @RequestHeader("X-User-Id") UUID userId,
             @PathVariable UUID classId) {
-        ClassDetailResponse classDetail = classService.getClassDetail(classId, tutorId);
+        ClassDetailResponse classDetail = classService.getClassDetail(classId, userId);
         return ResponseEntity.ok(ApiResponse.success(classDetail, "Class detail retrieved successfully"));
     }
 
@@ -143,6 +150,7 @@ public class ClassController {
      * PUT /api/v1/classes/{classId}
      * <p>
      * Update class information
+     * 
      * @param tutorId Tutor ID from header
      * @param classId Class ID from path
      * @param request Update class request
@@ -160,6 +168,7 @@ public class ClassController {
      * DELETE /api/v1/classes/{classId}
      * <p>
      * Delete class
+     * 
      * @param tutorId Tutor ID from header
      * @param classId Class ID from path
      */
@@ -177,8 +186,9 @@ public class ClassController {
      * Add a student to class
      * For OPENING classes: no authorization needed (public enrollment)
      * For other statuses: requires tutor authorization
-     * @param tutorId Tutor ID from header (optional for OPENING classes)
-     * @param classId Class ID from path
+     * 
+     * @param tutorId   Tutor ID from header (optional for OPENING classes)
+     * @param classId   Class ID from path
      * @param studentId Student ID from path
      */
     @PostMapping("/{classId}/students/{studentId}")
@@ -196,8 +206,9 @@ public class ClassController {
      * Remove a student from class
      * For OPENING classes: no authorization needed (students can leave freely)
      * For other statuses: requires tutor authorization
-     * @param tutorId Tutor ID from header (optional for OPENING classes)
-     * @param classId Class ID from path
+     * 
+     * @param tutorId   Tutor ID from header (optional for OPENING classes)
+     * @param classId   Class ID from path
      * @param studentId Student ID from path
      */
     @DeleteMapping("/{classId}/students/{studentId}")

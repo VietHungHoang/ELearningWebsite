@@ -24,75 +24,68 @@ const ClassDetailPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(!initialClassData);
     const [showUpdateScheduleModal, setShowUpdateScheduleModal] = useState(false);
 
-    useEffect(() => {
-        // Always fetch fresh data from API when classId is available
-        if (classId) {
-            const loadClassData = async () => {
-                setIsLoading(true);
+    const fetchClassData = async () => {
+        if (!classId) return;
+        setIsLoading(true);
 
-                try {
-                    const response = await classService.getClassDetail(classId);
-                    if (response.success && response.data) {
-                        // Transform ClassDetailResponse to ClassData format
-                        const apiData = response.data;
-                        const transformedData: ClassData = {
-                            id: apiData.id,
-                            classTitle: apiData.title,
-                            students: apiData.students.map(s => ({
-                                id: s.id,
-                                name: s.fullName,
-                                avatar: s.avatarUrl || '',
-                                email: undefined
-                            })),
-                            type: apiData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
-                            status: apiData.status === 'ONGOING' ? 'Ongoing' :
-                                apiData.status === 'OPENING' ? 'Opening' : 'Completed',
-                            schedules: apiData.schedules.map(s => ({
-                                day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][s.dayOfWeek % 7],
-                                time: s.time
-                            })),
-                            startDate: apiData.createdAt,
-                            completedSessions: apiData.completedSessions,
-                            totalSessions: apiData.totalSessions,
-                            quizzes: [], // Will be populated from separate API or tabs
-                            materials: apiData.materials?.map(m => ({
-                                id: m.id,
-                                name: m.name,
-                                type: m.type as 'PDF' | 'Video' | 'ZIP',
-                                date: m.uploadDate
-                            })) || [],
-                            subject: undefined,
-                            category: undefined,
-                            tuitionFee: apiData.pricePerHour,
-                            description: apiData.description,
-                            maxStudents: apiData.maxStudents
-                        };
-                        setClassData(transformedData);
-                    } else {
-                        console.warn('API returned unsuccessful response');
-                        // Use initial data from navigation state as fallback
-                        if (initialClassData) {
-                            setClassData(initialClassData);
-                        } else {
-                            setClassData(null);
-                        }
-                    }
-                } catch (apiError) {
-                    console.error('Failed to fetch class detail:', apiError);
-                    // Use initial data from navigation state as fallback
-                    if (initialClassData) {
-                        setClassData(initialClassData);
-                    } else {
-                        setClassData(null);
-                    }
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-
-            loadClassData();
+        try {
+            const response = await classService.getClassDetail(classId);
+            if (response.success && response.data) {
+                // Transform ClassDetailResponse to ClassData format
+                const apiData = response.data;
+                const transformedData: ClassData = {
+                    id: apiData.id,
+                    classTitle: apiData.title,
+                    students: apiData.students.map(s => ({
+                        id: s.id,
+                        name: s.fullName,
+                        avatar: s.avatarUrl || '',
+                        email: undefined
+                    })),
+                    type: apiData.type === 'ONE_ON_ONE' ? '1-on-1' : 'Group',
+                    status: apiData.status === 'ONGOING' ? 'Ongoing' :
+                        apiData.status === 'OPENING' ? 'Opening' : 'Completed',
+                    schedules: apiData.schedules.map(s => ({
+                        day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][s.dayOfWeek % 7],
+                        time: s.time
+                    })),
+                    startDate: apiData.createdAt,
+                    completedSessions: apiData.completedSessions,
+                    totalSessions: apiData.totalSessions,
+                    quizzes: [], // Will be populated from separate API or tabs
+                    materials: apiData.materials?.map(m => ({
+                        id: m.id,
+                        name: m.name,
+                        type: m.type as 'PDF' | 'Video' | 'ZIP',
+                        date: m.uploadDate,
+                        s3Url: m.s3Url,
+                        fileSize: m.fileSize
+                    })) || [],
+                    subject: undefined,
+                    category: undefined,
+                    tuitionFee: apiData.pricePerHour,
+                    description: apiData.description,
+                    maxStudents: apiData.maxStudents
+                };
+                setClassData(transformedData);
+            } else {
+                console.warn('API returned unsuccessful response');
+                if (initialClassData) setClassData(initialClassData);
+                else setClassData(null);
+            }
+        } catch (apiError) {
+            console.error('Failed to fetch class detail:', apiError);
+            if (initialClassData) setClassData(initialClassData);
+            else setClassData(null);
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    useEffect(() => {
+        fetchClassData();
     }, [classId]);
+
 
     const handleBack = () => {
         navigate('/dashboard/my-class');
@@ -328,7 +321,7 @@ const ClassDetailPage: React.FC = () => {
                                         <QuizzesTab onViewQuizResult={handleViewQuizResult} />
                                     )}
                                     {activeTab === "Materials" && (
-                                        <MaterialsTab classData={classData} />
+                                        <MaterialsTab classData={classData} onUpdate={fetchClassData} />
                                     )}
                                 </>
                             )}
