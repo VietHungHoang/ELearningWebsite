@@ -112,6 +112,7 @@ public class SearchServiceImpl implements SearchService {
                 co.elastic.clients.elasticsearch.core.search.Suggester suggester = co.elastic.clients.elasticsearch.core.search.Suggester
                                 .of(s -> s
                                                 .suggesters("tutor-suggest", fs -> fs
+                                                                .prefix(request.getKeyword().trim())
                                                                 .completion(c -> c
                                                                                 .field("suggest")
                                                                                 .skipDuplicates(true)
