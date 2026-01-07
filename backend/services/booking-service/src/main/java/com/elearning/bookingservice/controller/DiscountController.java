@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
 public class DiscountController {
