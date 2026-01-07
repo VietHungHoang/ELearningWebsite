@@ -118,12 +118,7 @@ public class SearchServiceImpl implements SearchService {
                                                                                 .skipDuplicates(true)
                                                                                 .size(request.getLimit() != null
                                                                                                 ? request.getLimit()
-                                                                                                : 10)
-                                                                                .fuzzy(f -> f
-                                                                                                .fuzziness("AUTO")) // Allow
-                                                                                                                    // minor
-                                                                                                                    // typos
-                                                                )));
+                                                                                                : 10))));
 
                 // Build native query
                 NativeQuery nativeQuery = NativeQuery.builder()
