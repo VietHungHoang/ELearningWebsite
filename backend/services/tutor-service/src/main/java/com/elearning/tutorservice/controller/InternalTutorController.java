@@ -36,13 +36,20 @@ public class InternalTutorController {
     public ResponseEntity<List<TutorIndexEvent>> exportAllTutors() {
         log.info("Exporting all verified tutors for search indexing");
 
-        // Get only verified tutors
-        List<Tutor> tutors = tutorRepository.findByIsVerifiedTrue();
+        // Get only verified tutors with relationships
+        List<Tutor> tutors = tutorRepository.findAllVerifiedWithRelationships();
 
         log.info("Found {} verified tutors to export", tutors.size());
 
         List<TutorIndexEvent> events = tutors.stream()
-                .map(tutor -> tutorIndexEventMapper.toEvent(tutor, "CREATED"))
+                .map(tutor -> {
+                    TutorIndexEvent event = tutorIndexEventMapper.toEvent(tutor, "CREATED");
+                    log.debug("Exported tutor {} - subjects: {}, languages: {}",
+                            tutor.getId(),
+                            tutor.getSubjects() != null ? tutor.getSubjects().size() : 0,
+                            tutor.getLanguages() != null ? tutor.getLanguages().size() : 0);
+                    return event;
+                })
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(events);
