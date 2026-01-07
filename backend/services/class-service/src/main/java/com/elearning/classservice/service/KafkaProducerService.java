@@ -20,6 +20,9 @@ public class KafkaProducerService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String SESSION_STARTED_TOPIC = "session_started";
+    private static final String TUTOR_HOURLY_RATE_REQUEST_TOPIC = "request_tutor_hourly_rate";
+    private static final String CLASS_NOTIFICATION_TOPIC = "class_notification";
+    private static final String CLASS_CREATED_BOOKING_TOPIC = "class_created_booking";
 
     public void sendMessage(String topic, String key, Object message) {
         try {
@@ -43,8 +46,6 @@ public class KafkaProducerService {
         }
     }
 
-    private static final String TUTOR_HOURLY_RATE_REQUEST_TOPIC = "request_tutor_hourly_rate";
-
     public void sendTutorHourlyRateRequest(Object event) {
         try {
             String jsonMessage = objectMapper.writeValueAsString(event);
@@ -55,8 +56,6 @@ public class KafkaProducerService {
             throw new RuntimeException("Failed to serialize TutorHourlyRateRequestEvent", e);
         }
     }
-
-    private static final String CLASS_NOTIFICATION_TOPIC = "class_notification";
 
     /**
      * Send class full event when a class reaches maximum capacity
@@ -70,6 +69,21 @@ public class KafkaProducerService {
         } catch (JsonProcessingException e) {
             log.error("Error converting ClassFullEvent to JSON: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to serialize ClassFullEvent", e);
+        }
+    }
+
+    /**
+     * Send class created event to booking-service
+     * Used to update booking record with class info after class creation
+     */
+    public void sendClassCreatedEvent(Object event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(CLASS_CREATED_BOOKING_TOPIC, jsonMessage);
+            log.info("Sent class created event to topic {}: {}", CLASS_CREATED_BOOKING_TOPIC, jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting ClassCreatedEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize ClassCreatedEvent", e);
         }
     }
 }
