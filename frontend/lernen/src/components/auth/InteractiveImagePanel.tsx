@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 import { VN } from 'country-flag-icons/react/3x2';
@@ -6,16 +6,69 @@ import { useTranslation } from 'react-i18next';
 
 export const InteractiveImagePanel: React.FC = () => {
     const { t } = useTranslation();
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+        }
+    }, []);
+
+    const handlePlayPause = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleVideoPlay = () => {
+        setIsPlaying(true);
+    };
+
+    const handleVideoPause = () => {
+        setIsPlaying(false);
+    };
+
+    const handleVideoLoadedData = () => {
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+        }
+    };
     
     return (
         <div className="relative">
             <div className="relative rounded-2xl overflow-hidden aspect-[4/3] group">
-                <img src="https://picsum.photos/seed/teacher/800/600" alt={t('home.introPanel.videoAlt')} className="w-full h-full object-cover zoom-image" />
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <button className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-all duration-300 transform group-hover:scale-110 cursor-pointer">
-                        <FaPlay size={20} />
-                    </button>
-                </div>
+                <video
+                    ref={videoRef}
+                    src="https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4"
+                    className="w-full h-full object-cover"
+                    onPlay={handleVideoPlay}
+                    onPause={handleVideoPause}
+                    onLoadedData={handleVideoLoadedData}
+                    onLoadedMetadata={handleVideoLoadedData}
+                    preload="auto"
+                    controls={isPlaying}
+                    playsInline
+                    muted={false}
+                />
+                {!isPlaying && (
+                    <div
+                        className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center cursor-pointer"
+                        onClick={handlePlayPause}
+                    >
+                        <button
+                            aria-label="Play video"
+                            className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-transform duration-300 group-hover:scale-110"
+                        >
+                            <FaPlay size={20} />
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Floating UI elements */}
