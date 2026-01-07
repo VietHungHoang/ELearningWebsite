@@ -156,8 +156,11 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTr
                                     }
 
                                     try {
-                                        await tutorService.submitReview(tutorId, {
+                                        await tutorService.submitReview({
+                                            tutorId: tutorId,
                                             studentId: state.user.id,
+                                            studentName: state.user.name,
+                                            studentAvatarUrl: state.user.avatarUrl || undefined,
                                             rating: selectedRating,
                                             comment: newComment,
                                         });

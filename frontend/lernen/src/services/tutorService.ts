@@ -41,30 +41,30 @@ export const tutorService = {
         try {
             // Format params manually to avoid Axios default serialization issues
             const queryParams = new URLSearchParams();
-            
+
             if (filters.category) queryParams.append('categoryId', filters.category);
             if (filters.subject) queryParams.append('subjectId', filters.subject);
-            
+
             // Handle languageCodes array - append each separately
             if (filters.languageCodes && filters.languageCodes.length > 0) {
                 filters.languageCodes.forEach(code => {
                     queryParams.append('languageCodes', code);
                 });
             }
-            
+
             if (filters.minFee !== undefined) queryParams.append('minPrice', filters.minFee.toString());
             if (filters.maxFee !== undefined) queryParams.append('maxPrice', filters.maxFee.toString());
             if (filters.sortBy) queryParams.append('sortBy', filters.sortBy);
             if (filters.keyword) queryParams.append('keyword', filters.keyword);
             if (filters.sessionType) queryParams.append('sessionType', filters.sessionType);
-            
+
             // Handle availability - convert to availableDays format with timeSlot
             // Format: "MONDAY_MORNING", "TUESDAY_AFTERNOON", etc.
             // Backend expects availableDays as List<String> with format "DAY_TIMESLOT"
             if (filters.availability && filters.availability.length > 0) {
                 // Map day numbers to day names
                 const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-                
+
                 // Map timeSlot from Vietnamese/English to uppercase English
                 const timeSlotMap: Record<string, string> = {
                     'Morning': 'MORNING',
@@ -77,13 +77,13 @@ export const tutorService = {
                     'AFTERNOON': 'AFTERNOON',
                     'EVENING': 'EVENING'
                 };
-                
+
                 // Convert each availability slot to "DAY_TIMESLOT" format
                 filters.availability.forEach(slot => {
                     if (slot.day && slot.day >= 1 && slot.day <= 7 && slot.timeSlot) {
                         const dayName = dayNames[slot.day - 1];
                         const timeSlotUpper = timeSlotMap[slot.timeSlot] || slot.timeSlot.toUpperCase();
-                        
+
                         if (dayName && timeSlotUpper) {
                             // Format: "MONDAY_MORNING", "TUESDAY_AFTERNOON", etc.
                             const dayTimeSlot = `${dayName}_${timeSlotUpper}`;
@@ -92,11 +92,11 @@ export const tutorService = {
                     }
                 });
             }
-            
+
             if (filters.page !== undefined) queryParams.append('page', filters.page.toString());
             if (filters.size !== undefined) queryParams.append('size', filters.size.toString());
             if (studentId) queryParams.append('studentId', studentId);
-            
+
             // Add timezone - use filter timezone or get user's current timezone
             if (filters.timezone) {
                 queryParams.append('timezone', filters.timezone);
@@ -109,7 +109,7 @@ export const tutorService = {
                     console.warn('Could not get user timezone:', e);
                 }
             }
-            
+
             const url = `/v1/public/search/tutors${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
             const response = await apiService.get<PaginatedResponse<TutorResponse>>(url);
             const mappedContent = await Promise.all(response.data.content.map(mapTutorResponseToTutor));
@@ -266,9 +266,9 @@ export const tutorService = {
         }
     },
 
-    submitReview: async (tutorId: string, reviewData: SubmitReviewRequest): Promise<ApiResponse<{ message: string }>> => {
+    submitReview: async (reviewData: SubmitReviewRequest): Promise<ApiResponse<{ message: string }>> => {
         try {
-            return await apiService.post<{ message: string }>(`/v1/tutors/${tutorId}/reviews`, reviewData);
+            return await apiService.post<{ message: string }>(`/v1/reviews`, reviewData);
         } catch (error) {
             console.warn("Failed to submit review to API:", error);
             throw error;
@@ -369,7 +369,7 @@ export const tutorService = {
         try {
             const queryParams = new URLSearchParams();
             if (studentId) queryParams.append('studentId', studentId);
-            
+
             const url = `/v1/public/tutors/${tutorId}/similar${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
             const response = await apiService.get<PaginatedResponse<TutorResponse>>(url);
             const mappedContent = await Promise.all(response.data.content.map(mapTutorResponseToTutor));
