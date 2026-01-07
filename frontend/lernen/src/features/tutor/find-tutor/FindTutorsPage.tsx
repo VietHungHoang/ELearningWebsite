@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import type { TutorSearchFilter as IFilters, PaginatedResponse } from "../../../types/api";
 import Layout from "../../../components/ui/Layout";
 import Breadcrumb from "../../../components/ui/Breadcrumb";
@@ -17,6 +18,7 @@ import { useTranslation } from "react-i18next";
 const FindTutorsPage: React.FC = () => {
     const { state } = useAuth();
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [tutors, setTutors] = useState<Tutor[]>([]);
     const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -25,6 +27,13 @@ const FindTutorsPage: React.FC = () => {
     const [currentFilters, setCurrentFilters] = useState<IFilters>({});
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
+
+    useEffect(() => {
+        // Redirect tutors to dashboard
+        if (state.user?.role === 'tutor') {
+            navigate('/dashboard');
+        }
+    }, [state.user?.role, navigate]);
 
     const handleOpenBookingModal = (tutor: Tutor) => {
         setSelectedTutor(tutor);

@@ -1,4 +1,5 @@
 import apiService from './apiService';
+import axiosInstance from '../lib/axiosInstance';
 
 // Types matching backend DTOs
 export type DiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
@@ -75,12 +76,34 @@ export interface PageResponse<T> {
     totalPages: number;
     size: number;
     number: number;
+    pageable?: {
+        pageNumber: number;
+        pageSize: number;
+        sort: {
+            sorted: boolean;
+            unsorted: boolean;
+            empty: boolean;
+        };
+        offset: number;
+        paged: boolean;
+        unpaged: boolean;
+    };
+    last?: boolean;
+    first?: boolean;
+    numberOfElements?: number;
+    sort?: {
+        sorted: boolean;
+        unsorted: boolean;
+        empty: boolean;
+    };
+    empty?: boolean;
 }
 
 const discountService = {
     // Tutor endpoints
     async getTutorDiscounts(page = 0, size = 10): Promise<PageResponse<Discount>> {
-        const response = await apiService.get<PageResponse<Discount>>(
+        // Use axiosInstance directly as backend returns PageResponse without ApiResponse wrapper
+        const response = await axiosInstance.get<PageResponse<Discount>>(
             `/v1/tutor/discounts?page=${page}&size=${size}`
         );
         return response.data;

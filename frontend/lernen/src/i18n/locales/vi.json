@@ -926,7 +926,7 @@
         "students": "Học sinh"
       },
       "myStudents": {
-        "title": "học viên của tôi",
+        "title": "Quản lý học sinh",
         "tabs": {
           "all": "Tất cả học viên",
           "ongoing": "Đang học",
@@ -963,7 +963,7 @@
       "studentDetail": {
         "breadcrumb": {
           "dashboard": "Trang quản trị",
-          "myStudents": "học viên của tôi"
+          "myStudents": "Quản lý học sinh"
         },
         "notFound": {
           "title": "Không tìm thấy học viên",
@@ -2332,8 +2332,8 @@
     "type": "Loại",
     "description": "Mô tả",
     "noTransactions": "Không tìm thấy giao dịch nào",
-    "noEarnings": "Không tìm thấy thu nhập nào",
-    "noEarningsDescription": "Bạn chưa kiếm được tiền nào. Bắt đầu dạy học để xem thu nhập của bạn ở đây.",
+    "noEarnings": "Không có thông tin thu nhập",
+    "noEarningsDescription": "Bắt đầu dạy học để xem thu nhập của bạn ở đây.",
     "nextPayout": "Thanh toán tiếp theo",
     "minimumThreshold": "Ngưỡng rút tiền tối thiểu",
     "commissionRate": "Tỷ lệ hoa hồng",

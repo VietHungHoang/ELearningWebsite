@@ -11,6 +11,7 @@ import Breadcrumb, { type BreadcrumbItem } from './Breadcrumb';
 import { useCurrency } from '../../../context/CurrencyContext';
 import { getCurrencyCodeFromDisplay } from '../../../utils/currencyHelper';
 import { currencyOptions, languageOptions } from '../../../constants/headerConstants';
+import { useAuth } from '../../../context/AuthContext';
 
 interface DashboardHeaderProps {
     userInfo: UserInfo;
@@ -23,6 +24,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
     const { i18n } = useTranslation();
     const { currencyDisplay, setSelectedCurrency } = useCurrency();
     const navigate = useNavigate();
+    const { state } = useAuth();
 
     const currentLanguageOption = languageOptions.find(option => option.code === i18n.language) || languageOptions[0];
 
@@ -69,7 +71,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
     };
 
     const handleLogoClick = () => {
-        navigate('/');
+        // Only allow navigation for non-tutor users
+        if (state.user?.role !== 'tutor') {
+            navigate('/');
+        }
     };
 
     return (
@@ -80,7 +85,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
                     <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
                         {isSidebarOpen && (
                             <div className="flex items-center gap-2 pl-6 pr-16">
-                                <LernenLogo onClick={handleLogoClick} clickable />
+                                <LernenLogo onClick={handleLogoClick} clickable={state.user?.role !== 'tutor'} />
                             </div>
                         )}
                     </div>
@@ -147,7 +152,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
                     {/* Profile Dropdown */}
                     <div ref={profileRef} className="relative">
                         <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center justify-center">
-                            <img src={userInfo.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userInfo.id || 'default'}`} alt="User Avatar" className="w-9 h-9 rounded-lg" style={{ borderRadius: '10px' }} />
+                            <img src={userInfo.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userInfo.name || userInfo.id || 'default'}`} alt="User Avatar" className="w-9 h-9 rounded-lg" style={{ borderRadius: '10px' }} />
                         </button>
                         {isProfileOpen && <ProfileDropdown />}
                     </div>

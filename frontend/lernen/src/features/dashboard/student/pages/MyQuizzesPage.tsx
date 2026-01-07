@@ -177,14 +177,17 @@ const MyQuizzesPage: React.FC = () => {
     );
 
     return (
-        <div className="max-w-7xl mx-auto">
-            <Breadcrumb
-                items={[
-                    { label: 'Dashboard', onClick: () => navigate('/dashboard') },
-                    { label: 'My Quizzes', isActive: true }
-                ]}
-                className="mb-6"
-            />
+        <div className="p-6">
+            {/* Toast for error messages */}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+            {/* Header */}
+            <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+                <div>
+                    <h1 className="text-xl font-bold text-gray-800">My Quizzes</h1>
+                    <p className="text-gray-600 mt-1">View and manage all your assigned quizzes</p>
+                </div>
+            </div>
 
             <div className="flex justify-between items-center mb-6">
                 <div className="bg-gray-100 p-1 rounded-xl inline-flex items-center">
@@ -351,9 +354,6 @@ const MyQuizzesPage: React.FC = () => {
                     </p>
                 </div>
             )}
-
-            {/* Toast for error messages */}
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
         </div>
     );
 };

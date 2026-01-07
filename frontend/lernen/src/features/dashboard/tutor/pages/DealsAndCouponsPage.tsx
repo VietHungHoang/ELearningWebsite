@@ -74,10 +74,16 @@ const DealsAndCouponsContent: React.FC = () => {
         try {
             setLoading(true);
             const response = await discountService.getTutorDiscounts(0, 50);
-            setCoupons(response.content.map(discountToCoupon));
+            // Handle empty content array (no coupons yet)
+            if (response.content && Array.isArray(response.content)) {
+                setCoupons(response.content.map(discountToCoupon));
+            } else {
+                setCoupons([]);
+            }
         } catch (error) {
             console.error('Failed to fetch discounts:', error);
             setToast({ message: t('dashboard.tutor.dealsCoupons.errors.fetchFailed'), type: 'error' });
+            setCoupons([]);
         } finally {
             setLoading(false);
         }

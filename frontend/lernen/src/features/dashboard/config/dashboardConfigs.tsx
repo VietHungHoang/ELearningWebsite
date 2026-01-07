@@ -113,12 +113,6 @@ export const TUTOR_SIDEBAR_OPTIONS: SidebarOption[] = [
         path: "/dashboard/profile-settings/personal-details",
     },
     {
-        icon: <FiCode className="w-4 h-4" />,
-        activeIcon: <FiCode className="w-4 h-4" />,
-        labelKey: "dashboard.sidebar.tutor.api",
-        path: "/dashboard/api",
-    },
-    {
         icon: <PiChalkboardTeacher className="w-4 h-4" />,
         activeIcon: <PiChalkboardTeacher className="w-4 h-4" />,
         labelKey: "dashboard.sidebar.tutor.whiteboard",
