@@ -19,52 +19,51 @@ import java.util.UUID;
 @Slf4j
 public class ReviewController {
 
-    private final ReviewService reviewService;
+        private final ReviewService reviewService;
 
-    /**
-     * POST /api/v1/reviews
-     * Create a new review with automatic content moderation
-     */
-    @PostMapping
-    public ResponseEntity<ApiResponse<ReviewResponse>> createReview(
-            @Valid @RequestBody CreateReviewRequest request) {
+        /**
+         * POST /api/v1/reviews
+         * Create a new review with automatic content moderation
+         */
+        @PostMapping
+        public ResponseEntity<ApiResponse<ReviewResponse>> createReview(
+                        @Valid @RequestBody CreateReviewRequest request) {
 
-        log.info("Creating review for tutor: {} from student: {}", 
-                request.getTutorId(), request.getStudentId());
+                log.info("Creating review for tutor: {} from student: {}",
+                                request.getTutorId(), request.getStudentId());
 
-        ReviewResponse review = reviewService.createReview(request);
+                ReviewResponse review = reviewService.createReview(request);
 
-        // Return different response based on moderation result
-        if (review.getModerationStatus() == com.elearning.tutorservice.enums.ReviewModerationStatus.REJECTED) {
-            // HTTP 200 but business error code indicates rejection
-            return ResponseEntity.ok(
-                    ApiResponse.businessError(
-                            review.getErrorCode(),
-                            "Review rejected: " + review.getErrorMessage()
-                    )
-            );
+                // Return different response based on moderation result
+                if (review.getModerationStatus() == com.elearning.tutorservice.enums.ReviewModerationStatus.REJECTED) {
+                        // HTTP 200 but business error code indicates rejection
+                        return ResponseEntity.ok(
+                                        ApiResponse.businessError(
+                                                        review.getErrorCode(),
+                                                        "Review rejected: " + review.getErrorMessage()));
+                }
+
+                // HTTP 200, success
+                return ResponseEntity.ok(
+                                ApiResponse.success(review, "Review created and approved successfully"));
         }
 
-        // HTTP 200, success
-        return ResponseEntity.ok(
-                ApiResponse.success(review, "Review created and approved successfully")
-        );
-    }
+        /**
+         * GET /reviews/tutors/{tutorId}
+         * Get reviews for a specific tutor:
+         * - All APPROVED reviews (visible to everyone)
+         * - Non-approved reviews of current user (if logged in)
+         */
+        @GetMapping("/tutors/{tutorId}")
+        public ResponseEntity<ApiResponse<List<ReviewResponse>>> getReviewsForTutor(
+                        @PathVariable UUID tutorId,
+                        @RequestHeader(value = "X-User-Id", required = false) UUID studentId) {
 
-    /**
-     * GET /api/v1/tutors/{tutorId}/reviews
-     * Get all approved reviews for a specific tutor
-     */
-    @GetMapping("/tutors/{tutorId}")
-    public ResponseEntity<ApiResponse<List<ReviewResponse>>> getReviewsByTutorId(
-            @PathVariable UUID tutorId) {
+                log.info("Getting reviews for tutor: {}, current user: {}", tutorId, studentId);
 
-        log.info("Getting reviews for tutor: {}", tutorId);
+                List<ReviewResponse> reviews = reviewService.getReviewsForTutor(tutorId, studentId);
 
-        List<ReviewResponse> reviews = reviewService.getReviewsByTutorId(tutorId);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(reviews, "Reviews retrieved successfully")
-        );
-    }
+                return ResponseEntity.ok(
+                                ApiResponse.success(reviews, "Reviews retrieved successfully"));
+        }
 }

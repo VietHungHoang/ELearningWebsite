@@ -3,13 +3,14 @@ import { FiX, FiVideo, FiCalendar } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import type { Session } from '../../../../../types/class';
 import commonUtils from '../../../../../utils/commonUtils';
+import BirdLoading from '../../../../../components/ui/BirdLoading';
 
 interface SessionDetailModalProps {
-  booking: Session;
-  position: { top: number; left: number };
-  onClose: () => void;
-  isAbove?: boolean; // Modal hiển thị phía trên trigger element
-  onReschedule?: () => void; // Callback khi click vào button đổi lịch
+    booking: Session;
+    position: { top: number; left: number };
+    onClose: () => void;
+    isAbove?: boolean; // Modal hiển thị phía trên trigger element
+    onReschedule?: () => void; // Callback khi click vào button đổi lịch
 }
 
 const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, position, onClose, isAbove = false, onReschedule }) => {
@@ -18,6 +19,45 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
     const modalRef = useRef<HTMLDivElement>(null);
     const [isLeft, setIsLeft] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [isStarting, setIsStarting] = useState(false);
+
+    // Handle join session - convert Zoom URL to Web Client URL and open in new tab
+    const handleJoinSession = async () => {
+        try {
+            // Check both meetingUrl and meetingLink fields for compatibility
+            const meetingUrl = booking?.meetingUrl || booking?.meetingLink;
+
+            if (!meetingUrl) {
+                console.error("No meeting URL found for session:", booking?.id);
+                alert(t('dashboard.student.noMeetingUrl') || 'Meeting link is not available yet. Please contact your tutor.');
+                return;
+            }
+
+            setIsStarting(true);
+
+            // Convert standard URL to Web Client URL to allow joining via browser
+            // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
+            let openUrl = meetingUrl;
+
+            // Regex to match /j/{meetingId}
+            const match = openUrl.match(/\/j\/(\d+)/);
+            if (match && match[1]) {
+                const meetingId = match[1];
+                // Replace /j/{meetingId} with /wc/{meetingId}/join
+                openUrl = openUrl.replace(/\/j\/\d+/, `/wc/${meetingId}/join`);
+            }
+
+            // Open meeting URL in new tab
+            window.open(openUrl, '_blank');
+            console.log("Joining session (Web Client):", booking.id, openUrl);
+
+        } catch (error) {
+            console.error("Error joining session:", error);
+            alert(t('dashboard.student.errorJoiningSession') || 'Failed to join the session. Please try again.');
+        } finally {
+            setIsStarting(false);
+        }
+    };
 
     useEffect(() => {
         setMounted(true);
@@ -36,7 +76,7 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
     }, [onClose]);
 
     useEffect(() => {
-        if(modalRef.current) {
+        if (modalRef.current) {
             const rect = modalRef.current.getBoundingClientRect();
             setIsLeft(rect.left < 0);
         }
@@ -52,61 +92,77 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
     const formattedTime = `${startTime} - ${endTime}`;
 
     return (
-        <div
-            ref={modalRef}
-            className={`fixed z-30 w-72 bg-white rounded-xl shadow-2xl border border-gray-200/80 p-5 transition-all duration-200 ease-out origin-top-left ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}
-            style={{ top: position.top, left: position.left }}
-        >
-            {/* Arrow: dynamically switch side and vertical position */}
-            <div className={`absolute w-4 h-4 bg-white border-b border-l border-gray-200/80 transform rotate-45 ${
-                isAbove ? 'bottom-4' : 'top-4'
-            } ${isLeft ? '-right-2' : '-left-2'}`}></div>
-
-            {/* Header */}
-            <div className="flex justify-between items-start">
-                <div>
-                    <h3 className="font-bold text-lg text-gray-800">
-                        {booking.sessionType === 'TRIAL' 
-                            ? t('dashboard.common.sessionTypes.trial') 
-                            : (booking.classInfo?.title || 'Session')
-                        }
-                    </h3>
-                    <p className="text-sm text-gray-500">{formattedDate}</p>
+        <>
+            {/* Loading Overlay */}
+            {isStarting && (
+                <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                    <BirdLoading
+                        title={t("dashboard.tutor.startingSession")}
+                        description={t("auth.resumeInput.pleaseWait")}
+                        size="lg"
+                    />
                 </div>
-                <button onClick={onClose} className="p-1 -mr-2 -mt-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
-                    <FiX />
-                </button>
-            </div>
+            )}
 
-            {/* Tutor Info */}
-            <div className="my-2">
-                <p className="text-sm font-semibold text-gray-800">{booking.tutor?.fullName || 'Tutor'}</p>
-            </div>
+            <div
+                ref={modalRef}
+                className={`fixed z-30 w-72 bg-white rounded-xl shadow-2xl border border-gray-200/80 p-5 transition-all duration-200 ease-out origin-top-left ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}
+                style={{ top: position.top, left: position.left }}
+            >
+                {/* Arrow: dynamically switch side and vertical position */}
+                <div className={`absolute w-4 h-4 bg-white border-b border-l border-gray-200/80 transform rotate-45 ${isAbove ? 'bottom-4' : 'top-4'
+                    } ${isLeft ? '-right-2' : '-left-2'}`}></div>
 
-            {/* Time */}
-            <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <p className="text-sm font-semibold text-gray-700">{formattedTime}</p>
-            </div>
+                {/* Header */}
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h3 className="font-bold text-lg text-gray-800">
+                            {booking.sessionType === 'TRIAL'
+                                ? t('dashboard.common.sessionTypes.trial')
+                                : (booking.classInfo?.title || 'Session')
+                            }
+                        </h3>
+                        <p className="text-sm text-gray-500">{formattedDate}</p>
+                    </div>
+                    <button onClick={onClose} className="p-1 -mr-2 -mt-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
+                        <FiX />
+                    </button>
+                </div>
 
-            {/* Actions */}
-            <div className="mt-4 flex flex-col gap-2">
-                <button className="w-full flex items-center justify-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-[#084c43] transition-colors">
-                    <FiVideo />
-                    {t('profile.session.joinClass')}
-                </button>
-                <button 
-                    onClick={() => {
-                        if (onReschedule) {
-                            onReschedule();
-                        }
-                    }}
-                    className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-                >
-                    <FiCalendar />
-                    {t('profile.session.reschedule')}
-                </button>
+                {/* Tutor Info */}
+                <div className="my-2">
+                    <p className="text-sm font-semibold text-gray-800">{booking.tutor?.fullName || 'Tutor'}</p>
+                </div>
+
+                {/* Time */}
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                    <p className="text-sm font-semibold text-gray-700">{formattedTime}</p>
+                </div>
+
+                {/* Actions */}
+                <div className="mt-4 flex flex-col gap-2">
+                    <button
+                        onClick={handleJoinSession}
+                        disabled={isStarting}
+                        className="w-full flex items-center justify-center gap-2 bg-[#0b6459] text-white font-semibold py-2.5 rounded-lg text-sm hover:bg-[#084c43] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <FiVideo />
+                        {t('profile.session.joinClass')}
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (onReschedule) {
+                                onReschedule();
+                            }
+                        }}
+                        className="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                    >
+                        <FiCalendar />
+                        {t('profile.session.reschedule')}
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

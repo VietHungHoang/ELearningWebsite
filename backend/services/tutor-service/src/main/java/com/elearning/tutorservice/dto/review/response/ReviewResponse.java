@@ -23,8 +23,14 @@ public class ReviewResponse {
     private Integer rating;
     private String comment;
     private ReviewModerationStatus moderationStatus;
+    private String statusDescription; // Human-readable status description
     private Integer errorCode;
     private String errorMessage;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // For Option B: mark if this is the current user's own review (to show
+    // pending/rejected)
+    @Builder.Default
+    private boolean ownReview = false;
 }

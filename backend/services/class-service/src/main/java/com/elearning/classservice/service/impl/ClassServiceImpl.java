@@ -2,6 +2,7 @@ package com.elearning.classservice.service.impl;
 
 import com.elearning.classservice.dto.response.OpeningClassResponse;
 import com.elearning.classservice.dto.response.ScheduleInfo;
+import com.elearning.classservice.dto.event.ClassFullEvent;
 import com.elearning.classservice.dto.request.CreateClassRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
 import com.elearning.classservice.dto.request.UpdateClassRequest;
@@ -23,6 +24,7 @@ import com.elearning.classservice.repository.ClassRepository;
 import com.elearning.classservice.repository.SessionRepository;
 import com.elearning.classservice.repository.UserRepository;
 import com.elearning.classservice.service.ClassService;
+import com.elearning.classservice.service.KafkaProducerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,6 +53,7 @@ public class ClassServiceImpl implements ClassService {
         private final ClassEnrollmentRepository classEnrollmentRepository;
         private final SessionRepository sessionRepository;
         private final UserRepository userRepository;
+        private final KafkaProducerService kafkaProducerService;
 
         @Override
         @Transactional(readOnly = true)
@@ -855,6 +858,65 @@ public class ClassServiceImpl implements ClassService {
 
                 classEnrollmentRepository.save(enrollment);
                 log.info("Student {} added to class {} successfully", studentId, classId);
+
+                // Check if class is now full (after adding this student)
+                long newEnrollmentCount = currentEnrollments + 1;
+                if (classEntity.getMaxStudents() != null && newEnrollmentCount >= classEntity.getMaxStudents()) {
+                        log.info("Class {} is now full ({}/{}), changing status to PENDING_PAYMENT",
+                                        classId, newEnrollmentCount, classEntity.getMaxStudents());
+
+                        // Update class status to PENDING_PAYMENT
+                        classEntity.setStatus(ClassStatus.PENDING_PAYMENT);
+                        classRepository.save(classEntity);
+
+                        // Update all enrolled students status to PENDING_PAYMENT
+                        List<ClassEnrollment> enrollments = classEntity.getEnrollments().stream()
+                                        .filter(e -> e.getStatus() == EnrollmentStatus.JOINED)
+                                        .collect(Collectors.toList());
+                        enrollments.forEach(e -> e.setStatus(EnrollmentStatus.PENDING_PAYMENT));
+                        classEnrollmentRepository.saveAll(enrollments);
+
+                        // Send Kafka notification to tutor and students
+                        sendClassFullNotification(classEntity);
+                }
+        }
+
+        /**
+         * Send notification when class is full and waiting for payment
+         */
+        private void sendClassFullNotification(ClassEntity classEntity) {
+                try {
+                        // Build student list from enrollments
+                        // Note: User entity in class-service doesn't have email, will be fetched by
+                        // notification-service via user ID
+                        List<ClassFullEvent.StudentInfo> students = classEntity.getEnrollments().stream()
+                                        .filter(e -> e.getStatus() == EnrollmentStatus.PENDING_PAYMENT)
+                                        .map(e -> ClassFullEvent.StudentInfo.builder()
+                                                        .id(e.getStudent().getId())
+                                                        .fullName(e.getStudent().getFullName())
+                                                        .email(null) // Email not available in class-service User entity
+                                                        .build())
+                                        .collect(Collectors.toList());
+
+                        ClassFullEvent event = ClassFullEvent.builder()
+                                        .eventType("CLASS_FULL_PENDING_PAYMENT")
+                                        .classId(classEntity.getId())
+                                        .classTitle(classEntity.getTitle())
+                                        .pricePerHour(classEntity.getPricePerHour())
+                                        .tutor(ClassFullEvent.TutorInfo.builder()
+                                                        .id(classEntity.getTutor().getId())
+                                                        .fullName(classEntity.getTutor().getFullName())
+                                                        .email(null) // Email not available in class-service User entity
+                                                        .build())
+                                        .students(students)
+                                        .build();
+
+                        kafkaProducerService.sendClassFullEvent(event);
+                        log.info("Sent class full notification for class {}", classEntity.getId());
+                } catch (Exception e) {
+                        log.error("Failed to send class full notification: {}", e.getMessage(), e);
+                        // Don't throw - let the enrollment succeed even if notification fails
+                }
         }
 
         @Override
