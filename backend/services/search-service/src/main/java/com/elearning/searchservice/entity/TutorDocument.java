@@ -16,18 +16,19 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Elasticsearch document for Tutor with multi-language support (Vietnamese, English, Japanese)
+ * Elasticsearch document for Tutor with multi-language support (Vietnamese,
+ * English, Japanese)
  */
-@Document(
-    indexName = "#{@elasticsearchConfig.getTutorIndexName()}",
-    createIndex = false  // Disable auto-creation, we handle it manually with custom analyzers
+@Document(indexName = "#{@elasticsearchConfig.getTutorIndexName()}", createIndex = false // Disable auto-creation, we
+                                                                                         // handle it manually with
+                                                                                         // custom analyzers
 )
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class TutorDocument {
-    
+
     @Id
     private UUID id;
 
@@ -41,7 +42,8 @@ public class TutorDocument {
     @Field(type = FieldType.Keyword)
     private String countryCode;
 
-    // ============= FULL NAME (single field, multi-language search based on countryCode) =============
+    // ============= FULL NAME (single field, multi-language search based on
+    // countryCode) =============
     @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
     private String fullNameVi;
 
@@ -61,7 +63,8 @@ public class TutorDocument {
     @Field(type = FieldType.Text, analyzer = "japanese_autocomplete", searchAnalyzer = "japanese_analyzer")
     private String fullNameJaAutocomplete;
 
-    // ============= INTRODUCTION (single field, multi-language search based on countryCode) =============
+    // ============= INTRODUCTION (single field, multi-language search based on
+    // countryCode) =============
     @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
     private String introductionVi;
 
@@ -71,7 +74,8 @@ public class TutorDocument {
     @Field(type = FieldType.Text, analyzer = "japanese_analyzer")
     private String introductionJa;
 
-    // ============= HEADLINE (single field, multi-language search based on countryCode) =============
+    // ============= HEADLINE (single field, multi-language search based on
+    // countryCode) =============
     @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
     private String headlineVi;
 
@@ -163,12 +167,12 @@ public class TutorDocument {
     private Double popularityScore;
 
     // ============= METADATA =============
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd||epoch_millis")
     private LocalDateTime createdAt;
 
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd||epoch_millis")
     private LocalDateTime updatedAt;
 
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd||epoch_millis")
     private LocalDateTime lastActiveAt;
 }
