@@ -32,35 +32,25 @@ public class InternalTutorController {
      * 
      * GET /api/internal/tutors/export
      */
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     @GetMapping("/export")
     public ResponseEntity<List<TutorIndexEvent>> exportAllTutors() {
         log.info("Exporting all verified tutors for search indexing");
 
-        // Get base tutors without collections (no MultipleBagFetchException)
         List<Tutor> tutors = tutorRepository.findByIsVerifiedTrue();
-
         log.info("Found {} verified tutors to export", tutors.size());
 
         List<TutorIndexEvent> events = tutors.stream()
                 .map(tutor -> {
-                    UUID id = tutor.getId();
+                    // Access lazy collections within transaction - Hibernate will fetch them
+                    int subjectsCount = tutor.getSubjects() != null ? tutor.getSubjects().size() : 0;
+                    int languagesCount = tutor.getLanguages() != null ? tutor.getLanguages().size() : 0;
+                    int availabilitiesCount = tutor.getAvailabilities() != null ? tutor.getAvailabilities().size() : 0;
 
-                    // Fetch each collection separately (1 at a time) to avoid
-                    // MultipleBagFetchException
-                    tutorRepository.findByIdWithSubjects(id)
-                            .ifPresent(t -> tutor.setSubjects(t.getSubjects()));
-                    tutorRepository.findByIdWithLanguages(id)
-                            .ifPresent(t -> tutor.setLanguages(t.getLanguages()));
-                    tutorRepository.findByIdWithAvailabilities(id)
-                            .ifPresent(t -> tutor.setAvailabilities(t.getAvailabilities()));
+                    log.debug("Exporting tutor {} - subjects: {}, languages: {}, availabilities: {}",
+                            tutor.getId(), subjectsCount, languagesCount, availabilitiesCount);
 
-                    TutorIndexEvent event = tutorIndexEventMapper.toEvent(tutor, "CREATED");
-                    log.debug("Exported tutor {} - subjects: {}, languages: {}, availabilities: {}",
-                            id,
-                            tutor.getSubjects() != null ? tutor.getSubjects().size() : 0,
-                            tutor.getLanguages() != null ? tutor.getLanguages().size() : 0,
-                            tutor.getAvailabilities() != null ? tutor.getAvailabilities().size() : 0);
-                    return event;
+                    return tutorIndexEventMapper.toEvent(tutor, "CREATED");
                 })
                 .collect(Collectors.toList());
 

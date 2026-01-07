@@ -194,29 +194,25 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             kafkaProducer.sendTutorApprovedEvent(event);
             log.info("Sent tutor approved notification for: {}", tutorId);
 
-            // Refresh tutor from DB with all relationships for proper indexing
+            // Refresh tutor from DB to access lazy collections
             entityManager.flush();
-            entityManager.clear(); // Clear persistence context to force re-fetch
-
-            // Fetch base tutor first
+            entityManager.clear();
             Tutor tutorWithRelationships = tutorRepository.findById(tutorId)
                     .orElseThrow(() -> new RuntimeException("Tutor not found after save: " + tutorId));
 
-            // Load each collection separately (1 at a time) to avoid
-            // MultipleBagFetchException
-            tutorRepository.findByIdWithSubjects(tutorId)
-                    .ifPresent(t -> tutorWithRelationships.setSubjects(t.getSubjects()));
-            tutorRepository.findByIdWithLanguages(tutorId)
-                    .ifPresent(t -> tutorWithRelationships.setLanguages(t.getLanguages()));
-            tutorRepository.findByIdWithAvailabilities(tutorId)
-                    .ifPresent(t -> tutorWithRelationships.setAvailabilities(t.getAvailabilities()));
+            // Access lazy collections (Hibernate will fetch them in current transaction)
+            int subjectsCount = tutorWithRelationships.getSubjects() != null
+                    ? tutorWithRelationships.getSubjects().size()
+                    : 0;
+            int languagesCount = tutorWithRelationships.getLanguages() != null
+                    ? tutorWithRelationships.getLanguages().size()
+                    : 0;
+            int availabilitiesCount = tutorWithRelationships.getAvailabilities() != null
+                    ? tutorWithRelationships.getAvailabilities().size()
+                    : 0;
 
             log.info("Refreshed tutor with relationships - subjects: {}, languages: {}, availabilities: {}",
-                    tutorWithRelationships.getSubjects() != null ? tutorWithRelationships.getSubjects().size() : 0,
-                    tutorWithRelationships.getLanguages() != null ? tutorWithRelationships.getLanguages().size() : 0,
-                    tutorWithRelationships.getAvailabilities() != null
-                            ? tutorWithRelationships.getAvailabilities().size()
-                            : 0);
+                    subjectsCount, languagesCount, availabilitiesCount);
 
             // Send to search service with full relationships
             TutorIndexEvent indexEvent = tutorIndexEventMapper.toEvent(tutorWithRelationships, "CREATED");
