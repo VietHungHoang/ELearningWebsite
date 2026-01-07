@@ -20,6 +20,12 @@ import com.elearning.bffservice.dto.request.ClassType;
 @AllArgsConstructor
 public class TutorSearchBffRequest {
 
+    // Search keyword (text search)
+    private String keyword;
+
+    // Language preference for search
+    private String language;
+
     // Search filters
     private List<String> languageCodes;
     private BigDecimal minPrice;

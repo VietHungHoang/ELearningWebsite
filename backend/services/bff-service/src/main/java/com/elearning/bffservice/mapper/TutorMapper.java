@@ -23,8 +23,11 @@ public class TutorMapper {
      * Maps TutorSearchBffRequest to SearchTutorRequest for search service
      */
     public SearchTutorRequest mapToSearchTutorRequest(TutorSearchBffRequest request) {
+        log.info("Mapping search request - keyword: {}, language: {}", request.getKeyword(), request.getLanguage());
 
         return SearchTutorRequest.builder()
+                .keyword(request.getKeyword())
+                .language(request.getLanguage())
                 .languageCodes(request.getLanguageCodes())
                 .minPrice(request.getMinPrice())
                 .maxPrice(request.getMaxPrice())
@@ -66,9 +69,11 @@ public class TutorMapper {
     }
 
     /**
-     * Maps TutorDetailResponse and GroupClassResponse list to TutorDetailBffResponse
+     * Maps TutorDetailResponse and GroupClassResponse list to
+     * TutorDetailBffResponse
      */
-    public TutorDetailBffResponse mapToTutorDetailBffResponse(TutorDetailResponse tutorDetail, List<GroupClassResponse> groupClasses) {
+    public TutorDetailBffResponse mapToTutorDetailBffResponse(TutorDetailResponse tutorDetail,
+            List<GroupClassResponse> groupClasses) {
         return TutorDetailBffResponse.builder()
                 .id(tutorDetail.getId())
                 .fullName(tutorDetail.getFullName())
@@ -99,5 +104,5 @@ public class TutorMapper {
                 .groupClasses(groupClasses)
                 .build();
     }
-    
+
 }
