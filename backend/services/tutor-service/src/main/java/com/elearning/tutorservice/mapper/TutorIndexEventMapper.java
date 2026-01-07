@@ -76,7 +76,9 @@ public class TutorIndexEventMapper {
                                 .currentSessionFee(tutor.getCurrentSessionFee() != null ? tutor.getCurrentSessionFee()
                                                 : java.math.BigDecimal.ZERO)
                                 .currency(null)
-                                .sessionDurationMinutes(tutor.getCurrentSessionFee().intValue())
+                                .sessionDurationMinutes(tutor.getCurrentSessionFee() != null
+                                                ? tutor.getCurrentSessionFee().intValue()
+                                                : 0)
                                 .averageRating(0.0) // TODO: calculate from reviews
                                 .totalReviews(tutor.getReviews() != null ? tutor.getReviews().size() : 0)
                                 .totalStudents(tutor.getTotalStudents() != null ? tutor.getTotalStudents() : 0)
