@@ -12,9 +12,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "tutor_reviews", indexes = {
-    @Index(name = "idx_tutor_reviews_tutor_id", columnList = "tutor_id"),
-    @Index(name = "idx_tutor_reviews_student_id", columnList = "student_id"),
-    @Index(name = "idx_tutor_reviews_status", columnList = "moderation_status")
+        @Index(name = "idx_tutor_reviews_tutor_id", columnList = "tutor_id"),
+        @Index(name = "idx_tutor_reviews_student_id", columnList = "student_id"),
+        @Index(name = "idx_tutor_reviews_status", columnList = "moderation_status")
 })
 @Data
 @Builder
@@ -45,7 +45,7 @@ public class TutorReview extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "moderation_status", nullable = false)
     @Builder.Default
-    private ReviewModerationStatus moderationStatus = ReviewModerationStatus.PENDING;
+    private ReviewModerationStatus moderationStatus = ReviewModerationStatus.PENDING_OTHER;
 
     @Column(name = "violation_code")
     private Integer violationCode;

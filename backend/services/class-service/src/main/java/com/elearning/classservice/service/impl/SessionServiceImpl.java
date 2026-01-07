@@ -2,6 +2,7 @@ package com.elearning.classservice.service.impl;
 
 import com.elearning.classservice.dto.event.SessionStartedEvent;
 import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
+import com.elearning.classservice.dto.response.ReviewEligibilityResponse;
 import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.response.StartSessionResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
@@ -247,5 +248,22 @@ public class SessionServiceImpl implements SessionService {
             return false;
         String status = session.getStatus().name();
         return "COMPLETED".equals(status) || "CANCELLED".equals(status);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ReviewEligibilityResponse checkReviewEligibility(UUID studentId, UUID tutorId) {
+        log.info("Checking review eligibility for student {} with tutor {}", studentId, tutorId);
+
+        Long sessionCount = sessionRepository.countSessionsByStudentAndTutor(studentId, tutorId);
+        boolean eligible = sessionCount != null && sessionCount > 0;
+
+        log.info("Student {} {} eligible to review tutor {} (session count: {})",
+                studentId, eligible ? "is" : "is not", tutorId, sessionCount);
+
+        return ReviewEligibilityResponse.builder()
+                .eligible(eligible)
+                .sessionCount(sessionCount != null ? sessionCount : 0)
+                .build();
     }
 }

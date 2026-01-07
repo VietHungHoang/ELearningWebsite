@@ -4,6 +4,7 @@ import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
 import com.elearning.classservice.dto.response.ApiResponse;
 import com.elearning.classservice.dto.response.CreateClassBookingResponse;
+import com.elearning.classservice.dto.response.ReviewEligibilityResponse;
 import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
 import com.elearning.classservice.service.ClassService;
@@ -100,5 +101,19 @@ public class SessionController {
                 request.getNewSchedule());
         rescheduleRequestService.createForSession(sessionId, userId, request);
         return ResponseEntity.status(201).body(ApiResponse.success(null, "Reschedule request created"));
+    }
+
+    /**
+     * Check if the current student is eligible to review a tutor
+     * Eligibility: student has at least one session with the tutor
+     */
+    @GetMapping("/check-review-eligibility")
+    public ResponseEntity<ApiResponse<ReviewEligibilityResponse>> checkReviewEligibility(
+            @RequestHeader("X-User-Id") UUID studentId,
+            @RequestParam UUID tutorId) {
+
+        log.info("Checking review eligibility for student {} with tutor {}", studentId, tutorId);
+        ReviewEligibilityResponse response = sessionService.checkReviewEligibility(studentId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(response, "Eligibility checked successfully"));
     }
 }

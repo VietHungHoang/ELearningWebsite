@@ -537,10 +537,10 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     useEffect(() => {
         const timer = setTimeout(() => {
             // Get category ID instead of name
-            const selectedCategory = selectedValues.category !== placeholders.category 
+            const selectedCategory = selectedValues.category !== placeholders.category
                 ? categories.find(cat => getLocalizedName(cat) === selectedValues.category)
                 : null;
-            
+
             // Get subject ID instead of name
             const selectedSubject = selectedValues.subject !== placeholders.subject
                 ? subjects.find(sub => getLocalizedName(sub) === selectedValues.subject)
@@ -563,7 +563,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
             // Parse availability slots to send to API
             // Format: "Monday-Morning" -> { day: 1, timeSlot: "Morning" }
-            const availabilitySlots = selectedAvailability.length > 0 
+            const availabilitySlots = selectedAvailability.length > 0
                 ? selectedAvailability.map(slot => {
                     const [day, time] = slot.split('-');
                     const dayIndex = availabilityDays.findIndex(d => d === day);

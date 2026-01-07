@@ -1,6 +1,7 @@
 package com.elearning.classservice.service;
 
 import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
+import com.elearning.classservice.dto.response.ReviewEligibilityResponse;
 import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.response.StartSessionResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
@@ -23,4 +24,13 @@ public interface SessionService {
     List<SessionResponse> getBookedSessionsForUser(UUID userId, LocalDateTime startDate, LocalDateTime endDate);
 
     SlotConflictResponse checkSlotConflicts(UUID studentId, CheckSlotConflictsRequest request);
+
+    /**
+     * Check if a student is eligible to review a tutor
+     * 
+     * @param studentId Student ID
+     * @param tutorId   Tutor ID
+     * @return Eligibility response with session count
+     */
+    ReviewEligibilityResponse checkReviewEligibility(UUID studentId, UUID tutorId);
 }

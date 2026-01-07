@@ -79,18 +79,8 @@ const FindTutorsPage: React.FC = () => {
     );
 
     const handleSearch = (keyword: string) => {
-        if (!keyword.trim()) {
-            setFilteredTutors(tutors);
-            return;
-        }
-        const lowercasedKeyword = keyword.toLowerCase();
-        const results = tutors.filter(
-            (tutor) =>
-                tutor.fullName.toLowerCase().includes(lowercasedKeyword) ||
-                tutor.headline.toLowerCase().includes(lowercasedKeyword) ||
-                tutor.introduction.toLowerCase().includes(lowercasedKeyword)
-        );
-        setFilteredTutors(results);
+        // Call API with keyword filter
+        handleFilterChange({ ...currentFilters, keyword: keyword.trim() || undefined }, 1);
     };
 
     return (

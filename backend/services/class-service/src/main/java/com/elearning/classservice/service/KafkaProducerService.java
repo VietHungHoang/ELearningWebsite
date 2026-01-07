@@ -55,4 +55,21 @@ public class KafkaProducerService {
             throw new RuntimeException("Failed to serialize TutorHourlyRateRequestEvent", e);
         }
     }
+
+    private static final String CLASS_NOTIFICATION_TOPIC = "class_notification";
+
+    /**
+     * Send class full event when a class reaches maximum capacity
+     * Notification service will send emails to tutor and students
+     */
+    public void sendClassFullEvent(Object event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(CLASS_NOTIFICATION_TOPIC, jsonMessage);
+            log.info("Sent class full event to topic {}: {}", CLASS_NOTIFICATION_TOPIC, jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting ClassFullEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize ClassFullEvent", e);
+        }
+    }
 }

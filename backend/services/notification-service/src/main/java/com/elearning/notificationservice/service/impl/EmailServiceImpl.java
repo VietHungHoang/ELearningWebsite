@@ -67,4 +67,44 @@ public class EmailServiceImpl implements EmailService {
 
         sendHtmlEmail(to, subject, htmlContent);
     }
+
+    @Override
+    public void sendClassFullNotificationToTutor(String to, String tutorName, String classTitle, int studentCount) {
+        String subject = "🎉 Lớp học \"" + classTitle + "\" đã đủ học sinh!";
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>" +
+                "<h2 style='color: #2e7d32;'>Xin chào " + tutorName + "!</h2>" +
+                "<p>Lớp học <strong>\"" + classTitle + "\"</strong> của bạn đã có đủ <strong>" + studentCount
+                + " học sinh</strong> đăng ký.</p>" +
+                "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 20px 0;'>" +
+                "<p style='margin: 0;'><strong>Trạng thái:</strong> Đang chờ thanh toán từ học sinh</p>" +
+                "</div>" +
+                "<p>Chúng tôi sẽ thông báo cho bạn khi tất cả học sinh đã hoàn tất thanh toán và lớp học sẵn sàng bắt đầu.</p>"
+                +
+                "<p>Trân trọng,<br><strong>Đội ngũ E-Learning</strong></p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
+
+    @Override
+    public void sendPaymentRequestToStudent(String to, String studentName, String classTitle, Double pricePerHour,
+            String tutorName) {
+        String formattedPrice = pricePerHour != null ? String.format("%,.0f VNĐ/giờ", pricePerHour) : "N/A";
+        String subject = "💳 Yêu cầu thanh toán cho lớp \"" + classTitle + "\"";
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>" +
+                "<h2 style='color: #1565c0;'>Xin chào " + studentName + "!</h2>" +
+                "<p>Lớp học <strong>\"" + classTitle + "\"</strong> do gia sư <strong>" + tutorName
+                + "</strong> giảng dạy đã có đủ học sinh đăng ký.</p>" +
+                "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;'>" +
+                "<p style='margin: 0 0 10px 0;'><strong>Thông tin thanh toán:</strong></p>" +
+                "<p style='margin: 0;'>Học phí: <strong>" + formattedPrice + "</strong></p>" +
+                "</div>" +
+                "<p style='color: #d32f2f;'><strong>⚠️ Vui lòng hoàn tất thanh toán sớm để lớp học có thể bắt đầu.</strong></p>"
+                +
+                "<p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.</p>" +
+                "<p>Trân trọng,<br><strong>Đội ngũ E-Learning</strong></p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
 }

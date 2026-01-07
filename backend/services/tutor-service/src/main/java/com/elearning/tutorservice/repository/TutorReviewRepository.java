@@ -18,10 +18,23 @@ public interface TutorReviewRepository extends JpaRepository<TutorReview, UUID> 
      * Đếm số reviews mới của tutor trong khoảng thời gian
      */
     @Query("SELECT COUNT(tr) FROM TutorReview tr WHERE tr.tutor.id = :tutorId AND tr.createdAt BETWEEN :startDate AND :endDate")
-    Long countNewReviewsByTutorAndDateRange(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    Long countNewReviewsByTutorAndDateRange(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate);
 
     /**
      * Get all reviews by tutor ID and moderation status
      */
     List<TutorReview> findByTutorIdAndModerationStatus(UUID tutorId, ReviewModerationStatus status);
+
+    /**
+     * Get all APPROVED reviews for a tutor
+     */
+    List<TutorReview> findByTutorIdAndModerationStatusOrderByCreatedAtDesc(UUID tutorId, ReviewModerationStatus status);
+
+    /**
+     * Get all non-approved reviews for a specific student on a specific tutor
+     */
+    @Query("SELECT tr FROM TutorReview tr WHERE tr.tutor.id = :tutorId AND tr.studentId = :studentId AND tr.moderationStatus != 'APPROVED' ORDER BY tr.createdAt DESC")
+    List<TutorReview> findNonApprovedByTutorIdAndStudentId(@Param("tutorId") UUID tutorId,
+            @Param("studentId") UUID studentId);
 }

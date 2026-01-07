@@ -15,6 +15,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { formatCurrency } from "../../../utils/currencyHelper";
 import Avatar from "react-avatar";
 import bookingService from "../../../services/bookingService";
+import discountService from "../../../services/discountService";
 import { useTranslation } from "react-i18next";
 import { FiLoader, FiCheck } from "react-icons/fi";
 import HeaderNoNavbar from "../../../components/ui/HeaderNoNavbar";
@@ -41,6 +42,8 @@ const CheckoutPage: React.FC = () => {
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [discountFromCoupon, setDiscountFromCoupon] = useState<number>(0);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [showSepayModal, setShowSepayModal] = useState(false);
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
 
@@ -82,7 +85,7 @@ const CheckoutPage: React.FC = () => {
   const subtotal =
     bookingData?.pricing?.totalPrice || originalPrice - discountAmount;
 
-  const couponDiscount = appliedCoupon === "SAVE10" ? subtotal * 0.1 : 0;
+  const couponDiscount = discountFromCoupon;
   const total = subtotal - couponDiscount;
 
   // Use real schedule
@@ -177,20 +180,38 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     const code = couponInput.toUpperCase().trim();
     setCouponError(null);
 
     if (!code) {
       setAppliedCoupon(null);
+      setDiscountFromCoupon(0);
       return;
     }
 
-    if (code === "SAVE10") {
-      setAppliedCoupon(code);
-      setCouponInput("");
-    } else {
-      setCouponError("Invalid coupon code. Try SAVE10 for 10% off.");
+    setIsValidatingCoupon(true);
+    try {
+      const response = await discountService.validateDiscount(
+        {
+          code,
+          amount: subtotal,
+        },
+        tutorData?.id
+      );
+
+      if (response.valid) {
+        setAppliedCoupon(code);
+        setDiscountFromCoupon(response.discountAmount || 0);
+        setCouponInput("");
+      } else {
+        setCouponError(response.message || "Mã giảm giá không hợp lệ");
+      }
+    } catch (error) {
+      console.error("Coupon validation error:", error);
+      setCouponError("Không thể xác thực mã giảm giá. Vui lòng thử lại.");
+    } finally {
+      setIsValidatingCoupon(false);
     }
   };
 
@@ -456,9 +477,10 @@ const CheckoutPage: React.FC = () => {
                     />
                     <button
                       onClick={handleApplyCoupon}
-                      className="shrink-0 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                      disabled={isValidatingCoupon}
+                      className={`shrink-0 px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${isValidatingCoupon ? 'bg-gray-200 text-gray-400 cursor-wait' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     >
-                      Áp dụng
+                      {isValidatingCoupon ? 'Đang kiểm tra...' : 'Áp dụng'}
                     </button>
                   </div>
                   {couponError && (
