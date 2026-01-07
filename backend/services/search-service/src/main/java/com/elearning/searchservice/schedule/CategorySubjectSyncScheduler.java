@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Scheduled task to sync category and subject data from common-service to Elasticsearch
+ * Scheduled task to sync category and subject data from common-service to
+ * Elasticsearch
  * Runs daily at 18:00 (6 PM)
  */
 @Component
@@ -36,31 +37,53 @@ public class CategorySubjectSyncScheduler {
     @Scheduled(cron = "0 0 18 * * *")
     public void syncCategoryAndSubjectData() {
         log.info("Starting scheduled sync of categories and subjects at {}", LocalDateTime.now());
-        
+
         try {
             // Fetch latest data from common-service
             List<CategorySyncDto> categories = commonServiceClient.getAllCategories();
             List<SubjectSyncDto> subjects = commonServiceClient.getAllSubjects();
-            
+
             if (categories.isEmpty() && subjects.isEmpty()) {
                 log.warn("No categories or subjects fetched from common-service, skipping sync");
                 return;
             }
-            
+
             // Build lookup maps
             Map<UUID, CategorySyncDto> categoryMap = categories.stream()
                     .collect(Collectors.toMap(CategorySyncDto::getId, c -> c));
             Map<UUID, SubjectSyncDto> subjectMap = subjects.stream()
                     .collect(Collectors.toMap(SubjectSyncDto::getId, s -> s));
-            
+
             // Get all tutor documents
             Iterable<TutorDocument> allTutors = tutorSearchRepository.findAll();
             List<TutorDocument> tutorsToUpdate = new ArrayList<>();
-            
+
             for (TutorDocument tutor : allTutors) {
                 boolean updated = false;
-                
-                // Update categories
+
+                // Extract categoryIds from subjects
+                if (tutor.getSubjectIds() != null && !tutor.getSubjectIds().isEmpty()) {
+                    List<UUID> categoryIds = tutor.getSubjectIds().stream()
+                            .filter(subjectMap::containsKey)
+                            .map(subjectId -> subjectMap.get(subjectId).getCategoryId())
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    if (!categoryIds.isEmpty() && !categoryIds.equals(tutor.getCategoryIds())) {
+                        tutor.setCategoryIds(categoryIds);
+                        updated = true;
+                    }
+
+                    // Update subjects with names
+                    List<SubjectInfo> updatedSubjects = updateSubjectInfo(tutor.getSubjectIds(), subjectMap);
+                    if (!updatedSubjects.isEmpty()) {
+                        tutor.setSubjects(updatedSubjects);
+                        updated = true;
+                    }
+                }
+
+                // Update categories with names
                 if (tutor.getCategoryIds() != null && !tutor.getCategoryIds().isEmpty()) {
                     List<CategoryInfo> updatedCategories = updateCategoryInfo(tutor.getCategoryIds(), categoryMap);
                     if (!updatedCategories.isEmpty()) {
@@ -68,31 +91,22 @@ public class CategorySubjectSyncScheduler {
                         updated = true;
                     }
                 }
-                
-                // Update subjects
-                if (tutor.getSubjectIds() != null && !tutor.getSubjectIds().isEmpty()) {
-                    List<SubjectInfo> updatedSubjects = updateSubjectInfo(tutor.getSubjectIds(), subjectMap);
-                    if (!updatedSubjects.isEmpty()) {
-                        tutor.setSubjects(updatedSubjects);
-                        updated = true;
-                    }
-                }
-                
+
                 if (updated) {
                     tutor.setUpdatedAt(LocalDateTime.now());
                     tutorsToUpdate.add(tutor);
                 }
             }
-            
+
             // Bulk save updated tutors
             if (!tutorsToUpdate.isEmpty()) {
                 tutorSearchRepository.saveAll(tutorsToUpdate);
-                log.info("Successfully updated {} tutor documents with latest category/subject data", 
+                log.info("Successfully updated {} tutor documents with latest category/subject data",
                         tutorsToUpdate.size());
             } else {
                 log.info("No tutor documents needed updating");
             }
-            
+
         } catch (Exception e) {
             log.error("Failed to sync category and subject data: {}", e.getMessage(), e);
         }

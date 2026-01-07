@@ -30,21 +30,17 @@ public class TutorIndexEvent {
     // ============= BASIC INFO =============
     private Boolean isVerified;
     private Boolean isActive;
+    private String countryCode;
 
-    // ============= MULTI-LANGUAGE NAME =============
-    private String nameVi;
-    private String nameEn;
-    private String nameJa;
+    // ============= MULTI-LANGUAGE FULL NAME =============
+    private String fullNameVi;
+    private String fullNameEn;
+    private String fullNameJa;
 
-    // ============= MULTI-LANGUAGE BIO =============
-    private String bioVi;
-    private String bioEn;
-    private String bioJa;
-
-    // ============= MULTI-LANGUAGE SPECIALIZATION =============
-    private String specializationVi;
-    private String specializationEn;
-    private String specializationJa;
+    // ============= MULTI-LANGUAGE INTRODUCTION =============
+    private String introductionVi;
+    private String introductionEn;
+    private String introductionJa;
 
     // ============= MULTI-LANGUAGE HEADLINE =============
     private String headlineVi;

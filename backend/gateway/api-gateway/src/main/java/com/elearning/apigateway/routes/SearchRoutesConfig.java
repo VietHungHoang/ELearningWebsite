@@ -31,7 +31,7 @@ public class SearchRoutesConfig {
                                                 .filters(f -> f
                                                                 .rewritePath(
                                                                                 "/api/v1/public/(?<rest>.*)",
-                                                                                "/api/v1/bff/${rest}"))
+                                                                                "/api/v1/${rest}"))
                                                 .uri(searchServiceUrl))
 
                                 .build();
