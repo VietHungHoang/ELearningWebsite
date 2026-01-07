@@ -9,20 +9,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BookingRoutesConfig {
 
-    @Value("${services.booking-service.url}")
-    private String bookingServiceUrl;
+        @Value("${services.booking-service.url}")
+        private String bookingServiceUrl;
 
-    @Bean
-    public RouteLocator bookingServiceRoutes(RouteLocatorBuilder builder) {
-        return builder.routes()
-                // Direct routes
-                .route("save-trial-seggggssion", r -> r
-                        .path("/api/v1/bookings/**",
-                                "/api/v1/discount/**",
-                                "/api/v1/tutor/discount/**",
-                                "/api/v1/admin/discounts/**")
-                        .uri(bookingServiceUrl))
+        @Bean
+        public RouteLocator bookingServiceRoutes(RouteLocatorBuilder builder) {
+                return builder.routes()
+                                // Direct routes
+                                .route("save-trial-seggggssion", r -> r
+                                                .path("/api/v1/bookings/**",
+                                                                "/api/v1/discount/**",
+                                                                "/api/v1/tutor/discounts/**",
+                                                                "/api/v1/admin/discounts/**")
+                                                .uri(bookingServiceUrl))
 
-                .build();
-    }
+                                .build();
+        }
 }

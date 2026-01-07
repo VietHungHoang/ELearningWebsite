@@ -4,6 +4,7 @@ import com.elearning.tutorservice.dto.embedded.*;
 import com.elearning.tutorservice.dto.event.TutorIndexEvent;
 import com.elearning.tutorservice.entity.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TutorIndexEventMapper {
 
         /**
@@ -149,6 +151,13 @@ public class TutorIndexEventMapper {
                         });
                 }
 
+                // Log the inputs for debugging
+                if (!inputs.isEmpty()) {
+                        log.info("Generated suggestion inputs for tutor {}: size={}, content={}",
+                                        tutor.getId(), inputs.size(), inputs);
+                } else {
+                        log.warn("No suggestion inputs generated for tutor {}", tutor.getId());
+                }
                 return inputs;
         }
 

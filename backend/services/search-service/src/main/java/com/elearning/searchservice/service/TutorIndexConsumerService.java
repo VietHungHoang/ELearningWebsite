@@ -41,8 +41,13 @@ public class TutorIndexConsumerService {
             // Deserialize event
             TutorIndexEvent event = objectMapper.readValue(message, TutorIndexEvent.class);
 
-            log.info("Processing tutor index event: type={}, tutorId={}",
-                    event.getEventType(), event.getTutorId());
+            log.info("Processing tutor index event: type={}, tutorId={}, suggestionInputsSize={}",
+                    event.getEventType(), event.getTutorId(),
+                    event.getSuggestionInputs() != null ? event.getSuggestionInputs().size() : "null");
+
+            if (event.getSuggestionInputs() != null && !event.getSuggestionInputs().isEmpty()) {
+                log.info("Suggestion inputs: {}", event.getSuggestionInputs());
+            }
 
             // Handle based on event type
             switch (event.getEventType()) {

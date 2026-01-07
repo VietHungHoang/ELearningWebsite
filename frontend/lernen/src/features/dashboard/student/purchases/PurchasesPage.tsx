@@ -6,6 +6,7 @@ import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import Pagination from '../../../../components/ui/Pagination';
 import BillDetailModal from './components/BillDetailModal';
 import { useTranslation } from 'react-i18next';
+import bookingService from '../../../../services/bookingService';
 
 // Purchase data type
 export interface PurchaseData {
@@ -37,6 +38,17 @@ export interface PurchaseData {
 
 type FilterTab = 'All Status' | 'Pending' | 'Completed' | 'Cancelled' | 'Refunded';
 
+// Map FilterTab to BookingStatus values that backend accepts
+const getStatusForApi = (tab: FilterTab): string | undefined => {
+    switch (tab) {
+        case 'Pending': return 'PENDING';
+        case 'Completed': return 'COMPLETED';
+        case 'Cancelled': return 'CANCELLED';
+        case 'Refunded': return 'CONFIRMED'; // Map Refunded to CONFIRMED for now
+        default: return undefined;
+    }
+};
+
 // --- MAIN COMPONENT ---
 const PurchasesPage: React.FC = () => {
     const { t, i18n } = useTranslation();
@@ -60,115 +72,60 @@ const PurchasesPage: React.FC = () => {
         ]);
     }, [setBreadcrumb, t]);
 
-    // Mock data - Replace with actual API call
+    // Fetch purchases from booking service API
     useEffect(() => {
         const fetchPurchases = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                // TODO: Replace with actual API call
-                // const response = await purchaseService.getPurchases({ page: currentPage, size: itemsPerPage });
-                
-                // Mock data for now
-                const mockPurchases: PurchaseData[] = [
-                    {
-                        id: '1',
-                        courseTitle: 'Toán học Nâng cao',
-                        type: 'ON_ONE_ONE',
-                        amount: 500000,
-                        status: 'COMPLETED',
-                        purchaseDate: '2024-01-15T10:30:00Z',
-                        paymentMethod: 'Thẻ tín dụng',
-                        invoiceNumber: 'INV-2024-001',
-                        studentName: 'Nguyễn Văn A',
-                        studentEmail: 'nguyenvana@example.com',
-                        tutorName: 'Trần Thị B',
-                        tutorEmail: 'tranthib@example.com',
-                        sessionsPurchased: 10,
-                        pricePerSession: 50000,
-                        discount: 10,
-                        discountAmount: 50000,
-                        subtotal: 500000,
-                        tax: 0,
-                        totalAmount: 500000,
-                        transactionId: 'TXN-2024-001',
-                        paymentDate: '2024-01-15T10:35:00Z',
-                        notes: 'Thanh toán thành công',
-                        schedule: [
-                            { date: '2024-01-20', time: '09:00' },
-                            { date: '2024-01-22', time: '09:00' }
-                        ]
-                    },
-                    {
-                        id: '2',
-                        courseTitle: 'Tiếng Anh Giao tiếp',
-                        type: 'GROUP',
-                        amount: 300000,
-                        status: 'PENDING',
-                        purchaseDate: '2024-01-20T14:20:00Z',
-                        paymentMethod: 'Chuyển khoản ngân hàng',
-                        invoiceNumber: 'INV-2024-002',
-                        studentName: 'Nguyễn Văn A',
-                        studentEmail: 'nguyenvana@example.com',
-                        tutorName: 'Lê Văn C',
-                        tutorEmail: 'levanc@example.com',
-                        sessionsPurchased: 8,
-                        pricePerSession: 40000,
-                        discount: 5,
-                        discountAmount: 16000,
-                        subtotal: 320000,
-                        tax: 0,
-                        totalAmount: 300000,
-                        notes: 'Đang chờ thanh toán'
-                    },
-                    {
-                        id: '3',
-                        courseTitle: 'Vật lý Cơ bản',
-                        type: 'GROUP',
-                        amount: 800000,
-                        status: 'COMPLETED',
-                        purchaseDate: '2024-01-10T09:15:00Z',
-                        paymentMethod: 'Ví điện tử',
-                        invoiceNumber: 'INV-2024-003'
-                    },
-                    {
-                        id: '4',
-                        courseTitle: 'Lịch sử Nghệ thuật',
-                        type: 'ON_ONE_ONE',
-                        amount: 450000,
-                        status: 'CANCELLED',
-                        purchaseDate: '2024-01-05T16:45:00Z',
-                        paymentMethod: 'Thẻ tín dụng',
-                        invoiceNumber: 'INV-2024-004'
-                    },
-                    {
-                        id: '5',
-                        courseTitle: 'Hóa học Cơ bản',
-                        type: 'GROUP',
-                        amount: 350000,
-                        status: 'REFUNDED',
-                        purchaseDate: '2024-01-12T11:30:00Z',
-                        paymentMethod: 'Chuyển khoản ngân hàng',
-                        invoiceNumber: 'INV-2024-005'
-                    }
-                ];
+                // Call booking service API to get booking history
+                // Backend uses 0-indexed pagination, so subtract 1 from currentPage
+                const response = await bookingService.getBookingHistory({
+                    page: currentPage - 1,
+                    limit: itemsPerPage,
+                    status: getStatusForApi(activeTab)
+                });
 
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 500));
+                if (response.success && response.data) {
+                    // Map API response to PurchaseData format
+                    const mappedPurchases: PurchaseData[] = response.data.content.map((item: any) => ({
+                        id: item.id,
+                        courseTitle: item.className || item.classTitle || 'Session Purchase',
+                        type: item.classType === 'ONE_ON_ONE' || item.classType === 'ON_ONE_ONE' ? 'ON_ONE_ONE' : 'GROUP',
+                        amount: item.amount || 0,
+                        status: (item.status || 'PENDING').toUpperCase() as PurchaseData['status'],
+                        purchaseDate: item.createdAt || new Date().toISOString(),
+                        paymentMethod: item.paymentProvider || '',
+                        invoiceNumber: item.providerTransactionId || item.transactionId || item.id,
+                        tutorName: item.tutorName || '',
+                        sessionsPurchased: item.sessionsPurchased || 0,
+                        pricePerSession: item.pricePerSession || 0,
+                        discount: item.discount || 0,
+                        totalAmount: item.amount || 0,
+                        transactionId: item.transactionId || item.id,
+                        paymentDate: item.createdAt || '',
+                        notes: item.notes || ''
+                    }));
 
-                setPurchases(mockPurchases);
-                setTotalElements(mockPurchases.length);
+                    setPurchases(mappedPurchases);
+                    setTotalElements(response.data.totalElements || mappedPurchases.length);
+                } else {
+                    setPurchases([]);
+                    setTotalElements(0);
+                }
             } catch (err) {
-                setError('Failed to fetch purchases');
                 console.error('Error fetching purchases:', err);
+                setError('Failed to fetch purchases');
+                setPurchases([]);
+                setTotalElements(0);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchPurchases();
-    }, [currentPage]);
+    }, [currentPage, activeTab]);
 
     const handleViewDetails = (purchase: PurchaseData) => {
         setSelectedPurchase(purchase);
@@ -260,10 +217,10 @@ const PurchasesPage: React.FC = () => {
                         ]}
                         selectedValue={
                             activeTab === 'All Status' ? t('dashboard.student.purchases.filterOptions.allStatus') :
-                            activeTab === 'Pending' ? t('dashboard.student.purchases.filterOptions.pending') :
-                            activeTab === 'Completed' ? t('dashboard.student.purchases.filterOptions.completed') :
-                            activeTab === 'Cancelled' ? t('dashboard.student.purchases.filterOptions.cancelled') :
-                            t('dashboard.student.purchases.filterOptions.refunded')
+                                activeTab === 'Pending' ? t('dashboard.student.purchases.filterOptions.pending') :
+                                    activeTab === 'Completed' ? t('dashboard.student.purchases.filterOptions.completed') :
+                                        activeTab === 'Cancelled' ? t('dashboard.student.purchases.filterOptions.cancelled') :
+                                            t('dashboard.student.purchases.filterOptions.refunded')
                         }
                         placeholder={t('dashboard.student.purchases.selectStatus')}
                         onSelect={(value: string) => {
@@ -332,13 +289,12 @@ const PurchasesPage: React.FC = () => {
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                purchase.type === 'ON_ONE_ONE'
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : 'bg-purple-100 text-purple-800'
-                                            }`}>
-                                                {purchase.type === 'ON_ONE_ONE' 
-                                                    ? t('dashboard.student.purchases.classTypes.oneOnOne') 
+                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${purchase.type === 'ON_ONE_ONE'
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : 'bg-purple-100 text-purple-800'
+                                                }`}>
+                                                {purchase.type === 'ON_ONE_ONE'
+                                                    ? t('dashboard.student.purchases.classTypes.oneOnOne')
                                                     : t('dashboard.student.purchases.classTypes.group')
                                                 }
                                             </span>
@@ -350,22 +306,21 @@ const PurchasesPage: React.FC = () => {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
-                                                <span className={`w-1.5 h-1.5 rounded-full ${
-                                                    purchase.status === 'COMPLETED'
-                                                        ? 'bg-green-600'
-                                                        : purchase.status === 'PENDING'
+                                                <span className={`w-1.5 h-1.5 rounded-full ${purchase.status === 'COMPLETED'
+                                                    ? 'bg-green-600'
+                                                    : purchase.status === 'PENDING'
                                                         ? 'bg-yellow-600'
                                                         : purchase.status === 'CANCELLED'
-                                                        ? 'bg-red-600'
-                                                        : 'bg-gray-600'
-                                                }`}></span>
+                                                            ? 'bg-red-600'
+                                                            : 'bg-gray-600'
+                                                    }`}></span>
                                                 {purchase.status === 'COMPLETED'
                                                     ? t('dashboard.student.purchases.statusLabels.completed')
                                                     : purchase.status === 'PENDING'
-                                                    ? t('dashboard.student.purchases.statusLabels.pending')
-                                                    : purchase.status === 'CANCELLED'
-                                                    ? t('dashboard.student.purchases.statusLabels.cancelled')
-                                                    : t('dashboard.student.purchases.statusLabels.refunded')
+                                                        ? t('dashboard.student.purchases.statusLabels.pending')
+                                                        : purchase.status === 'CANCELLED'
+                                                            ? t('dashboard.student.purchases.statusLabels.cancelled')
+                                                            : t('dashboard.student.purchases.statusLabels.refunded')
                                                 }
                                             </span>
                                         </td>
