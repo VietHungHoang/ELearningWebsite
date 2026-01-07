@@ -31,10 +31,51 @@ public class BookingServiceImpl implements BookingService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    @Transactional
     public CreateBookingResponse createBooking(CreateBookingRequest request) {
         log.info("Creating booking for student: {}, tutor: {}", request.getStudentId(), request.getTutorId());
 
+        // Step 1: Save booking (short transaction - releases connection quickly)
+        Booking booking = saveBooking(request);
+        log.info("Created booking record with ID: {}", booking.getId());
+
+        // Step 2: Call payment service OUTSIDE transaction (no DB connection held)
+        CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
+                .orderId(booking.getId())
+                .userId(request.getStudentId())
+                .amount(request.getAmount())
+                .paymentProvider(request.getPaymentProvider())
+                .redirectUrl(request.getRedirectUrl())
+                .build();
+
+        CreatePaymentResponse paymentResponse = paymentServiceClient.createPayment(paymentRequest);
+        log.info("Created payment with ID: {} and status: {}", paymentResponse.getPaymentId(),
+                paymentResponse.getStatus());
+
+        return CreateBookingResponse.builder()
+                .bookingId(booking.getId())
+                .paymentId(paymentResponse.getPaymentId())
+                .provider(paymentResponse.getProvider())
+                .status(paymentResponse.getStatus())
+                .paymentMethodType(paymentResponse.getPaymentMethodType())
+                .paymentData(CreateBookingResponse.PaymentData.builder()
+                        .redirectUrl(paymentResponse.getPaymentData() != null
+                                ? paymentResponse.getPaymentData().getRedirectUrl()
+                                : null)
+                        .qrCodeContent(paymentResponse.getPaymentData() != null
+                                ? paymentResponse.getPaymentData().getQrCodeContent()
+                                : null)
+                        .sdkParameters(paymentResponse.getPaymentData() != null
+                                ? paymentResponse.getPaymentData().getSdkParameters()
+                                : null)
+                        .build())
+                .build();
+    }
+
+    /**
+     * Save booking in a separate short transaction to release DB connection quickly
+     */
+    @Transactional
+    protected Booking saveBooking(CreateBookingRequest request) {
         // Serialize schedule to JSON array
         String scheduleJson;
         try {
@@ -44,11 +85,10 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Failed to serialize schedule", e);
         }
 
-        // Create Booking record - classId will be set later after class is created
         Booking booking = Booking.builder()
                 .studentId(request.getStudentId())
                 .tutorId(request.getTutorId())
-                .classId(null) // Will be set after payment success via Kafka event
+                .classId(null)
                 .sessionsPurchased(request.getSessions())
                 .discount(request.getDiscount())
                 .amount(request.getAmount())
@@ -57,32 +97,6 @@ public class BookingServiceImpl implements BookingService {
                 .status(BookingStatus.PENDING)
                 .build();
 
-        booking = bookingRepository.save(booking);
-        log.info("Created booking record with ID: {}", booking.getId());
-
-        // Call payment service to create payment request
-        CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
-                .orderId(booking.getId())
-                .userId(request.getStudentId()) // Pass studentId as userId for payment
-                .amount(request.getAmount())
-                .paymentProvider(request.getPaymentProvider())
-                .redirectUrl(request.getRedirectUrl())
-                .build();
-
-        CreatePaymentResponse paymentResponse = paymentServiceClient.createPayment(paymentRequest);
-        log.info("Created payment with ID: {} and status: {}", paymentResponse.getPaymentId(), paymentResponse.getStatus());
-
-        return CreateBookingResponse.builder()
-                .bookingId(booking.getId())
-                .paymentId(paymentResponse.getPaymentId())
-                .provider(paymentResponse.getProvider())
-                .status(paymentResponse.getStatus())
-                .paymentMethodType(paymentResponse.getPaymentMethodType())
-                .paymentData(CreateBookingResponse.PaymentData.builder()
-                        .redirectUrl(paymentResponse.getPaymentData() != null ? paymentResponse.getPaymentData().getRedirectUrl() : null)
-                        .qrCodeContent(paymentResponse.getPaymentData() != null ? paymentResponse.getPaymentData().getQrCodeContent() : null)
-                        .sdkParameters(paymentResponse.getPaymentData() != null ? paymentResponse.getPaymentData().getSdkParameters() : null)
-                        .build())
-                .build();
+        return bookingRepository.save(booking);
     }
 }
