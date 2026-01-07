@@ -522,7 +522,8 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [openDropdown, setOpenDropdown]);
 
-    // Trigger filter change when any filter updates (debounced)
+    // Trigger filter change when any filter updates (debounced) - keyword is NOT included here
+    // Keyword search is triggered separately via onSearch when user presses Enter
     useEffect(() => {
         const timer = setTimeout(() => {
             const filters: TutorSearchFilter = {
@@ -535,7 +536,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                 // timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined, // Removed per user request: timezone is not for search filtering
                 sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
                 sessionType: activeTab === 'Private Sessions' ? '1-on-1' : activeTab === 'Group Sessions' ? 'Group' : undefined,
-                keyword: keyword.trim() || undefined,
+                // keyword removed - only triggered on Enter via onSearch
                 minFee: feeRange[0],
                 maxFee: feeRange[1],
             };
@@ -543,7 +544,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         }, 300); // Debounce 300ms to avoid multiple API calls
 
         return () => clearTimeout(timer);
-    }, [selectedValues, selectedLanguages, feeRange, activeTab, keyword]);
+    }, [selectedValues, selectedLanguages, feeRange, activeTab]); // keyword removed from dependencies
 
     return (
         <>

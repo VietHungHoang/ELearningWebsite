@@ -93,4 +93,16 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
          */
         @Query("SELECT COALESCE(MAX(s.sessionNumber), 0) FROM Session s WHERE s.classEntity.id = :classId")
         Integer findMaxSessionNumberByClassId(@Param("classId") UUID classId);
+
+        /**
+         * Count sessions between a student and tutor (for review eligibility check)
+         * Includes both trial sessions and regular class sessions
+         */
+        @Query("SELECT COUNT(s) FROM Session s " +
+                        "LEFT JOIN s.participants p " +
+                        "LEFT JOIN s.classEntity c " +
+                        "LEFT JOIN c.enrollments e " +
+                        "WHERE s.tutor.id = :tutorId " +
+                        "AND (p.student.id = :studentId OR e.student.id = :studentId)")
+        Long countSessionsByStudentAndTutor(@Param("studentId") UUID studentId, @Param("tutorId") UUID tutorId);
 }
