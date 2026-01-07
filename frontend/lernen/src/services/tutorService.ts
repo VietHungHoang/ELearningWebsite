@@ -268,7 +268,7 @@ export const tutorService = {
 
     submitReview: async (tutorId: string, reviewData: SubmitReviewRequest): Promise<ApiResponse<{ message: string }>> => {
         try {
-            return await apiService.post<{ message: string }>(`/api/v1/tutors/${tutorId}/reviews`, reviewData);
+            return await apiService.post<{ message: string }>(`/v1/tutors/${tutorId}/reviews`, reviewData);
         } catch (error) {
             console.warn("Failed to submit review to API:", error);
             throw error;
