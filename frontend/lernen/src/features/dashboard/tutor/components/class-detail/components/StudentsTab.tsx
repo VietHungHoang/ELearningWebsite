@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
-import { FiUserPlus, FiTrash2, FiMessageCircle, FiSearch } from 'react-icons/fi';
+import { FiUserPlus, FiTrash2, FiMessageCircle, FiSearch, FiAlertTriangle } from 'react-icons/fi';
 import Avatar from 'react-avatar';
 import ModalLayout from '../../../../../../components/ui/ModalLayout';
-import type { ClassData } from '../../../../../../services/classService';
+import Toast from '../../../../../../components/ui/Toast';
+import { classService, type ClassData } from '../../../../../../services/classService';
 import { useAuth } from '../../../../../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 
 interface StudentsTabProps {
     classData: ClassData;
+    onUpdate?: () => void; // Callback to refresh class data after removal
 }
 
-const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
+const StudentsTab: React.FC<StudentsTabProps> = ({ classData, onUpdate }) => {
     const { state } = useAuth();
     const { t } = useTranslation();
     const isStudent = state.user?.role === 'student';
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    
+
+    // Delete confirmation modal state
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState<{ id: string; name: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Toast state
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
     // Get i18n keys based on role
     const i18nKey = isStudent ? 'student' : 'tutor';
 
@@ -25,8 +35,66 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
         setIsModalOpen(false);
         setSearchTerm('');
     };
+
+    // Open delete confirmation modal
+    const openDeleteModal = (studentId: string, studentName: string) => {
+        setStudentToDelete({ id: studentId, name: studentName });
+        setIsDeleteModalOpen(true);
+    };
+
+    // Close delete confirmation modal
+    const closeDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setStudentToDelete(null);
+    };
+
+    // Handle remove student from class
+    const handleRemoveStudent = async () => {
+        if (!studentToDelete || !classData.id) return;
+
+        setIsDeleting(true);
+        try {
+            const response = await classService.removeStudentFromClass(classData.id, studentToDelete.id);
+            if (response.success) {
+                setToast({
+                    message: t('dashboard.tutor.myClass.detail.studentsTab.tutor.removeSuccess', {
+                        name: studentToDelete.name
+                    }) || `Đã xóa ${studentToDelete.name} khỏi lớp`,
+                    type: 'success'
+                });
+                closeDeleteModal();
+                // Refresh class data
+                if (onUpdate) {
+                    onUpdate();
+                }
+            } else {
+                setToast({
+                    message: response.message || t('dashboard.tutor.myClass.detail.studentsTab.tutor.removeError') || 'Không thể xóa học viên',
+                    type: 'error'
+                });
+            }
+        } catch (error: any) {
+            console.error('Failed to remove student:', error);
+            setToast({
+                message: error.response?.data?.message || t('dashboard.tutor.myClass.detail.studentsTab.tutor.removeError') || 'Không thể xóa học viên',
+                type: 'error'
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     return (
         <div className="space-y-4">
+            {/* Toast notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -106,7 +174,11 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
                                             <FiMessageCircle className="w-4 h-4" />
                                         </button>
                                         {!isStudent && (
-                                            <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title={t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteStudent')}>
+                                            <button
+                                                onClick={() => openDeleteModal(student.id, studentName)}
+                                                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                title={t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteStudent')}
+                                            >
                                                 <FiTrash2 className="w-4 h-4" />
                                             </button>
                                         )}
@@ -169,6 +241,54 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classData }) => {
                         </button>
                         <button className="flex-1 px-4 py-2.5 bg-[#0b6459] text-white rounded-lg hover:bg-[#094d44] transition-colors font-semibold text-sm">
                             {t('dashboard.tutor.myClass.detail.studentsTab.tutor.addStudentModal.addSelected')}
+                        </button>
+                    </div>
+                </div>
+            </ModalLayout>
+
+            {/* Delete Confirmation Modal */}
+            <ModalLayout
+                isOpen={isDeleteModalOpen}
+                onClose={closeDeleteModal}
+                maxWidth="sm"
+                showCloseButton={true}
+            >
+                <div className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-red-100 rounded-full">
+                            <FiAlertTriangle className="w-6 h-6 text-red-600" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            {t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteConfirm.title') || 'Xác nhận xóa học viên'}
+                        </h3>
+                    </div>
+
+                    <p className="text-gray-600 mb-6">
+                        {t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteConfirm.message', { name: studentToDelete?.name })
+                            || `Bạn có chắc chắn muốn xóa ${studentToDelete?.name} khỏi lớp học này không?`}
+                    </p>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={closeDeleteModal}
+                            disabled={isDeleting}
+                            className="flex-1 px-4 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-semibold text-sm disabled:opacity-50"
+                        >
+                            {t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteConfirm.cancel') || 'Hủy'}
+                        </button>
+                        <button
+                            onClick={handleRemoveStudent}
+                            disabled={isDeleting}
+                            className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    {t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteConfirm.deleting') || 'Đang xóa...'}
+                                </>
+                            ) : (
+                                t('dashboard.tutor.myClass.detail.studentsTab.tutor.deleteConfirm.confirm') || 'Xóa học viên'
+                            )}
                         </button>
                     </div>
                 </div>
