@@ -194,8 +194,28 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             kafkaProducer.sendTutorApprovedEvent(event);
             log.info("Sent tutor approved notification for: {}", tutorId);
 
-            // Send to search service
-            TutorIndexEvent indexEvent = tutorIndexEventMapper.toEvent(tutor, "CREATED");
+            // Refresh tutor from DB to access lazy collections
+            entityManager.flush();
+            entityManager.clear();
+            Tutor tutorWithRelationships = tutorRepository.findById(tutorId)
+                    .orElseThrow(() -> new RuntimeException("Tutor not found after save: " + tutorId));
+
+            // Access lazy collections (Hibernate will fetch them in current transaction)
+            int subjectsCount = tutorWithRelationships.getSubjects() != null
+                    ? tutorWithRelationships.getSubjects().size()
+                    : 0;
+            int languagesCount = tutorWithRelationships.getLanguages() != null
+                    ? tutorWithRelationships.getLanguages().size()
+                    : 0;
+            int availabilitiesCount = tutorWithRelationships.getAvailabilities() != null
+                    ? tutorWithRelationships.getAvailabilities().size()
+                    : 0;
+
+            log.info("Refreshed tutor with relationships - subjects: {}, languages: {}, availabilities: {}",
+                    subjectsCount, languagesCount, availabilitiesCount);
+
+            // Send to search service with full relationships
+            TutorIndexEvent indexEvent = tutorIndexEventMapper.toEvent(tutorWithRelationships, "CREATED");
             kafkaProducer.sendTutorIndexEvent(indexEvent);
             log.info("Published tutor index event for new tutor: {}", tutorId);
 

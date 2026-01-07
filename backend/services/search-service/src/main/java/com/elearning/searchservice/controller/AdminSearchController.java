@@ -22,6 +22,7 @@ public class AdminSearchController {
 
     private final BulkReindexService bulkReindexService;
     private final CategorySubjectSyncScheduler categorySubjectSyncScheduler;
+    private final com.elearning.searchservice.repository.TutorSearchRepository tutorSearchRepository;
 
     /**
      * Trigger bulk reindex of all tutors
@@ -30,9 +31,9 @@ public class AdminSearchController {
     @PostMapping("/reindex-tutors")
     public ResponseEntity<ApiResponse<BulkReindexService.ReindexResult>> reindexAllTutors() {
         log.info("Admin triggered bulk reindex of all tutors");
-        
+
         BulkReindexService.ReindexResult result = bulkReindexService.reindexAllTutors();
-        
+
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
@@ -44,9 +45,9 @@ public class AdminSearchController {
     @DeleteMapping("/tutors")
     public ResponseEntity<ApiResponse<Void>> deleteAllTutors() {
         log.warn("Admin triggered deletion of all tutors from index");
-        
+
         bulkReindexService.deleteAllTutors();
-        
+
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -57,10 +58,38 @@ public class AdminSearchController {
     @PostMapping("/sync-categories-subjects")
     public ResponseEntity<ApiResponse<String>> syncCategoriesAndSubjects() {
         log.info("Admin triggered manual sync of categories and subjects");
-        
+
         categorySubjectSyncScheduler.triggerManualSync();
-        
+
         return ResponseEntity.ok(ApiResponse.success("Sync completed successfully"));
     }
-}
 
+    /**
+     * Debug endpoint to inspect tutor documents in ES
+     * GET /v1/admin/search/debug/tutors
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/debug/tutors")
+    public ResponseEntity<ApiResponse<java.util.List<java.util.Map<String, Object>>>> debugTutors() {
+        log.info("Debug: Fetching all tutor documents from ES");
+
+        java.util.List<java.util.Map<String, Object>> tutorDebugInfo = new java.util.ArrayList<>();
+
+        tutorSearchRepository.findAll().forEach(tutor -> {
+            java.util.Map<String, Object> info = new java.util.LinkedHashMap<>();
+            info.put("id", tutor.getId());
+            info.put("fullNameVi", tutor.getFullNameVi());
+            info.put("isActive", tutor.getIsActive());
+            info.put("categoryIds", tutor.getCategoryIds());
+            info.put("subjectIds", tutor.getSubjectIds());
+            info.put("categories", tutor.getCategories());
+            info.put("subjects", tutor.getSubjects());
+            info.put("currentSessionFee", tutor.getCurrentSessionFee());
+            info.put("availableDays", tutor.getAvailableDays());
+            tutorDebugInfo.add(info);
+        });
+
+        log.info("Debug: Found {} tutors in ES", tutorDebugInfo.size());
+
+        return ResponseEntity.ok(ApiResponse.success(tutorDebugInfo));
+    }
+}

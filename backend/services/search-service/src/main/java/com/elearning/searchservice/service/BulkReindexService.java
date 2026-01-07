@@ -35,37 +35,36 @@ public class BulkReindexService {
      */
     public ReindexResult reindexAllTutors() {
         log.info("Starting bulk reindex of all tutors");
-        
+
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failureCount = new AtomicInteger(0);
-        
+
         try {
             // Fetch all tutors from Tutor Service
             // TODO: Implement pagination for large datasets
-            String url = tutorServiceUrl + "/api/internal/tutors/export";
-            
+            String url = tutorServiceUrl + "/api/v1/internal/tutors/export";
+
             log.info("Fetching tutors from: {}", url);
-            
+
             ResponseEntity<TutorIndexEvent[]> response = restTemplate.getForEntity(
-                    url, 
-                    TutorIndexEvent[].class
-            );
-            
+                    url,
+                    TutorIndexEvent[].class);
+
             if (response.getBody() == null) {
                 log.warn("No tutors returned from Tutor Service");
                 return new ReindexResult(0, 0, "No tutors to index");
             }
-            
+
             List<TutorIndexEvent> tutors = Arrays.asList(response.getBody());
             log.info("Fetched {} tutors from Tutor Service", tutors.size());
-            
+
             // Index each tutor
             tutors.forEach(event -> {
                 try {
                     TutorDocument document = tutorIndexMapper.toDocument(event);
                     tutorSearchRepository.save(document);
                     successCount.incrementAndGet();
-                    
+
                     if (successCount.get() % 100 == 0) {
                         log.info("Indexed {} tutors so far...", successCount.get());
                     }
@@ -74,23 +73,21 @@ public class BulkReindexService {
                     failureCount.incrementAndGet();
                 }
             });
-            
-            log.info("Bulk reindex completed: success={}, failures={}", 
+
+            log.info("Bulk reindex completed: success={}, failures={}",
                     successCount.get(), failureCount.get());
-            
+
             return new ReindexResult(
-                    successCount.get(), 
-                    failureCount.get(), 
-                    "Reindex completed successfully"
-            );
-            
+                    successCount.get(),
+                    failureCount.get(),
+                    "Reindex completed successfully");
+
         } catch (Exception e) {
             log.error("Failed to bulk reindex tutors", e);
             return new ReindexResult(
-                    successCount.get(), 
-                    failureCount.get(), 
-                    "Reindex failed: " + e.getMessage()
-            );
+                    successCount.get(),
+                    failureCount.get(),
+                    "Reindex failed: " + e.getMessage());
         }
     }
 
@@ -109,6 +106,6 @@ public class BulkReindexService {
     public record ReindexResult(
             int successCount,
             int failureCount,
-            String message
-    ) {}
+            String message) {
+    }
 }

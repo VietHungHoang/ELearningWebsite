@@ -9,27 +9,31 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SearchRoutesConfig {
 
-    @Value("${services.search-service.url}")
-    private String searchServiceUrl;
+        @Value("${services.search-service.url}")
+        private String searchServiceUrl;
 
-    @Value("${services.bff-service.url}")
-    private String bffServiceUrl;
+        @Value("${services.bff-service.url}")
+        private String bffServiceUrl;
 
-    @Bean
-    public RouteLocator searchServiceRoutes(RouteLocatorBuilder builder) {
-        return builder.routes()
-                // Direct routes
-                .route("tutor-search", r -> r
-                        .path("/api/v1/public/search/**")
-                        .filters(f -> f
-                                .rewritePath(
-                                        "/api/v1/public/(?<rest>.*)",
-                                        "/api/v1/bff/${rest}"
-                                )
-                        )
-                        .uri(bffServiceUrl)
-                )
-                
-                .build();
-    }
+        @Bean
+        public RouteLocator searchServiceRoutes(RouteLocatorBuilder builder) {
+                return builder.routes()
+                                // Direct routes
+                                .route("tutor-search", r -> r
+                                                .path("/api/v1/public/search/tutors")
+                                                .filters(f -> f
+                                                                .rewritePath(
+                                                                                "/api/v1/public/(?<rest>.*)",
+                                                                                "/api/v1/bff/${rest}"))
+                                                .uri(bffServiceUrl))
+                                .route("tutor-search-suggestion", r -> r
+                                                .path("/api/v1/public/search/tutors/suggestions")
+                                                .filters(f -> f
+                                                                .rewritePath(
+                                                                                "/api/v1/public/(?<rest>.*)",
+                                                                                "/api/v1/${rest}"))
+                                                .uri(searchServiceUrl))
+
+                                .build();
+        }
 }

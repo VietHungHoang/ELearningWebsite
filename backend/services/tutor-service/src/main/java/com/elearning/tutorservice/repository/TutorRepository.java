@@ -30,4 +30,28 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
         * Find all verified tutors for search indexing
         */
        List<Tutor> findByIsVerifiedTrue();
+
+       /**
+        * Find tutor with subjects for search indexing
+        */
+       @Query("SELECT t FROM Tutor t " +
+                     "LEFT JOIN FETCH t.subjects " +
+                     "WHERE t.id = :tutorId")
+       java.util.Optional<Tutor> findByIdWithSubjects(@Param("tutorId") UUID tutorId);
+
+       /**
+        * Find tutor with languages for search indexing
+        */
+       @Query("SELECT t FROM Tutor t " +
+                     "LEFT JOIN FETCH t.languages " +
+                     "WHERE t.id = :tutorId")
+       java.util.Optional<Tutor> findByIdWithLanguages(@Param("tutorId") UUID tutorId);
+
+       /**
+        * Find tutor with availabilities for search indexing
+        */
+       @Query("SELECT t FROM Tutor t " +
+                     "LEFT JOIN FETCH t.availabilities " +
+                     "WHERE t.id = :tutorId")
+       java.util.Optional<Tutor> findByIdWithAvailabilities(@Param("tutorId") UUID tutorId);
 }
