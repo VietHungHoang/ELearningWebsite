@@ -1,5 +1,5 @@
 // Environment configuration
 export const environment = {
     production: false,
-    apiUrl: 'https://1mf17bgk-8081.asse.devtunnels.ms/api'
+    apiUrl: 'http://13.236.4.126:8081/api'
 };
