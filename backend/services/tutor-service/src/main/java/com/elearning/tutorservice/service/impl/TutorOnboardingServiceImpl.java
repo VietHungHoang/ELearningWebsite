@@ -197,8 +197,17 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             // Refresh tutor from DB with all relationships for proper indexing
             entityManager.flush();
             entityManager.clear(); // Clear persistence context to force re-fetch
-            Tutor tutorWithRelationships = tutorRepository.findByIdWithRelationships(tutorId)
+
+            // Load subjects and languages (max 2 bags at a time due to Hibernate)
+            Tutor tutorWithRelationships = tutorRepository.findByIdWithSubjectsAndLanguages(tutorId)
                     .orElseThrow(() -> new RuntimeException("Tutor not found after save: " + tutorId));
+
+            // Load availabilities separately
+            Tutor tutorWithAvailabilities = tutorRepository.findByIdWithAvailabilities(tutorId).orElse(null);
+            if (tutorWithAvailabilities != null) {
+                tutorWithRelationships.setAvailabilities(tutorWithAvailabilities.getAvailabilities());
+            }
+
             log.info("Refreshed tutor with relationships - subjects: {}, languages: {}, availabilities: {}",
                     tutorWithRelationships.getSubjects() != null ? tutorWithRelationships.getSubjects().size() : 0,
                     tutorWithRelationships.getLanguages() != null ? tutorWithRelationships.getLanguages().size() : 0,

@@ -36,18 +36,24 @@ public class InternalTutorController {
     public ResponseEntity<List<TutorIndexEvent>> exportAllTutors() {
         log.info("Exporting all verified tutors for search indexing");
 
-        // Get only verified tutors with relationships
-        List<Tutor> tutors = tutorRepository.findAllVerifiedWithRelationships();
+        // Get only verified tutors with subjects and languages (max 2 bags due to
+        // Hibernate)
+        List<Tutor> tutors = tutorRepository.findAllVerifiedWithSubjectsAndLanguages();
 
         log.info("Found {} verified tutors to export", tutors.size());
 
         List<TutorIndexEvent> events = tutors.stream()
                 .map(tutor -> {
+                    // Load availabilities separately to avoid MultipleBagFetchException
+                    tutorRepository.findByIdWithAvailabilities(tutor.getId())
+                            .ifPresent(t -> tutor.setAvailabilities(t.getAvailabilities()));
+
                     TutorIndexEvent event = tutorIndexEventMapper.toEvent(tutor, "CREATED");
-                    log.debug("Exported tutor {} - subjects: {}, languages: {}",
+                    log.debug("Exported tutor {} - subjects: {}, languages: {}, availabilities: {}",
                             tutor.getId(),
                             tutor.getSubjects() != null ? tutor.getSubjects().size() : 0,
-                            tutor.getLanguages() != null ? tutor.getLanguages().size() : 0);
+                            tutor.getLanguages() != null ? tutor.getLanguages().size() : 0,
+                            tutor.getAvailabilities() != null ? tutor.getAvailabilities().size() : 0);
                     return event;
                 })
                 .collect(Collectors.toList());
