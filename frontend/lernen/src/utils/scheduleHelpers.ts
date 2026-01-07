@@ -167,8 +167,25 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
  */
 export const convertUtcTimeToLocal = (utcTime: string): string => {
   try {
+    if (!utcTime || typeof utcTime !== 'string') {
+      console.warn('Invalid UTC time input:', utcTime);
+      return utcTime || '00:00';
+    }
+    
     // Parse UTC time (HH:mm format)
-    const [hours, minutes] = utcTime.split(':').map(Number);
+    const timeParts = utcTime.split(':');
+    if (timeParts.length < 2) {
+      console.warn('Invalid time format:', utcTime);
+      return utcTime;
+    }
+    
+    const hours = parseInt(timeParts[0], 10);
+    const minutes = parseInt(timeParts[1], 10);
+    
+    if (isNaN(hours) || isNaN(minutes)) {
+      console.warn('Invalid time values:', utcTime);
+      return utcTime;
+    }
     
     // Create a date object with UTC time (using today's date)
     const today = new Date();
@@ -188,8 +205,8 @@ export const convertUtcTimeToLocal = (utcTime: string): string => {
     // Format back to HH:mm
     return `${String(localHours).padStart(2, '0')}:${String(localMinutes).padStart(2, '0')}`;
   } catch (error) {
-    console.error('Error converting UTC time to local:', error);
-    return utcTime; // Return original time if conversion fails
+    console.error('Error converting UTC time to local:', error, utcTime);
+    return utcTime || '00:00'; // Return original time if conversion fails
   }
 };
 

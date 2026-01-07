@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import commonUtils from '../../../../utils/commonUtils';
 import type { TutorSearchFilter } from '../../../../types/api';
@@ -6,7 +6,7 @@ import type { Category, Language, Subject, Timezone } from '../../../../types/co
 import { useTranslation } from 'react-i18next';
 import { tutorService } from '../../../../services/tutorService';
 import { useCurrency } from '../../../../context/CurrencyContext';
-import { convertCurrency, formatCurrency } from '../../../../utils/currencyHelper';
+import { convertCurrency, formatCurrency, convertToVND } from '../../../../utils/currencyHelper';
 
 // --- Type Definitions ---
 interface TutorSearchFiltersProps {
@@ -275,11 +275,11 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const searchTimeoutRef = useRef<number | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Helper function to get localized name
-    const getLocalizedName = (item: Category | Subject): string => {
+    // Helper function to get localized name - memoized to prevent unnecessary re-renders
+    const getLocalizedName = useCallback((item: Category | Subject): string => {
         const isVietnamese = i18n.language === 'vi';
         return isVietnamese ? item.nameVi : item.nameEn;
-    };
+    }, [i18n.language]);
 
     // Debounced fuzzy search function
     const debouncedFuzzySearch = useCallback((searchTerm: string) => {
@@ -375,13 +375,14 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     // Loading states for lazy loading
     const [loadingFilterData, setLoadingFilterData] = useState<boolean>(false);
 
-    const placeholders = {
+    // Memoize placeholders to prevent unnecessary re-renders
+    const placeholders = useMemo(() => ({
         category: t('findTutors.filters.placeholders.chooseCategory'),
         subject: t('findTutors.filters.placeholders.chooseSubject'),
         languages: t('findTutors.filters.placeholders.selectLanguages'),
         sortBy: t('findTutors.filters.placeholders.sortBy'),
         timezone: t('findTutors.filters.placeholders.selectTimezone'),
-    };
+    }), [t]);
 
     const [selectedValues, setSelectedValues] = useState(() => {
         // Auto-detect timezone synchronously during initialization
@@ -472,7 +473,8 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         t('findTutors.filters.sortOptions.oldestFirst')
     ];
     const languageOptions: string[] = languages.map(lang => lang.name);
-    const availabilityDays = [
+    // Memoize availabilityDays to prevent unnecessary re-renders
+    const availabilityDays = useMemo(() => [
         t('findTutors.filters.availability.days.mon'),
         t('findTutors.filters.availability.days.tue'),
         t('findTutors.filters.availability.days.wed'),
@@ -480,7 +482,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         t('findTutors.filters.availability.days.fri'),
         t('findTutors.filters.availability.days.sat'),
         t('findTutors.filters.availability.days.sun')
-    ];
+    ], [t]);
     const availabilityTimes = [
         t('findTutors.filters.availability.times.morning'),
         t('findTutors.filters.availability.times.afternoon'),
@@ -522,29 +524,104 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [openDropdown, setOpenDropdown]);
 
-    // Trigger filter change when any filter updates (debounced) - keyword is NOT included here
-    // Keyword search is triggered separately via onSearch when user presses Enter
+    // Store previous filters to compare and avoid unnecessary API calls
+    const previousFiltersRef = useRef<string>('');
+    const onFilterChangeRef = useRef(onFilterChange);
+
+    // Update ref when onFilterChange changes
+    useEffect(() => {
+        onFilterChangeRef.current = onFilterChange;
+    }, [onFilterChange]);
+
+    // Trigger filter change when any filter updates (debounced)
     useEffect(() => {
         const timer = setTimeout(() => {
+            // Get category ID instead of name
+            const selectedCategory = selectedValues.category !== placeholders.category
+                ? categories.find(cat => getLocalizedName(cat) === selectedValues.category)
+                : null;
+
+            // Get subject ID instead of name
+            const selectedSubject = selectedValues.subject !== placeholders.subject
+                ? subjects.find(sub => getLocalizedName(sub) === selectedValues.subject)
+                : null;
+
+            // Convert fee from USD to VND (API expects VND)
+            const minFeeVND = convertToVND(feeRange[0], 'USD');
+            const maxFeeVND = convertToVND(feeRange[1], 'USD');
+
+            // Map language names to codes, ensure clean code without prefix
+            const languageCodes = selectedLanguages.length > 0 ? selectedLanguages.map(name => {
+                const lang = languages.find(l => l.name === name);
+                if (lang) {
+                    // Remove any prefix if exists (e.g., "languageCode-en" -> "en")
+                    const code = lang.code.replace(/^languageCode-?/i, '');
+                    return code;
+                }
+                return name;
+            }).filter(code => code) : undefined;
+
+            // Parse availability slots to send to API
+            // Format: "Monday-Morning" -> { day: 1, timeSlot: "Morning" }
+            const availabilitySlots = selectedAvailability.length > 0
+                ? selectedAvailability.map(slot => {
+                    const [day, time] = slot.split('-');
+                    const dayIndex = availabilityDays.findIndex(d => d === day);
+                    // Map day name to day number (1=Monday, 2=Tuesday, etc.)
+                    const dayNumber = dayIndex >= 0 ? dayIndex + 1 : null;
+                    return { day: dayNumber, timeSlot: time };
+                }).filter((slot): slot is { day: number; timeSlot: string } => slot.day !== null)
+                : undefined;
+
             const filters: TutorSearchFilter = {
-                category: selectedValues.category !== placeholders.category ? selectedValues.category : undefined,
-                subject: selectedValues.subject !== placeholders.subject ? selectedValues.subject : undefined,
-                languageCodes: selectedLanguages.length > 0 ? selectedLanguages.map(name => {
-                    const lang = languages.find(l => l.name === name);
-                    return lang ? lang.code : name;
-                }) : undefined,
+                category: selectedCategory?.id,
+                subject: selectedSubject?.id,
+                languageCodes: languageCodes,
                 // timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined, // Removed per user request: timezone is not for search filtering
                 sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
                 sessionType: activeTab === 'Private Sessions' ? '1-on-1' : activeTab === 'Group Sessions' ? 'Group' : undefined,
-                // keyword removed - only triggered on Enter via onSearch
-                minFee: feeRange[0],
-                maxFee: feeRange[1],
+                keyword: keyword.trim() || undefined,
+                minFee: minFeeVND,
+                maxFee: maxFeeVND,
+                availability: availabilitySlots,
             };
-            onFilterChange(filters);
+
+            // Compare with previous filters to avoid unnecessary API calls
+            const filtersString = JSON.stringify(filters);
+            if (filtersString === previousFiltersRef.current) {
+                // Filters haven't changed, skip API call
+                console.log('Filters unchanged, skipping API call');
+                return;
+            }
+
+            // Update previous filters and call API
+            previousFiltersRef.current = filtersString;
+            onFilterChangeRef.current(filters);
         }, 300); // Debounce 300ms to avoid multiple API calls
 
         return () => clearTimeout(timer);
-    }, [selectedValues, selectedLanguages, feeRange, activeTab]); // keyword removed from dependencies
+    }, [
+        // Only include actual state values that should trigger filter changes
+        selectedValues.category,
+        selectedValues.subject,
+        selectedValues.sortBy,
+        selectedLanguages,
+        feeRange,
+        activeTab,
+        keyword,
+        selectedAvailability,
+        // Include data arrays - these should be stable after initial load
+        categories,
+        subjects,
+        languages,
+        // Memoized values won't cause re-renders
+        placeholders.category,
+        placeholders.subject,
+        placeholders.sortBy,
+        availabilityDays,
+        getLocalizedName
+        // Note: onFilterChange is stored in ref to avoid re-triggering when parent re-renders
+    ]);
 
     return (
         <>

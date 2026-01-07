@@ -101,7 +101,7 @@ const FindTutorsPage: React.FC = () => {
                     </p>
                 </div>
 
-                <TutorSearchFilters onFilterChange={(filters) => handleFilterChange(filters)} onSearch={handleSearch} />
+                <TutorSearchFilters onFilterChange={handleFilterChange} onSearch={handleSearch} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
                     <div className="lg:col-span-3">

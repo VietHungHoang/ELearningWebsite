@@ -45,15 +45,17 @@ public class ConversationServiceImpl implements ConversationService {
     public ConversationResponse createConversation(CreateConversationRequest request, UUID createdBy) {
         log.info("Creating conversation: type={}, createdBy={}", request.getType(), createdBy);
 
-        // Save user info to cache if provided
-        if (request.getParticipantInfos() != null && !request.getParticipantInfos().isEmpty()) {
-            userCacheService.saveOrUpdateUsers(request.getParticipantInfos());
-        }
-
-        // Validate participants
+        // Validate participants first
         List<UUID> participantIds = new ArrayList<>(request.getParticipantIds());
         if (!participantIds.contains(createdBy)) {
             participantIds.add(createdBy);
+        }
+
+        // IMPORTANT: Save user info to cache BEFORE checking if conversation exists
+        // This ensures user info is always updated even for existing conversations
+        if (request.getParticipantInfos() != null && !request.getParticipantInfos().isEmpty()) {
+            userCacheService.saveOrUpdateUsers(request.getParticipantInfos());
+            log.debug("Updated user cache for {} participants", request.getParticipantInfos().size());
         }
 
         // For one-to-one, check if conversation already exists
@@ -64,6 +66,7 @@ public class ConversationServiceImpl implements ConversationService {
 
             var existing = conversationRepository.findOneToOneConversation(participantIds);
             if (existing.isPresent()) {
+                // User cache has been updated above, so mapToResponse will use the new data
                 return mapToResponse(existing.get(), null);
             }
         }

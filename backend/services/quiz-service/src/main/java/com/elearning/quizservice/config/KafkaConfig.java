@@ -22,8 +22,10 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfig {
 
-    private final String bootstrapServers = "kafka:9092";
-    private String groupId = "tutor-service-group";
+    @org.springframework.beans.factory.annotation.Value("${KAFKA_BOOTSTRAP_SERVERS}")
+    private String bootstrapServers;
+
+    private String groupId = "quiz-service-group";
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {

@@ -86,7 +86,7 @@ const MyClassPage: React.FC = () => {
         try {
             const date = new Date(dateString);
             const isVietnamese = i18n.language === 'vi';
-            
+
             if (isVietnamese) {
                 return date.toLocaleDateString('vi-VN', {
                     day: '2-digit',
@@ -208,9 +208,9 @@ const MyClassPage: React.FC = () => {
         try {
             setIsDeleting(true);
             await classService.deleteClass(classToDelete.id);
-            setToast({ 
-                message: t('dashboard.tutor.myClass.deleteSuccess', { classTitle: classToDelete.title }), 
-                type: 'success' 
+            setToast({
+                message: t('dashboard.tutor.myClass.deleteSuccess', { classTitle: classToDelete.title }),
+                type: 'success'
             });
             setIsDeleteModalOpen(false);
             setClassToDelete(null);
@@ -218,9 +218,9 @@ const MyClassPage: React.FC = () => {
             await refetchClasses();
         } catch (error) {
             console.error('Failed to delete class:', error);
-            setToast({ 
-                message: t('dashboard.tutor.myClass.deleteError'), 
-                type: 'error' 
+            setToast({
+                message: t('dashboard.tutor.myClass.deleteError'),
+                type: 'error'
             });
         } finally {
             setIsDeleting(false);
@@ -232,8 +232,14 @@ const MyClassPage: React.FC = () => {
         setClassToDelete(null);
     };
 
-    const handleCreateClass = (classData: ClassFormData) => {
+    const handleCreateClass = (classData: ClassFormData, paginatedData?: import('../../../../types/api').PaginatedResponse<ClassTable>) => {
         console.log('Creating class:', classData);
+        // If paginated data is provided, update the state directly without refetching
+        if (paginatedData) {
+            setClasses(paginatedData.content);
+            setTotalElements(paginatedData.totalElements);
+            setCurrentPage(1); // Reset to first page to see the newly created class
+        }
     };
 
     const filteredClasses = useMemo(() => {
@@ -365,8 +371,8 @@ const MyClassPage: React.FC = () => {
                                         <td className="p-4">
                                             <div className="max-w-xs">
                                                 <p className="font-semibold text-gray-800 truncate" title={!isTitleNull(classData.title) ? (classData.title || '') : (classData.students[0]?.fullName || '')}>
-                                                    {!isTitleNull(classData.title) 
-                                                        ? (classData.title || '') 
+                                                    {!isTitleNull(classData.title)
+                                                        ? (classData.title || '')
                                                         : (state.user?.role === 'tutor' && classData.students.length > 0 ? classData.students[0].fullName : '-')}
                                                 </p>
                                             </div>

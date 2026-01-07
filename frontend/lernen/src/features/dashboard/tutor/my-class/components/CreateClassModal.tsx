@@ -18,7 +18,7 @@ interface Schedule {
 interface CreateClassModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (classData: ClassFormData) => void;
+    onSubmit: (classData: ClassFormData, paginatedData?: import('../../../../../types/api').PaginatedResponse<import('../../../../../types/class').ClassTable>) => void;
 }
 
 export interface ClassFormData {
@@ -64,7 +64,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
         subject: '',
         category: '',
         tuitionFee: 0,
-        maxStudents: 1,
+        maxStudents: 2,
         description: '',
         schedules: [{ day: '', time: '' }]
     });
@@ -82,44 +82,86 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
     const transformFormDataToApiRequest = (formData: ClassFormData): CreateClassRequest => {
         // formData.subject now stores the subject ID directly
 
-        // Map day names to numbers (Monday = 1, Tuesday = 2, etc.)
+        // Map day names to numbers (Sunday = 0, Monday = 1, ..., Saturday = 6)
         const dayNameToNumber = (dayName: string): number => {
             const dayMap: Record<string, number> = {
+                [t('common.days.sunday')]: 0,
                 [t('common.days.monday')]: 1,
                 [t('common.days.tuesday')]: 2,
                 [t('common.days.wednesday')]: 3,
                 [t('common.days.thursday')]: 4,
                 [t('common.days.friday')]: 5,
                 [t('common.days.saturday')]: 6,
-                [t('common.days.sunday')]: 7,
             };
-            return dayMap[dayName] || 1; // Default to Monday if not found
+            return dayMap[dayName] ?? 1; // Default to Monday if not found
         };
 
         // Convert time from "10:00 AM" format to "10:00" (24h format)
         const convertTimeTo24Hour = (timeStr: string): string => {
             if (!timeStr) return '';
-            
+
             // If already in 24h format (HH:mm), return as is
             if (/^\d{1,2}:\d{2}$/.test(timeStr)) {
                 return timeStr;
             }
-            
+
             // Parse "10:00 AM" or "1:00 PM" format
             const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
             if (!match) return timeStr; // Return original if can't parse
-            
+
             let hours = parseInt(match[1], 10);
             const minutes = match[2];
             const period = match[3].toUpperCase();
-            
+
             if (period === 'PM' && hours !== 12) {
                 hours += 12;
             } else if (period === 'AM' && hours === 12) {
                 hours = 0;
             }
-            
+
             return `${hours.toString().padStart(2, '0')}:${minutes}`;
+        };
+
+        // Convert local time and dayOfWeek to UTC+0
+        // dayOfWeek: 0=Sunday, 1=Monday, ..., 6=Saturday
+        // Example: Friday (5) 8:00 AM in UTC+7 -> Thursday (4) 1:00 AM in UTC+0
+        const convertToUtc = (dayOfWeek: number, localTime: string): { dayOfWeek: number; time: string } => {
+            // Get timezone offset in hours (e.g., UTC+7 = -420 minutes = +7 hours)
+            const timezoneOffsetMinutes = new Date().getTimezoneOffset(); // This is negative for UTC+ timezones
+            const timezoneOffsetHours = -timezoneOffsetMinutes / 60; // Convert to positive hours for UTC+
+
+            // Parse local time
+            const [hoursStr, minutesStr] = localTime.split(':');
+            let localHours = parseInt(hoursStr, 10);
+            const localMinutes = parseInt(minutesStr, 10);
+
+            // Convert to UTC: subtract timezone offset
+            // For UTC+7: local 8:00 -> UTC 8:00 - 7 = 1:00
+            let utcHours = localHours - timezoneOffsetHours;
+            let utcMinutes = localMinutes;
+
+            // Handle day rollover (using 0-6 range)
+            let adjustedDayOfWeek = dayOfWeek;
+            if (utcHours < 0) {
+                // Rolled back to previous day
+                utcHours += 24;
+                adjustedDayOfWeek = dayOfWeek - 1;
+                if (adjustedDayOfWeek < 0) {
+                    adjustedDayOfWeek = 6; // Wrap to Saturday
+                }
+            } else if (utcHours >= 24) {
+                // Rolled forward to next day
+                utcHours -= 24;
+                adjustedDayOfWeek = dayOfWeek + 1;
+                if (adjustedDayOfWeek > 6) {
+                    adjustedDayOfWeek = 0; // Wrap to Sunday
+                }
+            }
+
+            return {
+                dayOfWeek: adjustedDayOfWeek,
+                time: `${Math.floor(utcHours).toString().padStart(2, '0')}:${utcMinutes.toString().padStart(2, '0')}`
+            };
         };
 
         return {
@@ -130,10 +172,15 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             description: formData.description,
             schedules: formData.schedules
                 .filter(schedule => schedule.day && schedule.time)
-                .map(schedule => ({
-                    dayOfWeek: Number(dayNameToNumber(schedule.day)), // Ensure it's a number, not string
-                    time: convertTimeTo24Hour(schedule.time)
-                }))
+                .map(schedule => {
+                    const localDayOfWeek = Number(dayNameToNumber(schedule.day));
+                    const localTime = convertTimeTo24Hour(schedule.time);
+                    const utcSchedule = convertToUtc(localDayOfWeek, localTime);
+                    return {
+                        dayOfWeek: utcSchedule.dayOfWeek,
+                        time: utcSchedule.time
+                    };
+                })
         };
     };
 
@@ -182,7 +229,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
         const hasValidTitle = formData.classTitle.trim() !== '';
         const hasValidSubject = formData.subject !== '';
         const hasValidFee = formData.tuitionFee >= 0;
-        const hasValidStudents = formData.maxStudents >= 1;
+        const hasValidStudents = formData.maxStudents >= 2;
         const hasValidDescription = formData.description.trim() !== '';
         const hasValidSchedule = formData.schedules.some(schedule => schedule.day !== '' && schedule.time !== '');
 
@@ -202,8 +249,8 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             const response = await classService.createClass(apiRequest);
 
             if (response.success) {
-                // Call the parent onSubmit with the original form data
-                onSubmit(formData);
+                // Call the parent onSubmit with the original form data and paginated response
+                onSubmit(formData, response.data);
 
                 // Reset form
                 setFormData({
@@ -211,7 +258,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                     subject: '',
                     category: '',
                     tuitionFee: 0,
-                    maxStudents: 1,
+                    maxStudents: 2,
                     description: '',
                     schedules: [{ day: '', time: '' }]
                 });
@@ -241,7 +288,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                 subject: '',
                 category: '',
                 tuitionFee: 0,
-                maxStudents: 1,
+                maxStudents: 2,
                 description: '',
                 schedules: [{ day: '', time: '' }]
             });
@@ -257,7 +304,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
             subject: '',
             category: '',
             tuitionFee: 0,
-            maxStudents: 1,
+            maxStudents: 2,
             description: '',
             schedules: [{ day: '', time: '' }]
         });
@@ -324,9 +371,9 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                 </label>
                                 <input
                                     type="number"
-                                    min="1"
+                                    min="2"
                                     value={formData.maxStudents}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, maxStudents: parseInt(e.target.value) || 1 }))}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, maxStudents: Math.max(2, parseInt(e.target.value) || 2) }))}
                                     className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out placeholder:text-gray-300"
                                     placeholder={t('dashboard.tutor.myClass.createModal.maxStudentsPlaceholder')}
                                     required
@@ -338,20 +385,20 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                 <CustomDropdown2
                                     label={t('dashboard.tutor.myClass.createModal.category')}
                                     options={categories.map(cat => i18n.language === 'vi' ? cat.nameVi : cat.nameEn)}
-                                    selectedValue={formData.category 
-                                        ? (categories.find(cat => cat.id === formData.category) 
-                                            ? (i18n.language === 'vi' 
-                                                ? categories.find(cat => cat.id === formData.category)!.nameVi 
+                                    selectedValue={formData.category
+                                        ? (categories.find(cat => cat.id === formData.category)
+                                            ? (i18n.language === 'vi'
+                                                ? categories.find(cat => cat.id === formData.category)!.nameVi
                                                 : categories.find(cat => cat.id === formData.category)!.nameEn)
                                             : '')
                                         : ''}
                                     placeholder={loadingCategories ? t('common.loading') : t('dashboard.tutor.myClass.createModal.categoryPlaceholder')}
                                     onSelect={(value: string) => {
-                                        const selectedCategory = categories.find(cat => 
+                                        const selectedCategory = categories.find(cat =>
                                             (i18n.language === 'vi' ? cat.nameVi : cat.nameEn) === value
                                         );
-                                        setFormData(prev => ({ 
-                                            ...prev, 
+                                        setFormData(prev => ({
+                                            ...prev,
                                             category: selectedCategory?.id || '',
                                             subject: '' // Reset subject when category changes
                                         }));
@@ -369,24 +416,24 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                     label={<>{t('dashboard.tutor.myClass.createModal.subject')} <span className="text-red-500">*</span></>}
                                     options={(() => {
                                         // Filter subjects by selected category
-                                        const filteredSubjects = formData.category 
+                                        const filteredSubjects = formData.category
                                             ? subjects.filter(sub => sub.categoryId === formData.category)
                                             : subjects;
                                         return filteredSubjects.map(sub => i18n.language === 'vi' ? sub.nameVi : sub.nameEn);
                                     })()}
-                                    selectedValue={formData.subject 
-                                        ? (subjects.find(sub => sub.id === formData.subject) 
-                                            ? (i18n.language === 'vi' 
-                                                ? subjects.find(sub => sub.id === formData.subject)!.nameVi 
+                                    selectedValue={formData.subject
+                                        ? (subjects.find(sub => sub.id === formData.subject)
+                                            ? (i18n.language === 'vi'
+                                                ? subjects.find(sub => sub.id === formData.subject)!.nameVi
                                                 : subjects.find(sub => sub.id === formData.subject)!.nameEn)
                                             : '')
                                         : ''}
                                     placeholder={loadingSubjects ? t('common.loading') : t('dashboard.tutor.myClass.createModal.subjectPlaceholder')}
                                     onSelect={(value: string) => {
-                                        const filteredSubjects = formData.category 
+                                        const filteredSubjects = formData.category
                                             ? subjects.filter(sub => sub.categoryId === formData.category)
                                             : subjects;
-                                        const selectedSubject = filteredSubjects.find(sub => 
+                                        const selectedSubject = filteredSubjects.find(sub =>
                                             (i18n.language === 'vi' ? sub.nameVi : sub.nameEn) === value
                                         );
                                         setFormData(prev => ({ ...prev, subject: selectedSubject?.id || '' }));
@@ -410,9 +457,9 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                                     value={formData.tuitionFee || ''}
                                     onChange={(e) => {
                                         const value = e.target.value;
-                                        setFormData(prev => ({ 
-                                            ...prev, 
-                                            tuitionFee: value === '' ? 0 : parseInt(value) || 0 
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            tuitionFee: value === '' ? 0 : parseInt(value) || 0
                                         }));
                                     }}
                                     className="w-full px-3 py-2 bg-[#f7f7f8] border border-transparent rounded-lg focus:outline-none focus:border-[#0b6459] focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-300 ease-in-out placeholder:text-gray-300"
@@ -515,8 +562,8 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
                         type="button"
                         disabled={!isFormValid() || isSubmitting}
                         className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${isFormValid() && !isSubmitting
-                                ? 'bg-[#0b6459] text-white hover:bg-[#084c43]'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            ? 'bg-[#0b6459] text-white hover:bg-[#084c43]'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                         onClick={handleSubmit}
                     >

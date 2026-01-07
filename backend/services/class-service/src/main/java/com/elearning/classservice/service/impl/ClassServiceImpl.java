@@ -441,7 +441,7 @@ public class ClassServiceImpl implements ClassService {
 
         @Override
         @Transactional
-        public void createClass(UUID tutorId, CreateClassRequest request) {
+        public Page<ClassTableItem> createClass(UUID tutorId, CreateClassRequest request) {
                 // Create schedules
                 List<ClassSchedule> schedules = request.getSchedules().stream()
                                 .map(scheduleReq -> ClassSchedule.builder()
@@ -469,6 +469,9 @@ public class ClassServiceImpl implements ClassService {
 
                 // Save
                 classRepository.save(classEntity);
+
+                // Return paginated list of tutor's classes sorted by createdAt desc
+                return getMyClass(tutorId, null, 0, 10);
         }
 
         @Override

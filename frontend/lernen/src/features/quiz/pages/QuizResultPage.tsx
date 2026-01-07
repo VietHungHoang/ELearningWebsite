@@ -311,6 +311,7 @@ const QuizResultPage: React.FC = () => {
     const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(new Set());
     const [filter, setFilter] = useState<FilterType>('all');
     const [showConfetti, setShowConfetti] = useState(false);
+    const [isRetaking, setIsRetaking] = useState(false);
     
     // Ref to track if component is mounted and prevent duplicate API calls
     const isMountedRef = useRef(true);
@@ -541,19 +542,38 @@ const QuizResultPage: React.FC = () => {
                     {/* Action Buttons */}
                     <div className="mt-auto space-y-3 pt-4">
                         <button
-                            onClick={() => {
-                                if (quizId) {
+                            onClick={async () => {
+                                if (!quizId) {
+                                    setToast({ message: 'Quiz ID not available for retake', type: 'error' });
+                                    return;
+                                }
+                                
+                                setIsRetaking(true);
+                                try {
+                                    await quizService.startQuizAttempt(quizId);
+                                    // If successful, navigate to quiz taking page
                                     navigate(`/quiz/take/${quizId}`);
-                                } else {
-                                    // TODO: Load quizId from API when implementing real data
-                                    console.warn('QuizId not available for retake');
+                                } catch (err: any) {
+                                    setIsRetaking(false);
+                                    // Check if it's a maximum attempts error
+                                    if (err.isMaxAttemptsReached || err.message?.toLowerCase().includes('maximum number of attempts reached')) {
+                                        setToast({ 
+                                            message: err.message || t('quizResult.errors.maxAttemptsReached'), 
+                                            type: 'error' 
+                                        });
+                                    } else {
+                                        setToast({ 
+                                            message: err.message || t('quizResult.errors.failedToRetake'), 
+                                            type: 'error' 
+                                        });
+                                    }
                                 }
                             }}
-                            disabled={!quizId}
+                            disabled={!quizId || isRetaking}
                             className="w-full px-4 py-3 bg-[#065A46] text-white text-sm font-semibold rounded-xl hover:bg-[#054d3b] transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <IoRefreshOutline className="w-5 h-5" />
-                            {t('quizResult.retakeQuiz')}
+                            {isRetaking ? t('quizResult.retaking') : t('quizResult.retakeQuiz')}
                         </button>
                         <button
                             onClick={() => navigate(quizzesPath)}

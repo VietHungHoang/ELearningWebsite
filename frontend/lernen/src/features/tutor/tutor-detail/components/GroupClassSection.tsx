@@ -11,7 +11,8 @@ import PaymentPromptModal from './PaymentPromptModal';
 import { classService } from '../../../../services/classService';
 import { useAuth } from '../../../../context/AuthContext';
 import { useCurrency } from '../../../../context/CurrencyContext';
-import { formatCurrency, convertFromVND } from '../../../../utils/currencyHelper';
+import { formatCurrency, convertFromVND, formatVNDSimplified } from '../../../../utils/currencyHelper';
+import { convertUtcTimeToLocal } from '../../../../utils/scheduleHelpers';
 
 interface GroupClassSectionProps {
     groupClasses: GroupClass[];
@@ -39,6 +40,10 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
 
     // Helper function to format price with currency conversion
     const formatPrice = (priceInVND: number): string => {
+        // Use simplified format for VND if >= 1,000,000
+        if (selectedCurrency === 'VND') {
+            return formatVNDSimplified(priceInVND);
+        }
         const convertedPrice = convertFromVND(priceInVND, selectedCurrency);
         return formatCurrency(convertedPrice, selectedCurrency);
     };
@@ -50,37 +55,60 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
 
     // Helper function to format schedule display
     const formatSchedule = (schedule: ClassSchedule[], duration: number): string => {
-        if (schedule.length === 0) return '';
+        if (!schedule || schedule.length === 0) return '';
 
         // Map dayOfWeek (1-7, where 1 = Monday) to i18n keys
         const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
-        const dayNames = schedule.map(item => {
-            const dayKey = dayKeys[item.dayOfWeek - 1];
-            return t(`common.days.${dayKey}`);
-        });
+        // Filter out invalid schedules and convert UTC times to local timezone
+        const scheduleWithLocalTime = schedule
+            .filter(item => item && item.time && item.dayOfWeek)
+            .map(item => {
+                const dayKey = dayKeys[item.dayOfWeek - 1];
+                if (!dayKey) {
+                    console.warn('Invalid dayOfWeek:', item.dayOfWeek);
+                    return null;
+                }
+                const localTime = convertUtcTimeToLocal(item.time);
+                if (!localTime || localTime.includes('NaN')) {
+                    console.warn('Invalid time conversion:', item.time, '->', localTime);
+                    return null;
+                }
+                return {
+                    ...item,
+                    dayKey,
+                    localTime
+                };
+            })
+            .filter(item => item !== null) as Array<ClassSchedule & { dayKey: string; localTime: string }>;
 
-        // Check if all items have the same time
-        const firstTime = schedule[0].time;
-        const allSameTime = schedule.every(item => item.time === firstTime);
+        if (scheduleWithLocalTime.length === 0) return '';
+
+        const dayNames = scheduleWithLocalTime.map(item => t(`common.days.${item.dayKey}`));
+
+        // Check if all items have the same time (after conversion)
+        const firstLocalTime = scheduleWithLocalTime[0].localTime;
+        const allSameTime = scheduleWithLocalTime.every(item => item.localTime === firstLocalTime);
 
         if (allSameTime) {
-            // Calculate end time
-            const endTime = calculateEndTime(firstTime, duration);
-            return `${dayNames.join(', ')} - ${firstTime} - ${endTime}`;
+            // Only show start time, no end time
+            return `${dayNames.join(', ')} - ${firstLocalTime}`;
         } else {
-            // Different times - show each day with its time range
-            return schedule.map(item => {
-                const dayKey = dayKeys[item.dayOfWeek - 1];
-                const dayName = t(`common.days.${dayKey}`);
-                const endTime = calculateEndTime(item.time, duration);
-                return `${dayName} ${item.time} - ${endTime}`;
+            // Different times - show each day with start time only
+            return scheduleWithLocalTime.map((item) => {
+                const dayName = t(`common.days.${item.dayKey}`);
+                return `${dayName} ${item.localTime}`;
             }).join(', ');
         }
     };
 
     // Helper function to calculate end time from start time and duration
     const calculateEndTime = (startTime: string, durationMinutes: number): string => {
+        if (!startTime || typeof startTime !== 'string') {
+            console.warn('Invalid startTime:', startTime);
+            return startTime || '00:00';
+        }
+        
         // Try to parse 12-hour format first (e.g., "3:00 PM" or "10:00 AM")
         const time12Regex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
         const match12 = startTime.match(time12Regex);
@@ -90,9 +118,14 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
 
         if (match12) {
             // 12-hour format
-            hours = parseInt(match12[1]);
-            minutes = parseInt(match12[2]);
+            hours = parseInt(match12[1], 10);
+            minutes = parseInt(match12[2], 10);
             const ampm = match12[3].toUpperCase();
+
+            if (isNaN(hours) || isNaN(minutes)) {
+                console.warn('Invalid time values in 12h format:', startTime);
+                return startTime;
+            }
 
             // Convert to 24-hour format
             if (ampm === 'PM' && hours !== 12) hours += 12;
@@ -103,9 +136,15 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
             const match24 = startTime.match(time24Regex);
 
             if (match24) {
-                hours = parseInt(match24[1]);
-                minutes = parseInt(match24[2]);
+                hours = parseInt(match24[1], 10);
+                minutes = parseInt(match24[2], 10);
+                
+                if (isNaN(hours) || isNaN(minutes)) {
+                    console.warn('Invalid time values in 24h format:', startTime);
+                    return startTime;
+                }
             } else {
+                console.warn('Cannot parse time format:', startTime);
                 return startTime; // Return as is if can't parse
             }
         }
@@ -200,7 +239,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                                 {formatPrice(gc.pricePerHour)}
                                             </span>
                                             <span className="text-sm text-gray-500 font-medium">
-                                                {t('tutorDetail.groupClass.perHour')}
+                                                /{((gc as any).sessions) || 10} {t('tutorDetail.groupClass.sessions')}
                                             </span>
                                         </div>
                                     </div>
@@ -352,36 +391,55 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                         <FiMessageCircle className="w-4 h-4" />
                                         {t('tutorDetail.groupClass.message')}
                                     </button>
-                                    {joinedClasses.has(gc.id) ? (
-                                        <button
-                                            onClick={() => {
-                                                setSelectedClass(gc);
-                                                setShowLeaveModal(true);
-                                            }}
-                                            className="flex-1 bg-red-600 text-white py-2.5 px-4 rounded-xl hover:bg-red-700 transition-colors font-semibold text-sm"
-                                        >
-                                            {t('tutorDetail.groupClass.leaveClass')}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => {
-                                                setSelectedClass(gc);
-                                                // Check if this is the last student
-                                                const currentEnrolled = gc.enrolledStudents ?? gc.students?.length ?? 0;
-                                                const maxStudents = gc.maxStudents ?? Infinity;
-                                                const isLastStudent = currentEnrolled + 1 === maxStudents;
+                                    {(() => {
+                                        const isJoined = joinedClasses.has(gc.id);
+                                        const currentEnrolled = gc.enrolledStudents ?? gc.students?.length ?? 0;
+                                        const maxStudents = gc.maxStudents ?? Infinity;
+                                        const isClassFull = currentEnrolled >= maxStudents;
+                                        
+                                        // Only show leave button if user is joined AND class is not full
+                                        // If class is full (last student joined), hide leave button
+                                        if (isJoined && !isClassFull) {
+                                            return (
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedClass(gc);
+                                                        setShowLeaveModal(true);
+                                                    }}
+                                                    className="flex-1 bg-red-600 text-white py-2.5 px-4 rounded-xl hover:bg-red-700 transition-colors font-semibold text-sm"
+                                                >
+                                                    {t('tutorDetail.groupClass.leaveClass')}
+                                                </button>
+                                            );
+                                        }
+                                        
+                                        // Show join button if not joined
+                                        if (!isJoined) {
+                                            return (
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedClass(gc);
+                                                        // Check if this is the last student
+                                                        const currentEnrolled = gc.enrolledStudents ?? gc.students?.length ?? 0;
+                                                        const maxStudents = gc.maxStudents ?? Infinity;
+                                                        const isLastStudent = currentEnrolled + 1 === maxStudents;
 
-                                                if (isLastStudent) {
-                                                    setShowLastStudentModal(true);
-                                                } else {
-                                                    setShowConfirmModal(true);
-                                                }
-                                            }}
-                                            className="flex-1 bg-[#0b6459] text-white py-2.5 px-4 rounded-xl hover:bg-[#084c43] transition-colors font-semibold text-sm"
-                                        >
-                                            {t('tutorDetail.groupClass.joinClass')}
-                                        </button>
-                                    )}
+                                                        if (isLastStudent) {
+                                                            setShowLastStudentModal(true);
+                                                        } else {
+                                                            setShowConfirmModal(true);
+                                                        }
+                                                    }}
+                                                    className="flex-1 bg-[#0b6459] text-white py-2.5 px-4 rounded-xl hover:bg-[#084c43] transition-colors font-semibold text-sm"
+                                                >
+                                                    {t('tutorDetail.groupClass.joinClass')}
+                                                </button>
+                                            );
+                                        }
+                                        
+                                        // If joined and class is full, don't show any button (or show a disabled state)
+                                        return null;
+                                    })()}
                                 </div>
                             </div>
                         </div>
