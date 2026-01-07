@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import NotificationsPopup from "./NotificationsPopup";
-import { FiShoppingCart, FiBell, FiMessageSquare, FiChevronDown } from "react-icons/fi";
+import { FiBell, FiChevronDown } from "react-icons/fi";
 import { currencyOptions, languageOptions } from "../../constants/headerConstants";
-import CartPopup from "../../features/cart/components/CartPopup";
 import { LernenLogo } from "../LernenLogo";
 import ProfileDropdown from "./ProfileDropdown";
 import { useAuth } from "../../context/AuthContext";
@@ -20,11 +19,9 @@ interface LanguageOption {
 
 const Header: React.FC = () => {
     const { t, i18n } = useTranslation();
-    const [isCartOpen, setIsCartOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-    const [cartCount, setCartCount] = useState(0);
 
     const { state } = useAuth();
     const { currencyDisplay, setSelectedCurrency } = useCurrency();
@@ -35,7 +32,6 @@ const Header: React.FC = () => {
 
     const currentLanguageOption = languageOptions.find(option => option.code === i18n.language) || languageOptions[0];
 
-    const cartRef = useRef<HTMLDivElement>(null);
     const notificationsRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
     const currencyRef = useRef<HTMLDivElement>(null);
@@ -43,9 +39,6 @@ const Header: React.FC = () => {
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
-                setIsCartOpen(false);
-            }
             if (
                 notificationsRef.current &&
                 !notificationsRef.current.contains(event.target as Node)
@@ -179,19 +172,6 @@ const Header: React.FC = () => {
                         {/* Action Icons - Only show when logged in */}
                         {isLoggedIn && (
                             <div className="flex items-center space-x-3">
-                                <div ref={cartRef} className="relative">
-                                    <LnIconButton onClick={() => setIsCartOpen(!isCartOpen)}>
-                                        <div className="relative">
-                                            <FiShoppingCart size={24} />
-                                            {cartCount > 0 && (
-                                                <span className="absolute -top-4 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                                    {cartCount}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </LnIconButton>
-                                    {isCartOpen && <CartPopup onCartCountChange={setCartCount} />}
-                                </div>
                                 <div ref={notificationsRef} className="relative">
                                     <LnIconButton
                                         onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
@@ -207,9 +187,6 @@ const Header: React.FC = () => {
                                     </LnIconButton>
                                     {isNotificationsOpen && <NotificationsPopup />}
                                 </div>
-                                <LnIconButton hasDot={true}>
-                                    <FiMessageSquare size={24} />
-                                </LnIconButton>
                             </div>
                         )}
 

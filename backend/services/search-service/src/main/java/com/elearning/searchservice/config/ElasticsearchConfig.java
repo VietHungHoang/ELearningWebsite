@@ -183,6 +183,10 @@ public class ElasticsearchConfig {
                                 .properties("totalStudents", Property.of(p -> p.integer(i -> i)))
                                 .properties("totalClasses", Property.of(p -> p.integer(i -> i)))
 
+                                // Completion suggester field for autocomplete
+                                .properties("suggest", Property.of(p -> p.completion(c -> c
+                                                .maxInputLength(100))))
+
                                 // Timestamps
                                 .properties("createdAt", Property.of(p -> p.date(d -> d)))
                                 .properties("updatedAt", Property.of(p -> p.date(d -> d)))

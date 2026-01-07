@@ -1732,6 +1732,26 @@
     },
     "header": {
       "quickSearch": "Quick search here"
+    },
+    "dropdown": {
+      "dashboard": "Dashboard",
+      "myStudents": "My Students",
+      "myCourses": "My Courses",
+      "myClass": "My Class",
+      "schedule": "Schedule",
+      "payouts": "Payouts",
+      "dealsCoupons": "Deals & Coupons",
+      "requests": "Requests",
+      "inbox": "Inbox",
+      "profileSettings": "Profile Settings",
+      "api": "API",
+      "myBookings": "My Bookings",
+      "myPurchases": "My Purchases",
+      "certificates": "Certificates",
+      "messages": "Messages",
+      "favourites": "Favourites",
+      "signOut": "Sign out",
+      "user": "User"
     }
   },
   "course": {

@@ -1766,6 +1766,26 @@
     },
     "header": {
       "quickSearch": "Tìm kiếm nhanh ở đây"
+    },
+    "dropdown": {
+      "dashboard": "Bảng Điều Khiển",
+      "myStudents": "Học Sinh Của Tôi",
+      "myCourses": "Khóa Học Của Tôi",
+      "myClass": "Lớp Học Của Tôi",
+      "schedule": "Lịch Học",
+      "payouts": "Thanh Toán",
+      "dealsCoupons": "Ưu Đãi & Mã Giảm Giá",
+      "requests": "Yêu Cầu",
+      "inbox": "Hộp Thư",
+      "profileSettings": "Cài Đặt Hồ Sơ",
+      "api": "API",
+      "myBookings": "Lịch Học Của Tôi",
+      "myPurchases": "Mua Hàng Của Tôi",
+      "certificates": "Chứng Chỉ",
+      "messages": "Tin Nhắn",
+      "favourites": "Yêu Thích",
+      "signOut": "Đăng Xuất",
+      "user": "Người Dùng"
     }
   },
   "course": {
