@@ -693,14 +693,6 @@ const MyQuizzesPage: React.FC = () => {
                             : (isTutor ? t('dashboard.tutor.myQuizzes.empty.description') : t('dashboard.student.myQuizzes.empty.description'))
                         }
                     </p>
-                    {isTutor && !searchTerm && (
-                        <button
-                            onClick={() => navigate('/dashboard/quizzes/create')}
-                            className="mt-4 bg-[#0b6459] text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-[#084c43] transition-colors"
-                        >
-                            {t('dashboard.tutor.myQuizzes.empty.createFirst')}
-                        </button>
-                    )}
                 </div>
             )}
 

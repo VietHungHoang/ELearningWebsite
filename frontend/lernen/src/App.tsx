@@ -10,8 +10,9 @@ import router from "./routes";
 
 const ConditionalChatWidget: React.FC = () => {
     const isDashboardRoute = window.location.pathname.startsWith('/dashboard');
+    const isOnboardingCompletionRoute = window.location.pathname === '/onboarding-completion';
 
-    if (isDashboardRoute) {
+    if (isDashboardRoute || isOnboardingCompletionRoute) {
         return null;
     }
 

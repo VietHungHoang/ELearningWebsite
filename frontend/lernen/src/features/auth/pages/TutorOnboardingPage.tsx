@@ -197,35 +197,63 @@ const TutorOnboardingPage: React.FC = () => {
         switch (step) {
             case 1:
                 if (!stepData.fullName?.trim()) {
-                    setError('Full name is required');
+                    setError(t('onboarding.validation.fullNameRequired'));
                     return false;
                 }
                 if (!stepData.gender) {
-                    setError('Please select your gender');
+                    setError(t('onboarding.validation.genderRequired'));
                     return false;
                 }
                 if (!stepData.countryCode) {
-                    setError('Country is required');
+                    setError(t('onboarding.validation.countryRequired'));
                     return false;
                 }
-
+                if (!stepData.timezone) {
+                    setError(t('onboarding.validation.timezoneRequired'));
+                    return false;
+                }
                 if (!stepData.languages || stepData.languages.length === 0) {
-                    setError('Please add at least one language');
+                    setError(t('onboarding.validation.languageRequired'));
+                    return false;
+                }
+                if (!stepData.languages.some(lang => lang.isNative)) {
+                    setError(t('onboarding.validation.nativeLanguageRequired'));
                     return false;
                 }
                 break;
             case 2:
+                if (!stepData.currentSessionFee || stepData.currentSessionFee <= 0) {
+                    setError(t('onboarding.validation.sessionFeeRequired'));
+                    return false;
+                }
                 if (!stepData.subjects || stepData.subjects.length === 0) {
-                    setError('Please add at least one subject you teach');
+                    setError(t('onboarding.validation.subjectRequired'));
                     return false;
                 }
                 break;
             case 3:
-                // Profile photo is optional for now
+                if (!stepData.avatarUrl?.trim()) {
+                    setError(t('onboarding.validation.profilePhotoRequired'));
+                    return false;
+                }
                 break;
             case 4:
+                if ((!stepData.educations || stepData.educations.length === 0) && (!stepData.experiences || stepData.experiences.length === 0)) {
+                    setError(t('onboarding.validation.educationOrExperienceRequired'));
+                    return false;
+                }
+                break;
             case 5:
+                if (!stepData.certifications || stepData.certifications.length === 0) {
+                    setError(t('onboarding.validation.certificationRequired'));
+                    return false;
+                }
+                break;
             case 6:
+                if (!stepData.availabilities || stepData.availabilities.length === 0) {
+                    setError(t('onboarding.validation.availabilityRequired'));
+                    return false;
+                }
                 break;
         }
         return true;
