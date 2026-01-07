@@ -36,7 +36,7 @@ public class TutorRoutesConfig {
                                                                 "/api/v1/admin/tutors/approve/{tutorId}",
                                                                 "/api/v1/tutors/zoom/oauth/authorize",
                                                                 "/api/v1/tutors/zoom/oauth/callback",
-                                                                "/api/v1/tutors/{tutorId}/reviews")
+                                                                "/api/v1/reviews")
                                                 .filters(f -> f
                                                                 .rewritePath(
                                                                                 "/api/v1/public/(?<rest>.*)",
