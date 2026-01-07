@@ -33,7 +33,7 @@ const FeatureTutors: React.FC = () => {
       reviewCount: 15,
       activeStudents: 8,
       videoThumbnail: "/media/homepage/Anthony Shao.png",
-      videoSource: "/media/homepage/tutor-video-1.mp4",
+      videoSource: "https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4",
       profileImage: "/media/homepage/Anthony Shao.png",
       subjects: ["Toán", "Lý"]
     },
@@ -46,7 +46,7 @@ const FeatureTutors: React.FC = () => {
       reviewCount: 23,
       activeStudents: 12,
       videoThumbnail: "/media/homepage/Steven Ford.png",
-      videoSource: "/media/homepage/tutor-video-2.mp4",
+      videoSource: "https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4",
       profileImage: "/media/homepage/Steven Ford.png",
       subjects: ["Tiếng Anh", "Văn"]
     },
@@ -59,7 +59,7 @@ const FeatureTutors: React.FC = () => {
       reviewCount: 18,
       activeStudents: 6,
       videoThumbnail: "/media/homepage/Anthony Shao.png",
-      videoSource: "/media/homepage/tutor-video-3.mp4",
+      videoSource: "https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4",
       profileImage: "/media/homepage/Anthony Shao.png",
       subjects: ["Hóa", "Sinh"]
     },
@@ -72,7 +72,7 @@ const FeatureTutors: React.FC = () => {
       reviewCount: 31,
       activeStudents: 15,
       videoThumbnail: "/media/homepage/Steven Ford.png",
-      videoSource: "/media/homepage/tutor-video-4.mp4",
+      videoSource: "https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4",
       profileImage: "/media/homepage/Steven Ford.png",
       subjects: ["Toán", "Lý"]
     },
@@ -85,7 +85,7 @@ const FeatureTutors: React.FC = () => {
       reviewCount: 12,
       activeStudents: 5,
       videoThumbnail: "/media/homepage/Anthony Shao.png",
-      videoSource: "/media/homepage/tutor-video-1.mp4",
+      videoSource: "https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4",
       profileImage: "/media/homepage/Anthony Shao.png",
       subjects: ["Văn", "Sử", "Địa"]
     }

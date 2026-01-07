@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AiOutlinePlayCircle } from 'react-icons/ai';
+import { FaPlay } from 'react-icons/fa';
 import { FiCheck } from 'react-icons/fi';
 
 const TipsSidebar: React.FC = () => {
     const { t } = useTranslation();
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
     
     const tips = [
         t('findTutors.tipsSidebar.tips.filterRequirements'),
@@ -13,15 +15,69 @@ const TipsSidebar: React.FC = () => {
         t('findTutors.tipsSidebar.tips.evaluateCommunication'),
         t('findTutors.tipsSidebar.tips.checkAvailability'),
     ];
+
+    useEffect(() => {
+        // Đảm bảo video hiển thị frame đầu tiên
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+        }
+    }, []);
+
+    const handlePlayPause = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleVideoPlay = () => {
+        setIsPlaying(true);
+    };
+
+    const handleVideoPause = () => {
+        setIsPlaying(false);
+    };
+
+    const handleVideoLoadedData = () => {
+        // Hiển thị frame đầu tiên khi video đã load
+        if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+        }
+    };
+
     return (
         <div className="bg-[#f9f3eb] border border-[rgba(219,132,1,0.1)] rounded-2xl shadow-sm p-6 sticky top-8">
-            <div className="relative rounded-lg overflow-hidden aspect-video">
-                <img src="https://picsum.photos/seed/sidebar/400/225" alt="Tutoring tips" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                    <button className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-colors">
-                        <AiOutlinePlayCircle className="text-2xl" />
-                    </button>
-                </div>
+            <div className="relative rounded-lg overflow-hidden aspect-video bg-black group">
+                <video
+                    ref={videoRef}
+                    src="https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4"
+                    className="w-full h-full object-cover"
+                    onPlay={handleVideoPlay}
+                    onPause={handleVideoPause}
+                    onLoadedData={handleVideoLoadedData}
+                    onLoadedMetadata={handleVideoLoadedData}
+                    preload="auto"
+                    controls={isPlaying}
+                    playsInline
+                    muted={false}
+                />
+                {!isPlaying && (
+                    <div
+                        className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center cursor-pointer"
+                        onClick={handlePlayPause}
+                    >
+                        <button
+                            aria-label="Play video"
+                            className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-transform duration-300 group-hover:scale-110"
+                        >
+                            <FaPlay />
+                        </button>
+                    </div>
+                )}
             </div>
 
             <h3 className="text-lg font-bold text-gray-800 mt-6">{t('findTutors.tipsSidebar.title')}</h3>
