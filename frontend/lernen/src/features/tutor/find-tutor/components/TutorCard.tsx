@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 // import { useNavigate } from 'react-router-dom'; // Temporarily commented - using window.open instead
 import { FaPlay, FaHeart } from 'react-icons/fa';
 import { FiCalendar, FiMessageSquare } from 'react-icons/fi';
@@ -14,7 +14,6 @@ import { flagComponents } from '../../../../lib/flagMapping';
 import { useCurrency } from '../../../../context/CurrencyContext';
 import { useChat } from '../../../../context/ChatContext';
 import { convertFromVND, formatCurrency } from '../../../../utils/currencyHelper';
-import useVideoThumbnail from '../../../../hooks/useVideoThumbnail';
 import VideoModal from './VideoModal';
 
 // Flag Icon Component
@@ -42,12 +41,11 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
   const { t, i18n } = useTranslation();
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showFullBio, setShowFullBio] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   // const navigate = useNavigate(); // Temporarily commented - using window.open instead
   const { selectedCurrency } = useCurrency();
   const { openChatWithTutor } = useChat();
-
-  // Auto-generate thumbnail from video
-  const videoThumbnail = useVideoThumbnail(tutor.videoUrl);
 
   const toggleBio = () => setShowFullBio(!showFullBio);
 
@@ -70,7 +68,17 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
     ? formatVNDWithK(convertedPrice)
     : formatCurrency(convertedPrice, selectedCurrency);
 
-  const handlePlayClick = () => {
+
+  const handleVideoPlay = () => {
+    setIsPlaying(true);
+  };
+
+  const handleVideoPause = () => {
+    setIsPlaying(false);
+  };
+
+  const handleVideoClick = () => {
+    // Always open modal when clicking on video
     setIsVideoModalOpen(true);
   };
 
@@ -107,23 +115,46 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
       >
         {/* Left side: Video and actions */}
         <div className="flex-shrink-0 w-full md:w-[300px] flex flex-col">
-          <div className="relative aspect-[18/10] rounded-2xl overflow-hidden shadow-lg p-2 bg-white mb-3 group">
-            <img
-              src={videoThumbnail || tutor.avatarUrl}
-              alt={tutor.fullName}
-              className="w-full h-full object-cover"
-            />
-            <div
-              className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center cursor-pointer"
-              onClick={handlePlayClick}
-            >
-              <button
-                aria-label="Play video"
-                className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-transform duration-300 group-hover:scale-110"
-              >
-                <FaPlay />
-              </button>
-            </div>
+          <div className="relative aspect-[18/10] rounded-lg overflow-hidden shadow-lg bg-white mb-3 group">
+            {tutor.videoUrl ? (
+              <>
+                <video
+                  ref={videoRef}
+                  src={tutor.videoUrl}
+                  className="w-full h-full object-cover cursor-pointer"
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  onPlay={handleVideoPlay}
+                  onPause={handleVideoPause}
+                  onClick={handleVideoClick}
+                />
+                {!isPlaying && (
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <button
+                      aria-label="Play video"
+                      className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-transform duration-300 group-hover:scale-110 pointer-events-auto"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVideoClick();
+                      }}
+                    >
+                      <FaPlay />
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <img
+                src={tutor.avatarUrl}
+                alt={tutor.fullName}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={handleVideoClick}
+              />
+            )}
           </div>
           <div className="space-y-2 flex-grow">
             {/* Temporarily commented: Book trial session button */}
@@ -242,6 +273,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
         onClose={() => setIsVideoModalOpen(false)}
         videoUrl={tutor.videoUrl}
         tutorName={tutor.fullName}
+        smallVideoRef={videoRef}
       />
     </>
   );
