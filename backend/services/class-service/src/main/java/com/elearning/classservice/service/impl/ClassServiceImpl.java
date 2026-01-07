@@ -887,12 +887,14 @@ public class ClassServiceImpl implements ClassService {
         private void sendClassFullNotification(ClassEntity classEntity) {
                 try {
                         // Build student list from enrollments
+                        // Note: User entity in class-service doesn't have email, will be fetched by
+                        // notification-service via user ID
                         List<ClassFullEvent.StudentInfo> students = classEntity.getEnrollments().stream()
                                         .filter(e -> e.getStatus() == EnrollmentStatus.PENDING_PAYMENT)
                                         .map(e -> ClassFullEvent.StudentInfo.builder()
                                                         .id(e.getStudent().getId())
                                                         .fullName(e.getStudent().getFullName())
-                                                        .email(e.getStudent().getEmail())
+                                                        .email(null) // Email not available in class-service User entity
                                                         .build())
                                         .collect(Collectors.toList());
 
@@ -904,7 +906,7 @@ public class ClassServiceImpl implements ClassService {
                                         .tutor(ClassFullEvent.TutorInfo.builder()
                                                         .id(classEntity.getTutor().getId())
                                                         .fullName(classEntity.getTutor().getFullName())
-                                                        .email(classEntity.getTutor().getEmail())
+                                                        .email(null) // Email not available in class-service User entity
                                                         .build())
                                         .students(students)
                                         .build();
