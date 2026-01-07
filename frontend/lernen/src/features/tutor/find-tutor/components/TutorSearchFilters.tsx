@@ -472,6 +472,19 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         t('findTutors.filters.sortOptions.newestFirst'),
         t('findTutors.filters.sortOptions.oldestFirst')
     ];
+    
+    // Map sortBy text to API code
+    const mapSortByToCode = (sortByText: string): string | undefined => {
+        if (sortByText === t('findTutors.filters.sortOptions.relevance')) {
+            return undefined; // Don't send param for relevance
+        } else if (sortByText === t('findTutors.filters.sortOptions.newestFirst')) {
+            return 'newest';
+        } else if (sortByText === t('findTutors.filters.sortOptions.oldestFirst')) {
+            return 'oldest';
+        }
+        return undefined;
+    };
+    
     const languageOptions: string[] = languages.map(lang => lang.name);
     // Memoize availabilityDays to prevent unnecessary re-renders
     const availabilityDays = useMemo(() => [
@@ -533,7 +546,16 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         onFilterChangeRef.current = onFilterChange;
     }, [onFilterChange]);
 
-    // Trigger filter change when any filter updates (debounced)
+    // Store keyword in ref to use in filter change without triggering re-renders
+    const keywordRef = useRef<string>('');
+    
+    // Update keyword ref when keyword changes
+    useEffect(() => {
+        keywordRef.current = keyword;
+    }, [keyword]);
+
+    // Trigger filter change when any filter updates (debounced) - EXCLUDING keyword
+    // Keyword will only trigger search when Enter is pressed or suggestion is selected
     useEffect(() => {
         const timer = setTimeout(() => {
             // Get category ID instead of name
@@ -573,14 +595,29 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
                 }).filter((slot): slot is { day: number; timeSlot: string } => slot.day !== null)
                 : undefined;
 
+            // Get timezone - use selected timezone or get user's current timezone
+            let timezoneValue: string | undefined;
+            if (selectedValues.timezone !== placeholders.timezone) {
+                // Find timezone object to get the actual timezone name (e.g., "Asia/Ho_Chi_Minh")
+                const selectedTimezone = timezones.find(tz => tz.name === selectedValues.timezone);
+                timezoneValue = selectedTimezone?.name;
+            } else {
+                // Fallback to user's current timezone
+                try {
+                    timezoneValue = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                } catch (e) {
+                    console.warn('Could not get user timezone:', e);
+                }
+            }
+
             const filters: TutorSearchFilter = {
                 category: selectedCategory?.id,
                 subject: selectedSubject?.id,
                 languageCodes: languageCodes,
-                // timezone: selectedValues.timezone !== placeholders.timezone ? selectedValues.timezone : undefined, // Removed per user request: timezone is not for search filtering
-                sortBy: selectedValues.sortBy !== placeholders.sortBy ? selectedValues.sortBy : undefined,
+                timezone: timezoneValue,
+                sortBy: selectedValues.sortBy !== placeholders.sortBy ? mapSortByToCode(selectedValues.sortBy) : undefined,
                 sessionType: activeTab === 'Private Sessions' ? '1-on-1' : activeTab === 'Group Sessions' ? 'Group' : undefined,
-                keyword: keyword.trim() || undefined,
+                keyword: keywordRef.current.trim() || undefined, // Use ref value, but don't trigger on keyword change
                 minFee: minFeeVND,
                 maxFee: maxFeeVND,
                 availability: availabilitySlots,
@@ -602,22 +639,25 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         return () => clearTimeout(timer);
     }, [
         // Only include actual state values that should trigger filter changes
+        // NOTE: keyword is NOT included here - it will only trigger search via Enter key or suggestion selection
         selectedValues.category,
         selectedValues.subject,
         selectedValues.sortBy,
+        selectedValues.timezone,
         selectedLanguages,
         feeRange,
         activeTab,
-        keyword,
         selectedAvailability,
         // Include data arrays - these should be stable after initial load
         categories,
         subjects,
         languages,
+        timezones,
         // Memoized values won't cause re-renders
         placeholders.category,
         placeholders.subject,
         placeholders.sortBy,
+        placeholders.timezone,
         availabilityDays,
         getLocalizedName
         // Note: onFilterChange is stored in ref to avoid re-triggering when parent re-renders

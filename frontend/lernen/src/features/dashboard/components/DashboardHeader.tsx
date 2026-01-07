@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { HiChevronDown, HiMenu } from 'react-icons/hi';
 import { FiBell } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import type { UserInfo } from '../config/dashboardConfigs';
 import NotificationsPopup from '../../../components/ui/NotificationsPopup';
 import ProfileDropdown from '../../../components/ui/ProfileDropdown';
@@ -21,6 +22,7 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSidebar, breadcrumb, isSidebarOpen = true }) => {
     const { i18n } = useTranslation();
     const { currencyDisplay, setSelectedCurrency } = useCurrency();
+    const navigate = useNavigate();
 
     const currentLanguageOption = languageOptions.find(option => option.code === i18n.language) || languageOptions[0];
 
@@ -66,6 +68,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
         setOpenDropdown(null);
     };
 
+    const handleLogoClick = () => {
+        navigate('/');
+    };
+
     return (
         <header className="flex-shrink-0 bg-[#f7f7f8]">
             <div className="flex items-center justify-between h-14 pr-6 pt-3">
@@ -74,7 +80,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userInfo, onToggleSid
                     <div className={`transition-all duration-300 ${isSidebarOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
                         {isSidebarOpen && (
                             <div className="flex items-center gap-2 pl-6 pr-16">
-                                <LernenLogo />
+                                <LernenLogo onClick={handleLogoClick} clickable />
                             </div>
                         )}
                     </div>
