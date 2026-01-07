@@ -24,8 +24,12 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
     // Handle join session - convert Zoom URL to Web Client URL and open in new tab
     const handleJoinSession = async () => {
         try {
-            if (!booking?.meetingUrl) {
+            // Check both meetingUrl and meetingLink fields for compatibility
+            const meetingUrl = booking?.meetingUrl || booking?.meetingLink;
+
+            if (!meetingUrl) {
                 console.error("No meeting URL found for session:", booking?.id);
+                alert(t('dashboard.student.noMeetingUrl') || 'Meeting link is not available yet. Please contact your tutor.');
                 return;
             }
 
@@ -33,7 +37,7 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
 
             // Convert standard URL to Web Client URL to allow joining via browser
             // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
-            let openUrl = booking.meetingUrl;
+            let openUrl = meetingUrl;
 
             // Regex to match /j/{meetingId}
             const match = openUrl.match(/\/j\/(\d+)/);
@@ -49,6 +53,7 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
 
         } catch (error) {
             console.error("Error joining session:", error);
+            alert(t('dashboard.student.errorJoiningSession') || 'Failed to join the session. Please try again.');
         } finally {
             setIsStarting(false);
         }

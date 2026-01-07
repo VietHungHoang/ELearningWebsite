@@ -54,7 +54,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
     }, [groupClasses]);
 
     // Helper function to format schedule display
-    const formatSchedule = (schedule: ClassSchedule[], duration: number): string => {
+    const formatSchedule = (schedule: ClassSchedule[]): string => {
         if (!schedule || schedule.length === 0) return '';
 
         // Map dayOfWeek (1-7, where 1 = Monday) to i18n keys
@@ -100,65 +100,6 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                 return `${dayName} ${item.localTime}`;
             }).join(', ');
         }
-    };
-
-    // Helper function to calculate end time from start time and duration
-    const calculateEndTime = (startTime: string, durationMinutes: number): string => {
-        if (!startTime || typeof startTime !== 'string') {
-            console.warn('Invalid startTime:', startTime);
-            return startTime || '00:00';
-        }
-        
-        // Try to parse 12-hour format first (e.g., "3:00 PM" or "10:00 AM")
-        const time12Regex = /(\d{1,2}):(\d{2})\s*(AM|PM)/i;
-        const match12 = startTime.match(time12Regex);
-
-        let hours: number;
-        let minutes: number;
-
-        if (match12) {
-            // 12-hour format
-            hours = parseInt(match12[1], 10);
-            minutes = parseInt(match12[2], 10);
-            const ampm = match12[3].toUpperCase();
-
-            if (isNaN(hours) || isNaN(minutes)) {
-                console.warn('Invalid time values in 12h format:', startTime);
-                return startTime;
-            }
-
-            // Convert to 24-hour format
-            if (ampm === 'PM' && hours !== 12) hours += 12;
-            if (ampm === 'AM' && hours === 12) hours = 0;
-        } else {
-            // Try to parse 24-hour format (e.g., "15:00" or "15:00:00")
-            const time24Regex = /(\d{1,2}):(\d{2})(?::\d{2})?/;
-            const match24 = startTime.match(time24Regex);
-
-            if (match24) {
-                hours = parseInt(match24[1], 10);
-                minutes = parseInt(match24[2], 10);
-                
-                if (isNaN(hours) || isNaN(minutes)) {
-                    console.warn('Invalid time values in 24h format:', startTime);
-                    return startTime;
-                }
-            } else {
-                console.warn('Cannot parse time format:', startTime);
-                return startTime; // Return as is if can't parse
-            }
-        }
-
-        // Add duration
-        const totalMinutes = hours * 60 + minutes + durationMinutes;
-        const endHours = Math.floor(totalMinutes / 60) % 24;
-        const endMinutes = totalMinutes % 60;
-
-        // Convert back to 12-hour format
-        const endAmpm = endHours >= 12 ? 'PM' : 'AM';
-        const displayHours = endHours === 0 ? 12 : endHours > 12 ? endHours - 12 : endHours;
-
-        return `${displayHours}:${endMinutes.toString().padStart(2, '0')} ${endAmpm}`;
     };
 
     const checkScrollability = () => {
@@ -338,7 +279,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                             </svg>
                                             <div className="flex-1">
                                                 <p className="text-xs text-gray-500">{t('tutorDetail.groupClass.schedule')}</p>
-                                                <p className="font-medium text-gray-800">{formatSchedule(gc.schedule, 60)}</p>
+                                                <p className="font-medium text-gray-800">{formatSchedule(gc.schedule)}</p>
                                             </div>
                                         </div>
                                     )}
@@ -396,7 +337,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                         const currentEnrolled = gc.enrolledStudents ?? gc.students?.length ?? 0;
                                         const maxStudents = gc.maxStudents ?? Infinity;
                                         const isClassFull = currentEnrolled >= maxStudents;
-                                        
+
                                         // Only show leave button if user is joined AND class is not full
                                         // If class is full (last student joined), hide leave button
                                         if (isJoined && !isClassFull) {
@@ -412,7 +353,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                                 </button>
                                             );
                                         }
-                                        
+
                                         // Show join button if not joined
                                         if (!isJoined) {
                                             return (
@@ -436,7 +377,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                                 </button>
                                             );
                                         }
-                                        
+
                                         // If joined and class is full, don't show any button (or show a disabled state)
                                         return null;
                                     })()}
@@ -610,7 +551,7 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                                 {selectedClass.schedule && selectedClass.schedule.length > 0 && (
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">{t('tutorDetail.groupClass.schedule')}</span>
-                                        <span className="text-gray-900 font-medium text-right">{formatSchedule(selectedClass.schedule, 60)}</span>
+                                        <span className="text-gray-900 font-medium text-right">{formatSchedule(selectedClass.schedule)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-sm">
