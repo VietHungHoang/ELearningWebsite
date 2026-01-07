@@ -9,8 +9,10 @@ import com.elearning.bookingservice.dto.response.BookingHistoryResponse;
 import com.elearning.bookingservice.dto.response.CreatePaymentResponse;
 import com.elearning.bookingservice.entity.Booking;
 import com.elearning.bookingservice.entity.BookingStatus;
+import com.elearning.bookingservice.entity.ClassInfo;
 import com.elearning.bookingservice.entity.PaymentProvider;
 import com.elearning.bookingservice.repository.BookingRepository;
+import com.elearning.bookingservice.repository.ClassInfoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
 
         private final PaymentServiceClient paymentServiceClient;
         private final BookingRepository bookingRepository;
+        private final ClassInfoRepository classInfoRepository;
         private final ObjectMapper objectMapper = new ObjectMapper();
 
         @Override
@@ -91,6 +94,22 @@ public class BookingServiceImpl implements BookingService {
         }
 
         private BookingHistoryResponse mapToBookingHistoryResponse(Booking booking) {
+                // Get class info from ClassInfo if classId exists
+                String className = null;
+                String classType = null;
+                if (booking.getClassId() != null) {
+                        classInfoRepository.findByClassId(booking.getClassId())
+                                        .ifPresent(classInfo -> {
+                                                // Using local variables to capture values
+                                        });
+                        // Get both className and classType
+                        var classInfoOpt = classInfoRepository.findByClassId(booking.getClassId());
+                        if (classInfoOpt.isPresent()) {
+                                className = classInfoOpt.get().getTitle();
+                                classType = classInfoOpt.get().getClassType();
+                        }
+                }
+
                 return BookingHistoryResponse.builder()
                                 .id(booking.getId())
                                 .studentId(booking.getStudentId())
@@ -108,6 +127,8 @@ public class BookingServiceImpl implements BookingService {
                                 .notes(booking.getNotes())
                                 .createdAt(booking.getCreatedAt())
                                 .updatedAt(booking.getUpdatedAt())
+                                .className(className)
+                                .classType(classType)
                                 .build();
         }
 

@@ -109,6 +109,19 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                     .build();
             kafkaProducerService.sendTutorHourlyRateRequest(rateRequest);
         }
+
+        // 6. Send ClassCreatedEvent to booking-service to update booking with class
+        // info
+        com.elearning.classservice.dto.event.ClassCreatedEvent classCreatedEvent = com.elearning.classservice.dto.event.ClassCreatedEvent
+                .builder()
+                .bookingId(event.getBookingId())
+                .classId(newClass.getId())
+                .title(newClass.getTitle())
+                .classType(newClass.getClassType() != null ? newClass.getClassType().name() : null)
+                .build();
+        kafkaProducerService.sendClassCreatedEvent(classCreatedEvent);
+        log.info("Sent ClassCreatedEvent to booking-service for bookingId: {}, classId: {}",
+                event.getBookingId(), newClass.getId());
     }
 
     private void createClassSchedules(ClassEntity classEntity, String scheduleJson) {
