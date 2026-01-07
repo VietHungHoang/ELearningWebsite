@@ -181,7 +181,9 @@ public class SearchServiceImpl implements SearchService {
                                         String text = option.getText();
                                         result.add(TutorSuggestion.builder()
                                                         .name(text)
-                                                        .score((float) option.getScore())
+                                                        .score(option.getScore() != null
+                                                                        ? option.getScore().floatValue()
+                                                                        : 0f)
                                                         .build());
                                 });
                         });
