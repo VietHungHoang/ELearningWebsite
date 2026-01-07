@@ -26,7 +26,7 @@ public class TutorHourlyRateRequestConsumer {
 
     private final TutorRepository tutorRepository;
     private final KafkaProducer kafkaProducer;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = TUTOR_HOURLY_RATE_REQUEST_TOPIC, groupId = "tutor-service-group")
     public void handleTutorHourlyRateRequest(String message) {

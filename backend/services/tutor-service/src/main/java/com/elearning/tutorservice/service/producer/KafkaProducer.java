@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class KafkaProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     private final String tutorApprovedTopic = "tutor_approved";
     private final String tutorIndexSyncTopic = "tutor-index-sync";

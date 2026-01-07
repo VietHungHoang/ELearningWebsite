@@ -22,7 +22,7 @@ import java.util.Map;
 public class GeminiModerationServiceImpl implements GeminiModerationService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Value("${gemini.api-key}")
     private String apiKey;
@@ -53,12 +53,12 @@ public class GeminiModerationServiceImpl implements GeminiModerationService {
 
     private String buildModerationPrompt(String comment, Integer rating) {
         return String.format("""
-                You are a content moderation AI for an online tutoring platform. 
+                You are a content moderation AI for an online tutoring platform.
                 Analyze the following review and determine if it violates any policies.
-                
+
                 Review Rating: %d/5
                 Review Comment: "%s"
-                
+
                 Check for the following violations:
                 1. Profanity or offensive language (code: 1001)
                 2. Spam or repetitive content (code: 1002)
@@ -68,7 +68,7 @@ public class GeminiModerationServiceImpl implements GeminiModerationService {
                 6. Off-topic content (code: 1006)
                 7. Fake or fraudulent review (code: 1007)
                 8. Promotional/advertising content (code: 1008)
-                
+
                 Respond ONLY in JSON format:
                 {
                   "approved": true/false,
@@ -87,9 +87,7 @@ public class GeminiModerationServiceImpl implements GeminiModerationService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("contents", List.of(
                     Map.of("parts", List.of(
-                            Map.of("text", prompt)
-                    ))
-            ));
+                            Map.of("text", prompt)))));
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
@@ -98,8 +96,7 @@ public class GeminiModerationServiceImpl implements GeminiModerationService {
                     url,
                     HttpMethod.POST,
                     entity,
-                    String.class
-            );
+                    String.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return extractTextFromResponse(response.getBody());
