@@ -166,6 +166,10 @@ public class TutorDocument {
     @Field(type = FieldType.Float)
     private Double popularityScore;
 
+    // ============= AUTOCOMPLETE =============
+    @org.springframework.data.elasticsearch.annotations.CompletionField(maxInputLength = 100)
+    private org.springframework.data.elasticsearch.core.suggest.Completion suggest;
+
     // ============= METADATA =============
     @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd||epoch_millis")
     private LocalDateTime createdAt;

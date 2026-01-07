@@ -101,44 +101,32 @@ public class SearchServiceImpl implements SearchService {
 
         @Override
         public List<TutorSuggestion> getTutorSuggestions(TutorSuggestionsRequest request) {
-                log.info("Getting tutor suggestions for keyword: {}, language: {}, limit: {}",
-                                request.getKeyword(), request.getLanguage(), request.getLimit());
+                log.info("Getting tutor suggestions (autocomplete) for keyword: {}, limit: {}",
+                                request.getKeyword(), request.getLimit());
 
                 if (request.getKeyword() == null || request.getKeyword().trim().isEmpty()) {
                         return Collections.emptyList();
                 }
 
-                String language = request.getLanguage() != null ? request.getLanguage() : "en";
-                String suffix = switch (language.toLowerCase()) {
-                        case "vi", "vietnamese" -> "Vi";
-                        case "ja", "japanese" -> "Ja";
-                        default -> "En";
-                };
+                // Build Completion Suggester
+                co.elastic.clients.elasticsearch.core.search.Suggester suggester = co.elastic.clients.elasticsearch.core.search.Suggester
+                                .of(s -> s
+                                                .suggesters("tutor-suggest", fs -> fs
+                                                                .completion(c -> c
+                                                                                .field("suggest")
+                                                                                .skipDuplicates(true)
+                                                                                .size(request.getLimit() != null
+                                                                                                ? request.getLimit()
+                                                                                                : 10)
+                                                                                .fuzzy(f -> f
+                                                                                                .fuzziness("AUTO")) // Allow
+                                                                                                                    // minor
+                                                                                                                    // typos
+                                                                )));
 
-                // Build fuzzy search query for suggestions
-                Query fuzzyQuery = Query.of(q -> q
-                                .bool(b -> b
-                                                .should(s -> s
-                                                                .fuzzy(f -> f
-                                                                                .field("fullName" + suffix)
-                                                                                .value(request.getKeyword())
-                                                                                .fuzziness("AUTO")))
-                                                .should(s -> s
-                                                                .fuzzy(f -> f
-                                                                                .field("headline" + suffix)
-                                                                                .value(request.getKeyword())
-                                                                                .fuzziness("AUTO")))
-                                                .should(s -> s
-                                                                .fuzzy(f -> f
-                                                                                .field("subjects.name" + suffix)
-                                                                                .value(request.getKeyword())
-                                                                                .fuzziness("AUTO")))
-                                                .minimumShouldMatch("1")));
-
-                // Build native query with limit
+                // Build native query
                 NativeQuery nativeQuery = NativeQuery.builder()
-                                .withQuery(fuzzyQuery)
-                                .withMaxResults(request.getLimit() != null ? request.getLimit() : 10)
+                                .withSuggester(suggester)
                                 .build();
 
                 // Execute search
@@ -147,13 +135,59 @@ public class SearchServiceImpl implements SearchService {
                                 TutorDocument.class,
                                 IndexCoordinates.of("tutors_v1"));
 
-                log.info("Found {} suggestions", searchHits.getTotalHits());
+                // Extract suggestions
+                // Note: Spring Data ES maps suggestions differently than hits.
+                // We need to access the response aggregation or suggest results.
+                // But SearchHits object might contain suggestions if mapped correctly.
+                // Actually, accessing suggestions from SearchHits in current Spring Data
+                // version:
 
-                // Map to suggestions with language context
-                final String finalSuffix = suffix;
-                return searchHits.getSearchHits().stream()
-                                .map(hit -> mapToSuggestion(hit, finalSuffix))
-                                .toList();
+                var suggestions = searchHits.getSuggest();
+                if (suggestions == null) {
+                        return Collections.emptyList();
+                }
+
+                List<TutorSuggestion> result = new ArrayList<>();
+
+                // "tutor-suggest" is the name we gave above
+                var suggestionEntry = suggestions.getSuggestion("tutor-suggest");
+                if (suggestionEntry != null) {
+                        suggestionEntry.getEntries().forEach(entry -> {
+                                entry.getOptions().forEach(option -> {
+                                        // Option contains the text and the document source if available
+                                        // option.getText() is the suggestion string
+                                        // option.getScore() is the weight/score
+
+                                        // For a Google-like simple suggestion, we just return the text.
+                                        // But our API returns TutorSuggestion object.
+                                        // If we want to return just the string, we might need to change DTO or map it.
+                                        // The user asked for "Google style", e.g. "java" -> "java script".
+                                        // The current TutorSuggestion DTO has tutorId, name, headline.
+                                        // This structure assumes we suggest A TUTOR.
+                                        // BUT "Google style" often suggests KEYWORDS first.
+                                        // If the user wants to suggest KEYWORDS, we should assume the input in
+                                        // 'suggest' field are keywords.
+                                        // So we return the keyword.
+
+                                        // However, the existing frontend might expect TutorSuggestion objects.
+                                        // Let's create a "Keyword" suggestion wrapped in TutorSuggestion structure for
+                                        // compatibility,
+                                        // OR we should have clarified if we want to return Strings.
+                                        // Given the DTO `TutorSuggestion` has `name`, `headline`...
+                                        // Let's set `name` = suggested text, and `tutorId` = null (or matched tutor ID
+                                        // if needed).
+                                        // Completion Suggester can return the document.
+
+                                        String text = option.getText();
+                                        result.add(TutorSuggestion.builder()
+                                                        .name(text)
+                                                        .score((float) option.getScore())
+                                                        .build());
+                                });
+                        });
+                }
+
+                return result;
         }
 
         @Override

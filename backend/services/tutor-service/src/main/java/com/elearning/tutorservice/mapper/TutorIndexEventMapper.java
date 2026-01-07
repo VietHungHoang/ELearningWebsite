@@ -6,6 +6,8 @@ import com.elearning.tutorservice.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,6 +97,7 @@ public class TutorIndexEventMapper {
                                 .popularityScore(0.0)
                                 .responseRate(0.0)
                                 .completionRate(0.0)
+                                .suggestionInputs(buildSuggestions(tutor))
 
                                 // Metadata
                                 .createdAt(tutor.getCreatedAt())
@@ -102,6 +105,58 @@ public class TutorIndexEventMapper {
                                 .lastActiveAt(tutor.getUpdatedAt())
 
                                 .build();
+        }
+
+        private List<String> buildSuggestions(Tutor tutor) {
+                if (tutor == null)
+                        return new ArrayList<>();
+
+                List<String> inputs = new ArrayList<>();
+
+                // 1. Full Name
+                addIfPresent(inputs, tutor.getFullName());
+
+                // 2. Headline
+                addIfPresent(inputs, tutor.getHeadline());
+
+                // 3. Experience (Title & Company)
+                if (tutor.getCareerEntries() != null) {
+                        tutor.getCareerEntries().stream()
+                                        .filter(e -> "EXPERIENCE".equals(e.getType()))
+                                        .forEach(e -> {
+                                                addIfPresent(inputs, e.getTitle());
+                                                addIfPresent(inputs, e.getInstitution()); // Company
+                                        });
+                }
+
+                // 4. Education (Degree/Field & School)
+                if (tutor.getCareerEntries() != null) {
+                        tutor.getCareerEntries().stream()
+                                        .filter(e -> "EDUCATION".equals(e.getType()))
+                                        .forEach(e -> {
+                                                addIfPresent(inputs, e.getTitle()); // Degree
+                                                addIfPresent(inputs, e.getInstitution()); // School
+                                        });
+                }
+
+                // 5. Certifications
+                if (tutor.getCertifications() != null) {
+                        tutor.getCertifications().forEach(c -> {
+                                addIfPresent(inputs, c.getName());
+                                addIfPresent(inputs, c.getIssuingOrganization());
+                        });
+                }
+
+                return inputs;
+        }
+
+        private void addIfPresent(List<String> inputs, String value) {
+                if (value != null && !value.trim().isEmpty()) {
+                        String trimmed = value.trim();
+                        if (!inputs.contains(trimmed)) {
+                                inputs.add(trimmed);
+                        }
+                }
         }
 
         /**
