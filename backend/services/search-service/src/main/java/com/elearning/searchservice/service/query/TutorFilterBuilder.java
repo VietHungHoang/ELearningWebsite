@@ -35,16 +35,19 @@ public class TutorFilterBuilder {
 
         // Language codes filter
         if (request.getLanguageCodes() != null && !request.getLanguageCodes().isEmpty()) {
+            log.info("Adding languageCodes filter: {}", request.getLanguageCodes());
             filters.add(buildLanguageCodesFilter(request.getLanguageCodes()));
         }
 
         // Category ID filter
         if (request.getCategoryId() != null) {
+            log.info("Adding categoryId filter: {} (searching in field 'categoryIds')", request.getCategoryId());
             filters.add(buildCategoryIdFilter(request.getCategoryId()));
         }
 
         // Subject ID filter
         if (request.getSubjectId() != null) {
+            log.info("Adding subjectId filter: {} (searching in field 'subjectIds')", request.getSubjectId());
             filters.add(buildSubjectIdFilter(request.getSubjectId()));
         }
 
