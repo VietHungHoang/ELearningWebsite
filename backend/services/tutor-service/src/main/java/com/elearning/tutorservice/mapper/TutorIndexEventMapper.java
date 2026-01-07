@@ -54,7 +54,7 @@ public class TutorIndexEventMapper {
                                 .subjects(mapSubjects(tutor.getSubjects()))
                                 .languages(mapLanguages(tutor.getLanguages()))
                                 .categories(List.of()) // Will be populated by CategorySubjectSyncScheduler
-                                .education(mapEducation(tutor.getCertifications()))
+                                .education(mapEducation(tutor.getCareerEntries()))
                                 .experience(mapExperience(tutor.getCareerEntries()))
                                 .activeClasses(List.of()) // TODO: implement when class entity available
 
@@ -74,7 +74,7 @@ public class TutorIndexEventMapper {
                                 .currentSessionFee(tutor.getCurrentSessionFee() != null ? tutor.getCurrentSessionFee()
                                                 : java.math.BigDecimal.ZERO)
                                 .currency(null)
-                                .sessionDurationMinutes(null)
+                                .sessionDurationMinutes(tutor.getCurrentSessionFee().intValue())
                                 .averageRating(0.0) // TODO: calculate from reviews
                                 .totalReviews(tutor.getReviews() != null ? tutor.getReviews().size() : 0)
                                 .totalStudents(tutor.getTotalStudents() != null ? tutor.getTotalStudents() : 0)
@@ -177,18 +177,19 @@ public class TutorIndexEventMapper {
                                 .collect(Collectors.toList());
         }
 
-        private List<EducationInfo> mapEducation(List<Certification> certifications) {
-                if (certifications == null)
+        private List<EducationInfo> mapEducation(List<CareerEntry> careerEntries) {
+                if (careerEntries == null)
                         return List.of();
 
-                return certifications.stream()
-                                .map(cert -> EducationInfo.builder()
-                                                .titleVi(cert.getName())
-                                                .titleEn(cert.getName())
-                                                .titleJa(cert.getName())
-                                                .institution(cert.getIssuingOrganization())
-                                                .graduationYear(cert.getIssueDate() != null
-                                                                ? cert.getIssueDate().getYear()
+                return careerEntries.stream()
+                                .filter(entry -> "EDUCATION".equals(entry.getType()))
+                                .map(edu -> EducationInfo.builder()
+                                                .titleVi(edu.getTitle())
+                                                .titleEn(edu.getTitle())
+                                                .titleJa(edu.getTitle())
+                                                .institution(edu.getInstitution())
+                                                .graduationYear(edu.getEndDate() != null
+                                                                ? edu.getEndDate().getYear()
                                                                 : null)
                                                 .build())
                                 .collect(Collectors.toList());

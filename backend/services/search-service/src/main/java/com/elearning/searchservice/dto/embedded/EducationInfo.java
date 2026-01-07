@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EducationInfo {
-    
+
     // Multi-language titles
     private String titleVi;
     private String titleEn;
     private String titleJa;
-    
+
     private String institution;
-    private Integer year;
+    private Integer graduationYear;
     private String location;
 }

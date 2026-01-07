@@ -92,4 +92,18 @@ public class AdminSearchController {
 
         return ResponseEntity.ok(ApiResponse.success(tutorDebugInfo));
     }
+
+    /**
+     * Debug endpoint to get raw ES document by ID
+     * GET /v1/admin/search/tutors/{id}
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/tutors/{id}")
+    public ResponseEntity<ApiResponse<com.elearning.searchservice.entity.TutorDocument>> getTutorById(
+            @org.springframework.web.bind.annotation.PathVariable java.util.UUID id) {
+        log.info("Debug: Fetching tutor document from ES with ID: {}", id);
+
+        return tutorSearchRepository.findById(id)
+                .map(tutor -> ResponseEntity.ok(ApiResponse.success(tutor)))
+                .orElse(ResponseEntity.ok(ApiResponse.error("Tutor not found in ES")));
+    }
 }
