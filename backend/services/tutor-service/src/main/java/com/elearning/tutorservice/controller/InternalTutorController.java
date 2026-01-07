@@ -46,9 +46,13 @@ public class InternalTutorController {
                     int subjectsCount = tutor.getSubjects() != null ? tutor.getSubjects().size() : 0;
                     int languagesCount = tutor.getLanguages() != null ? tutor.getLanguages().size() : 0;
                     int availabilitiesCount = tutor.getAvailabilities() != null ? tutor.getAvailabilities().size() : 0;
+                    int careerEntriesCount = tutor.getCareerEntries() != null ? tutor.getCareerEntries().size() : 0;
+                    int certificationsCount = tutor.getCertifications() != null ? tutor.getCertifications().size() : 0;
 
-                    log.debug("Exporting tutor {} - subjects: {}, languages: {}, availabilities: {}",
-                            tutor.getId(), subjectsCount, languagesCount, availabilitiesCount);
+                    log.debug(
+                            "Exporting tutor {} - subjects: {}, languages: {}, availabilities: {}, careerEntries: {}, certifications: {}",
+                            tutor.getId(), subjectsCount, languagesCount, availabilitiesCount, careerEntriesCount,
+                            certificationsCount);
 
                     return tutorIndexEventMapper.toEvent(tutor, "CREATED");
                 })

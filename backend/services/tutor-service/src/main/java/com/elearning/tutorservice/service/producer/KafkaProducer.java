@@ -40,8 +40,8 @@ public class KafkaProducer {
         try {
             String jsonMessage = objectMapper.writeValueAsString(event);
             kafkaTemplate.send(tutorIndexSyncTopic, event.getTutorId().toString(), jsonMessage);
-            log.info("Sent tutor index event to topic {}: type={}, tutorId={}",
-                    tutorIndexSyncTopic, event.getEventType(), event.getTutorId());
+            log.info("Sent tutor index event to topic {}: type={}, tutorId={}, payload={}",
+                    tutorIndexSyncTopic, event.getEventType(), event.getTutorId(), jsonMessage);
         } catch (JsonProcessingException e) {
             log.error("Error converting TutorIndexEvent to JSON: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to serialize TutorIndexEvent", e);

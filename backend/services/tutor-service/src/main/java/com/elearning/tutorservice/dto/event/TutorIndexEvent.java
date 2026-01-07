@@ -86,6 +86,9 @@ public class TutorIndexEvent {
     private Double responseRate;
     private Double completionRate;
 
+    // ============= AUTOCOMPLETE =============
+    private List<String> suggestionInputs;
+
     // ============= METADATA =============
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

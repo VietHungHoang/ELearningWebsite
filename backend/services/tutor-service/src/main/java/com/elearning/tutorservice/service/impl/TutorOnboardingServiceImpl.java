@@ -214,6 +214,16 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             log.info("Refreshed tutor with relationships - subjects: {}, languages: {}, availabilities: {}",
                     subjectsCount, languagesCount, availabilitiesCount);
 
+            // Access other lazy collections to ensure they are loaded
+            int careerEntriesCount = tutorWithRelationships.getCareerEntries() != null
+                    ? tutorWithRelationships.getCareerEntries().size()
+                    : 0;
+            int certificationsCount = tutorWithRelationships.getCertifications() != null
+                    ? tutorWithRelationships.getCertifications().size()
+                    : 0;
+            log.info("Refreshed additional relationships - careerEntries: {}, certifications: {}",
+                    careerEntriesCount, certificationsCount);
+
             // Send to search service with full relationships
             TutorIndexEvent indexEvent = tutorIndexEventMapper.toEvent(tutorWithRelationships, "CREATED");
             kafkaProducer.sendTutorIndexEvent(indexEvent);

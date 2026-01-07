@@ -6,6 +6,8 @@ import com.elearning.tutorservice.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,7 +56,7 @@ public class TutorIndexEventMapper {
                                 .subjects(mapSubjects(tutor.getSubjects()))
                                 .languages(mapLanguages(tutor.getLanguages()))
                                 .categories(List.of()) // Will be populated by CategorySubjectSyncScheduler
-                                .education(mapEducation(tutor.getCertifications()))
+                                .education(mapEducation(tutor.getCareerEntries()))
                                 .experience(mapExperience(tutor.getCareerEntries()))
                                 .activeClasses(List.of()) // TODO: implement when class entity available
 
@@ -74,7 +76,9 @@ public class TutorIndexEventMapper {
                                 .currentSessionFee(tutor.getCurrentSessionFee() != null ? tutor.getCurrentSessionFee()
                                                 : java.math.BigDecimal.ZERO)
                                 .currency(null)
-                                .sessionDurationMinutes(null)
+                                .sessionDurationMinutes(tutor.getCurrentSessionFee() != null
+                                                ? tutor.getCurrentSessionFee().intValue()
+                                                : 0)
                                 .averageRating(0.0) // TODO: calculate from reviews
                                 .totalReviews(tutor.getReviews() != null ? tutor.getReviews().size() : 0)
                                 .totalStudents(tutor.getTotalStudents() != null ? tutor.getTotalStudents() : 0)
@@ -95,6 +99,7 @@ public class TutorIndexEventMapper {
                                 .popularityScore(0.0)
                                 .responseRate(0.0)
                                 .completionRate(0.0)
+                                .suggestionInputs(buildSuggestions(tutor))
 
                                 // Metadata
                                 .createdAt(tutor.getCreatedAt())
@@ -102,6 +107,58 @@ public class TutorIndexEventMapper {
                                 .lastActiveAt(tutor.getUpdatedAt())
 
                                 .build();
+        }
+
+        private List<String> buildSuggestions(Tutor tutor) {
+                if (tutor == null)
+                        return new ArrayList<>();
+
+                List<String> inputs = new ArrayList<>();
+
+                // 1. Full Name
+                addIfPresent(inputs, tutor.getFullName());
+
+                // 2. Headline
+                addIfPresent(inputs, tutor.getHeadline());
+
+                // 3. Experience (Title & Company)
+                if (tutor.getCareerEntries() != null) {
+                        tutor.getCareerEntries().stream()
+                                        .filter(e -> "EXPERIENCE".equals(e.getType()))
+                                        .forEach(e -> {
+                                                addIfPresent(inputs, e.getTitle());
+                                                addIfPresent(inputs, e.getInstitution()); // Company
+                                        });
+                }
+
+                // 4. Education (Degree/Field & School)
+                if (tutor.getCareerEntries() != null) {
+                        tutor.getCareerEntries().stream()
+                                        .filter(e -> "EDUCATION".equals(e.getType()))
+                                        .forEach(e -> {
+                                                addIfPresent(inputs, e.getTitle()); // Degree
+                                                addIfPresent(inputs, e.getInstitution()); // School
+                                        });
+                }
+
+                // 5. Certifications
+                if (tutor.getCertifications() != null) {
+                        tutor.getCertifications().forEach(c -> {
+                                addIfPresent(inputs, c.getName());
+                                addIfPresent(inputs, c.getIssuingOrganization());
+                        });
+                }
+
+                return inputs;
+        }
+
+        private void addIfPresent(List<String> inputs, String value) {
+                if (value != null && !value.trim().isEmpty()) {
+                        String trimmed = value.trim();
+                        if (!inputs.contains(trimmed)) {
+                                inputs.add(trimmed);
+                        }
+                }
         }
 
         /**
@@ -177,18 +234,19 @@ public class TutorIndexEventMapper {
                                 .collect(Collectors.toList());
         }
 
-        private List<EducationInfo> mapEducation(List<Certification> certifications) {
-                if (certifications == null)
+        private List<EducationInfo> mapEducation(List<CareerEntry> careerEntries) {
+                if (careerEntries == null)
                         return List.of();
 
-                return certifications.stream()
-                                .map(cert -> EducationInfo.builder()
-                                                .titleVi(cert.getName())
-                                                .titleEn(cert.getName())
-                                                .titleJa(cert.getName())
-                                                .institution(cert.getIssuingOrganization())
-                                                .graduationYear(cert.getIssueDate() != null
-                                                                ? cert.getIssueDate().getYear()
+                return careerEntries.stream()
+                                .filter(entry -> "EDUCATION".equals(entry.getType()))
+                                .map(edu -> EducationInfo.builder()
+                                                .titleVi(edu.getTitle())
+                                                .titleEn(edu.getTitle())
+                                                .titleJa(edu.getTitle())
+                                                .institution(edu.getInstitution())
+                                                .graduationYear(edu.getEndDate() != null
+                                                                ? edu.getEndDate().getYear()
                                                                 : null)
                                                 .build())
                                 .collect(Collectors.toList());

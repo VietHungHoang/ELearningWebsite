@@ -438,7 +438,7 @@ const ClassDetailPage: React.FC = () => {
                                         />
                                     )}
                                     {activeTab === "Students" && (
-                                        <StudentsTab classData={classData} />
+                                        <StudentsTab classData={classData} onUpdate={fetchClassData} />
                                     )}
                                     {activeTab === "Quizzes" && (
                                         <QuizzesTab onViewQuizResult={handleViewQuizResult} />
