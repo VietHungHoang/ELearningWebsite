@@ -32,8 +32,8 @@ import ReviewsPage from '../tutor/reviews/ReviewsPage';
 import MyBookingsPage from '../student/my-session/MyBookingsPage';
 import StudentMyClassPage from '../student/my-class/MyClassPage';
 import PurchasesPage from '../student/purchases/PurchasesPage';
-import StudentPersonalDetailsPage from '../student/personal-detail/StudentPersonalDetailsPage';
-import WishlistPage from '../student/wishlist/WishlistPage';
+// import StudentPersonalDetailsPage from '../student/personal-detail/StudentPersonalDetailsPage'; // Missing file
+// import WishlistPage from '../student/wishlist/WishlistPage'; // Missing file
 
 // Conditional components
 const ConditionalMyClassPage = () => {
@@ -43,8 +43,8 @@ const ConditionalMyClassPage = () => {
 
 const ConditionalPersonalDetailsPage = () => {
   const { state } = useAuth();
-  return state.user?.role === 'student' 
-    ? <StudentPersonalDetailsPage />
+  return state.user?.role === 'student'
+    ? <div>Student Personal Details (Coming Soon)</div>
     : <ProfileSettingsWrapper><PersonalDetailsPage /></ProfileSettingsWrapper>;
 };
 
@@ -166,10 +166,10 @@ const dashboardRoutes: RouteObject[] = [
         path: 'messages',
         element: <InboxPage />,
       },
-      {
-        path: 'wishlist',
-        element: <WishlistPage />,
-      },
+      // {
+      //   path: 'wishlist',
+      //   element: <WishlistPage />,
+      // },
       // Shared routes - Profile settings with shared context
       {
         path: 'profile-settings',
