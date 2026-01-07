@@ -37,7 +37,7 @@ const SimilarTutorCard: React.FC<SimilarTutorCardProps> = ({ tutor }) => {
         <div className="bg-white rounded-2xl shadow-sm p-4 flex flex-col h-full interactive-card">
             {/* Header */}
             <div className="flex items-start gap-3">
-                <img src={tutor.avatar} alt={tutor.name} className="w-12 h-12 rounded-full object-cover" />
+                <img src={tutor.avatar} alt={tutor.name} className="w-12 h-12 rounded-lg object-cover" />
                 <div className="flex-grow">
                     <div className="flex items-center gap-1.5">
                         <h3 className="text-base font-bold text-gray-800">{tutor.name}</h3>

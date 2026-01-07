@@ -279,7 +279,7 @@ const FeatureTutors: React.FC = () => {
                     <img
                       src={tutor.profileImage}
                       alt={tutor.name}
-                      className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                      className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-base truncate">{tutor.name}</h3>
