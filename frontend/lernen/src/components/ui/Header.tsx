@@ -93,7 +93,7 @@ const Header: React.FC = () => {
     return (
         <header className="bg-[var(--page-bg-color)] border-b border-gray-200">
             <div className="px-8">
-                <div className="flex justify-between items-center py+2">
+                <div className="flex justify-between items-center py-2">
                     <div className="flex items-center space-x-8">
                         {/* Logo */}
                         <NavLink to="/" className="text-[#0b6459]">
