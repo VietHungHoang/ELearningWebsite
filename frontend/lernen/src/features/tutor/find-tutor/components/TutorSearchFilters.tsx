@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import commonUtils from '../../../../utils/commonUtils';
 import type { TutorSearchFilter } from '../../../../types/api';
@@ -263,6 +264,7 @@ interface TutorSearchFiltersProps {
 export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSearchFiltersProps): React.ReactElement {
     const { t, i18n } = useTranslation();
     const { selectedCurrency } = useCurrency();
+    const [searchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState<string>(t('findTutors.filters.tabs.allSessions'));
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [feeRange, setFeeRange] = useState([0, 100]);
@@ -274,6 +276,22 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
     const [isSearching, setIsSearching] = useState<boolean>(false);
     const searchTimeoutRef = useRef<number | null>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const hasInitializedFromUrl = useRef<boolean>(false);
+
+    // Read keyword from URL params on mount and trigger search
+    useEffect(() => {
+        if (hasInitializedFromUrl.current) return;
+
+        const urlKeyword = searchParams.get('keyword');
+        if (urlKeyword) {
+            setKeyword(urlKeyword);
+            // Delay to ensure component is fully mounted
+            setTimeout(() => {
+                onSearch(urlKeyword);
+            }, 100);
+            hasInitializedFromUrl.current = true;
+        }
+    }, [searchParams, onSearch]);
 
     // Helper function to get localized name - memoized to prevent unnecessary re-renders
     const getLocalizedName = useCallback((item: Category | Subject): string => {
@@ -472,7 +490,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         t('findTutors.filters.sortOptions.newestFirst'),
         t('findTutors.filters.sortOptions.oldestFirst')
     ];
-    
+
     // Map sortBy text to API code
     const mapSortByToCode = (sortByText: string): string | undefined => {
         if (sortByText === t('findTutors.filters.sortOptions.relevance')) {
@@ -484,7 +502,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
         }
         return undefined;
     };
-    
+
     const languageOptions: string[] = languages.map(lang => lang.name);
     // Memoize availabilityDays to prevent unnecessary re-renders
     const availabilityDays = useMemo(() => [
@@ -548,7 +566,7 @@ export default function TutorSearchFilters({ onSearch, onFilterChange }: TutorSe
 
     // Store keyword in ref to use in filter change without triggering re-renders
     const keywordRef = useRef<string>('');
-    
+
     // Update keyword ref when keyword changes
     useEffect(() => {
         keywordRef.current = keyword;

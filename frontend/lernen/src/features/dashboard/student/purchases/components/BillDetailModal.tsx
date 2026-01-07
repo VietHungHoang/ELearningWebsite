@@ -44,6 +44,7 @@ const BillDetailModal: React.FC<BillDetailModalProps> = ({
   const getStatusColor = (status: PurchaseData['status']) => {
     switch (status) {
       case 'COMPLETED':
+      case 'CONFIRMED':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -57,11 +58,11 @@ const BillDetailModal: React.FC<BillDetailModalProps> = ({
   };
 
   // Calculate amounts
-  const subtotal = purchase.subtotal || (purchase.sessionsPurchased && purchase.pricePerSession 
-    ? purchase.sessionsPurchased * purchase.pricePerSession 
+  const subtotal = purchase.subtotal || (purchase.sessionsPurchased && purchase.pricePerSession
+    ? purchase.sessionsPurchased * purchase.pricePerSession
     : purchase.amount);
-  const discountAmount = purchase.discountAmount || (purchase.discount && subtotal 
-    ? (subtotal * purchase.discount / 100) 
+  const discountAmount = purchase.discountAmount || (purchase.discount && subtotal
+    ? (subtotal * purchase.discount / 100)
     : 0);
   const tax = purchase.tax || 0;
   const totalAmount = purchase.totalAmount || purchase.amount;
@@ -188,13 +189,13 @@ const BillDetailModal: React.FC<BillDetailModalProps> = ({
                       purchase.status
                     )}`}
                   >
-                    {purchase.status === 'COMPLETED'
+                    {purchase.status === 'COMPLETED' || purchase.status === 'CONFIRMED'
                       ? t('dashboard.student.purchases.statusLabels.completed')
                       : purchase.status === 'PENDING'
-                      ? t('dashboard.student.purchases.statusLabels.pending')
-                      : purchase.status === 'CANCELLED'
-                      ? t('dashboard.student.purchases.statusLabels.cancelled')
-                      : t('dashboard.student.purchases.statusLabels.refunded')}
+                        ? t('dashboard.student.purchases.statusLabels.pending')
+                        : purchase.status === 'CANCELLED'
+                          ? t('dashboard.student.purchases.statusLabels.cancelled')
+                          : t('dashboard.student.purchases.statusLabels.refunded')}
                   </span>
                 </div>
               </div>
@@ -222,7 +223,7 @@ const BillDetailModal: React.FC<BillDetailModalProps> = ({
                 {discountAmount > 0 && (
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">
-                      {t('dashboard.student.purchases.billDetail.discount')} 
+                      {t('dashboard.student.purchases.billDetail.discount')}
                       {purchase.discount ? ` (${purchase.discount}%)` : ''}:
                     </span>
                     <span className="text-sm font-semibold text-red-600">
