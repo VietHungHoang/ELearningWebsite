@@ -24,8 +24,8 @@ public class ClassInfoServiceImpl implements ClassInfoService {
     @Override
     @Transactional
     public void handleClassCreatedEvent(ClassCreatedEvent event) {
-        log.info("Handling class created event: bookingId={}, classId={}, title={}",
-                event.getBookingId(), event.getClassId(), event.getTitle());
+        log.info("Handling class created event: bookingId={}, classId={}, title={}, classType={}",
+                event.getBookingId(), event.getClassId(), event.getTitle(), event.getClassType());
 
         // 1. Save or update ClassInfo
         Optional<ClassInfo> existingClassInfo = classInfoRepository.findByClassId(event.getClassId());
@@ -35,12 +35,14 @@ public class ClassInfoServiceImpl implements ClassInfoService {
             // Update existing
             classInfo = existingClassInfo.get();
             classInfo.setTitle(event.getTitle());
+            classInfo.setClassType(event.getClassType());
             log.info("Updating existing ClassInfo for classId: {}", event.getClassId());
         } else {
             // Create new
             classInfo = ClassInfo.builder()
                     .classId(event.getClassId())
                     .title(event.getTitle())
+                    .classType(event.getClassType())
                     .build();
             log.info("Creating new ClassInfo for classId: {}", event.getClassId());
         }

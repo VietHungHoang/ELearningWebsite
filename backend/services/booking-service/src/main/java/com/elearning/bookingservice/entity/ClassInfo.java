@@ -19,4 +19,7 @@ public class ClassInfo extends BaseEntity {
 
     @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "class_type")
+    private String classType;
 }

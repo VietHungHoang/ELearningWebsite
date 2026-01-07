@@ -117,6 +117,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 .bookingId(event.getBookingId())
                 .classId(newClass.getId())
                 .title(newClass.getTitle())
+                .classType(newClass.getClassType() != null ? newClass.getClassType().name() : null)
                 .build();
         kafkaProducerService.sendClassCreatedEvent(classCreatedEvent);
         log.info("Sent ClassCreatedEvent to booking-service for bookingId: {}, classId: {}",

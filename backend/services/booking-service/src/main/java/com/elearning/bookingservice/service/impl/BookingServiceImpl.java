@@ -94,12 +94,20 @@ public class BookingServiceImpl implements BookingService {
         }
 
         private BookingHistoryResponse mapToBookingHistoryResponse(Booking booking) {
-                // Get class name from ClassInfo if classId exists
+                // Get class info from ClassInfo if classId exists
                 String className = null;
+                String classType = null;
                 if (booking.getClassId() != null) {
-                        className = classInfoRepository.findByClassId(booking.getClassId())
-                                        .map(ClassInfo::getTitle)
-                                        .orElse(null);
+                        classInfoRepository.findByClassId(booking.getClassId())
+                                        .ifPresent(classInfo -> {
+                                                // Using local variables to capture values
+                                        });
+                        // Get both className and classType
+                        var classInfoOpt = classInfoRepository.findByClassId(booking.getClassId());
+                        if (classInfoOpt.isPresent()) {
+                                className = classInfoOpt.get().getTitle();
+                                classType = classInfoOpt.get().getClassType();
+                        }
                 }
 
                 return BookingHistoryResponse.builder()
@@ -120,6 +128,7 @@ public class BookingServiceImpl implements BookingService {
                                 .createdAt(booking.getCreatedAt())
                                 .updatedAt(booking.getUpdatedAt())
                                 .className(className)
+                                .classType(classType)
                                 .build();
         }
 

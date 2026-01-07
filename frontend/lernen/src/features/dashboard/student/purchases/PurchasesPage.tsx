@@ -14,7 +14,7 @@ export interface PurchaseData {
     courseTitle: string;
     type: 'ON_ONE_ONE' | 'GROUP';
     amount: number;
-    status: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED';
+    status: 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'REFUNDED' | 'CONFIRMED';
     purchaseDate: string;
     paymentMethod?: string;
     invoiceNumber?: string;
@@ -42,9 +42,9 @@ type FilterTab = 'All Status' | 'Pending' | 'Completed' | 'Cancelled' | 'Refunde
 const getStatusForApi = (tab: FilterTab): string | undefined => {
     switch (tab) {
         case 'Pending': return 'PENDING';
-        case 'Completed': return 'COMPLETED';
+        case 'Completed': return 'CONFIRMED'; // CONFIRMED = payment confirmed = completed for student
         case 'Cancelled': return 'CANCELLED';
-        case 'Refunded': return 'CONFIRMED'; // Map Refunded to CONFIRMED for now
+        case 'Refunded': return 'REFUNDED';
         default: return undefined;
     }
 };
@@ -306,7 +306,7 @@ const PurchasesPage: React.FC = () => {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
-                                                <span className={`w-1.5 h-1.5 rounded-full ${purchase.status === 'COMPLETED'
+                                                <span className={`w-1.5 h-1.5 rounded-full ${purchase.status === 'COMPLETED' || purchase.status === 'CONFIRMED'
                                                     ? 'bg-green-600'
                                                     : purchase.status === 'PENDING'
                                                         ? 'bg-yellow-600'
@@ -314,7 +314,7 @@ const PurchasesPage: React.FC = () => {
                                                             ? 'bg-red-600'
                                                             : 'bg-gray-600'
                                                     }`}></span>
-                                                {purchase.status === 'COMPLETED'
+                                                {purchase.status === 'COMPLETED' || purchase.status === 'CONFIRMED'
                                                     ? t('dashboard.student.purchases.statusLabels.completed')
                                                     : purchase.status === 'PENDING'
                                                         ? t('dashboard.student.purchases.statusLabels.pending')

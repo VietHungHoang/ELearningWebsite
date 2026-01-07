@@ -20,4 +20,5 @@ public class ClassCreatedEvent {
     private UUID bookingId;
     private UUID classId;
     private String title;
+    private String classType;
 }
