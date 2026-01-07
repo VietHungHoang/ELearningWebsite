@@ -108,84 +108,66 @@ public class SearchServiceImpl implements SearchService {
                         return Collections.emptyList();
                 }
 
-                // Build Completion Suggester
-                co.elastic.clients.elasticsearch.core.search.Suggester suggester = co.elastic.clients.elasticsearch.core.search.Suggester
-                                .of(s -> s
-                                                .suggesters("tutor-suggest", fs -> fs
-                                                                .prefix(request.getKeyword().trim())
-                                                                .completion(c -> c
-                                                                                .field("suggest")
-                                                                                .skipDuplicates(true)
-                                                                                .size(request.getLimit() != null
-                                                                                                ? request.getLimit()
-                                                                                                : 10))));
+                try {
+                        // Build Completion Suggester with a basic query
+                        // NativeQuery requires a query, so we use match_all
+                        String keyword = request.getKeyword().trim();
+                        int limit = request.getLimit() != null ? request.getLimit() : 10;
 
-                // Build native query
-                NativeQuery nativeQuery = NativeQuery.builder()
-                                .withSuggester(suggester)
-                                .build();
+                        // Build Completion Suggester
+                        co.elastic.clients.elasticsearch.core.search.Suggester suggester = co.elastic.clients.elasticsearch.core.search.Suggester
+                                        .of(s -> s
+                                                        .suggesters("tutor-suggest", fs -> fs
+                                                                        .prefix(keyword)
+                                                                        .completion(c -> c
+                                                                                        .field("suggest")
+                                                                                        .skipDuplicates(true)
+                                                                                        .size(limit)
+                                                                                        .fuzzy(f -> f
+                                                                                                        .fuzziness("AUTO")))));
 
-                // Execute search
-                SearchHits<TutorDocument> searchHits = elasticsearchOperations.search(
-                                nativeQuery,
-                                TutorDocument.class,
-                                IndexCoordinates.of("tutors_v1"));
+                        // Build native query with match_all query and suggester
+                        NativeQuery nativeQuery = NativeQuery.builder()
+                                        .withQuery(Query.of(q -> q.matchAll(m -> m))) // Required: basic query
+                                        .withSuggester(suggester)
+                                        .build();
 
-                // Extract suggestions
-                // Note: Spring Data ES maps suggestions differently than hits.
-                // We need to access the response aggregation or suggest results.
-                // But SearchHits object might contain suggestions if mapped correctly.
-                // Actually, accessing suggestions from SearchHits in current Spring Data
-                // version:
+                        // Execute search
+                        SearchHits<TutorDocument> searchHits = elasticsearchOperations.search(
+                                        nativeQuery,
+                                        TutorDocument.class,
+                                        IndexCoordinates.of("tutors_v1"));
 
-                var suggestions = searchHits.getSuggest();
-                if (suggestions == null) {
+                        // Extract suggestions
+                        List<TutorSuggestion> result = new ArrayList<>();
+
+                        var suggestions = searchHits.getSuggest();
+                        if (suggestions != null) {
+                                var suggestionEntry = suggestions.getSuggestion("tutor-suggest");
+                                if (suggestionEntry != null) {
+                                        suggestionEntry.getEntries().forEach(entry -> {
+                                                entry.getOptions().forEach(option -> {
+                                                        String text = option.getText();
+                                                        Float score = option.getScore() != null
+                                                                        ? option.getScore().floatValue()
+                                                                        : 0f;
+
+                                                        result.add(TutorSuggestion.builder()
+                                                                        .name(text)
+                                                                        .score(score)
+                                                                        .build());
+                                                });
+                                        });
+                                }
+                        }
+
+                        log.info("Found {} suggestions for keyword: {}", result.size(), keyword);
+                        return result;
+
+                } catch (Exception e) {
+                        log.error("Error getting tutor suggestions for keyword: {}", request.getKeyword(), e);
                         return Collections.emptyList();
                 }
-
-                List<TutorSuggestion> result = new ArrayList<>();
-
-                // "tutor-suggest" is the name we gave above
-                var suggestionEntry = suggestions.getSuggestion("tutor-suggest");
-                if (suggestionEntry != null) {
-                        suggestionEntry.getEntries().forEach(entry -> {
-                                entry.getOptions().forEach(option -> {
-                                        // Option contains the text and the document source if available
-                                        // option.getText() is the suggestion string
-                                        // option.getScore() is the weight/score
-
-                                        // For a Google-like simple suggestion, we just return the text.
-                                        // But our API returns TutorSuggestion object.
-                                        // If we want to return just the string, we might need to change DTO or map it.
-                                        // The user asked for "Google style", e.g. "java" -> "java script".
-                                        // The current TutorSuggestion DTO has tutorId, name, headline.
-                                        // This structure assumes we suggest A TUTOR.
-                                        // BUT "Google style" often suggests KEYWORDS first.
-                                        // If the user wants to suggest KEYWORDS, we should assume the input in
-                                        // 'suggest' field are keywords.
-                                        // So we return the keyword.
-
-                                        // However, the existing frontend might expect TutorSuggestion objects.
-                                        // Let's create a "Keyword" suggestion wrapped in TutorSuggestion structure for
-                                        // compatibility,
-                                        // OR we should have clarified if we want to return Strings.
-                                        // Given the DTO `TutorSuggestion` has `name`, `headline`...
-                                        // Let's set `name` = suggested text, and `tutorId` = null (or matched tutor ID
-                                        // if needed).
-                                        // Completion Suggester can return the document.
-
-                                        String text = option.getText();
-                                        result.add(TutorSuggestion.builder()
-                                                        .name(text)
-                                                        .score(option.getScore() != null
-                                                                        ? option.getScore().floatValue()
-                                                                        : 0f)
-                                                        .build());
-                                });
-                        });
-                }
-
-                return result;
         }
 
         @Override

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FiBookOpen, FiLogOut, FiSettings, FiCalendar, FiCreditCard, FiHeart, FiMessageSquare, FiHome, FiTag, FiBell, FiCode, FiShoppingBag, FiFileText, FiUsers } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 interface NavItemProps {
@@ -19,6 +20,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, isSignOut, onClick }) =>
 
 const ProfileDropdown: React.FC = () => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { state, logout } = useAuth();
     const { user } = state;
 
@@ -29,28 +31,26 @@ const ProfileDropdown: React.FC = () => {
 
     // Tutor menu items
     const tutorMenuItems = [
-        { icon: <FiHome />, label: "Dashboard", path: "/dashboard" },
-        { icon: <FiUsers />, label: "My Students", path: "/dashboard/my-students" },
-        { icon: <FiBookOpen />, label: "My Courses", path: "/dashboard/my-courses" },
-        { icon: <FiBookOpen />, label: "My Class", path: "/dashboard/my-class" },
-        { icon: <FiCalendar />, label: "Schedule", path: "/dashboard/schedule" },
-        { icon: <FiCreditCard />, label: "Payouts", path: "/dashboard/payouts" },
-        { icon: <FiTag />, label: "Deals & Coupons", path: "/dashboard/deals-coupons" },
-        { icon: <FiBell />, label: "Requests", path: "/dashboard/requests" },
-        { icon: <FiMessageSquare />, label: "Inbox", path: "/dashboard/inbox" },
-        { icon: <FiSettings />, label: "Profile Settings", path: "/dashboard/profile-settings/personal-details" },
-        { icon: <FiCode />, label: "API", path: "/dashboard/api" },
+        { icon: <FiHome />, label: t('profile.dropdown.dashboard'), path: "/dashboard" },
+        { icon: <FiUsers />, label: t('profile.dropdown.myStudents'), path: "/dashboard/my-students" },
+        { icon: <FiBookOpen />, label: t('profile.dropdown.myClass'), path: "/dashboard/my-class" },
+        { icon: <FiCalendar />, label: t('profile.dropdown.schedule'), path: "/dashboard/schedule" },
+        { icon: <FiCreditCard />, label: t('profile.dropdown.payouts'), path: "/dashboard/payouts" },
+        { icon: <FiTag />, label: t('profile.dropdown.dealsCoupons'), path: "/dashboard/deals-coupons" },
+        { icon: <FiBell />, label: t('profile.dropdown.requests'), path: "/dashboard/requests" },
+        { icon: <FiMessageSquare />, label: t('profile.dropdown.inbox'), path: "/dashboard/inbox" },
+        { icon: <FiSettings />, label: t('profile.dropdown.profileSettings'), path: "/dashboard/profile-settings/personal-details" },
+        { icon: <FiCode />, label: t('profile.dropdown.api'), path: "/dashboard/api" },
     ];
 
     // Student menu items
     const studentMenuItems = [
-        { icon: <FiCalendar />, label: "My Bookings", path: "/dashboard/my-bookings" },
-        { icon: <FiBookOpen />, label: "My Courses", path: "/dashboard/my-courses" },
-        { icon: <FiShoppingBag />, label: "My Purchases", path: "/dashboard/purchases" },
-        { icon: <FiFileText />, label: "Certificates", path: "/dashboard/certificates" },
-        { icon: <FiMessageSquare />, label: "Messages", path: "/dashboard/messages" },
-        { icon: <FiHeart />, label: "Favourites", path: "/profile/favourites" },
-        { icon: <FiSettings />, label: "Profile Settings", path: "/dashboard/profile-settings/personal-details" },
+        { icon: <FiCalendar />, label: t('profile.dropdown.myBookings'), path: "/dashboard/my-bookings" },
+        { icon: <FiShoppingBag />, label: t('profile.dropdown.myPurchases'), path: "/dashboard/purchases" },
+        { icon: <FiFileText />, label: t('profile.dropdown.certificates'), path: "/dashboard/certificates" },
+        { icon: <FiMessageSquare />, label: t('profile.dropdown.messages'), path: "/dashboard/messages" },
+        { icon: <FiHeart />, label: t('profile.dropdown.favourites'), path: "/profile/favourites" },
+        { icon: <FiSettings />, label: t('profile.dropdown.profileSettings'), path: "/dashboard/profile-settings/personal-details" },
     ];
 
     // Select menu items based on user role
@@ -66,7 +66,7 @@ const ProfileDropdown: React.FC = () => {
                     className="w-10 h-10 rounded-full"
                 />
                 <div>
-                    <p className="font-bold text-gray-800">{user?.name || 'User'}</p>
+                    <p className="font-bold text-gray-800">{user?.name || t('profile.dropdown.user')}</p>
                     <p className="text-xs text-gray-500">{user?.email || 'user@example.com'}</p>
                 </div>
             </div>
@@ -82,7 +82,7 @@ const ProfileDropdown: React.FC = () => {
                     />
                 ))}
                 <div className="pt-2 mt-2 border-t border-gray-100">
-                    <NavItem icon={<FiLogOut />} label="Sign out" isSignOut onClick={handleLogout} />
+                    <NavItem icon={<FiLogOut />} label={t('profile.dropdown.signOut')} isSignOut onClick={handleLogout} />
                 </div>
             </nav>
         </div>

@@ -6,9 +6,10 @@ interface VideoModalProps {
     onClose: () => void;
     videoUrl: string;
     tutorName: string;
+    smallVideoRef?: React.RefObject<HTMLVideoElement | null>;
 }
 
-const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, tutorName }) => {
+const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, tutorName, smallVideoRef }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isAnimating, setIsAnimating] = useState(false);
 
@@ -19,12 +20,52 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, tuto
                 setIsAnimating(true);
             });
             if (videoRef.current) {
-                videoRef.current.play();
+                // Sync currentTime from small video if available
+                if (smallVideoRef?.current) {
+                    const currentTime = smallVideoRef.current.currentTime || 0;
+                    videoRef.current.currentTime = currentTime;
+                }
+                // Play video in modal
+                videoRef.current.play().catch((error) => {
+                    console.warn('Error playing video:', error);
+                });
             }
         } else {
             setIsAnimating(false);
+            // When closing modal, sync currentTime back to small video
+            if (videoRef.current && smallVideoRef?.current) {
+                const modalCurrentTime = videoRef.current.currentTime;
+                smallVideoRef.current.currentTime = modalCurrentTime;
+                // If modal video was paused, pause small video too
+                if (videoRef.current.paused) {
+                    smallVideoRef.current.pause();
+                }
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, smallVideoRef]);
+
+    const handlePause = () => {
+        // Only sync currentTime, don't sync play/pause state
+        // Video in modal should be independent
+        if (videoRef.current && smallVideoRef?.current) {
+            smallVideoRef.current.currentTime = videoRef.current.currentTime;
+        }
+    };
+
+    const handlePlay = () => {
+        // Only sync currentTime, don't sync play/pause state
+        // Video in modal should be independent
+        if (videoRef.current && smallVideoRef?.current) {
+            smallVideoRef.current.currentTime = videoRef.current.currentTime;
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        // Sync currentTime to small video while playing
+        if (videoRef.current && smallVideoRef?.current && !videoRef.current.paused) {
+            smallVideoRef.current.currentTime = videoRef.current.currentTime;
+        }
+    };
 
     useEffect(() => {
         const handleEsc = (e: KeyboardEvent) => {
@@ -70,6 +111,9 @@ const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl, tuto
                         controls
                         autoPlay
                         className="w-full aspect-video"
+                        onPause={handlePause}
+                        onPlay={handlePlay}
+                        onTimeUpdate={handleTimeUpdate}
                     >
                         <source src={videoUrl} type="video/mp4" />
                         Your browser does not support the video tag.

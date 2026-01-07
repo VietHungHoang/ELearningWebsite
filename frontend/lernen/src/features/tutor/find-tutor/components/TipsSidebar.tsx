@@ -51,28 +51,33 @@ const TipsSidebar: React.FC = () => {
 
     return (
         <div className="bg-[#f9f3eb] border border-[rgba(219,132,1,0.1)] rounded-2xl shadow-sm p-6 sticky top-8">
-            <div className="relative rounded-lg overflow-hidden aspect-video bg-black group">
+            <div className="relative rounded-lg overflow-hidden aspect-video group">
                 <video
                     ref={videoRef}
                     src="https://amento-bucket-poc-2.s3.amazonaws.com/optionbuilder/uploads/banner-video.mp4"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-pointer"
                     onPlay={handleVideoPlay}
                     onPause={handleVideoPause}
                     onLoadedData={handleVideoLoadedData}
                     onLoadedMetadata={handleVideoLoadedData}
-                    preload="auto"
-                    controls={isPlaying}
+                    loop
+                    muted
                     playsInline
-                    muted={false}
+                    preload="metadata"
+                    controls={isPlaying}
+                    onClick={handlePlayPause}
                 />
                 {!isPlaying && (
                     <div
-                        className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center cursor-pointer"
-                        onClick={handlePlayPause}
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
                     >
                         <button
                             aria-label="Play video"
-                            className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-transform duration-300 group-hover:scale-110"
+                            className="w-14 h-14 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-white/50 transition-transform duration-300 group-hover:scale-110 pointer-events-auto"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handlePlayPause();
+                            }}
                         >
                             <FaPlay />
                         </button>
