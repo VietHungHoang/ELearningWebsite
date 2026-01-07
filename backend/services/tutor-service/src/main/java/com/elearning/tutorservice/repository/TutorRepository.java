@@ -32,13 +32,20 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
        List<Tutor> findByIsVerifiedTrue();
 
        /**
-        * Find tutor with subjects and languages for search indexing
+        * Find tutor with subjects for search indexing
+        */
+       @Query("SELECT t FROM Tutor t " +
+                     "LEFT JOIN FETCH t.subjects " +
+                     "WHERE t.id = :tutorId")
+       java.util.Optional<Tutor> findByIdWithSubjects(@Param("tutorId") UUID tutorId);
+
+       /**
+        * Find tutor with languages for search indexing
         */
        @Query("SELECT t FROM Tutor t " +
                      "LEFT JOIN FETCH t.languages " +
-                     "LEFT JOIN FETCH t.subjects " +
                      "WHERE t.id = :tutorId")
-       java.util.Optional<Tutor> findByIdWithSubjectsAndLanguages(@Param("tutorId") UUID tutorId);
+       java.util.Optional<Tutor> findByIdWithLanguages(@Param("tutorId") UUID tutorId);
 
        /**
         * Find tutor with availabilities for search indexing
@@ -47,14 +54,4 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
                      "LEFT JOIN FETCH t.availabilities " +
                      "WHERE t.id = :tutorId")
        java.util.Optional<Tutor> findByIdWithAvailabilities(@Param("tutorId") UUID tutorId);
-
-       /**
-        * Find all verified tutors with subjects and languages for bulk indexing
-        * Note: Can only fetch 2 bags at a time due to Hibernate limitation
-        */
-       @Query("SELECT DISTINCT t FROM Tutor t " +
-                     "LEFT JOIN FETCH t.languages " +
-                     "LEFT JOIN FETCH t.subjects " +
-                     "WHERE t.isVerified = true")
-       List<Tutor> findAllVerifiedWithSubjectsAndLanguages();
 }

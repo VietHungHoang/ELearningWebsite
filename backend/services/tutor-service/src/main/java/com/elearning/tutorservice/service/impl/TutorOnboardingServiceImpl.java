@@ -198,15 +198,18 @@ public class TutorOnboardingServiceImpl implements TutorOnboardingService {
             entityManager.flush();
             entityManager.clear(); // Clear persistence context to force re-fetch
 
-            // Load subjects and languages (max 2 bags at a time due to Hibernate)
-            Tutor tutorWithRelationships = tutorRepository.findByIdWithSubjectsAndLanguages(tutorId)
+            // Fetch base tutor first
+            Tutor tutorWithRelationships = tutorRepository.findById(tutorId)
                     .orElseThrow(() -> new RuntimeException("Tutor not found after save: " + tutorId));
 
-            // Load availabilities separately
-            Tutor tutorWithAvailabilities = tutorRepository.findByIdWithAvailabilities(tutorId).orElse(null);
-            if (tutorWithAvailabilities != null) {
-                tutorWithRelationships.setAvailabilities(tutorWithAvailabilities.getAvailabilities());
-            }
+            // Load each collection separately (1 at a time) to avoid
+            // MultipleBagFetchException
+            tutorRepository.findByIdWithSubjects(tutorId)
+                    .ifPresent(t -> tutorWithRelationships.setSubjects(t.getSubjects()));
+            tutorRepository.findByIdWithLanguages(tutorId)
+                    .ifPresent(t -> tutorWithRelationships.setLanguages(t.getLanguages()));
+            tutorRepository.findByIdWithAvailabilities(tutorId)
+                    .ifPresent(t -> tutorWithRelationships.setAvailabilities(t.getAvailabilities()));
 
             log.info("Refreshed tutor with relationships - subjects: {}, languages: {}, availabilities: {}",
                     tutorWithRelationships.getSubjects() != null ? tutorWithRelationships.getSubjects().size() : 0,
