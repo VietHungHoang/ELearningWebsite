@@ -13,9 +13,11 @@ import BookingModal from "./components/BookingModal";
 import type { Tutor } from "../../../types/tutor";
 import { useTranslation } from "react-i18next";
 import TutorRedirect from "../../../components/guards/TutorRedirect";
+import { useAuth } from "../../../context/AuthContext";
 
 const FindTutorsPage: React.FC = () => {
     const { t } = useTranslation();
+    const { state } = useAuth();
     const [tutors, setTutors] = useState<Tutor[]>([]);
     const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
