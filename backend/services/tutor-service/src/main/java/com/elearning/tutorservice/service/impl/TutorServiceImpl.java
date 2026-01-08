@@ -84,6 +84,22 @@ public class TutorServiceImpl implements TutorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<TutorResponse> getSimilarTutors(UUID tutorId, List<UUID> subjectIds) {
+        log.info("Finding similar tutors for tutor {} with {} subject IDs", tutorId, subjectIds.size());
+        
+        // Find tutors who teach any of the given subjects, excluding the current tutor
+        // Using native query with random order and limit 10
+        List<Tutor> similarTutors = tutorRepository.findSimilarTutorsBySubjects(tutorId, subjectIds, 10);
+        
+        log.info("Found {} similar tutors", similarTutors.size());
+        
+        return similarTutors.stream()
+                .map(tutorMapper::toTutorResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void submitReview(UUID tutorId, SubmitReviewRequest request) {
         try {

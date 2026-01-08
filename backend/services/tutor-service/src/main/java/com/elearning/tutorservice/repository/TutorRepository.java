@@ -54,4 +54,19 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
                      "LEFT JOIN FETCH t.availabilities " +
                      "WHERE t.id = :tutorId")
        java.util.Optional<Tutor> findByIdWithAvailabilities(@Param("tutorId") UUID tutorId);
+
+       /**
+        * Find similar tutors by subject IDs (random order, limit)
+        * Excludes the specified tutor and returns random tutors who teach any of the given subjects
+        */
+       @Query(value = "SELECT DISTINCT t.* FROM tutor t " +
+                     "INNER JOIN tutor_subject ts ON t.id = ts.tutor_id " +
+                     "WHERE t.is_verified = true " +
+                     "AND t.id != :tutorId " +
+                     "AND ts.subject_id IN :subjectIds " +
+                     "ORDER BY RANDOM() " +
+                     "LIMIT :limit", nativeQuery = true)
+       List<Tutor> findSimilarTutorsBySubjects(@Param("tutorId") UUID tutorId,
+                                                @Param("subjectIds") List<UUID> subjectIds,
+                                                @Param("limit") int limit);
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FiStar, FiCheckCircle } from 'react-icons/fi';
-import type { TutorReview } from '../../../../types/tutor';
+import { FiStar, FiCheckCircle, FiClock, FiAlertCircle, FiLoader } from 'react-icons/fi';
+import type { TutorReview, ReviewModerationStatus } from '../../../../types/tutor';
 import Toast from '../../../../components/ui/Toast';
 import { tutorService } from '../../../../services/tutorService';
 import { useAuth } from '../../../../context/AuthContext';
@@ -12,13 +12,24 @@ interface StudentReviewsProps {
     hasTrialSession?: boolean;
 }
 
-const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTrialSession = false }) => {
+// Helper to check if a status is pending
+const isPendingStatus = (status?: ReviewModerationStatus): boolean => {
+    if (!status) return false;
+    return status.startsWith('PENDING_');
+};
+
+const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews, tutorId, hasTrialSession = false }) => {
     const [visibleCount, setVisibleCount] = useState(3);
     const [selectedRating, setSelectedRating] = useState(0);
     const [newComment, setNewComment] = useState('');
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [localReviews, setLocalReviews] = useState<TutorReview[]>(initialReviews);
     const { state } = useAuth();
     const { t } = useTranslation();
+
+    // Use localReviews for display (includes newly submitted reviews)
+    const reviews = localReviews;
 
     const totalReviews = reviews.length;
     const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
@@ -66,23 +77,59 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTr
         const canTruncate = review.comment.length > 200;
         const displayText = isExpanded ? review.comment : `${review.comment.substring(0, 200)}${canTruncate ? '...' : ''}`;
 
+        const isPending = isPendingStatus(review.moderationStatus);
+        const isRejected = review.moderationStatus === 'REJECTED';
+        const showModerationBadge = review.ownReview && (isPending || isRejected);
+
         return (
-            <div className="grid grid-cols-10 gap-4">
+            <div className={`grid grid-cols-10 gap-4 ${showModerationBadge ? 'opacity-80' : ''}`}>
                 <div className="col-span-2">
                     <div className="flex items-center gap-3">
                         <img src={review.avatarUrl || 'https://picsum.photos/seed/' + review.studentId + '/48/48'} alt={review.studentName} className="w-12 h-12 rounded-md object-cover" />
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <p className="font-bold text-gray-800 text-sm">{review.studentName}</p>
-                                <FiCheckCircle className="w-3 h-3 text-green-500" />
+                                {!showModerationBadge && <FiCheckCircle className="w-3 h-3 text-green-500" />}
                             </div>
                             <p className="text-xs text-gray-500">{review.submitAt || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
                 <div className="col-span-8">
+                    {/* Moderation status badge for own pending/rejected reviews */}
+                    {showModerationBadge && (
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium mb-2 ${isRejected
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                            {isRejected ? (
+                                <FiAlertCircle className="w-3 h-3" />
+                            ) : (
+                                <FiClock className="w-3 h-3" />
+                            )}
+                            <span>
+                                {isRejected
+                                    ? t('tutorDetail.reviews.moderation.rejected')
+                                    : t('tutorDetail.reviews.moderation.pending')
+                                }
+                            </span>
+                        </div>
+                    )}
+
+                    {/* Show reason for pending/rejected */}
+                    {showModerationBadge && review.statusDescription && (
+                        <p className={`text-xs mb-2 ${isRejected ? 'text-red-600' : 'text-yellow-600'}`}>
+                            {review.statusDescription}
+                        </p>
+                    )}
+
                     <div className="flex items-center gap-1 mb-2">
-                        {[...Array(5)].map((_, i) => <FiStar key={i} className="w-4 h-4 text-yellow-400 fill-current" />)}
+                        {[...Array(5)].map((_, i) => (
+                            <FiStar
+                                key={i}
+                                className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                            />
+                        ))}
                         <span className="text-sm font-bold ml-1">{review.rating.toFixed(1)}/5.0</span>
                     </div>
                     <p className="text-gray-600 leading-relaxed text-sm">
@@ -101,6 +148,67 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTr
         );
     };
 
+    const handleSubmitReview = async () => {
+        if (!state.user) {
+            setToast({ message: t('tutorDetail.reviews.loginRequired'), type: 'error' });
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const response = await tutorService.submitReview({
+                tutorId: tutorId,
+                studentId: state.user.id,
+                studentName: state.user.name,
+                studentAvatarUrl: state.user.avatarUrl || undefined,
+                rating: selectedRating,
+                comment: newComment,
+            });
+
+            // Add the new review to local state
+            if (response.data) {
+                const newReview: TutorReview = {
+                    id: response.data.id,
+                    studentId: response.data.studentId,
+                    studentName: response.data.studentName || state.user.name,
+                    rating: response.data.rating,
+                    comment: response.data.comment,
+                    avatarUrl: response.data.avatarUrl || state.user.avatarUrl,
+                    submitAt: new Date().toLocaleDateString(),
+                    moderationStatus: response.data.moderationStatus,
+                    statusDescription: response.data.statusDescription,
+                    errorCode: response.data.errorCode,
+                    errorMessage: response.data.errorMessage,
+                    ownReview: true, // Mark as own review to show moderation status
+                };
+                setLocalReviews(prev => [newReview, ...prev]);
+            }
+
+            // Show appropriate message based on moderation status
+            if (response.data?.moderationStatus === 'APPROVED') {
+                setToast({ message: t('tutorDetail.reviews.submitSuccess'), type: 'success' });
+            } else if (response.data?.moderationStatus) {
+                // Review is pending moderation
+                setToast({
+                    message: t('tutorDetail.reviews.submitPending', {
+                        defaultValue: 'Đánh giá của bạn đã được gửi và đang chờ kiểm duyệt.'
+                    }),
+                    type: 'success'
+                });
+            } else {
+                setToast({ message: t('tutorDetail.reviews.submitSuccess'), type: 'success' });
+            }
+
+            setSelectedRating(0);
+            setNewComment('');
+        } catch (error) {
+            console.error('Failed to submit review:', error);
+            setToast({ message: t('tutorDetail.reviews.submitError'), type: 'error' });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     return (
         <div className="py-8">
@@ -110,8 +218,8 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTr
                 <div className="lg:col-span-1 space-y-6">
                     <RatingSummary />
 
-                    {/* Write a Review Section - only show if tutor doesn't have trial session */}
-                    {!hasTrialSession && (
+                    {/* Write a Review Section - only show if user has booked a trial session */}
+                    {hasTrialSession && (
                         <div className="bg-[#f9f3eb] rounded-2xl p-6">
                             <h3 className="text-lg font-bold text-gray-800 mb-4">{t('tutorDetail.reviews.writeReview')}</h3>
 
@@ -123,6 +231,7 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTr
                                             key={star}
                                             onClick={() => setSelectedRating(star)}
                                             className="transition-colors"
+                                            disabled={isSubmitting}
                                         >
                                             <FiStar
                                                 className={`w-6 h-6 ${selectedRating >= star ? 'text-yellow-400 fill-current' : 'text-gray-300'} hover:text-yellow-400`}
@@ -143,37 +252,23 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews, tutorId, hasTr
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder={t('tutorDetail.reviews.placeholder')}
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b6459] resize-none text-sm placeholder:text-gray-400"
+                                    disabled={isSubmitting}
                                 />
                             </div>
 
                             <button
-                                className="w-full px-6 py-3 bg-[#0b6459] text-white font-semibold rounded-lg hover:bg-[#084c43] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                disabled={selectedRating === 0}
-                                onClick={async () => {
-                                    if (!state.user) {
-                                        setToast({ message: t('tutorDetail.reviews.loginRequired'), type: 'error' });
-                                        return;
-                                    }
-
-                                    try {
-                                        await tutorService.submitReview({
-                                            tutorId: tutorId,
-                                            studentId: state.user.id,
-                                            studentName: state.user.name,
-                                            studentAvatarUrl: state.user.avatarUrl || undefined,
-                                            rating: selectedRating,
-                                            comment: newComment,
-                                        });
-                                        setToast({ message: t('tutorDetail.reviews.submitSuccess'), type: 'success' });
-                                        setSelectedRating(0);
-                                        setNewComment('');
-                                    } catch (error) {
-                                        console.error('Failed to submit review:', error);
-                                        setToast({ message: t('tutorDetail.reviews.submitError'), type: 'error' });
-                                    }
-                                }}
+                                className="w-full px-6 py-3 bg-[#0b6459] text-white font-semibold rounded-lg hover:bg-[#084c43] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                disabled={selectedRating === 0 || isSubmitting}
+                                onClick={handleSubmitReview}
                             >
-                                {t('tutorDetail.reviews.submitReview')}
+                                {isSubmitting ? (
+                                    <>
+                                        <FiLoader className="w-5 h-5 animate-spin" />
+                                        <span>{t('tutorDetail.reviews.submitting', { defaultValue: 'Đang gửi...' })}</span>
+                                    </>
+                                ) : (
+                                    t('tutorDetail.reviews.submitReview')
+                                )}
                             </button>
                         </div>
                     )}

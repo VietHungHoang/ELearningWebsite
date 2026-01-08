@@ -1991,10 +1991,25 @@
       "placeholder": "Chia sẻ trải nghiệm của bạn với gia sư này...",
       "loginRequired": "Vui lòng đăng nhập để gửi đánh giá.",
       "submitSuccess": "Đánh giá đã được gửi thành công!",
+      "submitPending": "Đánh giá của bạn đã được gửi và đang chờ kiểm duyệt.",
       "submitError": "Không thể gửi đánh giá. Vui lòng thử lại.",
       "submitReview": "Gửi đánh giá",
+      "submitting": "Đang gửi...",
       "loadMore": "Xem thêm đánh giá",
-      "showLess": "Thu gọn"
+      "showLess": "Thu gọn",
+      "moderation": {
+        "pending": "Đang chờ duyệt",
+        "rejected": "Đánh giá bị từ chối",
+        "pendingProfanity": "Chứa ngôn ngữ không phù hợp",
+        "pendingSpam": "Nội dung spam hoặc lặp lại",
+        "pendingPersonalInfo": "Chứa thông tin cá nhân",
+        "pendingHarassment": "Chứa nội dung quấy rối hoặc đe dọa",
+        "pendingInappropriate": "Chứa nội dung không phù hợp",
+        "pendingOffTopic": "Nội dung không liên quan",
+        "pendingFake": "Đánh giá giả mạo hoặc gian lận",
+        "pendingPromotional": "Chứa nội dung quảng cáo",
+        "pendingOther": "Đang chờ kiểm duyệt"
+      }
     },
     "tabs": {
       "introduction": "Giới thiệu",

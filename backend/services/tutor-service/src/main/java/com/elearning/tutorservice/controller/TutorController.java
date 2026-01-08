@@ -59,6 +59,15 @@ public class TutorController {
         return ResponseEntity.ok(ApiResponse.success(tutors, "Tutors retrieved successfully"));
     }
 
+    @GetMapping("/{tutorId}/similar")
+    public ResponseEntity<ApiResponse<List<TutorResponse>>> getSimilarTutors(
+            @PathVariable UUID tutorId,
+            @RequestParam List<UUID> subjectIds) {
+        log.info("Fetching similar tutors for tutor: {} with subjectIds: {}", tutorId, subjectIds);
+        List<TutorResponse> similarTutors = tutorService.getSimilarTutors(tutorId, subjectIds);
+        return ResponseEntity.ok(ApiResponse.success(similarTutors, "Similar tutors retrieved successfully"));
+    }
+
     @PostMapping("/approve/{tutorId}")
     public ResponseEntity<ApiResponse<Void>> approveTutor(@PathVariable UUID tutorId) {
         log.info("Received tutor approval request for: {}", tutorId);

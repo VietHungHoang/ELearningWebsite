@@ -10,7 +10,7 @@ import type {
 } from "../types/api";
 import apiService from "./apiService";
 import { mapTutorResponseToTutor, mapTutorProfileHeaderResponseToTutorProfileHeader } from "../mappers/tutorMapper";
-import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse } from "../types/tutor";
+import type { CertificationItem, EducationItem, ExperienceItem, Tutor, TutorResponse, TutorReview } from "../types/tutor";
 import type { SubmitReviewRequest } from "../types/student";
 
 interface FuzzySearchSuggestion {
@@ -274,9 +274,9 @@ export const tutorService = {
         }
     },
 
-    submitReview: async (reviewData: SubmitReviewRequest): Promise<ApiResponse<{ message: string }>> => {
+    submitReview: async (reviewData: SubmitReviewRequest): Promise<ApiResponse<TutorReview>> => {
         try {
-            return await apiService.post<{ message: string }>(`/v1/reviews`, reviewData);
+            return await apiService.post<TutorReview>(`/v1/reviews`, reviewData);
         } catch (error) {
             console.warn("Failed to submit review to API:", error);
             throw error;
@@ -383,22 +383,19 @@ export const tutorService = {
         }
     },
 
-    getSimilarTutors: async (tutorId: string, studentId?: string): Promise<ApiResponse<PaginatedResponse<Tutor>>> => {
+    getSimilarTutors: async (tutorId: string, subjectIds: string[]): Promise<ApiResponse<Tutor[]>> => {
         try {
             const queryParams = new URLSearchParams();
-            if (studentId) queryParams.append('studentId', studentId);
+            subjectIds.forEach(id => queryParams.append('subjectIds', id));
 
-            const url = `/v1/public/tutors/${tutorId}/similar${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-            const response = await apiService.get<PaginatedResponse<TutorResponse>>(url);
-            const mappedContent = await Promise.all(response.data.content.map(mapTutorResponseToTutor));
+            const url = `/v1/public/tutors/${tutorId}/similar?${queryParams.toString()}`;
+            const response = await apiService.get<TutorResponse[]>(url);
+            const mappedTutors = await Promise.all(response.data.map(mapTutorResponseToTutor));
             return {
                 status: response.status,
                 success: response.success,
                 message: response.message,
-                data: {
-                    ...response.data,
-                    content: mappedContent,
-                },
+                data: mappedTutors,
             };
         } catch (error) {
             console.warn("Failed to fetch similar tutors from API:", error);

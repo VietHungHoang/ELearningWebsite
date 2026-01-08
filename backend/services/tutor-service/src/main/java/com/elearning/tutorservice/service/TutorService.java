@@ -15,6 +15,8 @@ public interface TutorService {
 
     List<TutorResponse> getTutorsByIds(List<UUID> ids);
 
+    List<TutorResponse> getSimilarTutors(UUID tutorId, List<UUID> subjectIds);
+
     void submitReview(UUID tutorId, SubmitReviewRequest request);
     
     TutorResponse updateTutorProfile(UUID tutorId, UpdateTutorProfileRequest request);

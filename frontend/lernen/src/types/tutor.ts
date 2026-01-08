@@ -98,7 +98,26 @@ export interface TutorReview {
     comment: string;
     submitAt?: string;
     avatarUrl?: string;
+    // Moderation fields from backend
+    moderationStatus?: ReviewModerationStatus;
+    statusDescription?: string;
+    errorCode?: number;
+    errorMessage?: string;
+    ownReview?: boolean;
 }
+
+export type ReviewModerationStatus =
+    | 'APPROVED'
+    | 'PENDING_PROFANITY'
+    | 'PENDING_SPAM'
+    | 'PENDING_PERSONAL_INFO'
+    | 'PENDING_HARASSMENT'
+    | 'PENDING_INAPPROPRIATE'
+    | 'PENDING_OFF_TOPIC'
+    | 'PENDING_FAKE'
+    | 'PENDING_PROMOTIONAL'
+    | 'PENDING_OTHER'
+    | 'REJECTED';
 
 export interface TutorSocial {
     platform: string;

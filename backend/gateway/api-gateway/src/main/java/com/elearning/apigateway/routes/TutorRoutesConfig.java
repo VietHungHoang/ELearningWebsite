@@ -29,6 +29,7 @@ public class TutorRoutesConfig {
                                                                 prefix + "me/income",
                                                                 prefix + "me/earnings/**",
                                                                 "/api/v1/public/tutors/{tutorId}",
+                                                                "/api/v1/public/tutors/{tutorId}/similar",
                                                                 "/api/v1/tutors/me/profile",
                                                                 "/api/v1/tutors/me/career-entries",
                                                                 "/api/v1/tutors/me/career-entries/educations",

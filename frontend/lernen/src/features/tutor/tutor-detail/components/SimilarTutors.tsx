@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import SimilarTutorCard, { type SimilarTutor } from './SimilarTutorCard';
 import { useTranslation } from 'react-i18next';
 import { tutorService } from '../../../../services/tutorService';
 import { useAuth } from '../../../../context/AuthContext';
 import type { Tutor } from '../../../../types/tutor';
+import commonUtils from '../../../../utils/commonUtils';
 
 const mockSimilarTutors: SimilarTutor[] = [
     {
@@ -88,16 +89,21 @@ const mapTutorToSimilarTutor = (tutor: Tutor): SimilarTutor => {
     };
 };
 
-const SimilarTutors: React.FC = () => {
+interface SimilarTutorsProps {
+    currentTutor?: any; // Pass current tutor data to extract subjects
+}
+
+const SimilarTutors: React.FC<SimilarTutorsProps> = ({ currentTutor }) => {
     const { t } = useTranslation();
     const { tutorId } = useParams<{ tutorId: string }>();
     const { state } = useAuth();
+    const navigate = useNavigate();
     const [similarTutors, setSimilarTutors] = useState<SimilarTutor[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchSimilarTutors = async () => {
-            if (!tutorId) {
+            if (!tutorId || !currentTutor) {
                 setSimilarTutors(mockSimilarTutors);
                 setLoading(false);
                 return;
@@ -105,10 +111,26 @@ const SimilarTutors: React.FC = () => {
 
             try {
                 setLoading(true);
-                const response = await tutorService.getSimilarTutors(tutorId, state.user?.id);
+
+                // Step 1: Get current tutor's subject category IDs
+                const relevantCategoryIds = new Set<string>();
+                currentTutor.subjects?.forEach((tutorSubject: any) => {
+                    if (tutorSubject.subject?.categoryId) {
+                        relevantCategoryIds.add(tutorSubject.subject.categoryId);
+                    }
+                });
+
+                // Step 2: Get all subjects from these categories
+                const allSubjects = await commonUtils.getSubjects();
+                const relatedSubjectIds = allSubjects
+                    .filter(subject => relevantCategoryIds.has(subject.categoryId))
+                    .map(subject => subject.id);
+
+                // Step 3: Call API with all related subject IDs
+                const response = await tutorService.getSimilarTutors(tutorId, relatedSubjectIds);
                 
-                if (response.success && response.data && response.data.content) {
-                    const mappedTutors = response.data.content.map(mapTutorToSimilarTutor);
+                if (response.success && response.data) {
+                    const mappedTutors = response.data.map(mapTutorToSimilarTutor);
                     setSimilarTutors(mappedTutors);
                 } else {
                     // Fallback to mock data on API error
@@ -124,7 +146,7 @@ const SimilarTutors: React.FC = () => {
         };
 
         fetchSimilarTutors();
-    }, [tutorId, state.user?.id]);
+    }, [tutorId, currentTutor]);
 
     if (loading) {
         return (
@@ -158,7 +180,10 @@ const SimilarTutors: React.FC = () => {
             </div>
 
             <div className="mt-10 text-center">
-                <button className="px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-800 bg-white hover:bg-gray-50 transition-colors">
+                <button 
+                    onClick={() => navigate('/find-tutors')}
+                    className="px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-800 bg-white hover:bg-gray-50 transition-colors"
+                >
                     {t('tutorDetail.similarTutors.viewAll')}
                 </button>
             </div>

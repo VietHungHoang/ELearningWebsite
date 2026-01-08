@@ -1949,10 +1949,25 @@
       "placeholder": "Share your experience with this tutor...",
       "loginRequired": "Please login to submit a review.",
       "submitSuccess": "Review submitted successfully!",
+      "submitPending": "Your review has been submitted and is pending moderation.",
       "submitError": "Failed to submit review. Please try again.",
       "submitReview": "Submit Review",
+      "submitting": "Submitting...",
       "loadMore": "Load more reviews",
-      "showLess": "Show less"
+      "showLess": "Show less",
+      "moderation": {
+        "pending": "Pending Review",
+        "rejected": "Review Rejected",
+        "pendingProfanity": "Contains inappropriate language",
+        "pendingSpam": "Spam or repetitive content",
+        "pendingPersonalInfo": "Contains personal information",
+        "pendingHarassment": "Contains harassment or threats",
+        "pendingInappropriate": "Contains inappropriate content",
+        "pendingOffTopic": "Off-topic content",
+        "pendingFake": "Suspected fake review",
+        "pendingPromotional": "Contains promotional content",
+        "pendingOther": "Under review"
+      }
     },
     "tabs": {
       "introduction": "Introduction",

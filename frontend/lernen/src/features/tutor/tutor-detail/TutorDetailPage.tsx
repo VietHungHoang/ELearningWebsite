@@ -162,7 +162,7 @@ const TutorDetailPage: React.FC = () => {
                     <hr className="my-12 border-t border-gray-200" />
 
                     <div id="similar-tutors">
-                        <SimilarTutors />
+                        <SimilarTutors currentTutor={tutorData} />
                     </div>
                 </div>
             </main>
