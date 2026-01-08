@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
 import chatService, { type ConversationResponse, type MessageResponse } from '../../services/chatService';
 import chatWebSocketService from '../../services/chatWebSocketService';
+import { uploadService } from '../../services/uploadService';
 import ChatIconButton from './ChatIconButton';
 import EmojiPicker from 'emoji-picker-react';
 
@@ -15,6 +16,9 @@ interface Message {
     content: string;
     timestamp: Date;
     isOwn: boolean;
+    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE';
+    fileName?: string; // Original filename from user's upload
+    isLoading?: boolean; // For pending upload messages
 }
 
 interface Conversation {
@@ -47,6 +51,11 @@ const ChatWidget: React.FC = () => {
     const typingTimeoutRef = useRef<number | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+    // File upload refs
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const videoInputRef = useRef<HTMLInputElement>(null);
+    const documentInputRef = useRef<HTMLInputElement>(null);
 
     // Pagination states
     const [page, setPage] = useState(0);
@@ -135,6 +144,7 @@ const ChatWidget: React.FC = () => {
                         content: message.content,
                         timestamp: new Date(message.createdAt),
                         isOwn: message.senderId === state.user?.id,
+                        type: message.type || 'TEXT',
                     };
 
                     // Auto scroll smooth on new message
@@ -300,6 +310,7 @@ const ChatWidget: React.FC = () => {
                 content: msg.content,
                 timestamp: new Date(msg.createdAt),
                 isOwn: msg.senderId === state.user?.id,
+                type: msg.type || 'TEXT',
             }));
 
             setMessages(prev => {
@@ -441,6 +452,7 @@ const ChatWidget: React.FC = () => {
                     content: sentMessage.content,
                     timestamp: new Date(sentMessage.createdAt),
                     isOwn: true,
+                    type: sentMessage.type || 'TEXT',
                 };
                 setMessages(prev => [...prev, newMessage]);
 
@@ -478,6 +490,104 @@ const ChatWidget: React.FC = () => {
                     chatWebSocketService.sendTypingIndicator(selectedConversation.id, false, state.user.id);
                 }
             }, 2000);
+        }
+    };
+
+    // File selection and upload handlers with S3 flow
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'IMAGE' | 'VIDEO' | 'FILE') => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            await handleUploadAndSendFiles(Array.from(files), fileType);
+        }
+        e.target.value = '';
+    };
+
+    const handleUploadAndSendFiles = async (files: File[], fileType: 'IMAGE' | 'VIDEO' | 'FILE') => {
+        if (!state.user || !selectedConversation || files.length === 0) return;
+
+        setShowFileDropdown(false);
+
+        // Generate a temporary ID for pending message
+        const tempId = `temp-${Date.now()}`;
+        const originalFileName = files[0].name; // Store original filename
+
+        // Step 1: Create pending message with loading state immediately
+        const pendingMessage: Message = {
+            id: tempId,
+            senderId: state.user.id,
+            senderName: 'You',
+            content: '', // Will be filled after upload
+            timestamp: new Date(),
+            isOwn: true,
+            type: fileType,
+            fileName: originalFileName,
+            isLoading: true,
+        };
+
+        shouldScrollToBottom.current = 'smooth';
+        setMessages(prev => [...prev, pendingMessage]);
+
+        try {
+            const uploadedUrls: string[] = [];
+
+            for (const file of files) {
+                // Get presigned URL based on file type
+                let presignedData;
+                if (fileType === 'IMAGE') {
+                    presignedData = await uploadService.getPreSignedImageUrl(file.type);
+                } else if (fileType === 'VIDEO') {
+                    presignedData = await uploadService.getPreSignedVideoUrl(file.type);
+                } else {
+                    presignedData = await uploadService.getPreSignedUrl(file.type);
+                }
+
+                // Upload file to S3
+                await uploadService.uploadFileToS3(presignedData.presignedUrl, file);
+
+                // Store the final URL
+                uploadedUrls.push(presignedData.finalUrl);
+            }
+
+            // Send message with file URLs
+            const messageContent = uploadedUrls.join('\n');
+            const messageRequest = {
+                conversationId: selectedConversation.id,
+                type: fileType,
+                content: messageContent,
+            };
+
+            const sentMessage = await chatService.sendMessage(messageRequest);
+
+            // Replace pending message with sent message (keeping original filename)
+            setMessages(prev => prev.map(msg =>
+                msg.id === tempId
+                    ? {
+                        id: sentMessage.id,
+                        senderId: sentMessage.senderId,
+                        senderName: 'You',
+                        content: sentMessage.content,
+                        timestamp: new Date(sentMessage.createdAt),
+                        isOwn: true,
+                        type: sentMessage.type || fileType,
+                        fileName: originalFileName, // Keep original filename
+                        isLoading: false,
+                    }
+                    : msg
+            ));
+
+            // Update conversation last message
+            setConversations(prev =>
+                prev.map(conv =>
+                    conv.id === selectedConversation.id
+                        ? { ...conv, lastMessage: `Đã gửi ${files.length} tệp`, lastMessageTime: new Date() }
+                        : conv
+                )
+            );
+        } catch (error) {
+            console.error('Failed to upload and send files:', error);
+            // Remove pending message on error
+            setMessages(prev => prev.filter(msg => msg.id !== tempId));
+            alert('Không thể gửi tệp. Vui lòng thử lại.');
         }
     };
 
@@ -732,32 +842,104 @@ const ChatWidget: React.FC = () => {
                                     </div>
                                 ) : (
                                     <>
-                                        {[...messages].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()).map((message) => (
-                                            <div
-                                                key={message.id}
-                                                className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
-                                            >
+                                        {[...messages].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()).map((message) => {
+                                            return (
                                                 <div
-                                                    className={`max-w-[80%] rounded-2xl px-3 py-2 shadow-sm ${message.isOwn
-                                                        ? 'bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white rounded-br-sm'
-                                                        : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'
-                                                        }`}
+                                                    key={message.id}
+                                                    className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
                                                 >
-                                                    {!message.isOwn && (
-                                                        <p className="text-[10px] font-semibold mb-0.5 text-[#0b6459]">
-                                                            {message.senderName}
-                                                        </p>
-                                                    )}
-                                                    <p className="text-xs leading-relaxed">{message.content}</p>
-                                                    <p
-                                                        className={`text-[9px] mt-1 ${message.isOwn ? 'text-white/70' : 'text-gray-400'
+                                                    <div
+                                                        className={`${message.type === 'IMAGE' || message.type === 'VIDEO' || message.type === 'FILE' ? 'w-[50%] max-w-[200px]' : 'max-w-[80%]'} rounded-2xl ${message.type === 'IMAGE' || message.type === 'VIDEO' || message.type === 'FILE' ? '' : 'px-3 py-2 shadow-sm'} ${message.type === 'IMAGE' || message.type === 'VIDEO' || message.type === 'FILE'
+                                                            ? ''
+                                                            : message.isOwn
+                                                                ? 'bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white rounded-br-sm'
+                                                                : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm'
                                                             }`}
                                                     >
-                                                        {formatTime(message.timestamp)}
-                                                    </p>
+                                                        {!message.isOwn && (
+                                                            <p className={`text-[10px] font-semibold mb-0.5 text-[#0b6459] ${message.type === 'IMAGE' || message.type === 'VIDEO' ? 'px-3 pt-2' : ''}`}>
+                                                                {message.senderName}
+                                                            </p>
+                                                        )}
+
+                                                        {/* Loading state */}
+                                                        {message.isLoading ? (
+                                                            <div className="flex items-center gap-2 py-2">
+                                                                <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                                                                <span className="text-xs opacity-80">
+                                                                    {message.type === 'IMAGE' ? 'Đang gửi ảnh...' :
+                                                                        message.type === 'VIDEO' ? 'Đang gửi video...' :
+                                                                            `Đang gửi ${message.fileName || 'tệp'}...`}
+                                                                </span>
+                                                            </div>
+                                                        ) : message.type === 'IMAGE' ? (
+                                                            <div className="overflow-hidden rounded-2xl">
+                                                                <a href={message.content.split('\n')[0]} target="_blank" rel="noopener noreferrer">
+                                                                    <img
+                                                                        src={message.content.split('\n')[0]}
+                                                                        alt="Attached image"
+                                                                        className="w-full h-auto object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                                                                        onError={(e) => {
+                                                                            e.currentTarget.src = '/placeholder-image.png';
+                                                                        }}
+                                                                    />
+                                                                </a>
+                                                            </div>
+                                                        ) : message.type === 'VIDEO' ? (
+                                                            <div className="overflow-hidden rounded-2xl">
+                                                                <video
+                                                                    src={message.content.split('\n')[0]}
+                                                                    controls
+                                                                    className="w-full h-auto"
+                                                                    preload="metadata"
+                                                                >
+                                                                    Your browser does not support video playback.
+                                                                </video>
+                                                            </div>
+                                                        ) : message.type === 'FILE' ? (
+                                                            <>
+                                                                <a
+                                                                    href={message.content.split('\n')[0]}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className={`flex items-center gap-2 hover:opacity-80 transition-opacity px-3 py-2 rounded-2xl ${message.isOwn
+                                                                        ? 'bg-gradient-to-r from-[#0b6459] to-[#0d7a6c] text-white'
+                                                                        : 'bg-white border border-gray-100 text-gray-800'
+                                                                        }`}
+                                                                >
+                                                                    <HiDocument className="w-5 h-5 flex-shrink-0" />
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <p className="text-xs leading-relaxed truncate font-medium">
+                                                                            {message.fileName || 'Tập tin'}
+                                                                        </p>
+                                                                        <p className={`text-[9px] ${message.isOwn ? 'text-white/60' : 'text-gray-400'}`}>Click để tải xuống</p>
+                                                                    </div>
+                                                                </a>
+                                                                {!message.isLoading && (
+                                                                    <p className="text-[9px] mt-1 px-3 text-gray-800">
+                                                                        {formatTime(message.timestamp)}
+                                                                    </p>
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <p className="text-xs leading-relaxed">{message.content}</p>
+                                                        )}
+
+                                                        {/* Timestamp for IMAGE/VIDEO and TEXT messages */}
+                                                        {!message.isLoading && (message.type === 'IMAGE' || message.type === 'VIDEO') && (
+                                                            <p className="text-[9px] mt-1 px-3 pb-2 text-gray-800">
+                                                                {formatTime(message.timestamp)}
+                                                            </p>
+                                                        )}
+                                                        {!message.isLoading && message.type === 'TEXT' && (
+                                                            <p className={`text-[9px] mt-1 ${message.isOwn ? 'text-white/70' : 'text-gray-400'}`}>
+                                                                {formatTime(message.timestamp)}
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                         <div ref={messagesEndRef} />
 
                                         {/* Typing Indicator */}
@@ -789,16 +971,38 @@ const ChatWidget: React.FC = () => {
                                             <HiPaperClip className="w-4 h-4" />
                                         </button>
 
+                                        {/* Hidden File Inputs */}
+                                        <input
+                                            ref={imageInputRef}
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => handleFileSelect(e, 'IMAGE')}
+                                        />
+                                        <input
+                                            ref={videoInputRef}
+                                            type="file"
+                                            accept="video/*"
+                                            className="hidden"
+                                            onChange={(e) => handleFileSelect(e, 'VIDEO')}
+                                        />
+                                        <input
+                                            ref={documentInputRef}
+                                            type="file"
+                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar"
+                                            multiple
+                                            className="hidden"
+                                            onChange={(e) => handleFileSelect(e, 'FILE')}
+                                        />
+
                                         {/* File Type Dropdown */}
                                         {showFileDropdown && (
                                             <div className="absolute bottom-full left-0 mb-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                                                 <button
                                                     type="button"
                                                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                                    onClick={() => {
-                                                        // Handle image selection
-                                                        setShowFileDropdown(false);
-                                                    }}
+                                                    onClick={() => imageInputRef.current?.click()}
                                                 >
                                                     <HiPhotograph className="w-4 h-4 text-blue-500" />
                                                     <span>Ảnh</span>
@@ -806,10 +1010,7 @@ const ChatWidget: React.FC = () => {
                                                 <button
                                                     type="button"
                                                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                                    onClick={() => {
-                                                        // Handle video selection
-                                                        setShowFileDropdown(false);
-                                                    }}
+                                                    onClick={() => videoInputRef.current?.click()}
                                                 >
                                                     <HiVideoCamera className="w-4 h-4 text-red-500" />
                                                     <span>Video</span>
@@ -817,10 +1018,7 @@ const ChatWidget: React.FC = () => {
                                                 <button
                                                     type="button"
                                                     className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                                    onClick={() => {
-                                                        // Handle document selection
-                                                        setShowFileDropdown(false);
-                                                    }}
+                                                    onClick={() => documentInputRef.current?.click()}
                                                 >
                                                     <HiDocument className="w-4 h-4 text-green-500" />
                                                     <span>Tài liệu</span>

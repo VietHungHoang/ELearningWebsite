@@ -6,6 +6,7 @@ import { type BreadcrumbItem } from '../components/Breadcrumb';
 import { useAuth } from '../../../context/AuthContext';
 import chatService, { type MessageResponse } from '../../../services/chatService';
 import chatWebSocketService from '../../../services/chatWebSocketService';
+import { uploadService } from '../../../services/uploadService';
 import userCacheService, { type UserInfo } from '../../../services/userCacheService';
 import BirdLoading from '../../../components/ui/BirdLoading';
 
@@ -18,6 +19,9 @@ interface Message {
     sender: 'me' | 'them';
     senderName?: string;
     senderId: string;
+    type: 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE';
+    fileName?: string;
+    isLoading?: boolean;
 }
 
 interface Conversation {
@@ -90,11 +94,13 @@ interface ChatWindowProps {
     messages: Message[];
     i18nPrefix: string;
     onSendMessage: (text: string) => void;
+    onSendFiles: (files: File[], fileType: 'IMAGE' | 'VIDEO' | 'FILE') => Promise<void>;
     isTyping: boolean;
     currentUserId: string;
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, isTyping }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, onSendFiles, isTyping, setMessages }) => {
     const { t } = useTranslation();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -104,6 +110,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPre
     const prevConversationIdRef = useRef<string | null>(null);
     const prevMessagesLengthRef = useRef<number>(0);
     const isInitialMountRef = useRef(true);
+
+    // File upload refs
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const videoInputRef = useRef<HTMLInputElement>(null);
+    const documentInputRef = useRef<HTMLInputElement>(null);
+
+    // File selection handler
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'IMAGE' | 'VIDEO' | 'FILE') => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            setIsAttachmentPanelOpen(false);
+            await onSendFiles(Array.from(files), fileType);
+        }
+        e.target.value = '';
+    };
 
     useLayoutEffect(() => {
         if (!conversation || !messagesContainerRef.current) return;
@@ -196,19 +217,86 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPre
                             (msg.sender === 'them' && prevMsg.sender === 'them' &&
                                 (conversation.type === 'private' || msg.senderName === prevMsg.senderName))
                         );
+                        const isMediaType = msg.type === 'IMAGE' || msg.type === 'VIDEO' || msg.type === 'FILE';
 
                         return (
                             <div key={msg.id} className={`flex items-end gap-3 ${msg.sender === 'me' ? 'justify-end' : 'justify-start'} mb-1 ${!isSameSender && index > 0 ? 'mt-4' : ''}`}>
                                 {msg.sender === 'them' && !isSameSender && <img src={conversation.contactAvatar} className="w-6 h-6 rounded-full object-cover" />}
                                 {msg.sender === 'them' && isSameSender && <div className="w-6" />}
-                                <div className={`max-w-xs lg:max-w-md ${msg.sender === 'me' ? '' : 'min-w-0'}`}>
+                                <div className={`${isMediaType ? 'w-[50%] max-w-[250px]' : 'max-w-xs lg:max-w-md'} ${msg.sender === 'me' ? '' : 'min-w-0'}`}>
                                     {msg.sender === 'them' && conversation.type === 'group' && msg.senderName && !isSameSender && (
                                         <p className="text-xs text-gray-500 mb-1 ml-1">{msg.senderName}</p>
                                     )}
-                                    <div className={`px-4 py-3 rounded-2xl ${msg.sender === 'me' ? 'bg-[#0b6459] text-white rounded-br-lg' : 'bg-gray-100 text-gray-800 rounded-bl-lg'}`}>
-                                        <p className="text-sm">{msg.text}</p>
-                                        <p className={`text-[12px] mt-0.5 ${msg.sender === 'me' ? 'text-gray-200' : 'text-gray-500'} text-right`}>{msg.timestamp}</p>
-                                    </div>
+
+                                    {/* Loading state */}
+                                    {msg.isLoading ? (
+                                        <div className={`px-4 py-3 rounded-2xl ${msg.sender === 'me' ? 'bg-[#0b6459] text-white rounded-br-lg' : 'bg-gray-100 text-gray-800 rounded-bl-lg'}`}>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                                                <span className="text-sm opacity-80">
+                                                    {msg.type === 'IMAGE' ? 'Đang gửi ảnh...' :
+                                                        msg.type === 'VIDEO' ? 'Đang gửi video...' :
+                                                            `Đang gửi ${msg.fileName || 'tệp'}...`}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ) : msg.type === 'IMAGE' ? (
+                                        <div>
+                                            <div className="overflow-hidden rounded-2xl">
+                                                <a href={msg.text.split('\n')[0]} target="_blank" rel="noopener noreferrer">
+                                                    <img
+                                                        src={msg.text.split('\n')[0]}
+                                                        alt="Attached image"
+                                                        className="w-full h-auto object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                                                        onError={(e) => {
+                                                            e.currentTarget.src = '/placeholder-image.png';
+                                                        }}
+                                                    />
+                                                </a>
+                                            </div>
+                                            <p className="text-[12px] mt-1 text-gray-500">{msg.timestamp}</p>
+                                        </div>
+                                    ) : msg.type === 'VIDEO' ? (
+                                        <div>
+                                            <div className="overflow-hidden rounded-2xl">
+                                                <video
+                                                    src={msg.text.split('\n')[0]}
+                                                    controls
+                                                    className="w-full h-auto"
+                                                    preload="metadata"
+                                                >
+                                                    Your browser does not support video playback.
+                                                </video>
+                                            </div>
+                                            <p className="text-[12px] mt-1 text-gray-500">{msg.timestamp}</p>
+                                        </div>
+                                    ) : msg.type === 'FILE' ? (
+                                        <div>
+                                            <a
+                                                href={msg.text.split('\n')[0]}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`flex items-center gap-2 hover:opacity-80 transition-opacity px-4 py-3 rounded-2xl ${msg.sender === 'me'
+                                                    ? 'bg-[#0b6459] text-white'
+                                                    : 'bg-gray-100 text-gray-800'
+                                                    }`}
+                                            >
+                                                <HiDocument className="w-5 h-5 flex-shrink-0" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm truncate font-medium">
+                                                        {msg.fileName || 'Tập tin'}
+                                                    </p>
+                                                    <p className={`text-[11px] ${msg.sender === 'me' ? 'text-white/60' : 'text-gray-400'}`}>Click để tải xuống</p>
+                                                </div>
+                                            </a>
+                                            <p className="text-[12px] mt-1 text-gray-500">{msg.timestamp}</p>
+                                        </div>
+                                    ) : (
+                                        <div className={`px-4 py-3 rounded-2xl ${msg.sender === 'me' ? 'bg-[#0b6459] text-white rounded-br-lg' : 'bg-gray-100 text-gray-800 rounded-bl-lg'}`}>
+                                            <p className="text-sm">{msg.text}</p>
+                                            <p className={`text-[12px] mt-0.5 ${msg.sender === 'me' ? 'text-gray-200' : 'text-gray-500'} text-right`}>{msg.timestamp}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -232,21 +320,56 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPre
                 {isAttachmentPanelOpen && (
                     <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 p-2 w-40">
                         <div className="flex flex-col gap-1">
-                            <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <button
+                                type="button"
+                                onClick={() => imageInputRef.current?.click()}
+                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
                                 <HiPhotograph className="w-5 h-5 text-blue-500" />
                                 <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.photo`)}</span>
                             </button>
-                            <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <button
+                                type="button"
+                                onClick={() => videoInputRef.current?.click()}
+                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
                                 <HiVideoCamera className="w-5 h-5 text-red-500" />
                                 <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.video`)}</span>
                             </button>
-                            <button className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <button
+                                type="button"
+                                onClick={() => documentInputRef.current?.click()}
+                                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
                                 <HiDocument className="w-5 h-5 text-green-500" />
                                 <span className="text-sm text-gray-700">{t(`${i18nPrefix}.attachments.document`)}</span>
                             </button>
                         </div>
                     </div>
                 )}
+
+                {/* Hidden File Inputs */}
+                <input
+                    ref={imageInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e, 'IMAGE')}
+                />
+                <input
+                    ref={videoInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="video/*"
+                    onChange={(e) => handleFileSelect(e, 'VIDEO')}
+                />
+                <input
+                    ref={documentInputRef}
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip,.rar"
+                    onChange={(e) => handleFileSelect(e, 'FILE')}
+                />
 
                 <form onSubmit={handleSendMessage} className="relative">
                     <button
@@ -385,6 +508,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                     sender: msg.senderId === currentUserId ? 'me' : 'them',
                     senderName: msg.senderId === currentUserId ? 'You' : userCacheService.getDisplayName(senderUser ?? null),
                     senderId: msg.senderId,
+                    type: (msg.type as 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE') || 'TEXT',
                 };
             });
 
@@ -438,6 +562,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                     sender: message.senderId === currentUserId ? 'me' : 'them',
                     senderName: message.senderId === currentUserId ? 'You' : `User ${message.senderId.slice(0, 8)}`,
                     senderId: message.senderId,
+                    type: (message.type as 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE') || 'TEXT',
                 };
                 setMessages(prev => [...prev, newMessage]);
 
@@ -497,11 +622,93 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                     sender: 'me',
                     senderName: 'You',
                     senderId: sentMessage.senderId,
+                    type: (sentMessage.type as 'TEXT' | 'IMAGE' | 'VIDEO' | 'FILE') || 'TEXT',
                 };
                 setMessages(prev => [...prev, newMessage]);
             }
         } catch (err) {
             console.error('Failed to send message:', err);
+        }
+    };
+
+    // File upload handler with S3 flow
+    const handleSendFiles = async (files: File[], fileType: 'IMAGE' | 'VIDEO' | 'FILE') => {
+        if (!selectedConversationId || !state.user || files.length === 0) return;
+
+        // Generate a temporary ID for pending message
+        const tempId = `temp-${Date.now()}`;
+        const originalFileName = files[0].name;
+
+        // Create pending message with loading state immediately
+        const pendingMessage: Message = {
+            id: tempId,
+            text: '',
+            timestamp: formatTime(new Date().toISOString()),
+            sender: 'me',
+            senderName: 'You',
+            senderId: state.user.id,
+            type: fileType,
+            fileName: originalFileName,
+            isLoading: true,
+        };
+
+        setMessages(prev => [...prev, pendingMessage]);
+
+        try {
+            const uploadedUrls: string[] = [];
+
+            for (const file of files) {
+                let presignedData;
+                if (fileType === 'IMAGE') {
+                    presignedData = await uploadService.getPreSignedImageUrl(file.type);
+                } else if (fileType === 'VIDEO') {
+                    presignedData = await uploadService.getPreSignedVideoUrl(file.type);
+                } else {
+                    presignedData = await uploadService.getPreSignedUrl(file.type);
+                }
+
+                await uploadService.uploadFileToS3(presignedData.presignedUrl, file);
+                uploadedUrls.push(presignedData.finalUrl);
+            }
+
+            const messageContent = uploadedUrls.join('\n');
+            const messageRequest = {
+                conversationId: selectedConversationId,
+                type: fileType,
+                content: messageContent,
+            };
+
+            const sentMessage = await chatService.sendMessage(messageRequest);
+
+            // Replace pending message with sent message
+            setMessages(prev => prev.map(msg =>
+                msg.id === tempId
+                    ? {
+                        id: sentMessage.id,
+                        text: sentMessage.content,
+                        timestamp: formatTime(sentMessage.createdAt),
+                        sender: 'me' as const,
+                        senderName: 'You',
+                        senderId: sentMessage.senderId,
+                        type: fileType,
+                        fileName: originalFileName,
+                        isLoading: false,
+                    }
+                    : msg
+            ));
+
+            // Update conversation last message
+            setConversations(prev =>
+                prev.map(conv =>
+                    conv.id === selectedConversationId
+                        ? { ...conv, lastMessage: `Đã gửi ${files.length} tệp`, lastMessageTime: formatTime(new Date().toISOString()) }
+                        : conv
+                )
+            );
+        } catch (error) {
+            console.error('Failed to upload and send files:', error);
+            setMessages(prev => prev.filter(msg => msg.id !== tempId));
+            alert('Không thể gửi tệp. Vui lòng thử lại.');
         }
     };
 
@@ -626,8 +833,10 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                             messages={messages}
                             i18nPrefix={i18nPrefix}
                             onSendMessage={handleSendMessage}
+                            onSendFiles={handleSendFiles}
                             isTyping={typingUsers.size > 0}
                             currentUserId={currentUserId}
+                            setMessages={setMessages}
                         />
                     )}
                 </div>
