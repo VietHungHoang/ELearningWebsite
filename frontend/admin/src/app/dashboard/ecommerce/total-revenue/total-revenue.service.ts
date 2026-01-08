@@ -1,5 +1,18 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+export interface TotalRevenueData {
+    totalRevenue: number;
+    growthPercentage: number;
+    dailyData: {
+        date: string;
+        amount: number;
+    }[];
+}
 
 @Injectable({
     providedIn: 'root'
@@ -7,26 +20,43 @@ import { isPlatformBrowser } from '@angular/common';
 export class TotalRevenueService {
 
     private isBrowser: boolean;
+    private apiUrl = `${environment.apiUrl}/v1/admin/dashboard/total-revenue`;
+    private chart: any = null;
 
-    constructor(@Inject(PLATFORM_ID) private platformId: any) {
+    constructor(
+        @Inject(PLATFORM_ID) private platformId: any,
+        private http: HttpClient
+    ) {
         this.isBrowser = isPlatformBrowser(this.platformId);
     }
 
-    async loadChart(): Promise<void> {
-        if (this.isBrowser) {
-            try {
+    getTotalRevenue(startDate?: string, endDate?: string): Observable<TotalRevenueData> {
+        let params = new HttpParams();
 
+        if (startDate) {
+            params = params.set('startDate', startDate);
+        }
+        if (endDate) {
+            params = params.set('endDate', endDate);
+        }
+
+        return this.http.get<TotalRevenueData>(this.apiUrl, { params });
+    }
+
+    async loadChart(data: TotalRevenueData): Promise<void> {
+        if (this.isBrowser && data) {
+            try {
                 const ApexCharts = (await import('apexcharts')).default;
+
+                if (this.chart) {
+                    this.chart.destroy();
+                }
 
                 const options = {
                     series: [
                         {
-                            name: "Fashion",
-                            data: [20, 40, 25, 60, 30, 50]
-                        },
-                            {
-                            name: "Others",
-                            data: [20, 20, 25, 15, 35, 25]
+                            name: "Revenue",
+                            data: data.dailyData.map(d => d.amount)
                         }
                     ],
                     chart: {
@@ -46,7 +76,7 @@ export class TotalRevenueService {
                         }
                     },
                     colors: [
-                        "#605DFF", "#C2CDFF"
+                        "#605DFF"
                     ],
                     grid: {
                         show: true,
@@ -61,14 +91,10 @@ export class TotalRevenueService {
                         enabled: false
                     },
                     xaxis: {
-                        categories: [
-                            "Jan",
-                            "Feb",
-                            "Mar",
-                            "Apr",
-                            "May",
-                            "Jun"
-                        ],
+                        categories: data.dailyData.map(d => {
+                            const date = new Date(d.date);
+                            return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+                        }),
                         axisTicks: {
                             show: false,
                             color: '#ECEEF2'
@@ -91,6 +117,9 @@ export class TotalRevenueService {
                             style: {
                                 colors: "#64748B",
                                 fontSize: "12px"
+                            },
+                            formatter: (value: number) => {
+                                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
                             }
                         },
                         axisBorder: {
@@ -103,35 +132,25 @@ export class TotalRevenueService {
                         }
                     },
                     legend: {
-                        show: false,
-                        fontSize: '12px',
-                        position: 'bottom',
-                        horizontalAlign: 'center',
-                        itemMargin: {
-                            horizontal: 8,
-                            vertical: 0
-                        },
-                        labels: {
-                            colors: '#64748B'
-                        },
-                        markers: {
-                            size: 7,
-                            offsetX: -2,
-                            offsetY: -.5,
-                            shape: 'diamond'
-                        }
+                        show: false
                     },
-                    fill: {
-                        opacity: 1
+                    tooltip: {
+                        y: {
+                            formatter: function (val: any) {
+                                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+                            }
+                        }
                     }
                 };
 
-                const chart = new ApexCharts(document.querySelector('#ecommerce_total_revenue_chart'), options);
-                chart.render();
+                const chartElement = document.querySelector('#ecommerce_total_revenue_chart');
+                if (chartElement) {
+                    this.chart = new ApexCharts(chartElement, options);
+                    await this.chart.render();
+                }
             } catch (error) {
                 console.error('Error loading ApexCharts:', error);
             }
         }
     }
-
 }

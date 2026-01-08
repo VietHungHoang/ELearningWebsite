@@ -1,5 +1,6 @@
 package com.elearning.tutorservice.service;
 
+import com.elearning.tutorservice.dto.event.SessionStartedEvent;
 import com.elearning.tutorservice.dto.tutor_earnings.response.TutorEarningsResponse;
 import com.elearning.tutorservice.dto.tutor_earnings.response.TutorEarningsStatsResponse;
 import com.elearning.tutorservice.entity.enums.ClassType;
@@ -19,4 +20,10 @@ public interface TutorEarningsService {
      * Lấy tổng kết thu nhập của tutor
      */
     TutorEarningsStatsResponse getEarningsStatsByTutorId(UUID tutorId);
+
+    /**
+     * Create earnings record when session starts
+     * Called from Kafka consumer when receiving SessionStartedEvent
+     */
+    void createEarningsFromSessionStart(SessionStartedEvent event);
 }

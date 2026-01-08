@@ -68,7 +68,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Creating new class for booking: {}", event.getBookingId());
 
         // Generate localized title: "Lớp {tutorName}" (vi) or "Class {tutorName}" (en)
-        String titlePrefix = "vi".equalsIgnoreCase(event.getLocale()) ? "Lớp" : "Class";
+        String titlePrefix = "Lớp";
         String tutorName = event.getTutorName() != null ? event.getTutorName() : "";
         String classTitle = titlePrefix + " " + tutorName;
 
@@ -99,7 +99,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         ClassEnrollment enrollment = ClassEnrollment.builder()
                 .classEntity(newClass)
                 .student(com.elearning.classservice.entity.User.builder().id(event.getStudentId()).build())
-                .status(com.elearning.classservice.entity.enums.EnrollmentStatus.JOINED)
+                .status(com.elearning.classservice.entity.enums.EnrollmentStatus.ON_GOING)
                 .enrolledAt(java.time.LocalDateTime.now())
                 .build();
 
