@@ -1,6 +1,7 @@
 package com.elearning.bookingservice.service.impl;
 
 import com.elearning.bookingservice.service.BookingService;
+import com.elearning.bookingservice.service.BookingMetadataCache;
 import com.elearning.bookingservice.client.PaymentServiceClient;
 import com.elearning.bookingservice.dto.request.CreateBookingRequest;
 import com.elearning.bookingservice.dto.request.CreateBookingResponse;
@@ -34,6 +35,7 @@ public class BookingServiceImpl implements BookingService {
         private final PaymentServiceClient paymentServiceClient;
         private final BookingRepository bookingRepository;
         private final ClassInfoRepository classInfoRepository;
+        private final BookingMetadataCache metadataCache;
         private final ObjectMapper objectMapper = new ObjectMapper();
 
         @Override
@@ -43,6 +45,11 @@ public class BookingServiceImpl implements BookingService {
                 // Step 1: Save booking (short transaction - releases connection quickly)
                 Booking booking = saveBooking(request);
                 log.info("Created booking record with ID: {}", booking.getId());
+
+                // Step 1.5: Save locale to Redis cache (not persisted in DB)
+                if (request.getLocale() != null) {
+                        metadataCache.saveLocale(booking.getId(), request.getLocale());
+                }
 
                 // Step 2: Call payment service OUTSIDE transaction (no DB connection held)
                 CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
@@ -149,6 +156,7 @@ public class BookingServiceImpl implements BookingService {
                 Booking booking = Booking.builder()
                                 .studentId(request.getStudentId())
                                 .tutorId(request.getTutorId())
+                                .tutorName(request.getTutorName())
                                 .classId(null)
                                 .sessionsPurchased(request.getSessions())
                                 .discount(request.getDiscount())

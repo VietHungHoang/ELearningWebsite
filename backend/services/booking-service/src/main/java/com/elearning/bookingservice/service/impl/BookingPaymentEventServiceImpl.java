@@ -7,6 +7,7 @@ import com.elearning.bookingservice.entity.BookingStatus;
 import com.elearning.bookingservice.kafka.KafkaProducer;
 import com.elearning.bookingservice.repository.BookingRepository;
 import com.elearning.bookingservice.service.BookingPaymentEventService;
+import com.elearning.bookingservice.service.BookingMetadataCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class BookingPaymentEventServiceImpl implements BookingPaymentEventServic
 
         private final BookingRepository bookingRepository;
         private final KafkaProducer kafkaProducer;
+        private final BookingMetadataCache metadataCache;
 
         @Override
         @Transactional
@@ -37,6 +39,9 @@ public class BookingPaymentEventServiceImpl implements BookingPaymentEventServic
 
                 log.info("Updated booking {} status to CONFIRMED after payment success", event.getBookingId());
 
+                // Get locale from Redis cache
+                String locale = metadataCache.getLocale(event.getBookingId());
+
                 // Forward event to class-service with classId and creation details
                 BookingPaymentSuccessEvent classServiceEvent = BookingPaymentSuccessEvent.builder()
                                 .bookingId(event.getBookingId())
@@ -45,6 +50,8 @@ public class BookingPaymentEventServiceImpl implements BookingPaymentEventServic
                                 .providerTransactionId(event.getProviderTransactionId())
                                 .tutorId(booking.getTutorId())
                                 .studentId(booking.getStudentId())
+                                .tutorName(booking.getTutorName())
+                                .locale(locale)
                                 .schedule(booking.getSchedule())
                                 .sessionsPurchased(booking.getSessionsPurchased())
                                 .notes(booking.getNotes())
@@ -52,6 +59,9 @@ public class BookingPaymentEventServiceImpl implements BookingPaymentEventServic
 
                 kafkaProducer.sendBookingPaymentSuccessToClassService(classServiceEvent);
                 log.info("Forwarded payment success event to class-service for classId: {}", booking.getClassId());
+
+                // Cleanup: delete locale from Redis after forwarding
+                metadataCache.deleteLocale(event.getBookingId());
         }
 
         @Override

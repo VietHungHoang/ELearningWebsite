@@ -2,6 +2,7 @@ package com.elearning.classservice.service.impl;
 
 import com.elearning.classservice.dto.event.SessionStartedEvent;
 import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
+import com.elearning.classservice.dto.response.JoinSessionResponse;
 import com.elearning.classservice.dto.response.ReviewEligibilityResponse;
 import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.response.StartSessionResponse;
@@ -9,9 +10,11 @@ import com.elearning.classservice.dto.sessions.SessionResponse;
 import com.elearning.classservice.entity.ClassEnrollment;
 import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.entity.SessionParticipant;
+import com.elearning.classservice.entity.enums.AttendanceStatus;
 import com.elearning.classservice.exception.SessionNotFoundException;
 import com.elearning.classservice.mapper.SessionMapper;
 import com.elearning.classservice.repository.ClassEnrollmentRepository;
+import com.elearning.classservice.repository.SessionParticipantRepository;
 import com.elearning.classservice.repository.SessionRepository;
 import com.elearning.classservice.service.KafkaProducerService;
 import com.elearning.classservice.service.SessionService;
@@ -32,6 +35,7 @@ public class SessionServiceImpl implements SessionService {
 
     private final SessionRepository sessionRepository;
     private final ClassEnrollmentRepository enrollmentRepository;
+    private final SessionParticipantRepository participantRepository;
     // private final ZoomMeetingService zoomMeetingService;
     private final KafkaProducerService kafkaProducerService;
     private final SessionMapper sessionMapper;
@@ -264,6 +268,47 @@ public class SessionServiceImpl implements SessionService {
         return ReviewEligibilityResponse.builder()
                 .eligible(eligible)
                 .sessionCount(sessionCount != null ? sessionCount : 0)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public JoinSessionResponse joinSession(UUID sessionId, UUID studentId) {
+        log.info("Student {} joining session {}", studentId, sessionId);
+
+        // 1. Validate session exists
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new SessionNotFoundException(sessionId));
+
+        // 2. Mark attendance - find or create SessionParticipant
+        LocalDateTime now = LocalDateTime.now();
+        SessionParticipant participant = participantRepository
+                .findBySessionIdAndStudentId(sessionId, studentId)
+                .orElse(null);
+
+        if (participant == null) {
+            // Create new participant if not exists
+            participant = SessionParticipant.builder()
+                    .session(session)
+                    .student(com.elearning.classservice.entity.User.builder().id(studentId).build())
+                    .attendanceStatus(AttendanceStatus.PRESENT)
+                    .joinedAt(now)
+                    .build();
+        } else {
+            // Update existing participant
+            if (participant.getJoinedAt() == null) {
+                participant.setJoinedAt(now);
+            }
+            participant.setAttendanceStatus(AttendanceStatus.PRESENT);
+        }
+
+        participantRepository.save(participant);
+        log.info("Marked attendance for student {} in session {}", studentId, sessionId);
+
+        // 3. Return success
+        return JoinSessionResponse.builder()
+                .status("PRESENT")
+                .message("Successfully marked attendance")
                 .build();
     }
 }

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import type { Session } from '../../../../../types/class';
 import commonUtils from '../../../../../utils/commonUtils';
 import BirdLoading from '../../../../../components/ui/BirdLoading';
+import { classService } from '../../../../../services/classService';
+import { useAuth } from '../../../../../context/AuthContext';
 
 interface SessionDetailModalProps {
     booking: Session;
@@ -11,32 +13,69 @@ interface SessionDetailModalProps {
     onClose: () => void;
     isAbove?: boolean; // Modal hiển thị phía trên trigger element
     onReschedule?: () => void; // Callback khi click vào button đổi lịch
+    onShowToast?: (message: string, type: 'success' | 'error') => void;
 }
 
-const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, position, onClose, isAbove = false, onReschedule }) => {
+const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, position, onClose, isAbove = false, onReschedule, onShowToast }) => {
     const { t, i18n } = useTranslation();
     const locale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+    const { state } = useAuth();
     const modalRef = useRef<HTMLDivElement>(null);
     const [isLeft, setIsLeft] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
 
-    // Handle join session - convert Zoom URL to Web Client URL and open in new tab
+    // Handle join session - validate 15min window, call API, then open Zoom
     const handleJoinSession = async () => {
         try {
-            // Check both meetingUrl and meetingLink fields for compatibility
-            const meetingUrl = booking?.meetingUrl || booking?.meetingLink;
+            // 1. Validate 15-minute window before session start
+            const sessionDate = commonUtils.convertUTCToLocalDate(booking.sessionDatetime);
+            const now = new Date();
+            const minutesUntilSession = (sessionDate.getTime() - now.getTime()) / (1000 * 60);
 
-            if (!meetingUrl) {
-                console.error("No meeting URL found for session:", booking?.id);
-                alert(t('dashboard.student.noMeetingUrl') || 'Meeting link is not available yet. Please contact your tutor.');
+            // Can only join 15 minutes before session starts
+            // if (minutesUntilSession > 15) {
+            //     const message = t('dashboard.sidebar.student.session.tooEarlyToJoin', { minutes: 15 });
+            //     if (onShowToast) {
+            //         onShowToast(message, 'error');
+            //     } else {
+            //         alert(message);
+            //     }
+            //     return;
+            // }
+
+            // If session has already passed significantly (e.g., > 2 hours), also block
+            if (minutesUntilSession < -120) {
+                const message = t('dashboard.sidebar.student.session.sessionEnded');
+                if (onShowToast) {
+                    onShowToast(message, 'error');
+                } else {
+                    alert(message);
+                }
                 return;
             }
 
             setIsStarting(true);
 
-            // Convert standard URL to Web Client URL to allow joining via browser
-            // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
+            // 2. Call backend API to mark attendance and get meeting URL
+            const studentId = state.user?.id;
+            if (!studentId) {
+                throw new Error('Student ID not found');
+            }
+
+            const response = await classService.startSession(booking.id, studentId);
+            
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to join session');
+            }
+
+            // 3. Use meeting URL from booking object
+            const meetingUrl = booking.meetingUrl || booking.meetingLink;
+            if (!meetingUrl) {
+                throw new Error('Meeting link is not available');
+            }
+
+            // Convert standard URL to Web Client URL and open in new tab
             let openUrl = meetingUrl;
 
             // Regex to match /j/{meetingId}
@@ -51,9 +90,22 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
             window.open(openUrl, '_blank');
             console.log("Joining session (Web Client):", booking.id, openUrl);
 
-        } catch (error) {
+            // Show success message
+            if (onShowToast) {
+                onShowToast(t('dashboard.sidebar.student.session.joiningSuccess'), 'success');
+            }
+
+            // Close modal after successful join
+            onClose();
+
+        } catch (error: any) {
             console.error("Error joining session:", error);
-            alert(t('dashboard.student.errorJoiningSession') || 'Failed to join the session. Please try again.');
+            const message = error.message || t('dashboard.student.errorJoiningSession') || 'Failed to join the session. Please try again.';
+            if (onShowToast) {
+                onShowToast(message, 'error');
+            } else {
+                alert(message);
+            }
         } finally {
             setIsStarting(false);
         }
