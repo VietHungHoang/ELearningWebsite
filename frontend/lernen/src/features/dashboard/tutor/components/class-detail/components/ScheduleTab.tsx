@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiCalendar, FiEdit } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
-import { format, startOfToday } from "date-fns";
+import { format } from "date-fns";
 import { enUS, vi } from "date-fns/locale";
 import type { Locale } from "date-fns";
 import { HiVideoCamera, HiChevronLeft, HiChevronRight, HiChevronDown } from "react-icons/hi";
