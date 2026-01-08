@@ -34,10 +34,6 @@ export class CategoryListComponent implements OnInit {
     itemsPerPage = 10;
     currentPage = 1;
 
-    // Filters
-    selectedStatus = 'All';
-    isStatusDropdownOpen = false;
-
     // Modals
     showAddCategoryModal = false;
     showDeleteConfirm = false;
@@ -82,12 +78,6 @@ export class CategoryListComponent implements OnInit {
                 (category.name && category.name.toLowerCase().includes(searchLower)) ||
                 (category.description && category.description.toLowerCase().includes(searchLower))
             );
-        }
-
-        // Status filter
-        if (this.selectedStatus !== 'All') {
-            const isActive = this.selectedStatus === 'Active';
-            filtered = filtered.filter(category => category.isActive === isActive);
         }
 
         this.filteredCategories = filtered;
@@ -228,12 +218,6 @@ export class CategoryListComponent implements OnInit {
         }
     }
 
-    // Toggle active status
-    toggleActive(category: Category): void {
-        this.categoryService.toggleActive(category.id);
-        this.applyFilters();
-    }
-
     // Category Details Modal
     openCategoryDetailsModal(category: Category): void {
         // Fetch detailed category data from API
@@ -259,42 +243,6 @@ export class CategoryListComponent implements OnInit {
     closeCategoryDetailsModal(): void {
         this.showCategoryDetailsModal = false;
         this.selectedCategoryForDetail = null;
-    }
-
-    // Dropdown methods
-    toggleStatusDropdown(): void {
-        this.isStatusDropdownOpen = !this.isStatusDropdownOpen;
-    }
-
-    filterByStatus(status: string): void {
-        this.selectedStatus = status;
-        this.isStatusDropdownOpen = false;
-        this.applyFilters();
-    }
-
-    // Get total tutors for a category
-    getTutorCountForCategory(categoryId: string): number {
-        const category = this.categories.find(c => c.id === categoryId);
-        if (!category || !category.subjects) return 0;
-
-        let totalTutors = 0;
-        category.subjects.forEach((subject: Subject) => {
-            if (subject.tutorCount) {
-                totalTutors += subject.tutorCount;
-            }
-        });
-        return totalTutors;
-    }
-
-    getTutorCountForSubject(subjectId: string): number {
-        const subject = this.categories
-            .flatMap(cat => cat.subjects || [])
-            .find(sub => sub && sub.id === subjectId);
-        return subject?.tutorCount || 0;
-    }
-
-    getStatusColor(isActive: boolean): string {
-        return isActive ? 'bg-success-100 text-success-600' : 'bg-danger-100 text-danger-600';
     }
 
     // Pagination
