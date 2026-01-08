@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import type { Coupon, CouponDiscountType } from '../DealsAndCouponsPage';
 import CustomDropdownDashboard from '../../../../../components/ui/CustomDropdownDashboard';
 import ModalLayout from '../../../../../components/ui/ModalLayout';
+import { classService } from '../../../../../services/classService';
 
-const mockCourseList = [
-    'Time Management Mastery: Boost Your Productivity',
-    'Decision-Making Mastery: Make Better Choices',
-    "Beginner's Guide to Python Programming",
-    'Advanced Productivity Hacks for Creatives',
-];
+interface ClassOption {
+    id: string;
+    title: string;
+}
 
 interface CreateCouponModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (couponData: Omit<Coupon, 'id' | 'timesUsed'>) => void;
-  existingCoupon: Coupon | null;
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (couponData: Omit<Coupon, 'id' | 'timesUsed'>) => void;
+    existingCoupon: Coupon | null;
 }
 
 const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, onSave, existingCoupon }) => {
@@ -22,19 +21,47 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
     const [code, setCode] = useState('');
     const [discountType, setDiscountType] = useState<CouponDiscountType>('Percentage');
     const [discountValue, setDiscountValue] = useState<number | ''>('');
-    const [applicableCourses, setApplicableCourses] = useState<string[]>(['All']);
+    const [applicableClasses, setApplicableClasses] = useState<string[]>(['All']);
     const [usageLimit, setUsageLimit] = useState<number | ''>('');
     const [unlimitedUsage, setUnlimitedUsage] = useState(true);
     const [expiryDate, setExpiryDate] = useState('');
     const [isActive, setIsActive] = useState(true);
 
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [classList, setClassList] = useState<ClassOption[]>([]);
+    const [isLoadingClasses, setIsLoadingClasses] = useState(false);
+
+    // Fetch classes when modal opens
+    useEffect(() => {
+        const fetchClasses = async () => {
+            if (!isOpen) return;
+
+            setIsLoadingClasses(true);
+            try {
+                const response = await classService.getClassesForTutor({ size: 100 });
+                if (response.success && response.data?.content) {
+                    setClassList(response.data.content
+                        .filter(c => c.title)
+                        .map(c => ({
+                            id: c.id,
+                            title: c.title!
+                        })));
+                }
+            } catch (error) {
+                console.error('Failed to fetch classes:', error);
+            } finally {
+                setIsLoadingClasses(false);
+            }
+        };
+
+        fetchClasses();
+    }, [isOpen]);
 
     const resetForm = () => {
         setCode('');
         setDiscountType('Percentage');
         setDiscountValue('');
-        setApplicableCourses(['All']);
+        setApplicableClasses(['All']);
         setUsageLimit('');
         setUnlimitedUsage(true);
         setExpiryDate('');
@@ -48,7 +75,7 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
             setCode(existingCoupon.code);
             setDiscountType(existingCoupon.discountType);
             setDiscountValue(existingCoupon.discountValue);
-            setApplicableCourses(existingCoupon.applicableCourses);
+            setApplicableClasses(existingCoupon.applicableCourses);
             setUsageLimit(existingCoupon.usageLimit ?? '');
             setUnlimitedUsage(existingCoupon.usageLimit === null);
             setExpiryDate(existingCoupon.expiryDate);
@@ -69,21 +96,21 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
             code,
             discountType,
             discountValue: Number(discountValue),
-            applicableCourses,
+            applicableCourses: applicableClasses,
             usageLimit: unlimitedUsage ? null : Number(usageLimit),
             expiryDate,
             isActive,
         });
         resetForm();
     };
-    
-    const handleCourseToggle = (course: string) => {
-        setApplicableCourses(prev => {
-            if (prev.includes(course)) {
-                const newCourses = prev.filter(c => c !== course);
-                return newCourses.length === 0 ? ['All'] : newCourses;
+
+    const handleClassToggle = (classTitle: string) => {
+        setApplicableClasses(prev => {
+            if (prev.includes(classTitle)) {
+                const newClasses = prev.filter(c => c !== classTitle);
+                return newClasses.length === 0 ? ['All'] : newClasses;
             } else {
-                return [...prev.filter(c => c !== 'All'), course];
+                return [...prev.filter(c => c !== 'All'), classTitle];
             }
         });
     };
@@ -100,21 +127,21 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
             <div className="flex flex-col h-full max-h-[80vh] overflow-hidden relative z-10">
                 <div className="p-6 flex-1 overflow-y-auto relative z-20">
                     <h2 className="text-xl font-bold text-gray-800 mb-4">{existingCoupon ? 'Edit Coupon' : 'Create New Coupon'}</h2>
-                
+
                     <div className="space-y-4">
                         {/* Coupon Code */}
                         <div>
                             <label htmlFor="coupon-code" className="block text-sm font-medium text-gray-700 mb-1">Coupon Code</label>
-                            <input 
-                                id="coupon-code" 
-                                type="text" 
-                                value={code} 
-                                onChange={e => setCode(e.target.value.toUpperCase())} 
-                                placeholder="e.g. SUMMER25" 
-                                className={inputStyles} 
+                            <input
+                                id="coupon-code"
+                                type="text"
+                                value={code}
+                                onChange={e => setCode(e.target.value.toUpperCase())}
+                                placeholder="e.g. SUMMER25"
+                                className={inputStyles}
                             />
                         </div>
-                        
+
                         {/* Discount Type & Value */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -133,48 +160,48 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                                 <label htmlFor="discount-value" className="block text-sm font-medium text-gray-700 mb-1">Value</label>
                                 <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{discountType === 'Fixed' ? '$' : '%'}</span>
-                                    <input 
-                                        id="discount-value" 
-                                        type="number" 
-                                        value={discountValue} 
-                                        onChange={e => setDiscountValue(Number(e.target.value))} 
-                                        className={`${inputStyles} pl-7`} 
+                                    <input
+                                        id="discount-value"
+                                        type="number"
+                                        value={discountValue}
+                                        onChange={e => setDiscountValue(Number(e.target.value))}
+                                        className={`${inputStyles} pl-7`}
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Applicable Courses */}
+                        {/* Applicable Classes */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Applicable Courses</label>
-                            <CustomDropdownDashboard 
-                                options={['All', ...mockCourseList]}
-                                selectedValue={applicableCourses.length === 1 && applicableCourses[0] === 'All' ? 'All Courses' : `${applicableCourses.length} course(s) selected`}
-                                placeholder="Select courses"
-                                onSelect={handleCourseToggle}
-                                dropdownId="courses-select"
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Áp dụng cho lớp</label>
+                            <CustomDropdownDashboard
+                                options={isLoadingClasses ? ['Đang tải...'] : ['All', ...classList.map(c => c.title)]}
+                                selectedValue={applicableClasses.length === 1 && applicableClasses[0] === 'All' ? 'Tất cả các lớp' : `${applicableClasses.length} lớp đã chọn`}
+                                placeholder="Chọn lớp"
+                                onSelect={handleClassToggle}
+                                dropdownId="classes-select"
                                 openDropdown={openDropdown}
                                 setOpenDropdown={setOpenDropdown}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Select 'All' or choose specific courses.</p>
+                            <p className="text-xs text-gray-500 mt-1">Chọn 'All' hoặc các lớp cụ thể.</p>
                         </div>
 
                         {/* Usage Limit */}
                         <div>
                             <label htmlFor="usage-limit" className="block text-sm font-medium text-gray-700 mb-1">Usage Limit</label>
-                            <input 
-                                id="usage-limit" 
-                                type="number" 
-                                value={usageLimit} 
-                                onChange={e => setUsageLimit(Number(e.target.value))} 
-                                disabled={unlimitedUsage} 
-                                className={`${inputStyles} ${unlimitedUsage ? 'bg-gray-100 cursor-not-allowed' : ''}`} 
+                            <input
+                                id="usage-limit"
+                                type="number"
+                                value={usageLimit}
+                                onChange={e => setUsageLimit(Number(e.target.value))}
+                                disabled={unlimitedUsage}
+                                className={`${inputStyles} ${unlimitedUsage ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                             />
                             <label className="flex items-center gap-2 mt-2 text-sm">
-                                <input 
-                                    type="checkbox" 
-                                    checked={unlimitedUsage} 
-                                    onChange={e => setUnlimitedUsage(e.target.checked)} 
+                                <input
+                                    type="checkbox"
+                                    checked={unlimitedUsage}
+                                    onChange={e => setUnlimitedUsage(e.target.checked)}
                                     className="h-4 w-4 rounded border-gray-300 text-[#0b6459] focus:ring-[#0b6459]"
                                 />
                                 Unlimited usage
@@ -184,12 +211,12 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                         {/* Expiry Date */}
                         <div>
                             <label htmlFor="expiry-date" className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
-                            <input 
-                                id="expiry-date" 
-                                type="date" 
-                                value={expiryDate} 
-                                onChange={e => setExpiryDate(e.target.value)} 
-                                className={inputStyles} 
+                            <input
+                                id="expiry-date"
+                                type="date"
+                                value={expiryDate}
+                                onChange={e => setExpiryDate(e.target.value)}
+                                className={inputStyles}
                             />
                         </div>
                     </div>

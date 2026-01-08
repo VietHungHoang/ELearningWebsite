@@ -96,7 +96,6 @@ interface SimilarTutorsProps {
 const SimilarTutors: React.FC<SimilarTutorsProps> = ({ currentTutor }) => {
     const { t } = useTranslation();
     const { tutorId } = useParams<{ tutorId: string }>();
-    const { state } = useAuth();
     const navigate = useNavigate();
     const [similarTutors, setSimilarTutors] = useState<SimilarTutor[]>([]);
     const [loading, setLoading] = useState(true);
