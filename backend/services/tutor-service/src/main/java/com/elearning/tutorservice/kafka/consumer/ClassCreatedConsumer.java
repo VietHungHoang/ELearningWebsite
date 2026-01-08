@@ -28,11 +28,11 @@ public class ClassCreatedConsumer {
             log.info("Received class created for student event: {}", message);
             ClassCreatedForStudentEvent event = objectMapper.readValue(message, ClassCreatedForStudentEvent.class);
             
-            // Increment totalStudents for the tutor
-            tutorService.incrementTotalStudents(event.getTutorId());
+            // Handle new student enrollment: create StudentOfTutor record and increment totalStudents
+            tutorService.handleNewStudentEnrollment(event.getTutorId(), event.getStudentId());
             
-            log.info("Successfully incremented totalStudents for tutorId: {} after creating classId: {}", 
-                    event.getTutorId(), event.getClassId());
+            log.info("Successfully handled student enrollment for tutorId: {}, studentId: {}, classId: {}", 
+                    event.getTutorId(), event.getStudentId(), event.getClassId());
         } catch (Exception e) {
             log.error("Error processing class created for student event: {}", e.getMessage(), e);
         }
