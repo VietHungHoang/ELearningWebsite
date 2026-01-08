@@ -112,21 +112,32 @@ const SimilarTutors: React.FC<SimilarTutorsProps> = ({ currentTutor }) => {
             try {
                 setLoading(true);
 
-                // Step 1: Get current tutor's subject category IDs
+                // Step 1: Get current tutor's subjects (already mapped from response)
+                const tutorSubjects = currentTutor.subjects || [];
+                
+                if (tutorSubjects.length === 0) {
+                    setSimilarTutors(mockSimilarTutors);
+                    setLoading(false);
+                    return;
+                }
+
+                // Step 2: Get all subjects to find related subjects in same categories
+                const allSubjects = await commonUtils.getSubjects();
+                
+                // Step 3: Find which categories these subjects belong to
                 const relevantCategoryIds = new Set<string>();
-                currentTutor.subjects?.forEach((tutorSubject: any) => {
-                    if (tutorSubject.subject?.categoryId) {
-                        relevantCategoryIds.add(tutorSubject.subject.categoryId);
+                tutorSubjects.forEach((tutorSubject: any) => {
+                    if (tutorSubject.categoryId) {
+                        relevantCategoryIds.add(tutorSubject.categoryId);
                     }
                 });
 
-                // Step 2: Get all subjects from these categories
-                const allSubjects = await commonUtils.getSubjects();
+                // Step 4: Get all subjects from these categories
                 const relatedSubjectIds = allSubjects
                     .filter(subject => relevantCategoryIds.has(subject.categoryId))
                     .map(subject => subject.id);
 
-                // Step 3: Call API with all related subject IDs
+                // Step 5: Call API with all related subject IDs
                 const response = await tutorService.getSimilarTutors(tutorId, relatedSubjectIds);
                 
                 if (response.success && response.data) {

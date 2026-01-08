@@ -94,8 +94,10 @@ export interface TutorReview {
     id: string;
     studentId: string;
     studentName: string;
+    studentAvatarUrl?: string;
     rating: number;
     comment: string;
+    createdAt?: string;
     submitAt?: string;
     avatarUrl?: string;
     // Moderation fields from backend

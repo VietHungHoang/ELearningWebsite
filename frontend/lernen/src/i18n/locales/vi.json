@@ -1995,6 +1995,7 @@
       "submitError": "Không thể gửi đánh giá. Vui lòng thử lại.",
       "submitReview": "Gửi đánh giá",
       "submitting": "Đang gửi...",
+      "commentTooShort": "Vui lòng nhập ít nhất 10 ký tự.",
       "loadMore": "Xem thêm đánh giá",
       "showLess": "Thu gọn",
       "moderation": {

@@ -99,7 +99,7 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
         videoUrl: profileHeaderResponse.videoUrl,
         currentSessionFee: profileHeaderResponse.currentSessionFee,
         averageRating: profileHeaderResponse.averageRating,
-        reviewCount: profileHeaderResponse.reviewCount,
+        reviewCount: rawResponse.reviews?.length || profileHeaderResponse.reviewCount || 0,
         bookedSessionsCount: profileHeaderResponse.bookedSessionsCount,
         studentCount: profileHeaderResponse.studentCount,
         introduction: profileHeaderResponse.introduction,
@@ -107,8 +107,10 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
         languages,
         subjects,
         socialLinks: profileHeaderResponse.socialLinks,
+        // Map reviews from API response
+        reviews: rawResponse.reviews || [],
     } as import('../types/tutor').TutorDetail;
-    
+
     // Add resume data separately if available
     if (rawResponse.educations || rawResponse.experiences || rawResponse.certifications || rawResponse.certificates) {
         const tutorWithResume: import('../types/tutor').TutorDetail = {
@@ -119,6 +121,6 @@ export const mapTutorProfileHeaderResponseToTutorProfileHeader = async (
         };
         return tutorWithResume;
     }
-    
+
     return tutorDetail;
 };

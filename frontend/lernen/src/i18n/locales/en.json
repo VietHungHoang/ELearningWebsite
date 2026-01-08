@@ -1953,6 +1953,7 @@
       "submitError": "Failed to submit review. Please try again.",
       "submitReview": "Submit Review",
       "submitting": "Submitting...",
+      "commentTooShort": "Please enter at least 10 characters.",
       "loadMore": "Load more reviews",
       "showLess": "Show less",
       "moderation": {

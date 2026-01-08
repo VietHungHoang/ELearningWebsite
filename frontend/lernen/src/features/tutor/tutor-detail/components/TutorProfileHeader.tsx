@@ -66,7 +66,7 @@ const TutorProfileHeader: React.FC<{
     useEffect(() => {
         const checkWishlistStatus = async () => {
             if (!tutor?.id || authState.user?.role !== 'student') return;
-            
+
             try {
                 const inWishlist = await wishlistService.isTutorInWishlist(tutor.id);
                 setIsInWishlist(inWishlist);
@@ -284,12 +284,21 @@ const TutorProfileHeader: React.FC<{
                             <StatItem
                                 icon={<PiStar style={{ color: "rgb(88, 88, 88)", fontSize: "17px" }} />}
                                 text={
-                                    <>
-                                        <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
-                                            {(tutor.averageRating || 0).toFixed(1)}/5.0
-                                        </span>{" "}
-                                        ({(tutor.reviews?.length || 0)} review{(tutor.reviews?.length || 0) !== 1 ? "s" : ""})
-                                    </>
+                                    (() => {
+                                        const approvedReviews = tutor.reviews?.filter((r: any) => !r.moderationStatus || r.moderationStatus === 'APPROVED') || [];
+                                        const approvedCount = approvedReviews.length;
+                                        const approvedRating = approvedCount > 0
+                                            ? approvedReviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / approvedCount
+                                            : 0;
+                                        return (
+                                            <>
+                                                <span className="font-medium" style={{ color: "rgb(88, 88, 88)" }}>
+                                                    {approvedRating.toFixed(1)}/5.0
+                                                </span>{" "}
+                                                ({approvedCount} review{approvedCount !== 1 ? "s" : ""})
+                                            </>
+                                        );
+                                    })()
                                 }
                             />
                             <StatItem
@@ -402,8 +411,8 @@ const TutorProfileHeader: React.FC<{
                         className="flex items-center justify-center gap-2 border border-[#0b6459] bg-[#0b6459] text-white font-semibold py-2.5 px-7 rounded-xl hover:bg-[#084c43] transition-colors"
                     >
                         {hasTrialSession
-                            ? t("tutorDetail.profile.bookTrialSession")
-                            : t("tutorDetail.profile.bookSession")}{" "}
+                            ? t("tutorDetail.profile.bookSession")
+                            : t("tutorDetail.profile.bookTrialSession")}{" "}
                         <FiCalendar />
                     </button>
                     <button
@@ -413,14 +422,13 @@ const TutorProfileHeader: React.FC<{
                         {t("tutorDetail.profile.sendMessage")} <FiMessageSquare />
                     </button>
                     {authState.user?.role === 'student' && (
-                        <button 
+                        <button
                             onClick={handleWishlistToggle}
                             disabled={isWishlistLoading}
-                            className={`p-3.5 rounded-lg hover:border transition-colors ${
-                                isInWishlist
-                                    ? 'text-red-500 border-red-300 bg-red-50'
-                                    : 'text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-red-500'
-                            } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`p-3.5 rounded-lg hover:border transition-colors ${isInWishlist
+                                ? 'text-red-500 border-red-300 bg-red-50'
+                                : 'text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-red-500'
+                                } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             title={isInWishlist ? t('tutorDetail.wishlist.removeFromWishlist') : t('tutorDetail.wishlist.addToWishlist')}
                         >
                             <FaHeart />

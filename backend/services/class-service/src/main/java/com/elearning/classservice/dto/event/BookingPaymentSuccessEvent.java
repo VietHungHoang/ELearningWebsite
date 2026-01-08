@@ -12,13 +12,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingPaymentSuccessEvent {
-    
+
     private UUID bookingId;
     private UUID classId;
     private UUID transactionId;
     private String providerTransactionId;
-    
-    // New fields for class creation
+
+    // New fields for class creation abcsdf
     private UUID tutorId;
     private UUID studentId;
     private String tutorName; // For class title generation

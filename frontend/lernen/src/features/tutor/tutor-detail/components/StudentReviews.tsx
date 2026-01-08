@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FiStar, FiCheckCircle, FiClock, FiAlertCircle, FiLoader } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiStar, FiCheckCircle, FiClock, FiAlertCircle, FiLoader, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import type { TutorReview, ReviewModerationStatus } from '../../../../types/tutor';
 import Toast from '../../../../components/ui/Toast';
 import { tutorService } from '../../../../services/tutorService';
@@ -28,17 +28,24 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
     const { state } = useAuth();
     const { t } = useTranslation();
 
+    // Sync localReviews when initialReviews changes (e.g., from API response)
+    useEffect(() => {
+        setLocalReviews(initialReviews);
+    }, [initialReviews]);
+
     // Use localReviews for display (includes newly submitted reviews)
     const reviews = localReviews;
 
-    const totalReviews = reviews.length;
-    const averageRating = totalReviews > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews : 0;
+    // Filter APPROVED reviews for stats calculation
+    const approvedReviews = reviews.filter(r => !r.moderationStatus || r.moderationStatus === 'APPROVED');
+    const totalApprovedReviews = approvedReviews.length;
+    const averageRating = totalApprovedReviews > 0 ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) / totalApprovedReviews : 0;
     const ratingDistribution = {
-        5: reviews.filter(r => r.rating === 5).length,
-        4: reviews.filter(r => r.rating === 4).length,
-        3: reviews.filter(r => r.rating === 3).length,
-        2: reviews.filter(r => r.rating === 2).length,
-        1: reviews.filter(r => r.rating === 1).length,
+        5: approvedReviews.filter(r => r.rating === 5).length,
+        4: approvedReviews.filter(r => r.rating === 4).length,
+        3: approvedReviews.filter(r => r.rating === 3).length,
+        2: approvedReviews.filter(r => r.rating === 2).length,
+        1: approvedReviews.filter(r => r.rating === 1).length,
     };
 
 
@@ -50,14 +57,14 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
                     <div className="flex">
                         {[...Array(5)].map((_, i) => <FiStar key={i} className="w-5 h-5 text-yellow-400 fill-current" />)}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{t(totalReviews === 1 ? 'tutorDetail.reviews.basedOnRating' : 'tutorDetail.reviews.basedOnRatings', { count: totalReviews })}</p>
+                    <p className="text-sm text-gray-600 mt-1">{t(totalApprovedReviews === 1 ? 'tutorDetail.reviews.basedOnRating' : 'tutorDetail.reviews.basedOnRatings', { count: totalApprovedReviews })}</p>
                 </div>
             </div>
             <div className="border-t border-gray-300/70 my-4"></div>
             <div className="space-y-2">
                 {[5, 4, 3, 2, 1].map(star => {
                     const count = ratingDistribution[star as keyof typeof ratingDistribution];
-                    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                    const percentage = totalApprovedReviews > 0 ? (count / totalApprovedReviews) * 100 : 0;
                     return (
                         <div key={star} className="flex items-center gap-3 text-sm">
                             <p className="font-medium text-gray-700 w-8">{star.toFixed(1)}</p>
@@ -77,26 +84,49 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
         const canTruncate = review.comment.length > 200;
         const displayText = isExpanded ? review.comment : `${review.comment.substring(0, 200)}${canTruncate ? '...' : ''}`;
 
+        // Check if this is the current user's own review
+        const isOwnReview = state.user?.id === review.studentId;
         const isPending = isPendingStatus(review.moderationStatus);
         const isRejected = review.moderationStatus === 'REJECTED';
-        const showModerationBadge = review.ownReview && (isPending || isRejected);
+        const isApproved = review.moderationStatus === 'APPROVED' || !review.moderationStatus;
+        // Show moderation badge only for own pending/rejected reviews
+        const showModerationBadge = isOwnReview && (isPending || isRejected);
+
+        // Format date from createdAt
+        const formatDate = (dateString?: string) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString();
+            } catch {
+                return '';
+            }
+        };
+
+        // Get avatar URL - use studentAvatarUrl if available, otherwise generate default
+        const getAvatarUrl = () => {
+            if (review.studentAvatarUrl) return review.studentAvatarUrl;
+            if (review.avatarUrl) return review.avatarUrl;
+            // Generate a default avatar with initials or use a placeholder
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(review.studentName || 'User')}&background=random&size=48`;
+        };
 
         return (
-            <div className={`grid grid-cols-10 gap-4 ${showModerationBadge ? 'opacity-80' : ''}`}>
+            <div className={`grid grid-cols-10 gap-4 ${showModerationBadge ? 'bg-yellow-50/50 p-4 rounded-lg border border-yellow-200' : ''}`}>
                 <div className="col-span-2">
                     <div className="flex items-center gap-3">
-                        <img src={review.avatarUrl || 'https://picsum.photos/seed/' + review.studentId + '/48/48'} alt={review.studentName} className="w-12 h-12 rounded-md object-cover" />
+                        <img src={getAvatarUrl()} alt={review.studentName} className="w-12 h-12 rounded-md object-cover" />
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <p className="font-bold text-gray-800 text-sm">{review.studentName}</p>
-                                {!showModerationBadge && <FiCheckCircle className="w-3 h-3 text-green-500" />}
+                                {isApproved && <FiCheckCircle className="w-3 h-3 text-green-500" />}
                             </div>
-                            <p className="text-xs text-gray-500">{review.submitAt || 'N/A'}</p>
+                            <p className="text-xs text-gray-500">{formatDate(review.createdAt) || formatDate(review.submitAt)}</p>
                         </div>
                     </div>
                 </div>
                 <div className="col-span-8">
-                    {/* Moderation status badge for own pending/rejected reviews */}
+                    {/* Moderation status badge for pending/rejected reviews */}
                     {showModerationBadge && (
                         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium mb-2 ${isRejected
                             ? 'bg-red-100 text-red-700'
@@ -122,6 +152,7 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
                             {review.statusDescription}
                         </p>
                     )}
+
 
                     <div className="flex items-center gap-1 mb-2">
                         {[...Array(5)].map((_, i) => (
@@ -151,6 +182,12 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
     const handleSubmitReview = async () => {
         if (!state.user) {
             setToast({ message: t('tutorDetail.reviews.loginRequired'), type: 'error' });
+            return;
+        }
+
+        // Validate comment length
+        if (newComment.trim().length < 10) {
+            setToast({ message: t('tutorDetail.reviews.commentTooShort', { defaultValue: 'Vui lòng nhập ít nhất 10 ký tự.' }), type: 'error' });
             return;
         }
 
@@ -251,7 +288,7 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
                                     placeholder={t('tutorDetail.reviews.placeholder')}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b6459] resize-none text-sm placeholder:text-gray-400"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0b6459] focus:border-[#0b6459] resize-none text-sm placeholder:text-gray-400 transition-all duration-300"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -281,8 +318,9 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
                         <div className="text-center mt-6">
                             <button
                                 onClick={() => setVisibleCount(prev => prev + 3)}
-                                className="px-5 py-2.5 border border-[#0b6459] text-[#0b6459] font-semibold rounded-xl hover:bg-[#0b6459] hover:text-white transition-all duration-200 shadow-sm hover:shadow-md"
+                                className="inline-flex items-center gap-1 text-[#0b6459] font-semibold hover:underline transition-all duration-200"
                             >
+                                <FiChevronDown className="w-4 h-4" />
                                 {t('tutorDetail.reviews.loadMore')}
                             </button>
                         </div>
@@ -290,8 +328,9 @@ const StudentReviews: React.FC<StudentReviewsProps> = ({ reviews: initialReviews
                         <div className="text-center mt-6">
                             <button
                                 onClick={() => setVisibleCount(3)}
-                                className="px-5 py-2.5 border border-gray-300 text-gray-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-200 shadow-sm hover:shadow-md"
+                                className="inline-flex items-center gap-1 text-gray-600 font-semibold hover:underline transition-all duration-200"
                             >
+                                <FiChevronUp className="w-4 h-4" />
                                 {t('tutorDetail.reviews.showLess')}
                             </button>
                         </div>

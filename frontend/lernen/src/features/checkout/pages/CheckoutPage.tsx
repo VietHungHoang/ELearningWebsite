@@ -34,7 +34,7 @@ const CheckoutPage: React.FC = () => {
   const location = useLocation();
   const { selectedCurrency } = useCurrency();
   const { state } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [paymentMethod, setPaymentMethod] = useState("momo");
   const [checkoutState, setCheckoutState] = useState<
     "selecting" | "processing" | "success"
@@ -63,7 +63,7 @@ const CheckoutPage: React.FC = () => {
       avatar: tutorData.avatarUrl,
       subjects:
         (tutorData.subjects as any)?.map((s: any) =>
-          t("locale") === "vi" ? s.nameVi || s.name : s.nameEn || s.name
+          i18n.language === "vi" ? s.nameVi || s.name : s.nameEn || s.name
         ) || [],
       experience: tutorData.experienceYears || 0,
       lessons: tutorData.bookedSessionsCount || 5,
@@ -416,12 +416,12 @@ const CheckoutPage: React.FC = () => {
                       <h4 className="font-bold text-base leading-tight mb-1 text-gray-900">
                         {tutor?.name || "Gia sư"}
                       </h4>
-                      <p className="text-sm font-medium text-gray-900">
-                        {tutor?.subjects[0] || "Gia sư"}
-                      </p>
                       <div className="flex items-center gap-1 mt-1 text-xs text-amber-500 font-medium">
                         <MdStar className="text-[14px] fill-current" />
-                        <span>{tutor?.rating} ({tutor?.reviews} reviews)</span>
+                        <span>{tutor?.rating} ({tutor?.reviews} {t('checkout.reviews', { defaultValue: 'đánh giá' })})</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {tutor?.students} {t('checkout.students', { defaultValue: 'học sinh' })}
                       </div>
                     </div>
                   </div>
@@ -459,7 +459,7 @@ const CheckoutPage: React.FC = () => {
                       </div>
                     </div>
                     <span className="font-bold text-[#0b6459]">
-                      {formatCurrency(subtotal, selectedCurrency)}
+                      {formatCurrency(originalPrice, selectedCurrency)}
                     </span>
                   </div>
                 </div>

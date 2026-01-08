@@ -159,12 +159,25 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public TrialSessionRequestResponse getTrialSessionRequest(UUID tutorId, UUID studentId) {
         log.info("Fetching trial session request for tutor={} student={}", tutorId, studentId);
 
         return trialSessionRepository.findTopByTutorIdAndStudentIdOrderByCreatedAtDesc(tutorId, studentId)
-                .map(trialSessionRequestMapper::toResponse)
+                .map(entity -> {
+                    // Check if session is expired (sessionDateTime is in UTC)
+                    java.time.LocalDateTime now = java.time.LocalDateTime.now(java.time.ZoneOffset.UTC);
+                    
+                    if (entity.getSessionDateTime().isBefore(now) && 
+                        entity.getStatus() == ScheduleStatus.PENDING) {
+                        
+                        log.info("Trial session request {} has expired. Updating status to CANCELLED", entity.getId());
+                        entity.setStatus(ScheduleStatus.CANCELLED);
+                        trialSessionRepository.save(entity);
+                    }
+                    
+                    return trialSessionRequestMapper.toResponse(entity);
+                })
                 .orElse(null);
     }
 
