@@ -1,16 +1,21 @@
-<div class="header-area bg-white dark:bg-[#0c1427] py-[13px] px-[20px] md:px-[25px] fixed top-0 z-[6] rounded-b-md transition-all" id="header-area">
+<div class="header-area bg-white dark:bg-[#0c1427] py-[13px] px-[20px] md:px-[25px] fixed top-0 z-[6] rounded-b-md transition-all"
+    id="header-area">
     <div class="md:flex md:items-center md:justify-between">
         <div class="flex items-center justify-center md:justify-normal">
-            <div class="relative leading-none top-px ltr:mr-[13px] ltr:md:mr-[18px] ltr:lg:mr-[23px] rtl:ml-[13px] rtl:md:ml-[18px] rtl:lg:ml-[23px]">
-                <button type="button" class="hide-sidebar-toggle transition-all inline-block hover:text-primary-500" (click)="toggleSidebar()">
+            <div
+                class="relative leading-none top-px ltr:mr-[13px] ltr:md:mr-[18px] ltr:lg:mr-[23px] rtl:ml-[13px] rtl:md:ml-[18px] rtl:lg:ml-[23px]">
+                <button type="button" class="hide-sidebar-toggle transition-all inline-block hover:text-primary-500"
+                    (click)="toggleSidebar()">
                     <i class="material-symbols-outlined !text-[20px]">
                         menu
                     </i>
                 </button>
             </div>
             <form class="relative w-[250px] lg:w-[260px]">
-                <input type="text" [placeholder]="'header.search.placeholder' | translate" class="bg-gray-50 border border-gray-50 h-[44px] rounded-md w-full block text-black pt-[11px] pb-[12px] px-[13px] md:px-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
-                <button type="button" class="absolute text-primary-500 mt-[2px] ltr:right-[13px] ltr:md:right-[15px] rtl:left-[13px] rtl:md:left-[15px] top-1/2 -translate-y-1/2">
+                <input type="text" [placeholder]="'header.search.placeholder' | translate"
+                    class="bg-gray-50 border border-gray-50 h-[44px] rounded-md w-full block text-black pt-[11px] pb-[12px] px-[13px] md:px-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
+                <button type="button"
+                    class="absolute text-primary-500 mt-[2px] ltr:right-[13px] ltr:md:right-[15px] rtl:left-[13px] rtl:md:left-[15px] top-1/2 -translate-y-1/2">
                     <i class="material-symbols-outlined !text-[20px]">
                         search
                     </i>
@@ -18,36 +23,43 @@
             </form>
         </div>
         <ul class="flex items-center justify-center md:justify-normal mt-[13px] md:mt-0">
-            <li class="relative language-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="leading-none pr-[12px] inline-block transition-all relative top-[2px] hover:text-primary-500" id="languageMenuButton" (click)="toggleClass('languageMenuButton')" [class.active]="buttonStates['languageMenuButton']">
+            <li
+                class="relative language-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                <button type="button"
+                    class="leading-none pr-[12px] inline-block transition-all relative top-[2px] hover:text-primary-500"
+                    id="languageMenuButton" (click)="toggleClass('languageMenuButton')"
+                    [class.active]="buttonStates['languageMenuButton']">
                     <i class="material-symbols-outlined !text-[20px] md:!text-[22px]">
                         translate
                     </i>
-                    <i class="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2 -mt-[2px]"></i>
+                    <i
+                        class="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2 -mt-[2px]"></i>
                 </button>
-                <div class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
-                    <span class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
+                <div
+                    class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
+                    <span
+                        class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
                         {{ 'header.language.title' | translate }}
                     </span>
                     <ul>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
                             <button type="button"
-                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
-                                    [class.bg-primary-50]="currentLanguage === 'en'"
-                                    (click)="changeLanguage('en')">
+                                class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                [class.bg-primary-50]="currentLanguage === 'en'" (click)="changeLanguage('en')">
                                 <div class="flex items-center">
-                                    <img src="images/flags/usa.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="usa" onerror="this.style.display='none'">
+                                    <img src="images/flags/usa.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]"
+                                        alt="usa" onerror="this.style.display='none'">
                                     {{ 'header.language.english' | translate }}
                                 </div>
                             </button>
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
                             <button type="button"
-                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
-                                    [class.bg-primary-50]="currentLanguage === 'vi'"
-                                    (click)="changeLanguage('vi')">
+                                class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                [class.bg-primary-50]="currentLanguage === 'vi'" (click)="changeLanguage('vi')">
                                 <div class="flex items-center">
-                                    <img src="images/flags/vietnam.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]" alt="vietnam">
+                                    <img src="images/flags/vietnam.svg" class="w-[30px] ltr:mr-[10px] rtl:ml-[10px]"
+                                        alt="vietnam">
                                     {{ 'header.language.vietnamese' | translate }}
                                 </div>
                             </button>
@@ -55,23 +67,29 @@
                     </ul>
                 </div>
             </li>
-            <li class="relative language-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="leading-none pr-[12px] inline-block transition-all relative top-[2px] hover:text-primary-500" id="currencyMenuButton" (click)="toggleClass('currencyMenuButton')" [class.active]="buttonStates['currencyMenuButton']">
+            <li
+                class="relative language-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                <button type="button"
+                    class="leading-none pr-[12px] inline-block transition-all relative top-[2px] hover:text-primary-500"
+                    id="currencyMenuButton" (click)="toggleClass('currencyMenuButton')"
+                    [class.active]="buttonStates['currencyMenuButton']">
                     <i class="material-symbols-outlined !text-[20px] md:!text-[22px]">
                         currency_exchange
                     </i>
-                    <i class="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2 -mt-[2px]"></i>
+                    <i
+                        class="ri-arrow-down-s-line text-[15px] absolute -right-[3px] top-1/2 -translate-y-1/2 -mt-[2px]"></i>
                 </button>
-                <div class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
-                    <span class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
+                <div
+                    class="language-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none pt-[13px] md:pt-[14px] absolute mt-[18px] md:mt-[21px] w-[200px] md:w-[240px] z-[1] top-full ltr:left-0 ltr:md:left-auto ltr:lg:right-0 rtl:right-0 rtl:md:right-auto rtl:lg:left-0 rounded-md">
+                    <span
+                        class="block text-black dark:text-white font-semibold px-[20px] pb-[14px] text-sm md:text-[15px]">
                         {{ 'header.currency.title' | translate }}
                     </span>
                     <ul>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
                             <button type="button"
-                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
-                                    [class.bg-primary-50]="currentCurrency === 'VND'"
-                                    (click)="changeCurrency('VND')">
+                                class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                [class.bg-primary-50]="currentCurrency === 'VND'" (click)="changeCurrency('VND')">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">₫</span>
                                     {{ 'header.currency.vnd' | translate }}
@@ -80,9 +98,8 @@
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
                             <button type="button"
-                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
-                                    [class.bg-primary-50]="currentCurrency === 'USD'"
-                                    (click)="changeCurrency('USD')">
+                                class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                [class.bg-primary-50]="currentCurrency === 'USD'" (click)="changeCurrency('USD')">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">$</span>
                                     {{ 'header.currency.usd' | translate }}
@@ -91,9 +108,8 @@
                         </li>
                         <li class="border-t border-dashed border-gray-100 dark:border-[#172036]">
                             <button type="button"
-                                    class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
-                                    [class.bg-primary-50]="currentCurrency === 'EUR'"
-                                    (click)="changeCurrency('EUR')">
+                                class="text-black dark:text-white px-[20px] py-[12px] d-block w-full font-medium hover:bg-gray-50 dark:hover:bg-[#15203c] transition-all"
+                                [class.bg-primary-50]="currentCurrency === 'EUR'" (click)="changeCurrency('EUR')">
                                 <div class="flex items-center">
                                     <span class="text-lg ltr:mr-[10px] rtl:ml-[10px]">€</span>
                                     {{ 'header.currency.eur' | translate }}
@@ -103,21 +119,30 @@
                     </ul>
                 </div>
             </li>
-            <li class="relative mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="leading-none inline-block transition-all relative top-[2px] hover:text-primary-500" (click)="toggleFullscreen()">
+            <li
+                class="relative mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                <button type="button"
+                    class="leading-none inline-block transition-all relative top-[2px] hover:text-primary-500"
+                    (click)="toggleFullscreen()">
                     <i class="material-symbols-outlined !text-[22px] md:!text-xl">
                         {{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}
                     </i>
                 </button>
             </li>
-            <li class="relative notifications-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="leading-none inline-block transition-all relative top-[2px] hover:text-primary-500" id="notificationsMenuBtn" (click)="toggleClass('notificationsMenuBtn')" [class.active]="buttonStates['notificationsMenuBtn']">
+            <li
+                class="relative notifications-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                <button type="button"
+                    class="leading-none inline-block transition-all relative top-[2px] hover:text-primary-500"
+                    id="notificationsMenuBtn" (click)="toggleClass('notificationsMenuBtn')"
+                    [class.active]="buttonStates['notificationsMenuBtn']">
                     <i class="material-symbols-outlined !text-[22px] md:!text-xl">
                         notifications
                     </i>
-                    <span class="top-[3px] ltr:right-[4px] rtl:left-[4px] w-[6px] h-[6px] rounded-full absolute bg-orange-500"></span>
+                    <span
+                        class="top-[3px] ltr:right-[4px] rtl:left-[4px] w-[6px] h-[6px] rounded-full absolute bg-orange-500"></span>
                 </button>
-                <div class="notifications-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none py-[17px] absolute mt-[17px] md:mt-[20px] w-[290px] md:w-[350px] z-[1] top-full ltr:-right-[120px] ltr:md:right-0 rtl:-left-[120px] rtl:md:left-0 rounded-md">
+                <div
+                    class="notifications-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none py-[17px] absolute mt-[17px] md:mt-[20px] w-[290px] md:w-[350px] z-[1] top-full ltr:-right-[120px] ltr:md:right-0 rtl:-left-[120px] rtl:md:left-0 rounded-md">
                     <div class="flex items-center justify-between px-[20px] pb-[17px]">
                         <span class="font-semibold text-black dark:text-white text-[15px]">
                             Notifications
@@ -130,8 +155,10 @@
                         </a>
                     </div>
                     <ul class="mb-[18px]">
-                        <li class="relative border-b border-gray-100 dark:border-[#172036] border-dashed py-[17px] ltr:pl-[75px] ltr:pr-[20px] rtl:pr-[75px] rtl:pl-[20px] first:border-t first:border-gray-100 dark:first:border-[#172036]">
-                            <div class="rounded-full flex items-center justify-center absolute text-center transition-all top-1/2 -translate-y-1/2 ltr:left-[20px] rtl:right-[20px] w-[44px] h-[44px] text-primary-500 bg-[#4936f50d]">
+                        <li
+                            class="relative border-b border-gray-100 dark:border-[#172036] border-dashed py-[17px] ltr:pl-[75px] ltr:pr-[20px] rtl:pr-[75px] rtl:pl-[20px] first:border-t first:border-gray-100 dark:first:border-[#172036]">
+                            <div
+                                class="rounded-full flex items-center justify-center absolute text-center transition-all top-1/2 -translate-y-1/2 ltr:left-[20px] rtl:right-[20px] w-[44px] h-[44px] text-primary-500 bg-[#4936f50d]">
                                 <i class="material-symbols-outlined !text-[22px]">
                                     sms
                                 </i>
@@ -142,10 +169,13 @@
                             <span class="block">
                                 2 hrs ago
                             </span>
-                            <a routerLink="/dashboard/notifications" class="block left-0 top-0 right-0 bottom-0 z-[1] absolute"></a>
+                            <a routerLink="/dashboard/notifications"
+                                class="block left-0 top-0 right-0 bottom-0 z-[1] absolute"></a>
                         </li>
-                        <li class="relative border-b border-gray-100 dark:border-[#172036] border-dashed py-[17px] ltr:pl-[75px] ltr:pr-[20px] rtl:pr-[75px] rtl:pl-[20px] first:border-t first:border-gray-100 dark:first:border-[#172036]">
-                            <div class="rounded-full flex items-center justify-center absolute text-center transition-all top-1/2 -translate-y-1/2 ltr:left-[20px] rtl:right-[20px] w-[44px] h-[44px] text-[#39b2de] bg-[#4936f50d]">
+                        <li
+                            class="relative border-b border-gray-100 dark:border-[#172036] border-dashed py-[17px] ltr:pl-[75px] ltr:pr-[20px] rtl:pr-[75px] rtl:pl-[20px] first:border-t first:border-gray-100 dark:first:border-[#172036]">
+                            <div
+                                class="rounded-full flex items-center justify-center absolute text-center transition-all top-1/2 -translate-y-1/2 ltr:left-[20px] rtl:right-[20px] w-[44px] h-[44px] text-[#39b2de] bg-[#4936f50d]">
                                 <i class="material-symbols-outlined !text-[22px]">
                                     person
                                 </i>
@@ -156,11 +186,15 @@
                             <span class="block">
                                 3 hrs ago
                             </span>
-                            <a routerLink="/dashboard/notifications" class="block left-0 top-0 right-0 bottom-0 z-[1] absolute"></a>
-                            <span class="inline-block rounded-full bg-primary-500 absolute w-[6px] h-[6px] right-[20px] top-1/2 -translate-y-1/2"></span>
+                            <a routerLink="/dashboard/notifications"
+                                class="block left-0 top-0 right-0 bottom-0 z-[1] absolute"></a>
+                            <span
+                                class="inline-block rounded-full bg-primary-500 absolute w-[6px] h-[6px] right-[20px] top-1/2 -translate-y-1/2"></span>
                         </li>
-                        <li class="relative border-b border-gray-100 dark:border-[#172036] border-dashed py-[17px] ltr:pl-[75px] ltr:pr-[20px] rtl:pr-[75px] rtl:pl-[20px] first:border-t first:border-gray-100 dark:first:border-[#172036]">
-                            <div class="rounded-full flex items-center justify-center absolute text-center transition-all top-1/2 -translate-y-1/2 ltr:left-[20px] rtl:right-[20px] w-[44px] h-[44px] text-[#00b69b] bg-[#4936f50d]">
+                        <li
+                            class="relative border-b border-gray-100 dark:border-[#172036] border-dashed py-[17px] ltr:pl-[75px] ltr:pr-[20px] rtl:pr-[75px] rtl:pl-[20px] first:border-t first:border-gray-100 dark:first:border-[#172036]">
+                            <div
+                                class="rounded-full flex items-center justify-center absolute text-center transition-all top-1/2 -translate-y-1/2 ltr:left-[20px] rtl:right-[20px] w-[44px] h-[44px] text-[#00b69b] bg-[#4936f50d]">
                                 <i class="material-symbols-outlined !text-[22px]">
                                     mark_email_unread
                                 </i>
@@ -171,89 +205,59 @@
                             <span class="block">
                                 1 day ago
                             </span>
-                            <a routerLink="/dashboard/notifications" class="block left-0 top-0 right-0 bottom-0 z-[1] absolute"></a>
+                            <a routerLink="/dashboard/notifications"
+                                class="block left-0 top-0 right-0 bottom-0 z-[1] absolute"></a>
                         </li>
                     </ul>
                     <div class="text-center">
-                        <a routerLink="/dashboard/notifications" class="inline-block font-medium relative text-primary-500 transition-all hover:underline">
+                        <a routerLink="/dashboard/notifications"
+                            class="inline-block font-medium relative text-primary-500 transition-all hover:underline">
                             See All Notifications
                         </a>
                     </div>
                 </div>
             </li>
-            <li class="relative profile-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
-                <button type="button" class="flex items-center relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white" id="profileMenuBtn" (click)="toggleClass('profileMenuBtn')" [class.active]="buttonStates['profileMenuBtn']">
+            <li
+                class="relative profile-menu mx-[8px] md:mx-[10px] lg:mx-[12px] ltr:first:ml-0 ltr:last:mr-0 rtl:first:mr-0 rtl:last:ml-0">
+                <button type="button"
+                    class="flex items-center relative ltr:pr-[14px] rtl:pl-[14px] text-black dark:text-white"
+                    id="profileMenuBtn" (click)="toggleClass('profileMenuBtn')"
+                    [class.active]="buttonStates['profileMenuBtn']">
                     <span class="block font-semibold text-base">
                         {{ currentUser?.name || 'Admin' }}
                     </span>
-                    <i class="ri-arrow-down-s-line text-[15px] absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2 mt-px"></i>
+                    <i
+                        class="ri-arrow-down-s-line text-[15px] absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2 mt-px"></i>
                 </button>
-                <div class="profile-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none py-[22px] absolute mt-[13px] md:mt-[14px] w-[195px] z-[1] top-full ltr:right-0 rtl:left-0 rounded-md">
-                    <div class="flex items-center border-b border-gray-100 dark:border-[#172036] pb-[12px] mx-[20px] mb-[10px]">
+                <div
+                    class="profile-menu-dropdown bg-white dark:bg-[#0c1427] transition-all shadow-3xl dark:shadow-none py-[22px] absolute mt-[13px] md:mt-[14px] w-[195px] z-[1] top-full ltr:right-0 rtl:left-0 rounded-md">
+                    <div
+                        class="flex items-center border-b border-gray-100 dark:border-[#172036] pb-[12px] mx-[20px] mb-[10px]">
                         <div>
                             <span class="block text-black dark:text-white font-medium">
                                 {{ currentUser?.name || 'Admin User' }}
                             </span>
                             <span class="block text-xs">
-                                {{ currentUser?.role || ('header.profile.role' | translate) }}
+                                admin
                             </span>
                         </div>
                     </div>
                     <ul>
                         <li>
-                            <a routerLink="/dashboard/my-profile" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
-                                    account_circle
-                                </i>
-                                {{ 'header.profile.myProfile' | translate }}
-                            </a>
-                        </li>
-                        <li>
-                            <a routerLink="/dashboard/apps/chat" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
-                                    chat
-                                </i>
-                                {{ 'header.profile.messages' | translate }}
-                            </a>
-                        </li>
-                        <li>
-                            <a routerLink="/dashboard/ecommerce-page/checkout" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
-                                    credit_card
-                                </i>
-                                {{ 'header.profile.billing' | translate }}
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="border-t border-gray-100 dark:border-[#172036] mx-[20px] my-[9px]"></div>
-                    <ul>
-                        <li>
-                            <a routerLink="/dashboard/settings" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
+                            <a routerLink="/dashboard/settings"
+                                class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
+                                <i
+                                    class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     settings
                                 </i>
                                 {{ 'header.profile.settings' | translate }}
                             </a>
                         </li>
                         <li>
-                            <a routerLink="/dashboard/faq" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
-                                    support
-                                </i>
-                                {{ 'header.profile.support' | translate }}
-                            </a>
-                        </li>
-                        <li>
-                            <a routerLink="/authentication/lock-screen" class="block relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
-                                    lock
-                                </i>
-                                {{ 'header.profile.lockScreen' | translate }}
-                            </a>
-                        </li>
-                        <li>
-                            <button type="button" (click)="logout()" class="block w-full text-left relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
-                                <i class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
+                            <button type="button" (click)="logout()"
+                                class="block w-full text-left relative py-[7px] ltr:pl-[50px] ltr:pr-[20px] rtl:pr-[50px] rtl:pl-[20px] text-black dark:text-white transition-all hover:text-primary-500">
+                                <i
+                                    class="material-symbols-outlined top-1/2 -translate-y-1/2 !text-[22px] absolute ltr:left-[20px] rtl:right-[20px]">
                                     logout
                                 </i>
                                 {{ 'header.profile.logout' | translate }}
