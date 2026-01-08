@@ -24,4 +24,7 @@ public class User {
 
     @Column(name = "avatar_url")
     private String avatarUrl;
+
+    @Column(name = "email")
+    private String email;
 }

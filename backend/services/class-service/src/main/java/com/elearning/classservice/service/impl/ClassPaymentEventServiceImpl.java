@@ -58,11 +58,12 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
         log.info("Updated class {} status to IN_PROGRESS after payment success", event.getClassId());
 
-        // For RENEWAL: Create additional sessions for the class
-        if (event.getSchedule() != null && event.getSessionsPurchased() != null && event.getSessionsPurchased() > 0) {
+        // For RENEWAL: Create additional sessions starting AFTER the last existing
+        // session
+        if (event.getSessionsPurchased() != null && event.getSessionsPurchased() > 0) {
             log.info("Creating {} additional sessions for class renewal, classId: {}",
                     event.getSessionsPurchased(), event.getClassId());
-            createSessionsFromSchedule(classEntity, event.getSchedule(), event.getSessionsPurchased());
+            createRenewalSessions(classEntity, event.getSessionsPurchased());
         }
 
         // Create Zoom meeting links asynchronously (non-blocking)
@@ -349,6 +350,101 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 .build();
 
         sessionRepository.save(session);
+    }
+
+    /**
+     * Create renewal sessions for an existing class.
+     * Sessions are created starting AFTER the last existing session, using the
+     * ClassSchedule pattern.
+     */
+    private void createRenewalSessions(ClassEntity classEntity, int totalSessionsToCreate) {
+        UUID classId = classEntity.getId();
+        log.info("Creating {} renewal sessions for class {}", totalSessionsToCreate, classId);
+
+        // 1. Get existing schedules (the recurring pattern)
+        List<com.elearning.classservice.entity.ClassSchedule> schedules = classScheduleRepository
+                .findByClassEntityId(classId);
+        if (schedules.isEmpty()) {
+            log.warn("No schedules found for class {}. Cannot create renewal sessions.", classId);
+            return;
+        }
+
+        // 2. Get the last session's start time
+        List<Session> existingSessions = sessionRepository.findByClassEntityIdOrderByStartTimeAsc(classId);
+        java.time.LocalDateTime lastSessionTime;
+        if (existingSessions.isEmpty()) {
+            // No existing sessions, start from today
+            lastSessionTime = java.time.LocalDateTime.now();
+            log.info("No existing sessions for class {}. Starting from now.", classId);
+        } else {
+            lastSessionTime = existingSessions.get(existingSessions.size() - 1).getStartTime();
+            log.info("Last session for class {} is at {}", classId, lastSessionTime);
+        }
+
+        // 3. Get the max session number
+        int currentMaxSessionNumber = sessionRepository.findMaxSessionNumberByClassId(classId);
+        int nextSessionNumber = currentMaxSessionNumber + 1;
+
+        // 4. Build pattern list from ClassSchedule
+        class Pattern {
+            int dayOfWeek;
+            java.time.LocalTime time;
+            int duration;
+
+            Pattern(int d, java.time.LocalTime t, int dur) {
+                this.dayOfWeek = d;
+                this.time = t;
+                this.duration = dur;
+            }
+        }
+        List<Pattern> patterns = new java.util.ArrayList<>();
+        for (com.elearning.classservice.entity.ClassSchedule s : schedules) {
+            patterns.add(new Pattern(s.getDayOfWeek(), s.getStartTime(), s.getDurationMinutes()));
+        }
+        log.info("Found {} schedule patterns for class {}", patterns.size(), classId);
+
+        // 5. Start generating from the day AFTER the last session
+        java.time.LocalDateTime currentDate = lastSessionTime.plusDays(1).toLocalDate().atStartOfDay();
+        int sessionsCreated = 0;
+        java.util.Set<java.time.LocalDateTime> createdSessionTimes = new java.util.HashSet<>();
+
+        // Add existing session times to avoid duplicates
+        for (Session s : existingSessions) {
+            createdSessionTimes.add(s.getStartTime());
+        }
+
+        while (sessionsCreated < totalSessionsToCreate) {
+            int currentDay = currentDate.getDayOfWeek().getValue();
+
+            for (Pattern p : patterns) {
+                if (p.dayOfWeek == currentDay) {
+                    java.time.LocalDateTime candidate = java.time.LocalDateTime.of(currentDate.toLocalDate(), p.time);
+
+                    // Only create if after the last session and not already created
+                    if (candidate.isAfter(lastSessionTime) && !createdSessionTimes.contains(candidate)) {
+                        createSession(classEntity, candidate, nextSessionNumber);
+                        createdSessionTimes.add(candidate);
+                        sessionsCreated++;
+                        nextSessionNumber++;
+                        log.debug("Created renewal session {} at {}", sessionsCreated, candidate);
+
+                        if (sessionsCreated >= totalSessionsToCreate) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            currentDate = currentDate.plusDays(1);
+
+            // Safety break to prevent infinite loops (max 1 year)
+            if (currentDate.isAfter(lastSessionTime.plusYears(1))) {
+                log.warn("Exceeded 1 year of sessions generation for class {}. Stopping.", classId);
+                break;
+            }
+        }
+
+        log.info("Created {} renewal sessions for class {}", sessionsCreated, classId);
     }
 
     @Override
