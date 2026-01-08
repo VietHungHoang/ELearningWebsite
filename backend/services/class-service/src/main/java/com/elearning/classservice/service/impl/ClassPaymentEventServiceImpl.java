@@ -63,9 +63,14 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private void createNewClass(BookingPaymentSuccessEvent event) {
         log.info("Creating new class for booking: {}", event.getBookingId());
 
+        // Generate localized title: "Lớp {tutorName}" (vi) or "Class {tutorName}" (en)
+        String titlePrefix = "vi".equalsIgnoreCase(event.getLocale()) ? "Lớp" : "Class";
+        String tutorName = event.getTutorName() != null ? event.getTutorName() : "";
+        String classTitle = titlePrefix + " " + tutorName;
+
         // 1. Create Class Entity
         ClassEntity newClass = ClassEntity.builder()
-                .title("Lớp học 1-1 " + (event.getNotes() != null ? event.getNotes() : ""))
+                .title(classTitle)
                 .tutor(com.elearning.classservice.entity.User.builder().id(event.getTutorId()).build()) // Setup proxy
                                                                                                         // user
                                                                                                         // reference
@@ -122,6 +127,19 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         kafkaProducerService.sendClassCreatedEvent(classCreatedEvent);
         log.info("Sent ClassCreatedEvent to booking-service for bookingId: {}, classId: {}",
                 event.getBookingId(), newClass.getId());
+
+        // 7. Send ClassCreatedForStudentEvent to tutor-service to increment totalStudents
+        // This is ONLY sent when creating a NEW class
+        com.elearning.classservice.dto.event.ClassCreatedForStudentEvent studentEvent = com.elearning.classservice.dto.event.ClassCreatedForStudentEvent
+                .builder()
+                .classId(newClass.getId())
+                .tutorId(event.getTutorId())
+                .studentId(event.getStudentId())
+                .classType(newClass.getClassType() != null ? newClass.getClassType().name() : null)
+                .build();
+        kafkaProducerService.sendClassCreatedForStudentEvent(studentEvent);
+        log.info("Sent ClassCreatedForStudentEvent to tutor-service for tutorId: {}, classId: {}",
+                event.getTutorId(), newClass.getId());
     }
 
     private void createClassSchedules(ClassEntity classEntity, String scheduleJson) {

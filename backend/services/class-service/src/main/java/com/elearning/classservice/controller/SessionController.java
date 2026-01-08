@@ -2,8 +2,10 @@ package com.elearning.classservice.controller;
 
 import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
 import com.elearning.classservice.dto.request.CreateClassBookingRequest;
+import com.elearning.classservice.dto.request.JoinSessionRequest;
 import com.elearning.classservice.dto.response.ApiResponse;
 import com.elearning.classservice.dto.response.CreateClassBookingResponse;
+import com.elearning.classservice.dto.response.JoinSessionResponse;
 import com.elearning.classservice.dto.response.ReviewEligibilityResponse;
 import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
@@ -102,7 +104,24 @@ public class SessionController {
         rescheduleRequestService.createForSession(sessionId, userId, request);
         return ResponseEntity.status(201).body(ApiResponse.success(null, "Reschedule request created"));
     }
+    /**
+     * Student joins a session - marks attendance and returns meeting URL
+     */
+    @PostMapping("/{sessionId}/join")
+    public ResponseEntity<ApiResponse<JoinSessionResponse>> joinSession(
+            @PathVariable UUID sessionId,
+            @RequestBody JoinSessionRequest request) {
 
+        log.info("Student {} requesting to join session {}", request.getStudentId(), sessionId);
+        
+        try {
+            JoinSessionResponse response = sessionService.joinSession(sessionId, UUID.fromString(request.getStudentId()));
+            return ResponseEntity.ok(ApiResponse.success(response, "Successfully joined session"));
+        } catch (Exception e) {
+            log.error("Error joining session {}: {}", sessionId, e.getMessage(), e);
+            return ResponseEntity.badRequest().body(ApiResponse.error(500, "Failed to join session: " + e.getMessage()));
+        }
+    }
     /**
      * Check if the current student is eligible to review a tutor
      * Eligibility: student has at least one session with the tutor

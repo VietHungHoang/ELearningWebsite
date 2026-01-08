@@ -504,7 +504,14 @@
         "certificates": "Certificates",
         "messages": "Messages",
         "profileSettings": "Profile settings",
-        "whiteboard": "Whiteboard"
+        "whiteboard": "Whiteboard",
+        "session": {
+          "tooEarlyToJoin": "You can only join the class {{minutes}} minutes before the session. Please come back later.",
+          "sessionEnded": "This session has ended.",
+          "joiningSuccess": "Joining session...",
+          "errorJoiningSession": "Failed to join the session. Please try again.",
+          "noMeetingUrl": "Meeting link is not available yet. Please contact your tutor."
+        }
       },
       "signOut": "Sign out"
     },

@@ -1,6 +1,7 @@
 package com.elearning.classservice.service;
 
 import com.elearning.classservice.dto.request.CheckSlotConflictsRequest;
+import com.elearning.classservice.dto.response.JoinSessionResponse;
 import com.elearning.classservice.dto.response.ReviewEligibilityResponse;
 import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.response.StartSessionResponse;
@@ -14,6 +15,8 @@ import java.util.UUID;
 public interface SessionService {
 
     StartSessionResponse startSession(UUID sessionId, UUID tutorId);
+
+    JoinSessionResponse joinSession(UUID sessionId, UUID studentId);
 
     Session getSessionById(UUID sessionId);
 

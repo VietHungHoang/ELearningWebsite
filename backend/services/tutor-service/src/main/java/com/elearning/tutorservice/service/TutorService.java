@@ -18,4 +18,6 @@ public interface TutorService {
     void submitReview(UUID tutorId, SubmitReviewRequest request);
     
     TutorResponse updateTutorProfile(UUID tutorId, UpdateTutorProfileRequest request);
+    
+    void incrementTotalStudents(String tutorId);
 }

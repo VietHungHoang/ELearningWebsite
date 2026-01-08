@@ -245,6 +245,7 @@ const MyBookingsPage: React.FC = () => {
                         setSelectedBooking(null);
                         setIsRescheduleModalOpen(true);
                     }}
+                    onShowToast={(message, type) => setToast({ message, type })}
                 />
             )}
 
