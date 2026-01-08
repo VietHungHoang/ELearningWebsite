@@ -34,12 +34,33 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
     @Override
     @Transactional(readOnly = true)
     public Page<TutorEarningsResponse> getEarningsByTutorId(UUID tutorId, ClassType classType, Pageable pageable) {
+        log.info("=== GET EARNINGS BY TUTOR ID ===");
+        log.info("Tutor ID: {}", tutorId);
+        log.info("Class Type: {}", classType);
+        log.info("Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
+        
+        // Kiểm tra tổng số earnings của tutor này
+        long totalCount = tutorEarningsRepository.count();
+        log.info("Total earnings in DB: {}", totalCount);
+        
         Page<TutorEarnings> earningsPage;
         if (classType != null) {
             earningsPage = tutorEarningsRepository.findByTutorIdAndClassType(tutorId, classType, pageable);
+            log.info("Query with classType - Found {} earnings", earningsPage.getTotalElements());
         } else {
             earningsPage = tutorEarningsRepository.findByTutorId(tutorId, pageable);
+            log.info("Query without classType - Found {} earnings", earningsPage.getTotalElements());
         }
+        
+        if (earningsPage.isEmpty()) {
+            log.warn("No earnings found for tutor: {}", tutorId);
+        } else {
+            log.info("Returning {} earnings (page {}/{})", 
+                earningsPage.getNumberOfElements(), 
+                earningsPage.getNumber() + 1, 
+                earningsPage.getTotalPages());
+        }
+        
         return earningsPage.map(tutorEarningsMapper::toResponse);
     }
 
