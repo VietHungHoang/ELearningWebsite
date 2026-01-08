@@ -12,11 +12,17 @@ const ChartComp: React.FC = () => {
         const loadChartsData = async () => {
             try {
                 setChartsLoading(true);
-                const response = await tutorService.getTutorChartsData();
 
-                if (response.success && response.data) {
-                    setChartsData(response.data);
-                }
+                // Call both APIs in parallel
+                const [incomeRes, studentsRes] = await Promise.all([
+                    tutorService.getMonthlyIncomeStats(),
+                    tutorService.getMonthlyStudentStats()
+                ]);
+
+                setChartsData({
+                    incomes: incomeRes.success && incomeRes.data ? incomeRes.data.incomes : [],
+                    students: studentsRes.success && studentsRes.data ? studentsRes.data.students : []
+                });
             } catch (error) {
                 console.error('Error loading charts data:', error);
                 setChartsData({ incomes: [], students: [] });
