@@ -38,9 +38,6 @@ public class TutorRoutesConfig {
                                                                 "/api/v1/admin/tutors/approve/{tutorId}",
                                                                 "/api/v1/tutors/zoom/oauth/authorize",
                                                                 "/api/v1/tutors/zoom/oauth/callback",
-                                                                "/api/v1/admin/dashboard/tutor-pending-approvals",
-                                                                "/api/v1/admin/dashboard/new-students",
-                                                                "/api/v1/admin/dashboard/new-tutors",
                                                                 "/api/v1/reviews")
                                                 .filters(f -> f
                                                                 .rewritePath(
