@@ -1,4 +1,4 @@
-package com.elearning.classservice.dto.event;
+package com.elearning.tutorservice.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Kafka event published when a session starts
- * Consumed by:
- * - Notification service: to send notifications to students
- * - Tutor service: to create earnings record
+ * Event received from class-service when a session starts
+ * Used to create TutorEarnings record
  */
 @Data
 @Builder
@@ -38,7 +36,7 @@ public class SessionStartedEvent {
     
     private Boolean isTrial;
     
-    // Additional fields for TutorEarnings
+    // For TutorEarnings
     private BigDecimal pricePerHour;
     
     private String classType; // ONE_ON_ONE, GROUP

@@ -8,6 +8,7 @@ import com.elearning.classservice.dto.response.SlotConflictResponse;
 import com.elearning.classservice.dto.response.StartSessionResponse;
 import com.elearning.classservice.dto.sessions.SessionResponse;
 import com.elearning.classservice.entity.ClassEnrollment;
+import com.elearning.classservice.entity.ClassEntity;
 import com.elearning.classservice.entity.Session;
 import com.elearning.classservice.entity.SessionParticipant;
 import com.elearning.classservice.entity.enums.AttendanceStatus;
@@ -81,6 +82,9 @@ public class SessionServiceImpl implements SessionService {
 
         log.info("Session {} status updated to BOOKED by tutor {}", sessionId, tutorId);
 
+        // Publish SessionStartedEvent for tutor-service to create earnings
+        publishSessionStartedEvent(session);
+
         // Return session details
         return JoinSessionResponse.builder()
                 .sessionId(sessionId.toString())
@@ -91,6 +95,41 @@ public class SessionServiceImpl implements SessionService {
                 .meetingLink(session.getMeetingLink())
                 .attendanceStatus("PRESENT")
                 .build();
+    }
+
+    private void publishSessionStartedEvent(Session session) {
+        try {
+            ClassEntity classEntity = session.getClassEntity();
+            if (classEntity == null) {
+                log.warn("Session {} is not associated with any class, skipping earnings event", session.getId());
+                return;
+            }
+
+            // Get student IDs from session participants
+            List<UUID> studentIds = session.getParticipants().stream()
+                    .map(p -> p.getStudent().getId())
+                    .toList();
+
+            SessionStartedEvent event = SessionStartedEvent.builder()
+                    .sessionId(session.getId())
+                    .tutorId(session.getTutor().getId())
+                    .studentIds(studentIds)
+                    .zoomJoinUrl(session.getZoomJoinUrl())
+                    .startTime(session.getStartTime())
+                    .endTime(session.getEndTime())
+                    .sessionTitle(session.getTitle())
+                    .isTrial(session.getIsTrial())
+                    .pricePerHour(java.math.BigDecimal.valueOf(classEntity.getPricePerHour()))
+                    .classType(classEntity.getClassType().name())
+                    .classId(classEntity.getId())
+                    .build();
+
+            kafkaProducerService.sendSessionStartedEvent(event);
+            log.info("Published SessionStartedEvent for session {} to create earnings", session.getId());
+        } catch (Exception e) {
+            log.error("Failed to publish SessionStartedEvent for session {}: {}", session.getId(), e.getMessage(), e);
+            // Don't throw - earnings can be created manually later
+        }
     }
 
     @Override

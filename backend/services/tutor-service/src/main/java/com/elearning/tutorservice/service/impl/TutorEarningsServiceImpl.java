@@ -1,5 +1,6 @@
 package com.elearning.tutorservice.service.impl;
 
+import com.elearning.tutorservice.dto.event.SessionStartedEvent;
 import com.elearning.tutorservice.dto.response.PaymentMethodResponse;
 import com.elearning.tutorservice.dto.tutor_earnings.response.TutorEarningsResponse;
 import com.elearning.tutorservice.dto.tutor_earnings.response.TutorEarningsStatsResponse;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -63,5 +65,41 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
                 .paymentMethod(paymentMethod)
                 .totalEarned(totalEarned)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void createEarningsFromSessionStart(SessionStartedEvent event) {
+        log.info("Creating earnings record for session {} started by tutor {}", event.getSessionId(), event.getTutorId());
+
+        try {
+            // Calculate session duration in hours
+            long durationMinutes = Duration.between(event.getStartTime(), event.getEndTime()).toMinutes();
+            double hours = durationMinutes / 60.0;
+
+            // Calculate earnings amount
+            BigDecimal amount = event.getPricePerHour().multiply(BigDecimal.valueOf(hours));
+
+            // Map classType string to ClassType enum
+            ClassType classType = ClassType.valueOf(event.getClassType());
+
+            // Create TutorEarnings record
+            TutorEarnings earnings = TutorEarnings.builder()
+                    .tutorId(event.getTutorId())
+                    .sessionId(event.getSessionId())
+                    .amount(amount)
+                    .classType(classType)
+                    .status(TutorEarnings.EarningsStatus.PENDING)
+                    .notes("Earnings from session: " + (event.getSessionTitle() != null ? event.getSessionTitle() : event.getSessionId()))
+                    .build();
+
+            tutorEarningsRepository.save(earnings);
+
+            log.info("Successfully created earnings record for session {}: amount={}, duration={}h", 
+                    event.getSessionId(), amount, hours);
+        } catch (Exception e) {
+            log.error("Failed to create earnings record for session {}: {}", event.getSessionId(), e.getMessage(), e);
+            throw new RuntimeException("Failed to create earnings record", e);
+        }
     }
 }
