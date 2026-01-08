@@ -25,6 +25,8 @@ export interface TutorPendingApprovalsData {
     weeklyData: {
         /** Date in YYYY-MM-DD format */
         date: string;
+        /** Day name from backend (e.g. "T2", "T3", "CN") */
+        dayName: string;
         /** Number of approved tutors on this date */
         approved: number;
         /** Number of pending tutors on this date */
@@ -145,10 +147,7 @@ export class TotalCoursesService {
                         enabled: false
                     },
                     xaxis: {
-                        categories: data.weeklyData.map(d => {
-                            const date = new Date(d.date);
-                            return date.toLocaleDateString('vi-VN', { day: '2-digit' });
-                        }),
+                        categories: data.weeklyData.map(d => d.dayName),
                         axisTicks: {
                             show: false,
                             color: '#ECEEF2'
@@ -184,7 +183,7 @@ export class TotalCoursesService {
                     },
                     tooltip: {
                         y: {
-                            formatter: function(val:any) {
+                            formatter: function (val: any) {
                                 return val + " gia sư";
                             }
                         }

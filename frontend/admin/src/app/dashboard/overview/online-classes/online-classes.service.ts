@@ -20,8 +20,8 @@ export interface CompletedSessionsData {
     dailyData: {
         /** Date in YYYY-MM-DD format */
         date: string;
-        /** Day of week as number (0 = Sunday, 1 = Monday, ..., 6 = Saturday) */
-        dayOfWeek: number;
+        /** Day name from backend (e.g. "T2", "T3", "CN") */
+        dayName: string;
         /** Number of completed sessions on this date */
         sessions: number;
     }[];
@@ -91,13 +91,22 @@ export class OnlineClassesService {
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 
-        return this.http.get<ApiResponse<CompletedSessionsData>>(`${this.apiUrl}/completed-sessions`, { params })
+        return this.http.get<any>(`${this.apiUrl}/completed-sessions`, { params })
             .pipe(
                 map(response => {
-                    if (response.success && response.data) {
-                        return response.data;
+                    // Debug: Log raw API response
+                    console.log('📡 Completed Sessions API Response:', response);
+
+                    // Handle wrapped { success, data } response
+                    const backendData = response.data || response;
+
+                    if (!backendData || !backendData.dailyData) {
+                        console.error('❌ Invalid response format:', response);
+                        throw new Error('Invalid response format');
                     }
-                    throw new Error(response.message || 'Invalid response');
+
+                    console.log('✅ Completed Sessions Data:', backendData);
+                    return backendData as CompletedSessionsData;
                 })
             );
     }
@@ -146,7 +155,7 @@ export class OnlineClassesService {
                         borderColor: "#ffffff"
                     },
                     xaxis: {
-                        categories: data.dailyData.map(d => this.getDayName(d.dayOfWeek)),
+                        categories: data.dailyData.map(d => d.dayName),
                         axisTicks: {
                             show: false,
                             color: '#ECEEF2'
@@ -182,7 +191,7 @@ export class OnlineClassesService {
                     },
                     tooltip: {
                         y: {
-                            formatter: function(val: any) {
+                            formatter: function (val: any) {
                                 return val + " phiên";
                             }
                         }

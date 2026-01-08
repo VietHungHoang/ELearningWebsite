@@ -19,6 +19,8 @@ export interface NewStudentsData {
     dailyData: {
         /** Date in YYYY-MM-DD format */
         date: string;
+        /** Day name from backend (e.g. "T2", "T3", "CN") */
+        dayName: string;
         /** Number of new students registered on this date */
         count: number;
     }[];
@@ -55,24 +57,27 @@ export class TotalStudentsService {
     getNewStudentsData(startDate?: string, endDate?: string): Observable<NewStudentsData> {
         let params = new HttpParams();
 
-        // Default to current month (from 1st day to today)
+        // Default to last 7 days (weekly) if no dates provided
         if (!startDate || !endDate) {
-            const today = new Date();
-            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            const end = new Date();
+            const start = new Date();
+            start.setDate(start.getDate() - 6);
             startDate = start.toISOString().split('T')[0];
-            endDate = today.toISOString().split('T')[0];
+            endDate = end.toISOString().split('T')[0];
         }
 
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 
-        return this.http.get<ApiResponse<NewStudentsData>>(`${this.apiUrl}/new-students`, { params })
+        return this.http.get<any>(`${this.apiUrl}/new-students`, { params })
             .pipe(
                 map(response => {
-                    if (response.success && response.data) {
-                        return response.data;
+                    // Handle both wrapped { success, data } and direct response formats
+                    const backendData = response.data || response;
+                    if (!backendData || !backendData.dailyData) {
+                        throw new Error('Invalid response format');
                     }
-                    throw new Error(response.message || 'Invalid response');
+                    return backendData as NewStudentsData;
                 })
             );
     }
@@ -137,7 +142,7 @@ export class TotalStudentsService {
                         show: false
                     },
                     xaxis: {
-                        categories: data.dailyData.map(d => d.date),
+                        categories: data.dailyData.map(d => d.dayName),
                         labels: {
                             show: false
                         },
