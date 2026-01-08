@@ -254,14 +254,34 @@ export const tutorService = {
         }
     },
 
-    getTutorStats: async (isAll: boolean): Promise<ApiResponse<{
+    getTutorStats: async (options?: {
+        startDate?: string;
+        endDate?: string;
+        isAll?: boolean;
+    }): Promise<ApiResponse<{
         totalEarnings: number;
         totalStudents: number;
         teachingHours: number;
         newReviews: number;
     }>> => {
         try {
-            const params = isAll ? {} : { startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().replace('Z', '') };
+            const params: Record<string, string> = {};
+            
+            if (options?.isAll) {
+                // If isAll is true, don't send any date params
+            } else if (options?.startDate || options?.endDate) {
+                // Use provided dates
+                if (options.startDate) {
+                    params.startDate = options.startDate;
+                }
+                if (options.endDate) {
+                    params.endDate = options.endDate;
+                }
+            } else {
+                // Default: this month (backward compatibility)
+                params.startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().replace('Z', '');
+            }
+            
             return await apiService.get<{
                 totalEarnings: number;
                 totalStudents: number;

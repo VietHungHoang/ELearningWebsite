@@ -9,6 +9,7 @@ import type {
     PayoutMethod as PaymentMethod,
     PayoutHistoryItem,
     RecentEarning,
+    TutorEarningsApiResponse,
     PayoutFilters,
     RecentEarningsFilters,
     RescheduleRequest,
@@ -678,6 +679,8 @@ export const classService = {
         if (filters?.status) queryParams.append("status", filters.status);
         if (filters?.page) queryParams.append("page", filters.page.toString());
         if (filters?.limit) queryParams.append("limit", filters.limit.toString());
+        if (filters?.startDate) queryParams.append("startDate", filters.startDate);
+        if (filters?.endDate) queryParams.append("endDate", filters.endDate);
 
         const url = `/v1/payments/me/history${queryParams.toString() ? `?${queryParams.toString()}` : ""
             }`;
@@ -691,12 +694,103 @@ export const classService = {
         const queryParams = new URLSearchParams();
 
         if (filters?.type && filters.type !== "All") queryParams.append("classType", filters.type);
-        if (filters?.page) queryParams.append("page", filters.page.toString());
+        // Convert page from 1-based to 0-based for backend
+        if (filters?.page !== undefined) {
+            const page0Based = Math.max(0, filters.page - 1);
+            queryParams.append("page", page0Based.toString());
+        }
         if (filters?.size) queryParams.append("size", filters.size.toString());
+        if (filters?.startDate) queryParams.append("startDate", filters.startDate);
+        if (filters?.endDate) queryParams.append("endDate", filters.endDate);
 
         const url = `/v1/tutors/me/earnings${queryParams.toString() ? `?${queryParams.toString()}` : ""
             }`;
-        return await apiService.get<PaginatedResponse<RecentEarning>>(url);
+        
+        // Get raw API response
+        const response = await apiService.get<PaginatedResponse<TutorEarningsApiResponse>>(url);
+        
+        // Map API response to display format
+        if (response.success && response.data) {
+            const mappedContent: RecentEarning[] = response.data.content.map((item) => {
+                // Use className from backend, fallback to extracting from notes if className is not available
+                let courseName = item.className || 'Session';
+                if (!item.className && item.notes) {
+                    // Fallback: Extract course name from notes (e.g., "Earnings from session: Buổi học" -> "Buổi học")
+                    if (item.notes.includes(':')) {
+                        courseName = item.notes.split(':').slice(1).join(':').trim();
+                    } else {
+                        courseName = item.notes;
+                    }
+                }
+                
+                // Format date from createdAt
+                const date = new Date(item.createdAt);
+                const formattedDate = date.toLocaleDateString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                // Cut id to last 4 characters
+                const shortId = item.id.length >= 4 ? item.id.slice(-4) : item.id;
+                
+                // Determine type - default to '1-on-1' if not specified
+                // Could be enhanced to fetch from session if needed
+                const type: '1-on-1' | 'Group' = '1-on-1';
+                
+                return {
+                    id: shortId,
+                    course: courseName,
+                    type: type,
+                    date: formattedDate,
+                    amount: item.amount
+                };
+            });
+            
+            const mappedResponse: ApiResponse<PaginatedResponse<RecentEarning>> = {
+                status: response.status,
+                success: response.success,
+                message: response.message,
+                data: {
+                    content: mappedContent,
+                    pageable: response.data.pageable,
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                    last: response.data.last,
+                    numberOfElements: response.data.numberOfElements,
+                    first: response.data.first,
+                    size: response.data.size,
+                    number: response.data.number,
+                    empty: response.data.empty
+                }
+            };
+            
+            return mappedResponse;
+        }
+        
+        // Return empty response if mapping fails
+        return {
+            status: response.status,
+            success: false,
+            message: response.message || 'Failed to map earnings data',
+            data: {
+                content: [],
+                pageable: {
+                    pageNumber: 0,
+                    pageSize: 0,
+                    offset: 0,
+                    paged: false
+                },
+                totalPages: 0,
+                totalElements: 0,
+                last: true,
+                numberOfElements: 0,
+                first: true,
+                size: 0,
+                number: 0,
+                empty: true
+            }
+        };
     },
 
     // Get booked sessions for a tutor within date range
