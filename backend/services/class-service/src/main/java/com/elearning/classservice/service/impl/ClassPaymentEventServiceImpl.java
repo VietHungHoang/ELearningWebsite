@@ -14,6 +14,7 @@ import com.elearning.classservice.repository.SessionRepository;
 import com.elearning.classservice.service.ClassPaymentEventService;
 import com.elearning.classservice.service.KafkaProducerService;
 import com.elearning.classservice.service.ZoomMeetingService;
+import com.elearning.classservice.service.ZoomAsyncService;
 import com.elearning.classservice.dto.event.TutorHourlyRateRequestEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private final ClassEnrollmentRepository enrollmentRepository;
     private final com.elearning.classservice.repository.ClassScheduleRepository classScheduleRepository;
     private final ZoomMeetingService zoomMeetingService;
+    private final ZoomAsyncService zoomAsyncService;
     private final KafkaProducerService kafkaProducerService;
 
     @Override
@@ -56,8 +58,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
         log.info("Updated class {} status to IN_PROGRESS after payment success", event.getClassId());
 
-        // Create Zoom meeting links for all sessions of this class
-        createZoomMeetingsForClass(classEntity);
+        // Create Zoom meeting links asynchronously (non-blocking)
+        zoomAsyncService.createZoomMeetingsForClassAsync(event.getClassId());
+        log.info("Triggered async Zoom meeting creation for class {}", event.getClassId());
     }
 
     private void createNewClass(BookingPaymentSuccessEvent event) {
@@ -102,8 +105,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         enrollmentRepository.save(enrollment);
         log.info("Enrolled student {} to class {}", event.getStudentId(), newClass.getId());
 
-        // 4. Create Zoom Meetings
-        createZoomMeetingsForClass(newClass);
+        // 4. Trigger async Zoom meeting creation (non-blocking)
+        zoomAsyncService.createZoomMeetingsForClassAsync(newClass.getId());
+        log.info("Triggered async Zoom meeting creation for class {}", newClass.getId());
 
         // 5. Request tutor hourly rate if pricePerHour is not set
         if (newClass.getPricePerHour() == null || newClass.getPricePerHour() == 0) {
@@ -320,65 +324,6 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 .build();
 
         sessionRepository.save(session);
-    }
-
-    /**
-     * Create Zoom meetings for all sessions of a class
-     */
-    private void createZoomMeetingsForClass(ClassEntity classEntity) {
-        log.info("Creating Zoom meetings for class {}", classEntity.getId());
-
-        try {
-            // Get all sessions for this class
-            List<Session> sessions = sessionRepository.findByClassEntityIdOrderByStartTimeAsc(classEntity.getId());
-
-            if (sessions.isEmpty()) {
-                log.warn("No sessions found for class {}", classEntity.getId());
-                return;
-            }
-
-            UUID tutorId = classEntity.getTutor().getId();
-            int successCount = 0;
-            int failCount = 0;
-
-            for (Session session : sessions) {
-                try {
-                    // Skip if Zoom meeting already exists
-                    if (session.getZoomMeetingId() != null && !session.getZoomMeetingId().isEmpty()) {
-                        log.info("Session {} already has Zoom meeting ID: {}", session.getId(),
-                                session.getZoomMeetingId());
-                        continue;
-                    }
-
-                    // Create Zoom meeting
-                    ZoomMeetingResponse zoomMeeting = zoomMeetingService.createScheduledMeeting(tutorId,
-                            session.getId());
-
-                    // Update session with Zoom details
-                    session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
-                    session.setZoomPassword(zoomMeeting.getPassword());
-                    session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
-                    session.setMeetingLink(zoomMeeting.getJoinUrl());
-
-                    sessionRepository.save(session);
-
-                    successCount++;
-                    log.info("Created Zoom meeting for session {}: {}", session.getId(), zoomMeeting.getId());
-
-                } catch (Exception e) {
-                    failCount++;
-                    log.error("Failed to create Zoom meeting for session {}: {}", session.getId(), e.getMessage(), e);
-                    // Continue with next session even if one fails
-                }
-            }
-
-            log.info("Zoom meeting creation completed for class {}. Success: {}, Failed: {}",
-                    classEntity.getId(), successCount, failCount);
-
-        } catch (Exception e) {
-            log.error("Error creating Zoom meetings for class {}: {}", classEntity.getId(), e.getMessage(), e);
-            // Don't throw exception - class is already in IN_PROGRESS status
-        }
     }
 
     @Override

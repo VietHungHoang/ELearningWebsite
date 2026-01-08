@@ -503,7 +503,7 @@
         "myQuizzes": "Bài kiểm tra của tôi",
         "requests": "Yêu cầu",
         "myCourses": "Khóa học của tôi",
-        "myPurchases": "Mua hàng của tôi",
+        "myPurchases": "Lịch sử mua hàng",
         "certificates": "Chứng chỉ",
         "messages": "Tin nhắn",
         "wishlist": "Yêu thích",
@@ -736,7 +736,7 @@
         }
       },
       "purchases": {
-        "title": "Mua hàng của tôi",
+        "title": "Lịch sử mua hàng",
         "searchPlaceholder": "Tìm kiếm theo khóa học hoặc số hóa đơn...",
         "selectStatus": "Chọn trạng thái",
         "filterOptions": {
@@ -1787,7 +1787,7 @@
       "profileSettings": "Cài Đặt Hồ Sơ",
       "api": "API",
       "myBookings": "Lịch Học Của Tôi",
-      "myPurchases": "Mua Hàng Của Tôi",
+      "myPurchases": "Lịch sử mua hàng",
       "certificates": "Chứng Chỉ",
       "messages": "Tin Nhắn",
       "favourites": "Yêu Thích",
