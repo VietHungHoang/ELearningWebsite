@@ -11,7 +11,7 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 })
 export class TotalSalesComponent implements OnInit, OnDestroy {
 
-    selectedTimeframe: string = 'monthly';
+    selectedTimeframe: string = 'Filter';
     instanceId: string;
     totalRevenue: number = 0;
     growthPercentage: number = 0;
@@ -37,18 +37,44 @@ export class TotalSalesComponent implements OnInit, OnDestroy {
         this.totalSalesService.destroyChart();
     }
 
+    /**
+     * Calculate date range based on selected timeframe
+     * Supports: 'weekly' (7 days) and 'monthly' (30 days)
+     */
+    private getDateRange(): { startDate: string; endDate: string } {
+        const now = new Date();
+        const endDate = now.toISOString().split('T')[0]; // Today YYYY-MM-DD
+        let startDate: string;
+
+        switch (this.selectedTimeframe) {
+            case 'weekly':
+                // Last 7 days
+                const weekAgo = new Date(now);
+                weekAgo.setDate(weekAgo.getDate() - 6);
+                startDate = weekAgo.toISOString().split('T')[0];
+                break;
+            case 'monthly':
+            default:
+                // Last 30 days
+                const monthAgo = new Date(now);
+                monthAgo.setDate(monthAgo.getDate() - 29);
+                startDate = monthAgo.toISOString().split('T')[0];
+                break;
+        }
+
+        return { startDate, endDate };
+    }
+
     private loadData(): void {
-        this.subscription = this.totalSalesService.getTotalRevenueData(this.selectedTimeframe).subscribe({
+        const { startDate, endDate } = this.getDateRange();
+
+        this.subscription = this.totalSalesService.getTotalRevenueData(startDate, endDate).subscribe({
             next: (data: TotalRevenueData) => {
                 this.totalRevenue = data.totalRevenue;
                 this.growthPercentage = data.growthPercentage;
-                
-                const series = [
-                    { name: data.series.currentPeriod.name, data: data.series.currentPeriod.data },
-                    { name: data.series.previousPeriod.name, data: data.series.previousPeriod.data }
-                ];
-                
-                this.totalSalesService.loadChart(series, data.categories, 'overview_total_sales_chart');
+
+                // Use series directly from transformed data
+                this.totalSalesService.loadChart(data.series, data.categories, 'overview_total_sales_chart');
             },
             error: (error) => {
                 console.error('Error loading total revenue data:', error);

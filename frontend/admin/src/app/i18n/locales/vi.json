@@ -19,7 +19,7 @@
       },
       "totalCourses": {
         "title": "Gia sư chờ phê duyệt",
-        "thisWeek": "Tuần này",
+        "thisWeek": "7 ngày qua",
         "pending": "Chờ duyệt",
         "approved": "Đã duyệt",
         "rejected": "Đã từ chối"
@@ -32,13 +32,13 @@
       },
       "newTutors": {
         "title": "Gia sư mới",
-        "lastMonth": "Tháng này",
-        "vsLastMonth": "so với tháng trước"
+        "lastWeek": "7 ngày qua",
+        "vsLastWeek": "so với tuần trước"
       },
       "newStudents": {
-        "title": "học viên mới",
-        "lastMonth": "Tháng này",
-        "vsLastMonth": "so với tháng trước"
+        "title": "Học viên mới",
+        "lastWeek": "7 ngày qua",
+        "vsLastWeek": "so với tuần trước"
       },
       "completedSessions": {
         "title": "Các phiên đã học",
@@ -82,7 +82,7 @@
           "totalBookings": "Tổng đặt lịch"
         },
         "timePeriod": {
-          "thisWeek": "Tuần này",
+          "thisWeek": "7 ngày qua",
           "thisMonth": "Tháng này",
           "thisYear": "Năm này",
           "allTime": "Tất cả"
@@ -776,7 +776,7 @@
     },
     "dateRange": {
       "today": "Hôm nay",
-      "thisWeek": "Tuần này",
+      "thisWeek": "7 ngày qua",
       "thisMonth": "Tháng này"
     },
     "kpi": {
@@ -836,7 +836,7 @@
       "revenueTrend": {
         "title": "Xu hướng doanh thu",
         "timeframe": {
-          "weekly": "Tuần này",
+          "weekly": "7 ngày qua",
           "monthly": "Tháng này",
           "yearly": "Năm này"
         }
@@ -851,7 +851,7 @@
           "table": "Bảng"
         },
         "timeFilter": {
-          "weekly": "Tuần này",
+          "weekly": "7 ngày qua",
           "monthly": "Tháng này",
           "yearly": "Năm này"
         },
@@ -1063,7 +1063,7 @@
     },
     "summaryFilter": {
       "today": "Hôm nay",
-      "thisWeek": "Tuần này",
+      "thisWeek": "7 ngày qua",
       "thisMonth": "Tháng này"
     },
     "filters": {
@@ -1319,7 +1319,7 @@
     "actor": {
       "allStudents": "Tất cả học viên",
       "topSpenders": "Người chi tiêu nhiều",
-      "newStudents": "học viên mới",
+      "newStudents": "Học viên mới",
       "noSpending1Month": "Không chi tiêu (1 tháng)"
     },
     "actions": {
@@ -1384,7 +1384,7 @@
       "studentSegments": {
         "allStudents": "Tất cả học viên",
         "topSpenders": "Người chi tiêu nhiều (Chi tiêu cao nhất trong tháng)",
-        "newStudents": "học viên mới (Đăng ký < 30 ngày)",
+        "newStudents": "Học viên mới (Đăng ký < 30 ngày)",
         "noSpending1Month": "Không chi tiêu (Không mua hàng trong 1 tháng)"
       }
     },
@@ -1437,7 +1437,7 @@
       "studentSegments": {
         "allStudents": "Tất cả học viên",
         "topSpenders": "Người chi tiêu nhiều (Chi tiêu cao nhất trong tháng)",
-        "newStudents": "học viên mới (Đăng ký < 30 ngày)",
+        "newStudents": "Học viên mới (Đăng ký < 30 ngày)",
         "noSpending1Month": "Không chi tiêu (Không mua hàng trong 1 tháng)"
       }
     }

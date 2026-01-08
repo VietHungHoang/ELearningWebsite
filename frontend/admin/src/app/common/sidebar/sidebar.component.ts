@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, Renderer2 } from '@angular/core';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
-import { NgClass } from '@angular/common';
+import { NgClass, isPlatformBrowser } from '@angular/common';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { CategoryService } from '../../services/category.service';
 
@@ -18,10 +18,20 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
 
-    constructor(private router: Router, private categoryService: CategoryService) {}
+    constructor(
+        private router: Router,
+        private categoryService: CategoryService,
+        @Inject(PLATFORM_ID) private platformId: Object,
+        private renderer: Renderer2
+    ) { }
 
     ngOnInit(): void {
         // Không load subjects ở đây, để subject-list component tự load khi cần
+    }
+
+    // Toggle/close sidebar
+    toggleSidebar(): void {
+        this.renderer.addClass(document.body, 'sidebar-hidden');
     }
 
     openSectionIndex: number = -1;

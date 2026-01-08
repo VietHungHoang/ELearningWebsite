@@ -19,6 +19,8 @@ export interface NewTutorsData {
     dailyData: {
         /** Date in YYYY-MM-DD format */
         date: string;
+        /** Day name from backend (e.g. "T2", "T3", "CN") */
+        dayName: string;
         /** Number of new tutors registered on this date */
         count: number;
     }[];
@@ -55,24 +57,27 @@ export class TotalMentorsService {
     getNewTutorsData(startDate?: string, endDate?: string): Observable<NewTutorsData> {
         let params = new HttpParams();
 
-        // Default to current month (from 1st day to today)
+        // Default to last 7 days (weekly) if no dates provided
         if (!startDate || !endDate) {
-            const today = new Date();
-            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            const end = new Date();
+            const start = new Date();
+            start.setDate(start.getDate() - 6);
             startDate = start.toISOString().split('T')[0];
-            endDate = today.toISOString().split('T')[0];
+            endDate = end.toISOString().split('T')[0];
         }
 
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 
-        return this.http.get<ApiResponse<NewTutorsData>>(`${this.apiUrl}/new-tutors`, { params })
+        return this.http.get<any>(`${this.apiUrl}/new-tutors`, { params })
             .pipe(
                 map(response => {
-                    if (response.success && response.data) {
-                        return response.data;
+                    // Handle both wrapped { success, data } and direct response formats
+                    const backendData = response.data || response;
+                    if (!backendData || !backendData.dailyData) {
+                        throw new Error('Invalid response format');
                     }
-                    throw new Error(response.message || 'Invalid response');
+                    return backendData as NewTutorsData;
                 })
             );
     }
@@ -137,7 +142,7 @@ export class TotalMentorsService {
                         show: false
                     },
                     xaxis: {
-                        categories: data.dailyData.map(d => d.date),
+                        categories: data.dailyData.map(d => d.dayName),
                         labels: {
                             show: false
                         },
@@ -153,13 +158,13 @@ export class TotalMentorsService {
                     },
                     tooltip: {
                         x: {
-                            formatter: function(val: any, opts: any) {
+                            formatter: function (val: any, opts: any) {
                                 const date = new Date(data.dailyData[opts.dataPointIndex]?.date);
                                 return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
                             }
                         },
                         y: {
-                            formatter: function(val: any) {
+                            formatter: function (val: any) {
                                 return val + " gia sư";
                             }
                         }

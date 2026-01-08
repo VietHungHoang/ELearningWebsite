@@ -1,4 +1,5 @@
-<div class="trezo-card bg-white dark:bg-[#0c1427] p-[15px] md:p-[15px] rounded-md h-[450px] md:h-[530px]" [attr.data-instance-id]="instanceId">
+<div class="trezo-card bg-white dark:bg-[#0c1427] p-[15px] md:p-[15px] rounded-md h-[450px] md:h-[530px]"
+    [attr.data-instance-id]="instanceId">
     <div class="trezo-card-header mb-[10px] md:mb-[10px] flex items-center justify-between">
         <div class="trezo-card-title">
             <h5 class="!mb-0">
@@ -7,30 +8,33 @@
         </div>
         <div class="trezo-card-subtitle">
             <div class="trezo-card-dropdown relative">
-                <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[5px] md:py-[6.5px] px-[12px] md:px-[19px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19]" (click)="toggleCardHeaderMenu()">
+                <button type="button"
+                    class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[5px] md:py-[6.5px] px-[12px] md:px-[19px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19]"
+                    (click)="toggleCardHeaderMenu()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
                         {{ selectedTimeframe }}
-                        <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
+                        <i
+                            class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
                     </span>
                 </button>
                 @if (isCardHeaderOpen) {
-                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[195px] z-[5] dark:bg-dark dark:shadow-none">
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('weekly')">
-                                {{ 'dashboard.overview.totalSales.weekly' | translate }}
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('monthly')">
-                                {{ 'dashboard.overview.totalSales.monthly' | translate }}
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="onTimeframeChange('yearly')">
-                                {{ 'dashboard.overview.totalSales.yearly' | translate }}
-                            </button>
-                        </li>
-                    </ul>
+                <ul
+                    class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[195px] z-[5] dark:bg-dark dark:shadow-none">
+                    <li>
+                        <button type="button"
+                            class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black"
+                            (click)="onTimeframeChange('weekly')">
+                            {{ 'dashboard.overview.totalSales.weekly' | translate }}
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button"
+                            class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black"
+                            (click)="onTimeframeChange('monthly')">
+                            {{ 'dashboard.overview.totalSales.monthly' | translate }}
+                        </button>
+                    </li>
+                </ul>
                 }
             </div>
         </div>

@@ -7,7 +7,7 @@
                 </span>
             </div>
             <span class="block text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap flex-shrink-0">
-                {{ 'dashboard.overview.newStudents.lastMonth' | translate }}
+                {{ 'dashboard.overview.newStudents.lastWeek' | translate }}
             </span>
         </div>
         <h5 class="!text-lg md:!text-[20px] !mb-0 mb-[15px]">
@@ -18,18 +18,18 @@
         </div>
         <div class="flex items-center gap-2 mt-[10px]">
             @if (growthPercentage >= 0) {
-                <span class="inline-flex items-center text-sm text-green-500">
-                    <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
-                    +{{ growthPercentage }}%
-                </span>
+            <span class="inline-flex items-center text-sm text-green-500">
+                <span class="material-symbols-outlined text-[16px] mr-1">trending_up</span>
+                +{{ growthPercentage }}%
+            </span>
             } @else {
-                <span class="inline-flex items-center text-sm text-red-500">
-                    <span class="material-symbols-outlined text-[16px] mr-1">trending_down</span>
-                    {{ growthPercentage }}%
-                </span>
+            <span class="inline-flex items-center text-sm text-red-500">
+                <span class="material-symbols-outlined text-[16px] mr-1">trending_down</span>
+                {{ growthPercentage }}%
+            </span>
             }
             <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ 'dashboard.overview.newStudents.vsLastMonth' | translate }}
+                {{ 'dashboard.overview.newStudents.vsLastWeek' | translate }}
             </span>
         </div>
     </div>

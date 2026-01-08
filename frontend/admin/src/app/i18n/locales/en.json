@@ -32,13 +32,13 @@
       },
       "newTutors": {
         "title": "New Tutors",
-        "lastMonth": "This month",
-        "vsLastMonth": "vs last month"
+        "lastWeek": "This week",
+        "vsLastWeek": "vs last week"
       },
       "newStudents": {
         "title": "New Students",
-        "lastMonth": "This month",
-        "vsLastMonth": "vs last month"
+        "lastWeek": "This week",
+        "vsLastWeek": "vs last week"
       },
       "completedSessions": {
         "title": "Completed Sessions",
@@ -1471,4 +1471,3 @@
     }
   }
 }
-
