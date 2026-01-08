@@ -127,6 +127,10 @@ const ScheduleAndCalendar: React.FC = () => {
 
             setSessionStarting(true);
 
+            // Call API to start session (updates status to BOOKED)
+            await classService.startSessionByTutor(sessionId);
+            console.log("Session started via API:", sessionId);
+
             // Convert standard URL to Web Client URL to allow joining via browser
             // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
             let openUrl = session.meetingUrl;
@@ -141,7 +145,7 @@ const ScheduleAndCalendar: React.FC = () => {
 
             // Open meeting URL in new tab
             window.open(openUrl, '_blank');
-            console.log("Starting session (Web Client):", sessionId, openUrl);
+            console.log("Opening Zoom (Web Client):", sessionId, openUrl);
 
         } catch (error) {
             console.error("Error starting session:", error);

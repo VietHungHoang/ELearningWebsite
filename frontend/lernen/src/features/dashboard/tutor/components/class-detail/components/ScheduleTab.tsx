@@ -459,15 +459,23 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
         return link;
     };
 
-    const handleStartSession = (session: Session) => {
+    const handleStartSession = async (session: Session) => {
         if (!session.meetingLink) {
             console.warn("No meeting URL available for session:", session.id);
             return;
         }
         
-        // Convert to web link and open in new tab
-        const webLink = convertToWebLink(session.meetingLink);
-        window.open(webLink, '_blank', 'noopener,noreferrer');
+        try {
+            // Call API to start session (updates status to BOOKED)
+            await classService.startSessionByTutor(session.id);
+            console.log("Session started via API:", session.id);
+            
+            // Convert to web link and open in new tab
+            const webLink = convertToWebLink(session.meetingLink);
+            window.open(webLink, '_blank', 'noopener,noreferrer');
+        } catch (error) {
+            console.error("Error starting session:", error);
+        }
     };
 
     const handleAddNote = (sessionId: string) => {

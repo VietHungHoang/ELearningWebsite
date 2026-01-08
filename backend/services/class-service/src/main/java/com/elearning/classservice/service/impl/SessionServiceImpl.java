@@ -322,7 +322,30 @@ public class SessionServiceImpl implements SessionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new SessionNotFoundException(sessionId));
 
-        // 2. Mark attendance - find or create SessionParticipant
+        // 2. Check if Zoom link exists, if not create one
+        if (session.getZoomJoinUrl() == null || session.getZoomJoinUrl().trim().isEmpty()) {
+            log.info("Session {} has no Zoom link, creating one now", sessionId);
+            
+            try {
+                UUID tutorId = session.getTutor().getId();
+                com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = 
+                    zoomMeetingService.createScheduledMeeting(tutorId, sessionId);
+                
+                // Update session with Zoom details
+                session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
+                session.setZoomPassword(zoomMeeting.getPassword());
+                session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
+                session.setMeetingLink(zoomMeeting.getJoinUrl());
+                sessionRepository.save(session);
+                
+                log.info("Created Zoom meeting for session {}: {}", sessionId, zoomMeeting.getId());
+            } catch (Exception e) {
+                log.error("Failed to create Zoom meeting for session {}: {}", sessionId, e.getMessage(), e);
+                throw new RuntimeException("Failed to create Zoom meeting: " + e.getMessage());
+            }
+        }
+
+        // 3. Mark attendance - find or create SessionParticipant
         LocalDateTime now = LocalDateTime.now();
         SessionParticipant participant = participantRepository
                 .findBySessionIdAndStudentId(sessionId, studentId)

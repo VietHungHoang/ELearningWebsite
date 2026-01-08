@@ -16,7 +16,7 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
     const [isLeft, setIsLeft] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
 
-    // Handle start session - convert Zoom URL to Web Client URL and open in new tab
+    // Handle start session - call API then convert Zoom URL to Web Client URL and open in new tab
     const handleStartSession = async () => {
         try {
             if (!session?.meetingUrl) {
@@ -25,6 +25,11 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
             }
 
             setIsStarting(true);
+
+            // Call API to start session (updates status to BOOKED)
+            const { classService } = await import('../../../../services/classService');
+            await classService.startSessionByTutor(session.id);
+            console.log("Session started via API:", session.id);
 
             // Convert standard URL to Web Client URL to allow joining via browser
             // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
@@ -40,7 +45,7 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
 
             // Open meeting URL in new tab
             window.open(openUrl, '_blank');
-            console.log("Starting session (Web Client):", session.id, openUrl);
+            console.log("Opening Zoom (Web Client):", session.id, openUrl);
 
         } catch (error) {
             console.error("Error starting session:", error);

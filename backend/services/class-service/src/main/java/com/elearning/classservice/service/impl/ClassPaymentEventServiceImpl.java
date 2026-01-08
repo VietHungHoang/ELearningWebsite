@@ -59,8 +59,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Updated class {} status to IN_PROGRESS after payment success", event.getClassId());
 
         // Create Zoom meeting links asynchronously (non-blocking)
-        zoomAsyncService.createZoomMeetingsForClassAsync(event.getClassId());
-        log.info("Triggered async Zoom meeting creation for class {}", event.getClassId());
+        // TODO: Temporarily commented - Zoom links will be created on-demand when tutor/student starts session
+        // zoomAsyncService.createZoomMeetingsForClassAsync(event.getClassId());
+        // log.info("Triggered async Zoom meeting creation for class {}", event.getClassId());
     }
 
     private void createNewClass(BookingPaymentSuccessEvent event) {
@@ -106,8 +107,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Enrolled student {} to class {}", event.getStudentId(), newClass.getId());
 
         // 4. Trigger async Zoom meeting creation (non-blocking)
-        zoomAsyncService.createZoomMeetingsForClassAsync(newClass.getId());
-        log.info("Triggered async Zoom meeting creation for class {}", newClass.getId());
+        // TODO: Temporarily commented - Zoom links will be created on-demand when tutor/student starts session
+        // zoomAsyncService.createZoomMeetingsForClassAsync(newClass.getId());
+        // log.info("Triggered async Zoom meeting creation for class {}", newClass.getId());
 
         // 5. Request tutor hourly rate if pricePerHour is not set
         if (newClass.getPricePerHour() == null || newClass.getPricePerHour() == 0) {
