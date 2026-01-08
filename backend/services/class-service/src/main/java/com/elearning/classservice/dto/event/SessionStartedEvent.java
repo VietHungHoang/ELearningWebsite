@@ -44,4 +44,8 @@ public class SessionStartedEvent {
     private String classType; // ONE_ON_ONE, GROUP
     
     private UUID classId;
+    
+    private String className; // Title of the class
+    
+    private String studentName; // Name of the student (for ONE_ON_ONE)
 }

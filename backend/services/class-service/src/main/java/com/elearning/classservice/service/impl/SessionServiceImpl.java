@@ -110,6 +110,12 @@ public class SessionServiceImpl implements SessionService {
                     .map(p -> p.getStudent().getId())
                     .toList();
 
+            // Get student name for ONE_ON_ONE classes
+            String studentName = null;
+            if (classEntity.getClassType().name().equals("ONE_ON_ONE") && !session.getParticipants().isEmpty()) {
+                studentName = session.getParticipants().get(0).getStudent().getFullName();
+            }
+            
             SessionStartedEvent event = SessionStartedEvent.builder()
                     .sessionId(session.getId())
                     .tutorId(session.getTutor().getId())
@@ -122,6 +128,8 @@ public class SessionServiceImpl implements SessionService {
                     .pricePerHour(java.math.BigDecimal.valueOf(classEntity.getPricePerHour()))
                     .classType(classEntity.getClassType().name())
                     .classId(classEntity.getId())
+                    .className(classEntity.getTitle())
+                    .studentName(studentName)
                     .build();
 
             kafkaProducerService.sendSessionStartedEvent(event);

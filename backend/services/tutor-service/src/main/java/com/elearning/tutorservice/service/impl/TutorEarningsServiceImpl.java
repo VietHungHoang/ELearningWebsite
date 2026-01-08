@@ -98,11 +98,20 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
             long durationMinutes = Duration.between(event.getStartTime(), event.getEndTime()).toMinutes();
             double hours = durationMinutes / 60.0;
 
-            // Calculate earnings amount
-            BigDecimal amount = event.getPricePerHour().multiply(BigDecimal.valueOf(hours));
+            // Calculate earnings amount - only 70%
+            BigDecimal fullAmount = event.getPricePerHour().multiply(BigDecimal.valueOf(hours));
+            BigDecimal amount = fullAmount.multiply(BigDecimal.valueOf(0.70));
 
             // Map classType string to ClassType enum
             ClassType classType = ClassType.valueOf(event.getClassType());
+
+            // Determine className based on classType
+            String className;
+            if (classType == ClassType.ONE_ON_ONE) {
+                className = event.getStudentName() != null ? event.getStudentName() : "Unknown Student";
+            } else {
+                className = event.getClassName() != null ? event.getClassName() : "Group Class";
+            }
 
             // Create TutorEarnings record
             TutorEarnings earnings = TutorEarnings.builder()
@@ -110,6 +119,7 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
                     .sessionId(event.getSessionId())
                     .amount(amount)
                     .classType(classType)
+                    .className(className)
                     .status(TutorEarnings.EarningsStatus.PENDING)
                     .notes("Earnings from session: " + (event.getSessionTitle() != null ? event.getSessionTitle() : event.getSessionId()))
                     .build();

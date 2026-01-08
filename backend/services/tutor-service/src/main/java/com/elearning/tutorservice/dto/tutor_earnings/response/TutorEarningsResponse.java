@@ -17,6 +17,7 @@ public class TutorEarningsResponse {
     private UUID id;
     private UUID sessionId;
     private BigDecimal amount;
+    private String className;
     private String status;
     private LocalDateTime paidAt;
     private UUID paymentId;

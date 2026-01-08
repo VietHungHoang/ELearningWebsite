@@ -12,6 +12,7 @@ public class TutorEarningsMapper {
                 .id(earnings.getId())
                 .sessionId(earnings.getSessionId())
                 .amount(earnings.getAmount())
+                .className(earnings.getClassName())
                 .status(earnings.getStatus().name())
                 .paidAt(earnings.getPaidAt())
                 .paymentId(earnings.getPaymentId())
