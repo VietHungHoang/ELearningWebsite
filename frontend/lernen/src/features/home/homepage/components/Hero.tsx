@@ -1,15 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FiSearch, FiChevronDown } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import IntroducePanel from '../../../../components/auth/IntroducePanel';
 
 const Hero: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState('');
+
   const scrollToContent = () => {
     window.scrollTo({
       top: window.innerHeight - 100,
       behavior: 'smooth'
     });
+  };
+
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      navigate(`/find-tutors?keyword=${encodeURIComponent(searchValue.trim())}`);
+    } else {
+      navigate('/find-tutors');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -45,9 +63,15 @@ const Hero: React.FC = () => {
               <input
                 type="text"
                 placeholder={t('home.hero.searchPlaceholder')}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={handleKeyDown}
                 className="w-full pl-5 pr-16 py-3.5 text-base bg-white border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent transition-all hover:shadow-md placeholder-gray-400"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-[#3A3535] rounded-lg flex items-center justify-center transition-all shadow-md">
+              <button
+                onClick={handleSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-[#3A3535] rounded-lg flex items-center justify-center transition-all shadow-md hover:bg-[#2a2525]"
+              >
                 <FiSearch size={20} color='white' />
               </button>
             </div>

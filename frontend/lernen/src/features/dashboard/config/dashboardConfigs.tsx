@@ -12,7 +12,7 @@ import {
     FiBell,
     FiShoppingBag,
     // FiFileText,
-    FiCode,
+
     FiStar,
 } from "react-icons/fi";
 import { PiChalkboardTeacher } from "react-icons/pi";

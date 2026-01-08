@@ -3,6 +3,7 @@ package com.elearning.tutorservice.controller;
 import com.elearning.tutorservice.dto.response.ApiResponse;
 import com.elearning.tutorservice.dto.tutor_stats.response.TutorDashboardStatisticsResponse;
 import com.elearning.tutorservice.dto.tutor_stats.response.TutorMonthlyIncomeResponse;
+import com.elearning.tutorservice.dto.tutor_stats.response.TutorChartsDataResponse;
 import com.elearning.tutorservice.service.TutorStatisticService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,10 @@ public class TutorStatsController {
             @RequestParam(required = false) LocalDateTime startDate,
             @RequestParam(required = false) LocalDateTime endDate) {
 
-        TutorDashboardStatisticsResponse statistics = tutorStatisticService.getTutorStatistics(tutorId, startDate, endDate);
-        ApiResponse<TutorDashboardStatisticsResponse> response = ApiResponse.success(statistics, "Tutor statistics retrieved successfully");
+        TutorDashboardStatisticsResponse statistics = tutorStatisticService.getTutorStatistics(tutorId, startDate,
+                endDate);
+        ApiResponse<TutorDashboardStatisticsResponse> response = ApiResponse.success(statistics,
+                "Tutor statistics retrieved successfully");
         return ResponseEntity.ok(response);
     }
 
@@ -49,5 +52,20 @@ public class TutorStatsController {
                 .incomes(stats)
                 .build();
         return ResponseEntity.ok(ApiResponse.success(response, "Monthly income statistics retrieved successfully"));
+    }
+
+    /**
+     * GET /api/v1/tutors/me/dashboard/charts
+     * <p>
+     * Get charts data (income and students) for tutor dashboard
+     *
+     * @param tutorId ID of the tutor from header
+     * @return Charts data with monthly income and student statistics
+     */
+    @GetMapping("/me/dashboard/charts")
+    public ResponseEntity<ApiResponse<TutorChartsDataResponse>> getChartsData(
+            @RequestHeader("X-User-Id") UUID tutorId) {
+        TutorChartsDataResponse chartsData = tutorStatisticService.getChartsData(tutorId);
+        return ResponseEntity.ok(ApiResponse.success(chartsData, "Charts data retrieved successfully"));
     }
 }

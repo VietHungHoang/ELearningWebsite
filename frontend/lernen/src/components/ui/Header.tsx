@@ -93,7 +93,7 @@ const Header: React.FC = () => {
     return (
         <header className="bg-[var(--page-bg-color)] border-b border-gray-200">
             <div className="px-8">
-                <div className="flex justify-between items-center py-4">
+                <div className="flex justify-between items-center py-2">
                     <div className="flex items-center space-x-8">
                         {/* Logo */}
                         <NavLink to="/" className="text-[#0b6459]">
@@ -216,7 +216,7 @@ const Header: React.FC = () => {
                                     <img
                                         src={state.user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${state.user?.id || 'default'}`}
                                         alt="User Avatar"
-                                        className="w-10 h-10 rounded-full"
+                                        className="w-10 h-10 rounded-lg object-cover"
                                     />
                                 </button>
                                 {isProfileOpen && <ProfileDropdown />}

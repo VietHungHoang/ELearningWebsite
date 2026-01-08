@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch } from 'react-icons/hi';
-import Breadcrumb from '../../components/Breadcrumb';
+
 import { useAuth } from '../../../../context/AuthContext';
 import quizService from '../../../../services/quizService';
 import Toast from '../../../../components/ui/Toast';
@@ -284,14 +284,14 @@ const MyQuizzesPage: React.FC = () => {
                                         setLoadingQuizId(null);
                                         // Check if it's a maximum attempts error
                                         if (err.isMaxAttemptsReached || err.message?.toLowerCase().includes('maximum number of attempts reached')) {
-                                            setToast({ 
-                                                message: err.message || 'Maximum number of attempts reached', 
-                                                type: 'error' 
+                                            setToast({
+                                                message: err.message || 'Maximum number of attempts reached',
+                                                type: 'error'
                                             });
                                         } else {
-                                            setToast({ 
-                                                message: err.message || 'Failed to start quiz', 
-                                                type: 'error' 
+                                            setToast({
+                                                message: err.message || 'Failed to start quiz',
+                                                type: 'error'
                                             });
                                         }
                                     }
@@ -302,22 +302,22 @@ const MyQuizzesPage: React.FC = () => {
                                         navigate(`/quiz/result/${currentAttemptId}`);
                                     } else {
                                         // Navigate immediately and fetch attemptId in background
-                                        navigate(`/quiz/result/loading`, { 
-                                            state: { quizId: quiz.id } 
+                                        navigate(`/quiz/result/loading`, {
+                                            state: { quizId: quiz.id }
                                         });
-                                        
+
                                         // Fetch attemptId in background and update URL
                                         import('../../../../services/quizService').then(({ default: quizService }) => {
                                             return quizService.getLatestCompletedAttemptId(quiz.id);
                                         })
-                                        .then(attemptId => {
-                                            if (attemptId) {
-                                                navigate(`/quiz/result/${attemptId}`, { replace: true });
-                                            }
-                                        })
-                                        .catch(err => {
-                                            console.error('Failed to get attempt ID:', err);
-                                        });
+                                            .then(attemptId => {
+                                                if (attemptId) {
+                                                    navigate(`/quiz/result/${attemptId}`, { replace: true });
+                                                }
+                                            })
+                                            .catch(err => {
+                                                console.error('Failed to get attempt ID:', err);
+                                            });
                                     }
                                 }
                             }}
@@ -329,8 +329,8 @@ const MyQuizzesPage: React.FC = () => {
                         >
                             {loadingQuizId === quiz.id ? 'Loading...' :
                                 quiz.status === 'completed' ? 'View Results' :
-                                quiz.status === 'in_progress' ? 'Continue Quiz' :
-                                    'Start Quiz'}
+                                    quiz.status === 'in_progress' ? 'Continue Quiz' :
+                                        'Start Quiz'}
                         </button>
 
                         {quiz.completedAt ? (
