@@ -32,7 +32,11 @@ public class AdminRoutesConfig {
                                                 .filters(f -> f
                                                                 .rewritePath(
                                                                                 "/api/v1/admin/tutors/(?<rest>.*)",
-                                                                                "/api/v1/tutors/${rest}"))
+                                                                                "/api/v1/tutors/${rest}")
+                                                                .rewritePath(
+                                                                                "/api/v1/admin/dashboard/(?<rest>.*)",
+                                                                                "/api/v1/dashboard/${rest}"))
+                                                                                
                                                 .uri(tutorServiceUrl))
 
                                 // Bff routes

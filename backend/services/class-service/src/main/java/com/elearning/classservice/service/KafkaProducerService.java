@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class KafkaProducerService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     private static final String SESSION_STARTED_TOPIC = "session_started";
     private static final String TUTOR_HOURLY_RATE_REQUEST_TOPIC = "request_tutor_hourly_rate";
