@@ -2414,7 +2414,7 @@
       "failedToSkip": "Không thể bỏ qua bước này"
     },
     "validation": {
-      "sessionFeeRequired": "Học phí yêu cầu",
+      "sessionFeeRequired": "Học phí yêu cầu ",
       "subjectRequired": "Cần chọn ít nhất một môn học"
     },
     "steps": {

@@ -53,7 +53,7 @@ export interface ParticipantUserInfo {
 export interface ConversationResponse {
     id: string;
     name?: string;
-    type: "ONE_ON_ONE" | "GROUP";
+    type: "ONE_TO_ONE" | "GROUP";
     participantIds: string[];
     participantDetails?: ParticipantUserInfo[];
     classId?: string;
