@@ -100,7 +100,7 @@ interface ChatWindowProps {
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, onSendFiles, isTyping, setMessages }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, onSendFiles, isTyping }) => {
     const { t } = useTranslation();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);

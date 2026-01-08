@@ -137,8 +137,8 @@ const ClassDetailPage: React.FC = () => {
                         id: s.id,
                         sessionNumber: s.sessionNumber,
                         title: s.title,
-                        startTime: convertUtcDateTimeToLocal(s.startTime),
-                        endTime: convertUtcDateTimeToLocal(s.endTime),
+                        startTime: s.startTime, // Keep as UTC, will convert when needed
+                        endTime: s.endTime, // Keep as UTC, will convert when needed
                         meetingLink: s.meetingLink,
                         status: s.status,
                         participantsCount: s.participantsCount
@@ -203,9 +203,12 @@ const ClassDetailPage: React.FC = () => {
                 ? (classData.tutor?.fullName || '')
                 : (classData.students.length > 0 ? classData.students[0].name : ''));
 
+        // Convert startTime from UTC to local timezone
+        const localStartTime = convertUtcDateTimeToLocal(session.startTime);
+
         return {
             id: session.id,
-            sessionDatetime: session.startTime, // Already converted to local timezone
+            sessionDatetime: localStartTime, // Converted from UTC to local timezone
             sessionType: classData.type === '1-on-1' ? 'ONE_ON_ONE' : 'GROUP',
             classInfo: {
                 id: classData.id,

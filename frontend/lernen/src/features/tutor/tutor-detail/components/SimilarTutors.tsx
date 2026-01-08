@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import SimilarTutorCard, { type SimilarTutor } from './SimilarTutorCard';
 import { useTranslation } from 'react-i18next';
 import { tutorService } from '../../../../services/tutorService';
-import { useAuth } from '../../../../context/AuthContext';
 import type { Tutor } from '../../../../types/tutor';
 import commonUtils from '../../../../utils/commonUtils';
 

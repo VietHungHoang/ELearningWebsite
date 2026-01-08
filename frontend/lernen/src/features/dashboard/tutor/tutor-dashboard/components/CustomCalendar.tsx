@@ -58,43 +58,58 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
 
     const days = getDaysInMonth(currentMonth);
 
-    // Check if date has sessions
-    const hasSessions = (date: Date) => {
-        return sessionDates.some(sessionDate =>
-            sessionDate.getDate() === date.getDate() &&
-            sessionDate.getMonth() === date.getMonth() &&
-            sessionDate.getFullYear() === date.getFullYear()
+    // Helper function to compare dates (only date part, ignoring time)
+    // Uses local date for comparison to match calendar display
+    const isSameDate = (date1: Date, date2: Date): boolean => {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
         );
     };
 
-    // Count sessions on date
+    // Helper function to get date at midnight in local timezone
+    const getDateAtMidnight = (date: Date): Date => {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    };
+
+    // Check if date has sessions (local date comparison)
+    const hasSessions = (date: Date) => {
+        const dateLocal = getDateAtMidnight(date);
+        return sessionDates.some((sessionDate) => {
+            const sessionDateLocal = getDateAtMidnight(sessionDate);
+            return isSameDate(sessionDateLocal, dateLocal);
+        });
+    };
+
+    // Count sessions on date (local date comparison)
     const getSessionCount = (date: Date) => {
-        return sessionDates.filter(sessionDate =>
-            sessionDate.getDate() === date.getDate() &&
-            sessionDate.getMonth() === date.getMonth() &&
-            sessionDate.getFullYear() === date.getFullYear()
-        ).length;
+        const dateLocal = getDateAtMidnight(date);
+        return sessionDates.filter((sessionDate) => {
+            const sessionDateLocal = getDateAtMidnight(sessionDate);
+            return isSameDate(sessionDateLocal, dateLocal);
+        }).length;
     };
 
-    // Check if date is selected
+    // Check if date is selected (local date comparison)
     const isSelected = (date: Date) => {
-        return selectedDate.getDate() === date.getDate() &&
-               selectedDate.getMonth() === date.getMonth() &&
-               selectedDate.getFullYear() === date.getFullYear();
+        const dateLocal = getDateAtMidnight(date);
+        const selectedDateLocal = getDateAtMidnight(selectedDate);
+        return isSameDate(dateLocal, selectedDateLocal);
     };
 
-    // Check if date is today
+    // Check if date is today (local date comparison)
     const isToday = (date: Date) => {
-        return today.getDate() === date.getDate() &&
-               today.getMonth() === date.getMonth() &&
-               today.getFullYear() === date.getFullYear();
+        const dateLocal = getDateAtMidnight(date);
+        const todayLocal = getDateAtMidnight(today);
+        return isSameDate(dateLocal, todayLocal);
     };
 
-    // Check if date is in the past
+    // Check if date is in the past (local date comparison)
     const isPastDate = (date: Date) => {
-        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-        const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        return dateStart < todayStart;
+        const dateLocal = getDateAtMidnight(date);
+        const todayLocal = getDateAtMidnight(today);
+        return dateLocal < todayLocal;
     };
 
     // Check if current month is the current month

@@ -17,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { classService } from '../../../../services/classService';
 import type { ClassTable, ClassStatus } from '../../../../types/class';
 import { convertUtcTimeToLocal } from '../../../../utils/scheduleHelpers';
-import { useAuth } from '../../../../context/AuthContext';
 
 type FilterTab = 'All Status' | 'Ongoing' | 'Opening' | 'Completed';
 
@@ -25,7 +24,6 @@ type FilterTab = 'All Status' | 'Ongoing' | 'Opening' | 'Completed';
 const MyClassPage: React.FC = () => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
-    const { state } = useAuth();
     const [classes, setClasses] = useState<ClassTable[]>([]);
     const [totalElements, setTotalElements] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -370,10 +368,10 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4">
                                             <div className="max-w-xs">
-                                                <p className="font-semibold text-gray-800 truncate" title={!isTitleNull(classData.title) ? (classData.title || '') : (classData.students[0]?.fullName || '')}>
-                                                    {!isTitleNull(classData.title)
-                                                        ? (classData.title || '')
-                                                        : (state.user?.role === 'tutor' && classData.students.length > 0 ? classData.students[0].fullName : '-')}
+                                                <p className="font-semibold text-gray-800 truncate" title={classData.type === 'ONE_ON_ONE' && classData.students.length > 0 ? classData.students[0].fullName : (classData.title || '')}>
+                                                    {classData.type === 'ONE_ON_ONE' && classData.students.length > 0
+                                                        ? classData.students[0].fullName
+                                                        : (!isTitleNull(classData.title) ? classData.title : '-')}
                                                 </p>
                                             </div>
                                         </td>
