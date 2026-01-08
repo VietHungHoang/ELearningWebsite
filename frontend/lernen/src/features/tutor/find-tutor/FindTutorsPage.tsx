@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useCallback } from "react";
 import type { TutorSearchFilter as IFilters, PaginatedResponse } from "../../../types/api";
 import Layout from "../../../components/ui/Layout";
 import Breadcrumb from "../../../components/ui/Breadcrumb";
@@ -11,14 +10,12 @@ import TipsSidebar from "./components/TipsSidebar";
 import { tutorService } from "../../../services/tutorService";
 import Loading from "../../../components/ui/Loading";
 import BookingModal from "./components/BookingModal";
-import { useAuth } from "../../../context/AuthContext";
 import type { Tutor } from "../../../types/tutor";
 import { useTranslation } from "react-i18next";
+import TutorRedirect from "../../../components/guards/TutorRedirect";
 
 const FindTutorsPage: React.FC = () => {
-    const { state } = useAuth();
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const [tutors, setTutors] = useState<Tutor[]>([]);
     const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -27,13 +24,6 @@ const FindTutorsPage: React.FC = () => {
     const [currentFilters, setCurrentFilters] = useState<IFilters>({});
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [selectedTutor, setSelectedTutor] = useState<Tutor | null>(null);
-
-    useEffect(() => {
-        // Redirect tutors to dashboard
-        if (state.user?.role === 'tutor') {
-            navigate('/dashboard');
-        }
-    }, [state.user?.role, navigate]);
 
     const handleOpenBookingModal = (tutor: Tutor) => {
         setSelectedTutor(tutor);
@@ -93,61 +83,63 @@ const FindTutorsPage: React.FC = () => {
     };
 
     return (
-        <Layout>
-            <div className="container max-w-7xl mx-auto px-4 py-8">
-                <Breadcrumb
-                    paths={[
-                        { name: t("header.home"), path: "/" },
-                        { name: t("header.findTutors"), path: "/find-tutors" },
-                    ]}
-                />
-                <div className="mb-6">
-                    <h1 className="text-4xl font-bold text-gray-800 mt-2">
-                        {t("findTutors.pageTitle")}
-                    </h1>
-                    <p className="mt-2 text-gray-600 max-w-4xl">
-                        {t("findTutors.pageDescription")}
-                    </p>
+        <TutorRedirect>
+            <Layout>
+                <div className="container max-w-7xl mx-auto px-4 py-8">
+                    <Breadcrumb
+                        paths={[
+                            { name: t("header.home"), path: "/" },
+                            { name: t("header.findTutors"), path: "/find-tutors" },
+                        ]}
+                    />
+                    <div className="mb-6">
+                        <h1 className="text-4xl font-bold text-gray-800 mt-2">
+                            {t("findTutors.pageTitle")}
+                        </h1>
+                        <p className="mt-2 text-gray-600 max-w-4xl">
+                            {t("findTutors.pageDescription")}
+                        </p>
+                    </div>
+
+                    <TutorSearchFilters onFilterChange={handleFilterChange} onSearch={handleSearch} />
+
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
+                        <div className="lg:col-span-3">
+                            {loading ? (
+                                <Loading />
+                            ) : error ? (
+                                <SearchNotFound
+                                    title={t("findTutors.connectionError")}
+                                    message={t("findTutors.connectionErrorMessage")}
+                                />
+                            ) : tutors.length > 0 ? (
+                                <>
+                                    <TutorList tutors={filteredTutors} onBookTrial={handleOpenBookingModal} />
+                                    {pagination && (
+                                        <Pagination
+                                            currentPage={pagination.number + 1}
+                                            totalPages={pagination.totalPages}
+                                            totalItems={pagination.totalElements}
+                                            itemsPerPage={pagination.size}
+                                            onPageChange={handlePageChange}
+                                        />
+                                    )}
+                                </>
+                            ) : (
+                                <SearchNotFound />
+                            )}
+                        </div>
+                        <div>
+                            <TipsSidebar />
+                        </div>
+                    </div>
                 </div>
 
-                <TutorSearchFilters onFilterChange={handleFilterChange} onSearch={handleSearch} />
-
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-8">
-                    <div className="lg:col-span-3">
-                        {loading ? (
-                            <Loading />
-                        ) : error ? (
-                            <SearchNotFound
-                                title={t("findTutors.connectionError")}
-                                message={t("findTutors.connectionErrorMessage")}
-                            />
-                        ) : tutors.length > 0 ? (
-                            <>
-                                <TutorList tutors={filteredTutors} onBookTrial={handleOpenBookingModal} />
-                                {pagination && (
-                                    <Pagination
-                                        currentPage={pagination.number + 1}
-                                        totalPages={pagination.totalPages}
-                                        totalItems={pagination.totalElements}
-                                        itemsPerPage={pagination.size}
-                                        onPageChange={handlePageChange}
-                                    />
-                                )}
-                            </>
-                        ) : (
-                            <SearchNotFound />
-                        )}
-                    </div>
-                    <div>
-                        <TipsSidebar />
-                    </div>
-                </div>
-            </div>
-
-            {selectedTutor && (
-                <BookingModal isOpen={isBookingModalOpen} onClose={handleCloseBookingModal} tutor={selectedTutor} />
-            )}
-        </Layout>
+                {selectedTutor && (
+                    <BookingModal isOpen={isBookingModalOpen} onClose={handleCloseBookingModal} tutor={selectedTutor} />
+                )}
+            </Layout>
+        </TutorRedirect>
     );
 };
 

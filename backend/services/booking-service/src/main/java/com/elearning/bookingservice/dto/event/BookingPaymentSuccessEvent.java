@@ -21,6 +21,8 @@ public class BookingPaymentSuccessEvent {
     // New fields for class creation
     private UUID tutorId;
     private UUID studentId;
+    private String tutorName;
+    private String locale;
     private String schedule;
     private Integer sessionsPurchased;
     private String notes;

@@ -31,8 +31,9 @@ public class ClassRoutesConfig {
                                 "/api/v1/classes/sessions/students/{studentId}",
                                 "/api/v1/classes/tutors/{tutorId}/opening",
                                 "/api/v1/classes/{classId}/students/{studentId}",
-                                "/api/v1/classes/sessions/me/**",
+                                "/api/v1/classes/sessions/me/**",       
                                 "/api/v1/classes/sessions/{sessionId}/reschedule",
+                                "/api/v1/classes/sessions/{sessionId}/join",
                                 "/api/v1/classes/reschedule-requests/**")
                         .filters(f -> f
                                 .rewritePath(
