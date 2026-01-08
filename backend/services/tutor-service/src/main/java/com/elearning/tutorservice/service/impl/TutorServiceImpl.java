@@ -206,4 +206,30 @@ public class TutorServiceImpl implements TutorService {
         // Return updated profile
         return getTutorById(tutorId);
     }
+
+    @Override
+    @Transactional
+    public void incrementTotalStudents(String tutorIdStr) {
+        try {
+            UUID tutorId = UUID.fromString(tutorIdStr);
+            Tutor tutor = tutorRepository.findById(tutorId)
+                    .orElseThrow(() -> new RuntimeException("Tutor not found with ID: " + tutorId));
+            
+            Integer currentCount = tutor.getTotalStudents();
+            if (currentCount == null) {
+                currentCount = 0;
+            }
+            tutor.setTotalStudents(currentCount + 1);
+            tutorRepository.save(tutor);
+            
+            log.info("Successfully incremented totalStudents for tutor {} from {} to {}", 
+                    tutorId, currentCount, currentCount + 1);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid tutor ID format: {}", tutorIdStr, e);
+            throw new RuntimeException("Invalid tutor ID format", e);
+        } catch (Exception e) {
+            log.error("Failed to increment totalStudents for tutor {}: {}", tutorIdStr, e.getMessage(), e);
+            throw new RuntimeException("Failed to increment totalStudents", e);
+        }
+    }
 }

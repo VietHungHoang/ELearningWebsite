@@ -16,7 +16,7 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 gemini:
-  api-key: AIzaSyDRUFCJA2ZtNYRjOniJdAnGhgUTOa1uHcI
+  api-key: AIzaSyButGa0cH34h1NkcPxiPmiGOmybuF8LJr8
   api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
 
 services:

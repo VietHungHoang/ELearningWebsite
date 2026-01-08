@@ -23,6 +23,7 @@ public class KafkaProducerService {
     private static final String TUTOR_HOURLY_RATE_REQUEST_TOPIC = "request_tutor_hourly_rate";
     private static final String CLASS_NOTIFICATION_TOPIC = "class_notification";
     private static final String CLASS_CREATED_BOOKING_TOPIC = "class_created_booking";
+    private static final String CLASS_CREATED_STUDENT_TOPIC = "class_created_student";
 
     public void sendMessage(String topic, String key, Object message) {
         try {
@@ -84,6 +85,21 @@ public class KafkaProducerService {
         } catch (JsonProcessingException e) {
             log.error("Error converting ClassCreatedEvent to JSON: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to serialize ClassCreatedEvent", e);
+        }
+    }
+
+    /**
+     * Send class created event to tutor-service (or student-service)
+     * Used to increment totalStudents count when a NEW class is created
+     */
+    public void sendClassCreatedForStudentEvent(Object event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(CLASS_CREATED_STUDENT_TOPIC, jsonMessage);
+            log.info("Sent class created for student event to topic {}: {}", CLASS_CREATED_STUDENT_TOPIC, jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting ClassCreatedForStudentEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize ClassCreatedForStudentEvent", e);
         }
     }
 }

@@ -26,6 +26,7 @@ public class TutorRoutesConfig {
                                                                 prefix + "{tutorId}/availabilities",
                                                                 prefix + "{tutorId}/onboarding/**",
                                                                 prefix + "me/dashboard/stats",
+                                                                prefix + "me/income",
                                                                 prefix + "me/earnings/**",
                                                                 "/api/v1/public/tutors/{tutorId}",
                                                                 "/api/v1/tutors/me/profile",
@@ -57,5 +58,6 @@ public class TutorRoutesConfig {
                                                 .uri(bffServiceUrl))
 
                                 .build();
+
         }
 }

@@ -508,7 +508,14 @@
         "messages": "Tin nhắn",
         "wishlist": "Yêu thích",
         "profileSettings": "Cài đặt hồ sơ",
-        "whiteboard": "Bảng vẽ"
+        "whiteboard": "Bảng vẽ",
+        "session": {
+          "tooEarlyToJoin": "Bạn chỉ có thể tham gia lớp học trước {{minutes}} phút. Vui lòng quay lại sau.",
+          "sessionEnded": "Buổi học này đã kết thúc.",
+          "joiningSuccess": "Đang tham gia buổi học...",
+          "errorJoiningSession": "Không thể tham gia buổi học. Vui lòng thử lại.",
+          "noMeetingUrl": "Link họp chưa có sẵn. Vui lòng liên hệ giáo viên."
+        }
       },
       "signOut": "Đăng xuất"
     },
@@ -900,7 +907,7 @@
       "totalStudents": "Tổng số học sinh",
       "teachingHours": "Tổng số giờ dạy học",
       "newReviews": "Đánh giá mới",
-      "upcomingSessions": "Lịch dạy sắp tới",
+      "upcomingSessions": "Lịch sắp tới",
       "sessionScheduled": "{{count}} tiết dạy vào {{period}}",
       "sessionScheduled_plural": "{{count}} tiết dạy vào {{period}}",
       "todayPeriod": "hôm nay",
@@ -1522,7 +1529,7 @@
         }
       },
       "scheduleTab": {
-        "upcomingSessions": "Lịch dạy sắp tới",
+        "upcomingSessions": "Lịch sắp tới",
         "noUpcomingSessions": "Không có lịch nào",
         "pastSessions": "Lịch sử",
         "noPastSessions": "Chưa có lịch sử nào",

@@ -132,6 +132,8 @@ const CheckoutPage: React.FC = () => {
         ...packageData, // Flatten package info fields
         studentId: state.user?.id, // Get from logged-in user
         tutorId: tutorData.id,
+        tutorName: tutorData.fullName, // Add tutor name for class title
+        locale: t('locale'), // Add locale (vi or en) for class title localization
         schedule: scheduleForApi,
         // Flatten payment information
         amount: total,

@@ -21,6 +21,8 @@ public class CreateBookingRequest {
     private Integer sessions;
     private Integer discount;
     private UUID tutorId;
+    private String tutorName; // For class title generation
+    private String locale; // For class title localization (vi/en)
     private List<ScheduleItem> schedule;
     private Long amount;
     private String paymentProvider;

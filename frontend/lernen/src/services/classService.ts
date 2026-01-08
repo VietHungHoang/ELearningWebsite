@@ -890,6 +890,16 @@ export const classService = {
         }
     },
 
+    // Start session for student (marks attendance)
+    startSession: async (sessionId: string, studentId: string): Promise<ApiResponse<{ status: string; message: string }>> => {
+        try {
+            return await apiService.post<{ status: string; message: string }>(`/v1/classes/sessions/${sessionId}/join`, { studentId });
+        } catch (error) {
+            console.error('Error starting session:', error);
+            throw error;
+        }
+    },
+
     // Check conflicts for selected time slots
     // Returns both tutor busy slots (to hide) and student busy slots (to show with warning)
     checkSlotConflicts: async (tutorId: string, startDate: string, endDate: string): Promise<ApiResponse<SlotConflictResponse>> => {

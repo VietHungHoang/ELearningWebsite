@@ -20,6 +20,9 @@ public class Booking extends BaseEntity {
     @Column(name = "tutor_id", nullable = false)
     private UUID tutorId;
 
+    @Column(name = "tutor_name")
+    private String tutorName; // For class title generation
+
     @Column(name = "class_id", nullable = true)
     private UUID classId;
 

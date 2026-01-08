@@ -24,6 +24,14 @@ export interface ChartsData {
     students: Array<{ month: string; students: number }>; // month format: "YYYY-MM"
 }
 
+export interface MonthlyIncomeResponse {
+    incomes: Array<{ month: string; income: number }>;
+}
+
+export interface MonthlyStudentsResponse {
+    students: Array<{ month: string; students: number }>;
+}
+
 export const tutorService = {
     getFilterData: async (): Promise<ApiResponse<FilterData>> => {
         return await apiService.get<FilterData>("/v1/public/common/tutor-filter");
@@ -275,9 +283,19 @@ export const tutorService = {
         }
     },
 
-    // Get charts data for tutor dashboard
-    getTutorChartsData: async (): Promise<ApiResponse<ChartsData>> => {
-        return await apiService.get<ChartsData>(`/v1/tutors/me/dashboard/charts`);
+    // Get charts data for tutor dashboard (DEPRECATED - use separate endpoints)
+    // getTutorChartsData: async (): Promise<ApiResponse<ChartsData>> => {
+    //     return await apiService.get<ChartsData>(`/v1/tutors/me/dashboard/charts`);
+    // },
+
+    // Get monthly income statistics for tutor
+    getMonthlyIncomeStats: async (): Promise<ApiResponse<MonthlyIncomeResponse>> => {
+        return await apiService.get<MonthlyIncomeResponse>(`/v1/tutors/me/income`);
+    },
+
+    // Get monthly student statistics for tutor
+    getMonthlyStudentStats: async (): Promise<ApiResponse<MonthlyStudentsResponse>> => {
+        return await apiService.get<MonthlyStudentsResponse>(`/v1/classes/statistics/me/students`);
     },
 
     /**
