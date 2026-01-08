@@ -15,6 +15,13 @@ export const uploadService = {
         return response.data;
     },
 
+    getPreSignedImageUrl: async (contentType: string): Promise<PreSignedUrlResponse> => {
+        const response = await apiService.post<PreSignedUrlResponse>('/v1/file/images/presigned-url', {
+            contentType,
+        });
+        return response.data;
+    },
+
     getPreSignedVideoUrl: async (contentType: string): Promise<PreSignedUrlResponse> => {
         const response = await apiService.post<PreSignedUrlResponse>('/v1/file/videos/presigned-url', {
             contentType,
