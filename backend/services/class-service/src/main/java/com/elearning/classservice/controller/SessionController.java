@@ -108,13 +108,13 @@ public class SessionController {
      * Student joins a session - marks attendance and returns meeting URL
      */
     @PostMapping("/{sessionId}/start")
-    public ResponseEntity<ApiResponse<Void>> startSession(
+    public ResponseEntity<ApiResponse<JoinSessionResponse>> startSession(
             @PathVariable UUID sessionId,
             @RequestHeader("X-User-Id") UUID tutorId) {
 
         log.info("Tutor {} starting session {}", tutorId, sessionId);
-        sessionService.startSessionByTutor(sessionId, tutorId);
-        return ResponseEntity.ok(ApiResponse.success(null, "Session started successfully"));
+        JoinSessionResponse response = sessionService.startSessionByTutor(sessionId, tutorId);
+        return ResponseEntity.ok(ApiResponse.success(response, "Session started successfully"));
     }
 
     @PostMapping("/{sessionId}/join")

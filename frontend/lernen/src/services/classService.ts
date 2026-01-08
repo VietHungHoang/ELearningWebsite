@@ -12,6 +12,7 @@ import type {
     PayoutFilters,
     RecentEarningsFilters,
     RescheduleRequest,
+    JoinSessionResponse,
 } from "../types/api";
 import type { ClassTable, GetBookedSessionsRequest, GetBookedSessionsResponse, Session, ClassSchedule } from "../types/class";
 import type { GroupClass, GroupClassApiResponse } from "../types/tutor";
@@ -890,20 +891,31 @@ export const classService = {
         }
     },
 
-    // Start session for student (marks attendance)
-    startSession: async (sessionId: string, studentId: string): Promise<ApiResponse<{ status: string; message: string }>> => {
+    // Start session for student (marks attendance and returns session details with Zoom link)
+    startSession: async (sessionId: string, studentId: string): Promise<ApiResponse<JoinSessionResponse>> => {
         try {
-            return await apiService.post<{ status: string; message: string }>(`/v1/classes/sessions/${sessionId}/join`, { studentId });
+            return await apiService.post<JoinSessionResponse>(`/v1/classes/sessions/${sessionId}/join`, { studentId });
         } catch (error) {
             console.error('Error starting session:', error);
             throw error;
         }
     },
 
-    // Start session for tutor (marks session as started/BOOKED)
-    startSessionByTutor: async (sessionId: string): Promise<ApiResponse<void>> => {
+    // Alias for student joining session (same as startSession)
+    joinSession: async (sessionId: string, request: { studentId: string }): Promise<ApiResponse<JoinSessionResponse>> => {
         try {
-            return await apiService.post<void>(`/v1/classes/sessions/${sessionId}/start`, {});
+            return await apiService.post<JoinSessionResponse>(`/v1/classes/sessions/${sessionId}/join`, request);
+        } catch (error) {
+            console.error('Error joining session:', error);
+            throw error;
+        }
+    },
+
+    // Start session for tutor (marks session as started/BOOKED)
+    // Returns session details including Zoom link
+    startSessionByTutor: async (sessionId: string): Promise<ApiResponse<JoinSessionResponse>> => {
+        try {
+            return await apiService.post<JoinSessionResponse>(`/v1/classes/sessions/${sessionId}/start`, {});
         } catch (error) {
             console.error('Error starting session by tutor:', error);
             throw error;

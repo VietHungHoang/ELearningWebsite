@@ -460,18 +460,44 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
     };
 
     const handleStartSession = async (session: Session) => {
-        if (!session.meetingLink) {
-            console.warn("No meeting URL available for session:", session.id);
-            return;
-        }
-        
         try {
-            // Call API to start session (updates status to BOOKED)
-            await classService.startSessionByTutor(session.id);
-            console.log("Session started via API:", session.id);
+            let zoomUrl = session.meetingLink;
+
+            // Check cache first - if already started, open directly
+            const { default: sessionCacheService } = await import('../../../../../../services/sessionCacheService');
+            const cachedUrl = sessionCacheService.getCachedZoomUrl(session.id);
+            
+            if (cachedUrl) {
+                console.log("Using cached Zoom URL for session:", session.id);
+                zoomUrl = cachedUrl;
+            } else {
+                // Call API to start session (creates Zoom link if missing, updates status to BOOKED)
+                const response = await classService.startSessionByTutor(session.id);
+                console.log("Session started via API:", session.id, response);
+
+                if (response.success && response.data) {
+                    // Cache the session state
+                    sessionCacheService.saveSessionState(
+                        session.id,
+                        response.data.status,
+                        response.data.zoomJoinUrl,
+                        response.data.meetingLink,
+                        response.data.attendanceStatus,
+                        response.data.zoomPassword
+                    );
+
+                    // Use the Zoom URL from API response
+                    zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+                }
+            }
+
+            if (!zoomUrl) {
+                console.warn("No meeting URL available for session:", session.id);
+                return;
+            }
             
             // Convert to web link and open in new tab
-            const webLink = convertToWebLink(session.meetingLink);
+            const webLink = convertToWebLink(zoomUrl);
             window.open(webLink, '_blank', 'noopener,noreferrer');
         } catch (error) {
             console.error("Error starting session:", error);

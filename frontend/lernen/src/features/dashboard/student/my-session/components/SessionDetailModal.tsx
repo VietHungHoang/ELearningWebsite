@@ -25,7 +25,7 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
     const [mounted, setMounted] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
 
-    // Handle join session - validate 15min window, call API, then open Zoom
+    // Handle join session - check cache first, validate window, call API if needed, then open Zoom
     const handleJoinSession = async () => {
         try {
             // 1. Validate 15-minute window before session start
@@ -57,26 +57,50 @@ const SessionDetailModal: React.FC<SessionDetailModalProps> = ({ booking, positi
 
             setIsStarting(true);
 
-            // 2. Call backend API to mark attendance and get meeting URL
-            const studentId = state.user?.id;
-            if (!studentId) {
-                throw new Error('Student ID not found');
-            }
+            let zoomUrl = booking.meetingUrl || booking.meetingLink;
 
-            const response = await classService.startSession(booking.id, studentId);
+            // 2. Check cache first - if already joined (PRESENT), open directly without API call
+            const { default: sessionCacheService } = await import('../../../../../services/sessionCacheService');
+            const cachedUrl = sessionCacheService.getCachedZoomUrl(booking.id);
             
-            if (!response.success) {
-                throw new Error(response.message || 'Failed to join session');
+            if (cachedUrl) {
+                console.log("Using cached Zoom URL for session:", booking.id);
+                zoomUrl = cachedUrl;
+            } else {
+                // 3. Call backend API to mark attendance and get meeting URL
+                const studentId = state.user?.id;
+                if (!studentId) {
+                    throw new Error('Student ID not found');
+                }
+
+                const response = await classService.joinSession(booking.id, { studentId });
+                
+                if (!response.success) {
+                    throw new Error(response.message || 'Failed to join session');
+                }
+
+                if (response.data) {
+                    // Cache the session state
+                    sessionCacheService.saveSessionState(
+                        booking.id,
+                        response.data.status,
+                        response.data.zoomJoinUrl,
+                        response.data.meetingLink,
+                        response.data.attendanceStatus,
+                        response.data.zoomPassword
+                    );
+
+                    // Use the Zoom URL from API response
+                    zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+                }
             }
 
-            // 3. Use meeting URL from booking object
-            const meetingUrl = booking.meetingUrl || booking.meetingLink;
-            if (!meetingUrl) {
+            if (!zoomUrl) {
                 throw new Error('Meeting link is not available');
             }
 
-            // Convert standard URL to Web Client URL and open in new tab
-            let openUrl = meetingUrl;
+            // 4. Convert standard URL to Web Client URL and open in new tab
+            let openUrl = zoomUrl;
 
             // Regex to match /j/{meetingId}
             const match = openUrl.match(/\/j\/(\d+)/);

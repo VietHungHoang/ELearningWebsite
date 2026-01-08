@@ -18,8 +18,9 @@ public interface SessionService {
 
     /**
      * Start a session for tutor (mark as BOOKED/ONGOING)
+     * Returns session details including Zoom link
      */
-    void startSessionByTutor(UUID sessionId, UUID tutorId);
+    JoinSessionResponse startSessionByTutor(UUID sessionId, UUID tutorId);
 
     JoinSessionResponse joinSession(UUID sessionId, UUID studentId);
 

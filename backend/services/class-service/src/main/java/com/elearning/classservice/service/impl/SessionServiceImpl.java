@@ -42,7 +42,7 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     @Transactional
-    public void startSessionByTutor(UUID sessionId, UUID tutorId) {
+    public JoinSessionResponse startSessionByTutor(UUID sessionId, UUID tutorId) {
         log.info("Tutor {} starting session {}", tutorId, sessionId);
 
         // Find session
@@ -80,6 +80,17 @@ public class SessionServiceImpl implements SessionService {
         sessionRepository.save(session);
 
         log.info("Session {} status updated to BOOKED by tutor {}", sessionId, tutorId);
+
+        // Return session details
+        return JoinSessionResponse.builder()
+                .sessionId(sessionId.toString())
+                .status("BOOKED")
+                .message("Session started successfully")
+                .zoomJoinUrl(session.getZoomJoinUrl())
+                .zoomPassword(session.getZoomPassword())
+                .meetingLink(session.getMeetingLink())
+                .attendanceStatus("PRESENT")
+                .build();
     }
 
     @Override
@@ -370,10 +381,15 @@ public class SessionServiceImpl implements SessionService {
         participantRepository.save(participant);
         log.info("Marked attendance for student {} in session {}", studentId, sessionId);
 
-        // 3. Return success
+        // 4. Return session details with Zoom link
         return JoinSessionResponse.builder()
+                .sessionId(sessionId.toString())
                 .status("PRESENT")
                 .message("Successfully marked attendance")
+                .zoomJoinUrl(session.getZoomJoinUrl())
+                .zoomPassword(session.getZoomPassword())
+                .meetingLink(session.getMeetingLink())
+                .attendanceStatus(participant.getAttendanceStatus().name())
                 .build();
     }
 }

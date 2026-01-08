@@ -19,21 +19,47 @@ const TutorSessionDetailModal: React.FC<TutorSessionDetailModalProps> = ({ sessi
     // Handle start session - call API then convert Zoom URL to Web Client URL and open in new tab
     const handleStartSession = async () => {
         try {
-            if (!session?.meetingUrl) {
-                console.error("No meeting URL found for session:", session?.id);
+            setIsStarting(true);
+
+            let zoomUrl = session.meetingUrl;
+
+            // Check cache first - if already started, open directly
+            const { default: sessionCacheService } = await import('../../../../services/sessionCacheService');
+            const cachedUrl = sessionCacheService.getCachedZoomUrl(session.id);
+            
+            if (cachedUrl) {
+                console.log("Using cached Zoom URL for session:", session.id);
+                zoomUrl = cachedUrl;
+            } else {
+                // Call API to start session (creates Zoom link if missing, updates status to BOOKED)
+                const { classService } = await import('../../../../services/classService');
+                const response = await classService.startSessionByTutor(session.id);
+                console.log("Session started via API:", session.id, response);
+
+                if (response.success && response.data) {
+                    // Cache the session state
+                    sessionCacheService.saveSessionState(
+                        session.id,
+                        response.data.status,
+                        response.data.zoomJoinUrl,
+                        response.data.meetingLink,
+                        response.data.attendanceStatus,
+                        response.data.zoomPassword
+                    );
+
+                    // Use the Zoom URL from API response
+                    zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+                }
+            }
+
+            if (!zoomUrl) {
+                console.error("No meeting URL available for session:", session.id);
                 return;
             }
 
-            setIsStarting(true);
-
-            // Call API to start session (updates status to BOOKED)
-            const { classService } = await import('../../../../services/classService');
-            await classService.startSessionByTutor(session.id);
-            console.log("Session started via API:", session.id);
-
             // Convert standard URL to Web Client URL to allow joining via browser
             // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
-            let openUrl = session.meetingUrl;
+            let openUrl = zoomUrl;
 
             // Regex to match /j/{meetingId}
             const match = openUrl.match(/\/j\/(\d+)/);

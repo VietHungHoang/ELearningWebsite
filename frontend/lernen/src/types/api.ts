@@ -90,6 +90,16 @@ export interface Student {
 export type StudentEnrollmentType = '1-on-1' | 'Group' | 'Trial';
 export type StudentStatus = 'Ongoing' | 'Completed';
 
+export interface JoinSessionResponse {
+    sessionId: string;
+    status: string; // PRESENT for student, BOOKED for tutor
+    message: string;
+    zoomJoinUrl: string;
+    zoomPassword?: string;
+    meetingLink: string;
+    attendanceStatus: string; // PRESENT, ABSENT, etc.
+}
+
 export interface StudentListItem extends Student {
     email: string;
     enrollmentTypes: StudentEnrollmentType[];

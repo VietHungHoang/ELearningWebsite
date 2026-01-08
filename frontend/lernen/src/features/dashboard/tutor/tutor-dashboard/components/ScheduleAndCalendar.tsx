@@ -120,20 +120,58 @@ const ScheduleAndCalendar: React.FC = () => {
     const handleStartSession = async (sessionId: string) => {
         try {
             const session = sessionsData.find(s => s.id === sessionId);
-            if (!session?.meetingUrl) {
-                console.error("No meeting URL found for session:", sessionId);
+            if (!session) {
+                console.error("Session not found:", sessionId);
                 return;
             }
 
             setSessionStarting(true);
 
-            // Call API to start session (updates status to BOOKED)
-            await classService.startSessionByTutor(sessionId);
-            console.log("Session started via API:", sessionId);
+            let zoomUrl = session.meetingUrl;
+
+            // Check cache first - if already started (has Zoom link), open directly
+            const { default: sessionCacheService } = await import('../../../../../services/sessionCacheService');
+            const cachedUrl = sessionCacheService.getCachedZoomUrl(sessionId);
+            
+            if (cachedUrl) {
+                console.log("Using cached Zoom URL for session:", sessionId);
+                zoomUrl = cachedUrl;
+            } else {
+                // Call API to start session (creates Zoom link if missing, updates status to BOOKED)
+                const response = await classService.startSessionByTutor(sessionId);
+                console.log("Session started via API:", sessionId, response);
+
+                if (response.success && response.data) {
+                    // Cache the session state
+                    sessionCacheService.saveSessionState(
+                        sessionId,
+                        response.data.status,
+                        response.data.zoomJoinUrl,
+                        response.data.meetingLink,
+                        response.data.attendanceStatus,
+                        response.data.zoomPassword
+                    );
+
+                    // Use the Zoom URL from API response
+                    zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+
+                    // Update the session in the local state
+                    setSessionsData(prev => prev.map(s => 
+                        s.id === sessionId 
+                            ? { ...s, meetingUrl: zoomUrl, meetingLink: zoomUrl }
+                            : s
+                    ));
+                }
+            }
+
+            if (!zoomUrl) {
+                console.error("No meeting URL available for session:", sessionId);
+                return;
+            }
 
             // Convert standard URL to Web Client URL to allow joining via browser
             // Format: https://zoom.us/wc/{meetingId}/join?pwd={password}
-            let openUrl = session.meetingUrl;
+            let openUrl = zoomUrl;
 
             // Regex to match /j/{meetingId}
             const match = openUrl.match(/\/j\/(\d+)/);
