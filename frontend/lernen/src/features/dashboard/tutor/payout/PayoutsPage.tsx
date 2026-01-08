@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { HiCurrencyDollar, HiCheckCircle, HiCreditCard, HiOfficeBuilding, HiPlus, HiDownload, HiCalendar, HiEye } from 'react-icons/hi';
+import { HiCurrencyDollar, HiCheckCircle, HiCreditCard, HiOfficeBuilding, HiPlus, HiDownload, HiCalendar } from 'react-icons/hi';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import Toast from '../../../../components/ui/Toast';
@@ -35,6 +35,12 @@ const PayoutsPage = () => {
     }));
     const [payoutMethods, setPayoutMethods] = useState<PayoutMethod[]>([]);
     const [history, setHistory] = useState<PayoutHistoryItem[]>([]);
+    const [historyPagination, setHistoryPagination] = useState({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: 5
+    });
     const [recentEarnings, setRecentEarnings] = useState<RecentEarning[]>([]);
     const [earningsPagination, setEarningsPagination] = useState({
         currentPage: 1,
@@ -65,6 +71,8 @@ const PayoutsPage = () => {
     const [selectedTransaction, setSelectedTransaction] = useState<PayoutHistoryItem | null>(null);
     const [isTransactionDetailOpen, setIsTransactionDetailOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'earnings' | 'history'>('earnings');
+    const [appliedStartDate, setAppliedStartDate] = useState<Date | null>(null);
+    const [appliedEndDate, setAppliedEndDate] = useState<Date | null>(null);
 
     // Refs for tab buttons and underline animation
     const earningsTabRef = useRef<HTMLButtonElement>(null);
@@ -76,7 +84,7 @@ const PayoutsPage = () => {
 
     // Helper function to translate session type
     const translateSessionType = (type: string): string => {
-        if (type === '1-on-1') {
+        if (type === '1-on-1' || type === 'one-on-one') {
             return t('payouts.oneOnOne');
         } else if (type === 'Group') {
             return t('payouts.group');
@@ -138,9 +146,18 @@ const PayoutsPage = () => {
                 const statsResponse = await classService.getPayoutStats();
                 console.log('Stats response:', statsResponse);
                 if (statsResponse.success) {
-                    setStats(statsResponse.data);
-                    if (statsResponse.data.currentPaymentMethod) {
-                        setSelectedMethodId(statsResponse.data.currentPaymentMethod.id);
+                    // Add mock Momo data if no payment method is returned
+                    const statsData = { ...statsResponse.data };
+                    if (!statsData.currentPaymentMethod) {
+                        statsData.currentPaymentMethod = {
+                            id: 'mock-momo-id',
+                            type: 'Momo',
+                            identifier: '0982316213'
+                        };
+                    }
+                    setStats(statsData);
+                    if (statsData.currentPaymentMethod) {
+                        setSelectedMethodId(statsData.currentPaymentMethod.id);
                     }
                 }
             } catch (err) {
@@ -158,11 +175,19 @@ const PayoutsPage = () => {
             if (!state.user?.id || activeTab !== 'earnings') return;
 
             try {
-                const earningsResponse = await classService.getRecentEarnings({
+                const filters: any = {
                     page: earningsCurrentPage,
                     size: earningsItemsPerPage,
                     type: earningsFilter !== 'All' ? earningsFilter : undefined
-                });
+                };
+
+                // Add date range if applied
+                if (appliedStartDate && appliedEndDate) {
+                    filters.startDate = appliedStartDate.toISOString().split('T')[0];
+                    filters.endDate = appliedEndDate.toISOString().split('T')[0];
+                }
+
+                const earningsResponse = await classService.getRecentEarnings(filters);
                 console.log('Earnings response:', earningsResponse);
                 if (earningsResponse.success) {
                     setRecentEarnings(earningsResponse.data.content);
@@ -190,19 +215,34 @@ const PayoutsPage = () => {
         };
 
         fetchRecentEarnings();
-    }, [state.user?.id, activeTab, earningsCurrentPage, earningsFilter]);
+    }, [state.user?.id, activeTab, earningsCurrentPage, earningsFilter, appliedStartDate, appliedEndDate]);
 
     useEffect(() => {
         const fetchTransactionHistory = async () => {
             if (!state.user?.id || activeTab !== 'history') return;
 
             try {
-                const historyResponse = await classService.getPayoutHistory({
+                const filters: any = {
                     page: currentPage,
-                    limit: itemsPerPage
-                });
+                    limit: itemsPerPage,
+                    status: statusFilter !== 'All' ? statusFilter : undefined
+                };
+
+                // Add date range if applied
+                if (appliedStartDate && appliedEndDate) {
+                    filters.startDate = appliedStartDate.toISOString().split('T')[0];
+                    filters.endDate = appliedEndDate.toISOString().split('T')[0];
+                }
+
+                const historyResponse = await classService.getPayoutHistory(filters);
                 if (historyResponse.success) {
                     setHistory(historyResponse.data.content);
+                    setHistoryPagination({
+                        currentPage: historyResponse.data.pageable.pageNumber + 1,
+                        totalPages: historyResponse.data.totalPages,
+                        totalItems: historyResponse.data.totalElements,
+                        itemsPerPage: historyResponse.data.size
+                    });
                 }
 
             } catch (err) {
@@ -213,7 +253,7 @@ const PayoutsPage = () => {
         };
 
         fetchTransactionHistory();
-    }, [state.user?.id, activeTab, currentPage]);
+    }, [state.user?.id, activeTab, currentPage, statusFilter, appliedStartDate, appliedEndDate]);
 
     // Fetch payout methods CHỈ khi user click "View All Methods"
     useEffect(() => {
@@ -243,20 +283,9 @@ const PayoutsPage = () => {
     }, [state.user?.id, isPaymentMethodsModalOpen, payoutMethods.length, selectedMethodId]);
 
     // Filter and Pagination Logic
-    // For Transaction History, we use the full mock data for pagination calculation
-    // since API returns paginated results but we need to show all filtered results
-    const allHistoryData = history.filter(item => {
-        const matchesStatus = statusFilter === 'All' ? true : item.status === statusFilter;
-        const itemDate = new Date(item.date);
-        const matchesDateRange = itemDate >= startDate && itemDate <= endDate;
-        return matchesStatus && matchesDateRange;
-    });
-
-    const totalPages = Math.ceil(allHistoryData.length / itemsPerPage);
-    const currentHistory = allHistoryData.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    // For Transaction History, API handles all filtering (status and date range) and pagination
+    // We use the data directly from API response
+    const currentHistory = history;
 
     // Recent earnings are now handled by API with server-side filtering and pagination
 
@@ -285,6 +314,22 @@ const PayoutsPage = () => {
     const handleViewDetails = (transaction: PayoutHistoryItem) => {
         setSelectedTransaction(transaction);
         setIsTransactionDetailOpen(true);
+    };
+
+    const handleApplyDateFilter = () => {
+        // Apply the selected date range
+        setAppliedStartDate(startDate);
+        setAppliedEndDate(endDate);
+        setIsDateRangePickerOpen(false);
+        
+        // Reset to first page when applying filter
+        if (activeTab === 'earnings') {
+            setEarningsCurrentPage(1);
+        } else {
+            setCurrentPage(1);
+        }
+
+        setToast({ message: t('payouts.dateFilterApplied') || 'Date filter applied', type: 'success' });
     };
 
     return (
@@ -352,10 +397,10 @@ const PayoutsPage = () => {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
                                         <h3 className="text-xl font-bold text-gray-800">
-                                            {stats.currentPaymentMethod?.type || 'None'}
+                                            {stats.currentPaymentMethod?.type || t('payouts.noPaymentMethod')}
                                         </h3>
                                         <p className="text-sm font-medium text-gray-500 mt-1">
-                                            {stats.currentPaymentMethod?.identifier || t('payouts.noPaymentMethod')}
+                                            {stats.currentPaymentMethod?.identifier || t('payouts.currentPaymentMethod')}
                                         </p>
                                     </div>
                                     <div className="bg-blue-100 p-3 rounded-lg">
@@ -371,7 +416,7 @@ const PayoutsPage = () => {
                                 <h3 className="text-lg font-bold text-gray-800 mb-4 md:mb-0">{t('payouts.transactionHistory')}</h3>
                                 <div className="flex flex-wrap items-center gap-3">
                                     {/* Date Range Picker */}
-                                    <div className="relative">
+                                    <div className="relative flex items-center gap-2">
                                         <button
                                             onClick={() => setIsDateRangePickerOpen(true)}
                                             className="bg-white rounded-lg border border-gray-200 shadow-sm px-3 py-2 h-[40px] text-sm font-medium text-gray-800 hover:bg-gray-50 focus:outline-none flex items-center gap-2"
@@ -390,6 +435,12 @@ const PayoutsPage = () => {
                                             isOpen={isDateRangePickerOpen}
                                             onClose={() => setIsDateRangePickerOpen(false)}
                                         />
+                                        <button
+                                            onClick={handleApplyDateFilter}
+                                            className="bg-[#0b6459] text-white rounded-lg px-4 py-2 h-[40px] text-sm font-medium hover:bg-[#084c43] focus:outline-none transition-colors"
+                                        >
+                                            OK
+                                        </button>
                                     </div>
 
                                     {/* Status Filter */}
@@ -500,21 +551,19 @@ const PayoutsPage = () => {
                                                 <tr>
                                                     {activeTab === 'earnings' ? (
                                                         <>
-                                                            <th className="p-4 text-center">ID</th>
-                                                            <th className="p-4 text-center">Course/Service</th>
-                                                            <th className="p-4 text-center">Type</th>
-                                                            <th className="p-4 text-center">Date</th>
-                                                            <th className="p-4 text-center">Amount</th>
-                                                            <th className="p-4 text-center">Actions</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.id')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.courseService')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.type')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.date')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.amount')}</th>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <th className="p-4 text-center">Transaction ID</th>
-                                                            <th className="p-4 text-center">Date</th>
-                                                            <th className="p-4 text-center">Amount</th>
-                                                            <th className="p-4 text-center">Method</th>
-                                                            <th className="p-4 text-center">Status</th>
-                                                            <th className="p-4 text-center">Actions</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.transactionId')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.date')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.amount')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.method')}</th>
+                                                            <th className="p-4 text-center">{t('payouts.tableHeaders.status')}</th>
                                                         </>
                                                     )}
                                                 </tr>
@@ -537,15 +586,9 @@ const PayoutsPage = () => {
                                                                 <p className="text-sm text-gray-600">{item.date}</p>
                                                             </td>
                                                             <td className="p-4 text-center">
-                                                                <p className="text-sm font-semibold text-gray-800">+${item.amount.toFixed(2)}</p>
-                                                            </td>
-                                                            <td className="p-4 text-center">
-                                                                <button
-                                                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-[#0b6459] transition-colors"
-                                                                    title="View Details"
-                                                                >
-                                                                    <HiEye className="w-5 h-5" />
-                                                                </button>
+                                                                <p className="text-sm font-semibold text-gray-800">
+                                                                    +{formatCurrency(convertCurrency(item.amount, 'VND', selectedCurrency), selectedCurrency)}
+                                                                </p>
                                                             </td>
                                                         </tr>
                                                     ))
@@ -560,7 +603,9 @@ const PayoutsPage = () => {
                                                                 <p className="text-sm text-gray-600">{item.date}</p>
                                                             </td>
                                                             <td className="p-4 text-center">
-                                                                <p className="text-sm font-semibold text-gray-800">${item.amount.toFixed(2)}</p>
+                                                                <p className="text-sm font-semibold text-gray-800">
+                                                                    {formatCurrency(convertCurrency(item.amount, 'VND', selectedCurrency), selectedCurrency)}
+                                                                </p>
                                                             </td>
                                                             <td className="p-4 text-center">
                                                                 <div className="flex items-center justify-center gap-2">
@@ -573,15 +618,6 @@ const PayoutsPage = () => {
                                                             <td className="p-4 text-center">
                                                                 <PayoutStatusBadge status={item.status} />
                                                             </td>
-                                                            <td className="p-4 text-center">
-                                                                <button
-                                                                    onClick={() => handleViewDetails(item)}
-                                                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-[#0b6459] transition-colors"
-                                                                    title="View Details"
-                                                                >
-                                                                    <HiEye className="w-5 h-5" />
-                                                                </button>
-                                                            </td>
                                                         </tr>
                                                     ))
                                                 )}
@@ -590,13 +626,13 @@ const PayoutsPage = () => {
                                     </div>
 
                                     {/* Pagination - show for both tabs when needed */}
-                                    {activeTab === 'history' && totalPages > 1 && (
+                                    {activeTab === 'history' && historyPagination.totalPages > 1 && (
                                         <div className="mt-6">
                                             <Pagination
-                                                currentPage={currentPage}
-                                                totalPages={totalPages}
-                                                totalItems={allHistoryData.length}
-                                                itemsPerPage={itemsPerPage}
+                                                currentPage={historyPagination.currentPage}
+                                                totalPages={historyPagination.totalPages}
+                                                totalItems={historyPagination.totalItems}
+                                                itemsPerPage={historyPagination.itemsPerPage}
                                                 onPageChange={setCurrentPage}
                                             />
                                         </div>

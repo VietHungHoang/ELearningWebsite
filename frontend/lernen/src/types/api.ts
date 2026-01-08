@@ -286,12 +286,29 @@ export interface PayoutFilters {
     status?: PayoutStatus;
     page?: number;
     limit?: number;
+    startDate?: string; // ISO date string (YYYY-MM-DD)
+    endDate?: string; // ISO date string (YYYY-MM-DD)
 }
 
+// API response from backend
+export interface TutorEarningsApiResponse {
+    id: string;
+    sessionId: string;
+    amount: number;
+    status: string;
+    paidAt: string | null;
+    paymentId: string | null;
+    notes: string;
+    className?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// Frontend display format
 export interface RecentEarning {
     id: string;
     course: string;
-    type: 'one-on-one' | 'Group';
+    type: '1-on-1' | 'one-on-one' | 'Group';
     date: string;
     amount: number;
 }
@@ -301,6 +318,8 @@ export interface RecentEarningsFilters {
     page?: number;
     size?: number;
     limit?: number;
+    startDate?: string; // ISO date string (YYYY-MM-DD)
+    endDate?: string; // ISO date string (YYYY-MM-DD)
 }
 
 export interface UpdateTutorProfileRequest {
