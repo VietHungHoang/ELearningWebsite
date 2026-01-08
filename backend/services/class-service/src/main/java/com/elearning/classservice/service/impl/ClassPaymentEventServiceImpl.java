@@ -68,7 +68,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Creating new class for booking: {}", event.getBookingId());
 
         // Generate localized title: "Lớp {tutorName}" (vi) or "Class {tutorName}" (en)
-        String titlePrefix = "vi".equalsIgnoreCase(event.getLocale()) ? "Lớp" : "Class";
+        String titlePrefix = "Lớp";
         String tutorName = event.getTutorName() != null ? event.getTutorName() : "";
         String classTitle = titlePrefix + " " + tutorName;
 
