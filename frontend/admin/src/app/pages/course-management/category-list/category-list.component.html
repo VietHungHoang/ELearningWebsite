@@ -325,9 +325,6 @@
                                                 [class]="subject.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'">
                                                 {{ subject.isActive ? ('categorySubjectManagement.categoryList.status.active' | translate) : ('categorySubjectManagement.categoryList.status.inactive' | translate) }}
                                             </span>
-                                            <span class="inline-block px-[8px] py-[2px] rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300">
-                                                {{ getTutorCountForSubject(subject.id) }} tutors
-                                            </span>
                                         </div>
                                     </div>
                                 }
