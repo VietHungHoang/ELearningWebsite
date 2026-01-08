@@ -7,12 +7,14 @@
 
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker - use local worker file
-// @ts-ignore - pdfjs-dist worker import
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
+// Configure PDF.js worker - use static worker file from public folder
+// This fixes the "Failed to fetch dynamically imported module" error in production
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+  // Use static path from public folder instead of dynamic import
+  // This ensures the worker file is always available at a predictable URL
+  // Support base path for deployments in subdirectories
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `${baseUrl}pdf.worker.min.mjs`;
 }
 
 export interface PdfParseResult {
