@@ -9,6 +9,7 @@ import { MdAccessTime, MdDateRange } from "react-icons/md";
 import type { Session } from "../../../../../../types/class";
 import LoadingOverlay from "../../LoadingOverlay";
 import { useAuth } from "../../../../../../context/AuthContext";
+import { classService } from "../../../../../../services/classService";
 
 interface ScheduleTabProps {
     upcomingSessions: Session[];
@@ -74,9 +75,7 @@ const SessionCard: React.FC<SessionCardProps> = ({
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => onStartSession(session)}
-                        className="bg-[#0b6459] text-white px-3 py-2 rounded-lg font-semibold text-sm hover:bg-[#094d44] transition-colors duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!session.meetingLink}
-                        title={!session.meetingLink ? t("dashboard.tutor.scheduleTab.noMeetingLink") : undefined}
+                        className="bg-[#0b6459] text-white px-3 py-2 rounded-lg font-semibold text-sm hover:bg-[#094d44] transition-colors duration-200 flex items-center gap-2"
                     >
                         <HiVideoCamera className="w-4 h-4" />
                         {t("dashboard.tutor.startSession")}
@@ -463,7 +462,7 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
         try {
             let zoomUrl = session.meetingLink;
 
-            // Check cache first - if already started, open directly
+            // Check cache first - if already started/joined, open directly
             const { default: sessionCacheService } = await import('../../../../../../services/sessionCacheService');
             const cachedUrl = sessionCacheService.getCachedZoomUrl(session.id);
             
@@ -471,23 +470,51 @@ const ScheduleTab: React.FC<ScheduleTabProps> = ({
                 console.log("Using cached Zoom URL for session:", session.id);
                 zoomUrl = cachedUrl;
             } else {
-                // Call API to start session (creates Zoom link if missing, updates status to BOOKED)
-                const response = await classService.startSessionByTutor(session.id);
-                console.log("Session started via API:", session.id, response);
+                // Call appropriate API based on user role
+                if (isStudent) {
+                    // Student: call joinSession API
+                    const studentId = state.user?.id;
+                    if (!studentId) {
+                        console.error("Student ID not found");
+                        return;
+                    }
 
-                if (response.success && response.data) {
-                    // Cache the session state
-                    sessionCacheService.saveSessionState(
-                        session.id,
-                        response.data.status,
-                        response.data.zoomJoinUrl,
-                        response.data.meetingLink,
-                        response.data.attendanceStatus,
-                        response.data.zoomPassword
-                    );
+                    const response = await classService.joinSession(session.id, { studentId });
+                    console.log("Student joined session via API:", session.id, response);
 
-                    // Use the Zoom URL from API response
-                    zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+                    if (response.success && response.data) {
+                        // Cache the session state
+                        sessionCacheService.saveSessionState(
+                            session.id,
+                            response.data.status,
+                            response.data.zoomJoinUrl,
+                            response.data.meetingLink,
+                            response.data.attendanceStatus,
+                            response.data.zoomPassword
+                        );
+
+                        // Use the Zoom URL from API response
+                        zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+                    }
+                } else {
+                    // Tutor: call startSessionByTutor API
+                    const response = await classService.startSessionByTutor(session.id);
+                    console.log("Tutor started session via API:", session.id, response);
+
+                    if (response.success && response.data) {
+                        // Cache the session state
+                        sessionCacheService.saveSessionState(
+                            session.id,
+                            response.data.status,
+                            response.data.zoomJoinUrl,
+                            response.data.meetingLink,
+                            response.data.attendanceStatus,
+                            response.data.zoomPassword
+                        );
+
+                        // Use the Zoom URL from API response
+                        zoomUrl = response.data.zoomJoinUrl || response.data.meetingLink;
+                    }
                 }
             }
 
