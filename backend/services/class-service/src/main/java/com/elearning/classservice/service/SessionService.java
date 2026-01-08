@@ -16,6 +16,11 @@ public interface SessionService {
 
     StartSessionResponse startSession(UUID sessionId, UUID tutorId);
 
+    /**
+     * Start a session for tutor (mark as BOOKED/ONGOING)
+     */
+    void startSessionByTutor(UUID sessionId, UUID tutorId);
+
     JoinSessionResponse joinSession(UUID sessionId, UUID studentId);
 
     Session getSessionById(UUID sessionId);

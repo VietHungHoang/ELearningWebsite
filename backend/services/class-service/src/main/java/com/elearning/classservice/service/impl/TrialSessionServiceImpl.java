@@ -125,7 +125,7 @@ public class TrialSessionServiceImpl implements TrialSessionRequestService {
                 .title("Trial Session")
                 .startTime(entity.getSessionDateTime())
                 .endTime(entity.getSessionDateTime().plusHours(1)) // Assuming 1 hour duration
-                .status(ScheduleStatus.BOOKED)
+                .status(ScheduleStatus.PENDING)
                 .build();
 
         session = sessionRepository.save(session);
