@@ -19,7 +19,8 @@ public class TutorDashboardController {
     /**
      * GET /api/v1/bff/tutors/me/dashboard/charts
      * <p>
-     * Get dashboard charts data for the current tutor including monthly students and income stats
+     * Get dashboard charts data for the current tutor including monthly students
+     * and income stats
      *
      * @param tutorId ID of the tutor from header
      * @return Dashboard charts data
