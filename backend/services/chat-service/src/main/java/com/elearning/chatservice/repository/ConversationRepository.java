@@ -15,9 +15,6 @@ import java.util.UUID;
 @Repository
 public interface ConversationRepository extends MongoRepository<Conversation, UUID> {
 
-    /**
-     * Find all conversations for a user
-     */
     @Query("{ 'participantIds': ?0, 'isActive': true }")
     Page<Conversation> findByParticipantId(UUID userId, Pageable pageable);
 

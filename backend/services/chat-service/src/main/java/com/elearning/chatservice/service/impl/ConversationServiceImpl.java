@@ -52,7 +52,7 @@ public class ConversationServiceImpl implements ConversationService {
         }
 
         // IMPORTANT: Save user info to cache BEFORE checking if conversation exists
-        // This ensures user info is always updated even for existing conversations
+
         if (request.getParticipantInfos() != null && !request.getParticipantInfos().isEmpty()) {
             userCacheService.saveOrUpdateUsers(request.getParticipantInfos());
             log.debug("Updated user cache for {} participants", request.getParticipantInfos().size());
