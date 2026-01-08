@@ -15,7 +15,7 @@ spring:
         
 
 gemini:
-  api-key: AIzaSyDRUFCJA2ZtNYRjOniJdAnGhgUTOa1uHcI
+  api-key: AIzaSyCAW3eU7ckC2sIvC4ot77eC3xVzSMkCkSM
   api-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
 
 services:
