@@ -28,6 +28,9 @@ public class CreateBookingRequest {
     private String paymentProvider;
     private String redirectUrl;
 
+    // Optional: For class renewal (add sessions to existing class)
+    private UUID classId;
+
     @Data
     @Builder
     @NoArgsConstructor

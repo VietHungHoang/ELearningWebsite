@@ -34,12 +34,33 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
     @Override
     @Transactional(readOnly = true)
     public Page<TutorEarningsResponse> getEarningsByTutorId(UUID tutorId, ClassType classType, Pageable pageable) {
+        log.info("=== GET EARNINGS BY TUTOR ID ===");
+        log.info("Tutor ID: {}", tutorId);
+        log.info("Class Type: {}", classType);
+        log.info("Page: {}, Size: {}", pageable.getPageNumber(), pageable.getPageSize());
+        
+        // Kiểm tra tổng số earnings của tutor này
+        long totalCount = tutorEarningsRepository.count();
+        log.info("Total earnings in DB: {}", totalCount);
+        
         Page<TutorEarnings> earningsPage;
         if (classType != null) {
             earningsPage = tutorEarningsRepository.findByTutorIdAndClassType(tutorId, classType, pageable);
+            log.info("Query with classType - Found {} earnings", earningsPage.getTotalElements());
         } else {
             earningsPage = tutorEarningsRepository.findByTutorId(tutorId, pageable);
+            log.info("Query without classType - Found {} earnings", earningsPage.getTotalElements());
         }
+        
+        if (earningsPage.isEmpty()) {
+            log.warn("No earnings found for tutor: {}", tutorId);
+        } else {
+            log.info("Returning {} earnings (page {}/{})", 
+                earningsPage.getNumberOfElements(), 
+                earningsPage.getNumber() + 1, 
+                earningsPage.getTotalPages());
+        }
+        
         return earningsPage.map(tutorEarningsMapper::toResponse);
     }
 
@@ -77,11 +98,20 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
             long durationMinutes = Duration.between(event.getStartTime(), event.getEndTime()).toMinutes();
             double hours = durationMinutes / 60.0;
 
-            // Calculate earnings amount
-            BigDecimal amount = event.getPricePerHour().multiply(BigDecimal.valueOf(hours));
+            // Calculate earnings amount - only 70%
+            BigDecimal fullAmount = event.getPricePerHour().multiply(BigDecimal.valueOf(hours));
+            BigDecimal amount = fullAmount.multiply(BigDecimal.valueOf(0.70));
 
             // Map classType string to ClassType enum
             ClassType classType = ClassType.valueOf(event.getClassType());
+
+            // Determine className based on classType
+            String className;
+            if (classType == ClassType.ONE_ON_ONE) {
+                className = event.getStudentName() != null ? event.getStudentName() : "Unknown Student";
+            } else {
+                className = event.getClassName() != null ? event.getClassName() : "Group Class";
+            }
 
             // Create TutorEarnings record
             TutorEarnings earnings = TutorEarnings.builder()
@@ -89,6 +119,7 @@ public class TutorEarningsServiceImpl implements TutorEarningsService {
                     .sessionId(event.getSessionId())
                     .amount(amount)
                     .classType(classType)
+                    .className(className)
                     .status(TutorEarnings.EarningsStatus.PENDING)
                     .notes("Earnings from session: " + (event.getSessionTitle() != null ? event.getSessionTitle() : event.getSessionId()))
                     .build();

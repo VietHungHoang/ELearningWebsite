@@ -15,9 +15,15 @@ import java.util.UUID;
 public interface StudentOfTutorRepository extends JpaRepository<StudentOfTutor, UUID> {
 
     /**
+     * Check if student-tutor relationship exists
+     */
+    boolean existsByTutorIdAndStudentId(UUID tutorId, UUID studentId);
+
+    /**
      * Count new students (student-tutor relationships) created between dates
      */
-    long countByCreatedAtBetween(LocalDate startDate, LocalDate endDate);
+    @Query("SELECT COUNT(s) FROM StudentOfTutor s WHERE DATE(s.createdAt) BETWEEN :startDate AND :endDate")
+    long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     /**
      * Get daily counts of new students between dates

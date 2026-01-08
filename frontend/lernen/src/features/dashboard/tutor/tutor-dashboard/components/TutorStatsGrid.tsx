@@ -27,7 +27,7 @@ const TutorStatsGrid: React.FC<{ timePeriod: 'this month' | 'all' }> = ({ timePe
             try {
                 setStatsLoading(true);
                 const isAll = timePeriod === 'all';
-                const response = await tutorService.getTutorStats(isAll);
+                const response = await tutorService.getTutorStats({ isAll });
                 if (response.success && response.data) {
                     setStatsData(response.data);
                 } else {

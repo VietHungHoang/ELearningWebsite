@@ -36,9 +36,9 @@ public interface TutorEarningsRepository extends JpaRepository<TutorEarnings, UU
     Page<TutorEarnings> findByTutorIdAndClassType(@Param("tutorId") UUID tutorId, @Param("classType") ClassType classType, Pageable pageable);
 
     /**
-     * Tính tổng thu nhập của tutor trong khoảng thời gian
+     * Tính tổng thu nhập của tutor trong khoảng thời gian (tất cả status)
      */
-    @Query("SELECT COALESCE(SUM(te.amount), 0) FROM TutorEarnings te WHERE te.tutorId = :tutorId AND te.status = 'PAID' AND te.paidAt BETWEEN :startDate AND :endDate")
+    @Query("SELECT COALESCE(SUM(te.amount), 0) FROM TutorEarnings te WHERE te.tutorId = :tutorId AND te.createdAt BETWEEN :startDate AND :endDate")
     BigDecimal getTotalEarningsByTutorAndDateRange(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     /**
@@ -90,12 +90,12 @@ public interface TutorEarningsRepository extends JpaRepository<TutorEarnings, UU
     Long countTeachingHoursByTutorAndDateRange(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     /**
-     * Lấy thống kê thu nhập hàng tháng của tutor trong 12 tháng gần nhất
+     * Lấy thống kê thu nhập hàng tháng của tutor trong 12 tháng gần nhất (tất cả status)
      */
-    @Query("SELECT YEAR(te.paidAt) as year, MONTH(te.paidAt) as month, SUM(te.amount) as income " +
+    @Query("SELECT YEAR(te.createdAt) as year, MONTH(te.createdAt) as month, SUM(te.amount) as income " +
            "FROM TutorEarnings te " +
-           "WHERE te.tutorId = :tutorId AND te.status = 'PAID' AND te.paidAt >= :startDate " +
-           "GROUP BY YEAR(te.paidAt), MONTH(te.paidAt) " +
-           "ORDER BY YEAR(te.paidAt) DESC, MONTH(te.paidAt) DESC")
+           "WHERE te.tutorId = :tutorId AND te.createdAt >= :startDate " +
+           "GROUP BY YEAR(te.createdAt), MONTH(te.createdAt) " +
+           "ORDER BY YEAR(te.createdAt) DESC, MONTH(te.createdAt) DESC")
     List<Object[]> getMonthlyIncomeStats(@Param("tutorId") UUID tutorId, @Param("startDate") LocalDateTime startDate);
 }

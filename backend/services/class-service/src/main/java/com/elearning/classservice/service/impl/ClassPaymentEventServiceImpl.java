@@ -58,10 +58,19 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
         log.info("Updated class {} status to IN_PROGRESS after payment success", event.getClassId());
 
+        // For RENEWAL: Create additional sessions for the class
+        if (event.getSchedule() != null && event.getSessionsPurchased() != null && event.getSessionsPurchased() > 0) {
+            log.info("Creating {} additional sessions for class renewal, classId: {}",
+                    event.getSessionsPurchased(), event.getClassId());
+            createSessionsFromSchedule(classEntity, event.getSchedule(), event.getSessionsPurchased());
+        }
+
         // Create Zoom meeting links asynchronously (non-blocking)
-        // TODO: Temporarily commented - Zoom links will be created on-demand when tutor/student starts session
+        // TODO: Temporarily commented - Zoom links will be created on-demand when
+        // tutor/student starts session
         // zoomAsyncService.createZoomMeetingsForClassAsync(event.getClassId());
-        // log.info("Triggered async Zoom meeting creation for class {}", event.getClassId());
+        // log.info("Triggered async Zoom meeting creation for class {}",
+        // event.getClassId());
     }
 
     private void createNewClass(BookingPaymentSuccessEvent event) {
@@ -107,9 +116,11 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Enrolled student {} to class {}", event.getStudentId(), newClass.getId());
 
         // 4. Trigger async Zoom meeting creation (non-blocking)
-        // TODO: Temporarily commented - Zoom links will be created on-demand when tutor/student starts session
+        // TODO: Temporarily commented - Zoom links will be created on-demand when
+        // tutor/student starts session
         // zoomAsyncService.createZoomMeetingsForClassAsync(newClass.getId());
-        // log.info("Triggered async Zoom meeting creation for class {}", newClass.getId());
+        // log.info("Triggered async Zoom meeting creation for class {}",
+        // newClass.getId());
 
         // 5. Request tutor hourly rate if pricePerHour is not set
         if (newClass.getPricePerHour() == null || newClass.getPricePerHour() == 0) {
@@ -134,18 +145,30 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         log.info("Sent ClassCreatedEvent to booking-service for bookingId: {}, classId: {}",
                 event.getBookingId(), newClass.getId());
 
-        // 7. Send ClassCreatedForStudentEvent to tutor-service to increment totalStudents
-        // This is ONLY sent when creating a NEW class
-        com.elearning.classservice.dto.event.ClassCreatedForStudentEvent studentEvent = com.elearning.classservice.dto.event.ClassCreatedForStudentEvent
-                .builder()
-                .classId(newClass.getId().toString())
-                .tutorId(event.getTutorId().toString())
-                .studentId(event.getStudentId().toString())
-                .classType(newClass.getClassType() != null ? newClass.getClassType().name() : null)
-                .build();
-        kafkaProducerService.sendClassCreatedForStudentEvent(studentEvent);
-        log.info("Sent ClassCreatedForStudentEvent to tutor-service for tutorId: {}, classId: {}",
-                event.getTutorId(), newClass.getId());
+        // 7. Send ClassCreatedForStudentEvent to tutor-service to increment
+        // totalStudents
+        // Check if this is the first time student enrolls with this tutor
+        boolean isFirstTimeWithTutor = enrollmentRepository.findByTutorIdAndStudentId(
+                event.getTutorId(),
+                event.getStudentId()).isEmpty();
+
+        if (isFirstTimeWithTutor) {
+            // This is the first class of this student with this tutor
+            com.elearning.classservice.dto.event.ClassCreatedForStudentEvent studentEvent = com.elearning.classservice.dto.event.ClassCreatedForStudentEvent
+                    .builder()
+                    .classId(newClass.getId().toString())
+                    .tutorId(event.getTutorId().toString())
+                    .studentId(event.getStudentId().toString())
+                    .classType(newClass.getClassType() != null ? newClass.getClassType().name() : null)
+                    .build();
+            kafkaProducerService.sendClassCreatedForStudentEvent(studentEvent);
+            log.info(
+                    "Sent ClassCreatedForStudentEvent to tutor-service for tutorId: {}, classId: {} (FIRST TIME student)",
+                    event.getTutorId(), newClass.getId());
+        } else {
+            log.info("Student {} already enrolled with tutor {} before. Skipping totalStudents increment.",
+                    event.getStudentId(), event.getTutorId());
+        }
     }
 
     private void createClassSchedules(ClassEntity classEntity, String scheduleJson) {

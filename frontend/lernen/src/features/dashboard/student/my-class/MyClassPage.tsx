@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch } from 'react-icons/hi';
-import { FiEye, FiMessageSquare } from 'react-icons/fi';
+import { FiEye, FiMessageSquare, FiRefreshCw } from 'react-icons/fi';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import Pagination from '../../../../components/ui/Pagination';
@@ -10,6 +10,7 @@ import { classService } from '../../../../services/classService';
 import { useAuth } from '../../../../context/AuthContext';
 import type { ClassTable, EnrollmentStatus } from '../../../../types/class';
 import { convertUtcTimeToLocal } from '../../../../utils/scheduleHelpers';
+import RenewClassModal from './components/RenewClassModal';
 
 type FilterTab = 'All Status' | 'Ongoing' | 'Completed';
 
@@ -26,6 +27,8 @@ const MyClassPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const [renewModalOpen, setRenewModalOpen] = useState(false);
+    const [selectedClassForRenewal, setSelectedClassForRenewal] = useState<ClassTable | null>(null);
     const itemsPerPage = 10;
     const { setBreadcrumb } = useBreadcrumb();
 
@@ -116,13 +119,13 @@ const MyClassPage: React.FC = () => {
         // Otherwise, navigate to full detail page with tabs
         if (classData.status === 'OPENING') {
             // Navigate to view-only page (reuse ClassInfoPage with view mode)
-            navigate(`/dashboard/my-class/${classData.id}/view`, { 
-                state: { classData, isViewMode: true, isStudentView: true } 
+            navigate(`/dashboard/my-class/${classData.id}/view`, {
+                state: { classData, isViewMode: true, isStudentView: true }
             });
         } else {
             // Navigate to detail page with tabs (Schedule, Students, Quizzes, Materials)
-            navigate(`/dashboard/my-class/${classData.id}`, { 
-                state: { classData } 
+            navigate(`/dashboard/my-class/${classData.id}`, {
+                state: { classData }
             });
         }
     };
@@ -183,8 +186,8 @@ const MyClassPage: React.FC = () => {
                         ]}
                         selectedValue={
                             activeTab === 'All Status' ? t('dashboard.student.myClass.filterOptions.allStatus') :
-                            activeTab === 'Ongoing' ? t('dashboard.student.myClass.filterOptions.ongoing') :
-                            t('dashboard.student.myClass.filterOptions.completed')
+                                activeTab === 'Ongoing' ? t('dashboard.student.myClass.filterOptions.ongoing') :
+                                    t('dashboard.student.myClass.filterOptions.completed')
                         }
                         placeholder={t('dashboard.student.myClass.selectStatus')}
                         onSelect={(value: string) => {
@@ -248,20 +251,19 @@ const MyClassPage: React.FC = () => {
                                         <td className="p-4">
                                             <div className="max-w-xs">
                                                 <p className="font-semibold text-gray-800 truncate" title={!isTitleNull(classData.title) ? (classData.title || '') : (classData.tutor?.fullName || '')}>
-                                                    {!isTitleNull(classData.title) 
-                                                        ? (classData.title || '') 
+                                                    {!isTitleNull(classData.title)
+                                                        ? (classData.title || '')
                                                         : (state.user?.role === 'student' ? classData.tutor?.fullName || '-' : '-')}
                                                 </p>
                                             </div>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                classData.type === 'ONE_ON_ONE'
+                                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${classData.type === 'ONE_ON_ONE'
                                                     ? 'bg-blue-100 text-blue-800'
                                                     : 'bg-purple-100 text-purple-800'
-                                            }`}>
-                                                {classData.type === 'ONE_ON_ONE' 
-                                                    ? t('dashboard.student.myClass.classTypes.oneOnOne') 
+                                                }`}>
+                                                {classData.type === 'ONE_ON_ONE'
+                                                    ? t('dashboard.student.myClass.classTypes.oneOnOne')
                                                     : t('dashboard.student.myClass.classTypes.group')
                                                 }
                                             </span>
@@ -302,7 +304,7 @@ const MyClassPage: React.FC = () => {
                                                 const enrollmentStatus = getEnrollmentStatus(classData);
                                                 let statusLabel = '';
                                                 let statusColor = 'bg-yellow-600';
-                                                
+
                                                 if (enrollmentStatus === 'JOINED') {
                                                     statusLabel = t('dashboard.student.myClass.statusLabels.enrolled');
                                                     statusColor = 'bg-blue-600';
@@ -319,7 +321,7 @@ const MyClassPage: React.FC = () => {
                                                     statusLabel = t('dashboard.student.myClass.statusLabels.enrolled');
                                                     statusColor = 'bg-yellow-600';
                                                 }
-                                                
+
                                                 return (
                                                     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
                                                         <span className={`w-1.5 h-1.5 rounded-full ${statusColor}`}></span>
@@ -347,6 +349,18 @@ const MyClassPage: React.FC = () => {
                                                 >
                                                     <FiMessageSquare className="w-4 h-4" />
                                                 </button>
+                                                {state.user?.role === 'student' && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedClassForRenewal(classData);
+                                                            setRenewModalOpen(true);
+                                                        }}
+                                                        className="p-1 text-gray-500 hover:text-[#0b6459] hover:bg-gray-50 rounded-md transition-colors"
+                                                        title={t('dashboard.student.myClass.renewClass') || 'Gia hạn lớp'}
+                                                    >
+                                                        <FiRefreshCw className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -361,6 +375,18 @@ const MyClassPage: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Renew Class Modal */}
+            {selectedClassForRenewal && (
+                <RenewClassModal
+                    isOpen={renewModalOpen}
+                    onClose={() => {
+                        setRenewModalOpen(false);
+                        setSelectedClassForRenewal(null);
+                    }}
+                    classData={selectedClassForRenewal}
+                />
+            )}
 
             {!loading && !error && totalElements > 0 && (
                 <>

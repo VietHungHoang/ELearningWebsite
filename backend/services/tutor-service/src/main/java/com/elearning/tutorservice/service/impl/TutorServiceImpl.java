@@ -55,6 +55,7 @@ public class TutorServiceImpl implements TutorService {
     private final TutorLanguageRepository tutorLanguageRepository;
     private final TutorSocialRepository tutorSocialRepository;
     private final TutorSubjectRepository tutorSubjectRepository;
+    private final com.elearning.tutorservice.repository.StudentOfTutorRepository studentOfTutorRepository;
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -246,6 +247,45 @@ public class TutorServiceImpl implements TutorService {
         } catch (Exception e) {
             log.error("Failed to increment totalStudents for tutor {}: {}", tutorIdStr, e.getMessage(), e);
             throw new RuntimeException("Failed to increment totalStudents", e);
+        }
+    }
+    
+    @Override
+    @Transactional
+    public void handleNewStudentEnrollment(String tutorIdStr, String studentIdStr) {
+        try {
+            UUID tutorId = UUID.fromString(tutorIdStr);
+            UUID studentId = UUID.fromString(studentIdStr);
+            
+            log.info("Handling new student enrollment: tutorId={}, studentId={}", tutorId, studentId);
+            
+            // Check if student-tutor relationship already exists
+            boolean exists = studentOfTutorRepository.existsByTutorIdAndStudentId(tutorId, studentId);
+            
+            if (exists) {
+                log.info("Student {} already exists for tutor {}. Skipping.", studentId, tutorId);
+                return;
+            }
+            
+            // Create new StudentOfTutor record
+            com.elearning.tutorservice.entity.StudentOfTutor studentOfTutor = com.elearning.tutorservice.entity.StudentOfTutor.builder()
+                    .tutorId(tutorId)
+                    .studentId(studentId)
+                    .build();
+            
+            studentOfTutorRepository.save(studentOfTutor);
+            log.info("Created StudentOfTutor record for tutor {} and student {}", tutorId, studentId);
+            
+            // Increment totalStudents
+            incrementTotalStudents(tutorIdStr);
+            
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid ID format: tutorId={}, studentId={}", tutorIdStr, studentIdStr, e);
+            throw new RuntimeException("Invalid ID format", e);
+        } catch (Exception e) {
+            log.error("Failed to handle new student enrollment: tutorId={}, studentId={}, error={}", 
+                    tutorIdStr, studentIdStr, e.getMessage(), e);
+            throw new RuntimeException("Failed to handle new student enrollment", e);
         }
     }
 }

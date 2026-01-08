@@ -1106,6 +1106,7 @@
           "group": "Nhóm"
         },
         "statusLabels": {
+          "inProgress": "Đang học",
           "ongoing": "Đang dạy",
           "completed": "Đã hoàn thành",
           "opening": "Đang chờ"
@@ -2375,7 +2376,19 @@
     "insufficientBalance": "Số dư không đủ",
     "belowMinimum": "Số tiền thấp hơn ngưỡng tối thiểu",
     "noTransactionsDescription": "Không tìm thấy giao dịch nào. Lịch sử thanh toán của bạn sẽ xuất hiện ở đây khi bạn thực hiện rút tiền.",
-    "dateRange": "{{startDate}} - {{endDate}}"
+    "dateRange": "{{startDate}} - {{endDate}}",
+    "tableHeaders": {
+      "id": "ID",
+      "courseService": "Khóa học/Dịch vụ",
+      "type": "Loại",
+      "date": "Ngày",
+      "amount": "Số tiền",
+      "actions": "Thao tác",
+      "transactionId": "Mã giao dịch",
+      "method": "Phương thức",
+      "status": "Trạng thái"
+    },
+    "dateFilterApplied": "Đã áp dụng bộ lọc ngày"
   },
   "whiteboard": {
     "title": "Bảng vẽ",

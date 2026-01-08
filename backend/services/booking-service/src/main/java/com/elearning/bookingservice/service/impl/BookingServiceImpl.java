@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
                                 .studentId(request.getStudentId())
                                 .tutorId(request.getTutorId())
                                 .tutorName(request.getTutorName())
-                                .classId(null)
+                                .classId(request.getClassId()) // Support class renewal
                                 .sessionsPurchased(request.getSessions())
                                 .discount(request.getDiscount())
                                 .amount(request.getAmount())

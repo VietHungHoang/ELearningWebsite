@@ -32,7 +32,8 @@ package com.elearning.tutorservice.entity;
 
      @Enumerated(EnumType.STRING)
      private ClassType classType;
-
+    @Column(name = "class_name")
+    private String className;
      @Enumerated(EnumType.STRING)
      @Column(name = "status", nullable = false)
      @Builder.Default

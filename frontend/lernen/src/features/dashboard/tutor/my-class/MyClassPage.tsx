@@ -422,17 +422,21 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full bg-white border border-gray-300 text-gray-800">
-                                                <span className={`w-1.5 h-1.5 rounded-full ${classData.status === 'ONGOING'
+                                                <span className={`w-1.5 h-1.5 rounded-full ${classData.status === 'IN_PROGRESS'
                                                     ? 'bg-green-600'
-                                                    : classData.status === 'COMPLETED'
-                                                        ? 'bg-gray-600'
-                                                        : 'bg-yellow-600'
+                                                    : classData.status === 'ONGOING'
+                                                        ? 'bg-green-600'
+                                                        : classData.status === 'COMPLETED'
+                                                            ? 'bg-gray-600'
+                                                            : 'bg-yellow-600'
                                                     }`}></span>
-                                                {classData.status === 'ONGOING'
-                                                    ? t('dashboard.tutor.myClass.statusLabels.ongoing')
-                                                    : classData.status === 'COMPLETED'
-                                                        ? t('dashboard.tutor.myClass.statusLabels.completed')
-                                                        : t('dashboard.tutor.myClass.statusLabels.opening')
+                                                {classData.status === 'IN_PROGRESS'
+                                                    ? t('dashboard.tutor.myClass.statusLabels.inProgress')
+                                                    : classData.status === 'ONGOING'
+                                                        ? t('dashboard.tutor.myClass.statusLabels.ongoing')
+                                                        : classData.status === 'COMPLETED'
+                                                            ? t('dashboard.tutor.myClass.statusLabels.completed')
+                                                            : t('dashboard.tutor.myClass.statusLabels.opening')
                                                 }
                                             </span>
                                         </td>

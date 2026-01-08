@@ -1065,6 +1065,7 @@
           "group": "Group"
         },
         "statusLabels": {
+          "inProgress": "In Progress",
           "ongoing": "Ongoing",
           "completed": "Completed",
           "opening": "Opening"
@@ -2220,7 +2221,19 @@
     "invalidAmount": "Invalid withdrawal amount",
     "insufficientBalance": "Insufficient balance",
     "noTransactionsDescription": "No transactions found. Your payout history will appear here once you make withdrawals.",
-    "dateRange": "{{startDate}} - {{endDate}}"
+    "dateRange": "{{startDate}} - {{endDate}}",
+    "tableHeaders": {
+      "id": "ID",
+      "courseService": "Course/Service",
+      "type": "Type",
+      "date": "Date",
+      "amount": "Amount",
+      "actions": "Actions",
+      "transactionId": "Transaction ID",
+      "method": "Method",
+      "status": "Status"
+    },
+    "dateFilterApplied": "Date filter applied"
   },
   "quiz": {
     "create": {

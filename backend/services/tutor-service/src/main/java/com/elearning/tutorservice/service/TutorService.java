@@ -22,4 +22,6 @@ public interface TutorService {
     TutorResponse updateTutorProfile(UUID tutorId, UpdateTutorProfileRequest request);
     
     void incrementTotalStudents(String tutorId);
+    
+    void handleNewStudentEnrollment(String tutorId, String studentId);
 }

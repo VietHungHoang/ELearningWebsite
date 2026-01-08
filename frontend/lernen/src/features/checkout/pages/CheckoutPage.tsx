@@ -55,6 +55,8 @@ const CheckoutPage: React.FC = () => {
   // Get data from navigation state
   const bookingData = location.state?.bookingData;
   const tutorData = location.state?.tutor;
+  const classId = location.state?.classId; // For class renewal
+  const isRenewal = location.state?.isRenewal || false;
 
   // Use real tutor data
   const tutor = tutorData
@@ -139,6 +141,8 @@ const CheckoutPage: React.FC = () => {
         amount: total,
         paymentProvider: paymentProviderMap[paymentMethod] || paymentMethod,
         redirectUrl: `${window.location.origin}/payment-result`,
+        // For class renewal
+        ...(classId && { classId }),
       };
 
       const bookingResponse = (await bookingService.createBooking(
