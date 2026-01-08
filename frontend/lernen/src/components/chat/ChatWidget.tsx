@@ -234,12 +234,12 @@ const ChatWidget: React.FC = () => {
 
     const getConversationName = (apiConv: ConversationResponse, currentUserId: string): string => {
         // For ONE_TO_ONE conversations, get name from participantDetails
-        if (apiConv.type === 'ONE_ON_ONE' && apiConv.participantDetails) {
+        if (apiConv.type === 'ONE_TO_ONE' && apiConv.participantDetails) {
             const other = apiConv.participantDetails.find(p => p.userId !== currentUserId);
             if (other && other.fullName) return other.fullName;
         }
         // Fallback to participant IDs
-        if (apiConv.type === 'ONE_ON_ONE') {
+        if (apiConv.type === 'ONE_TO_ONE') {
             const otherParticipantId = apiConv.participantIds.find((id: string) => id !== currentUserId);
             return `User ${otherParticipantId?.substring(0, 8) || 'Unknown'}`;
         }
@@ -247,7 +247,7 @@ const ChatWidget: React.FC = () => {
     };
 
     const getConversationAvatar = (apiConv: ConversationResponse, currentUserId: string): string | undefined => {
-        if (apiConv.type === 'ONE_ON_ONE' && apiConv.participantDetails) {
+        if (apiConv.type === 'ONE_TO_ONE' && apiConv.participantDetails) {
             const other = apiConv.participantDetails.find(p => p.userId !== currentUserId);
             return other?.avatarUrl;
         }

@@ -2372,7 +2372,7 @@
       "failedToSkip": "Failed to skip step"
     },
     "validation": {
-      "sessionFeeRequired": "Session fee is required ",
+      "sessionFeeRequired": "Session fee is required",
       "subjectRequired": "At least one subject is required"
     },
     "steps": {
