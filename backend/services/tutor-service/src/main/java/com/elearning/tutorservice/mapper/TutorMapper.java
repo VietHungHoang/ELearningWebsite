@@ -52,9 +52,18 @@ public class TutorMapper {
                 .map(review -> TutorReviewResponse.builder()
                         .id(review.getId())
                         .studentId(review.getStudentId())
+                        .studentName(review.getStudentName())
+                        .studentAvatarUrl(review.getStudentAvatarUrl())
                         .rating(review.getRating())
                         .comment(review.getComment())
                         .createdAt(review.getCreatedAt())
+                        // Moderation fields
+                        .moderationStatus(review.getModerationStatus())
+                        .statusDescription(review.getModerationStatus() != null
+                                ? review.getModerationStatus().getDescription()
+                                : null)
+                        .errorCode(review.getViolationCode())
+                        .errorMessage(review.getViolationReason())
                         .build())
                 .collect(Collectors.toList());
     }
