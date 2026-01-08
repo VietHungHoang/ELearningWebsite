@@ -57,7 +57,7 @@ public class ConversationServiceImpl implements ConversationService {
             userCacheService.saveOrUpdateUsers(request.getParticipantInfos());
             log.debug("Updated user cache for {} participants", request.getParticipantInfos().size());
         }
-
+        // For one-to-one, check if conversation already exists
         // For one-to-one, check if conversation already exists
         if (request.getType() == ConversationType.ONE_ON_ONE) {
             if (participantIds.size() != 2) {
