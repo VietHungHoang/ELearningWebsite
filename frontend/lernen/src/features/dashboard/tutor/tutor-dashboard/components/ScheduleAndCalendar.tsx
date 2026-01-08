@@ -87,20 +87,40 @@ const ScheduleAndCalendar: React.FC = () => {
         loadSessions();
     }, []);
 
+    // Helper function to compare dates (only date part, ignoring time)
+    // Uses local date for comparison to match calendar display
+    const isSameDate = (date1: Date, date2: Date): boolean => {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+        );
+    };
+
+    // Helper function to get date at midnight in local timezone
+    const getDateAtMidnight = (date: Date): Date => {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    };
+
     // Get session dates for calendar
     const sessionDates = sessionsData.map((session) => new Date(session.sessionDatetime));
 
-    // Filter sessions based on selected date and filter mode
+    // Filter sessions based on selected date and filter mode (local date comparison)
     const filteredSessions = sessionsData.filter((session) => {
         const sessionDate = new Date(session.sessionDatetime);
+        const sessionDateLocal = getDateAtMidnight(sessionDate);
+        
         if (isCustomDateFilter) {
             // When custom date is selected, show sessions for that specific date
-            return sessionDate.toDateString() === selectedDate.toDateString();
+            const selectedDateLocal = getDateAtMidnight(selectedDate);
+            return isSameDate(sessionDateLocal, selectedDateLocal);
         } else if (filterMode === "today") {
-            return sessionDate.toDateString() === today.toDateString();
+            const todayLocal = getDateAtMidnight(today);
+            return isSameDate(sessionDateLocal, todayLocal);
         } else if (filterMode === "week") {
-            const weekFromNow = addDays(today, 7);
-            return sessionDate >= today && sessionDate <= weekFromNow;
+            const todayLocal = getDateAtMidnight(today);
+            const weekFromNow = getDateAtMidnight(addDays(today, 7));
+            return sessionDateLocal >= todayLocal && sessionDateLocal <= weekFromNow;
         }
         return true;
     });
@@ -220,7 +240,7 @@ const ScheduleAndCalendar: React.FC = () => {
                                             {
                                                 count: filteredSessions.length,
                                                 period: isCustomDateFilter
-                                                    ? selectedDate.toDateString() === today.toDateString()
+                                                    ? isSameDate(getDateAtMidnight(selectedDate), getDateAtMidnight(today))
                                                         ? t("dashboard.tutor.todayPeriod")
                                                         : format(
                                                             selectedDate,
@@ -331,10 +351,26 @@ interface SessionCardProps {
     onStartSession: (sessionId: string) => Promise<void>;
 }
 
+// Helper function to compare dates (only date part, ignoring time)
+// Uses local date for comparison to match calendar display
+const isSameDate = (date1: Date, date2: Date): boolean => {
+    return (
+        date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate()
+    );
+};
+
+// Helper function to get date at midnight in local timezone
+const getDateAtMidnight = (date: Date): Date => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+};
+
 const SessionCard: React.FC<SessionCardProps> = ({ session, locale, language, t, onStartSession }) => {
     const sessionDate = new Date(session.sessionDatetime);
-    const today = startOfToday();
-    const isToday = sessionDate.toDateString() === today.toDateString();
+    const today = getDateAtMidnight(new Date());
+    const sessionDateLocal = getDateAtMidnight(sessionDate);
+    const isToday = isSameDate(sessionDateLocal, today);
 
     const getStatusColor = (sessionType: string) => {
         switch (sessionType) {

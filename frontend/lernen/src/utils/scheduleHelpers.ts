@@ -212,15 +212,32 @@ export const convertUtcTimeToLocal = (utcTime: string): string => {
 
 /**
  * Convert UTC datetime string to local timezone datetime string
- * @param utcDateTime - ISO datetime string in UTC (e.g., "2026-01-08T02:00:00")
+ * Backend returns datetime in UTC format without timezone indicator (e.g., "2026-01-09T09:00:00")
+ * This function treats it as UTC and converts to local timezone
+ * @param utcDateTime - ISO datetime string in UTC (e.g., "2026-01-09T09:00:00")
  * @returns ISO datetime string in local timezone
  */
 export const convertUtcDateTimeToLocal = (utcDateTime: string): string => {
   try {
-    // Parse UTC datetime
-    const utcDate = new Date(utcDateTime);
+    if (!utcDateTime) {
+      return utcDateTime;
+    }
+
+    // Check if string already has timezone indicator
+    const hasTimezone = utcDateTime.endsWith('Z') || 
+                       /[+-]\d{2}:\d{2}$/.test(utcDateTime) ||
+                       /[+-]\d{4}$/.test(utcDateTime);
     
-    // Get local datetime components
+    // If no timezone indicator, treat as UTC and add 'Z'
+    // Example: "2026-01-09T09:00:00" -> "2026-01-09T09:00:00Z" (UTC)
+    const utcString = hasTimezone ? utcDateTime : `${utcDateTime}Z`;
+    
+    // Parse as UTC - JavaScript will automatically convert to local timezone
+    // Example: "2026-01-09T09:00:00Z" (UTC) -> converts to local (UTC+7) = "2026-01-09T16:00:00"
+    const utcDate = new Date(utcString);
+    
+    // Verify the conversion worked correctly
+    // getHours() returns local time hours (already converted from UTC)
     const localYear = utcDate.getFullYear();
     const localMonth = String(utcDate.getMonth() + 1).padStart(2, '0');
     const localDay = String(utcDate.getDate()).padStart(2, '0');
@@ -228,10 +245,12 @@ export const convertUtcDateTimeToLocal = (utcDateTime: string): string => {
     const localMinutes = String(utcDate.getMinutes()).padStart(2, '0');
     const localSeconds = String(utcDate.getSeconds()).padStart(2, '0');
     
-    // Format back to ISO string
+    // Format back to ISO string (without timezone indicator)
+    // This string represents local time, not UTC
+    // Example: "2026-01-09T09:00:00" (UTC) -> "2026-01-09T16:00:00" (UTC+7)
     return `${localYear}-${localMonth}-${localDay}T${localHours}:${localMinutes}:${localSeconds}`;
   } catch (error) {
-    console.error('Error converting UTC datetime to local:', error);
+    console.error('Error converting UTC datetime to local:', error, utcDateTime);
     return utcDateTime; // Return original datetime if conversion fails
   }
 };
