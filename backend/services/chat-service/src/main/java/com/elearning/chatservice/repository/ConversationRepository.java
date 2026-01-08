@@ -15,16 +15,13 @@ import java.util.UUID;
 @Repository
 public interface ConversationRepository extends MongoRepository<Conversation, UUID> {
 
-    /**
-     * Find all conversations for a user
-     */
     @Query("{ 'participantIds': ?0, 'isActive': true }")
     Page<Conversation> findByParticipantId(UUID userId, Pageable pageable);
 
     /**
      * Find one-to-one conversation between two users
      */
-    @Query("{ 'type': 'ONE_TO_ONE', 'participantIds': { $all: ?0 }, 'isActive': true }")
+    @Query("{ 'type': 'ONE_ON_ONE', 'participantIds': { $all: ?0 }, 'isActive': true }")
     Optional<Conversation> findOneToOneConversation(List<UUID> participantIds);
 
     /**

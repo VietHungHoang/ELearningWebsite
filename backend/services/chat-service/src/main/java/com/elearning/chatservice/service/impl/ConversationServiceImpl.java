@@ -52,14 +52,14 @@ public class ConversationServiceImpl implements ConversationService {
         }
 
         // IMPORTANT: Save user info to cache BEFORE checking if conversation exists
-        // This ensures user info is always updated even for existing conversations
+
         if (request.getParticipantInfos() != null && !request.getParticipantInfos().isEmpty()) {
             userCacheService.saveOrUpdateUsers(request.getParticipantInfos());
             log.debug("Updated user cache for {} participants", request.getParticipantInfos().size());
         }
 
         // For one-to-one, check if conversation already exists
-        if (request.getType() == ConversationType.ONE_TO_ONE) {
+        if (request.getType() == ConversationType.ONE_ON_ONE) {
             if (participantIds.size() != 2) {
                 throw new IllegalArgumentException("One-to-one conversation must have exactly 2 participants");
             }
@@ -107,7 +107,7 @@ public class ConversationServiceImpl implements ConversationService {
 
         // Create new conversation
         CreateConversationRequest request = CreateConversationRequest.builder()
-                .type(ConversationType.ONE_TO_ONE)
+                .type(ConversationType.ONE_ON_ONE)
                 .participantIds(participantIds)
                 .build();
 
@@ -145,7 +145,7 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
-        if (conversation.getType() == ConversationType.ONE_TO_ONE) {
+        if (conversation.getType() == ConversationType.ONE_ON_ONE) {
             throw new IllegalArgumentException("Cannot add participants to one-to-one conversation");
         }
 
@@ -178,7 +178,7 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new RuntimeException("Conversation not found"));
 
-        if (conversation.getType() == ConversationType.ONE_TO_ONE) {
+        if (conversation.getType() == ConversationType.ONE_ON_ONE) {
             throw new IllegalArgumentException("Cannot remove participants from one-to-one conversation");
         }
 
