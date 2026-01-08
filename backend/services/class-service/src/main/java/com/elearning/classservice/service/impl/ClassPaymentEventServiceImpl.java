@@ -132,9 +132,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         // This is ONLY sent when creating a NEW class
         com.elearning.classservice.dto.event.ClassCreatedForStudentEvent studentEvent = com.elearning.classservice.dto.event.ClassCreatedForStudentEvent
                 .builder()
-                .classId(newClass.getId())
-                .tutorId(event.getTutorId())
-                .studentId(event.getStudentId())
+                .classId(newClass.getId().toString())
+                .tutorId(event.getTutorId().toString())
+                .studentId(event.getStudentId().toString())
                 .classType(newClass.getClassType() != null ? newClass.getClassType().name() : null)
                 .build();
         kafkaProducerService.sendClassCreatedForStudentEvent(studentEvent);
