@@ -2398,6 +2398,10 @@
       "failedToSave": "Không thể lưu dữ liệu",
       "failedToSkip": "Không thể bỏ qua bước này"
     },
+    "validation": {
+      "sessionFeeRequired": "Học phí yêu cầu ",
+      "subjectRequired": "Cần chọn ít nhất một môn học"
+    },
     "steps": {
       "basicInfo": "Thông tin cơ bản",
       "professional": "Chuyên môn",
