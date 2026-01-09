@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,17 +59,17 @@ public class SessionServiceImpl implements SessionService {
         // Check if Zoom link exists, if not create one
         if (session.getZoomJoinUrl() == null || session.getZoomJoinUrl().trim().isEmpty()) {
             log.info("Session {} has no Zoom link, creating one now", sessionId);
-            
+
             try {
-                com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = 
-                    zoomMeetingService.createScheduledMeeting(tutorId, sessionId);
-                
+                com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = zoomMeetingService
+                        .createScheduledMeeting(tutorId, sessionId);
+
                 // Update session with Zoom details
                 session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
                 session.setZoomPassword(zoomMeeting.getPassword());
                 session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
                 session.setMeetingLink(zoomMeeting.getJoinUrl());
-                
+
                 log.info("Created Zoom meeting for session {}: {}", sessionId, zoomMeeting.getId());
             } catch (Exception e) {
                 log.error("Failed to create Zoom meeting for session {}: {}", sessionId, e.getMessage(), e);
@@ -115,7 +116,7 @@ public class SessionServiceImpl implements SessionService {
             if (classEntity.getClassType().name().equals("ONE_ON_ONE") && !session.getParticipants().isEmpty()) {
                 studentName = session.getParticipants().get(0).getStudent().getFullName();
             }
-            
+
             SessionStartedEvent event = SessionStartedEvent.builder()
                     .sessionId(session.getId())
                     .tutorId(session.getTutor().getId())
@@ -279,7 +280,7 @@ public class SessionServiceImpl implements SessionService {
     @Transactional(readOnly = true)
     public List<SessionResponse> getBookedSessionsForUser(UUID userId, LocalDateTime startDate, LocalDateTime endDate) {
         LocalDateTime effectiveStartDate = startDate != null ? startDate : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime effectiveEndDate = endDate != null ? endDate : LocalDateTime.now().plusDays(1);
+        LocalDateTime effectiveEndDate = endDate != null ? endDate : LocalDateTime.now(ZoneOffset.UTC).plusDays(1);
 
         log.info("Getting booked sessions for user {} from {} to {}", userId, effectiveStartDate, effectiveEndDate);
 
@@ -299,7 +300,8 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public SlotConflictResponse checkSlotConflicts(UUID studentId, CheckSlotConflictsRequest request) {
         UUID tutorId = request.getTutorId();
-        LocalDateTime startDate = request.getStartDate() != null ? request.getStartDate() : LocalDateTime.now();
+        LocalDateTime startDate = request.getStartDate() != null ? request.getStartDate()
+                : LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime endDate = request.getEndDate() != null ? request.getEndDate() : startDate.plusMonths(1);
 
         log.info("Checking slot conflicts for tutor {}, student {}, from {} to {}", tutorId, studentId, startDate,
@@ -342,7 +344,6 @@ public class SessionServiceImpl implements SessionService {
         List<Session> sessions = sessionRepository.findByStudentIdAndStartTimeBetween(studentId, startDate, endDate);
         return sessions.stream()
                 .filter(s -> !isCompletedOrCancelled(s))
-                .filter(s -> !s.getTutor().getId().equals(currentTutorId)) // Exclude current tutor's sessions
                 .map(s -> s.getStartTime().toString())
                 .collect(Collectors.toList());
     }
@@ -383,19 +384,19 @@ public class SessionServiceImpl implements SessionService {
         // 2. Check if Zoom link exists, if not create one
         if (session.getZoomJoinUrl() == null || session.getZoomJoinUrl().trim().isEmpty()) {
             log.info("Session {} has no Zoom link, creating one now", sessionId);
-            
+
             try {
                 UUID tutorId = session.getTutor().getId();
-                com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = 
-                    zoomMeetingService.createScheduledMeeting(tutorId, sessionId);
-                
+                com.elearning.classservice.dto.zoom.response.ZoomMeetingResponse zoomMeeting = zoomMeetingService
+                        .createScheduledMeeting(tutorId, sessionId);
+
                 // Update session with Zoom details
                 session.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
                 session.setZoomPassword(zoomMeeting.getPassword());
                 session.setZoomJoinUrl(zoomMeeting.getJoinUrl());
                 session.setMeetingLink(zoomMeeting.getJoinUrl());
                 sessionRepository.save(session);
-                
+
                 log.info("Created Zoom meeting for session {}: {}", sessionId, zoomMeeting.getId());
             } catch (Exception e) {
                 log.error("Failed to create Zoom meeting for session {}: {}", sessionId, e.getMessage(), e);
@@ -404,7 +405,7 @@ public class SessionServiceImpl implements SessionService {
         }
 
         // 3. Mark attendance - find or create SessionParticipant
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         SessionParticipant participant = participantRepository
                 .findBySessionIdAndStudentId(sessionId, studentId)
                 .orElse(null);
