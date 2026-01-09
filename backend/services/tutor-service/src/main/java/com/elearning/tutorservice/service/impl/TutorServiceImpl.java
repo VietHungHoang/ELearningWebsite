@@ -30,6 +30,10 @@ import com.elearning.tutorservice.mapper.TutorMapper;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -287,5 +291,25 @@ public class TutorServiceImpl implements TutorService {
                     tutorIdStr, studentIdStr, e.getMessage(), e);
             throw new RuntimeException("Failed to handle new student enrollment", e);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TutorResponse> getAllTutors(int page, int size) {
+        log.info("Getting all verified tutors, page: {}, size: {}", page, size);
+
+        // Convert to 0-based index if needed
+        int pageIndex = page > 0 ? page - 1 : 0;
+
+        Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Tutor> tutorPage = tutorRepository.findByIsVerifiedTrue(pageable);
+
+        return tutorPage.map(tutor -> {
+            TutorResponse response = tutorMapper.toTutorResponse(tutor);
+            // Set additional fields
+            response.setZoomConnected(tutorZoomCredentialRepository.existsByTutorId(tutor.getId()));
+            response.setTimezone(tutor.getTimezone());
+            return response;
+        });
     }
 }

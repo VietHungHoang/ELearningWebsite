@@ -701,11 +701,11 @@ export class UserService {
 
     /**
      * Get list of approved tutors (for instructor-list page)
-     * Calls /admin/tutors API - similar mapping approach as tutor-approval page
+     * Calls /tutors API - similar mapping approach as tutor-approval page
      */
     getTutor(): Observable<Tutor[]> {
-        // Gọi API /admin/tutors - lấy danh sách gia sư đã được duyệt
-        return this.apiService.get<PaginatedResponse<InstructorRequestBackend>>('/admin/tutors').pipe(
+        // Gọi API /tutors - lấy danh sách gia sư đã được duyệt
+        return this.apiService.get<PaginatedResponse<InstructorRequestBackend>>('/tutors').pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data && response.data.content) {

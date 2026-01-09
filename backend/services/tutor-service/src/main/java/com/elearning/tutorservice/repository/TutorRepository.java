@@ -32,6 +32,11 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
        List<Tutor> findByIsVerifiedTrue();
 
        /**
+        * Find all verified tutors with pagination
+        */
+       Page<Tutor> findByIsVerifiedTrue(Pageable pageable);
+
+       /**
         * Find tutor with subjects for search indexing
         */
        @Query("SELECT t FROM Tutor t " +
