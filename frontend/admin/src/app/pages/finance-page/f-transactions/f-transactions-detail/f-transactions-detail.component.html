@@ -182,14 +182,14 @@
                     class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">
                     {{ 'transactions.detail.actions.backToList' | translate }}
                 </a>
-                <button type="button"
-                    class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-primary-500 text-white hover:bg-primary-400 text-sm">
+                <button type="button" (click)="downloadPdf()" [disabled]="downloading"
+                    class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-primary-500 text-white hover:bg-primary-400 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                     <span class="inline-block relative ltr:pl-[22px] rtl:pr-[22px]">
                         <i
                             class="material-symbols-outlined ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 text-sm">
-                            download
+                            {{ downloading ? 'hourglass_empty' : 'download' }}
                         </i>
-                        {{ 'transactions.detail.actions.download' | translate }}
+                        {{ downloading ? 'Downloading...' : ('transactions.detail.actions.download' | translate) }}
                     </span>
                 </button>
             </div>

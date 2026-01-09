@@ -1105,6 +1105,15 @@ export class TransactionService {
     }
 
     /**
+     * Download transaction receipt as PDF
+     * @param id Transaction ID
+     * @returns Observable of Blob (PDF file)
+     */
+    downloadTransactionPdf(id: string): Observable<Blob> {
+        return this.apiService.getBlob(`/transactions/${id}/download-pdf`);
+    }
+
+    /**
      * Get mock transactions response for fallback
      * Converts internal mock data to BookingTransactionResponse format
      */

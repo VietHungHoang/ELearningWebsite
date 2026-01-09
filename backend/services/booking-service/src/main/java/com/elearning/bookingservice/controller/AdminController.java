@@ -7,6 +7,9 @@ import com.elearning.bookingservice.entity.Booking;
 import com.elearning.bookingservice.entity.ClassInfo;
 import com.elearning.bookingservice.repository.BookingRepository;
 import com.elearning.bookingservice.repository.ClassInfoRepository;
+import com.elearning.bookingservice.service.PdfService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -28,6 +31,7 @@ public class AdminController {
 
         private final BookingRepository bookingRepository;
         private final ClassInfoRepository classInfoRepository;
+        private final PdfService pdfService;
 
         /**
          * GET /api/v1/admin/transactions
@@ -134,5 +138,67 @@ public class AdminController {
                                 .build();
 
                 return ResponseEntity.ok(ApiResponse.success(response, "Transaction detail retrieved successfully"));
+        }
+
+        /**
+         * GET /api/v1/admin/transactions/{id}/download-pdf
+         * Download transaction receipt as PDF
+         * 
+         * @param id Transaction/Booking ID
+         * @return PDF file
+         */
+        @GetMapping("/transactions/{id}/download-pdf")
+        public ResponseEntity<byte[]> downloadTransactionPdf(@PathVariable java.util.UUID id) {
+                log.info("Admin downloading PDF for transaction id: {}", id);
+
+                // Get transaction detail
+                Booking booking = bookingRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Transaction not found with id: " + id));
+
+                // Get class info if classId exists
+                String className = null;
+                String classType = null;
+                if (booking.getClassId() != null) {
+                        ClassInfo classInfo = classInfoRepository.findByClassId(booking.getClassId()).orElse(null);
+                        if (classInfo != null) {
+                                className = classInfo.getTitle();
+                                classType = classInfo.getClassType();
+                        }
+                }
+
+                TransactionDetailResponse response = TransactionDetailResponse.builder()
+                                .id(booking.getId())
+                                .transactionId(booking.getTransactionId())
+                                .providerTransactionId(booking.getProviderTransactionId())
+                                .amount(booking.getAmount())
+                                .discount(booking.getDiscount())
+                                .pricePerSession(booking.getPricePerSession())
+                                .sessionsPurchased(booking.getSessionsPurchased())
+                                .paymentProvider(booking.getPaymentProvider())
+                                .status(booking.getStatus())
+                                .schedule(booking.getSchedule())
+                                .notes(booking.getNotes())
+                                .createdAt(booking.getCreatedAt())
+                                .updatedAt(booking.getUpdatedAt())
+                                .studentId(booking.getStudentId())
+                                .tutorId(booking.getTutorId())
+                                .tutorName(booking.getTutorName())
+                                .classId(booking.getClassId())
+                                .className(className)
+                                .classType(classType)
+                                .build();
+
+                // Generate PDF
+                byte[] pdfBytes = pdfService.generateTransactionReceipt(response);
+
+                // Set headers for PDF download
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.setContentDispositionFormData("attachment", "transaction-" + id + ".pdf");
+                headers.setContentLength(pdfBytes.length);
+
+                return ResponseEntity.ok()
+                                .headers(headers)
+                                .body(pdfBytes);
         }
 }
