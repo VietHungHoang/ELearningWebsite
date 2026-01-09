@@ -42,34 +42,47 @@ const FindTutorsPage: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        try {
-            const searchFilters: IFilters = {
-                ...filters,
-                page,
-                size: 10,
-            };
+        const searchFilters: IFilters = {
+            ...filters,
+            page,
+            size: 10,
+        };
 
-            setCurrentFilters(searchFilters);
+        setCurrentFilters(searchFilters);
 
-            const response = await tutorService.searchTutors(searchFilters, state.user?.id);
-            if (response.success) {
-                setTutors(response.data.content);
-                setFilteredTutors(response.data.content);
-                setPagination(response.data);
-            } else {
-                setError(response.message);
-                setTutors([]);
-                setPagination(null);
+        const MAX_RETRIES = 3;
+        let lastError: any = null;
+
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                const response = await tutorService.searchTutors(searchFilters, state.user?.id);
+                if (response.success) {
+                    setTutors(response.data.content);
+                    setFilteredTutors(response.data.content);
+                    setPagination(response.data);
+                    setLoading(false);
+                    return; // Success - exit function
+                } else {
+                    lastError = response.message;
+                }
+            } catch (err) {
+                lastError = err;
+                console.warn(`Search attempt ${attempt}/${MAX_RETRIES} failed:`, err);
+
+                // Wait before retrying (exponential backoff: 1s, 2s, 4s)
+                if (attempt < MAX_RETRIES) {
+                    await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
+                }
             }
-        } catch (err) {
-            setError(t("findTutors.errorMessages.failedToSearchTutors"));
-            console.error("Search error:", err);
-            setTutors([]);
-            setPagination(null);
-        } finally {
-            setLoading(false);
         }
-    }, []);
+
+        // All retries failed
+        console.error("All search attempts failed:", lastError);
+        setError(t("findTutors.errorMessages.failedToSearchTutors"));
+        setTutors([]);
+        setPagination(null);
+        setLoading(false);
+    }, [t, state.user?.id]);
 
     // Handle page change
     const handlePageChange = useCallback(
