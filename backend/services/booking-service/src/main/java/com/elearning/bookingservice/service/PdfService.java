@@ -1,7 +1,7 @@
 package com.elearning.bookingservice.service;
 
 import com.elearning.bookingservice.dto.response.TransactionDetailResponse;
-import com.itextpdf.kernel.colors.ColorConstants;
+
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -113,7 +113,8 @@ public class PdfService {
                 .setMarginBottom(15);
 
         // Student Information
-        addTableRow(table, "Student ID", transaction.getStudentId());
+        addTableRow(table, "Student ID",
+                transaction.getStudentId() != null ? transaction.getStudentId().toString() : null);
 
         // Tutor Information
         addTableRow(table, "Tutor", transaction.getTutorName());
@@ -155,8 +156,10 @@ public class PdfService {
         }
 
         addTableRow(table, "Total Amount", formatCurrency(transaction.getAmount()));
-        addTableRow(table, "Payment Method", formatPaymentMethod(transaction.getPaymentProvider()));
-        addTableRow(table, "Status", formatStatus(transaction.getStatus()));
+        addTableRow(table, "Payment Method", formatPaymentMethod(
+                transaction.getPaymentProvider() != null ? transaction.getPaymentProvider().name() : null));
+        addTableRow(table, "Status",
+                formatStatus(transaction.getStatus() != null ? transaction.getStatus().name() : null));
 
         if (transaction.getProviderTransactionId() != null) {
             addTableRow(table, "Provider TX ID", transaction.getProviderTransactionId());
@@ -195,13 +198,15 @@ public class PdfService {
         table.addCell(valueCell);
     }
 
-    private String formatDateTime(String dateTime) {
+    private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "N/A";
+        }
         try {
-            LocalDateTime dt = LocalDateTime.parse(dateTime);
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm:ss", new Locale("vi", "VN"));
-            return dt.format(formatter);
+            return dateTime.format(formatter);
         } catch (Exception e) {
-            return dateTime;
+            return dateTime.toString();
         }
     }
 
