@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { HiSearch, HiCog, HiPaperAirplane, HiUser, HiUsers, HiPlus, HiPhotograph, HiDocument, HiVideoCamera } from 'react-icons/hi';
+import { HiSearch, HiCog, HiPaperAirplane, HiUser, HiUsers, HiPlus, HiPhotograph, HiDocument, HiVideoCamera, HiX, HiMenu } from 'react-icons/hi';
 import { useBreadcrumb } from '../context/BreadcrumbContext';
 import { type BreadcrumbItem } from '../components/Breadcrumb';
 import { useAuth } from '../../../context/AuthContext';
@@ -98,9 +98,11 @@ interface ChatWindowProps {
     isTyping: boolean;
     currentUserId: string;
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+    isTutor?: boolean;
+    onHideConversation?: () => void;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, onSendFiles, isTyping }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPrefix, onSendMessage, onSendFiles, isTyping, isTutor, onHideConversation }) => {
     const { t } = useTranslation();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -201,6 +203,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversation, messages, i18nPre
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {isTutor && onHideConversation && (
+                        <button 
+                            onClick={onHideConversation}
+                            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+                            title="Ẩn danh sách cuộc trò chuyện"
+                        >
+                            <HiX className="w-5 h-5" />
+                        </button>
+                    )}
                     <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
                         <HiCog className="w-5 h-5" />
                     </button>
@@ -422,6 +433,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
     const [wsConnected, setWsConnected] = useState(false);
     const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
     const [, setUserCache] = useState<Map<string, UserInfo>>(new Map());
+    const [isConversationListHidden, setIsConversationListHidden] = useState(false);
 
     // Breadcrumb
     useEffect(() => {
@@ -753,7 +765,7 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
         <div className="flex flex-col h-full min-h-0">
             <div className="flex bg-white rounded-2xl shadow-sm overflow-hidden flex-1 min-h-0">
                 {/* Left Pane: Contact List */}
-                <div className="w-full md:w-2/5 xl:w-1/3 max-w-sm border-r border-gray-200 flex flex-col">
+                <div className={`${isConversationListHidden ? 'hidden' : 'flex'} w-full md:w-2/5 xl:w-1/3 max-w-sm border-r border-gray-200 flex-col`}>
                     <div className="p-4 border-b border-gray-200">
                         <h2 className="text-xl font-bold text-gray-800">{t(`${i18nPrefix}.title`)}</h2>
                         <div className="relative mt-4">
@@ -821,7 +833,17 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                 </div>
 
                 {/* Right Pane: Chat Window */}
-                <div className="hidden md:flex w-3/5 xl:w-2/3 flex-col relative min-h-0">
+                <div className={`${isConversationListHidden ? 'flex' : 'hidden md:flex'} ${isConversationListHidden ? 'w-full' : 'w-3/5 xl:w-2/3'} flex-col relative min-h-0`}>
+                    {/* Show conversation list button when hidden (for tutor) */}
+                    {isTutor && isConversationListHidden && (
+                        <button
+                            onClick={() => setIsConversationListHidden(false)}
+                            className="absolute top-4 left-4 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors border border-gray-200"
+                            title="Hiện danh sách cuộc trò chuyện"
+                        >
+                            <HiMenu className="w-5 h-5 text-gray-600" />
+                        </button>
+                    )}
                     {loadingMessages ? (
                         <div className="flex items-center justify-center h-full">
                             <BirdLoading title={t('common.loading')} size="sm" />
@@ -837,6 +859,8 @@ const InboxPage: React.FC<InboxContentProps> = ({ initialSelectedStudentId }) =>
                             isTyping={typingUsers.size > 0}
                             currentUserId={currentUserId}
                             setMessages={setMessages}
+                            isTutor={isTutor}
+                            onHideConversation={() => setIsConversationListHidden(true)}
                         />
                     )}
                 </div>
