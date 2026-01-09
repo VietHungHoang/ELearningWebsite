@@ -26,7 +26,7 @@ export class InstructorListComponent implements OnInit {
     showDeleteDialog = false;
     instructorToDelete: Tutor | null = null;
 
-    itemsPerPage = 3;
+    itemsPerPage = 5;
     currentPage = 1;
     totalInstructors = 0;
     paginatedInstructors: Tutor[] = [];
@@ -54,19 +54,20 @@ export class InstructorListComponent implements OnInit {
 
     /**
      * Load instructors from API (with fallback to mock data)
-     * Gọi API lần đầu và cache dữ liệu cho phân trang
+     * Gọi API với pagination - server-side pagination
      */
     loadInstructors(): void {
         this.isLoading = true;
-        this.userService.getTutor().subscribe({
-            next: (instructors) => {
-                this.allInstructors = instructors; // Lưu backup
-                this.instructors = instructors; // Dùng cho phân trang hiện tại
-                this.totalInstructors = instructors.length;
-                this.currentPage = 1; // Reset trang về 1
-                this.applyPagination(instructors);
+        // Convert 1-based page to 0-based for backend
+        const backendPage = this.currentPage - 1;
+        
+        this.userService.getTutor(backendPage, this.itemsPerPage).subscribe({
+            next: (result: { tutors: Tutor[], total: number }) => {
+                this.instructors = result.tutors;
+                this.paginatedInstructors = result.tutors;
+                this.totalInstructors = result.total; // Use total from backend pagination
                 this.isLoading = false;
-                console.log('[InstructorList] Data loaded from API:', instructors.length, 'items');
+                console.log('[InstructorList] Data loaded from API:', result.tutors.length, 'items, total:', result.total);
             },
             error: (error: any) => {
                 console.error('Error loading instructors:', error);
@@ -120,19 +121,18 @@ export class InstructorListComponent implements OnInit {
             // Call search method with search term
             this.userService.searchInstructors(searchTerm).subscribe({
                 next: (searchResults) => {
-                    this.instructors = searchResults; // Update instructors cho pagination
+                    // For search, we still do client-side pagination on search results
+                    this.instructors = searchResults;
                     this.totalInstructors = searchResults.length;
-                    this.applyPagination(searchResults); // Apply pagination cho search results
+                    this.applyPagination(searchResults);
                     console.log('[InstructorList] Search results:', searchResults.length, 'items');
                 },
                 error: (error) => console.error('Error searching instructors:', error)
             });
         } else {
-            // Restore original data từ backup
-            this.instructors = this.allInstructors;
-            this.totalInstructors = this.allInstructors.length;
-            this.applyPagination(this.allInstructors);
-            console.log('[InstructorList] Cleared search, restored original data');
+            // Reload from API when clearing search
+            this.loadInstructors();
+            console.log('[InstructorList] Cleared search, reloading from API');
         }
     }
 
@@ -200,14 +200,14 @@ export class InstructorListComponent implements OnInit {
     goToPage(page: number): void {
         if (page < 1 || page > this.totalPages) return;
         this.currentPage = page;
-        this.applyPagination(this.instructors);
+        this.loadInstructors(); // Reload from API with new page
         console.log('[InstructorList] Navigated to page', page);
     }
 
     previousPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
-            this.applyPagination(this.instructors);
+            this.loadInstructors(); // Reload from API with new page
             console.log('[InstructorList] Previous page:', this.currentPage);
         }
     }
@@ -215,7 +215,7 @@ export class InstructorListComponent implements OnInit {
     nextPage(): void {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.applyPagination(this.instructors);
+            this.loadInstructors(); // Reload from API with new page
             console.log('[InstructorList] Next page:', this.currentPage);
         }
     }

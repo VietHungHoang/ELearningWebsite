@@ -709,9 +709,10 @@ export class UserService {
      * Get list of approved tutors (for instructor-list page)
      * Calls /tutors API - returns TutorResponse from backend
      */
-    getTutor(): Observable<Tutor[]> {
-        // Gọi API /tutors - lấy danh sách gia sư đã được duyệt
-        return this.apiService.get<PaginatedResponse<any>>('/tutors').pipe(
+    getTutor(page: number = 0, size: number = 5): Observable<{ tutors: Tutor[], total: number }> {
+        // Gọi API /tutors - lấy danh sách gia sư đã được duyệt với pagination
+        // Mặc định lấy page=0, size=5 (backend dùng 0-based page)
+        return this.apiService.get<PaginatedResponse<any>>('/tutors', { page, size }).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data && response.data.content) {
@@ -727,20 +728,33 @@ export class UserService {
                         this.mapTutorResponseToTutor(item)
                     );
                     this.instructorsSubject.next(tutors);
-                    return tutors;
+                    
+                    // Trả về cả tutors và totalElements từ pagination
+                    return {
+                        tutors,
+                        total: response.data.totalElements || 0
+                    };
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for approved tutors:', response.message);
-                return this.instructorsSubject.value.length > 0
+                const fallbackTutors = this.instructorsSubject.value.length > 0
                     ? this.instructorsSubject.value
                     : this.mockTutors;
+                return {
+                    tutors: fallbackTutors,
+                    total: fallbackTutors.length
+                };
             }),
             catchError(error => {
                 // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
                 console.error('[UserService] API error for approved tutors, returning mock data:', error);
-                return of(this.instructorsSubject.value.length > 0
+                const fallbackTutors = this.instructorsSubject.value.length > 0
                     ? this.instructorsSubject.value
-                    : this.mockTutors);
+                    : this.mockTutors;
+                return of({
+                    tutors: fallbackTutors,
+                    total: fallbackTutors.length
+                });
             })
         );
     }
@@ -881,9 +895,9 @@ export class UserService {
         };
     }
 
-    getStudents(page: number = 0, size: number = 1000): Observable<Student[]> {
+    getStudents(page: number = 0, size: number = 5): Observable<{ students: Student[], total: number }> {
         // Gọi API /students - lấy danh sách học sinh với pagination
-        // Mặc định lấy page=0, size=1000 để lấy tất cả (backend dùng 0-based page)
+        // Mặc định lấy page=0, size=5 (backend dùng 0-based page)
         return this.apiService.get<PaginatedResponse<any>>('/students', { page, size }).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
@@ -900,20 +914,33 @@ export class UserService {
                         this.mapStudentResponseToStudent(item)
                     );
                     this.studentsSubject.next(students);
-                    return students;
+                    
+                    // Trả về cả students và totalElements từ pagination
+                    return {
+                        students,
+                        total: response.data.totalElements || 0
+                    };
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for students:', response.message);
-                return this.studentsSubject.value.length > 0
+                const fallbackStudents = this.studentsSubject.value.length > 0
                     ? this.studentsSubject.value
                     : this.mockStudents;
+                return {
+                    students: fallbackStudents,
+                    total: fallbackStudents.length
+                };
             }),
             catchError(error => {
                 // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
                 console.error('[UserService] API error for students, returning mock data:', error);
-                return of(this.studentsSubject.value.length > 0
+                const fallbackStudents = this.studentsSubject.value.length > 0
                     ? this.studentsSubject.value
-                    : this.mockStudents);
+                    : this.mockStudents;
+                return of({
+                    students: fallbackStudents,
+                    total: fallbackStudents.length
+                });
             })
         );
     }
