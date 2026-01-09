@@ -83,8 +83,11 @@ const BookASession: React.FC<BookASessionProps> = ({
 
             try {
                 const response = await classService.getTrialSessionRequest(tutorId, state.user.id);
-                setHasTrialSession(!response.data);
-                setTrialSessionRequest(response.data);
+                // Only consider PENDING or ACCEPTED trials as "existing" - CANCELLED/DECLINED should allow new booking
+                const hasActiveTrialSession = response.data &&
+                    (response.data.status === 'PENDING' || response.data.status === 'ACCEPTED');
+                setHasTrialSession(!hasActiveTrialSession);
+                setTrialSessionRequest(hasActiveTrialSession ? response.data : null);
             } catch (error) {
                 console.error("Failed to check trial session availability:", error);
                 setHasTrialSession(true);

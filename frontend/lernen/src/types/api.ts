@@ -381,7 +381,7 @@ export interface TrialSessionRequest {
     message?: string; // Optional message from student
 }
 
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED' | 'REJECTED' | 'CANCELLED';
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'ACCEPTED' | 'DECLINED' | 'REJECTED' | 'CANCELLED';
 export type RequestTargetType = 'SESSION' | 'CLASS';
 
 export interface RescheduleRequest {

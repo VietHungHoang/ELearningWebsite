@@ -13,6 +13,7 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
     const getStatusColor = (status: RequestStatus): string => {
         switch (status) {
             case 'APPROVED':
+            case 'ACCEPTED':
                 return 'bg-[#065A46]'; // Primary color - success state (same as active/completed in quiz)
             case 'PENDING':
                 return 'bg-[#a16207]'; // Warm amber - working/pending state (same as draft/in_progress in quiz)
@@ -30,6 +31,7 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
     const statusLabels: Record<RequestStatus, string> = {
         PENDING: t('dashboard.tutor.requests.status.pending'),
         APPROVED: t('dashboard.tutor.requests.status.approved'),
+        ACCEPTED: t('dashboard.tutor.requests.status.accepted'),
         DECLINED: t('dashboard.tutor.requests.status.declined'),
         REJECTED: t('dashboard.tutor.requests.status.rejected'),
         CANCELLED: t('dashboard.tutor.requests.status.cancelled'),

@@ -1393,6 +1393,7 @@
         "status": {
           "pending": "Pending",
           "approved": "Approved",
+          "accepted": "Accepted",
           "declined": "Declined",
           "rejected": "Rejected",
           "cancelled": "Cancelled"
