@@ -107,4 +107,37 @@ public class EmailServiceImpl implements EmailService {
 
         sendHtmlEmail(to, subject, htmlContent);
     }
+
+    @Override
+    public void sendSessionReminder(String to, String recipientName, String classTitle, String time, String date,
+            String tutorName, String zoomJoinUrl, boolean isForTutor) {
+        String subject = "⏰ Nhắc nhở: Buổi học \"" + classTitle + "\" sẽ bắt đầu lúc " + time;
+
+        String joinButton = "";
+        if (zoomJoinUrl != null && !zoomJoinUrl.isEmpty()) {
+            joinButton = "<a href='" + zoomJoinUrl
+                    + "' style='display: inline-block; background-color: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 15px;'>Tham gia lớp học ngay</a>";
+        }
+
+        String tutorInfo = "";
+        if (!isForTutor && tutorName != null) {
+            tutorInfo = "<p>Gia sư: <strong>" + tutorName + "</strong></p>";
+        }
+
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>" +
+                "<h2 style='color: #1565c0;'>Xin chào " + recipientName + "!</h2>" +
+                "<p>Đây là nhắc nhở rằng buổi học của bạn sẽ bắt đầu trong <strong>15 phút</strong> nữa.</p>" +
+                "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
+                "<p style='margin: 0 0 10px 0;'><strong>📚 Lớp học:</strong> " + classTitle + "</p>" +
+                "<p style='margin: 0 0 10px 0;'><strong>📅 Ngày:</strong> " + date + "</p>" +
+                "<p style='margin: 0 0 10px 0;'><strong>🕐 Thời gian:</strong> " + time + "</p>" +
+                tutorInfo +
+                "</div>" +
+                "<p>Hãy chuẩn bị sẵn sàng để có một buổi học hiệu quả!</p>" +
+                joinButton +
+                "<p style='margin-top: 20px;'>Trân trọng,<br><strong>Đội ngũ E-Learning</strong></p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
 }

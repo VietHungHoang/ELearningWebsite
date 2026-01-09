@@ -19,4 +19,10 @@ public interface EmailService {
      */
     void sendPaymentRequestToStudent(String to, String studentName, String classTitle, Double pricePerHour,
             String tutorName);
+
+    /**
+     * Send session reminder 15 minutes before class starts
+     */
+    void sendSessionReminder(String to, String recipientName, String classTitle, String time, String date,
+            String tutorName, String zoomJoinUrl, boolean isForTutor);
 }
