@@ -788,9 +788,9 @@
         "title": "Instructor Payouts",
         "description": "Total paid to instructors"
       },
-      "profitMargin": {
-        "title": "Profit Margin",
-        "description": "Average commission rate"
+      "successRate": {
+        "title": "Success Rate",
+        "description": "Percentage of successful transactions"
       },
       "transactions": {
         "title": "Transactions",
@@ -1072,7 +1072,8 @@
     "paymentMethod": {
       "momo": "Momo",
       "vnpay": "VNPay",
-      "banking": "Banking"
+      "banking": "Banking",
+      "sepay": "SePay"
     },
     "confirm": {
       "title": "Confirm Approval",

@@ -55,7 +55,7 @@ export class PaymentMethodChartComponent implements OnInit, OnChanges {
                         type: 'donut',
                         height: 280
                     },
-                    colors: ['#9CAAFF', '#605DFF'],
+                    colors: ['#005baa', '#a50064', '#00BE99'], // Colors for VNPay, MoMo, SePay
                     labels,
                     plotOptions: {
                         pie: {
