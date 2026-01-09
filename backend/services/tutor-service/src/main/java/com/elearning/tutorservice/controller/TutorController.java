@@ -7,6 +7,7 @@ import com.elearning.tutorservice.service.TutorOnboardingService;
 import com.elearning.tutorservice.service.TutorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,5 +74,18 @@ public class TutorController {
         log.info("Received tutor approval request for: {}", tutorId);
         tutorOnboardingService.approveTutor(tutorId);
         return ResponseEntity.ok(ApiResponse.success(null, "Tutor approved successfully"));
+    }
+
+    /**
+     * GET /tutors
+     * Get all verified tutors with pagination (for admin)
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<TutorResponse>>> getAllTutors(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("Getting all verified tutors, page: {}, size: {}", page, size);
+        Page<TutorResponse> tutors = tutorService.getAllTutors(page, size);
+        return ResponseEntity.ok(ApiResponse.success(tutors, "Tutors retrieved successfully"));
     }
 }

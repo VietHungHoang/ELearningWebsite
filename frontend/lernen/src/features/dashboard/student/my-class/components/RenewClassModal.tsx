@@ -76,7 +76,8 @@ const RenewClassModal: React.FC<RenewClassModalProps> = ({ isOpen, onClose, clas
     if (!shouldRender) return null;
 
     // Get tutor's session fee from class data
-    const basePrice = classData.tutor?.currentSessionFee || 300000; // Fallback to 300k VND
+    // Note: UserBasicInfoResponse doesn't have currentSessionFee, using fallback
+    const basePrice = 300000; // Default to 300k VND (tutor fee should be fetched separately if needed)
     const convertedBasePrice = convertFromVND(basePrice, selectedCurrency);
 
     const calculatePricePerSession = (discount: number) => {

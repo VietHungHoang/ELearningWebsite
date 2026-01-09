@@ -27,18 +27,20 @@ export class TutorApprovalComponent implements OnInit {
     activeTab: 'pending' | 'requestEdit' | 'history' = 'pending';
 
     // Data from API
+    allRequests: InstructorRequest[] = []; // Original data from API để restore sau search/filter
     filteredRequests: InstructorRequest[] = [];
+    paginatedRequests: InstructorRequest[] = [];
+
     searchTerm: string = '';
 
     // Filter properties
     selectedStatus: string = 'all';
     selectedSubject: string = 'all';
 
-    // Pagination (from backend)
+    // Pagination (frontend-based like instructor-list)
     itemsPerPage = 5;
-    currentPage = 0; // 0-based for Spring Boot
+    currentPage = 1; // 1-based like instructor-list
     totalRequests = 0;
-    totalPages = 0;
 
     showLevelDialog = false;
     selectedRequest: InstructorRequest | null = null;
@@ -155,31 +157,22 @@ export class TutorApprovalComponent implements OnInit {
     switchTab(tab: 'pending' | 'requestEdit' | 'history'): void {
         this.activeTab = tab;
         this.selectedRequests.clear(); // Clear selections when switching tabs
-        this.currentPage = 0; // Reset to first page (0-based)
-        this.loadApprovalRequests();
+        this.currentPage = 1; // Reset to first page (1-based)
+        this.applyFilters();
     }
 
     loadApprovalRequests(): void {
-        // Build params for API call
-        const params: any = {
-            page: this.currentPage,
-            size: this.itemsPerPage
-        };
+        // Load all data without pagination for frontend-based pagination
+        const params: any = {};
 
         // Map activeTab to status filter
-        // pending tab: show PENDING and REQUEST_CHANGES
-        // requestEdit tab: show REQUEST_CHANGES
-        // history tab: show APPROVED and REJECTED
         if (this.activeTab === 'pending') {
-            // For pending tab, use status filter if selected, otherwise backend should return PENDING + REQUEST_CHANGES
-            if (this.selectedStatus !== 'all') {
-                params.status = this.selectedStatus;
-            }
+            // For pending tab: PENDING and REQUEST_CHANGES
+            params.status = 'pending,edited';
         } else if (this.activeTab === 'requestEdit') {
             params.status = 'edited'; // REQUEST_CHANGES
         } else if (this.activeTab === 'history') {
-            // For history tab, backend should return APPROVED + REJECTED
-            // Can add status filter if needed
+            params.status = 'approved,rejected'; // APPROVED and REJECTED
         }
 
         // Add subject filter if not 'all'
@@ -192,36 +185,65 @@ export class TutorApprovalComponent implements OnInit {
             params.search = this.searchTerm.trim();
         }
 
-        // Call API with params
+        // Call API without page/size to get all data
         this.isLoading = true;
         this.userService.getInstructorRequests(params).subscribe({
             next: (response: PaginatedResponse<InstructorRequest>) => {
-                this.filteredRequests = response.content;
-                this.totalRequests = response.totalElements;
-                this.totalPages = response.totalPages;
-                this.currentPage = response.number; // Update current page from backend
+                // Since we're not using pagination, we need to get all pages
+                // For now, assume the API returns all data when no page/size is specified
+                // If not, we might need to modify the service to support loading all
+                this.allRequests = response.content;
+                this.applyFilters();
                 this.isLoading = false;
             },
             error: (error) => {
                 console.error('Error loading instructor requests:', error);
-                this.filteredRequests = [];
-                this.totalRequests = 0;
-                this.totalPages = 0;
+                this.allRequests = [];
+                this.applyFilters();
                 this.isLoading = false;
             }
         });
+    }
+
+    applyFilters(): void {
+        let filtered = [...this.allRequests];
+
+        // Apply additional filters if needed
+        if (this.selectedStatus !== 'all') {
+            const statusMap: { [key: string]: string } = {
+                'new': 'PENDING',
+                'edited': 'REQUEST_CHANGES'
+            };
+            const backendStatus = statusMap[this.selectedStatus];
+            if (backendStatus) {
+                filtered = filtered.filter(request => request.requestStatus === backendStatus);
+            }
+        }
+
+        this.filteredRequests = filtered;
+        this.totalRequests = filtered.length;
+        this.currentPage = 1;
+        this.applyPagination();
+    }
+
+    applyPagination(): void {
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        this.paginatedRequests = this.filteredRequests.slice(startIndex, endIndex);
     }
 
     onSearchChange(searchTerm?: string): void {
         if (searchTerm !== undefined) {
             this.searchTerm = searchTerm;
         }
-        this.currentPage = 0; // Reset to first page (0-based)
+        this.currentPage = 1; // Reset to first page (1-based)
         this.loadApprovalRequests();
     }
 
+
+
     onFilterChange(): void {
-        this.currentPage = 0; // Reset to first page (0-based)
+        this.currentPage = 1; // Reset to first page (1-based)
         this.loadApprovalRequests();
     }
 
@@ -229,7 +251,7 @@ export class TutorApprovalComponent implements OnInit {
         this.selectedStatus = 'all';
         this.selectedSubject = 'all';
         this.searchTerm = '';
-        this.currentPage = 0; // Reset to first page (0-based)
+        this.currentPage = 1; // Reset to first page (1-based)
         this.loadApprovalRequests();
     }
 
@@ -248,7 +270,7 @@ export class TutorApprovalComponent implements OnInit {
 
     clearSearch(): void {
         this.searchTerm = '';
-        this.currentPage = 0; // Reset to first page (0-based)
+        this.currentPage = 1; // Reset to first page (1-based)
         this.loadApprovalRequests();
     }
 
@@ -626,7 +648,7 @@ export class TutorApprovalComponent implements OnInit {
         this.toastTitle = title;
         this.toastMessage = message;
         this.showToast = true;
-        
+
         // Auto dismiss after 3 seconds
         setTimeout(() => {
             this.showToast = false;
@@ -647,54 +669,72 @@ export class TutorApprovalComponent implements OnInit {
         return instructor.languages.map(l => l.languageCode).join(', ');
     }
 
-    // Pagination methods
+    // // Pagination methods
+    // get showingText(): string {
+    //     if (this.totalRequests === 0) {
+    //         return this.i18nService.translate('instructorApproval.pagination.showing', { start: 0, end: 0, total: 0 });
+    //     }
+    //     // Convert 0-based page to 1-based for display
+    //     const startItem = this.currentPage * this.itemsPerPage + 1;
+    //     const endItem = Math.min((this.currentPage + 1) * this.itemsPerPage, this.totalRequests);
+    //     return this.i18nService.translate('instructorApproval.pagination.showing', {
+    //         start: startItem,
+    //         end: endItem,
+    //         total: this.totalRequests
+    //     });
+    // }
+
+    getSttNumber(index: number): number {
+        // Calculate STT based on current page (1-based) and items per page
+        return (this.currentPage - 1) * this.itemsPerPage + index + 1;
+    }
+
+    // goToPage(page: number): void {
+    //     // page is 1-based from UI, convert to 0-based for API
+    //     const pageIndex = page - 1;
+    //     if (pageIndex < 0 || pageIndex >= this.totalPages) return;
+    //     this.currentPage = pageIndex;
+    //     this.loadApprovalRequests();
+    // }
+
+    get totalPages(): number {
+        return Math.ceil(this.totalRequests / this.itemsPerPage);
+    }
+
     get showingText(): string {
-        if (this.totalRequests === 0) {
-            return this.i18nService.translate('instructorApproval.pagination.showing', { start: 0, end: 0, total: 0 });
-        }
-        // Convert 0-based page to 1-based for display
-        const startItem = this.currentPage * this.itemsPerPage + 1;
-        const endItem = Math.min((this.currentPage + 1) * this.itemsPerPage, this.totalRequests);
-        return this.i18nService.translate('instructorApproval.pagination.showing', {
+        const startItem = (this.currentPage - 1) * this.itemsPerPage + 1;
+        const endItem = Math.min(this.currentPage * this.itemsPerPage, this.totalRequests);
+        return this.i18nService.translate('tutorApproval.pagination.showing', {
             start: startItem,
             end: endItem,
             total: this.totalRequests
         });
     }
 
-    getSttNumber(index: number): number {
-        // Calculate STT based on current page (0-based) and items per page
-        return this.currentPage * this.itemsPerPage + index + 1;
-    }
-
     goToPage(page: number): void {
-        // page is 1-based from UI, convert to 0-based for API
-        const pageIndex = page - 1;
-        if (pageIndex < 0 || pageIndex >= this.totalPages) return;
-        this.currentPage = pageIndex;
-        this.loadApprovalRequests();
+        if (page < 1 || page > this.totalPages) return;
+        this.currentPage = page;
+        this.applyPagination();
     }
 
     previousPage(): void {
-        if (this.currentPage > 0) {
+        if (this.currentPage > 1) {
             this.currentPage--;
-            this.loadApprovalRequests();
+            this.applyPagination();
         }
     }
 
     nextPage(): void {
-        if (this.currentPage < this.totalPages - 1) {
+        if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.loadApprovalRequests();
+            this.applyPagination();
         }
     }
 
     get visiblePages(): number[] {
         const pages: number[] = [];
         const maxVisiblePages = 4;
-        // Convert 0-based to 1-based for display
-        const currentPage1Based = this.currentPage + 1;
-        let startPage = Math.max(1, currentPage1Based - Math.floor(maxVisiblePages / 2));
+        let startPage = Math.max(1, this.currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
 
         if (endPage - startPage + 1 < maxVisiblePages) {

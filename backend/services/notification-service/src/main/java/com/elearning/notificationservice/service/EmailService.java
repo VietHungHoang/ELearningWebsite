@@ -25,4 +25,15 @@ public interface EmailService {
      */
     void sendSessionReminder(String to, String recipientName, String classTitle, String time, String date,
             String tutorName, String zoomJoinUrl, boolean isForTutor);
+            
+     /**
+      * Send payment success notification to student
+      */
+    void sendPaymentSuccessNotification(String to, String studentName, String tutorName, String classTitle, 
+            java.math.BigDecimal amount, String currency);
+
+    /**
+     * Send new student enrollment notification to tutor
+     */
+    void sendNewStudentEnrollmentNotification(String to, String tutorName, String studentName, String classTitle);
 }

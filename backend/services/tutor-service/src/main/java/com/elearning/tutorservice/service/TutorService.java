@@ -6,6 +6,7 @@ import com.elearning.tutorservice.dto.request.UpdateTutorProfileRequest;
 import com.elearning.tutorservice.dto.response.*;
 import com.elearning.tutorservice.dto.event.AccountCreatedEvent;
 import com.elearning.tutorservice.dto.event.TutorProfileUpdatedEvent;
+import org.springframework.data.domain.Page;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -24,4 +25,12 @@ public interface TutorService {
     void incrementTotalStudents(String tutorId);
     
     void handleNewStudentEnrollment(String tutorId, String studentId);
+
+    /**
+     * Get all verified tutors with pagination
+     * @param page Page number (1-based)
+     * @param size Page size
+     * @return Page of verified tutors
+     */
+    Page<TutorResponse> getAllTutors(int page, int size);
 }

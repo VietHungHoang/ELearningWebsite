@@ -119,4 +119,17 @@ public class KafkaProducerService {
             throw new RuntimeException("Failed to serialize SessionReminderEvent", e);
         }
     }
+    /**
+     * Send new student enrollment notification to tutor
+     */
+    public void sendNewStudentEnrollmentNotification(Object event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send("new_student_enrollment_notification", jsonMessage);
+            log.info("Sent new student enrollment notification to topic new_student_enrollment_notification: {}", jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting NewStudentEnrollmentNotificationEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize NewStudentEnrollmentNotificationEvent", e);
+        }
+    }
 }

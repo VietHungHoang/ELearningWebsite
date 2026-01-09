@@ -60,6 +60,26 @@ public class BookingPaymentEventServiceImpl implements BookingPaymentEventServic
                 kafkaProducer.sendBookingPaymentSuccessToClassService(classServiceEvent);
                 log.info("Forwarded payment success event to class-service for classId: {}", booking.getClassId());
 
+                // Send payment success notification to student
+                String classTitle = booking.getClassId() != null 
+                    ? "Lớp " + (booking.getTutorName() != null ? booking.getTutorName() : "")
+                    : "Lớp " + (booking.getTutorName() != null ? booking.getTutorName() : "");
+                
+                com.elearning.bookingservice.dto.event.PaymentSuccessNotificationEvent paymentNotificationEvent = 
+                    com.elearning.bookingservice.dto.event.PaymentSuccessNotificationEvent.builder()
+                        .bookingId(event.getBookingId())
+                        .studentId(booking.getStudentId())
+                        .studentEmail(null) // Will use default email in notification-service
+                        .studentName(null) // Not available in booking
+                        .amount(booking.getAmount() != null ? java.math.BigDecimal.valueOf(booking.getAmount()) : null)
+                        .currency("VNĐ")
+                        .tutorName(booking.getTutorName())
+                        .classTitle(classTitle)
+                        .build();
+                
+                kafkaProducer.sendPaymentSuccessNotification(paymentNotificationEvent);
+                log.info("Sent payment success notification event for bookingId: {}", event.getBookingId());
+
                 // Cleanup: delete locale from Redis after forwarding
                 metadataCache.deleteLocale(event.getBookingId());
         }

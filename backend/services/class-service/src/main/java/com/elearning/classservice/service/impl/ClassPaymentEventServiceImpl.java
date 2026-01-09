@@ -36,6 +36,8 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private final ZoomMeetingService zoomMeetingService;
     private final ZoomAsyncService zoomAsyncService;
     private final KafkaProducerService kafkaProducerService;
+    private final com.elearning.classservice.repository.UserRepository userRepository;
+    private final com.elearning.classservice.repository.SessionParticipantRepository sessionParticipantRepository;
 
     @Override
     @Transactional
@@ -61,9 +63,9 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         // For RENEWAL: Create additional sessions starting AFTER the last existing
         // session
         if (event.getSessionsPurchased() != null && event.getSessionsPurchased() > 0) {
-            log.info("Creating {} additional sessions for class renewal, classId: {}",
-                    event.getSessionsPurchased(), event.getClassId());
-            createRenewalSessions(classEntity, event.getSessionsPurchased());
+            log.info("Creating {} additional sessions for class renewal, classId: {}, studentId: {}",
+                    event.getSessionsPurchased(), event.getClassId(), event.getStudentId());
+            createRenewalSessions(classEntity, event.getSessionsPurchased(), event.getStudentId());
         }
 
         // Create Zoom meeting links asynchronously (non-blocking)
@@ -102,7 +104,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
             // Generate Sessions (based on pattern + total sessions purchased)
             int totalSessions = event.getSessionsPurchased() != null ? event.getSessionsPurchased() : 1;
-            createSessionsFromSchedule(newClass, event.getSchedule(), totalSessions);
+            createSessionsFromSchedule(newClass, event.getSchedule(), totalSessions, event.getStudentId());
         }
 
         // 3. Create Enrollment
@@ -170,6 +172,38 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
             log.info("Student {} already enrolled with tutor {} before. Skipping totalStudents increment.",
                     event.getStudentId(), event.getTutorId());
         }
+
+        // Send new student enrollment notification to tutor
+        try {
+            // Get tutor information from users table
+            com.elearning.classservice.entity.User tutor = userRepository.findById(event.getTutorId())
+                    .orElse(null);
+            
+            // Get student information from users table
+            com.elearning.classservice.entity.User student = userRepository.findById(event.getStudentId())
+                    .orElse(null);
+
+            if (tutor != null && tutor.getEmail() != null) {
+                com.elearning.classservice.dto.event.NewStudentEnrollmentNotificationEvent tutorNotificationEvent = 
+                    com.elearning.classservice.dto.event.NewStudentEnrollmentNotificationEvent.builder()
+                        .tutorId(event.getTutorId())
+                        .tutorEmail(tutor.getEmail())
+                        .tutorName(tutor.getFullName())
+                        .studentId(event.getStudentId())
+                        .studentName(student != null ? student.getFullName() : null)
+                        .classId(newClass.getId())
+                        .classTitle(newClass.getTitle())
+                        .build();
+                
+                kafkaProducerService.sendNewStudentEnrollmentNotification(tutorNotificationEvent);
+                log.info("Sent new student enrollment notification to tutor: {}", tutor.getEmail());
+            } else {
+                log.warn("Tutor not found or email is null for tutorId: {}", event.getTutorId());
+            }
+        } catch (Exception e) {
+            log.error("Failed to send new student enrollment notification to tutor: {}", e.getMessage(), e);
+            // Don't throw exception, just log error to avoid breaking the main flow
+        }
     }
 
     private void createClassSchedules(ClassEntity classEntity, String scheduleJson) {
@@ -215,7 +249,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         }
     }
 
-    private void createSessionsFromSchedule(ClassEntity classEntity, String scheduleJson, int totalSessionsToCreate) {
+    private void createSessionsFromSchedule(ClassEntity classEntity, String scheduleJson, int totalSessionsToCreate, UUID studentId) {
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, String>>> typeRef = new com.fasterxml.jackson.core.type.TypeReference<>() {
@@ -249,7 +283,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 if (sessionsCreated >= totalSessionsToCreate)
                     break;
 
-                createSession(classEntity, startTime, nextSessionNumber);
+                createSession(classEntity, startTime, nextSessionNumber, studentId);
                 createdSessionTimes.add(startTime);
                 sessionsCreated++;
                 nextSessionNumber++;
@@ -311,7 +345,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                             // Don't duplicate if for some reason it overlaps with existing (though logic
                             // starts after)
                             if (!createdSessionTimes.contains(candidate)) {
-                                createSession(classEntity, candidate, nextSessionNumber);
+                                createSession(classEntity, candidate, nextSessionNumber, studentId);
                                 createdSessionTimes.add(candidate);
                                 sessionsCreated++;
                                 nextSessionNumber++;
@@ -338,7 +372,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         }
     }
 
-    private void createSession(ClassEntity classEntity, java.time.LocalDateTime startTime, int sessionNumber) {
+    private void createSession(ClassEntity classEntity, java.time.LocalDateTime startTime, int sessionNumber, UUID studentId) {
         Session session = Session.builder()
                 .classEntity(classEntity)
                 .tutor(classEntity.getTutor())
@@ -349,7 +383,19 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
                 .sessionNumber(sessionNumber) // Gán thứ tự session
                 .build();
 
-        sessionRepository.save(session);
+        session = sessionRepository.save(session);
+        log.info("Created session {} for class {}", session.getId(), classEntity.getId());
+
+        // Create SessionParticipant for student
+        com.elearning.classservice.entity.SessionParticipant participant = com.elearning.classservice.entity.SessionParticipant.builder()
+                .session(session)
+                .student(com.elearning.classservice.entity.User.builder().id(studentId).build())
+                .attendanceStatus(com.elearning.classservice.entity.enums.AttendanceStatus.REGISTERED)
+                .isHost(false)
+                .build();
+
+        sessionParticipantRepository.save(participant);
+        log.info("Created session participant for student {} in session {}", studentId, session.getId());
     }
 
     /**
@@ -357,9 +403,14 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
      * Sessions are created starting AFTER the last existing session, using the
      * ClassSchedule pattern.
      */
-    private void createRenewalSessions(ClassEntity classEntity, int totalSessionsToCreate) {
+    private void createRenewalSessions(ClassEntity classEntity, int totalSessionsToCreate, UUID studentId) {
         UUID classId = classEntity.getId();
-        log.info("Creating {} renewal sessions for class {}", totalSessionsToCreate, classId);
+        log.info("Creating {} renewal sessions for class {} for student {}", totalSessionsToCreate, classId, studentId);
+
+        if (studentId == null) {
+            log.error("StudentId is null. Cannot create renewal sessions for class {}", classId);
+            return;
+        }
 
         // 1. Get existing schedules (the recurring pattern)
         List<com.elearning.classservice.entity.ClassSchedule> schedules = classScheduleRepository
@@ -422,7 +473,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
 
                     // Only create if after the last session and not already created
                     if (candidate.isAfter(lastSessionTime) && !createdSessionTimes.contains(candidate)) {
-                        createSession(classEntity, candidate, nextSessionNumber);
+                        createSession(classEntity, candidate, nextSessionNumber, studentId);
                         createdSessionTimes.add(candidate);
                         sessionsCreated++;
                         nextSessionNumber++;

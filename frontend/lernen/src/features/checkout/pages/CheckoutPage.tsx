@@ -56,7 +56,7 @@ const CheckoutPage: React.FC = () => {
   const bookingData = location.state?.bookingData;
   const tutorData = location.state?.tutor;
   const classId = location.state?.classId; // For class renewal
-  const isRenewal = location.state?.isRenewal || false;
+  // const isRenewal = location.state?.isRenewal || false; // Reserved for future use
 
   // Use real tutor data
   const tutor = tutorData

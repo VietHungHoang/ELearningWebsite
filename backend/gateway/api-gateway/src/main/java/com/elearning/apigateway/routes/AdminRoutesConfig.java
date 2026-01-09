@@ -18,6 +18,12 @@ public class AdminRoutesConfig {
         @Value("${services.payment-service.url}")
         private String paymentServiceUrl;
 
+        @Value("${services.booking-service.url}")
+        private String bookingServiceUrl;
+
+        @Value("${services.student-service.url}")
+        private String studentServiceUrl;
+
         @Bean
         public RouteLocator adminServiceRoutes(RouteLocatorBuilder builder) {
                 return builder.routes()
@@ -26,17 +32,21 @@ public class AdminRoutesConfig {
                                                                 "/api/v1/admin/dashboard/tutor-pending-approvals",
                                                                 "/api/v1/admin/dashboard/new-tutors",
                                                                 "/api/v1/admin/dashboard/new-students",
+                                                                "/api/v1/admin/tutors",
                                                                 "/api/v1/admin/tutors/{tutorId}/approve",
                                                                 "/api/v1/admin/tutors/{tutorId}/reject",
                                                                 "/api/v1/admin/tutors/requests")
                                                 .filters(f -> f
+                                                                .rewritePath(
+                                                                                "/api/v1/admin/tutors$",
+                                                                                "/api/v1/tutors")
                                                                 .rewritePath(
                                                                                 "/api/v1/admin/tutors/(?<rest>.*)",
                                                                                 "/api/v1/tutors/${rest}")
                                                                 .rewritePath(
                                                                                 "/api/v1/admin/dashboard/(?<rest>.*)",
                                                                                 "/api/v1/dashboard/${rest}"))
-                                                                                
+
                                                 .uri(tutorServiceUrl))
 
                                 // Bff routes
@@ -50,6 +60,23 @@ public class AdminRoutesConfig {
                                                                 "/api/v1/admin/dashboard/total-revenue",
                                                                 "/api/v1/dashboard/total-revenue"))
                                                 .uri(paymentServiceUrl))
+
+                                // Admin transactions route - forward to booking-service
+                                .route("booking-service-transactions", r -> r
+                                                .path("/api/v1/admin/transactions")
+                                                .uri(bookingServiceUrl))
+
+                                // Admin students route - forward to student-service
+                                .route("student-service", r -> r
+                                                .path("/api/v1/admin/students")
+                                                .filters(f -> f
+                                                                .rewritePath(
+                                                                                "/api/v1/admin/students$",
+                                                                                "/api/v1/students")
+                                                                .rewritePath(
+                                                                                "/api/v1/admin/students/(?<rest>.*)",
+                                                                                "/api/v1/students/${rest}"))
+                                                .uri(studentServiceUrl))
 
                                 .build();
         }

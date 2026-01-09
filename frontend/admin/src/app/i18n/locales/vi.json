@@ -416,7 +416,7 @@
       "stt": "STT",
       "name": "Tên",
       "email": "Email",
-      "joinDate": "Ngày tham gia",
+      "sessionFee": "Học phí/giờ",
       "rating": "Đánh giá",
       "country": "Quốc gia",
       "action": "Thao tác"

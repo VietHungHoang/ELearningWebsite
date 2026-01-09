@@ -51,7 +51,7 @@ export class FTransactionsComponent implements OnInit {
     approvalNotes: string = '';
 
 
-    constructor(private transactionService: TransactionService, private router: Router) {}
+    constructor(private transactionService: TransactionService, private router: Router) { }
 
     ngOnInit(): void {
         this.loadOrders();
@@ -72,8 +72,12 @@ export class FTransactionsComponent implements OnInit {
             typeFilter: this.typeFilter || undefined,
         }).subscribe({
             next: (response) => {
-                this.filteredOrders = response.content;
-                this.orders = response.content;
+                // Transform BookingTransactionResponse to PaymentResponse for display
+                const transformedContent = response.content.map(booking =>
+                    this.transactionService.transformBookingToPayment(booking)
+                );
+                this.filteredOrders = transformedContent;
+                this.orders = transformedContent;
                 this.totalPages = response.totalPages;
                 this.totalElements = response.totalElements;
                 this.currentPage = response.number + 1; // Convert from 0-based to 1-based

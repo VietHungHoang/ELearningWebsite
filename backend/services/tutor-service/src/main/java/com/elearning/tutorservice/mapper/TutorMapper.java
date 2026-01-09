@@ -95,6 +95,7 @@ public class TutorMapper {
                 .educations(mapEducations(tutor))
                 .experiences(mapExperiences(tutor))
                 .certificates(mapCertifications(tutor))
+                .createdAt(tutor.getCreatedAt())
                 .build();
     }
 

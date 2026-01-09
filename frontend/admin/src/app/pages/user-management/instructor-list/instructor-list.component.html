@@ -48,7 +48,7 @@
                             {{ 'instructorList.table.email' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
-                            {{ 'instructorList.table.joinDate' | translate }}
+                            {{ 'instructorList.table.sessionFee' | translate }}
                         </th>
                         <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
                             {{ 'instructorList.table.rating' | translate }}
@@ -78,8 +78,12 @@
                                 </span>
                             </td>
                             <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ instructor.joinDate | date:'dd/MM/yyyy HH:mm:ss' }}
+                                <span class="text-gray-500 dark:text-gray-400 font-medium">
+                                    @if (getSessionFee(instructor)) {
+                                        {{ getSessionFee(instructor) | currencyFormat:'VND' }}
+                                    } @else {
+                                        N/A
+                                    }
                                 </span>
                             </td>
                             <td class="text-center whitespace-nowrap px-[12px] py-[15px]">

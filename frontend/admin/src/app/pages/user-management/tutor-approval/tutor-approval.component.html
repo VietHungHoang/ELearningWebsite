@@ -47,18 +47,6 @@
             </button>
             <button
                 type="button"
-                (click)="bulkRequestEditRequests()"
-                [disabled]="selectedRequests.size === 0"
-                class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    bg-white dark:bg-[#15203c] border-warning-300 dark:border-warning-700 text-warning-600 dark:text-warning-400
-                    hover:bg-warning-50 dark:hover:bg-warning-900/20 hover:border-warning-400 dark:hover:border-warning-600
-                    disabled:hover:bg-white disabled:hover:border-warning-300">
-                <i class="material-symbols-outlined !text-lg">edit</i>
-                {{ 'tutorApproval.actions.requestEdit' | translate }}
-            </button>
-            <button
-                type="button"
                 (click)="bulkRejectRequests()"
                 [disabled]="selectedRequests.size === 0"
                 class="px-[14px] py-[8px] rounded-lg text-sm font-medium transition-all flex items-center gap-[6px] border
@@ -120,7 +108,7 @@
     </div>
     <div class="trezo-card-content -mx-[20px] md:-mx-[25px] px-[20px] md:px-[25px]">
         <div class="table-responsive overflow-x-auto shadow-sm rounded-lg">
-            <table id="instructors-table" class="w-full bg-white dark:bg-[#0c1427]">
+            <table id="instructors-table" class="w-full min-w-[1100px] bg-white dark:bg-[#0c1427]">
                 <thead class="text-black dark:text-white bg-primary-50 dark:bg-[#15203c] border-b border-gray-200 dark:border-[#172036]">
                     <tr>
                         @if (activeTab === 'pending') {
@@ -132,33 +120,33 @@
                                     class="cursor-pointer w-[18px] h-[18px]">
                             </th>
                         }
-                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
                             {{ 'tutorApproval.table.stt' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[280px]">
                             {{ 'tutorApproval.table.instructorName' | translate }}
                         </th>
-                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                        <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[250px]">
                             {{ 'tutorApproval.table.subject' | translate }}
                         </th>
-                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
                             {{ 'tutorApproval.table.submittedDate' | translate }}
                         </th>
-                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
                             {{ 'tutorApproval.table.status' | translate }}
                         </th>
                         @if (activeTab === 'history') {
-                            <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                            <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[100px]">
                                 {{ 'tutorApproval.table.status' | translate }}
                             </th>
                         }
-                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap">
+                        <th class="font-medium text-center px-[12px] py-[11px] bg-primary-50 dark:bg-[#15203c] whitespace-nowrap w-[120px]">
                             {{ 'tutorApproval.table.actions' | translate }}
                         </th>
                     </tr>
                 </thead>
                 <tbody class="text-black dark:text-white">
-                    @for (request of filteredRequests; track request.id; let i = $index) {
+                    @for (request of paginatedRequests; track request.id; let i = $index) {
                         <tr class="border-b border-gray-100 dark:border-[#172036] hover:bg-gray-50 dark:hover:bg-[#15203c] transition-colors">
                             @if (activeTab === 'pending') {
                                 <td class="text-center whitespace-nowrap px-[12px] py-[15px]">
@@ -223,16 +211,16 @@
                                     (click)="viewProfile(request)"
                                     class="text-primary-500 leading-none hover:text-primary-600 transition-colors"
                                     [title]="'tutorApproval.actions.viewProfile' | translate">
-                                    <i class="material-symbols-outlined !text-2xl">
+                                    <i class="material-symbols-outlined !text-lg">
                                         visibility
                                     </i>
                                 </button>
                             </td>
                         </tr>
                     }
-                    @if (filteredRequests.length === 0) {
+                    @if (paginatedRequests.length === 0) {
                         <tr>
-                            <td [attr.colspan]="activeTab === 'pending' ? 8 : (activeTab === 'history' ? 7 : 7)" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
+                            <td [attr.colspan]="activeTab === 'pending' ? 7 : 6" class="text-center py-[30px] text-gray-500 dark:text-gray-400">
                                 @switch (activeTab) {
                                     @case ('pending') {
                                         {{ 'tutorApproval.emptyState.noPendingRequests' | translate }}

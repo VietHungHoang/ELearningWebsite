@@ -62,34 +62,6 @@
         <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex items-center gap-[15px]">
 
             <div class="trezo-card-dropdown relative">
-                <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleStatusDropdown()">
-                    <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
-                        {{ 'categorySubjectManagement.subjectList.statusLabel' | translate }}: {{ selectedStatus === 'All' ? ('categorySubjectManagement.subjectList.status.all' | translate) : (selectedStatus === 'Active' ? ('categorySubjectManagement.subjectList.status.active' | translate) : ('categorySubjectManagement.subjectList.status.inactive' | translate)) }}
-                        <i class="ri-arrow-down-s-line text-lg absolute ltr:-right-[3px] rtl:-left-[3px] top-1/2 -translate-y-1/2"></i>
-                    </span>
-                </button>
-                @if (isStatusDropdownOpen) {
-                    <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[15px] absolute ltr:right-0 rtl:left-0 w-[160px] z-[5] dark:bg-dark dark:shadow-none">
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('All')">
-                                {{ 'categorySubjectManagement.subjectList.status.all' | translate }}
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('Active')">
-                                {{ 'categorySubjectManagement.subjectList.status.active' | translate }}
-                            </button>
-                        </li>
-                        <li>
-                            <button type="button" class="block w-full transition-all text-black ltr:text-left rtl:text-right relative py-[8px] px-[20px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="filterByStatus('Inactive')">
-                                {{ 'categorySubjectManagement.subjectList.status.inactive' | translate }}
-                            </button>
-                        </li>
-                    </ul>
-                }
-            </div>
-
-            <div class="trezo-card-dropdown relative">
                 <button type="button" class="trezo-card-dropdown-btn inline-block transition-all hover:text-primary-500" (click)="toggleCategoryFilterDropdown()">
                     <span class="inline-block relative ltr:pr-[17px] ltr:md:pr-[20px] rtl:pl-[17px] rtl:ml:pr-[20px]">
                         {{ 'categorySubjectManagement.subjectList.category' | translate }}: {{ selectedCategoryFilter === 'All' ? ('categorySubjectManagement.subjectList.status.all' | translate) : selectedCategoryFilter }}
@@ -141,9 +113,6 @@
                         <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[100px] text-gray-700 dark:text-gray-300">
                             {{ 'categorySubjectManagement.subjectList.table.tutors' | translate }}
                         </th>
-                        <th class="font-semibold text-xs uppercase tracking-wider ltr:text-left rtl:text-right px-[16px] py-[12px] whitespace-nowrap w-[120px] text-gray-700 dark:text-gray-300">
-                            {{ 'categorySubjectManagement.subjectList.table.status' | translate }}
-                        </th>
                         <th class="font-semibold text-xs uppercase tracking-wider px-[16px] py-[12px] whitespace-nowrap w-[120px] text-gray-700 dark:text-gray-300 text-center">
                             {{ 'categorySubjectManagement.subjectList.table.actions' | translate }}
                         </th>
@@ -152,7 +121,7 @@
                 <tbody class="text-black dark:text-white">
                     @if (paginatedSubjectItems.length === 0) {
                         <tr>
-                            <td colspan="7" class="px-[25px] py-[60px] text-center">
+                            <td colspan="6" class="px-[25px] py-[60px] text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <i class="material-symbols-outlined !text-[48px] text-gray-300 dark:text-gray-600 mb-[15px]">school</i>
                                     <p class="text-gray-500 dark:text-gray-400 font-medium text-sm">{{ 'categorySubjectManagement.subjectList.emptyState.title' | translate }}</p>
@@ -192,22 +161,8 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="ltr:text-left rtl:text-right whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036]">
-                                    <span [class]="'inline-flex items-center px-[10px] py-[4px] rounded-md text-xs font-medium ' + getStatusColor(item.subject && item.subject.isActive ? item.subject.isActive : false)">
-                                        <span [class]="'w-1.5 h-1.5 rounded-full mr-1.5 ' + ((item.subject && item.subject.isActive) ? 'bg-success-600' : 'bg-danger-600')"></span>
-                                        {{ (item.subject && item.subject.isActive) ? ('categorySubjectManagement.subjectList.status.active' | translate) : ('categorySubjectManagement.subjectList.status.inactive' | translate) }}
-                                    </span>
-                                </td>
                                 <td class="whitespace-nowrap px-[16px] py-[12px] border-b border-gray-100 dark:border-[#172036] text-center">
                                     <div class="flex items-center justify-center gap-[4px]">
-                                        <button
-                                            class="p-[4px] rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400 transition-all duration-150"
-                                            (click)="toggleSubjectActive(item)"
-                                            [title]="item.subject.isActive ? 'Deactivate' : 'Activate'">
-                                            <i class="material-symbols-outlined !text-base">
-                                                {{ item.subject.isActive ? 'toggle_on' : 'toggle_off' }}
-                                            </i>
-                                        </button>
                                         <button
                                             class="p-[4px] rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-600 dark:text-primary-400 transition-all duration-150"
                                             (click)="editSubject(item)"

@@ -46,60 +46,21 @@ export class LearnerListComponent implements OnInit {
      */
     loadLearners(): void {
         this.isLoading = true;
-        // Load both learners and classes to calculate enrollment count
-        forkJoin({
-            learners: this.userService.getStudents(),
-            classes: this.classService.getClasses(0, 1000) // Get all classes to count enrollments
-        }).subscribe({
-            next: ({ learners, classes }: { learners: Student[], classes: PaginatedResponse<GroupClass> }) => {
-                // Calculate enrollment count for each learner
-                const learnersWithEnrollment = learners.map((learner: Student) => {
-                    // Count how many classes this learner is enrolled in
-                    // Check if learner.id exists in any class's students array
-                    let enrollmentCount = 0;
-                    
-                    classes.content.forEach((cls: GroupClass) => {
-                        if (cls.students && Array.isArray(cls.students)) {
-                            // Check if learner.id matches any student in the class
-                            const isEnrolled = cls.students.some((student: any) => {
-                                // Handle different possible student object structures
-                                return student.id === learner.id || 
-                                       student.studentId === learner.id ||
-                                       (typeof student === 'string' && student === learner.id);
-                            });
-                            
-                            if (isEnrolled) {
-                                enrollmentCount++;
-                            }
-                        }
-                    });
-                    
-                    return {
-                        ...learner,
-                        enrollmentCount: enrollmentCount
-                    };
-                });
-                
-                this.learners = learnersWithEnrollment;
-                this.totalLearners = learnersWithEnrollment.length;
-                this.paginatedLearners = learnersWithEnrollment;
+        // Convert 1-based page to 0-based for backend
+        const backendPage = this.currentPage - 1;
+        
+        // Load learners with pagination
+        this.userService.getStudents(backendPage, this.itemsPerPage).subscribe({
+            next: (result: { students: Student[], total: number }) => {
+                // Set enrollmentCount to 0 (can be enhanced later if needed)
+                this.learners = result.students.map((l: Student) => ({ ...l, enrollmentCount: l.enrollmentCount || 0 }));
+                this.paginatedLearners = this.learners;
+                this.totalLearners = result.total; // Use total from backend pagination
                 this.isLoading = false;
             },
             error: (error: any) => {
                 console.error('Error loading learners:', error);
-                // Fallback: load learners without enrollment count
-                this.userService.getStudents().subscribe({
-                    next: (learners: Student[]) => {
-                        this.learners = learners.map((l: Student) => ({ ...l, enrollmentCount: 0 }));
-                        this.totalLearners = learners.length;
-                        this.paginatedLearners = this.learners;
-                        this.isLoading = false;
-                    },
-                    error: (err: any) => {
-                        console.error('Error loading learners:', err);
-                        this.isLoading = false;
-                    }
-                });
+                this.isLoading = false;
             }
         });
     }
@@ -177,18 +138,14 @@ export class LearnerListComponent implements OnInit {
     previousPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
-            this.userService.getStudents().subscribe((learners: Student[]) => {
-                this.applyPagination(learners);
-            });
+            this.loadLearners();
         }
     }
 
     nextPage(): void {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
-            this.userService.getStudents().subscribe((learners: Student[]) => {
-                this.applyPagination(learners);
-            });
+            this.loadLearners();
         }
     }
 
