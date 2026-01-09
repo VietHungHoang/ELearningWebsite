@@ -180,15 +180,46 @@ export interface PaymentResponse {
 }
 
 /**
- * API Response for transactions with pagination
+ * Backend BookingHistoryResponse from booking-service
+ * /api/v1/admin/transactions endpoint
+ */
+export interface BookingTransactionResponse {
+    id: string;
+    studentId: string;
+    tutorId: string;
+    tutorName: string;
+    classId?: string;
+    sessionsPurchased?: number;
+    discount?: number;
+    pricePerSession?: number;
+    amount: number;
+    paymentProvider: 'MOMO' | 'VNPAY' | 'SEPAY' | null;
+    transactionId?: string;
+    providerTransactionId?: string;
+    schedule?: string;
+    status: 'PENDING' | 'CONFIRMED' | 'FAILED' | 'CANCELLED';
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+    className?: string;
+    classType?: string;
+}
+
+/**
+ * API Response for transactions with pagination (Spring Page format)
  */
 export interface TransactionsApiResponse {
-    content: PaymentResponse[];
+    content: BookingTransactionResponse[];
     pageable: {
         pageNumber: number;
         pageSize: number;
         offset: number;
         paged: boolean;
+        sort?: {
+            sorted: boolean;
+            unsorted: boolean;
+            empty: boolean;
+        };
     };
     totalPages: number;
     totalElements: number;
@@ -198,6 +229,11 @@ export interface TransactionsApiResponse {
     size: number;
     number: number;
     empty: boolean;
+    sort?: {
+        sorted: boolean;
+        unsorted: boolean;
+        empty: boolean;
+    };
 }
 
 /**
@@ -1005,12 +1041,8 @@ export class TransactionService {
         return this.apiService.get<TransactionsApiResponse>('/transactions', queryParams).pipe(
             map(response => {
                 if (response.success && response.data) {
-                    // Transform API response to simplified format
-                    const transformedContent = response.data.content.map(payment => this.transformPayment(payment));
-                    // Note: API response is already in simplified format, so we store as-is
-                    // For internal use, we need to convert back or store separately
-                    // For now, we'll store the transformed data
-                    this.paymentsSubject.next(response.data.content as any);
+                    // Return raw API response - transformation to PaymentResponse 
+                    // should be done in component using transformBookingToPayment
                     return response.data;
                 }
                 // If API returns error response, use mock data
@@ -1027,6 +1059,7 @@ export class TransactionService {
 
     /**
      * Get mock transactions response for fallback
+     * Converts internal mock data to BookingTransactionResponse format
      */
     private getMockTransactionsResponse(params?: {
         page?: number;
@@ -1102,8 +1135,46 @@ export class TransactionService {
             });
         }
 
-        // Transform payments to simplified format
-        const transformedPayments = filtered.map(payment => this.transformPayment(payment));
+        // Transform InternalPayment to BookingTransactionResponse format
+        const transformedPayments: BookingTransactionResponse[] = filtered.map(payment => {
+            const internalSession = payment.session as InternalSession | undefined;
+
+            // Map FE paymentMethod to BE paymentProvider
+            const providerMap: { [key: string]: 'MOMO' | 'VNPAY' | 'SEPAY' } = {
+                'momo': 'MOMO',
+                'vnpay': 'VNPAY',
+                'banking': 'SEPAY'
+            };
+
+            // Map FE status to BE status
+            const statusMap: { [key: string]: 'PENDING' | 'CONFIRMED' | 'FAILED' | 'CANCELLED' } = {
+                'pending': 'PENDING',
+                'completed': 'CONFIRMED',
+                'failed': 'FAILED'
+            };
+
+            return {
+                id: payment.id,
+                studentId: payment.sessionId || payment.id, // Use sessionId or fallback
+                tutorId: internalSession?.tutorId || '',
+                tutorName: internalSession?.tutorName || '',
+                classId: internalSession?.classId || undefined,
+                sessionsPurchased: 1,
+                discount: 0,
+                pricePerSession: payment.totalAmount,
+                amount: payment.totalAmount,
+                paymentProvider: providerMap[payment.paymentMethod] || null,
+                transactionId: payment.transactionId || undefined,
+                providerTransactionId: payment.transactionId || undefined,
+                schedule: undefined,
+                status: statusMap[payment.status] || 'PENDING',
+                notes: payment.notes || undefined,
+                createdAt: payment.createdDate,
+                updatedAt: payment.completedDate || payment.createdDate,
+                className: internalSession?.className || '',
+                classType: internalSession?.classType || ''
+            };
+        });
 
         // Pagination
         const page = (params?.page ?? 1) - 1; // Convert to 0-based
@@ -1113,8 +1184,6 @@ export class TransactionService {
         const paginatedContent = transformedPayments.slice(startIndex, endIndex);
         const totalElements = transformedPayments.length;
         const totalPages = Math.ceil(totalElements / size);
-
-        // Note: summary calculation removed as KPI cards are removed
 
         return {
             content: paginatedContent,
@@ -1147,7 +1216,7 @@ export class TransactionService {
         // Transform from InternalPayment
         const internalPayment = payment as InternalPayment;
         const internalSession = internalPayment.session as InternalSession | undefined;
-        
+
         const session = internalSession ? {
             className: internalSession.className || '',
             tutorName: internalSession.tutorName || ''
@@ -1165,6 +1234,43 @@ export class TransactionService {
             status: internalPayment.status,
             createdDate: internalPayment.createdDate,
             transactionId: internalPayment.transactionId
+        };
+    }
+
+    /**
+     * Transform BookingTransactionResponse from BE to PaymentResponse for display
+     */
+    transformBookingToPayment(booking: BookingTransactionResponse): PaymentResponse {
+        // Map BE paymentProvider to FE paymentMethod
+        const paymentMethodMap: { [key: string]: PaymentMethod } = {
+            'MOMO': 'momo',
+            'VNPAY': 'vnpay',
+            'SEPAY': 'banking'
+        };
+
+        // Map BE status to FE status
+        const statusMap: { [key: string]: PaymentStatus } = {
+            'PENDING': 'pending',
+            'CONFIRMED': 'completed',
+            'FAILED': 'failed',
+            'CANCELLED': 'failed'
+        };
+
+        return {
+            id: booking.id,
+            paymentNumber: `PAY-${booking.id.substring(0, 8).toUpperCase()}`,
+            studentName: `Student ${booking.studentId?.substring(0, 8) || 'Unknown'}`, // TODO: Fetch student name from API
+            studentEmail: '', // Not available in booking response
+            session: {
+                className: booking.className || 'Unknown Class',
+                tutorName: booking.tutorName || 'Unknown Tutor'
+            },
+            totalAmount: booking.amount || 0,
+            currency: 'VND',
+            paymentMethod: paymentMethodMap[booking.paymentProvider || ''] || 'banking',
+            status: statusMap[booking.status] || 'pending',
+            createdDate: booking.createdAt || '',
+            transactionId: booking.providerTransactionId || booking.transactionId
         };
     }
 

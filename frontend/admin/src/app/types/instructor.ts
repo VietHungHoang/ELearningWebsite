@@ -11,29 +11,36 @@ export interface Tutor {
 
 export interface TutorDetail extends Tutor {
   avatarUrl: string;
-  timezone: string;
+  timezone?: string;
   gender?: 'MALE' | 'FEMALE' | 'NOT SPECIFIED';
   languages: TutorLanguage[];
-  totalHours: number;
-  submittedDate?: string;
+  totalHours?: number; // FE-only, set null if BE doesn't provide
+  submittedDate?: string; // FE-only, set null if BE doesn't provide
   initialPrice?: number;
   headline?: string;
   introduction?: string;
-  totalStudents: number;
-  totalReviews: number;
-  subjects: TutorSubject[];
-  instructorLevel: string[];
-  experience: number;
+  totalStudents?: number;
+  totalReviews?: number;
+  subjects?: TutorSubject[];
+  instructorLevel?: string[]; // FE-only, set null if BE doesn't provide
+  experience?: number; // FE-only, set null if BE doesn't provide
   certifications?: Certification[];
-  classes?: TutorClass[];
-  availableSchedule?: { [key: string]: string[] };
-  isVerified: boolean;
+  classes?: TutorClass[]; // FE-only, set null if BE doesn't provide
+  availableSchedule?: { [key: string]: string[] }; // FE-only
+  isVerified?: boolean;
   videoUrl?: string;
-  videoThumbnailUrl?: string;
+  videoThumbnailUrl?: string; // FE-only
   currentSessionFee?: number;
   socialLinks?: TutorSocial[];
   careerEntries?: CareerEntry[];
-  availabilities?: TutorAvailability[];
+  availabilities?: TutorAvailability[]; // FE-only
+
+  // BE-only fields (not displayed in UI but available for use)
+  bookedSessionsCount?: number;
+  reviews?: TutorReview[];
+  zoomConnected?: boolean;
+  originalSessionFee?: number;
+  subjectIds?: string[]; // Raw subject IDs from BE
 }
 export interface TutorLanguage {
   languageCode: string;

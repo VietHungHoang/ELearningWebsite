@@ -644,17 +644,17 @@ export class UserService {
         const mockInstructorRequestsDetail: InstructorRequestDetail[] = mockInstructorRequests.map(req => ({
             ...req,
             email: req.id === '550e8400-e29b-41d4-a716-446655442001' ? 'nguyen.van.hung@example.com' :
-                   req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'tran.thi.lan@example.com' :
-                   req.id === '550e8400-e29b-41d4-a716-446655442003' ? 'le.minh.tuan@example.com' :
-                   req.id === '550e8400-e29b-41d4-a716-446655442004' ? 'pham.thi.mai@example.com' :
-                   req.id === '550e8400-e29b-41d4-a716-446655442005' ? 'hoang.van.quang@example.com' :
-                   'vu.thi.huong@example.com',
+                req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'tran.thi.lan@example.com' :
+                    req.id === '550e8400-e29b-41d4-a716-446655442003' ? 'le.minh.tuan@example.com' :
+                        req.id === '550e8400-e29b-41d4-a716-446655442004' ? 'pham.thi.mai@example.com' :
+                            req.id === '550e8400-e29b-41d4-a716-446655442005' ? 'hoang.van.quang@example.com' :
+                                'vu.thi.huong@example.com',
             avatarUrl: 'images/users/user6.jpg',
             countryCode: req.id === '550e8400-e29b-41d4-a716-446655442001' ? 'US' :
-                         req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'US' :
-                         req.id === '550e8400-e29b-41d4-a716-446655442003' ? 'CN' :
-                         req.id === '550e8400-e29b-41d4-a716-446655442004' ? 'ES' :
-                         req.id === '550e8400-e29b-41d4-a716-446655442005' ? 'US' : 'JP',
+                req.id === '550e8400-e29b-41d4-a716-446655442002' ? 'US' :
+                    req.id === '550e8400-e29b-41d4-a716-446655442003' ? 'CN' :
+                        req.id === '550e8400-e29b-41d4-a716-446655442004' ? 'ES' :
+                            req.id === '550e8400-e29b-41d4-a716-446655442005' ? 'US' : 'JP',
             gender: 'Male',
             instructorLevel: [],
             initialPrice: (req.experience || 0) > 10 ? 75 : (req.experience || 0) > 7 ? 60 : 50,
@@ -699,24 +699,32 @@ export class UserService {
         this.mockInstructorRequestsDetail = mockInstructorRequestsDetail;
     }
 
+    /**
+     * Get list of approved tutors (for instructor-list page)
+     * Calls /admin/tutors API - similar mapping approach as tutor-approval page
+     */
     getTutor(): Observable<Tutor[]> {
-        // Gọi API thực - apiService.get() trả về ApiResponse<Tutor[]>
-        return this.apiService.get<Tutor[]>('/tutors').pipe(
+        // Gọi API /admin/tutors - lấy danh sách gia sư đã được duyệt
+        return this.apiService.get<PaginatedResponse<InstructorRequestBackend>>('/admin/tutors').pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
-                if (response.success && response.data && Array.isArray(response.data)) {
-                    this.instructorsSubject.next(response.data);
-                    return response.data;
+                if (response.success && response.data && response.data.content) {
+                    // Map BE response to FE Tutor format (similar to tutor-approval)
+                    const tutors: Tutor[] = response.data.content.map(item =>
+                        this.mapBackendToTutor(item)
+                    );
+                    this.instructorsSubject.next(tutors);
+                    return tutors;
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
-                console.warn('[UserService] API failed for tutors:', response.message);
+                console.warn('[UserService] API failed for approved tutors:', response.message);
                 return this.instructorsSubject.value.length > 0
                     ? this.instructorsSubject.value
                     : this.mockTutors;
             }),
             catchError(error => {
                 // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
-                console.error('[UserService] API error for tutors, returning mock data:', error);
+                console.error('[UserService] API error for approved tutors, returning mock data:', error);
                 return of(this.instructorsSubject.value.length > 0
                     ? this.instructorsSubject.value
                     : this.mockTutors);
@@ -724,13 +732,28 @@ export class UserService {
         );
     }
 
+    /**
+     * Map BE InstructorRequestBackend to FE Tutor interface
+     * Similar mapping approach as tutor-approval page uses mapBackendToInstructorRequest
+     */
+    private mapBackendToTutor(backend: InstructorRequestBackend): Tutor {
+        return {
+            id: backend.tutorId,
+            name: backend.fullName || '',
+            email: backend.email || '',
+            joinDate: backend.createdAt || '',
+            rating: 0, // Not available in backend response
+            countryCode: undefined // Not available in backend response
+        };
+    }
+
     getTutorDetail(id: string): Observable<TutorDetail | undefined> {
-        // Thử lấy từ API - apiService.get() trả về ApiResponse<TutorDetail>
-        return this.apiService.get<TutorDetail>(`/tutors/${id}`).pipe(
+        // Thử lấy từ API - apiService.get() trả về ApiResponse<any> (BE TutorResponse)
+        return this.apiService.get<any>(`/tutors/${id}`).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data) {
-                    return response.data;
+                    return this.mapTutorResponseToDetail(response.data);
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 const mockData = this.mockTutorsDetail.find((i: TutorDetail) => i.id === id);
@@ -744,6 +767,60 @@ export class UserService {
                 return of(mockData);
             })
         );
+    }
+
+    /**
+     * Map BE TutorResponse to FE TutorDetail interface
+     * - Fields FE has but BE doesn't → set to undefined
+     * - Fields BE has but FE doesn't → added to interface but not displayed in UI
+     * - Field name differences → properly mapped
+     */
+    private mapTutorResponseToDetail(beResponse: any): TutorDetail {
+        return {
+            // From Tutor base interface
+            id: beResponse.id,
+            name: beResponse.fullName || '', // BE: fullName → FE: name
+            email: beResponse.email || '',
+            joinDate: '', // FE-only, set empty
+            rating: beResponse.averageRating || 0, // BE: averageRating → FE: rating
+            countryCode: beResponse.countryCode,
+
+            // TutorDetail specific fields
+            avatarUrl: beResponse.avatarUrl || '',
+            timezone: beResponse.timezone,
+            gender: undefined, // FE-only
+            languages: beResponse.languageCodes || [], // BE: languageCodes → FE: languages
+            totalHours: undefined, // FE-only
+            submittedDate: undefined, // FE-only
+            initialPrice: beResponse.originalSessionFee, // BE: originalSessionFee → FE: initialPrice
+            headline: beResponse.headline,
+            introduction: beResponse.introduction,
+            totalStudents: beResponse.studentCount || 0, // BE: studentCount → FE: totalStudents
+            totalReviews: beResponse.reviews?.length || 0, // Calculate from reviews array
+            subjects: [], // Need to lookup by subjectIds
+            subjectIds: beResponse.subjectIds || [], // Store raw IDs for lookup
+            instructorLevel: undefined, // FE-only
+            experience: undefined, // FE-only
+            certifications: beResponse.certificates || [], // BE: certificates → FE: certifications
+            classes: undefined, // FE-only
+            availableSchedule: undefined, // FE-only
+            isVerified: beResponse.isVerified || false,
+            videoUrl: beResponse.videoUrl,
+            videoThumbnailUrl: undefined, // FE-only
+            currentSessionFee: beResponse.currentSessionFee,
+            socialLinks: beResponse.socialLinks || [],
+            careerEntries: [
+                ...(beResponse.educations || []),
+                ...(beResponse.experiences || [])
+            ], // Merge BE educations + experiences → FE careerEntries
+            availabilities: undefined, // FE-only
+
+            // BE-only fields (stored but not displayed in UI)
+            bookedSessionsCount: beResponse.bookedSessionsCount,
+            reviews: beResponse.reviews,
+            zoomConnected: beResponse.zoomConnected,
+            originalSessionFee: beResponse.originalSessionFee
+        };
     }
 
     getStudents(): Observable<Student[]> {
