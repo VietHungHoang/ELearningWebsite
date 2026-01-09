@@ -39,6 +39,7 @@ export class FTransactionsDetailComponent implements OnInit {
     // UI state
     loading: boolean = true;
     error: string | null = null;
+    downloading: boolean = false;
 
     constructor(
         private route: ActivatedRoute,
@@ -118,6 +119,32 @@ export class FTransactionsDetailComponent implements OnInit {
                 second: '2-digit'
             });
         }
+    }
+
+    downloadPdf(): void {
+        if (!this.transactionId || this.downloading) {
+            return;
+        }
+
+        this.downloading = true;
+
+        this.transactionService.downloadTransactionPdf(this.transactionId).subscribe({
+            next: (blob: Blob) => {
+                // Create a download link and trigger download
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `transaction-${this.transactionId}.pdf`;
+                link.click();
+                window.URL.revokeObjectURL(url);
+                this.downloading = false;
+            },
+            error: (err) => {
+                console.error('Error downloading PDF:', err);
+                this.error = 'Failed to download PDF';
+                this.downloading = false;
+            }
+        });
     }
 
     getClassTypeTranslationKey(): string {
