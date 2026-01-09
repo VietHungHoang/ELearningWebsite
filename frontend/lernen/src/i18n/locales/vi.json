@@ -717,6 +717,8 @@
           "enrolled": "Đã đăng ký",
           "pendingPayment": "Chờ thanh toán"
         },
+        "payNow": "Thanh toán ngay",
+        "renewClass": "Gia hạn lớp",
         "loading": "Đang tải lớp học...",
         "errorTitle": "Không thể tải lớp học",
         "tryAgain": "Thử lại",
@@ -1434,8 +1436,10 @@
         "status": {
           "pending": "Đang chờ",
           "approved": "Đã chấp nhận",
+          "accepted": "Đã chấp nhận",
           "declined": "Đã từ chối",
-          "rejected": "Đã từ chối"
+          "rejected": "Đã từ chối",
+          "cancelled": "Đã hủy"
         },
         "trial": {
           "badge": "Yêu cầu học thử",

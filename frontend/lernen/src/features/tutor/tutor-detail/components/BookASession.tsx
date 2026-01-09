@@ -83,8 +83,11 @@ const BookASession: React.FC<BookASessionProps> = ({
 
             try {
                 const response = await classService.getTrialSessionRequest(tutorId, state.user.id);
-                setHasTrialSession(!response.data);
-                setTrialSessionRequest(response.data);
+                // Only consider PENDING or ACCEPTED trials as "existing" - CANCELLED/DECLINED should allow new booking
+                const hasActiveTrialSession = response.data &&
+                    (response.data.status === 'PENDING' || response.data.status === 'ACCEPTED');
+                setHasTrialSession(!hasActiveTrialSession);
+                setTrialSessionRequest(hasActiveTrialSession ? response.data : null);
             } catch (error) {
                 console.error("Failed to check trial session availability:", error);
                 setHasTrialSession(true);
@@ -290,7 +293,18 @@ const BookASession: React.FC<BookASessionProps> = ({
 
         // Step 3: Filter out booked slots AND tutor busy slots (hide completely)
         // Note: studentBusySlots are NOT filtered - they will be shown with warning style
-        const tutorBusySlotsSet = new Set<string>(tutorBusySlots);
+        // IMPORTANT: Normalize tutorBusySlots to ISO format for proper comparison
+        // API returns format like "2026-01-09T15:00" but allPossibleSlots contains "2026-01-09T15:00:00.000Z"
+        const tutorBusySlotsSet = new Set<string>(
+            tutorBusySlots.map(slot => {
+                // Add 'Z' if not present to treat as UTC
+                let dateTimeString = slot;
+                if (!dateTimeString.endsWith('Z') && !dateTimeString.includes('+')) {
+                    dateTimeString += 'Z';
+                }
+                return new Date(dateTimeString).toISOString();
+            })
+        );
         const availableSlots = allPossibleSlots.filter(slot =>
             !bookedSlotsSet.has(slot) && !tutorBusySlotsSet.has(slot)
         );

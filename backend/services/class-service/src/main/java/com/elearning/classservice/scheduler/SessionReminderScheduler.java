@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class SessionReminderScheduler {
      */
     @Scheduled(fixedRate = 60000) // Every 60 seconds
     public void checkUpcomingSessions() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime windowStart = now.plusMinutes(14);
         LocalDateTime windowEnd = now.plusMinutes(15);
 

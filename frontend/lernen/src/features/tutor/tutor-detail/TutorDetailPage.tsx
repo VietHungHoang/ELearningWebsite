@@ -45,7 +45,10 @@ const TutorDetailPage: React.FC = () => {
                 if (state.user?.id) {
                     try {
                         const trialResponse = await classService.getTrialSessionRequest(tutorId, state.user.id);
-                        setHasTrialSession(trialResponse.data !== null);
+                        // Only consider PENDING or ACCEPTED trials as "existing" - CANCELLED/DECLINED should allow new booking
+                        const hasActiveTrialSession = !!(trialResponse.data &&
+                            (trialResponse.data.status === 'PENDING' || trialResponse.data.status === 'ACCEPTED'));
+                        setHasTrialSession(hasActiveTrialSession);
                     } catch (trialError) {
                         console.error("Failed to check trial session:", trialError);
                         setHasTrialSession(false);

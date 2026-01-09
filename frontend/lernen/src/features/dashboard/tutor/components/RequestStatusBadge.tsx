@@ -4,15 +4,16 @@ import type { RequestStatus } from '../../../../types/api';
 
 
 interface RequestStatusBadgeProps {
-  status: RequestStatus;
+    status: RequestStatus;
 }
 
 const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
     const { t } = useTranslation();
-    
+
     const getStatusColor = (status: RequestStatus): string => {
         switch (status) {
             case 'APPROVED':
+            case 'ACCEPTED':
                 return 'bg-[#065A46]'; // Primary color - success state (same as active/completed in quiz)
             case 'PENDING':
                 return 'bg-[#a16207]'; // Warm amber - working/pending state (same as draft/in_progress in quiz)
@@ -20,6 +21,8 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
                 return 'bg-[#475569]'; // Dark slate - inactive state (same as archived/not_started in quiz)
             case 'REJECTED':
                 return 'bg-[#475569]'; // Dark slate - inactive state (same as declined)
+            case 'CANCELLED':
+                return 'bg-[#dc2626]'; // Red - cancelled state
             default:
                 return 'bg-[#64748b]';
         }
@@ -28,8 +31,10 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
     const statusLabels: Record<RequestStatus, string> = {
         PENDING: t('dashboard.tutor.requests.status.pending'),
         APPROVED: t('dashboard.tutor.requests.status.approved'),
+        ACCEPTED: t('dashboard.tutor.requests.status.accepted'),
         DECLINED: t('dashboard.tutor.requests.status.declined'),
         REJECTED: t('dashboard.tutor.requests.status.rejected'),
+        CANCELLED: t('dashboard.tutor.requests.status.cancelled'),
     };
 
     return (

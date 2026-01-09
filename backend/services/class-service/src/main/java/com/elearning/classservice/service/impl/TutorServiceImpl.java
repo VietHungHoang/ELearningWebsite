@@ -284,9 +284,15 @@ public class TutorServiceImpl implements TutorService {
                                         .collect(Collectors.toSet());
                         int studentCount = uniqueStudents.size();
 
-                        // Check if tutor has trial session with the specified student
-                        boolean hasTrialSession = studentId == null
-                                        || !trialSessionRepository.existsByTutorIdAndStudentId(tutorId, studentId);
+                        // Check if tutor has ACTIVE trial session with the specified student
+                        // Active means PENDING or ACCEPTED - CANCELLED/DECLINED trials should allow new
+                        // booking
+                        boolean hasActiveTrialSession = studentId != null
+                                        && trialSessionRepository.existsByTutorIdAndStudentIdAndStatusIn(
+                                                        tutorId, studentId,
+                                                        List.of(com.elearning.classservice.entity.enums.ScheduleStatus.PENDING,
+                                                                        com.elearning.classservice.entity.enums.ScheduleStatus.ACCEPTED));
+                        boolean hasTrialSession = studentId == null || !hasActiveTrialSession;
 
                         TutorStatsResponse stats = TutorStatsResponse.builder()
                                         .tutorId(tutorId)
