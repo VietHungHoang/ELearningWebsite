@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { CurrencyService } from './currency.service';
+
+// LocalStorage key for vouchers
+const VOUCHERS_STORAGE_KEY = 'elearning_vouchers';
 
 export interface Voucher {
   id: string;
@@ -98,7 +101,10 @@ export class VoucherService {
   constructor(
     private apiService: ApiService,
     private currencyService: CurrencyService
-  ) { }
+  ) {
+    // Load vouchers from localStorage on service initialization
+    this.loadVouchersFromLocalStorage();
+  }
 
   /**
    * Get vouchers from API
@@ -132,12 +138,12 @@ export class VoucherService {
           this.vouchersSubject.next(vouchers);
           return vouchers;
         }
-        console.warn('[VoucherService] API failed, returning mock data. Response:', response);
-        return this.getMockVouchers(params);
+        console.warn('[VoucherService] API failed, returning localStorage + mock data. Response:', response);
+        return this.getFilteredLocalVouchers(params);
       }),
       catchError(error => {
-        console.error('[VoucherService] API error, returning mock data:', error);
-        return of(this.getMockVouchers(params));
+        console.error('[VoucherService] API error, returning localStorage + mock data:', error);
+        return of(this.getFilteredLocalVouchers(params));
       })
     );
   }
@@ -183,6 +189,52 @@ export class VoucherService {
     }
 
     this.vouchersSubject.next(filtered);
+    return filtered;
+  }
+
+  /**
+   * Get filtered vouchers from current BehaviorSubject (includes localStorage data)
+   * Used when API fails to ensure localStorage vouchers are still displayed
+   */
+  private getFilteredLocalVouchers(params?: {
+    search?: string;
+    creator?: string;
+    status?: string;
+    type?: string;
+  }): Voucher[] {
+    // Get current vouchers from BehaviorSubject (already includes localStorage data)
+    let filtered = [...this.vouchersSubject.value];
+
+    // Filter by search
+    if (params?.search) {
+      const search = params.search.toLowerCase();
+      filtered = filtered.filter(v => v.code.toLowerCase().includes(search));
+    }
+
+    // Filter by creator
+    if (params?.creator && params.creator !== 'all') {
+      if (params.creator === 'admin') {
+        filtered = filtered.filter(v => v.createdBy === 'Admin');
+      } else if (params.creator === 'instructor') {
+        filtered = filtered.filter(v => v.createdBy === 'Instructor');
+      }
+    }
+
+    // Filter by status
+    if (params?.status && params.status !== 'all') {
+      filtered = filtered.filter(v => v.status === params.status);
+    }
+
+    // Filter by type
+    if (params?.type && params.type !== 'all') {
+      if (params.type === '%') {
+        filtered = filtered.filter(v => v.value.includes('%'));
+      } else if (params.type === 'đ') {
+        filtered = filtered.filter(v => v.value.includes('VND') || v.value.includes('đ'));
+      }
+    }
+
+    console.log('[VoucherService] Filtered local vouchers (includes localStorage):', filtered.length);
     return filtered;
   }
 
@@ -241,7 +293,11 @@ export class VoucherService {
       map((response: any) => {
         if (response.success && response.data) {
           const currentVouchers = this.vouchersSubject.value;
-          this.vouchersSubject.next([...currentVouchers, response.data]);
+          const updatedVouchers = [...currentVouchers, response.data];
+          this.vouchersSubject.next(updatedVouchers);
+          // Save to localStorage
+          this.saveVouchersToLocalStorage(updatedVouchers);
+          console.log('[VoucherService] Voucher created and saved to localStorage:', response.data);
           return response.data;
         }
         throw new Error(response.message || 'Failed to create voucher');
@@ -264,7 +320,11 @@ export class VoucherService {
           ...voucherData
         } as Voucher;
         const currentVouchers = this.vouchersSubject.value;
-        this.vouchersSubject.next([...currentVouchers, newVoucher]);
+        const updatedVouchers = [...currentVouchers, newVoucher];
+        this.vouchersSubject.next(updatedVouchers);
+        // Save to localStorage even in fallback mode
+        this.saveVouchersToLocalStorage(updatedVouchers);
+        console.log('[VoucherService] Voucher created locally and saved to localStorage:', newVoucher);
         return of(newVoucher);
       })
     );
@@ -283,6 +343,9 @@ export class VoucherService {
           if (index !== -1) {
             currentVouchers[index] = response.data;
             this.vouchersSubject.next([...currentVouchers]);
+            // Save to localStorage
+            this.saveVouchersToLocalStorage(currentVouchers);
+            console.log('[VoucherService] Voucher updated and saved to localStorage:', response.data);
           }
           return response.data;
         }
@@ -304,6 +367,9 @@ export class VoucherService {
         };
         currentVouchers[index] = updatedVoucher;
         this.vouchersSubject.next([...currentVouchers]);
+        // Save to localStorage
+        this.saveVouchersToLocalStorage(currentVouchers);
+        console.log('[VoucherService] Voucher updated locally and saved to localStorage:', updatedVoucher);
         return of(updatedVoucher);
       })
     );
@@ -319,6 +385,9 @@ export class VoucherService {
         if (response.success) {
           const currentVouchers = this.vouchersSubject.value.filter(v => v.id !== id);
           this.vouchersSubject.next(currentVouchers);
+          // Save to localStorage
+          this.saveVouchersToLocalStorage(currentVouchers);
+          console.log('[VoucherService] Voucher deleted and saved to localStorage');
         }
       }),
       catchError(error => {
@@ -326,6 +395,9 @@ export class VoucherService {
         // Fallback: delete locally
         const currentVouchers = this.vouchersSubject.value.filter(v => v.id !== id);
         this.vouchersSubject.next(currentVouchers);
+        // Save to localStorage
+        this.saveVouchersToLocalStorage(currentVouchers);
+        console.log('[VoucherService] Voucher deleted locally and saved to localStorage');
         return of(void 0);
       })
     );
@@ -344,6 +416,9 @@ export class VoucherService {
           if (index !== -1) {
             currentVouchers[index] = response.data;
             this.vouchersSubject.next([...currentVouchers]);
+            // Save to localStorage
+            this.saveVouchersToLocalStorage(currentVouchers);
+            console.log('[VoucherService] Voucher status updated and saved to localStorage:', response.data);
           }
           return response.data;
         }
@@ -357,6 +432,9 @@ export class VoucherService {
         if (index !== -1) {
           currentVouchers[index].status = status;
           this.vouchersSubject.next([...currentVouchers]);
+          // Save to localStorage
+          this.saveVouchersToLocalStorage(currentVouchers);
+          console.log('[VoucherService] Voucher status updated locally and saved to localStorage');
           return of(currentVouchers[index]);
         }
         throw error;
@@ -384,5 +462,58 @@ export class VoucherService {
       return `${start} - ${end}`;
     }
     return '';
+  }
+
+  /**
+   * Save vouchers to localStorage
+   */
+  private saveVouchersToLocalStorage(vouchers: Voucher[]): void {
+    try {
+      localStorage.setItem(VOUCHERS_STORAGE_KEY, JSON.stringify(vouchers));
+      console.log('[VoucherService] Saved vouchers to localStorage:', vouchers.length);
+    } catch (error) {
+      console.error('[VoucherService] Error saving to localStorage:', error);
+    }
+  }
+
+  /**
+   * Load vouchers from localStorage
+   */
+  private loadVouchersFromLocalStorage(): void {
+    try {
+      const storedVouchers = localStorage.getItem(VOUCHERS_STORAGE_KEY);
+      if (storedVouchers) {
+        const vouchers = JSON.parse(storedVouchers) as Voucher[];
+        // Merge with mock vouchers (mock first, then override with stored)
+        const mergedVouchers = [...this.mockVouchers];
+        vouchers.forEach(stored => {
+          const index = mergedVouchers.findIndex(v => v.id === stored.id);
+          if (index !== -1) {
+            mergedVouchers[index] = stored;
+          } else {
+            mergedVouchers.push(stored);
+          }
+        });
+        this.vouchersSubject.next(mergedVouchers);
+        console.log('[VoucherService] Loaded vouchers from localStorage:', vouchers.length);
+      } else {
+        // If no stored vouchers, use mock data
+        this.vouchersSubject.next(this.mockVouchers);
+        console.log('[VoucherService] No stored vouchers, using mock data');
+      }
+    } catch (error) {
+      console.error('[VoucherService] Error loading from localStorage:', error);
+      // Fallback to mock data on error
+      this.vouchersSubject.next(this.mockVouchers);
+    }
+  }
+
+  /**
+   * Clear vouchers from localStorage (for debugging/admin purposes)
+   */
+  clearLocalStorage(): void {
+    localStorage.removeItem(VOUCHERS_STORAGE_KEY);
+    this.vouchersSubject.next(this.mockVouchers);
+    console.log('[VoucherService] Cleared localStorage and reset to mock data');
   }
 }
