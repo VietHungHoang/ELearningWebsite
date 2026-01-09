@@ -1,45 +1,63 @@
-
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
         {{ 'voucherManagement.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
-                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard"
+                class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+                <i
+                    class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
                 {{ 'voucherManagement.breadcrumb.dashboard' | translate }}
             </a>
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             {{ 'voucherManagement.breadcrumb.promotionManagement' | translate }}
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             {{ 'voucherManagement.breadcrumb.vouchers' | translate }}
         </li>
     </ol>
 </div>
 
 @if (isLoading) {
-    <app-loading></app-loading>
+<app-loading></app-loading>
 } @else {
+
+<!-- Success Message -->
+@if (successMessage) {
+<div
+    class="mb-[15px] p-[12px] bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md flex items-center gap-[10px] text-green-700 dark:text-green-300">
+    <i class="material-symbols-outlined text-lg">check_circle</i>
+    <span class="font-medium text-sm">{{ successMessage }}</span>
+    <button type="button" (click)="successMessage = null"
+        class="ml-auto text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 transition-colors">
+        <i class="material-symbols-outlined text-lg">close</i>
+    </button>
+</div>
+}
+
 <div class="trezo-card bg-white dark:bg-[#0c1427] mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-header mb-[20px] md:mb-[25px] sm:flex items-center justify-between">
         <div class="trezo-card-title">
             <form class="relative sm:w-[265px]">
-                <label class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
+                <label
+                    class="leading-none absolute ltr:left-[13px] rtl:right-[13px] text-black dark:text-white mt-px top-1/2 -translate-y-1/2">
                     <i class="material-symbols-outlined !text-[20px]">search</i>
                 </label>
-                <input
-                    type="text"
-                    [placeholder]="'voucherManagement.searchPlaceholder' | translate"
+                <input type="text" [placeholder]="'voucherManagement.searchPlaceholder' | translate"
                     (change)="onSearchChange($event)"
                     class="bg-gray-50 border border-gray-50 h-[36px] text-xs rounded-md w-full block text-black pt-[11px] pb-[12px] ltr:pl-[38px] rtl:pr-[38px] ltr:pr-[13px] ltr:md:pr-[16px] rtl:pl-[13px] rtl:md:pl-[16px] placeholder:text-gray-500 outline-0 dark:bg-[#15203c] dark:text-white dark:border-[#15203c] dark:placeholder:text-gray-400">
             </form>
         </div>
         <div class="trezo-card-subtitle mt-[15px] sm:mt-0 flex gap-[10px]">
-            <button type="button" routerLink="/dashboard/promotion/vouchers/create" class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-primary-500 rounded-md hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700">
+            <button type="button" routerLink="/dashboard/promotion/vouchers/create"
+                class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-primary-500 rounded-md hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-700">
                 <i class="ri-add-line mr-[4px]"></i>
                 {{ 'voucherManagement.createNewVoucher' | translate }}
             </button>
@@ -49,25 +67,32 @@
     <div class="mb-[20px] flex flex-wrap gap-[12px]">
 
         <div class="relative">
-            <button type="button" class="inline-block px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm hover:bg-gray-100 dark:bg-[#15203c] dark:border-[#172036] dark:hover:bg-[#1a2a4a] whitespace-nowrap" (click)="toggleFilterMenu()">
+            <button type="button"
+                class="inline-block px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm hover:bg-gray-100 dark:bg-[#15203c] dark:border-[#172036] dark:hover:bg-[#1a2a4a] whitespace-nowrap"
+                (click)="toggleFilterMenu()">
                 {{ 'voucherManagement.filters.creator' | translate }} <i class="ri-arrow-down-s-line ml-[4px]"></i>
             </button>
             @if (isFilterMenuOpen) {
-                <div class="absolute top-full left-0 right-0 mt-[8px] bg-white border border-gray-200 rounded-md shadow-lg z-10 dark:bg-[#0c1427] dark:border-[#172036] min-w-full">
-                    <button type="button" (click)="onCreatorChange('all')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036] whitespace-nowrap">
-                        {{ 'voucherManagement.filters.all' | translate }}
-                    </button>
-                    <button type="button" (click)="onCreatorChange('admin')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036] whitespace-nowrap">
-                        {{ 'voucherManagement.filters.createdByAdmin' | translate }}
-                    </button>
-                    <button type="button" (click)="onCreatorChange('instructor')" class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] whitespace-nowrap">
-                        {{ 'voucherManagement.filters.createdByInstructor' | translate }}
-                    </button>
-                </div>
+            <div
+                class="absolute top-full left-0 right-0 mt-[8px] bg-white border border-gray-200 rounded-md shadow-lg z-10 dark:bg-[#0c1427] dark:border-[#172036] min-w-full">
+                <button type="button" (click)="onCreatorChange('all')"
+                    class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036] whitespace-nowrap">
+                    {{ 'voucherManagement.filters.all' | translate }}
+                </button>
+                <button type="button" (click)="onCreatorChange('admin')"
+                    class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] border-b border-gray-200 dark:border-[#172036] whitespace-nowrap">
+                    {{ 'voucherManagement.filters.createdByAdmin' | translate }}
+                </button>
+                <button type="button" (click)="onCreatorChange('instructor')"
+                    class="block w-full px-[16px] py-[8px] text-left hover:bg-gray-50 dark:hover:bg-[#15203c] whitespace-nowrap">
+                    {{ 'voucherManagement.filters.createdByInstructor' | translate }}
+                </button>
+            </div>
             }
         </div>
 
-        <select [(ngModel)]="selectedStatus" (change)="onStatusChange(selectedStatus)" class="px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm dark:bg-[#15203c] dark:border-[#172036] dark:text-white">
+        <select [(ngModel)]="selectedStatus" (change)="onStatusChange(selectedStatus)"
+            class="px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm dark:bg-[#15203c] dark:border-[#172036] dark:text-white">
             <option value="all">{{ 'voucherManagement.filters.allStatus' | translate }}</option>
             <option value="active">{{ 'voucherManagement.status.active' | translate }}</option>
             <option value="expired">{{ 'voucherManagement.status.expired' | translate }}</option>
@@ -75,22 +100,24 @@
             <option value="upcoming">{{ 'voucherManagement.status.upcoming' | translate }}</option>
         </select>
 
-        <select [(ngModel)]="selectedType" (change)="onTypeChange(selectedType)" class="px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm dark:bg-[#15203c] dark:border-[#172036] dark:text-white">
+        <select [(ngModel)]="selectedType" (change)="onTypeChange(selectedType)"
+            class="px-[12px] py-[6px] bg-gray-50 border border-gray-200 rounded-md text-sm dark:bg-[#15203c] dark:border-[#172036] dark:text-white">
             <option value="all">{{ 'voucherManagement.filters.allTypes' | translate }}</option>
             <option value="%">{{ 'voucherManagement.filters.percentageDiscount' | translate }}</option>
             <option value="đ">{{ 'voucherManagement.filters.fixedAmount' | translate }}</option>
         </select>
 
         @if (selectedVouchers.size > 0) {
-            <div class="flex items-center gap-[10px] ltr:ml-auto rtl:mr-auto">
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ selectedVouchers.size }} {{ 'voucherManagement.bulkActions.selected' | translate }}
-                </span>
-                <button type="button" (click)="bulkDeleteVouchers()" class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-danger-500 rounded-md hover:bg-danger-600">
-                    <i class="ri-delete-bin-line mr-[4px]"></i>
-                    {{ 'voucherManagement.bulkActions.deleteSelected' | translate }}
-                </button>
-            </div>
+        <div class="flex items-center gap-[10px] ltr:ml-auto rtl:mr-auto">
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+                {{ selectedVouchers.size }} {{ 'voucherManagement.bulkActions.selected' | translate }}
+            </span>
+            <button type="button" (click)="bulkDeleteVouchers()"
+                class="inline-block transition-all text-white font-medium py-[8px] px-[16px] bg-danger-500 rounded-md hover:bg-danger-600">
+                <i class="ri-delete-bin-line mr-[4px]"></i>
+                {{ 'voucherManagement.bulkActions.deleteSelected' | translate }}
+            </button>
+        </div>
         }
     </div>
 
@@ -98,76 +125,100 @@
         <table id="vouchers-table" class="w-full">
             <thead class="text-black dark:text-white">
                 <tr>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap w-[50px]">
-                        <input type="checkbox"
-                            [checked]="isAllSelected()"
-                            [indeterminate]="isIndeterminate()"
-                            (change)="toggleSelectAll()"
-                            class="cursor-pointer">
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap w-[50px]">
+                        <input type="checkbox" [checked]="isAllSelected()" [indeterminate]="isIndeterminate()"
+                            (change)="toggleSelectAll()" class="cursor-pointer">
                     </th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">{{ 'voucherManagement.table.stt' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.code' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.creator' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.productType' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.value' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.actor' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.usage' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.duration' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.status' | translate }}</th>
-                    <th class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">{{ 'voucherManagement.table.actions' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap w-[80px]">
+                        {{ 'voucherManagement.table.stt' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.code' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.creator' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.productType' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.value' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.actor' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.usage' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.duration' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.status' | translate }}</th>
+                    <th
+                        class="font-medium ltr:text-left rtl:text-right px-[20px] py-[11px] bg-gray-50 dark:bg-[#15203c] whitespace-nowrap">
+                        {{ 'voucherManagement.table.actions' | translate }}</th>
                 </tr>
             </thead>
             <tbody class="text-black dark:text-white">
                 @for (voucher of filteredVouchers; track voucher.id) {
-                    <tr class="border-b border-gray-100 dark:border-[#172036]">
-                        <td class="px-[20px] py-[15px]">
-                            <input type="checkbox"
-                                [checked]="selectedVouchers.has(voucher.id)"
-                                (change)="toggleVoucherSelection(voucher.id)"
-                                class="cursor-pointer">
-                        </td>
-                        <td class="px-[20px] py-[15px]">
-                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $index + 1 }}</span>
-                        </td>
-                        <td class="px-[20px] py-[15px] font-medium">{{ voucher.code }}</td>
-                        <td class="px-[20px] py-[15px]">
-                            <span class="inline-block px-[8px] py-[4px] rounded text-xs" [ngClass]="voucher.createdBy === 'Admin' ? 'bg-primary-50 text-primary-600' : 'bg-warning-50 text-warning-600'">
-                                {{ voucher.creatorName }}
-                            </span>
-                        </td>
-                        <td class="px-[20px] py-[15px]">{{ voucher.productType }}</td>
-                        <td class="px-[20px] py-[15px]">{{ voucher.value }}</td>
-                        <td class="px-[20px] py-[15px]">{{ getActorLabel(voucher.targetAudience) | translate }}</td>
-                        <td class="px-[20px] py-[15px]">{{ voucher.usage }}</td>
-                        <td class="px-[20px] py-[15px]">{{ voucher.date }}</td>
-                        <td class="px-[20px] py-[15px]">
-                            <span class="inline-block px-[8px] py-[4px] rounded text-xs whitespace-nowrap" [ngClass]="getStatusClass(voucher.status)">
-                                {{ getStatusText(voucher.status) | translate }}
-                            </span>
-                        </td>
-                        <td class="px-[20px] py-[15px]">
-                            <div class="flex gap-[8px]">
-                                @if (voucher.createdBy === 'Admin') {
-                                    <button type="button" [routerLink]="['/dashboard/promotion/vouchers/edit', voucher.id]" class="text-primary-500 hover:text-primary-600 transition-colors" [title]="'voucherManagement.actions.edit' | translate">
-                                        <i class="ri-edit-line"></i>
-                                    </button>
-                                }
-                                <button type="button" (click)="pauseVoucher(voucher)" class="text-warning-500 hover:text-warning-600 transition-colors" [title]="voucher.status === 'paused' ? ('voucherManagement.actions.resume' | translate) : ('voucherManagement.actions.pause' | translate)">
-                                    <i [class]="voucher.status === 'paused' ? 'ri-play-line' : 'ri-pause-line'"></i>
-                                </button>
-                                <button type="button" (click)="deleteVoucher(voucher.id)" class="text-danger-500 hover:text-danger-600 transition-colors" [title]="'voucherManagement.actions.delete' | translate">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                <tr class="border-b border-gray-100 dark:border-[#172036]">
+                    <td class="px-[20px] py-[15px]">
+                        <input type="checkbox" [checked]="selectedVouchers.has(voucher.id)"
+                            (change)="toggleVoucherSelection(voucher.id)" class="cursor-pointer">
+                    </td>
+                    <td class="px-[20px] py-[15px]">
+                        <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $index + 1 }}</span>
+                    </td>
+                    <td class="px-[20px] py-[15px] font-medium">{{ voucher.code }}</td>
+                    <td class="px-[20px] py-[15px]">
+                        <span class="inline-block px-[8px] py-[4px] rounded text-xs"
+                            [ngClass]="voucher.createdBy === 'Admin' ? 'bg-primary-50 text-primary-600' : 'bg-warning-50 text-warning-600'">
+                            {{ voucher.creatorName }}
+                        </span>
+                    </td>
+                    <td class="px-[20px] py-[15px]">{{ voucher.productType }}</td>
+                    <td class="px-[20px] py-[15px]">{{ voucher.value }}</td>
+                    <td class="px-[20px] py-[15px]">{{ getActorLabel(voucher.targetAudience) | translate }}</td>
+                    <td class="px-[20px] py-[15px]">{{ voucher.usage }}</td>
+                    <td class="px-[20px] py-[15px]">{{ voucher.date }}</td>
+                    <td class="px-[20px] py-[15px]">
+                        <span class="inline-block px-[8px] py-[4px] rounded text-xs whitespace-nowrap"
+                            [ngClass]="getStatusClass(voucher.status)">
+                            {{ getStatusText(voucher.status) | translate }}
+                        </span>
+                    </td>
+                    <td class="px-[20px] py-[15px]">
+                        <div class="flex gap-[8px]">
+                            @if (voucher.createdBy === 'Admin') {
+                            <button type="button" [routerLink]="['/dashboard/promotion/vouchers/edit', voucher.id]"
+                                class="text-primary-500 hover:text-primary-600 transition-colors"
+                                [title]="'voucherManagement.actions.edit' | translate">
+                                <i class="ri-edit-line"></i>
+                            </button>
+                            }
+                            <button type="button" (click)="pauseVoucher(voucher)"
+                                class="text-warning-500 hover:text-warning-600 transition-colors"
+                                [title]="voucher.status === 'paused' ? ('voucherManagement.actions.resume' | translate) : ('voucherManagement.actions.pause' | translate)">
+                                <i [class]="voucher.status === 'paused' ? 'ri-play-line' : 'ri-pause-line'"></i>
+                            </button>
+                            <button type="button" (click)="deleteVoucher(voucher.id)"
+                                class="text-danger-500 hover:text-danger-600 transition-colors"
+                                [title]="'voucherManagement.actions.delete' | translate">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
                 }
                 @if (filteredVouchers.length === 0) {
-                    <tr>
-                        <td colspan="9" class="px-[20px] py-[30px] text-center text-gray-500">
-                            {{ 'voucherManagement.emptyState.noVouchersFound' | translate }}
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="9" class="px-[20px] py-[30px] text-center text-gray-500">
+                        {{ 'voucherManagement.emptyState.noVouchersFound' | translate }}
+                    </td>
+                </tr>
                 }
             </tbody>
         </table>

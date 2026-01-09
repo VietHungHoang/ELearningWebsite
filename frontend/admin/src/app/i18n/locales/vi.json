@@ -22,7 +22,8 @@
         "thisWeek": "7 ngày qua",
         "pending": "Chờ duyệt",
         "approved": "Đã duyệt",
-        "rejected": "Đã từ chối"
+        "rejected": "Đã từ chối",
+        "vsLastWeek": "so với tuần trước"
       },
       "totalMentors": {
         "title": "Tổng số gia sư",
@@ -1085,7 +1086,7 @@
       "date": "Ngày giờ",
       "status": "Trạng thái",
       "action": "Thao tác",
-      "searchPlaceholder": "Tìm kiếm mã đơn hàng...",
+      "searchPlaceholder": "Tìm kiếm theo tên học viên, mã giao dịch, tên lớp...",
       "exportExcel": "Xuất Excel",
       "noTransactionsFound": "Không tìm thấy giao dịch nào"
     },
@@ -1102,7 +1103,7 @@
     "paymentMethod": {
       "momo": "Momo",
       "vnpay": "VNPay",
-      "banking": "Ngân hàng"
+      "sepay": "SePay"
     },
     "confirm": {
       "title": "Xác nhận duyệt",
@@ -1156,7 +1157,8 @@
       },
       "actions": {
         "print": "In",
-        "download": "Tải xuống"
+        "download": "Tải xuống",
+        "backToList": "Quay lại Danh sách"
       }
     }
   },

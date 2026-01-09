@@ -103,6 +103,22 @@ public class KafkaProducerService {
         }
     }
 
+    private static final String SESSION_REMINDER_TOPIC = "session_reminder";
+
+    /**
+     * Send session reminder event 15 minutes before session starts
+     * Notification service will send email and in-app notification to students
+     */
+    public void sendSessionReminderEvent(Object event) {
+        try {
+            String jsonMessage = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(SESSION_REMINDER_TOPIC, jsonMessage);
+            log.info("Sent session reminder event to topic {}: {}", SESSION_REMINDER_TOPIC, jsonMessage);
+        } catch (JsonProcessingException e) {
+            log.error("Error converting SessionReminderEvent to JSON: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to serialize SessionReminderEvent", e);
+        }
+    }
     /**
      * Send new student enrollment notification to tutor
      */

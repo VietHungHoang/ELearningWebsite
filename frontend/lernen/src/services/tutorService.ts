@@ -42,7 +42,34 @@ export const tutorService = {
         if (language) {
             params.language = language;
         }
-        return await apiService.get<FuzzySearchSuggestion[]>(`/v1/public/search/tutors/suggestions`, params);
+
+        interface BackendSearchSuggestion {
+            tutorId: string | null;
+            name: string;
+            headline: string | null;
+            score: number;
+        }
+
+        const response = await apiService.get<BackendSearchSuggestion[]>(`/v1/public/search/tutors/suggestions`, params);
+
+        // Map backend response to frontend interface
+        if (response.success && response.data) {
+            const mappedData: FuzzySearchSuggestion[] = response.data.map((item, index) => ({
+                id: item.tutorId || `suggestion-${index}`,
+                text: item.name,
+                type: item.tutorId ? 'tutor' : 'subject' // Default to subject for keyword matches if no tutorId
+            }));
+
+            return {
+                ...response,
+                data: mappedData
+            };
+        }
+
+        return {
+            ...response,
+            data: []
+        };
     },
 
     searchTutors: async (filters: TutorSearchFilter, studentId?: string): Promise<ApiResponse<PaginatedResponse<Tutor>>> => {
@@ -266,7 +293,7 @@ export const tutorService = {
     }>> => {
         try {
             const params: Record<string, string> = {};
-            
+
             if (options?.isAll) {
                 // If isAll is true, don't send any date params
             } else if (options?.startDate || options?.endDate) {
@@ -281,7 +308,7 @@ export const tutorService = {
                 // Default: this month (backward compatibility)
                 params.startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().replace('Z', '');
             }
-            
+
             return await apiService.get<{
                 totalEarnings: number;
                 totalStudents: number;

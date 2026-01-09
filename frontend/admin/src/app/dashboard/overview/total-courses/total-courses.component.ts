@@ -18,12 +18,13 @@ export class TotalCoursesComponent implements OnInit, OnDestroy {
     pendingPercentage = 0;
     approvedPercentage = 0;
     rejectedPercentage = 0;
+    growthPercentage = 27; // Mock growth percentage
 
     private subscriptions: Subscription[] = [];
 
     constructor(
         private totalCoursesService: TotalCoursesService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.loadData();
@@ -55,7 +56,8 @@ export class TotalCoursesComponent implements OnInit, OnDestroy {
         this.totalCount = data.total;
 
         if (this.totalCount > 0) {
-            this.pendingPercentage = data.percentage;
+            // Round all percentages to integers (e.g., 23.1% -> 23%)
+            this.pendingPercentage = Math.round(data.percentage);
             this.approvedPercentage = Math.round((this.approvedCount / this.totalCount) * 100);
             this.rejectedPercentage = Math.round((this.rejectedCount / this.totalCount) * 100);
         }

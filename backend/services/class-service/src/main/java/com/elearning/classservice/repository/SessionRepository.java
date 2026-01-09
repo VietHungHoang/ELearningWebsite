@@ -21,6 +21,11 @@ public interface SessionRepository extends JpaRepository<Session, UUID> {
         List<Session> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
 
         /**
+         * Find sessions in time range with specific status (for reminders)
+         */
+        List<Session> findByStartTimeBetweenAndStatus(LocalDateTime start, LocalDateTime end, ScheduleStatus status);
+
+        /**
          * Find booked sessions by tutor ID and date range
          */
         List<Session> findByTutorIdAndStartTimeBetween(UUID tutorId, LocalDateTime startDate, LocalDateTime endDate);

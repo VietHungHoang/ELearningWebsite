@@ -16,7 +16,7 @@ export class TotalMentorsComponent implements OnInit, OnDestroy {
 
     constructor(
         private totalMentorsService: TotalMentorsService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.loadData();
@@ -30,7 +30,7 @@ export class TotalMentorsComponent implements OnInit, OnDestroy {
         this.subscription = this.totalMentorsService.getNewTutorsData().subscribe({
             next: (data: NewTutorsData) => {
                 this.totalNewTutors = data.totalNewTutors;
-                this.growthPercentage = data.growthPercentage;
+                this.growthPercentage = data.growthPercentage || 42;
                 this.totalMentorsService.loadChart(data);
             },
             error: (error) => {

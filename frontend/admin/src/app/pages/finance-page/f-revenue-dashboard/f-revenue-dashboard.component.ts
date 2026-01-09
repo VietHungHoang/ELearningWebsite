@@ -7,7 +7,6 @@ import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 import { LoadingComponent } from '../../../components/loading/loading.component';
 import { RevenueTrendComponent } from './revenue-trend/revenue-trend.component';
 import { PaymentMethodChartComponent } from './payment-method-chart/payment-method-chart.component';
-import { TopInstructorsChartComponent } from './top-instructors-chart/top-instructors-chart.component';
 import { RevenueDashboardService, RevenueDashboardData } from './revenue-dashboard.service';
 import { I18nService } from '../../../i18n/i18n.service';
 
@@ -21,8 +20,7 @@ import { I18nService } from '../../../i18n/i18n.service';
         CurrencyFormatPipe,
         LoadingComponent,
         RevenueTrendComponent,
-        PaymentMethodChartComponent,
-        TopInstructorsChartComponent
+        PaymentMethodChartComponent
     ],
     templateUrl: './f-revenue-dashboard.component.html',
     styleUrl: './f-revenue-dashboard.component.scss'
@@ -57,7 +55,7 @@ export class FRevenueDashboardComponent implements OnInit {
     constructor(
         private revenueDashboardService: RevenueDashboardService,
         private i18nService: I18nService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.loadDashboardData();

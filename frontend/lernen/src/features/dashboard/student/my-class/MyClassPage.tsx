@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiSearch } from 'react-icons/hi';
-import { FiEye, FiMessageSquare, FiRefreshCw } from 'react-icons/fi';
+import { FiEye, FiMessageSquare, FiRefreshCw, FiCreditCard } from 'react-icons/fi';
 import { useBreadcrumb } from '../../context/BreadcrumbContext';
 import CustomDropdown from '../../../../components/ui/CustomDropdown';
 import Pagination from '../../../../components/ui/Pagination';
@@ -259,8 +259,8 @@ const MyClassPage: React.FC = () => {
                                         </td>
                                         <td className="p-4 text-center">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${classData.type === 'ONE_ON_ONE'
-                                                    ? 'bg-blue-100 text-blue-800'
-                                                    : 'bg-purple-100 text-purple-800'
+                                                ? 'bg-blue-100 text-blue-800'
+                                                : 'bg-purple-100 text-purple-800'
                                                 }`}>
                                                 {classData.type === 'ONE_ON_ONE'
                                                     ? t('dashboard.student.myClass.classTypes.oneOnOne')
@@ -349,7 +349,52 @@ const MyClassPage: React.FC = () => {
                                                 >
                                                     <FiMessageSquare className="w-4 h-4" />
                                                 </button>
-                                                {state.user?.role === 'student' && (
+                                                {state.user?.role === 'student' && getEnrollmentStatus(classData) === 'PENDING_PAYMENT' && (
+                                                    <button
+                                                        onClick={() => {
+                                                            // Navigate to checkout for group class payment
+                                                            navigate('/checkout', {
+                                                                state: {
+                                                                    classId: classData.id,
+                                                                    isGroupClassPayment: true,
+                                                                    bookingData: {
+                                                                        sessions: classData.totalSessions || 10,
+                                                                        package: {
+                                                                            name: classData.title || 'Lớp học nhóm',
+                                                                            sessions: classData.totalSessions || 10,
+                                                                            discount: 0,
+                                                                        },
+                                                                        pricing: {
+                                                                            originalPrice: (classData.tutor as any)?.pricePerHour ?
+                                                                                (classData.tutor as any).pricePerHour * (classData.totalSessions || 10) :
+                                                                                0,
+                                                                            discountAmount: 0,
+                                                                            totalPrice: (classData.tutor as any)?.pricePerHour ?
+                                                                                (classData.tutor as any).pricePerHour * (classData.totalSessions || 10) :
+                                                                                0,
+                                                                        },
+                                                                        schedule: classData.schedules.map((s: any, idx: number) => ({
+                                                                            sessionNumber: idx + 1,
+                                                                            dayOfWeek: s.dayOfWeek,
+                                                                            time: s.time,
+                                                                            date: '',
+                                                                        })),
+                                                                    },
+                                                                    tutor: {
+                                                                        id: classData.tutor?.id,
+                                                                        fullName: classData.tutor?.fullName,
+                                                                        avatarUrl: classData.tutor?.avatarUrl,
+                                                                    },
+                                                                }
+                                                            });
+                                                        }}
+                                                        className="p-1 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 rounded-md transition-colors"
+                                                        title={t('dashboard.student.myClass.payNow') || 'Thanh toán ngay'}
+                                                    >
+                                                        <FiCreditCard className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {state.user?.role === 'student' && getEnrollmentStatus(classData) !== 'PENDING_PAYMENT' && (
                                                     <button
                                                         onClick={() => {
                                                             setSelectedClassForRenewal(classData);

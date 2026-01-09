@@ -219,7 +219,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor, onBookTrial: _onBookTrial 
             <div className="space-y-2">
               <StatItem
                 icon={<PiStar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}
-                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{((tutor as any).averageRating || 0).toFixed(1)}/5.0</span> ({(tutor as any).reviewCount || 0} {((tutor as any).reviewCount !== 1 ? t('findTutors.tutorCard.reviews') : t('findTutors.tutorCard.review'))})</>}
+                text={<><span className="font-medium" style={{ color: 'rgb(88, 88, 88)' }}>{(((tutor as any).reviewCount || 0) === 0 ? 0 : ((tutor as any).averageRating || 0)).toFixed(1)}/5.0</span> ({(tutor as any).reviewCount || 0} {(((tutor as any).reviewCount || 0) !== 1 ? t('findTutors.tutorCard.reviews') : t('findTutors.tutorCard.review'))})</>}
               />
               <StatItem
                 icon={<PiCalendar style={{ color: 'rgb(88, 88, 88)', fontSize: '17px' }} />}

@@ -27,7 +27,7 @@ export class ApiService {
     private lastStatusSubject = new BehaviorSubject<'idle' | 'loading' | 'success' | 'error'>('idle');
     public lastStatus$ = this.lastStatusSubject.asObservable();
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     private setLoading(v: boolean) { this.isLoadingSubject.next(v); }
     private setSuccess(msg: string | null) { this.successMessageSubject.next(msg); }
@@ -110,6 +110,17 @@ export class ApiService {
         return this.handleRequest<T>(
             this.http.delete<ApiResponse<T>>(`${this.apiUrl}${endpoint}`)
         );
+    }
+
+    /**
+     * Download binary file (e.g., PDF) from API
+     * @param endpoint API endpoint
+     * @returns Observable of Blob
+     */
+    getBlob(endpoint: string): Observable<Blob> {
+        const url = `${this.apiUrl}${endpoint}`;
+        console.log('[ApiService] GET Blob request:', url);
+        return this.http.get(url, { responseType: 'blob' });
     }
 
     // Common API methods (using Public Common API)

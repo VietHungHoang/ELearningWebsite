@@ -709,6 +709,8 @@
           "enrolled": "Enrolled",
           "pendingPayment": "Pending Payment"
         },
+        "payNow": "Pay Now",
+        "renewClass": "Renew Class",
         "loading": "Loading classes...",
         "errorTitle": "Failed to load classes",
         "tryAgain": "Try again",
@@ -1393,8 +1395,10 @@
         "status": {
           "pending": "Pending",
           "approved": "Approved",
+          "accepted": "Accepted",
           "declined": "Declined",
-          "rejected": "Rejected"
+          "rejected": "Rejected",
+          "cancelled": "Cancelled"
         },
         "trial": {
           "badge": "Trial session request",
