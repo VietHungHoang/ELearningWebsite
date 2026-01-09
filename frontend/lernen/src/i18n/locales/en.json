@@ -1394,7 +1394,8 @@
           "pending": "Pending",
           "approved": "Approved",
           "declined": "Declined",
-          "rejected": "Rejected"
+          "rejected": "Rejected",
+          "cancelled": "Cancelled"
         },
         "trial": {
           "badge": "Trial session request",

@@ -4,12 +4,12 @@ import type { RequestStatus } from '../../../../types/api';
 
 
 interface RequestStatusBadgeProps {
-  status: RequestStatus;
+    status: RequestStatus;
 }
 
 const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
     const { t } = useTranslation();
-    
+
     const getStatusColor = (status: RequestStatus): string => {
         switch (status) {
             case 'APPROVED':
@@ -20,6 +20,8 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
                 return 'bg-[#475569]'; // Dark slate - inactive state (same as archived/not_started in quiz)
             case 'REJECTED':
                 return 'bg-[#475569]'; // Dark slate - inactive state (same as declined)
+            case 'CANCELLED':
+                return 'bg-[#dc2626]'; // Red - cancelled state
             default:
                 return 'bg-[#64748b]';
         }
@@ -30,6 +32,7 @@ const RequestStatusBadge: React.FC<RequestStatusBadgeProps> = ({ status }) => {
         APPROVED: t('dashboard.tutor.requests.status.approved'),
         DECLINED: t('dashboard.tutor.requests.status.declined'),
         REJECTED: t('dashboard.tutor.requests.status.rejected'),
+        CANCELLED: t('dashboard.tutor.requests.status.cancelled'),
     };
 
     return (

@@ -3,19 +3,19 @@ import type { TutorResponse, TutorDetail, Tutor, TutorAvailability, EducationIte
 import type { GetBookedSessionsRequest, Session } from "./class";
 
 // Re-export all types
-export type { 
-    EducationItem, 
-    ExperienceItem, 
-    CertificationItem, 
-    TutorDetail, 
-    TutorResponse, 
-    Tutor, 
-    TutorAvailability, 
-    GetAvailabilityRequest, 
-    GetBookedSessionsRequest, 
-    UpdateAvailabilityRequest, 
-    Category, 
-    Subject, 
+export type {
+    EducationItem,
+    ExperienceItem,
+    CertificationItem,
+    TutorDetail,
+    TutorResponse,
+    Tutor,
+    TutorAvailability,
+    GetAvailabilityRequest,
+    GetBookedSessionsRequest,
+    UpdateAvailabilityRequest,
+    Category,
+    Subject,
     Language,
     Timezone
 };
@@ -381,7 +381,7 @@ export interface TrialSessionRequest {
     message?: string; // Optional message from student
 }
 
-export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED' | 'REJECTED';
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'DECLINED' | 'REJECTED' | 'CANCELLED';
 export type RequestTargetType = 'SESSION' | 'CLASS';
 
 export interface RescheduleRequest {
