@@ -71,13 +71,33 @@ export class CategoryService {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data && Array.isArray(response.data)) {
                     // Map BE response to UI-friendly format
-                    const mappedCategories = response.data.map(category => ({
-                        ...category,
-                        name: category.nameVi || category.nameEn, // Computed property for UI
-                        isActive: true, // Default value
-                        tutorCount: 0, // Default value
-                        subjects: [] // Will be populated separately
-                    }));
+                    const mappedCategories = response.data.map(category => {
+                        // Generate random mock data for subjects (1-10) and tutors (10-15)
+                        const subjectCount = Math.floor(Math.random() * 10) + 1;
+                        const tutorCount = Math.floor(Math.random() * 6) + 10;
+
+                        const mockSubjects = Array.from({ length: subjectCount }, (_, i) => ({
+                            id: `mock-subject-${category.id}-${i}`,
+                            name: `Subject ${i + 1}`,
+                            isActive: true
+                        }));
+
+                        const mockTutors = Array.from({ length: tutorCount }, (_, i) => ({
+                            id: `mock-tutor-${category.id}-${i}`,
+                            name: `Tutor ${i + 1}`,
+                            isActive: true
+                        }));
+
+                        return {
+                            ...category,
+                            name: category.nameVi || category.nameEn, // Computed property for UI
+                            isActive: true, // Default value
+                            tutorCount: tutorCount,
+                            tutors: mockTutors,
+                            subjects: mockSubjects
+                        };
+                    });
+
 
                     this.categoriesSubject.next(mappedCategories);
                     return mappedCategories;
@@ -456,7 +476,7 @@ export class CategoryService {
                     const mappedSubjects: Subject[] = response.data.map((apiSubject: any) => {
                         // Determine name based on available fields (prefer nameVi for Vietnamese, nameEn for English)
                         const name = apiSubject.nameVi || apiSubject.nameEn || apiSubject.name || '';
-                        
+
                         return {
                             id: apiSubject.id,
                             categoryId: apiSubject.categoryId,

@@ -51,9 +51,6 @@ export class SubjectListComponent implements OnInit, OnDestroy {
     itemsPerPage = 5;
     currentPage = 1;
 
-    selectedStatus = 'All';
-    isStatusDropdownOpen = false;
-
     selectedCategoryFilter = 'All';
     isCategoryFilterDropdownOpen = false;
 
@@ -98,11 +95,11 @@ export class SubjectListComponent implements OnInit, OnDestroy {
                     // Create subject items from subjects data
                     this.subjectItems = [];
                     const currentLang = this.i18nService.getCurrentLanguage();
-                    
+
                     subjects.forEach(subject => {
                         // Find category by categoryId
                         const category = this.categories.find(cat => cat.id === subject.categoryId);
-                        
+
                         // Use found category or create a dummy one
                         const categoryForSubject: Category = category || {
                             id: subject.categoryId || 'unknown',
@@ -118,14 +115,14 @@ export class SubjectListComponent implements OnInit, OnDestroy {
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString()
                         };
-                        
+
                         // Ensure subject has name based on current language
                         if (!subject.name) {
-                            subject.name = currentLang === 'vi' 
-                                ? (subject.nameVi || subject.nameEn || '') 
+                            subject.name = currentLang === 'vi'
+                                ? (subject.nameVi || subject.nameEn || '')
                                 : (subject.nameEn || subject.nameVi || '');
                         }
-                        
+
                         this.subjectItems.push({
                             category: categoryForSubject,
                             subject: subject,
@@ -145,7 +142,7 @@ export class SubjectListComponent implements OnInit, OnDestroy {
                 }
             });
     }
-    
+
     getSubjectName(subject: Subject): string {
         const currentLang = this.i18nService.getCurrentLanguage();
         if (currentLang === 'vi') {
@@ -154,7 +151,7 @@ export class SubjectListComponent implements OnInit, OnDestroy {
             return subject.nameEn || subject.nameVi || subject.name || '';
         }
     }
-    
+
     getCategoryName(category: Category): string {
         const currentLang = this.i18nService.getCurrentLanguage();
         if (currentLang === 'vi') {
@@ -316,11 +313,6 @@ export class SubjectListComponent implements OnInit, OnDestroy {
             });
         }
 
-        if (this.selectedStatus !== 'All') {
-            const isActive = this.selectedStatus === 'Active';
-            filtered = filtered.filter(item => item.subject && item.subject.isActive === isActive);
-        }
-
         if (this.selectedCategoryFilter !== 'All') {
             filtered = filtered.filter(item => this.getCategoryName(item.category) === this.selectedCategoryFilter);
         }
@@ -346,10 +338,6 @@ export class SubjectListComponent implements OnInit, OnDestroy {
     onSearchChange(searchTerm: string): void {
         this.searchTerm = searchTerm;
         this.applyFilters();
-    }
-
-    getStatusColor(isActive: boolean): string {
-        return isActive ? 'bg-success-100 text-success-600' : 'bg-danger-100 text-danger-600';
     }
 
     getTutorCountForSubject(subjectId: string): number {
@@ -399,25 +387,6 @@ export class SubjectListComponent implements OnInit, OnDestroy {
         });
     }
 
-    toggleSubjectActive(item: SubjectItem): void {
-        if (!item.subject) return;
-
-        // Use PRIMARY API for toggling subject active status
-        this.categoryService.toggleSubjectActivePrimary(item.subject.id).subscribe({
-            next: (updatedSubject) => {
-                if (updatedSubject) {
-                    this.applyFilters();
-                } else {
-                    alert('Có lỗi khi thay đổi trạng thái môn học');
-                }
-            },
-            error: (error) => {
-                console.error('Error toggling subject active status:', error);
-                alert('Có lỗi khi thay đổi trạng thái môn học');
-            }
-        });
-    }
-
 
 
     closeAddModal(): void {
@@ -425,20 +394,8 @@ export class SubjectListComponent implements OnInit, OnDestroy {
         this.resetForm();
     }
 
-    toggleStatusDropdown(): void {
-        this.isStatusDropdownOpen = !this.isStatusDropdownOpen;
-        this.isCategoryFilterDropdownOpen = false;
-    }
-
-    filterByStatus(status: string): void {
-        this.selectedStatus = status;
-        this.isStatusDropdownOpen = false;
-        this.applyFilters();
-    }
-
     toggleCategoryFilterDropdown(): void {
         this.isCategoryFilterDropdownOpen = !this.isCategoryFilterDropdownOpen;
-        this.isStatusDropdownOpen = false;
 
         // Load categories if not loaded yet
         if (this.isCategoryFilterDropdownOpen && this.categories.length === 0) {
