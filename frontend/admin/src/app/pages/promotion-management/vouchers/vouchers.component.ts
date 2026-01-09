@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { VoucherService, Voucher } from '../../../services/voucher.service';
@@ -24,11 +24,27 @@ export class VouchersComponent implements OnInit, OnDestroy {
   isFilterMenuOpen = false;
   selectedVouchers: Set<string> = new Set();
   isLoading = false;
+  successMessage: string | null = null;
   private subscription: Subscription = new Subscription();
 
-  constructor(private voucherService: VoucherService) {}
+  constructor(
+    private voucherService: VoucherService,
+    private route: ActivatedRoute
+  ) { }
 
   ngOnInit(): void {
+    // Check if redirected from create voucher page
+    this.subscription.add(
+      this.route.queryParams.subscribe(params => {
+        if (params['created'] === 'success') {
+          this.successMessage = 'Tạo voucher thành công!';
+          // Auto hide message after 5 seconds
+          setTimeout(() => {
+            this.successMessage = null;
+          }, 5000);
+        }
+      })
+    );
     this.loadVouchers();
   }
 
@@ -66,7 +82,7 @@ export class VouchersComponent implements OnInit, OnDestroy {
   }
 
   getStatusClass(status: string): string {
-    switch(status) {
+    switch (status) {
       case 'active': return 'bg-success-50 text-success-600';
       case 'expired': return 'bg-danger-50 text-danger-600';
       case 'paused': return 'bg-warning-50 text-warning-600';

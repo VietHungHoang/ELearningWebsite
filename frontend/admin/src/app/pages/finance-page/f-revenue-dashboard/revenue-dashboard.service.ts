@@ -79,7 +79,7 @@ export interface RevenueDashboardData {
     providedIn: 'root'
 })
 export class RevenueDashboardService {
-    constructor(private apiService: ApiService) {}
+    constructor(private apiService: ApiService) { }
 
     /**
      * Get revenue dashboard data

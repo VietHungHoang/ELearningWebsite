@@ -79,11 +79,21 @@ export class TotalCoursesService {
         params = params.set('startDate', startDate);
         params = params.set('endDate', endDate);
 
+        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
         return this.http.get<ApiResponse<TutorPendingApprovalsData>>(`${this.apiUrl}/tutor-pending-approvals`, { params })
             .pipe(
                 map(response => {
                     if (response.success && response.data) {
-                        return response.data;
+                        // Calculate dayName from date since backend doesn't provide it
+                        const dataWithDayNames = {
+                            ...response.data,
+                            weeklyData: response.data.weeklyData.map(d => ({
+                                ...d,
+                                dayName: d.dayName || dayNames[new Date(d.date).getDay()]
+                            }))
+                        };
+                        return dataWithDayNames;
                     }
                     throw new Error(response.message || 'Invalid response');
                 })

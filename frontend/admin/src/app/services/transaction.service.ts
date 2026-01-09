@@ -10,7 +10,7 @@ import { CurrencyService } from './currency.service';
 // Payment statuses for student payment
 // Pending: Waiting for payment gateway callback (VNPay/Momo webhook will auto-update to completed/failed)
 export type PaymentStatus = 'pending' | 'completed' | 'failed';
-export type PaymentMethod = 'momo' | 'vnpay' | 'banking';
+export type PaymentMethod = 'momo' | 'vnpay' | 'sepay';
 export type ClassType = '1 and 1' | '1 and n';
 
 // Payout status - monthly release to tutor
@@ -201,6 +201,32 @@ export interface BookingTransactionResponse {
     notes?: string;
     createdAt: string;
     updatedAt: string;
+    className?: string;
+    classType?: string;
+}
+
+/**
+ * Backend TransactionDetailResponse from booking-service
+ * /api/v1/admin/transactions/{id} endpoint
+ */
+export interface TransactionDetailResponse {
+    id: string;
+    transactionId?: string;
+    providerTransactionId?: string;
+    amount: number;
+    discount?: number;
+    pricePerSession?: number;
+    sessionsPurchased?: number;
+    paymentProvider: 'MOMO' | 'VNPAY' | 'SEPAY' | null;
+    status: 'PENDING' | 'CONFIRMED' | 'FAILED' | 'CANCELLED';
+    schedule?: string;
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+    studentId: string;
+    tutorId: string;
+    tutorName: string;
+    classId?: string;
     className?: string;
     classType?: string;
 }
@@ -996,7 +1022,7 @@ export class TransactionService {
                 },
                 totalAmount: 1000000,
                 currency: 'VND',
-                paymentMethod: 'banking',
+                paymentMethod: 'sepay',
                 status: 'failed',
                 createdDate: '2025-10-25',
                 notes: 'Card declined'
@@ -1053,6 +1079,27 @@ export class TransactionService {
                 // If API throws error, use mock data
                 console.warn('[TransactionService] API error:', error);
                 return of(this.getMockTransactionsResponse(params));
+            })
+        );
+    }
+
+    /**
+     * Get transaction detail by ID from API
+     * API Endpoint: GET /api/v1/admin/transactions/{id}
+     * @param id Transaction/Booking ID
+     * @returns Observable of TransactionDetailResponse
+     */
+    getTransactionById(id: string): Observable<TransactionDetailResponse> {
+        return this.apiService.get<TransactionDetailResponse>(`/transactions/${id}`).pipe(
+            map(response => {
+                if (response.success && response.data) {
+                    return response.data;
+                }
+                throw new Error(response.message || 'Failed to fetch transaction detail');
+            }),
+            catchError(error => {
+                console.error('[TransactionService] Error fetching transaction detail:', error);
+                throw error;
             })
         );
     }
@@ -1245,7 +1292,7 @@ export class TransactionService {
         const paymentMethodMap: { [key: string]: PaymentMethod } = {
             'MOMO': 'momo',
             'VNPAY': 'vnpay',
-            'SEPAY': 'banking'
+            'SEPAY': 'sepay'
         };
 
         // Map BE status to FE status
@@ -1262,12 +1309,12 @@ export class TransactionService {
             studentName: `Student ${booking.studentId?.substring(0, 8) || 'Unknown'}`, // TODO: Fetch student name from API
             studentEmail: '', // Not available in booking response
             session: {
-                className: booking.className || 'Unknown Class',
+                className: booking.className || (booking.classId ? `class ${booking.classId.substring(0, 8)}` : 'Unknown Class'),
                 tutorName: booking.tutorName || 'Unknown Tutor'
             },
             totalAmount: booking.amount || 0,
             currency: 'VND',
-            paymentMethod: paymentMethodMap[booking.paymentProvider || ''] || 'banking',
+            paymentMethod: paymentMethodMap[booking.paymentProvider || ''] || 'vnpay',
             status: statusMap[booking.status] || 'pending',
             createdDate: booking.createdAt || '',
             transactionId: booking.providerTransactionId || booking.transactionId
@@ -1397,7 +1444,7 @@ export class TransactionService {
                 bankName: '',
                 accountHolder: tutorName
             },
-            paymentMethod: 'banking',
+            paymentMethod: 'sepay',
             relatedPaymentIds: paymentIds,
             createdDate: this.getCurrentDate()
         };

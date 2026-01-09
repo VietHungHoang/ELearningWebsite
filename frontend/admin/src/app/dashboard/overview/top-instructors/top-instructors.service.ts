@@ -65,18 +65,18 @@ export class TopInstructorsService {
 
     private apiUrl = `${environment.apiUrl}/v1/admin/dashboard`;
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * Get mock data for Top Instructors when API fails
      */
     private getMockData(criteria: 'revenue' | 'rating' | 'bookings', period: 'week' | 'month' | 'year' | 'all'): TopInstructorsData {
         const mockInstructors: TopInstructorItem[] = [
-            { id: 1, name: 'Nguyễn Văn A', rating: 4.9, revenue: 150000000, totalBookings: 245, image: 'images/users/user13.jpg', hours: 120, rank: 1 },
-            { id: 2, name: 'Trần Thị B', rating: 4.8, revenue: 120000000, totalBookings: 180, image: 'images/users/user16.jpg', hours: 95, rank: 2 },
-            { id: 3, name: 'Lê Văn C', rating: 4.5, revenue: 90000000, totalBookings: 156, image: 'images/users/user17.jpg', hours: 78, rank: 3 },
-            { id: 4, name: 'Phạm Thị D', rating: 4.2, revenue: 85000000, totalBookings: 132, image: 'images/users/user18.jpg', hours: 65, rank: 4 },
-            { id: 5, name: 'Hoàng Văn E', rating: 4.0, revenue: 75000000, totalBookings: 98, image: 'images/users/user19.jpg', hours: 52, rank: 5 }
+            { id: 1, name: 'Nguyễn Minh Tuấn', rating: 4.9, revenue: 18000000, totalBookings: 9, image: 'images/users/user13.jpg', hours: 45, rank: 1 },
+            { id: 2, name: 'Trần Thị Hương', rating: 4.8, revenue: 15000000, totalBookings: 8, image: 'images/users/user16.jpg', hours: 38, rank: 2 },
+            { id: 3, name: 'Lê Hoàng Nam', rating: 4.5, revenue: 12000000, totalBookings: 7, image: 'images/users/user17.jpg', hours: 32, rank: 3 },
+            { id: 4, name: 'Phạm Thu Hà', rating: 4.2, revenue: 9000000, totalBookings: 6, image: 'images/users/user18.jpg', hours: 25, rank: 4 },
+            { id: 5, name: 'Hoàng Đức Anh', rating: 4.0, revenue: 6000000, totalBookings: 5, image: 'images/users/user19.jpg', hours: 18, rank: 5 }
         ];
 
         // Sort by criteria

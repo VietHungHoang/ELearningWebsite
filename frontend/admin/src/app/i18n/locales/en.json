@@ -1126,7 +1126,8 @@
       },
       "actions": {
         "print": "Print",
-        "download": "Download"
+        "download": "Download",
+        "backToList": "Back to Transactions"
       }
     }
   },
