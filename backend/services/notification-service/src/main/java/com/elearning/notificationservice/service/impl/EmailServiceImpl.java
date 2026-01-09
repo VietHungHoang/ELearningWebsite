@@ -107,4 +107,43 @@ public class EmailServiceImpl implements EmailService {
 
         sendHtmlEmail(to, subject, htmlContent);
     }
+
+    @Override
+    public void sendPaymentSuccessNotification(String to, String studentName, String tutorName, String classTitle,
+            java.math.BigDecimal amount, String currency) {
+        String formattedAmount = amount != null ? String.format("%,.0f %s", amount, currency != null ? currency : "VNĐ") : "N/A";
+        String subject = "✅ Thanh toán thành công - " + classTitle;
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>" +
+                "<h2 style='color: #2e7d32;'>Xin chào " + studentName + "!</h2>" +
+                "<p>Thanh toán của bạn đã được xử lý thành công.</p>" +
+                "<div style='background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 20px 0;'>" +
+                "<p style='margin: 0 0 10px 0;'><strong>Thông tin giao dịch:</strong></p>" +
+                "<p style='margin: 0 0 5px 0;'>Lớp học: <strong>" + classTitle + "</strong></p>" +
+                "<p style='margin: 0 0 5px 0;'>Giáo viên: <strong>" + tutorName + "</strong></p>" +
+                "<p style='margin: 0;'>Số tiền: <strong>" + formattedAmount + "</strong></p>" +
+                "</div>" +
+                "<p>Lớp học của bạn sẽ sớm được bắt đầu. Chúng tôi sẽ thông báo cho bạn khi có thông tin chi tiết.</p>" +
+                "<p>Trân trọng,<br><strong>Đội ngũ E-Learning</strong></p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
+
+    @Override
+    public void sendNewStudentEnrollmentNotification(String to, String tutorName, String studentName, String classTitle) {
+        String subject = "🎓 Học sinh mới đăng ký lớp \"" + classTitle + "\"";
+        String htmlContent = "<html><body style='font-family: Arial, sans-serif;'>" +
+                "<h2 style='color: #1565c0;'>Xin chào " + tutorName + "!</h2>" +
+                "<p>Bạn có một học sinh mới đã đăng ký vào lớp học của bạn.</p>" +
+                "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;'>" +
+                "<p style='margin: 0 0 10px 0;'><strong>Thông tin học sinh:</strong></p>" +
+                "<p style='margin: 0 0 5px 0;'>Tên học sinh: <strong>" + studentName + "</strong></p>" +
+                "<p style='margin: 0;'>Lớp học: <strong>" + classTitle + "</strong></p>" +
+                "</div>" +
+                "<p>Hãy chuẩn bị sẵn sàng cho buổi học đầu tiên với học sinh mới của bạn!</p>" +
+                "<p>Trân trọng,<br><strong>Đội ngũ E-Learning</strong></p>" +
+                "</body></html>";
+
+        sendHtmlEmail(to, subject, htmlContent);
+    }
 }

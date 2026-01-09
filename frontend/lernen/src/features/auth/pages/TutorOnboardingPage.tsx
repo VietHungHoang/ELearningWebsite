@@ -244,10 +244,7 @@ const TutorOnboardingPage: React.FC = () => {
                 }
                 break;
             case 5:
-                if (!stepData.certifications || stepData.certifications.length === 0) {
-                    setError(t('onboarding.validation.certificationRequired'));
-                    return false;
-                }
+                // Certifications are optional, no validation needed
                 break;
             case 6:
                 if (!stepData.availabilities || stepData.availabilities.length === 0) {

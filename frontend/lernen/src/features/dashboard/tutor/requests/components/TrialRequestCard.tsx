@@ -4,6 +4,7 @@ import RequestStatusBadge from '../../components/RequestStatusBadge';
 import type { TrialSessionRequestResponse } from '../../../../../types/api';
 import { classService } from '../../../../../services/classService';
 import Toast from '../../../../../components/ui/Toast';
+import BirdLoading from '../../../../../components/ui/BirdLoading';
 
 // Delete Confirm Popup Component - Similar to Step 5
 interface DeleteConfirmPopupProps {
@@ -285,6 +286,16 @@ const TrialRequestCard: React.FC<TrialRequestCardProps> = ({ request, viewMode, 
 
     return (
         <>
+            {/* Bird Loading Overlay when accepting */}
+            {isAccepting && (
+                <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                    <BirdLoading
+                        title={t('dashboard.tutor.requests.trial.accepting')}
+                        size="lg"
+                    />
+                </div>
+            )}
+
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 flex flex-col gap-4 relative">
                 {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 

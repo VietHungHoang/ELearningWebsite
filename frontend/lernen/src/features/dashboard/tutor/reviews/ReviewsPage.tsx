@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiStar, FiFilter, FiSearch } from 'react-icons/fi';
+import { tutorService } from '../../../../services/tutorService';
+import { useAuth } from '../../../../context/AuthContext';
+import type { TutorReview } from '../../../../types/tutor';
+import Loading from '../../../../components/ui/Loading';
 
 interface Review {
     id: string;
@@ -9,66 +13,78 @@ interface Review {
     rating: number;
     comment: string;
     courseName?: string;
-    sessionDate: string;
+    sessionDate?: string;
     createdAt: string;
 }
 
-// Mock data - replace with API call
-const mockReviews: Review[] = [
-    {
-        id: '1',
-        studentName: 'Nguyễn Nam Sơn',
-        studentAvatar: 'https://i.pravatar.cc/150?img=1',
-        rating: 5,
-        comment: 'Giáo viên dạy rất nhiệt tình và dễ hiểu. Tôi đã học được rất nhiều điều bổ ích từ khóa học này!',
-        courseName: 'React Cơ bản',
-        sessionDate: '2024-12-15',
-        createdAt: '2024-12-16T10:30:00Z',
-    },
-    {
-        id: '2',
-        studentName: 'Trần Thị Mai',
-        studentAvatar: 'https://i.pravatar.cc/150?img=2',
-        rating: 4,
-        comment: 'Khóa học tốt, giáo viên có kinh nghiệm. Tuy nhiên tôi mong có thêm nhiều bài tập thực hành hơn.',
-        courseName: 'JavaScript Nâng cao',
-        sessionDate: '2024-12-10',
-        createdAt: '2024-12-11T14:20:00Z',
-    },
-    {
-        id: '3',
-        studentName: 'Lê Minh Đức',
-        rating: 5,
-        comment: 'Phương pháp giảng dạy xuất sắc! Giải thích rất rõ ràng và có nhiều ví dụ thực tế.',
-        courseName: 'TypeScript Cơ bản',
-        sessionDate: '2024-12-08',
-        createdAt: '2024-12-09T09:15:00Z',
-    },
-    {
-        id: '4',
-        studentName: 'Phạm Thị Hương',
-        studentAvatar: 'https://i.pravatar.cc/150?img=4',
-        rating: 3,
-        comment: 'Nội dung ổn nhưng tốc độ giảng hơi nhanh, khó theo kịp.',
-        courseName: 'React Cơ bản',
-        sessionDate: '2024-12-05',
-        createdAt: '2024-12-06T16:45:00Z',
-    },
-];
-
 const ReviewsPage: React.FC = () => {
     const { t } = useTranslation();
-    const [reviews] = useState<Review[]>(mockReviews);
+    const { state } = useAuth();
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [filterRating, setFilterRating] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
+    // Fetch tutor data with reviews
+    useEffect(() => {
+        const fetchTutorReviews = async () => {
+            if (!state.user?.id) {
+                setError('User not authenticated');
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await tutorService.getTutor(state.user.id);
+                
+                if (response.success && response.data) {
+                    // Extract reviews from tutor data
+                    const tutorReviews: TutorReview[] = (response.data as any).reviews || [];
+                    
+                    // Filter only APPROVED reviews
+                    const approvedReviews = tutorReviews.filter(
+                        (review: TutorReview) => review.moderationStatus === 'APPROVED'
+                    );
+                    
+                    // Map TutorReview to Review format
+                    const mappedReviews: Review[] = approvedReviews.map((review: TutorReview) => ({
+                        id: review.id,
+                        studentName: review.studentName,
+                        studentAvatar: review.studentAvatarUrl || review.avatarUrl,
+                        rating: review.rating,
+                        comment: review.comment,
+                        courseName: undefined, // Not available in API response
+                        sessionDate: undefined, // Not available in API response
+                        createdAt: review.createdAt || review.submitAt || new Date().toISOString(),
+                    }));
+                    
+                    setReviews(mappedReviews);
+                } else {
+                    setError('Failed to load reviews');
+                    setReviews([]);
+                }
+            } catch (err) {
+                console.error('Failed to fetch tutor reviews:', err);
+                setError('Failed to load reviews');
+                setReviews([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTutorReviews();
+    }, [state.user?.id]);
+
     // Calculate statistics
     const totalReviews = reviews.length;
-    const averageRating = reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews;
+    const averageRating = totalReviews > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews : 0;
     const ratingDistribution = [5, 4, 3, 2, 1].map(star => ({
         star,
         count: reviews.filter(r => r.rating === star).length,
-        percentage: (reviews.filter(r => r.rating === star).length / totalReviews) * 100,
+        percentage: totalReviews > 0 ? (reviews.filter(r => r.rating === star).length / totalReviews) * 100 : 0,
     }));
 
     // Filter reviews
@@ -105,6 +121,30 @@ const ReviewsPage: React.FC = () => {
             day: 'numeric',
         }).format(date);
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loading />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <div className="bg-white border-b border-gray-200 px-6 py-4">
+                    <h1 className="text-2xl font-bold text-gray-800">{t('dashboard.reviews.title')}</h1>
+                    <p className="text-sm text-gray-600 mt-1">{t('dashboard.reviews.subtitle')}</p>
+                </div>
+                <div className="p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-red-200 p-12 text-center">
+                        <p className="text-red-600">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -165,7 +205,7 @@ const ReviewsPage: React.FC = () => {
                                 placeholder={t('dashboard.reviews.searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0b6459] focus:border-transparent placeholder:text-gray-400"
                             />
                         </div>
 

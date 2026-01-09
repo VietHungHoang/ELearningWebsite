@@ -35,4 +35,8 @@ public class KafkaProducer {
     public void sendBookingPaymentFailedToClassService(BookingPaymentFailedEvent event) {
         sendMessage("booking_class_failed", event.getBookingId().toString(), event);
     }
+
+    public void sendPaymentSuccessNotification(Object event) {
+        sendMessage("payment_success_notification", null, event);
+    }
 }

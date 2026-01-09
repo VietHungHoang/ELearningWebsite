@@ -36,6 +36,7 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
     private final ZoomMeetingService zoomMeetingService;
     private final ZoomAsyncService zoomAsyncService;
     private final KafkaProducerService kafkaProducerService;
+    private final com.elearning.classservice.repository.UserRepository userRepository;
 
     @Override
     @Transactional
@@ -169,6 +170,38 @@ public class ClassPaymentEventServiceImpl implements ClassPaymentEventService {
         } else {
             log.info("Student {} already enrolled with tutor {} before. Skipping totalStudents increment.",
                     event.getStudentId(), event.getTutorId());
+        }
+
+        // Send new student enrollment notification to tutor
+        try {
+            // Get tutor information from users table
+            com.elearning.classservice.entity.User tutor = userRepository.findById(event.getTutorId())
+                    .orElse(null);
+            
+            // Get student information from users table
+            com.elearning.classservice.entity.User student = userRepository.findById(event.getStudentId())
+                    .orElse(null);
+
+            if (tutor != null && tutor.getEmail() != null) {
+                com.elearning.classservice.dto.event.NewStudentEnrollmentNotificationEvent tutorNotificationEvent = 
+                    com.elearning.classservice.dto.event.NewStudentEnrollmentNotificationEvent.builder()
+                        .tutorId(event.getTutorId())
+                        .tutorEmail(tutor.getEmail())
+                        .tutorName(tutor.getFullName())
+                        .studentId(event.getStudentId())
+                        .studentName(student != null ? student.getFullName() : null)
+                        .classId(newClass.getId())
+                        .classTitle(newClass.getTitle())
+                        .build();
+                
+                kafkaProducerService.sendNewStudentEnrollmentNotification(tutorNotificationEvent);
+                log.info("Sent new student enrollment notification to tutor: {}", tutor.getEmail());
+            } else {
+                log.warn("Tutor not found or email is null for tutorId: {}", event.getTutorId());
+            }
+        } catch (Exception e) {
+            log.error("Failed to send new student enrollment notification to tutor: {}", e.getMessage(), e);
+            // Don't throw exception, just log error to avoid breaking the main flow
         }
     }
 
