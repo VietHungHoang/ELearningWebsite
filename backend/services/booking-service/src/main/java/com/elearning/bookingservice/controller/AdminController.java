@@ -4,9 +4,7 @@ import com.elearning.bookingservice.dto.response.ApiResponse;
 import com.elearning.bookingservice.dto.response.BookingHistoryResponse;
 import com.elearning.bookingservice.dto.response.TransactionDetailResponse;
 import com.elearning.bookingservice.entity.Booking;
-import com.elearning.bookingservice.entity.BookingStatus;
 import com.elearning.bookingservice.entity.ClassInfo;
-import com.elearning.bookingservice.entity.PaymentProvider;
 import com.elearning.bookingservice.repository.BookingRepository;
 import com.elearning.bookingservice.repository.ClassInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,15 +48,9 @@ public class AdminController {
         public ResponseEntity<ApiResponse<Page<BookingHistoryResponse>>> getAllTransactions(
                         @RequestParam(defaultValue = "0") int page,
                         @RequestParam(defaultValue = "10") int size,
-                        @RequestParam(defaultValue = "desc") String sortOrder,
-                        @RequestParam(required = false) String search,
-                        @RequestParam(required = false) String status,
-                        @RequestParam(required = false) String paymentMethod,
-                        @RequestParam(required = false) String startDate,
-                        @RequestParam(required = false) String endDate) {
+                        @RequestParam(defaultValue = "desc") String sortOrder) {
 
-                log.info("Admin fetching transactions - page: {}, size: {}, sortOrder: {}, search: {}, status: {}, paymentMethod: {}, startDate: {}, endDate: {}",
-                                page, size, sortOrder, search, status, paymentMethod, startDate, endDate);
+                log.info("Admin fetching transactions - page: {}, size: {}, sortOrder: {}", page, size, sortOrder);
 
                 Sort sort = "asc".equalsIgnoreCase(sortOrder)
                                 ? Sort.by("createdAt").ascending()
@@ -66,57 +58,8 @@ public class AdminController {
 
                 Pageable pageable = PageRequest.of(page, size, sort);
 
-                // Parse filters
-                BookingStatus statusEnum = null;
-                if (status != null && !status.trim().isEmpty()) {
-                        try {
-                                statusEnum = BookingStatus.valueOf(status.toUpperCase());
-                        } catch (IllegalArgumentException e) {
-                                log.warn("Invalid status filter: {}", status);
-                        }
-                }
-
-                PaymentProvider paymentProviderEnum = null;
-                if (paymentMethod != null && !paymentMethod.trim().isEmpty()) {
-                        try {
-                                paymentProviderEnum = PaymentProvider.valueOf(paymentMethod.toUpperCase());
-                        } catch (IllegalArgumentException e) {
-                                log.warn("Invalid payment method filter: {}", paymentMethod);
-                        }
-                }
-
-                // Parse dates
-                java.time.LocalDateTime startDateTime = null;
-                java.time.LocalDateTime endDateTime = null;
-                if (startDate != null && !startDate.trim().isEmpty()) {
-                        try {
-                                startDateTime = java.time.LocalDate.parse(startDate).atStartOfDay();
-                        } catch (Exception e) {
-                                log.warn("Invalid start date: {}", startDate);
-                        }
-                }
-                if (endDate != null && !endDate.trim().isEmpty()) {
-                        try {
-                                endDateTime = java.time.LocalDate.parse(endDate).atTime(23, 59, 59);
-                        } catch (Exception e) {
-                                log.warn("Invalid end date: {}", endDate);
-                        }
-                }
-
-                // Prepare search term
-                String searchTerm = null;
-                if (search != null && !search.trim().isEmpty()) {
-                        searchTerm = "%" + search.trim().toLowerCase() + "%";
-                }
-
-                // Use comprehensive filter method
-                Page<Booking> bookings = bookingRepository.findWithFilters(
-                                statusEnum,
-                                paymentProviderEnum,
-                                startDateTime,
-                                endDateTime,
-                                searchTerm,
-                                pageable);
+                // Simple findAll with pagination
+                Page<Booking> bookings = bookingRepository.findAll(pageable);
 
                 Page<BookingHistoryResponse> transactions = bookings.map(booking -> BookingHistoryResponse.builder()
                                 .id(booking.getId())
