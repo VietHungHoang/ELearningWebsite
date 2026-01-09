@@ -717,6 +717,8 @@
           "enrolled": "Đã đăng ký",
           "pendingPayment": "Chờ thanh toán"
         },
+        "payNow": "Thanh toán ngay",
+        "renewClass": "Gia hạn lớp",
         "loading": "Đang tải lớp học...",
         "errorTitle": "Không thể tải lớp học",
         "tryAgain": "Thử lại",

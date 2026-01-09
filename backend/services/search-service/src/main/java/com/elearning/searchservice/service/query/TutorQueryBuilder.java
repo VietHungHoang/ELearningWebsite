@@ -183,15 +183,10 @@ public class TutorQueryBuilder {
                 "fullName" + suffix + "Autocomplete^2.5",
 
                 // Introduction (low boost)
-                "introduction" + suffix + "^1.5",
-
-                // Education titles (very low boost)
-                "education.title" + suffix + "^1.2",
-
-                // Experience titles (very low boost)
-                "experience.title" + suffix + "^1.2",
-
-                // Active classes (lowest boost)
-                "activeClasses.title" + suffix + "^1.0");
+                "introduction" + suffix + "^1.5"
+                
+                // NOTE: Nested fields like education.title, experience.title, activeClasses.title
+                // cannot be queried directly with multi_match. They require nested queries.
+        );
     }
 }

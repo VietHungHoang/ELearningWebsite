@@ -709,6 +709,8 @@
           "enrolled": "Enrolled",
           "pendingPayment": "Pending Payment"
         },
+        "payNow": "Pay Now",
+        "renewClass": "Renew Class",
         "loading": "Loading classes...",
         "errorTitle": "Failed to load classes",
         "tryAgain": "Try again",
