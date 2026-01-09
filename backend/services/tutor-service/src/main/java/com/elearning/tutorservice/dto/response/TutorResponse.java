@@ -1,6 +1,7 @@
 package com.elearning.tutorservice.dto.response;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,4 +40,5 @@ public class TutorResponse extends UserInfoResponse {
     private List<CareerEntryResponse> experiences;
     private List<CertificationResponse> certificates;
     private Boolean zoomConnected;
+    private LocalDateTime createdAt;
 }

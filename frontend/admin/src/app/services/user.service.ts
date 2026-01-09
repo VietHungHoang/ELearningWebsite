@@ -22,6 +22,12 @@ export class UserService {
     private instructorRequestsSubject = new BehaviorSubject<InstructorRequest[]>([]);
     public instructorRequests$ = this.instructorRequestsSubject.asObservable();
 
+    // Cache full TutorResponse data từ API list để dùng cho detail
+    private tutorsFullDataCache = new Map<string, any>();
+
+    // Cache full StudentResponse data từ API list để dùng cho detail
+    private studentsFullDataCache = new Map<string, any>();
+
     // Cache data để dùng làm mock
     private mockTutors: Tutor[] = [];
     private mockTutorsDetail: TutorDetail[] = [];
@@ -701,17 +707,24 @@ export class UserService {
 
     /**
      * Get list of approved tutors (for instructor-list page)
-     * Calls /tutors API - similar mapping approach as tutor-approval page
+     * Calls /tutors API - returns TutorResponse from backend
      */
     getTutor(): Observable<Tutor[]> {
         // Gọi API /tutors - lấy danh sách gia sư đã được duyệt
-        return this.apiService.get<PaginatedResponse<InstructorRequestBackend>>('/tutors').pipe(
+        return this.apiService.get<PaginatedResponse<any>>('/tutors').pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
                 if (response.success && response.data && response.data.content) {
-                    // Map BE response to FE Tutor format (similar to tutor-approval)
-                    const tutors: Tutor[] = response.data.content.map(item =>
-                        this.mapBackendToTutor(item)
+                    // Lưu full data vào cache để dùng cho detail
+                    response.data.content.forEach((item: any) => {
+                        if (item.id) {
+                            this.tutorsFullDataCache.set(item.id, item);
+                        }
+                    });
+                    
+                    // Map BE TutorResponse to FE Tutor format
+                    const tutors: Tutor[] = response.data.content.map((item: any) =>
+                        this.mapTutorResponseToTutor(item)
                     );
                     this.instructorsSubject.next(tutors);
                     return tutors;
@@ -733,40 +746,79 @@ export class UserService {
     }
 
     /**
-     * Map BE InstructorRequestBackend to FE Tutor interface
-     * Similar mapping approach as tutor-approval page uses mapBackendToInstructorRequest
+     * Map BE TutorResponse to FE Tutor interface
+     * Only map necessary fields: name, email, rating, countryCode, currentSessionFee, avatarUrl
      */
-    private mapBackendToTutor(backend: InstructorRequestBackend): Tutor {
+    private mapTutorResponseToTutor(backend: any): Tutor {
         return {
-            id: backend.tutorId,
+            id: backend.id || '',
             name: backend.fullName || '',
             email: backend.email || '',
-            joinDate: backend.createdAt || '',
-            rating: 0, // Not available in backend response
-            countryCode: undefined // Not available in backend response
+            joinDate: backend.createdAt || backend.updatedAt || '', // Keep for backward compatibility
+            rating: backend.averageRating || 0,
+            countryCode: backend.countryCode || undefined,
+            currentSessionFee: backend.currentSessionFee || undefined
         };
     }
 
     getTutorDetail(id: string): Observable<TutorDetail | undefined> {
-        // Thử lấy từ API - apiService.get() trả về ApiResponse<any> (BE TutorResponse)
-        return this.apiService.get<any>(`/tutors/${id}`).pipe(
-            map(response => {
-                // ✅ ƯU TIÊN: Xử lý data thật từ API
-                if (response.success && response.data) {
-                    return this.mapTutorResponseToDetail(response.data);
-                }
-                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
-                const mockData = this.mockTutorsDetail.find((i: TutorDetail) => i.id === id);
-                console.warn(`[UserService] API failed for tutor detail ${id}:`, response.message);
-                return mockData;
-            }),
-            catchError(error => {
-                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
-                console.error(`[UserService] API error for tutor detail ${id}, returning mock data:`, error);
-                const mockData = this.mockTutorsDetail.find((i: TutorDetail) => i.id === id);
-                return of(mockData);
-            })
-        );
+        // Lấy từ cache full data (đã lưu từ API list)
+        const fullData = this.tutorsFullDataCache.get(id);
+        
+        if (fullData) {
+            // Map từ full TutorResponse sang TutorDetail với đầy đủ thông tin
+            return of(this.mapTutorResponseToDetail(fullData));
+        }
+        
+        // Nếu không có trong cache, thử lấy từ danh sách hiện tại
+        const currentInstructors = this.instructorsSubject.value;
+        const tutor = currentInstructors.find(t => t.id === id);
+        
+        if (tutor) {
+            // Map từ Tutor sang TutorDetail với các trường cơ bản
+            const tutorDetail: TutorDetail = {
+                ...tutor,
+                // TutorDetail specific fields - set defaults
+                avatarUrl: '',
+                timezone: undefined,
+                gender: undefined,
+                languages: [],
+                totalHours: undefined,
+                submittedDate: undefined,
+                initialPrice: undefined,
+                headline: undefined,
+                introduction: undefined,
+                totalStudents: undefined,
+                totalReviews: undefined,
+                subjects: [],
+                instructorLevel: undefined,
+                experience: undefined,
+                certifications: [],
+                classes: undefined,
+                availableSchedule: undefined,
+                isVerified: undefined,
+                videoUrl: undefined,
+                videoThumbnailUrl: undefined,
+                socialLinks: [],
+                careerEntries: [],
+                availabilities: undefined,
+                bookedSessionsCount: undefined,
+                reviews: undefined,
+                zoomConnected: undefined,
+                originalSessionFee: undefined
+            };
+            return of(tutorDetail);
+        }
+        
+        // Nếu không tìm thấy, thử lấy từ mock data
+        const mockData = this.mockTutorsDetail.find((i: TutorDetail) => i.id === id);
+        if (mockData) {
+            console.warn(`[UserService] Tutor ${id} not found in cache, using mock data`);
+            return of(mockData);
+        }
+        
+        console.warn(`[UserService] Tutor ${id} not found`);
+        return of(undefined);
     }
 
     /**
@@ -776,25 +828,31 @@ export class UserService {
      * - Field name differences → properly mapped
      */
     private mapTutorResponseToDetail(beResponse: any): TutorDetail {
+        // Map languageCodes từ BE format { code, isNative } sang FE format { languageCode, isNative }
+        const languages = (beResponse.languageCodes || []).map((lang: any) => ({
+            languageCode: lang.code || lang.languageCode || '',
+            isNative: lang.isNative || false
+        }));
+
         return {
             // From Tutor base interface
             id: beResponse.id,
             name: beResponse.fullName || '', // BE: fullName → FE: name
             email: beResponse.email || '',
-            joinDate: '', // FE-only, set empty
+            joinDate: beResponse.createdAt || beResponse.updatedAt || '', // Use createdAt from backend
             rating: beResponse.averageRating || 0, // BE: averageRating → FE: rating
             countryCode: beResponse.countryCode,
 
             // TutorDetail specific fields
-            avatarUrl: beResponse.avatarUrl || '',
+            avatarUrl: beResponse.avatarUrl || '', // Map avatarUrl để hiển thị ảnh
             timezone: beResponse.timezone,
             gender: undefined, // FE-only
-            languages: beResponse.languageCodes || [], // BE: languageCodes → FE: languages
+            languages: languages, // Map từ BE languageCodes sang FE languages format
             totalHours: undefined, // FE-only
             submittedDate: undefined, // FE-only
             initialPrice: beResponse.originalSessionFee, // BE: originalSessionFee → FE: initialPrice
-            headline: beResponse.headline,
-            introduction: beResponse.introduction,
+            headline: beResponse.headline || undefined, // Map headline cho phần Thông tin bổ sung
+            introduction: beResponse.introduction || undefined, // Map introduction cho phần Thông tin bổ sung
             totalStudents: beResponse.studentCount || 0, // BE: studentCount → FE: totalStudents
             totalReviews: beResponse.reviews?.length || 0, // Calculate from reviews array
             subjects: [], // Need to lookup by subjectIds
@@ -805,10 +863,10 @@ export class UserService {
             classes: undefined, // FE-only
             availableSchedule: undefined, // FE-only
             isVerified: beResponse.isVerified || false,
-            videoUrl: beResponse.videoUrl,
+            videoUrl: beResponse.videoUrl || undefined, // Map videoUrl cho phần Thông tin bổ sung
             videoThumbnailUrl: undefined, // FE-only
             currentSessionFee: beResponse.currentSessionFee,
-            socialLinks: beResponse.socialLinks || [],
+            socialLinks: beResponse.socialLinks || [], // Map socialLinks cho phần Thông tin bổ sung
             careerEntries: [
                 ...(beResponse.educations || []),
                 ...(beResponse.experiences || [])
@@ -823,14 +881,26 @@ export class UserService {
         };
     }
 
-    getStudents(): Observable<Student[]> {
-        // Gọi API thực - apiService.get() trả về ApiResponse<Student[]>
-        return this.apiService.get<Student[]>('/students').pipe(
+    getStudents(page: number = 0, size: number = 1000): Observable<Student[]> {
+        // Gọi API /students - lấy danh sách học sinh với pagination
+        // Mặc định lấy page=0, size=1000 để lấy tất cả (backend dùng 0-based page)
+        return this.apiService.get<PaginatedResponse<any>>('/students', { page, size }).pipe(
             map(response => {
                 // ✅ ƯU TIÊN: Xử lý data thật từ API
-                if (response.success && response.data && Array.isArray(response.data)) {
-                    this.studentsSubject.next(response.data);
-                    return response.data;
+                if (response.success && response.data && response.data.content) {
+                    // Lưu full data vào cache để dùng cho detail
+                    response.data.content.forEach((item: any) => {
+                        if (item.id) {
+                            this.studentsFullDataCache.set(item.id, item);
+                        }
+                    });
+                    
+                    // Map BE StudentResponse to FE Student format
+                    const students: Student[] = response.data.content.map((item: any) =>
+                        this.mapStudentResponseToStudent(item)
+                    );
+                    this.studentsSubject.next(students);
+                    return students;
                 }
                 // ⚠️ FALLBACK: Chỉ khi API trả về success=false
                 console.warn('[UserService] API failed for students:', response.message);
@@ -848,26 +918,89 @@ export class UserService {
         );
     }
 
+    /**
+     * Map BE StudentResponse to FE Student interface
+     * Only map necessary fields: id, email, fullname, joinDate
+     */
+    private mapStudentResponseToStudent(backend: any): Student {
+        return {
+            id: backend.id || '',
+            email: backend.email || '',
+            fullname: backend.fullName || '', // BE: fullName → FE: fullname
+            phone: undefined, // FE-only, not in BE
+            joinDate: backend.createdAt || backend.updatedAt || '', // Use createdAt from backend
+            enrollmentCount: undefined // FE-only, not in BE
+        };
+    }
+
     getStudentDetail(id: string): Observable<StudentDetail | undefined> {
-        // Thử lấy từ API - apiService.get() trả về ApiResponse<StudentDetail>
-        return this.apiService.get<StudentDetail>(`/students/${id}`).pipe(
-            map(response => {
-                // ✅ ƯU TIÊN: Xử lý data thật từ API
-                if (response.success && response.data) {
-                    return response.data;
-                }
-                // ⚠️ FALLBACK: Chỉ khi API trả về success=false
-                const mockData = this.mockStudentsDetail.find((student: StudentDetail) => student.id === id);
-                console.warn(`[UserService] API failed for student detail ${id}:`, response.message);
-                return mockData;
-            }),
-            catchError(error => {
-                // ⚠️ FALLBACK: Chỉ khi API throw exception (network error, timeout)
-                console.error(`[UserService] API error for student detail ${id}, returning mock data:`, error);
-                const mockData = this.mockStudentsDetail.find((student: StudentDetail) => student.id === id);
-                return of(mockData);
-            })
-        );
+        // Lấy từ cache full data (đã lưu từ API list)
+        const fullData = this.studentsFullDataCache.get(id);
+        
+        if (fullData) {
+            // Map từ full StudentResponse sang StudentDetail với đầy đủ thông tin
+            return of(this.mapStudentResponseToDetail(fullData));
+        }
+        
+        // Nếu không có trong cache, thử lấy từ danh sách hiện tại
+        const currentStudents = this.studentsSubject.value;
+        const student = currentStudents.find(s => s.id === id);
+        
+        if (student) {
+            // Map từ Student sang StudentDetail với các trường cơ bản
+            const studentDetail: StudentDetail = {
+                ...student,
+                // StudentDetail specific fields - set defaults
+                avatar: undefined,
+                bio: undefined,
+                dateOfBirth: undefined,
+                address: undefined,
+                city: undefined,
+                country: undefined,
+                learningGoals: undefined,
+                strengths: undefined,
+                weaknesses: undefined,
+                classes: []
+            };
+            return of(studentDetail);
+        }
+        
+        // Nếu không tìm thấy, thử lấy từ mock data
+        const mockData = this.mockStudentsDetail.find((s: StudentDetail) => s.id === id);
+        if (mockData) {
+            console.warn(`[UserService] Student ${id} not found in cache, using mock data`);
+            return of(mockData);
+        }
+        
+        console.warn(`[UserService] Student ${id} not found`);
+        return of(undefined);
+    }
+
+    /**
+     * Map BE StudentResponse to FE StudentDetail interface
+     */
+    private mapStudentResponseToDetail(beResponse: any): StudentDetail {
+        return {
+            // From Student base interface
+            id: beResponse.id,
+            email: beResponse.email || '',
+            fullname: beResponse.fullName || '', // BE: fullName → FE: fullname
+            phone: undefined, // FE-only, not in BE
+            joinDate: beResponse.createdAt || beResponse.updatedAt || '', // Use createdAt from backend
+            enrollmentCount: undefined, // FE-only, not in BE
+
+            // StudentDetail specific fields
+            avatar: beResponse.avatarUrl || undefined, // BE: avatarUrl → FE: avatar
+            bio: beResponse.bio || undefined,
+            dateOfBirth: beResponse.dateOfBirth ? beResponse.dateOfBirth.toString() : undefined,
+            address: beResponse.address || undefined,
+            city: beResponse.city || undefined,
+            country: beResponse.country || undefined,
+            learningGoals: beResponse.learningGoals || undefined,
+            strengths: undefined, // FE-only
+            weaknesses: undefined, // FE-only
+            classes: [] // FE-only, need to fetch separately
+        };
     }
 
     /**

@@ -412,7 +412,7 @@
       "stt": "STT",
       "name": "Name",
       "email": "Email",
-      "joinDate": "Join Date",
+      "sessionFee": "Hourly Fee",
       "rating": "Rating",
       "country": "Country",
       "action": "Action"

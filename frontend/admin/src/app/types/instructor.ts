@@ -6,6 +6,7 @@ export interface Tutor {
   joinDate: string;
   rating: number;
   countryCode?: string;
+  currentSessionFee?: number;
 }
 
 

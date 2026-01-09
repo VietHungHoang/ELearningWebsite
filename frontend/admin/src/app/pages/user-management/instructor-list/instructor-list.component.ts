@@ -9,11 +9,12 @@ import { LoadingComponent } from '../../../components/loading/loading.component'
 import { LocaleUtilsService } from '../../../shared/utils';
 import { I18nService } from '../../../i18n/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { CurrencyFormatPipe } from '../../../shared/pipes/currency-format.pipe';
 
 @Component({
     selector: 'app-instructor-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, LoadingComponent, TranslatePipe],
+    imports: [CommonModule, RouterLink, ConfirmDialogComponent, SearchInputComponent, LoadingComponent, TranslatePipe, CurrencyFormatPipe],
     templateUrl: './instructor-list.component.html',
     styleUrl: './instructor-list.component.scss'
 })
@@ -136,10 +137,18 @@ export class InstructorListComponent implements OnInit {
     }
 
     /**
-     * Get the rating of an instructor
+     * Get the rating of an instructor, formatted to 1 decimal place
      */
-    getRating(instructor: Tutor): number {
-        return instructor.rating || 0;
+    getRating(instructor: Tutor): string {
+        const rating = instructor.rating || 0;
+        return rating.toFixed(1);
+    }
+
+    /**
+     * Get the session fee of an instructor
+     */
+    getSessionFee(instructor: Tutor): number | null {
+        return instructor.currentSessionFee || null;
     }
 
     /**
