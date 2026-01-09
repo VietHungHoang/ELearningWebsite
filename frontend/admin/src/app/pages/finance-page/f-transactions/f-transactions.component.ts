@@ -190,18 +190,21 @@ export class FTransactionsComponent implements OnInit {
     goToPage(page: number): void {
         if (page >= 1 && page <= this.totalPages) {
             this.currentPage = page;
+            this.loadOrders();
         }
     }
 
     nextPage(): void {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
+            this.loadOrders();
         }
     }
 
     prevPage(): void {
         if (this.currentPage > 1) {
             this.currentPage--;
+            this.loadOrders();
         }
     }
 
@@ -280,11 +283,11 @@ export class FTransactionsComponent implements OnInit {
     }
 
     getPaymentMethodDisplay(method: PaymentMethod): string {
-        return method === 'momo' ? 'transactions.paymentMethod.momo' : method === 'vnpay' ? 'transactions.paymentMethod.vnpay' : 'transactions.paymentMethod.banking';
+        return method === 'momo' ? 'transactions.paymentMethod.momo' : method === 'vnpay' ? 'transactions.paymentMethod.vnpay' : 'transactions.paymentMethod.sepay';
     }
 
     getPaymentMethodIcon(method: PaymentMethod): string {
-        return method === 'momo' ? 'momo-icon' : method === 'vnpay' ? 'vnpay-icon' : 'banking-icon';
+        return method === 'momo' ? 'momo-icon' : method === 'vnpay' ? 'vnpay-icon' : 'sepay-icon';
     }
 
     formatCurrency(amount: number): string {

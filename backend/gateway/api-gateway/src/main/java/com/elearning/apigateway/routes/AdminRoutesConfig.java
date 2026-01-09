@@ -63,7 +63,7 @@ public class AdminRoutesConfig {
 
                                 // Admin transactions route - forward to booking-service
                                 .route("booking-service-transactions", r -> r
-                                                .path("/api/v1/admin/transactions")
+                                                .path("/api/v1/admin/transactions", "/api/v1/admin/transactions/**")
                                                 .uri(bookingServiceUrl))
 
                                 // Admin students route - forward to student-service

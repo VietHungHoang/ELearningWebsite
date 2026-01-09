@@ -1,5 +1,5 @@
 @if (loading) {
-    <app-loading />
+<app-loading />
 } @else {
 <div class="mb-[16px] md:flex items-center justify-between">
     <div class="flex items-center gap-[20px]">
@@ -8,46 +8,61 @@
         </h5>
 
         <div class="trezo-card-dropdown relative">
-            <button type="button" class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[4px] px-[10px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19] whitespace-nowrap" (click)="toggleDateRangeDropdown()">
+            <button type="button"
+                class="trezo-card-dropdown-btn inline-block rounded-md border border-gray-100 py-[4px] px-[10px] transition-all hover:bg-gray-50 dark:border-[#172036] dark:hover:bg-[#0a0e19] whitespace-nowrap"
+                (click)="toggleDateRangeDropdown()">
                 <span class="inline-block relative text-sm ltr:pr-[16px] rtl:pl-[16px]">
                     {{ getDateRangeDisplayText() | translate }}
-                    <i class="ri-arrow-down-s-line text-base absolute ltr:-right-[2px] rtl:-left-[2px] top-1/2 -translate-y-1/2"></i>
+                    <i
+                        class="ri-arrow-down-s-line text-base absolute ltr:-right-[2px] rtl:-left-[2px] top-1/2 -translate-y-1/2"></i>
                 </span>
             </button>
             @if (isDateRangeDropdownOpen) {
-                <ul class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[120px] z-[4] dark:bg-dark dark:shadow-none">
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('today')">
-                            {{ 'revenueDashboard.dateRange.today' | translate }}
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('thisWeek')">
-                            {{ 'revenueDashboard.dateRange.thisWeek' | translate }}
-                        </button>
-                    </li>
-                    <li>
-                        <button type="button" class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black" (click)="setDateRange('thisMonth')">
-                            {{ 'revenueDashboard.dateRange.thisMonth' | translate }}
-                        </button>
-                    </li>
-                </ul>
+            <ul
+                class="trezo-card-dropdown-menu transition-all bg-white shadow-3xl rounded-md top-full py-[8px] absolute ltr:right-0 rtl:left-0 min-w-[120px] z-[4] dark:bg-dark dark:shadow-none">
+                <li>
+                    <button type="button"
+                        class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black"
+                        (click)="setDateRange('today')">
+                        {{ 'revenueDashboard.dateRange.today' | translate }}
+                    </button>
+                </li>
+                <li>
+                    <button type="button"
+                        class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black"
+                        (click)="setDateRange('thisWeek')">
+                        {{ 'revenueDashboard.dateRange.thisWeek' | translate }}
+                    </button>
+                </li>
+                <li>
+                    <button type="button"
+                        class="block w-full transition-all text-black text-sm ltr:text-left rtl:text-right relative py-[6px] px-[12px] hover:bg-gray-50 dark:text-white dark:hover:bg-black"
+                        (click)="setDateRange('thisMonth')">
+                        {{ 'revenueDashboard.dateRange.thisMonth' | translate }}
+                    </button>
+                </li>
+            </ul>
             }
         </div>
     </div>
     <ol class="breadcrumb mt-[12px] md:mt-0">
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
-                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard"
+                class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500 text-gray-600 dark:text-gray-400">
+                <i
+                    class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
                 {{ 'revenueDashboard.breadcrumb.dashboard' | translate }}
             </a>
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
             {{ 'revenueDashboard.breadcrumb.finance' | translate }}
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 rtl:last:ml-0 text-gray-600 dark:text-gray-400">
             {{ 'revenueDashboard.breadcrumb.revenueDashboard' | translate }}
         </li>
     </ol>
@@ -57,90 +72,125 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[12px] mb-[16px]">
 
     <!-- 1. Total Revenue -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #10b981;">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4"
+        style="border-left-color: #10b981;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.totalRevenue.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{
+                'revenueDashboard.kpi.totalRevenue.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.totalRevenue | currencyFormat:'VND' }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.totalRevenue |
+                currencyFormat:'VND' }}</span>
             <div class="flex items-center gap-[4px]">
-                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.revenueTrend)">{{ getTrendIcon(kpis.revenueTrend) }}</i>
-                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.revenueTrend)">{{ formatTrend(kpis.revenueTrend) }}</span>
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.revenueTrend)">{{
+                    getTrendIcon(kpis.revenueTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.revenueTrend)">{{
+                    formatTrend(kpis.revenueTrend) }}</span>
             </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.totalRevenue.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.totalRevenue.description' |
+            translate }}</p>
     </div>
 
     <!-- 2. Platform Fee Earned -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #605DFF;">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4"
+        style="border-left-color: #605DFF;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.platformFee.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{
+                'revenueDashboard.kpi.platformFee.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.platformFeeEarned | currencyFormat:'VND' }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.platformFeeEarned |
+                currencyFormat:'VND' }}</span>
             <div class="flex items-center gap-[4px]">
-                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.platformFeeTrend)">{{ getTrendIcon(kpis.platformFeeTrend) }}</i>
-                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.platformFeeTrend)">{{ formatTrend(kpis.platformFeeTrend) }}</span>
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.platformFeeTrend)">{{
+                    getTrendIcon(kpis.platformFeeTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.platformFeeTrend)">{{
+                    formatTrend(kpis.platformFeeTrend) }}</span>
             </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.platformFee.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.platformFee.description' |
+            translate }}</p>
     </div>
 
     <!-- 3. Instructor Payouts -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #f97316;">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4"
+        style="border-left-color: #f97316;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.instructorPayout.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{
+                'revenueDashboard.kpi.instructorPayout.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.tutorPayouts | currencyFormat:'VND' }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.tutorPayouts |
+                currencyFormat:'VND' }}</span>
             <div class="flex items-center gap-[4px]">
-                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.payoutTrend)">{{ getTrendIcon(kpis.payoutTrend) }}</i>
-                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.payoutTrend)">{{ formatTrend(kpis.payoutTrend) }}</span>
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.payoutTrend)">{{
+                    getTrendIcon(kpis.payoutTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.payoutTrend)">{{
+                    formatTrend(kpis.payoutTrend) }}</span>
             </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.instructorPayout.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.instructorPayout.description' |
+            translate }}</p>
     </div>
 
     <!-- 4. Success Rate % -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #3b82f6;">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4"
+        style="border-left-color: #3b82f6;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.successRate.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{
+                'revenueDashboard.kpi.successRate.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.successRate.toFixed(1) }}%</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.successRate.toFixed(1)
+                }}%</span>
             <div class="flex items-center gap-[4px]">
-                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.successRateTrend)">{{ getTrendIcon(kpis.successRateTrend) }}</i>
-                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.successRateTrend)">{{ formatTrend(kpis.successRateTrend) }}</span>
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.successRateTrend)">{{
+                    getTrendIcon(kpis.successRateTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.successRateTrend)">{{
+                    formatTrend(kpis.successRateTrend) }}</span>
             </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.successRate.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.successRate.description' |
+            translate }}</p>
     </div>
 
     <!-- 5. Total Transactions -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #a78bfa;">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4"
+        style="border-left-color: #a78bfa;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.transactions.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{
+                'revenueDashboard.kpi.transactions.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.totalTransactions.toLocaleString() }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{
+                kpis.totalTransactions.toLocaleString() }}</span>
             <div class="flex items-center gap-[4px]">
-                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.transactionsTrend)">{{ getTrendIcon(kpis.transactionsTrend) }}</i>
-                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.transactionsTrend)">{{ formatTrend(kpis.transactionsTrend) }}</span>
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.transactionsTrend)">{{
+                    getTrendIcon(kpis.transactionsTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.transactionsTrend)">{{
+                    formatTrend(kpis.transactionsTrend) }}</span>
             </div>
         </div>
-        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.transactions.description' | translate }}</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.transactions.description' |
+            translate }}</p>
     </div>
 
     <!-- 6. Average Order Value -->
-    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4" style="border-left-color: #ec4899;">
+    <div class="trezo-card bg-white dark:bg-[#0c1427] p-[16px] rounded-lg border border-gray-200 dark:border-[#172036] border-l-4"
+        style="border-left-color: #ec4899;">
         <div class="mb-[12px]">
-            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{ 'revenueDashboard.kpi.aov.title' | translate }}</h6>
+            <h6 class="kpi-title text-base font-bold text-gray-900 dark:text-white leading-tight mb-0">{{
+                'revenueDashboard.kpi.aov.title' | translate }}</h6>
         </div>
         <div class="mb-[8px] flex items-end justify-between">
-            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.averageOrderValue | currencyFormat:'VND' }}</span>
+            <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">{{ kpis.averageOrderValue |
+                currencyFormat:'VND' }}</span>
             <div class="flex items-center gap-[4px]">
-                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.aovTrend)">{{ getTrendIcon(kpis.aovTrend) }}</i>
-                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.aovTrend)">{{ formatTrend(kpis.aovTrend) }}</span>
+                <i class="material-symbols-outlined text-sm" [ngClass]="getTrendColor(kpis.aovTrend)">{{
+                    getTrendIcon(kpis.aovTrend) }}</i>
+                <span class="text-xs font-semibold" [ngClass]="getTrendColor(kpis.aovTrend)">{{
+                    formatTrend(kpis.aovTrend) }}</span>
             </div>
         </div>
         <p class="text-xs text-gray-600 dark:text-gray-400">{{ 'revenueDashboard.kpi.aov.description' | translate }}</p>
@@ -151,26 +201,22 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-[12px] mb-[12px]">
     <div class="lg:col-span-2">
         @if (dashboardData) {
-            <app-revenue-trend
-                [revenueTrendData]="dashboardData.revenueTrend"
-                [selectedTimeframe]="selectedTimeframe"
-                (timeframeChange)="onTimeframeChange($event)" />
+        <app-revenue-trend [revenueTrendData]="dashboardData.revenueTrend" [selectedTimeframe]="selectedTimeframe"
+            (timeframeChange)="onTimeframeChange($event)" />
         }
     </div>
 
     <div class="lg:col-span-1">
         @if (dashboardData) {
-            <app-payment-method-chart [paymentMethodsData]="dashboardData.paymentMethods" />
+        <app-payment-method-chart [paymentMethodsData]="dashboardData.paymentMethods" />
         }
     </div>
 </div>
 
-<div class="grid grid-cols-1 gap-[12px] mb-0">
+<!-- <div class="grid grid-cols-1 gap-[12px] mb-0">
     @if (dashboardData) {
-        <app-top-instructors-chart
-            [topTutorsData]="dashboardData.topTutors"
-            [selectedTimeFilter]="selectedTimeFilter"
-            (timeFilterChange)="onTimeFilterChange($event)" />
+    <app-top-instructors-chart [topTutorsData]="dashboardData.topTutors" [selectedTimeFilter]="selectedTimeFilter"
+        (timeFilterChange)="onTimeFilterChange($event)" />
     }
-</div>
+</div> -->
 }

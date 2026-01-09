@@ -105,11 +105,10 @@ export class CreateVoucherComponent implements OnInit {
       this.voucherService.createVoucher(this.voucherForm.value).subscribe({
         next: () => {
           this.isLoading = false;
-          this.message = { type: 'success', text: this.i18nService.translate('voucherManagement.createVoucher.messages.createSuccess') };
-
-          setTimeout(() => {
-            this.router.navigate(['/dashboard/promotion/vouchers']);
-          }, 1500);
+          // Navigate immediately to voucher list with success message
+          this.router.navigate(['/dashboard/promotion/vouchers'], {
+            queryParams: { created: 'success' }
+          });
         },
         error: (error: any) => {
           this.isLoading = false;

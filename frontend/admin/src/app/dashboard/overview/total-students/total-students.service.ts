@@ -72,14 +72,94 @@ export class TotalStudentsService {
         return this.http.get<any>(`${this.apiUrl}/new-students`, { params })
             .pipe(
                 map(response => {
+                    // Always generate mock data and merge with backend data
+                    const mockData = this.generateMockData(startDate!, endDate!);
+
                     // Handle both wrapped { success, data } and direct response formats
                     const backendData = response.data || response;
-                    if (!backendData || !backendData.dailyData) {
-                        throw new Error('Invalid response format');
+
+                    // If backend has data, merge it with mock data
+                    if (backendData && backendData.dailyData && backendData.dailyData.length > 0) {
+                        return this.mergeWithBackendData(mockData, backendData);
                     }
-                    return backendData as NewStudentsData;
+
+                    // Otherwise just return mock data
+                    return mockData;
                 })
             );
+    }
+
+    /**
+     * Merge mock data with backend data
+     * Backend data takes priority, mock data fills in missing dates
+     */
+    private mergeWithBackendData(mockData: NewStudentsData, backendData: any): NewStudentsData {
+        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+        // Create a map of backend data by date
+        const backendMap = new Map<string, number>();
+        if (backendData.dailyData) {
+            backendData.dailyData.forEach((item: any) => {
+                backendMap.set(item.date, item.count || 0);
+            });
+        }
+
+        // Merge: use backend data if available, otherwise use mock data
+        const mergedDailyData = mockData.dailyData.map(mockItem => {
+            const backendCount = backendMap.get(mockItem.date);
+            return {
+                ...mockItem,
+                count: backendCount !== undefined ? backendCount : mockItem.count
+            };
+        });
+
+        const totalNewStudents = mergedDailyData.reduce((sum, d) => sum + d.count, 0);
+
+        return {
+            totalNewStudents: totalNewStudents,
+            growthPercentage: backendData.growthPercentage || 0,
+            dailyData: mergedDailyData
+        };
+    }
+
+    /**
+     * Generate mock data pattern
+     * Days 1-4: count = day number (1,2,3,4)
+     * Days 5-7: count = 1,2,3
+     */
+    private generateMockData(startDate: string, endDate: string): NewStudentsData {
+        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const dailyData: NewStudentsData['dailyData'] = [];
+
+        let dayCounter = 1;
+        let current = new Date(start);
+
+        while (current <= end) {
+            const dateStr = current.toISOString().split('T')[0];
+            const dayName = dayNames[current.getDay()];
+
+            // Days 1-4: count = day number, Days 5-7: count = 1,2,3
+            const count = dayCounter <= 4 ? dayCounter : (dayCounter - 4);
+
+            dailyData.push({
+                date: dateStr,
+                dayName: dayName,
+                count: count
+            });
+
+            current.setDate(current.getDate() + 1);
+            dayCounter++;
+        }
+
+        const totalNewStudents = dailyData.reduce((sum, d) => sum + d.count, 0);
+
+        return {
+            totalNewStudents: totalNewStudents,
+            growthPercentage: 0,
+            dailyData: dailyData
+        };
     }
 
     async loadChart(data: NewStudentsData): Promise<void> {

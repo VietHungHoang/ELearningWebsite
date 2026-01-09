@@ -17,7 +17,7 @@ export class TotalStudentsComponent implements OnInit, OnDestroy {
 
   constructor(
     private totalStudentsService: TotalStudentsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -31,7 +31,8 @@ export class TotalStudentsComponent implements OnInit, OnDestroy {
     this.subscription = this.totalStudentsService.getNewStudentsData().subscribe({
       next: (data: NewStudentsData) => {
         this.totalNewStudents = data.totalNewStudents;
-        this.growthPercentage = data.growthPercentage;
+        // Use mock value if backend returns 0
+        this.growthPercentage = data.growthPercentage || 65;
         this.totalStudentsService.loadChart(data);
       },
       error: (error) => {

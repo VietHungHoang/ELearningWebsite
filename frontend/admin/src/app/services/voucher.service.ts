@@ -40,7 +40,7 @@ export class VoucherService {
       voucherId: 'VOI-2025-001',
       code: 'BLACKFRIDAY',
       createdBy: 'Admin',
-      creatorName: 'Admin',
+      creatorName: 'Nguyễn Văn An',
       productType: 'All Products',
       targetAudience: 'all',
       value: '30% off (Max 200k)',
@@ -54,7 +54,7 @@ export class VoucherService {
       voucherId: 'VOI-2025-002',
       code: 'JSDETHA',
       createdBy: 'Instructor',
-      creatorName: 'Inst: A.Nguyen',
+      creatorName: 'Trần Thị Bình',
       productType: 'Classes',
       targetAudience: 'top-spenders',
       value: '50% off (Max 500k)',
@@ -68,7 +68,7 @@ export class VoucherService {
       voucherId: 'VOI-2025-003',
       code: 'WELCOME10',
       createdBy: 'Admin',
-      creatorName: 'Admin',
+      creatorName: 'Lê Minh Hoàng',
       productType: 'Classes',
       targetAudience: 'new-students',
       value: '100,000 VND off',
@@ -82,7 +82,7 @@ export class VoucherService {
       voucherId: 'VOI-2025-004',
       code: 'TUTOR_B',
       createdBy: 'Instructor',
-      creatorName: 'Inst: B.Tran',
+      creatorName: 'Phạm Thanh Hằng',
       productType: '1-on-1 Classes',
       targetAudience: 'no-spending-1month',
       value: '200,000 VND off',
@@ -98,7 +98,7 @@ export class VoucherService {
   constructor(
     private apiService: ApiService,
     private currencyService: CurrencyService
-  ) {}
+  ) { }
 
   /**
    * Get vouchers from API
@@ -254,7 +254,7 @@ export class VoucherService {
           code: voucherData.code || '',
           description: voucherData.description || '',
           createdBy: 'Admin',
-          creatorName: 'Admin',
+          creatorName: 'Quản trị viên',
           productType: voucherData.productType || 'course',
           value: this.formatVoucherValue(voucherData),
           scope: 'All Products',

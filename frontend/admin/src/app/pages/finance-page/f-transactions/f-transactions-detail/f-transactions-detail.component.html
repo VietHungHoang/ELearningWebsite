@@ -1,82 +1,101 @@
-
 <div class="mb-[25px] md:flex items-center justify-between">
     <h5 class="!mb-0">
         {{ 'transactions.detail.title' | translate }}
     </h5>
     <ol class="breadcrumb mt-[12px] md:mt-0">
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard" class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
-                <i class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard"
+                class="inline-block relative ltr:pl-[22px] rtl:pr-[22px] transition-all hover:text-primary-500">
+                <i
+                    class="material-symbols-outlined absolute ltr:left-0 rtl:right-0 !text-lg -mt-px text-primary-500 top-1/2 -translate-y-1/2">
                     home
                 </i>
                 {{ 'transactions.detail.breadcrumb.dashboard' | translate }}
             </a>
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             {{ 'transactions.detail.breadcrumb.finance' | translate }}
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
-            <a routerLink="/dashboard/finance/transactions" class="transition-all hover:text-primary-500">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+            <a routerLink="/dashboard/finance-page/transactions" class="transition-all hover:text-primary-500">
                 {{ 'transactions.detail.breadcrumb.transactions' | translate }}
             </a>
         </li>
-        <li class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
+        <li
+            class="breadcrumb-item inline-block relative text-sm mx-[13px] ltr:first:ml-0 rtl:first:mr-0 ltr:last:mr-0 rtl:last:ml-0">
             {{ 'transactions.detail.breadcrumb.detail' | translate }}
         </li>
     </ol>
 </div>
 
-<div class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
+<!-- Loading State -->
+<app-loading *ngIf="loading"></app-loading>
+
+<!-- Error State -->
+<div *ngIf="error && !loading" class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
+    <div class="text-center py-[40px]">
+        <i class="material-symbols-outlined text-danger-500 text-[48px] mb-[16px]">error</i>
+        <p class="text-gray-700">{{ error }}</p>
+        <a routerLink="/dashboard/finance-page/transactions"
+            class="mt-[16px] inline-block text-primary-500 hover:underline">
+            {{ 'transactions.detail.actions.backToList' | translate }}
+        </a>
+    </div>
+</div>
+
+<!-- Content -->
+<div *ngIf="!loading && !error" class="trezo-card bg-white mb-[25px] p-[20px] md:p-[25px] rounded-md">
     <div class="trezo-card-content">
         <!-- Transaction ID & Date (Header) -->
         <div class="mb-[20px]">
-            <span class="block text-sm text-gray-500 mb-[4px]">{{ 'transactions.detail.transactionId' | translate }}:</span>
-            <span class="block text-lg font-bold text-gray-900 mb-[12px]">{{ transactionId }}</span>
+            <span class="block text-sm text-gray-500 mb-[4px]">{{ 'transactions.detail.transactionId' | translate
+                }}:</span>
+            <span class="block text-lg font-bold text-gray-900 mb-[12px] font-mono">{{ transactionId }}</span>
         </div>
 
         <!-- Main Content Grid: Student (Left) vs Class (Right) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-[20px] mb-[25px]">
             <!-- Student Information (Left) -->
             <div>
-                <h6 class="text-base font-medium text-gray-900 mb-[12px]">{{ 'transactions.detail.studentInformation.title' | translate }}</h6>
+                <h6 class="text-base font-medium text-gray-900 mb-[12px]">{{
+                    'transactions.detail.studentInformation.title' | translate }}</h6>
                 <div class="space-y-[8px]">
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.studentId' | translate }}:</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{
+                            'transactions.detail.studentInformation.studentId' | translate }}:</span>
                         <span class="text-xs text-gray-600 font-mono">{{ studentId }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.name' | translate }}:</span>
-                        <span class="text-sm text-gray-900">{{ studentName }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.email' | translate }}:</span>
-                        <span class="text-sm text-gray-900">{{ studentEmail }}</span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.studentInformation.phone' | translate }}:</span>
-                        <span class="text-sm text-gray-900">{{ studentPhone }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Class Information (Right) -->
             <div>
-                <h6 class="text-base font-medium text-gray-900 mb-[12px]">{{ 'transactions.detail.classInformation.title' | translate }}</h6>
+                <h6 class="text-base font-medium text-gray-900 mb-[12px]">{{
+                    'transactions.detail.classInformation.title' | translate }}</h6>
                 <div class="space-y-[8px]">
-                    <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.classId' | translate }}:</span>
+                    <div class="flex items-center" *ngIf="classId">
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{
+                            'transactions.detail.classInformation.classId' | translate }}:</span>
                         <span class="text-xs text-gray-600 font-mono">{{ classId }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.name' | translate }}:</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{
+                            'transactions.detail.classInformation.name' | translate }}:</span>
                         <span class="text-sm text-gray-900">{{ className }}</span>
                     </div>
                     <div class="flex items-center gap-[8px]">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.type' | translate }}:</span>
-                        <span class="inline-block text-xs bg-blue-50 text-blue-600 px-[8px] py-[4px] rounded-full font-medium">{{ getClassTypeTranslationKey() | translate }}</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{
+                            'transactions.detail.classInformation.type' | translate }}:</span>
+                        <span
+                            class="inline-block text-xs bg-blue-50 text-blue-600 px-[8px] py-[4px] rounded-full font-medium">{{
+                            getClassTypeTranslationKey() | translate }}</span>
                     </div>
                     <div class="flex items-center">
-                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{ 'transactions.detail.classInformation.tutor' | translate }}:</span>
+                        <span class="text-xs font-bold text-gray-700 min-w-[80px]">{{
+                            'transactions.detail.classInformation.tutor' | translate }}:</span>
                         <span class="text-sm text-gray-900">{{ tutorName }}</span>
                     </div>
                 </div>
@@ -85,53 +104,89 @@
 
         <!-- Payment Information (Bottom) -->
         <div class="border-t border-gray-200 pt-[20px]">
-            <h6 class="text-base font-medium text-gray-900 mb-[15px]">{{ 'transactions.detail.paymentInformation.title' | translate }}</h6>
-            
+            <h6 class="text-base font-medium text-gray-900 mb-[15px]">{{ 'transactions.detail.paymentInformation.title'
+                | translate }}</h6>
+
             <div class="table-responsive overflow-x-auto mb-[20px]">
                 <table class="w-full">
                     <thead class="text-gray-900">
                         <tr>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap ltr:first:rounded-tl-md rtl:first:rounded-tr-md text-sm">
+                            <th
+                                class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap ltr:first:rounded-tl-md rtl:first:rounded-tr-md text-sm">
                                 {{ 'transactions.detail.paymentInformation.totalAmount' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap text-sm">
+                            <th
+                                class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap text-sm">
                                 {{ 'transactions.detail.paymentInformation.paymentTime' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap text-sm">
+                            <th
+                                class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap text-sm">
                                 {{ 'transactions.detail.paymentInformation.paymentMethod' | translate }}
                             </th>
-                            <th class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap ltr:last:rounded-tr-md rtl:last:rounded-tl-md text-sm">
+                            <th
+                                class="font-medium ltr:text-left rtl:text-right px-[12px] py-[10px] bg-gray-50 whitespace-nowrap ltr:last:rounded-tr-md rtl:last:rounded-tl-md text-sm">
                                 {{ 'transactions.detail.paymentInformation.status' | translate }}
                             </th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-900">
                         <tr>
-                            <td class="font-bold ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm text-primary-500">
-                                ${{ totalAmount }}
+                            <td
+                                class="font-bold ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm text-primary-500">
+                                {{ totalAmount | currencyFormat }}
                             </td>
-                            <td class="text-gray-700 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                            <td
+                                class="text-gray-700 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
                                 {{ paymentTime }}
                             </td>
-                            <td class="text-gray-700 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                            <td
+                                class="text-gray-700 ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
                                 {{ getPaymentMethodTranslationKey() | translate }}
                             </td>
-                            <td class="ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
-                                <span class="inline-block text-xs px-[8px] py-[4px] rounded-full bg-success-50 text-success-600 font-medium">{{ getPaymentStatusTranslationKey() | translate }}</span>
+                            <td
+                                class="ltr:text-left rtl:text-right px-[12px] py-[12px] border-b border-gray-100 ltr:first:border-l ltr:last:border-r rtl:first:border-r rtl:last:border-l text-sm">
+                                <span class="inline-block text-xs px-[8px] py-[4px] rounded-full font-medium"
+                                    [ngClass]="getStatusClass()">{{ getPaymentStatusTranslationKey() | translate
+                                    }}</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
+            <!-- Additional Payment Details -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-[12px] mb-[20px]"
+                *ngIf="sessionsPurchased || pricePerSession || discount">
+                <div *ngIf="sessionsPurchased" class="bg-gray-50 p-[12px] rounded-md">
+                    <span class="block text-xs text-gray-500 mb-[4px]">Sessions Purchased</span>
+                    <span class="block text-sm font-bold text-gray-900">{{ sessionsPurchased }}</span>
+                </div>
+                <div *ngIf="pricePerSession" class="bg-gray-50 p-[12px] rounded-md">
+                    <span class="block text-xs text-gray-500 mb-[4px]">Price/Session</span>
+                    <span class="block text-sm font-bold text-gray-900">{{ pricePerSession | currencyFormat }}</span>
+                </div>
+                <div *ngIf="discount" class="bg-gray-50 p-[12px] rounded-md">
+                    <span class="block text-xs text-gray-500 mb-[4px]">Discount</span>
+                    <span class="block text-sm font-bold text-success-600">{{ discount }}%</span>
+                </div>
+                <div *ngIf="providerTransactionId" class="bg-gray-50 p-[12px] rounded-md">
+                    <span class="block text-xs text-gray-500 mb-[4px]">Provider TX ID</span>
+                    <span class="block text-sm font-bold text-gray-900 font-mono truncate">{{ providerTransactionId
+                        }}</span>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="flex gap-[12px] justify-end">
-                <button type="button" class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-danger-500 text-white hover:bg-danger-400 text-sm">
-                    {{ 'transactions.detail.actions.print' | translate }}
-                </button>
-                <button type="button" class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-primary-500 text-white hover:bg-primary-400 text-sm">
+                <a routerLink="/dashboard/finance-page/transactions"
+                    class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-gray-100 text-gray-700 hover:bg-gray-200 text-sm">
+                    {{ 'transactions.detail.actions.backToList' | translate }}
+                </a>
+                <button type="button"
+                    class="font-medium inline-block transition-all rounded-md py-[6px] md:py-[8px] px-[16px] md:px-[18px] bg-primary-500 text-white hover:bg-primary-400 text-sm">
                     <span class="inline-block relative ltr:pl-[22px] rtl:pr-[22px]">
-                        <i class="material-symbols-outlined ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 text-sm">
+                        <i
+                            class="material-symbols-outlined ltr:left-0 rtl:right-0 absolute top-1/2 -translate-y-1/2 text-sm">
                             download
                         </i>
                         {{ 'transactions.detail.actions.download' | translate }}
