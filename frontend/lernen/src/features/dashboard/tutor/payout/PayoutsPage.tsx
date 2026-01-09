@@ -68,7 +68,7 @@ const PayoutsPage = () => {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [earningsCurrentPage, setEarningsCurrentPage] = useState(1);
-    const [selectedTransaction, setSelectedTransaction] = useState<PayoutHistoryItem | null>(null);
+    const [selectedTransaction, _setSelectedTransaction] = useState<PayoutHistoryItem | null>(null);
     const [isTransactionDetailOpen, setIsTransactionDetailOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'earnings' | 'history'>('earnings');
     const [appliedStartDate, setAppliedStartDate] = useState<Date | null>(null);
@@ -311,10 +311,11 @@ const PayoutsPage = () => {
         }
     };
 
-    const handleViewDetails = (transaction: PayoutHistoryItem) => {
-        setSelectedTransaction(transaction);
-        setIsTransactionDetailOpen(true);
-    };
+    // Reserved for future use: open transaction detail modal
+    // const handleViewDetails = (transaction: PayoutHistoryItem) => {
+    //     setSelectedTransaction(transaction);
+    //     setIsTransactionDetailOpen(true);
+    // };
 
     const handleApplyDateFilter = () => {
         // Apply the selected date range
