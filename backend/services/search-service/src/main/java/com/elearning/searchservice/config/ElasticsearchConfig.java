@@ -191,12 +191,23 @@ public class ElasticsearchConfig {
                                 .properties("createdAt", Property.of(p -> p.date(d -> d)))
                                 .properties("updatedAt", Property.of(p -> p.date(d -> d)))
 
-                                // Nested objects (using object type for simplicity)
-                                .properties("subjects", Property.of(p -> p.object(o -> o)))
-                                .properties("languages", Property.of(p -> p.object(o -> o)))
-                                .properties("categories", Property.of(p -> p.object(o -> o)))
-                                .properties("educations", Property.of(p -> p.object(o -> o)))
-                                .properties("experiences", Property.of(p -> p.object(o -> o)))
-                                .properties("upcomingClasses", Property.of(p -> p.object(o -> o))));
+                                // Nested objects for proper nested queries
+                                .properties("subjects", Property.of(p -> p.nested(n -> n
+                                                .properties("id", Property.of(sp -> sp.keyword(k -> k)))
+                                                .properties("categoryId", Property.of(sp -> sp.keyword(k -> k)))
+                                                .properties("nameVi", Property.of(sp -> sp.text(t -> t.analyzer("vietnamese_analyzer"))))
+                                                .properties("nameEn", Property.of(sp -> sp.text(t -> t.analyzer("english_analyzer")))))))
+                                .properties("categories", Property.of(p -> p.nested(n -> n
+                                                .properties("id", Property.of(sp -> sp.keyword(k -> k)))
+                                                .properties("isParent", Property.of(sp -> sp.boolean_(b -> b)))
+                                                .properties("nameVi", Property.of(sp -> sp.text(t -> t.analyzer("vietnamese_analyzer"))))
+                                                .properties("nameEn", Property.of(sp -> sp.text(t -> t.analyzer("english_analyzer")))))))
+                                .properties("languages", Property.of(p -> p.nested(n -> n
+                                                .properties("code", Property.of(sp -> sp.keyword(k -> k)))
+                                                .properties("nameVi", Property.of(sp -> sp.text(t -> t.analyzer("vietnamese_analyzer"))))
+                                                .properties("nameEn", Property.of(sp -> sp.text(t -> t.analyzer("english_analyzer")))))))
+                                .properties("education", Property.of(p -> p.object(o -> o)))
+                                .properties("experience", Property.of(p -> p.object(o -> o)))
+                                .properties("activeClasses", Property.of(p -> p.object(o -> o))));
         }
 }
