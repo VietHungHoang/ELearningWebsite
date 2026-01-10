@@ -199,7 +199,10 @@ export class RevenueTrendComponent implements OnInit, OnChanges {
             yaxis: {
                 labels: {
                     formatter: (val: any) => {
-                        return '$' + (val / 1000000).toFixed(1) + 'M';
+                        if (val >= 1000000000) {
+                            return (val / 1000000000).toFixed(1) + ' tỷ';
+                        }
+                        return (val / 1000000).toFixed(0) + ' tr';
                     },
                     style: {
                         colors: '#64748B',
@@ -210,7 +213,7 @@ export class RevenueTrendComponent implements OnInit, OnChanges {
             tooltip: {
                 y: {
                     formatter: function (val: any) {
-                        return '$' + (val / 1000000).toFixed(1) + 'M';
+                        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
                     }
                 }
             },

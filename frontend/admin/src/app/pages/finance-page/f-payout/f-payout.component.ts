@@ -94,7 +94,7 @@ export class FPayoutComponent implements OnInit {
 
     // Pagination
     currentPage: number = 1;
-    pageSize: number = 10;
+    pageSize: number = 5;
     totalPages: number = 1;
     currentPageHistory: number = 1;
     totalPagesHistory: number = 1;
@@ -129,7 +129,7 @@ export class FPayoutComponent implements OnInit {
     isLoading = false;
     qrCodeDataUrl: string = '';
 
-    constructor(private payoutService: PayoutService) {}
+    constructor(private payoutService: PayoutService) { }
 
     ngOnInit(): void {
         this.initializeCycleDates();
@@ -382,6 +382,10 @@ export class FPayoutComponent implements OnInit {
                 }
             });
 
+            // Save to localStorage after bulk payment
+            this.payoutService.savePayoutHistoryToLocalStorage(this.payoutHistory);
+            console.log('[FPayoutComponent] Saved payment history to localStorage after bulk payment');
+
             this.pendingPayouts = this.pendingPayouts.filter(p => !this.selectedPayouts.has(p.id));
             this.groupedPendingPayouts = this.pendingPayouts;
             this.selectedPayouts.clear();
@@ -417,6 +421,10 @@ export class FPayoutComponent implements OnInit {
             };
 
             this.payoutHistory.unshift(historyRecord);
+
+            // Save to localStorage
+            this.payoutService.savePayoutHistoryToLocalStorage(this.payoutHistory);
+            console.log('[FPayoutComponent] Saved payment history to localStorage after marking as paid');
 
             this.pendingPayouts = this.pendingPayouts.filter(p => p.id !== this.selectedPayout!.id);
             this.groupedPendingPayouts = this.pendingPayouts;

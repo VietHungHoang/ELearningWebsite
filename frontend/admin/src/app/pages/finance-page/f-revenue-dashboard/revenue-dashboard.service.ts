@@ -207,28 +207,28 @@ export class RevenueDashboardService {
                 series: [
                     {
                         name: 'Revenue',
-                        data: [18500000, 19200000, 17800000, 22100000]
+                        data: [12500000, 15000000, 11000000, 14500000, 18000000, 9500000, 13000000]
                     }
                 ],
-                categories: ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+                categories: ['Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'CN']
             },
             Monthly: {
                 series: [
                     {
                         name: 'Revenue',
-                        data: [75000000, 82000000, 78000000, 91000000, 86000000, 95000000]
+                        data: [65000000, 72000000, 68000000, 75000000]
                     }
                 ],
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+                categories: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4']
             },
             Yearly: {
                 series: [
                     {
                         name: 'Revenue',
-                        data: [850000000, 920000000, 980000000, 1050000000, 1120000000, 1200000000]
+                        data: [750000000, 820000000, 780000000, 910000000, 860000000, 950000000, 880000000, 920000000, 990000000, 1050000000, 1100000000, 1200000000]
                     }
                 ],
-                categories: ['2019', '2020', '2021', '2022', '2023', '2024']
+                categories: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12']
             }
         };
 
@@ -253,8 +253,8 @@ export class RevenueDashboardService {
             kpis: kpisData[dateRange] || kpisData['30days'],
             revenueTrend: revenueTrendData,
             paymentMethods: {
-                series: [60, 40],
-                labels: ['VNPay', 'Momo']
+                series: [45, 35, 20],
+                labels: ['VNPay', 'Momo', 'SePay']
             },
             topTutors: topTutorsData
         };
