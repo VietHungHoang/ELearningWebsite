@@ -151,7 +151,7 @@ public class TutorFilterBuilder {
 
         return Query.of(q -> q
                 .terms(t -> t
-                        .field("availableDays")
+                        .field("availableDays.keyword")
                         .terms(tv -> tv.value(values))));
     }
 
