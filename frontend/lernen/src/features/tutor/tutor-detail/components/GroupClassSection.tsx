@@ -437,29 +437,68 @@ const GroupClassSection: React.FC<GroupClassSectionProps> = ({ groupClasses, tut
                     setShowPaymentPromptModal(false);
                     // Navigate to checkout with proper state
                     if (selectedClass) {
-                        navigate('/checkout', {
-                            state: {
+                        try {
+                            console.log('[GroupClass] onPayNow - selectedClass:', selectedClass);
+                            console.log('[GroupClass] onPayNow - tutor:', tutor);
+                            
+                            // Generate selectedTimes from schedule for backend processing
+                            const selectedTimes = selectedClass.schedule?.map(s => {
+                                // Create a date for next occurrence of this day
+                                const now = new Date();
+                                const currentDay = now.getDay();
+                                // s.dayOfWeek: 1=Monday, 7=Sunday. JS getDay(): 0=Sunday, 6=Saturday
+                                const targetDay = s.dayOfWeek === 7 ? 0 : s.dayOfWeek;
+                                let daysUntilNext = targetDay - currentDay;
+                                if (daysUntilNext <= 0) daysUntilNext += 7;
+
+                                const nextDate = new Date(now);
+                                nextDate.setDate(now.getDate() + daysUntilNext);
+
+                                // Parse time (HH:mm format) and set hours - with safety check
+                                if (s.time && typeof s.time === 'string' && s.time.includes(':')) {
+                                    const [hours, minutes] = s.time.split(':').map(Number);
+                                    nextDate.setUTCHours(hours || 0, minutes || 0, 0, 0);
+                                }
+
+                                return nextDate.toISOString();
+                            }) || [];
+
+                            const checkoutState = {
+                                classId: selectedClass.id, // Pass classId at top level for group class
+                                isGroupClassPayment: true,
                                 tutor: tutor,
                                 bookingData: {
-                                    sessions: selectedClass.schedule?.length || 1, // Fallback
-                                    schedule: selectedClass.schedule?.map(s => ({
-                                        date: '', // No specific date for fixed schedule
+                                    sessions: (selectedClass as any).sessions || selectedClass.schedule?.length || 10,
+                                    schedule: selectedClass.schedule?.map((s, idx) => ({
+                                        sessionNumber: idx + 1,
+                                        date: '', // Display only, not used for API
                                         dayOfWeek: s.dayOfWeek,
                                         time: s.time
                                     })) || [],
+                                    // Pass selectedTimes for backend processing
+                                    selectedTimes: selectedTimes,
                                     package: {
                                         name: selectedClass.title,
                                         isGroupClass: true,
-                                        classId: selectedClass.id
+                                        classId: selectedClass.id,
+                                        sessions: (selectedClass as any).sessions || 10,
+                                        discount: 0
                                     },
                                     pricing: {
-                                        originalPrice: selectedClass.pricePerHour, // Assumption: price is per entire course or session? usually per hour/session
-                                        totalPrice: selectedClass.pricePerHour
+                                        originalPrice: selectedClass.pricePerHour,
+                                        totalPrice: selectedClass.pricePerHour,
+                                        discountAmount: 0
                                     }
                                 }
-                            }
-                        });
-                        setSelectedClass(null);
+                            };
+                            
+                            console.log('[GroupClass] Navigating to checkout with state:', checkoutState);
+                            navigate('/checkout', { state: checkoutState });
+                            setSelectedClass(null);
+                        } catch (error) {
+                            console.error('[GroupClass] Error in onPayNow:', error);
+                            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                        }
                     }
                 }}
                 onPayLater={() => {

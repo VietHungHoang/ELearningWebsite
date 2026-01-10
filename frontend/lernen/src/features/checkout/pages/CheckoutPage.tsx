@@ -55,7 +55,14 @@ const CheckoutPage: React.FC = () => {
   // Get data from navigation state
   const bookingData = location.state?.bookingData;
   const tutorData = location.state?.tutor;
-  const classId = location.state?.classId; // For class renewal
+  // For class renewal or group class payment - check both locations
+  const classId = location.state?.classId || bookingData?.package?.classId;
+  
+  // Debug logging
+  console.log('[Checkout] location.state:', location.state);
+  console.log('[Checkout] bookingData:', bookingData);
+  console.log('[Checkout] tutorData:', tutorData);
+  console.log('[Checkout] classId:', classId);
   // const isRenewal = location.state?.isRenewal || false; // Reserved for future use
 
   // Use real tutor data

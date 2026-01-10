@@ -352,6 +352,24 @@ const MyClassPage: React.FC = () => {
                                                 {state.user?.role === 'student' && getEnrollmentStatus(classData) === 'PENDING_PAYMENT' && (
                                                     <button
                                                         onClick={() => {
+                                                            // Generate selectedTimes from schedule for backend processing
+                                                            const selectedTimes = classData.schedules?.map((s: any) => {
+                                                                const now = new Date();
+                                                                const currentDay = now.getDay();
+                                                                // s.dayOfWeek: 1=Monday, 7=Sunday. JS getDay(): 0=Sunday, 6=Saturday
+                                                                const targetDay = s.dayOfWeek === 7 ? 0 : s.dayOfWeek;
+                                                                let daysUntilNext = targetDay - currentDay;
+                                                                if (daysUntilNext <= 0) daysUntilNext += 7;
+
+                                                                const nextDate = new Date(now);
+                                                                nextDate.setDate(now.getDate() + daysUntilNext);
+
+                                                                const [hours, minutes] = s.time.split(':').map(Number);
+                                                                nextDate.setUTCHours(hours, minutes, 0, 0);
+
+                                                                return nextDate.toISOString();
+                                                            }) || [];
+
                                                             // Navigate to checkout for group class payment
                                                             navigate('/checkout', {
                                                                 state: {
@@ -359,19 +377,18 @@ const MyClassPage: React.FC = () => {
                                                                     isGroupClassPayment: true,
                                                                     bookingData: {
                                                                         sessions: classData.totalSessions || 10,
+                                                                        selectedTimes: selectedTimes,
                                                                         package: {
                                                                             name: classData.title || 'Lớp học nhóm',
                                                                             sessions: classData.totalSessions || 10,
                                                                             discount: 0,
+                                                                            classId: classData.id,
+                                                                            isGroupClass: true,
                                                                         },
                                                                         pricing: {
-                                                                            originalPrice: (classData.tutor as any)?.pricePerHour ?
-                                                                                (classData.tutor as any).pricePerHour * (classData.totalSessions || 10) :
-                                                                                0,
+                                                                            originalPrice: ((classData.tutor as any)?.pricePerHour || (classData as any).pricePerHour || 340000) * (classData.totalSessions || 10),
                                                                             discountAmount: 0,
-                                                                            totalPrice: (classData.tutor as any)?.pricePerHour ?
-                                                                                (classData.tutor as any).pricePerHour * (classData.totalSessions || 10) :
-                                                                                0,
+                                                                            totalPrice: ((classData.tutor as any)?.pricePerHour || (classData as any).pricePerHour || 340000) * (classData.totalSessions || 10),
                                                                         },
                                                                         schedule: classData.schedules.map((s: any, idx: number) => ({
                                                                             sessionNumber: idx + 1,

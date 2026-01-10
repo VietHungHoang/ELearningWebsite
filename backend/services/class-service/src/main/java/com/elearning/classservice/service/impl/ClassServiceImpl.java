@@ -856,6 +856,9 @@ public class ClassServiceImpl implements ClassService {
                                 .status(EnrollmentStatus.JOINED)
                                 .build();
 
+                // Add enrollment to classEntity's collection BEFORE saving
+                // This ensures the new enrollment is included when we update all enrollments
+                classEntity.getEnrollments().add(enrollment);
                 classEnrollmentRepository.save(enrollment);
                 log.info("Student {} added to class {} successfully", studentId, classId);
 
@@ -869,10 +872,11 @@ public class ClassServiceImpl implements ClassService {
                         classEntity.setStatus(ClassStatus.PENDING_PAYMENT);
                         classRepository.save(classEntity);
 
-                        // Update all enrolled students status to PENDING_PAYMENT
+                        // Update all enrolled students status to PENDING_PAYMENT (including the new one)
                         List<ClassEnrollment> enrollments = classEntity.getEnrollments().stream()
                                         .filter(e -> e.getStatus() == EnrollmentStatus.JOINED)
                                         .collect(Collectors.toList());
+                        log.info("Updating {} enrollments to PENDING_PAYMENT status", enrollments.size());
                         enrollments.forEach(e -> e.setStatus(EnrollmentStatus.PENDING_PAYMENT));
                         classEnrollmentRepository.saveAll(enrollments);
 
