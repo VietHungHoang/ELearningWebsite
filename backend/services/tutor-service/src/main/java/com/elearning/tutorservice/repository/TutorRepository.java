@@ -62,16 +62,17 @@ public interface TutorRepository extends JpaRepository<Tutor, UUID> {
 
        /**
         * Find similar tutors by subject IDs (random order, limit)
-        * Excludes the specified tutor and returns random tutors who teach any of the given subjects
+        * Excludes the specified tutor and returns random tutors who teach any of the
+        * given subjects
         */
        @Query(value = "SELECT DISTINCT t.* FROM tutors t " +
-                     "INNER JOIN tutor_subject ts ON t.id = ts.tutor_id " +
+                     "INNER JOIN tutor_subjects ts ON t.id = ts.tutor_id " +
                      "WHERE t.is_verified = true " +
                      "AND t.id != :tutorId " +
                      "AND ts.subject_id IN :subjectIds " +
                      "ORDER BY RANDOM() " +
                      "LIMIT :limit", nativeQuery = true)
        List<Tutor> findSimilarTutorsBySubjects(@Param("tutorId") UUID tutorId,
-                                                @Param("subjectIds") List<UUID> subjectIds,
-                                                @Param("limit") int limit);
+                     @Param("subjectIds") List<UUID> subjectIds,
+                     @Param("limit") int limit);
 }
